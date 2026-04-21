@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+/dist/
+/build/
+/.nest/
+/.cache/
+/.turbo/
+/.vite/
+
+# TypeScript incremental artifacts
+*.tsbuildinfo
+
+# Coverage / reports
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.sample
+
+# Generated / temporary artifacts
+src/generated/
+tmp/
+temp/
+uploads/
+export/
+exports/
+.generated/
+
+# IDE / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Archives / binaries / local DB artifacts
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+*.bak
+*.backup
+*.old
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep these visible for Cline because they are active source of truth:
+# - prisma/schema.prisma
+# - bootstrap.sql
+# - backend-implementation-contract.md
+# - auth.md, users.md, tenants.md, rooms.md, stays.md, invoices.md, invoice-payments.md,
+#   meter-readings.md, tickets.md, inventory-items.md, inventory-movements.md,
+#   wifi-sales.md, expenses.md, announcements.md
+# - package.json
+# - prisma.config.ts
+# - nest-cli.json
+# - tsconfig.json
+# - tsconfig.build.json
+# - .env.example

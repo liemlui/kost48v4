@@ -1,0 +1,91 @@
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { buildMeta, buildPagination } from '../../common/utils/pagination';
+import { CreateAnnouncementDto, UpdateAnnouncementDto } from './dto/announcement.dto';
+import { AnnouncementsQueryDto } from './dto/announcements-query.dto';
+import { AuditLogService } from '../../audit-log/audit-log.service';
+import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { AnnouncementAudience, UserRole } from '../../common/enums/app.enums';
+
+@Injectable()
+export class AnnouncementsService {
+  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+
+  async findAll(query: AnnouncementsQueryDto) {
+    const { page, limit, skip, take } = buildPagination(query.page, query.limit);
+    const where: any = {
+      AND: [
+        query.search ? { OR: [{ title: { contains: query.search, mode: 'insensitive' } }, { content: { contains: query.search, mode: 'insensitive' } }] } : {},
+        query.audience ? { audience: query.audience } : {},
+        typeof query.isPublished === 'string' ? { isPublished: query.isPublished === 'true' } : {},
+        typeof query.isPinned === 'string' ? { isPinned: query.isPinned === 'true' } : {},
+      ],
+    };
+    const [items, totalItems] = await this.prisma.$transaction([
+      this.prisma.announcement.findMany({ where, skip, take, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }] }),
+      this.prisma.announcement.count({ where }),
+    ]);
+    return { items, meta: buildMeta(page, limit, totalItems) };
+  }
+
+  async findActive(user: CurrentUserPayload) {
+    const now = new Date();
+    const audience = user.role === UserRole.TENANT ? [AnnouncementAudience.TENANT, AnnouncementAudience.ALL] : undefined;
+    return {
+      items: await this.prisma.announcement.findMany({
+        where: {
+          isPublished: true,
+          AND: [
+            audience ? { audience: { in: audience as any } } : {},
+            { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+            { OR: [{ expiresAt: null }, { expiresAt: { gte: now } }] },
+          ],
+        },
+        orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }],
+      }),
+    };
+  }
+
+  async findOne(id: number, user: CurrentUserPayload) {
+    const item = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!item) throw new NotFoundException('Announcement tidak ditemukan');
+    if (user.role === UserRole.TENANT) {
+      const now = new Date();
+      if (!item.isPublished) throw new ForbiddenException('Tidak berhak melihat announcement ini');
+      if (![AnnouncementAudience.TENANT, AnnouncementAudience.ALL].includes(item.audience as any)) throw new ForbiddenException('Tidak berhak melihat announcement ini');
+      if ((item.startsAt && item.startsAt > now) || (item.expiresAt && item.expiresAt < now)) throw new ForbiddenException('Tidak berhak melihat announcement ini');
+    }
+    return item;
+  }
+
+  async create(dto: CreateAnnouncementDto, actor: CurrentUserPayload) {
+    this.validateWindow(dto.startsAt, dto.expiresAt);
+    const created = await this.prisma.announcement.create({ data: { ...dto, startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined, expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined, createdById: actor.id, publishedAt: dto.isPublished ? new Date() : null } });
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Announcement', entityId: String(created.id), newData: created });
+    return created;
+  }
+
+  async update(id: number, dto: UpdateAnnouncementDto, actor: CurrentUserPayload) {
+    const existing = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Announcement tidak ditemukan');
+    this.validateWindow(dto.startsAt ?? existing.startsAt?.toISOString(), dto.expiresAt ?? existing.expiresAt?.toISOString());
+    const updated = await this.prisma.announcement.update({ where: { id }, data: { ...dto, startsAt: dto.startsAt ? new Date(dto.startsAt) : dto.startsAt === undefined ? undefined : null, expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : dto.expiresAt === undefined ? undefined : null } });
+    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
+    return updated;
+  }
+
+  async publish(id: number, actor: CurrentUserPayload) {
+    const existing = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Announcement tidak ditemukan');
+    if (existing.isPublished) throw new ConflictException('Announcement sudah dipublikasikan');
+    const updated = await this.prisma.announcement.update({ where: { id }, data: { isPublished: true, publishedAt: new Date() } });
+    await this.audit.log({ actorUserId: actor.id, action: 'PUBLISH', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
+    return updated;
+  }
+
+  private validateWindow(startsAt?: string | null, expiresAt?: string | null) {
+    if (startsAt && expiresAt && new Date(expiresAt) < new Date(startsAt)) {
+      throw new ConflictException('Window tanggal tidak konsisten');
+    }
+  }
+}

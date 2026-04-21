@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+.nest/
+*.tsbuildinfo
+
+# Generated sources
+src/generated/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+.cache/
+.parcel-cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Archives / backups
+*.bak
+*.backup
+*.old
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+
+# Binary / local DB artifacts
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep docs and source-of-truth files versioned.
+# Do not ignore schema.prisma, bootstrap.sql, package.json, or project docs.
