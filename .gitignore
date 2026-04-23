@@ -9,6 +9,9 @@ coverage/
 
 # Generated sources
 src/generated/
+backend/src/generated/
+frontend/src/generated/
+backend/src/generated/prisma/libquery_engine-*
 
 # Environment files
 .env
