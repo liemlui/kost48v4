@@ -9,6 +9,7 @@ Selected Files Directory Structure:
     │   │   ├── invoices.ts
     │   │   ├── meterReadings.ts
     │   │   ├── payments.ts
+    │   │   ├── paymentSubmissions.ts
     │   │   ├── resources.ts
     │   │   ├── stays.ts
     │   │   └── tenants.ts
@@ -27,6 +28,10 @@ Selected Files Directory Structure:
     │   │   │   ├── AppLayout.tsx
     │   │   │   ├── GlobalSearch.tsx
     │   │   │   └── ProtectedRoute.tsx
+    │   │   ├── payments
+    │   │   │   └── ReviewPaymentModal.tsx
+    │   │   ├── portal
+    │   │   │   └── SubmitPaymentModal.tsx
     │   │   ├── resources
     │   │   │   ├── ResourceFormModal.tsx
     │   │   │   └── ResourceTable.tsx
@@ -63,6 +68,8 @@ Selected Files Directory Structure:
     │   │   ├── invoices
     │   │   │   ├── InvoiceDetailPage.tsx
     │   │   │   └── InvoicesPage.tsx
+    │   │   ├── payments
+    │   │   │   └── PaymentReviewPage.tsx
     │   │   ├── portal
     │   │   │   ├── MyAnnouncementsPage.tsx
     │   │   │   ├── MyBookingsPage.tsx
@@ -88,6 +95,7 @@ Selected Files Directory Structure:
     │   ├── types
     │   │   └── index.ts
     │   ├── utils
+    │   │   ├── bookingExpiry.ts
     │   │   ├── formatCurrency.ts
     │   │   └── statusLabels.ts
     │   ├── App.tsx
@@ -98,454 +106,10 @@ Selected Files Directory Structure:
     ├── index.html
     ├── package-lock.json
     ├── package.json
+    ├── PATCH_NOTES_APR22_2026.md
     ├── tsconfig.json
     └── vite.config.ts
 
-
-
---- FINAL_FRONTEND_FEATURES.md ---
-
-# KOST48 — Final Frontend Feature Set (Updated)
-
-**Versi:** 2026-04-21 (Sinkronisasi dengan Frontend V4 Fase 4.0 + 4.1B Approval Surface)
-
-## Ringkasan
-
-Frontend KOST48 adalah workspace gabungan untuk **backoffice**, **tenant portal**, dan kini juga **surface publik terbatas** untuk mendukung flow **booking mandiri tenant** dan **approval booking backoffice** pada roadmap V4.
-
-Frontend ini dibangun dengan prinsip:
-- **role-first**
-- **tenant-first di portal**
-- **compact over clutter**
-- **jujur terhadap kontrak backend yang benar-benar tersedia**
-- **patch pragmatis, bukan rewrite total**
-
-Stack utama:
-- **Vite + React 18 + TypeScript**
-- **React-Bootstrap**
-- **TanStack Query**
-
-Route, tipe data, label status, dan surface utama frontend telah diselaraskan dengan kontrak aktif proyek, termasuk dukungan terhadap:
-- `RoomStatus.RESERVED`
-- `Stay.expiresAt`
-- `GET /public/rooms`
-- `POST /tenant/bookings`
-- `GET /tenant/bookings/my`
-- `PATCH /admin/bookings/:stayId/approve`
-
----
-
-## Role & Workspace
-
-### 1. Guest / Public
-Guest dapat mengakses katalog kamar publik melalui route `/rooms`. Surface ini dipakai untuk menampilkan kamar aktif yang tersedia dan menjadi pintu masuk flow booking mandiri.
-
-### 2. OWNER / ADMIN / STAFF
-Role backoffice tetap memakai workspace operasional utama. Route `/rooms` untuk mereka tetap membuka surface rooms backoffice, bukan katalog publik.
-
-### 3. TENANT
-Tenant memakai **portal tenant** untuk kebutuhan harian seperti hunian, tagihan, tiket, pengumuman, profil, dan kini juga **pemesanan/booking**.
-
-Pemisahan role tetap dijaga agar portal tenant tidak bocor ke surface backoffice.
-
----
-
-## Fitur Inti Backoffice
-
-### 1. Dashboard Operasional
-Dashboard dipisahkan per role:
-- **Owner Dashboard**
-- **Admin Dashboard**
-- **Staff Dashboard**
-
-Fungsinya meliputi:
-- KPI kamar terisi / kosong
-- stay aktif dan reminder operasional
-- invoice overdue / due soon
-- deposit queue
-- tabel pemantauan stay dan invoice prioritas
-
-Batch pagination + UAT readiness juga menyesuaikan fetch limit agar pembacaan data besar lebih realistis.
-
-### 2. Tenants & Portal Access
-Modul tenant mendukung:
-- CRUD tenant
-- pencarian
-- filter tenant aktif
-- guard UI untuk tenant yang sedang punya stay aktif
-
-Untuk **OWNER / ADMIN**, tersedia **Portal Access Management**:
-- lihat portal summary tenant
-- buat akun portal
-- toggle aktif/nonaktif akses portal
-- reset password portal
-
-Relasi tenant ↔ user tenant dibuat lebih jujur dan mudah dibaca dari context tenant.
-
-### 3. Rooms
-Modul room mendukung:
-- CRUD room
-- status kamar
-- info tenant aktif
-- guard UI untuk room yang sedang ditempati
-
-Route `/rooms` kini mendukung **dua surface**:
-- backoffice rooms untuk OWNER / ADMIN / STAFF
-- katalog publik untuk guest / TENANT
-
-Keputusan ini menjaga kompatibilitas route lama tanpa mematahkan flow baru.
-
-### 4. Stays
-Modul stay tetap menjadi pusat flow operasional existing:
-- list stay aktif
-- filter status dan pencarian
-- check-in wizard multi-step
-- detail stay dengan tab:
-  - **Info**
-  - **Meteran**
-  - **Keuangan**
-  - **Catatan**
-
-Aksi existing yang masih aktif:
-- Checkout
-- Perpanjang Stay
-- Batalkan Stay
-- Proses Deposit
-
-Selain itu, halaman stays kini juga memuat:
-- **surface read-only booking reserved**
-- **queue approval booking**
-- **modal approval booking**
-
-Semua ini di-embed ke surface existing agar tidak membuka menu besar baru.
-
-### 5. Invoices
-Modul invoice mendukung:
-- list invoice dengan filter status, keyword, dan rentang tanggal
-- detail invoice dengan line items dan riwayat pembayaran
-- issue invoice dari draft
-- batalkan invoice
-
-Invoice tetap mengikuti baseline bahwa total dikelola otomatis dari `InvoiceLine`, dan frontend hanya membaca kontrak yang ada tanpa memalsukan angka.
-
-### 6. Invoice Payments
-Modul pembayaran invoice mendukung:
-- CRUD pembayaran
-- blokir overpay di UI
-- preview status invoice setelah pembayaran
-
-Flow ini masih memakai mekanisme pembayaran existing, bukan payment submission V4.
-
-### 7. Tickets
-Backoffice ticket difokuskan untuk tindak lanjut operasional:
-- list tiket
-- filter status
-- assign ke staff/admin
-- update progress
-- penutupan tiket
-
-Backoffice bukan lagi surface utama untuk create ticket tenant; create ticket tenant diarahkan ke portal tenant sesuai redesign tenant-first.
-
-### 8. Announcements
-Modul pengumuman mendukung:
-- CRUD announcement
-- audience
-- publish
-- pinned
-- masa berlaku
-
-### 9. Meter Readings
-Modul meter readings mendukung:
-- CRUD pembacaan meter listrik dan air
-- penggunaan sebagai modul terpisah
-- embedding di detail stay / room bila diperlukan
-
-### 10. Inventory
-Modul inventory mencakup:
-- **Inventory Items**
-- **Room Items**
-- **Inventory Movements**
-
-### 11. WiFi Sales
-Modul WiFi Sales mendukung pencatatan penjualan paket WiFi dan integrasi dasar ke invoice sesuai fase yang sudah selesai.
-
-### 12. Expenses
-Modul expenses mendukung pencatatan pengeluaran operasional.
-
-### 13. Users
-Modul users mendukung manajemen akun dan role, dengan pembatasan keamanan bahwa admin tidak dapat:
-- mengedit akun owner
-- menghapus akun owner
-- mengubah role menjadi OWNER
-
----
-
-## Fitur Tenant Portal
-
-### 1. Pengumuman
-Tenant dapat melihat daftar pengumuman aktif yang relevan untuk mereka, termasuk pinned badge dan tanggal berlaku.
-
-### 2. Hunian Saya
-Tenant dapat melihat stay aktif mereka, termasuk:
-- kamar
-- sewa
-- deposit
-- rencana checkout
-
-Surface ini dijaga tetap sederhana dan hanya menampilkan data yang relevan untuk tenant.
-
-### 3. Tagihan Saya
-Tenant dapat melihat daftar invoice sendiri, termasuk:
-- status invoice
-- overdue state
-- ringkasan total
-- sisa pembayaran
-
-### 4. Tiket Saya
-Tenant dapat:
-- melihat daftar tiket sendiri
-- membuat tiket baru tanpa input ID teknis
-- memantau progres tiket
-
-Ini mengikuti pendekatan tenant-first di mana context tiket otomatis diisi dari tenant/stay/room yang sesuai.
-
-### 5. Profil Saya
-Tenant dapat melihat profil sendiri dan mengganti password sesuai kontrak backend yang tersedia.
-
-### 6. Pemesanan Saya (V4 Fase 4.0 + 4.1B)
-Tenant kini memiliki halaman **Pemesanan Saya** di route `/portal/bookings`.
-
-Halaman ini menampilkan:
-- kamar
-- tanggal check-in
-- pricing term
-- tarif utama / tarif relevan
-- masa berlaku booking (`expiresAt`)
-- status booking yang jujur:
-  - **Menunggu Approval**
-  - **Menunggu Pembayaran**
-
-Tenant tidak diberi kesan kamar sudah aktif penuh / `OCCUPIED`, dan tidak diarahkan ke payment submission flow karena fase itu belum dibuka.
-
----
-
-## Surface Publik Baru (V4 Fase 4.0)
-
-### 1. Katalog Kamar Publik — `/rooms`
-Guest dan tenant dapat melihat kamar aktif yang tersedia dari katalog publik.
-
-Informasi utama yang ditampilkan:
-- kode / nama kamar
-- lantai
-- tarif utama yang relevan
-- daftar pricing term tersedia
-- CTA **Pesan Sekarang**
-
-Filter yang tersedia:
-- `search`
-- `floor`
-- `pricingTerm`
-
-Jika gambar belum tersedia, frontend memakai placeholder netral agar tetap jujur terhadap data yang benar-benar ada.
-
-### 2. Resolver Route `/rooms`
-Route `/rooms` bertindak sebagai resolver:
-- backoffice user masuk ke workspace rooms existing
-- guest / tenant masuk ke katalog publik
-
-Keputusan ini menjaga kompatibilitas route lama dan menghindari duplikasi jalur yang membingungkan.
-
-### 3. Form Booking Tenant — `/booking/:roomId`
-Frontend menyediakan halaman booking tenant yang menampilkan ringkasan kamar dan form booking dalam satu layar.
-
-Field yang didukung:
-- `checkInDate`
-- `pricingTerm`
-- `plannedCheckOutDate`
-- `stayPurpose`
-- `notes`
-
-Submit terhubung ke kontrak backend booking mandiri. Setelah sukses:
-- query terkait di-refresh
-- tenant diarahkan ke `/portal/bookings`
-
-Error backend ditampilkan secara aman tanpa wording palsu.
-
----
-
-## Surface Backoffice Baru untuk Approval Booking
-
-### 1. Booking Reserved Read-Only
-Surface booking reserved tetap di-embed ke halaman **Stays** sebagai mode/filter tambahan.
-
-Karakteristiknya:
-- stay masih aktif secara booking
-- room berstatus `RESERVED`
-- tidak otomatis membuka detail operasional penuh
-
-### 2. Approval Booking Queue
-Backoffice kini memiliki queue approval booking yang di-embed ke halaman **Stays** melalui mode **Booking Reserved**.
-
-Queue ini menampilkan konteks manusiawi:
-- tenant
-- kamar
-- check-in
-- pricing term
-- `expiresAt`
-- status approval
-
-Reserved booking yang sudah memiliki invoice awal tidak lagi terasa “masih menunggu approval”.
-
-### 3. Approval Booking Modal
-Backoffice memiliki modal approval booking yang terhubung ke endpoint backend existing:
-- `PATCH /admin/bookings/:stayId/approve`
-
-Field minimum:
-- `agreedRentAmountRupiah`
-- `depositAmountRupiah`
-- `initialElectricityKwh`
-- `initialWaterM3`
-
-Validasi frontend bersifat defensif:
-- semua field wajib angka valid
-- meter tidak boleh negatif
-
-Setelah approval sukses:
-- query stays / invoices / dashboard terkait di-invalidasi
-- queue approval menjadi sinkron
-- flow tetap jujur dan tidak membuka payment submission
-
----
-
-## Pagination & UAT Readiness Improvements
-
-Batch terbaru juga menambahkan penyempurnaan untuk kesiapan UAT:
-
-### 1. Server-Side Pagination
-Pola fetch-all dengan limit besar mulai diganti ke pagination server-side yang lebih proper pada:
-- `SimpleCrudPage`
-- `StaysPage`
-- `InvoicesPage`
-- `ResourceTable`
-
-Komponen `PaginationControls` ditambahkan untuk navigasi halaman.
-
-### 2. Dashboard Data Fetch Tuning
-Owner dan admin dashboard mendapat penyesuaian fetch limit yang lebih realistis untuk pembacaan data saat UAT.
-
-### 3. Booking Reserved UX Guard
-`StayDetailPage` membedakan booking mandiri dari stay operasional:
-- booking reserved diberi info badge
-- tombol aksi operasional disembunyikan
-- stay operasional dengan room `OCCUPIED` tetap berjalan seperti biasa
-
----
-
-## Sinkronisasi Kontrak Frontend
-
-Frontend saat ini sudah diselaraskan dengan kontrak aktif berikut:
-- `cancelReason` untuk cancel stay
-- login error generik
-- password portal minimal 8 karakter
-- role-aware global search
-- `RoomStatus.RESERVED`
-- `Stay.expiresAt`
-- endpoint booking mandiri:
-  - `GET /public/rooms`
-  - `POST /tenant/bookings`
-  - `GET /tenant/bookings/my`
-- endpoint approval booking:
-  - `PATCH /admin/bookings/:stayId/approve`
-
-Yang **belum** dibuka:
-- payment submission / approval (Fase 4.2)
-- notifikasi / reminder WhatsApp (Fase 4.3)
-- registrasi fleksibel email/HP (Fase 4.4)
-- forgot/reset password self-service tenant (Fase 4.5)
-
----
-
-## UI/UX
-
-Frontend memakai:
-- sidebar desktop + offcanvas mobile
-- breadcrumb topbar
-- page header konsisten
-- status badge Bahasa Indonesia
-- format Rupiah
-- empty state aman
-- loading state / skeleton aman
-- responsive layout
-- navigasi role-aware
-- embedding modul kecil jika lebih tepat daripada menjadikannya menu utama
-
-Tenant portal tetap dijaga sederhana dan tidak bocor ke surface backoffice. Prinsip **honest UX** tetap dipertahankan, termasuk untuk booking reserved dan approval booking yang belum boleh terasa seperti flow pembayaran penuh.
-
----
-
-## Status Terkini & Catatan Penting
-
-### ✅ Sudah Ditutup
-- Status `PENDING` dihapus dari UI aktif
-- `activateStay` legacy dihapus
-- portal access reactivity dibenahi
-- login redirect sudah role-aware
-- global search sudah role-aware
-- cancel stay memakai `cancelReason`
-- tenant portal lebih jujur dan sederhana
-- frontend V4 Fase 4.0 sudah masuk:
-  - `/rooms`
-  - `/booking/:roomId`
-  - `/portal/bookings`
-  - booking reserved read-only di backoffice
-- frontend V4 Fase 4.1B sudah masuk:
-  - queue approval booking di `Stays`
-  - modal approval booking
-  - status tenant portal `Menunggu Approval` / `Menunggu Pembayaran`
-- pagination + beberapa guard UAT readiness sudah ditambahkan
-
-### ⏳ Belum Dinilai Lolos Penuh
-- UAT end-to-end Fase 4.0 masih belum dinyatakan lolos penuh
-- UAT approval booking Fase 4.1 juga masih belum dinyatakan lolos penuh
-- Karena itu Fase 4.0 dan 4.1 masih berstatus ⏳, bukan freeze-ready penuh
-
-### ⬜ Belum Dibuka
-- upload bukti bayar booking
-- aktivasi otomatis `RESERVED` → `OCCUPIED`
-- reminder / notifikasi WhatsApp
-- galeri kamar publik penuh
-- registrasi fleksibel email / nomor HP
-- self-service forgot/reset password tenant
-
-### ⚠️ Catatan
-- Route `/rooms` memegang dua surface berbeda
-- booking reserved dan approval booking tetap di-embed ke surface existing, bukan menu besar baru
-- warning bundle size dari Vite masih bisa muncul, tetapi bukan blocker build/runtime pada batch ini
-
----
-
-## Catatan Paket
-
-Zip final frontend idealnya memuat:
-- source code frontend lengkap
-- artifact build yang lolos kompilasi
-- `CHANGELOG.md` yang diperbarui
-- dokumen fitur ini yang sinkron dengan status resmi terbaru
-
---- index.html ---
-
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kost48 Surabaya V3</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
 
 
 --- package.json ---
@@ -3373,6 +2937,28 @@ Zip final frontend idealnya memuat:
 }
 
 
+--- PATCH_NOTES_APR22_2026.md ---
+
+Patch applied for reserved booking UX hardening and admin stays cleanup.
+
+Included in this batch:
+- expiresAt display hardening for booking rows and tenant booking list
+- defensive API normalization for `expiresAt` / alias fields in stays + tenant bookings
+- expired booking badge and helper text in admin + tenant surfaces
+- quick access button to switch into Booking Reserved mode from Stays page
+- fix duplicate / wrong pagination block in Stays operasional mode
+
+Backend approval, invoice generation on approval, and room/stay status transition after approval are still not implemented in this frontend-only artifact because they require the Phase 4.1 backend endpoints and business logic.
+
+
+Patch besar lanjutan: payment submission surface dipertegas di tenant invoice + admin review queue, termasuk normalisasi respons API snake_case/camelCase, pagination/filter admin, dan penggantian upload dummy invoice menjadi modal submission yang nyata.
+
+## Patch Lanjutan — 2026-04-22 (Higher Patch UAT Sync)
+- MyStayPage: jika /stays/me/current mengembalikan 404 tetapi tenant masih punya booking reserved, halaman Hunian Saya kini menampilkan kartu status proses booking dan CTA ke Pemesanan Saya / Tagihan Saya, bukan sekadar empty state membingungkan.
+- ApproveBookingModal: conflict 409 sekarang memberi pesan yang lebih jujur dan sekaligus memicu refresh query terkait agar admin cepat melihat state terbaru dari server.
+- PaymentReviewPage: pagination diselaraskan dengan shape response { items, meta } sehingga build kembali hijau.
+
+
 --- tsconfig.json ---
 
 {
@@ -3441,10 +3027,10 @@ export async function changePassword(payload: {
 import { createResource, listResource, updateResource } from './resources';
 import type {
   ApproveBookingPayload,
+  ApproveBookingResult,
   CreateTenantBookingPayload,
   PaginatedResponse,
   PublicRoom,
-  Stay,
   TenantBooking,
 } from '../types';
 
@@ -3452,16 +3038,52 @@ export async function listPublicRooms(params?: Record<string, unknown>) {
   return listResource<PublicRoom>('/public/rooms', params) as Promise<PaginatedResponse<PublicRoom>>;
 }
 
+function readAlias<T>(source: unknown, ...keys: string[]): T | undefined {
+  if (!source || typeof source !== 'object') return undefined;
+  const record = source as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined) return value as T;
+  }
+  return undefined;
+}
+
+function normalizeTenantBooking(raw: TenantBooking): TenantBooking {
+  return {
+    ...raw,
+    checkInDate: readAlias<string>(raw, 'checkInDate', 'check_in_date') ?? raw.checkInDate,
+    plannedCheckOutDate: readAlias<string | null>(raw, 'plannedCheckOutDate', 'planned_check_out_date') ?? raw.plannedCheckOutDate ?? null,
+    expiresAt: readAlias<string | null>(raw, 'expiresAt', 'expires_at') ?? raw.expiresAt ?? null,
+    bookingSource: readAlias<string | null>(raw, 'bookingSource', 'booking_source') ?? raw.bookingSource ?? null,
+    stayPurpose: readAlias<string | null>(raw, 'stayPurpose', 'stay_purpose') ?? raw.stayPurpose ?? null,
+    invoiceCount: Number(readAlias<number | string>(raw, 'invoiceCount', 'invoice_count') ?? raw.invoiceCount ?? 0),
+    latestInvoiceId: readAlias<number | null>(raw, 'latestInvoiceId', 'latest_invoice_id') ?? raw.latestInvoiceId ?? null,
+    latestInvoiceNumber: readAlias<string | null>(raw, 'latestInvoiceNumber', 'latest_invoice_number') ?? raw.latestInvoiceNumber ?? null,
+    latestInvoiceStatus: readAlias<string | null>(raw, 'latestInvoiceStatus', 'latest_invoice_status') ?? raw.latestInvoiceStatus ?? null,
+    room: raw.room
+      ? {
+          ...raw.room,
+          status: readAlias<string>(raw.room, 'status', 'roomStatus', 'room_status') ?? raw.room.status,
+        }
+      : raw.room,
+  };
+}
+
 export async function createTenantBooking(payload: CreateTenantBookingPayload) {
-  return createResource<TenantBooking>('/tenant/bookings', payload as unknown as Record<string, unknown>);
+  const response = await createResource<TenantBooking>('/tenant/bookings', payload as unknown as Record<string, unknown>);
+  return normalizeTenantBooking(response);
 }
 
 export async function listMyTenantBookings(params?: Record<string, unknown>) {
-  return listResource<TenantBooking>('/tenant/bookings/my', params) as Promise<PaginatedResponse<TenantBooking>>;
+  const response = await listResource<TenantBooking>('/tenant/bookings/my', params) as PaginatedResponse<TenantBooking>;
+  return {
+    ...response,
+    items: (response.items ?? []).map((item) => normalizeTenantBooking(item)),
+  } satisfies PaginatedResponse<TenantBooking>;
 }
 
-export async function approveTenantBooking(stayId: number | string, payload: ApproveBookingPayload) {
-  return updateResource<Stay>(`/admin/bookings/${stayId}/approve`, payload as unknown as Record<string, unknown>);
+export async function approveBooking(stayId: number | string, payload: ApproveBookingPayload) {
+  return updateResource<ApproveBookingResult>(`/admin/bookings/${stayId}/approve`, payload as unknown as Record<string, unknown>);
 }
 
 
@@ -3553,6 +3175,13 @@ export async function issueInvoice(invoiceId: number | string) {
   return postAction<Invoice>(`/invoices/${invoiceId}/issue`);
 }
 
+export async function cancelInvoice(
+  invoiceId: number | string,
+  payload: { cancelReason: string },
+) {
+  return postAction<Invoice>(`/invoices/${invoiceId}/cancel`, payload as unknown as Record<string, unknown>);
+}
+
 
 --- src/api/meterReadings.ts ---
 
@@ -3596,13 +3225,136 @@ export async function createPayment(payload: {
 }
 
 
+--- src/api/paymentSubmissions.ts ---
+
+import { createResource, listResource, postAction } from './resources';
+import type {
+  CreatePaymentSubmissionPayload,
+  PaginatedResponse,
+  PaymentSubmission,
+  ReviewQueueQuery,
+} from '../types';
+
+function readAlias<T>(source: unknown, ...keys: string[]): T | undefined {
+  if (!source || typeof source !== 'object') return undefined;
+  const record = source as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined) return value as T;
+  }
+  return undefined;
+}
+
+function normalizePaymentSubmission(raw: PaymentSubmission): PaymentSubmission {
+  const invoice = raw.invoice
+    ? {
+        ...raw.invoice,
+        invoiceNumber: readAlias<string | null>(raw.invoice, 'invoiceNumber', 'invoice_number') ?? raw.invoice.invoiceNumber ?? null,
+        totalAmountRupiah: Number(readAlias<number | string>(raw.invoice, 'totalAmountRupiah', 'total_amount_rupiah') ?? raw.invoice.totalAmountRupiah ?? 0) || undefined,
+        paidAmountRupiah: Number(readAlias<number | string>(raw.invoice, 'paidAmountRupiah', 'paid_amount_rupiah') ?? raw.invoice.paidAmountRupiah ?? 0) || undefined,
+        remainingAmountRupiah: Number(readAlias<number | string>(raw.invoice, 'remainingAmountRupiah', 'remaining_amount_rupiah') ?? raw.invoice.remainingAmountRupiah ?? 0) || undefined,
+      }
+    : raw.invoice;
+
+  return {
+    ...raw,
+    paidAt: readAlias<string>(raw, 'paidAt', 'paid_at') ?? raw.paidAt,
+    paymentMethod: readAlias<string>(raw, 'paymentMethod', 'payment_method') ?? raw.paymentMethod,
+    senderName: readAlias<string | null>(raw, 'senderName', 'sender_name') ?? raw.senderName ?? null,
+    senderBankName: readAlias<string | null>(raw, 'senderBankName', 'sender_bank_name') ?? raw.senderBankName ?? null,
+    referenceNumber: readAlias<string | null>(raw, 'referenceNumber', 'reference_number') ?? raw.referenceNumber ?? null,
+    reviewNotes: readAlias<string | null>(raw, 'reviewNotes', 'review_notes') ?? raw.reviewNotes ?? null,
+    reviewedAt: readAlias<string | null>(raw, 'reviewedAt', 'reviewed_at') ?? raw.reviewedAt ?? null,
+    fileKey: readAlias<string | null>(raw, 'fileKey', 'file_key') ?? raw.fileKey ?? null,
+    fileUrl: readAlias<string | null>(raw, 'fileUrl', 'file_url') ?? raw.fileUrl ?? null,
+    originalFilename: readAlias<string | null>(raw, 'originalFilename', 'original_filename') ?? raw.originalFilename ?? null,
+    mimeType: readAlias<string | null>(raw, 'mimeType', 'mime_type') ?? raw.mimeType ?? null,
+    fileSizeBytes: Number(readAlias<number | string>(raw, 'fileSizeBytes', 'file_size_bytes') ?? raw.fileSizeBytes ?? 0) || undefined,
+    createdAt: readAlias<string>(raw, 'createdAt', 'created_at') ?? raw.createdAt,
+    updatedAt: readAlias<string>(raw, 'updatedAt', 'updated_at') ?? raw.updatedAt,
+    room: raw.room
+      ? {
+          ...raw.room,
+          code: readAlias<string>(raw.room, 'code', 'roomCode', 'room_code') ?? raw.room.code,
+          name: readAlias<string | null>(raw.room, 'name', 'roomName', 'room_name') ?? raw.room.name ?? null,
+          status: readAlias<string>(raw.room, 'status', 'roomStatus', 'room_status') ?? raw.room.status,
+        }
+      : raw.room,
+    tenant: raw.tenant
+      ? {
+          ...raw.tenant,
+          fullName: readAlias<string | null>(raw.tenant, 'fullName', 'full_name') ?? raw.tenant.fullName ?? null,
+        }
+      : raw.tenant,
+    invoice,
+  };
+}
+
+async function normalizePage(request: Promise<PaginatedResponse<PaymentSubmission>>) {
+  const response = await request;
+  return {
+    ...response,
+    items: (response.items ?? []).map((item) => normalizePaymentSubmission(item)),
+  } satisfies PaginatedResponse<PaymentSubmission>;
+}
+
+export async function createPaymentSubmission(payload: CreatePaymentSubmissionPayload) {
+  const response = await createResource<PaymentSubmission>('/payment-submissions', payload as unknown as Record<string, unknown>);
+  return normalizePaymentSubmission(response);
+}
+
+export async function listMyPaymentSubmissions(params?: ReviewQueueQuery) {
+  return normalizePage(
+    listResource<PaymentSubmission>('/payment-submissions/my', params as Record<string, unknown>) as Promise<PaginatedResponse<PaymentSubmission>>,
+  );
+}
+
+export async function listPaymentReviewQueue(params?: ReviewQueueQuery) {
+  return normalizePage(
+    listResource<PaymentSubmission>('/payment-submissions/review-queue', params as Record<string, unknown>) as Promise<PaginatedResponse<PaymentSubmission>>,
+  );
+}
+
+export async function approvePaymentSubmission(id: number | string) {
+  const response = await postAction<PaymentSubmission>(`/payment-submissions/${id}/approve`);
+  return normalizePaymentSubmission(response);
+}
+
+export async function rejectPaymentSubmission(id: number | string, reviewNotes: string) {
+  const response = await postAction<PaymentSubmission>(`/payment-submissions/${id}/reject`, { reviewNotes });
+  return normalizePaymentSubmission(response);
+}
+
+
 --- src/api/resources.ts ---
 
 import client from './client';
 import { ApiEnvelope, PaginatedResponse } from '../types';
 
+const IS_ACTIVE_FILTER_PATHS = new Set([
+  '/users',
+  '/tenants',
+  '/rooms',
+  '/inventory-items',
+  '/expenses',
+  '/announcements',
+]);
+
+function sanitizeListParams(path: string, params?: Record<string, unknown>) {
+  if (!params) return params;
+
+  const nextParams = { ...params };
+  if (!IS_ACTIVE_FILTER_PATHS.has(path)) {
+    delete nextParams.isActive;
+  }
+
+  return nextParams;
+}
+
 export async function listResource<T>(path: string, params?: Record<string, unknown>) {
-  const response = await client.get<ApiEnvelope<PaginatedResponse<T>>>(path, { params });
+  const response = await client.get<ApiEnvelope<PaginatedResponse<T>>>(path, {
+    params: sanitizeListParams(path, params),
+  });
   return response.data.data;
 }
 
@@ -3651,12 +3403,47 @@ export type CreateStayResponse = {
   invoice: Invoice;
 };
 
+function readAlias<T>(source: unknown, ...keys: string[]): T | undefined {
+  if (!source || typeof source !== 'object') return undefined;
+  const record = source as Record<string, unknown>;
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined) return value as T;
+  }
+  return undefined;
+}
+
+function normalizeStay(raw: Stay): Stay {
+  return {
+    ...raw,
+    checkInDate: readAlias<string>(raw, 'checkInDate', 'check_in_date') ?? raw.checkInDate,
+    plannedCheckOutDate: readAlias<string | null>(raw, 'plannedCheckOutDate', 'planned_check_out_date') ?? raw.plannedCheckOutDate ?? null,
+    actualCheckOutDate: readAlias<string | null>(raw, 'actualCheckOutDate', 'actual_check_out_date') ?? raw.actualCheckOutDate ?? null,
+    expiresAt: readAlias<string | null>(raw, 'expiresAt', 'expires_at') ?? raw.expiresAt ?? null,
+    bookingSource: readAlias<string | null>(raw, 'bookingSource', 'booking_source') ?? raw.bookingSource ?? null,
+    stayPurpose: readAlias<string | null>(raw, 'stayPurpose', 'stay_purpose') ?? raw.stayPurpose ?? null,
+    checkoutReason: readAlias<string | null>(raw, 'checkoutReason', 'checkout_reason') ?? raw.checkoutReason ?? null,
+    cancelReason: readAlias<string | null>(raw, 'cancelReason', 'cancel_reason') ?? raw.cancelReason ?? null,
+    room: raw.room
+      ? {
+          ...raw.room,
+          status: readAlias<string>(raw.room, 'status', 'roomStatus', 'room_status') ?? raw.room.status,
+        }
+      : raw.room,
+  };
+}
+
 export async function listStays(params?: Record<string, unknown>) {
-  return listResource<Stay>('/stays', params) as Promise<PaginatedResponse<Stay>>;
+  const response = await listResource<Stay>('/stays', params) as PaginatedResponse<Stay>;
+  return {
+    ...response,
+    items: (response.items ?? []).map((item) => normalizeStay(item)),
+  } satisfies PaginatedResponse<Stay>;
 }
 
 export async function getStayById(id: number | string) {
-  return getResource<Stay>(`/stays/${id}`);
+  const response = await getResource<Stay>(`/stays/${id}`);
+  return normalizeStay(response);
 }
 
 export async function createStay(payload: StayCreatePayload) {
@@ -3778,6 +3565,7 @@ import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
+import PaymentReviewPage from './pages/payments/PaymentReviewPage';
 import MyAnnouncementsPage from './pages/portal/MyAnnouncementsPage';
 import MyInvoicesPage from './pages/portal/MyInvoicesPage';
 import MyBookingsPage from './pages/portal/MyBookingsPage';
@@ -3849,6 +3637,7 @@ export default function App() {
           <Route path="/stays/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StayDetailPage /></RequireRoles>} />
           <Route path="/invoices" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoicesPage /></RequireRoles>} />
           <Route path="/invoice-payments" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['invoice-payments']} /></RequireRoles>} />
+          <Route path="/payment-submissions/review" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><PaymentReviewPage /></RequireRoles>} />
           <Route path="/invoices/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoiceDetailPage /></RequireRoles>} />
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.announcements} /></RequireRoles>} />
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['meter-readings']} /></RequireRoles>} />
@@ -4815,6 +4604,311 @@ export default function ProtectedRoute() {
 }
 
 
+--- src/components/payments/ReviewPaymentModal.tsx ---
+
+import { useEffect, useState } from 'react';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import CurrencyDisplay from '../common/CurrencyDisplay';
+import StatusBadge from '../common/StatusBadge';
+import type { PaymentSubmission } from '../../types';
+
+type Props = {
+  show: boolean;
+  mode: 'approve' | 'reject' | 'view';
+  submission: PaymentSubmission | null;
+  busy?: boolean;
+  errorMessage?: string | null;
+  onHide: () => void;
+  onApprove: () => void;
+  onReject: (reviewNotes: string) => void;
+};
+
+export default function ReviewPaymentModal({ show, mode, submission, busy = false, errorMessage, onHide, onApprove, onReject }: Props) {
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!show) {
+      setReviewNotes('');
+      setValidationError(null);
+    }
+  }, [show]);
+
+  const handleReject = () => {
+    if (!reviewNotes.trim()) {
+      setValidationError('Alasan penolakan wajib diisi.');
+      return;
+    }
+    setValidationError(null);
+    onReject(reviewNotes.trim());
+  };
+
+  const title = mode === 'approve'
+    ? 'Setujui Bukti Bayar'
+    : mode === 'reject'
+      ? 'Tolak Bukti Bayar'
+      : 'Detail Submission Pembayaran';
+
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {submission ? (
+          <>
+            <div className="mb-3 small text-muted">
+              <div className="fw-semibold text-dark">{submission.room?.code ?? `Kamar #${submission.room?.id ?? '-'}`}</div>
+              <div>{submission.tenant?.fullName ?? 'Tenant tidak diketahui'} · {submission.invoice?.invoiceNumber ?? `INV-${submission.invoiceId}`}</div>
+            </div>
+            <div className="d-flex flex-wrap gap-2 mb-3">
+              <StatusBadge status={submission.status} />
+              <StatusBadge status={submission.invoice?.status ?? 'DRAFT'} />
+            </div>
+            <Alert variant="light" className="small">
+              <div>Nominal: <strong><CurrencyDisplay amount={submission.amountRupiah} /></strong></div>
+              <div>Tanggal bayar: <strong>{submission.paidAt ? new Date(submission.paidAt).toLocaleDateString('id-ID') : '-'}</strong></div>
+              <div>Metode: <strong>{submission.paymentMethod}</strong></div>
+              {submission.referenceNumber ? <div>Ref: <strong>{submission.referenceNumber}</strong></div> : null}
+              {submission.senderName ? <div>Pengirim: <strong>{submission.senderName}</strong></div> : null}
+              {submission.senderBankName ? <div>Sumber dana: <strong>{submission.senderBankName}</strong></div> : null}
+              {submission.fileUrl ? <div>URL bukti: <a href={submission.fileUrl} target="_blank" rel="noreferrer">Buka link</a></div> : null}
+            </Alert>
+
+            {submission.notes ? <Alert variant="secondary" className="small">Catatan tenant: {submission.notes}</Alert> : null}
+            {submission.reviewNotes ? <Alert variant="warning" className="small">Catatan review: {submission.reviewNotes}</Alert> : null}
+            {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
+            {errorMessage ? <Alert variant="danger">{errorMessage}</Alert> : null}
+
+            {mode === 'reject' ? (
+              <Form.Group>
+                <Form.Label>Alasan Penolakan</Form.Label>
+                <Form.Control as="textarea" rows={3} value={reviewNotes} onChange={(e) => setReviewNotes(e.currentTarget.value)} disabled={busy} />
+              </Form.Group>
+            ) : null}
+
+            {mode === 'approve' ? (
+              <Alert variant="warning" className="small mb-0">
+                Approval akan membuat pembayaran invoice final. Jika nominal ini melunasi invoice booking awal, kamar akan berubah dari <strong>RESERVED</strong> menjadi <strong>OCCUPIED</strong>.
+              </Alert>
+            ) : null}
+          </>
+        ) : null}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide} disabled={busy}>Tutup</Button>
+        {mode === 'approve' ? (
+          <Button onClick={onApprove} disabled={!submission || busy}>Setujui</Button>
+        ) : null}
+        {mode === 'reject' ? (
+          <Button variant="danger" onClick={handleReject} disabled={!submission || busy}>Tolak</Button>
+        ) : null}
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+
+--- src/components/portal/SubmitPaymentModal.tsx ---
+
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import CurrencyDisplay from '../common/CurrencyDisplay';
+import type { CreatePaymentSubmissionPayload, PaymentMethod, PaymentSubmission, TenantBooking } from '../../types';
+
+function todayValue() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+type Props = {
+  show: boolean;
+  booking: TenantBooking | null;
+  existingPending?: PaymentSubmission | null;
+  submitting?: boolean;
+  errorMessage?: string | null;
+  onHide: () => void;
+  onSubmit: (payload: CreatePaymentSubmissionPayload) => void;
+};
+
+export default function SubmitPaymentModal({ show, booking, existingPending, submitting = false, errorMessage, onHide, onSubmit }: Props) {
+  const remainingAmount = Math.max((booking?.latestInvoiceStatus === 'PAID' ? 0 : 0) + ((booking as any)?.invoice?.remainingAmountRupiah ?? 0), 0);
+  const fallbackRemaining = Math.max(
+    Number((booking as any)?.invoiceRemainingAmountRupiah ?? 0)
+      || Math.max(Number((booking as any)?.invoiceTotalAmountRupiah ?? booking?.agreedRentAmountRupiah ?? 0) - Number((booking as any)?.invoicePaidAmountRupiah ?? 0), 0),
+    0,
+  );
+  const maxAmount = remainingAmount || fallbackRemaining || Number(booking?.agreedRentAmountRupiah ?? 0);
+
+  const [amountRupiah, setAmountRupiah] = useState<string>('');
+  const [paidAt, setPaidAt] = useState<string>(todayValue());
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('TRANSFER');
+  const [senderName, setSenderName] = useState('');
+  const [senderBankName, setSenderBankName] = useState('');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [notes, setNotes] = useState('');
+  const [fileUrl, setFileUrl] = useState('');
+  const [originalFilename, setOriginalFilename] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!show || !booking) return;
+    setAmountRupiah(String(maxAmount || booking.agreedRentAmountRupiah || ''));
+    setPaidAt(todayValue());
+    setPaymentMethod('TRANSFER');
+    setSenderName('');
+    setSenderBankName('');
+    setReferenceNumber('');
+    setNotes('');
+    setFileUrl('');
+    setOriginalFilename('');
+    setValidationError(null);
+  }, [show, booking, maxAmount]);
+
+  const isPendingBlocked = existingPending?.status === 'PENDING_REVIEW';
+
+  const helperText = useMemo(() => {
+    if (!booking) return null;
+    if (isPendingBlocked) {
+      return 'Sudah ada bukti pembayaran yang sedang menunggu review. Tunggu hasil review admin sebelum mengirim ulang.';
+    }
+    return 'Untuk MVP fase ini, bukti bayar dapat dikirim sebagai URL share link. File upload storage penuh bisa disambungkan di iterasi berikutnya tanpa mengubah kontrak utama.';
+  }, [booking, isPendingBlocked]);
+
+  const handleSubmit = () => {
+    if (!booking?.latestInvoiceId) {
+      setValidationError('Invoice booking awal belum tersedia untuk submission pembayaran.');
+      return;
+    }
+
+    const numericAmount = Number(amountRupiah);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setValidationError('Nominal pembayaran harus lebih besar dari nol.');
+      return;
+    }
+
+    if (maxAmount > 0 && numericAmount > maxAmount) {
+      setValidationError('Nominal pembayaran tidak boleh melebihi sisa tagihan invoice.');
+      return;
+    }
+
+    if (!paidAt) {
+      setValidationError('Tanggal bayar wajib diisi.');
+      return;
+    }
+
+    const paidAtDate = new Date(paidAt);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (Number.isNaN(paidAtDate.getTime()) || paidAtDate > today) {
+      setValidationError('Tanggal bayar tidak valid atau berada di masa depan.');
+      return;
+    }
+
+    setValidationError(null);
+    onSubmit({
+      stayId: booking.id,
+      invoiceId: booking.latestInvoiceId,
+      amountRupiah: numericAmount,
+      paidAt,
+      paymentMethod,
+      senderName: senderName.trim() || undefined,
+      senderBankName: senderBankName.trim() || undefined,
+      referenceNumber: referenceNumber.trim() || undefined,
+      notes: notes.trim() || undefined,
+      fileUrl: fileUrl.trim() || undefined,
+      originalFilename: originalFilename.trim() || undefined,
+    });
+  };
+
+  return (
+    <Modal show={show} onHide={onHide} size="lg" centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Upload Bukti Bayar</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {booking ? (
+          <>
+            <Alert variant={isPendingBlocked ? 'warning' : 'info'} className="small">
+              <div className="fw-semibold mb-1">{booking.room?.code ?? `Kamar #${booking.roomId}`}</div>
+              <div>{helperText}</div>
+            </Alert>
+
+            <div className="mb-3 small text-muted">
+              Invoice awal: <strong>{booking.latestInvoiceNumber ?? `INV-${booking.latestInvoiceId ?? '-'}`}</strong>
+              {' · '}
+              Maksimal yang dapat dikirim sekarang: <strong><CurrencyDisplay amount={maxAmount} /></strong>
+            </div>
+
+            {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
+            {errorMessage ? <Alert variant="danger">{errorMessage}</Alert> : null}
+
+            <Form.Group className="mb-3">
+              <Form.Label>Nominal Dibayar</Form.Label>
+              <Form.Control type="number" min={1} max={maxAmount || undefined} value={amountRupiah} onChange={(e) => setAmountRupiah(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tanggal Bayar</Form.Label>
+              <Form.Control type="date" value={paidAt} onChange={(e) => setPaidAt(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Metode Pembayaran</Form.Label>
+              <Form.Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.currentTarget.value as PaymentMethod)} disabled={isPendingBlocked || submitting}>
+                <option value="TRANSFER">Transfer</option>
+                <option value="QRIS">QRIS</option>
+                <option value="EWALLET">E-Wallet</option>
+                <option value="CASH">Tunai</option>
+                <option value="OTHER">Lainnya</option>
+              </Form.Select>
+            </Form.Group>
+
+            <div className="row g-3">
+              <div className="col-md-6">
+                <Form.Group>
+                  <Form.Label>Nama Pengirim</Form.Label>
+                  <Form.Control value={senderName} onChange={(e) => setSenderName(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+                </Form.Group>
+              </div>
+              <div className="col-md-6">
+                <Form.Group>
+                  <Form.Label>Bank / Sumber Dana</Form.Label>
+                  <Form.Control value={senderBankName} onChange={(e) => setSenderBankName(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+                </Form.Group>
+              </div>
+            </div>
+
+            <Form.Group className="mt-3">
+              <Form.Label>Nomor Referensi</Form.Label>
+              <Form.Control value={referenceNumber} onChange={(e) => setReferenceNumber(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+
+            <Form.Group className="mt-3">
+              <Form.Label>URL Bukti Bayar</Form.Label>
+              <Form.Control type="url" placeholder="https://..." value={fileUrl} onChange={(e) => setFileUrl(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+
+            <Form.Group className="mt-3">
+              <Form.Label>Nama File Asli</Form.Label>
+              <Form.Control placeholder="mis. bukti-transfer-april.jpg" value={originalFilename} onChange={(e) => setOriginalFilename(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+
+            <Form.Group className="mt-3">
+              <Form.Label>Catatan</Form.Label>
+              <Form.Control as="textarea" rows={3} value={notes} onChange={(e) => setNotes(e.currentTarget.value)} disabled={isPendingBlocked || submitting} />
+            </Form.Group>
+          </>
+        ) : null}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide} disabled={submitting}>Tutup</Button>
+        <Button onClick={handleSubmit} disabled={!booking || isPendingBlocked || submitting}>Kirim Bukti Bayar</Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+
 --- src/components/resources/ResourceFormModal.tsx ---
 
 import { useEffect, useMemo, useState } from 'react';
@@ -5207,7 +5301,7 @@ export default function ResourceFormModal({
                               type="password"
                               value={createFormData.password}
                               onChange={(event) => setCreateFormData((prev) => ({ ...prev, password: event.target.value }))}
-                              placeholder="Minimal 6 karakter"
+                              placeholder="Minimal 8 karakter"
                             />
                           </Form.Group>
                           <Form.Group className="mb-3">
@@ -5936,19 +6030,15 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
 
 --- src/components/stays/ApproveBookingModal.tsx ---
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
-import { approveTenantBooking } from '../../api/bookings';
-import type { ApproveBookingPayload, Stay, TenantBooking } from '../../types';
+import { approveBooking } from '../../api/bookings';
+import type { ApproveBookingPayload, Stay } from '../../types';
+import { formatDateId } from '../../utils/bookingExpiry';
 
-function isDashboardKey(value: unknown) {
-  return typeof value === 'string' && value.startsWith('dashboard');
-}
-
-function toNumber(value: string) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+function formatNumberInput(value: string) {
+  return value.replace(/[^0-9.]/g, '');
 }
 
 export default function ApproveBookingModal({
@@ -5958,160 +6048,161 @@ export default function ApproveBookingModal({
 }: {
   show: boolean;
   onHide: () => void;
-  booking: TenantBooking | Stay | null;
+  booking: Stay | null;
 }) {
   const queryClient = useQueryClient();
   const [agreedRentAmountRupiah, setAgreedRentAmountRupiah] = useState('');
   const [depositAmountRupiah, setDepositAmountRupiah] = useState('');
-  const [initialElectricityKwh, setInitialElectricityKwh] = useState('');
-  const [initialWaterM3, setInitialWaterM3] = useState('');
+  const [initialElectricityKwh, setInitialElectricityKwh] = useState('0');
+  const [initialWaterM3, setInitialWaterM3] = useState('0');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!show || !booking) return;
-    setAgreedRentAmountRupiah(String(booking.agreedRentAmountRupiah ?? ''));
-    setDepositAmountRupiah(String(booking.depositAmountRupiah ?? ''));
-    setInitialElectricityKwh('0');
-    setInitialWaterM3('0');
-    setError('');
-  }, [booking, show]);
-
-  const payload = useMemo<ApproveBookingPayload | null>(() => {
-    const agreed = toNumber(agreedRentAmountRupiah);
-    const deposit = toNumber(depositAmountRupiah);
-    const electricity = toNumber(initialElectricityKwh);
-    const water = toNumber(initialWaterM3);
-
-    if (agreed === null || deposit === null || electricity === null || water === null) return null;
-    return {
-      agreedRentAmountRupiah: agreed,
-      depositAmountRupiah: deposit,
-      initialElectricityKwh: electricity,
-      initialWaterM3: water,
-    };
-  }, [agreedRentAmountRupiah, depositAmountRupiah, initialElectricityKwh, initialWaterM3]);
-
   const mutation = useMutation({
-    mutationFn: (nextPayload: ApproveBookingPayload) => approveTenantBooking(booking?.id ?? 0, nextPayload),
+    mutationFn: ({ stayId, payload }: { stayId: number; payload: ApproveBookingPayload }) => approveBooking(stayId, payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['stays'] });
-      await queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] });
-      await queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
-      await queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      await queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const firstKey = Array.isArray(query.queryKey) ? query.queryKey[0] : undefined;
-          return isDashboardKey(firstKey);
-        },
-      });
-      onHide();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        queryClient.invalidateQueries({
+          predicate: (query) => typeof query.queryKey?.[0] === 'string' && String(query.queryKey[0]).startsWith('dashboard-'),
+        }),
+      ]);
+      handleClose();
     },
   });
 
+  const roomLabel = useMemo(() => {
+    if (!booking) return '-';
+    return booking.room?.code ?? `Kamar #${booking.roomId}`;
+  }, [booking]);
+
   const handleClose = () => {
-    if (mutation.isPending) return;
-    setError('');
-    onHide();
+    if (!mutation.isPending) {
+      setAgreedRentAmountRupiah('');
+      setDepositAmountRupiah('');
+      setInitialElectricityKwh('0');
+      setInitialWaterM3('0');
+      setError('');
+      onHide();
+    }
   };
 
-  const validatePayload = () => {
-    if (!payload) {
-      return 'Semua field approval wajib diisi dengan angka yang valid.';
-    }
+  const validate = () => {
+    const rent = Number(agreedRentAmountRupiah);
+    const deposit = Number(depositAmountRupiah);
+    const electricity = Number(initialElectricityKwh);
+    const water = Number(initialWaterM3);
 
-    if (payload.agreedRentAmountRupiah < 0) return 'Tarif sewa disepakati tidak boleh negatif.';
-    if (payload.depositAmountRupiah < 0) return 'Deposit tidak boleh negatif.';
-    if (payload.initialElectricityKwh < 0) return 'Meter awal listrik tidak boleh negatif.';
-    if (payload.initialWaterM3 < 0) return 'Meter awal air tidak boleh negatif.';
-
+    if (!Number.isFinite(rent) || rent <= 0) return 'Tarif sewa disepakati harus lebih besar dari 0.';
+    if (!Number.isFinite(deposit) || deposit < 0) return 'Deposit tidak boleh negatif.';
+    if (!Number.isFinite(electricity) || electricity < 0) return 'Meter awal listrik tidak boleh negatif.';
+    if (!Number.isFinite(water) || water < 0) return 'Meter awal air tidak boleh negatif.';
     return '';
   };
 
   const handleSubmit = async () => {
-    const validationError = validatePayload();
+    if (!booking) return;
+
+    const validationError = validate();
     setError(validationError);
-    if (validationError || !payload || !booking) return;
+    if (validationError) return;
 
     try {
-      await mutation.mutateAsync(payload);
+      await mutation.mutateAsync({
+        stayId: booking.id,
+        payload: {
+          agreedRentAmountRupiah: Number(agreedRentAmountRupiah),
+          depositAmountRupiah: Number(depositAmountRupiah),
+          initialElectricityKwh,
+          initialWaterM3,
+        },
+      });
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal menyetujui booking. Silakan coba lagi.');
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message;
+      if (status === 409) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['stays'] }),
+          queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+          queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        ]);
+      }
+      const resolvedMessage = Array.isArray(message) ? message.join(', ') : message;
+      setError(status === 409
+        ? `${resolvedMessage || 'Booking ini sudah berubah state di server.'} Silakan refresh daftar booking lalu cek status terbarunya.`
+        : resolvedMessage || 'Gagal menyetujui booking.');
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Approval Booking</Modal.Title>
+        <Modal.Title>Setujui Booking</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Alert variant="info" className="small">
-          Booking akan tetap berstatus <strong>reserved</strong> pada fase ini. Sistem akan membuat 2 baseline meter reading dan invoice awal <strong>DRAFT</strong>, tanpa membuka flow pembayaran.
-        </Alert>
-
         {booking ? (
-          <div className="mb-3 small text-muted">
+          <Alert variant="light" className="border small">
             <div><strong>Tenant:</strong> {booking.tenant?.fullName ?? `Tenant #${booking.tenantId}`}</div>
-            <div><strong>Kamar:</strong> {booking.room?.code ?? `Room #${booking.roomId}`} {booking.room?.name ? `· ${booking.room.name}` : ''}</div>
-          </div>
+            <div><strong>Kamar:</strong> {roomLabel}</div>
+            <div><strong>Check-in:</strong> {formatDateId(booking.checkInDate)}</div>
+            <div><strong>Pricing term:</strong> {booking.pricingTerm ?? '-'}</div>
+            <div><strong>Expires at:</strong> {formatDateId(booking.expiresAt)}</div>
+          </Alert>
         ) : null}
 
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tarif Sewa Disepakati</Form.Label>
+          <Form.Label>Tarif Sewa Disepakati <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="1"
+            min={1}
+            step={1}
             value={agreedRentAmountRupiah}
-            onChange={(event) => setAgreedRentAmountRupiah(event.target.value)}
-            placeholder="Contoh: 1500000"
+            onChange={(e) => setAgreedRentAmountRupiah(formatNumberInput(e.target.value))}
+            placeholder="Contoh: 1200000"
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Deposit</Form.Label>
+          <Form.Label>Deposit <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="1"
+            min={0}
+            step={1}
             value={depositAmountRupiah}
-            onChange={(event) => setDepositAmountRupiah(event.target.value)}
+            onChange={(e) => setDepositAmountRupiah(formatNumberInput(e.target.value))}
             placeholder="Contoh: 500000"
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Meter Awal Listrik (kWh)</Form.Label>
+          <Form.Label>Meter Awal Listrik (kWh) <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="0.01"
+            min={0}
+            step="0.001"
             value={initialElectricityKwh}
-            onChange={(event) => setInitialElectricityKwh(event.target.value)}
-            placeholder="Contoh: 0"
+            onChange={(e) => setInitialElectricityKwh(formatNumberInput(e.target.value))}
           />
         </Form.Group>
 
         <Form.Group>
-          <Form.Label>Meter Awal Air (m³)</Form.Label>
+          <Form.Label>Meter Awal Air (m3) <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="0.01"
+            min={0}
+            step="0.001"
             value={initialWaterM3}
-            onChange={(event) => setInitialWaterM3(event.target.value)}
-            placeholder="Contoh: 0"
+            onChange={(e) => setInitialWaterM3(formatNumberInput(e.target.value))}
           />
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>Tutup</Button>
+        <Button variant="secondary" onClick={handleClose} disabled={mutation.isPending}>Batal</Button>
         <Button onClick={handleSubmit} disabled={mutation.isPending || !booking}>
-          {mutation.isPending ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Setujui Booking'}
+          {mutation.isPending ? <><Spinner size="sm" className="me-2" />Menyetujui...</> : 'Setujui Booking'}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -6688,22 +6779,18 @@ function isOverdue(invoice: Invoice) {
 }
 
 function paidAmount(invoice: Invoice): number | null {
-  // Prioritas 1: pakai paidAmountRupiah jika tersedia dan valid
   if (typeof invoice.paidAmountRupiah === 'number' && !isNaN(invoice.paidAmountRupiah)) {
     return invoice.paidAmountRupiah;
   }
-  
-  // Prioritas 2: hitung dari payments jika ada dan valid
+
   if (Array.isArray(invoice.payments) && invoice.payments.length > 0) {
     const sum = invoice.payments.reduce((sum, item) => {
       const amount = Number(item?.amountRupiah ?? 0);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-    // Hanya kembalikan sum jika > 0 atau ada data payments yang valid
     return sum > 0 ? sum : null;
   }
-  
-  // Prioritas 3: tidak ada data yang cukup untuk menghitung
+
   return null;
 }
 
@@ -6712,9 +6799,40 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'ALL' | 'OPEN' | 'OVERDUE' | 'PAID'>('ALL');
-  const { data, isLoading, isError } = useInvoices(stay.id, enabled);
+  const [actionError, setActionError] = useState('');
+  const { data, isLoading, isError, cancelMutation } = useInvoices(stay.id, enabled);
   const invoices = data?.items ?? [];
   const overdueCount = useMemo(() => invoices.filter(isOverdue).length, [invoices]);
+
+  const handleCancelInvoice = async (invoice: Invoice) => {
+    const defaultReason = `Dibatalkan dari stay ${stay.id}`;
+    const input = window.prompt(
+      `Masukkan alasan pembatalan untuk ${invoice.invoiceNumber || `INV-${invoice.id}`}`,
+      defaultReason,
+    );
+
+    if (input === null) return;
+
+    const cancelReason = input.trim();
+    if (!cancelReason) {
+      setActionError('Alasan pembatalan invoice wajib diisi.');
+      return;
+    }
+
+    setActionError('');
+    try {
+      await cancelMutation.mutateAsync({ invoiceId: invoice.id, payload: { cancelReason } });
+      if (selectedInvoiceId === invoice.id) {
+        setSelectedInvoiceId(null);
+      }
+    } catch (error: unknown) {
+      const message = error && typeof error === 'object' && 'response' in error
+        ? ((error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Gagal membatalkan invoice.')
+        : 'Gagal membatalkan invoice.';
+      setActionError(Array.isArray(message) ? message.join(', ') : message);
+    }
+  };
+
   const filteredInvoices = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return invoices.filter((invoice) => {
@@ -6788,6 +6906,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
 
         <div className="table-meta-count mb-3">Menampilkan {filteredInvoices.length} dari {invoices.length} invoice</div>
 
+        {actionError ? <Alert variant="danger" className="mb-3">{actionError}</Alert> : null}
         {isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
         {isError ? <Alert variant="danger">Gagal mengambil data invoice.</Alert> : null}
         {!isLoading && !isError && !filteredInvoices.length ? (
@@ -6826,7 +6945,21 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                     <td><CurrencyDisplay amount={paidAmount(invoice)} /></td>
                     <td className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
                     <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status)} /></td>
-                    <td><Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button></td>
+                    <td>
+                      <div className="d-flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button>
+                        {invoice.status === 'DRAFT' ? (
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => void handleCancelInvoice(invoice)}
+                            disabled={cancelMutation.isPending}
+                          >
+                            {cancelMutation.isPending ? 'Membatalkan...' : 'Cancel Invoice'}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -7735,6 +7868,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/dashboard', label: 'Dashboard Owner', icon: '📈', hint: 'KPI properti, koleksi, dan arah keputusan bisnis.' },
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau billed, collected, overdue, dan follow-up utama.' },
+      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
       { to: '/expenses', label: 'Pengeluaran', icon: '💸', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
       { to: '/users', label: 'Users', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
@@ -7773,6 +7907,7 @@ const adminSections: NavigationSection[] = [
     links: [
       { to: '/invoices', label: 'Invoices', icon: '💳', hint: 'Tagihan, line item, dan status pembayaran.' },
       { to: '/invoice-payments', label: 'Invoice Payments', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
+      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Queue review bukti bayar booking reserved tenant.' },
       { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
       { to: '/expenses', label: 'Expenses', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
@@ -7888,6 +8023,7 @@ export type ResourceConfig = {
   fields: ResourceField[];
   allowDelete?: boolean;
   createLabel?: string;
+  supportsIsActiveFilter?: boolean;
 };
 
 const userRoles = [
@@ -7899,15 +8035,13 @@ const userRoles = [
 
 const announcementAudienceOptions = [
   { value: 'TENANT', label: 'Tenant' },
-  { value: 'STAFF', label: 'Staff' },
-  { value: 'ADMIN', label: 'Admin' },
-  { value: 'STAFF_ADMIN', label: 'Staff & Admin' },
   { value: 'ALL', label: 'Semua' },
 ];
 
 export const resourceConfigs: Record<string, ResourceConfig> = {
   users: {
     title: 'Users & Akses',
+    supportsIsActiveFilter: true,
     path: '/users',
     columns: [
       { key: 'id', label: 'ID' },
@@ -7958,6 +8092,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
 
   tenants: {
     title: 'Tenants & Portal Access',
+    supportsIsActiveFilter: true,
     path: '/tenants',
     columns: [
       { key: 'fullName', label: 'Nama Tenant' },
@@ -8048,6 +8183,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
 
   rooms: {
     title: 'Rooms',
+    supportsIsActiveFilter: true,
     path: '/rooms',
     columns: [
       { key: 'code', label: 'Kamar' },
@@ -8239,6 +8375,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
 
   announcements: {
     title: 'Pengumuman & Komunikasi',
+    supportsIsActiveFilter: true,
     path: '/announcements',
     createLabel: 'Buat Pengumuman',
     columns: [
@@ -8627,6 +8764,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
 
   expenses: {
     title: 'Expenses',
+    supportsIsActiveFilter: true,
     path: '/expenses',
     allowDelete: true,
     columns: [
@@ -8843,13 +8981,12 @@ export function useAuth() {
 --- src/hooks/useInvoices.ts ---
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addInvoiceLine, createInvoice, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
+import { addInvoiceLine, cancelInvoice, createInvoice, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
 
 export function useInvoices(stayId?: number | string, enabled = true) {
   const queryClient = useQueryClient();
   const key = ['stay', stayId, 'invoices'];
 
-  // Validasi stayId: harus angka valid, bukan "undefined" string atau NaN
   const isValidStayId = stayId !== undefined && stayId !== null && stayId !== 'undefined' && stayId !== 'null' && !isNaN(Number(stayId));
 
   const query = useQuery({
@@ -8884,7 +9021,17 @@ export function useInvoices(stayId?: number | string, enabled = true) {
     },
   });
 
-  return { ...query, createMutation, addLineMutation, issueMutation };
+  const cancelMutation = useMutation({
+    mutationFn: ({ invoiceId, payload }: { invoiceId: number | string; payload: { cancelReason: string } }) =>
+      cancelInvoice(invoiceId, payload),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: key });
+      await queryClient.invalidateQueries({ queryKey: ['invoice', variables.invoiceId] });
+      await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    },
+  });
+
+  return { ...query, createMutation, addLineMutation, issueMutation, cancelMutation };
 }
 
 export function useInvoice(invoiceId?: number | string, enabled = true) {
@@ -9038,6 +9185,12 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error) => {
+        const status = (error as { response?: { status?: number } } | undefined)?.response?.status;
+        if (status && status < 500) return false;
+        return failureCount < 1;
+      },
     },
   },
 });
@@ -9045,7 +9198,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <App />
         </AuthProvider>
@@ -9441,6 +9594,7 @@ export default function BookingPage() {
 --- src/pages/dashboard/DashboardPage.tsx ---
 
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -9452,6 +9606,40 @@ import { listResource } from '../../api/resources';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import type { Invoice, Room, Stay } from '../../types';
+
+type DashboardListSummary<T> = {
+  items: T[];
+  totalItems: number;
+  isTruncated: boolean;
+};
+
+async function fetchAllPagesForDashboard<T>(
+  path: string,
+  params?: Record<string, unknown>,
+  pageSize = 100,
+  maxPages = 50,
+): Promise<DashboardListSummary<T>> {
+  const items: T[] = [];
+  let totalPages = 1;
+  let totalItems = 0;
+  let page = 1;
+
+  do {
+    const response = await listResource<T>(path, { ...(params ?? {}), page, limit: pageSize });
+    items.push(...(response.items ?? []));
+    totalPages = response.meta?.totalPages ?? 1;
+    totalItems = response.meta?.totalItems ?? items.length;
+
+    if (!(response.items ?? []).length) break;
+    page += 1;
+  } while (page <= totalPages && page <= maxPages);
+
+  return {
+    items,
+    totalItems,
+    isTruncated: totalItems > items.length || totalPages > maxPages,
+  };
+}
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
   if (!dateValue) return '-';
@@ -9496,7 +9684,7 @@ function SmallTable({ title, subtitle, headers, rows, emptyTitle, emptyDescripti
   title: string;
   subtitle: string;
   headers: string[];
-  rows: React.ReactNode;
+  rows: ReactNode;
   emptyTitle: string;
   emptyDescription: string;
 }) {
@@ -9525,8 +9713,8 @@ function OwnerDashboard() {
   const navigate = useNavigate();
   const roomsQuery = useQuery({ queryKey: ['dashboard-owner', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
   const staysQuery = useQuery({ queryKey: ['dashboard-owner', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 1000 }) });
-  const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses'], queryFn: () => listResource<any>('/expenses', { limit: 1000 }) });
+  const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices-summary'], queryFn: () => fetchAllPagesForDashboard<Invoice>('/invoices') });
+  const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses-summary'], queryFn: () => fetchAllPagesForDashboard<any>('/expenses') });
 
   if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading) return <LoadingDashboard />;
   if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
@@ -9534,9 +9722,11 @@ function OwnerDashboard() {
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
   const invoices = invoicesQuery.data?.items ?? [];
-  const invoiceTotalItems = invoicesQuery.data?.meta?.totalItems ?? 0;
-  const invoiceIsTruncated = invoiceTotalItems > 0 && invoiceTotalItems > invoices.length;
+  const invoiceTotalItems = invoicesQuery.data?.totalItems ?? invoices.length;
+  const invoiceIsTruncated = Boolean(invoicesQuery.data?.isTruncated);
   const expenses = expensesQuery.data?.items ?? [];
+  const expenseTotalItems = expensesQuery.data?.totalItems ?? expenses.length;
+  const expenseIsTruncated = Boolean(expensesQuery.data?.isTruncated);
 
   const occupiedRooms = rooms.filter((room) => room.status === 'OCCUPIED').length;
   const availableRooms = rooms.filter((room) => room.status === 'AVAILABLE').length;
@@ -9556,10 +9746,13 @@ function OwnerDashboard() {
 
       {invoiceIsTruncated ? (
         <Alert variant="warning" className="mb-3 py-2 small">
-          Data finansial dihitung dari <strong>{invoices.length}</strong> invoice terbaru.
-          Total invoice di database: <strong>{invoiceTotalItems}</strong>.
-          Angka billed dan collected di bawah bersifat estimasi.{' '}
-          <a href="/invoices">Lihat semua invoice →</a>
+Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{invoices.length}</strong> invoice, sementara total di database <strong>{invoiceTotalItems}</strong>.
+        </Alert>
+      ) : null}
+
+      {expenseIsTruncated ? (
+        <Alert variant="warning" className="mb-3 py-2 small">
+          Ringkasan expense belum memuat semua data. Total expense saat ini dihitung dari <strong>{expenses.length}</strong> data, sementara total di database <strong>{expenseTotalItems}</strong>.
         </Alert>
       ) : null}
 
@@ -10274,9 +10467,10 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import SearchableSelect from '../../components/common/SearchableSelect';
-import { createResource, listResource, postAction } from '../../api/resources';
+import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
+import { cancelInvoice, issueInvoice } from '../../api/invoices';
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -10347,12 +10541,12 @@ export default function InvoicesPage() {
   });
 
   const issueMutation = useMutation({
-    mutationFn: (id: number) => postAction(`/invoices/${id}/issue`),
+    mutationFn: (id: number) => issueInvoice(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: number) => postAction(`/invoices/${id}/cancel`, { cancelReason: 'Dibatalkan dari workspace invoice' }),
+    mutationFn: (id: number) => cancelInvoice(id, { cancelReason: 'Dibatalkan dari workspace invoice' }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 
@@ -10661,6 +10855,245 @@ export default function InvoicesPage() {
 }
 
 
+--- src/pages/payments/PaymentReviewPage.tsx ---
+
+import { useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import PaginationControls from '../../components/common/PaginationControls';
+import StatusBadge from '../../components/common/StatusBadge';
+import CurrencyDisplay from '../../components/common/CurrencyDisplay';
+import ReviewPaymentModal from '../../components/payments/ReviewPaymentModal';
+import {
+  approvePaymentSubmission,
+  listPaymentReviewQueue,
+  rejectPaymentSubmission,
+} from '../../api/paymentSubmissions';
+import type { PaymentMethod, PaymentSubmission } from '../../types';
+
+function formatDate(value?: string | null) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function getRemainingAmount(item: PaymentSubmission) {
+  const invoiceRemaining = Number(item.invoice?.remainingAmountRupiah ?? 0);
+  if (invoiceRemaining > 0) return invoiceRemaining;
+
+  const total = Number(item.invoice?.totalAmountRupiah ?? 0);
+  const paid = Number(item.invoice?.paidAmountRupiah ?? 0);
+  const fallback = Math.max(total - paid, 0);
+  return fallback > 0 ? fallback : null;
+}
+
+export default function PaymentReviewPage() {
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState<'PENDING_REVIEW' | 'REJECTED' | 'APPROVED' | 'EXPIRED'>('PENDING_REVIEW');
+  const [search, setSearch] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('');
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<PaymentSubmission | null>(null);
+  const [modalMode, setModalMode] = useState<'approve' | 'reject' | 'view'>('approve');
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const query = useQuery({
+    queryKey: ['payment-review-queue', page, status, search, paymentMethod],
+    queryFn: () => listPaymentReviewQueue({
+      page,
+      status,
+      search: search.trim() || undefined,
+      paymentMethod: paymentMethod || undefined,
+      limit: 20,
+    }),
+  });
+
+  const items = useMemo(() => query.data?.items ?? [], [query.data]);
+  const totalItems = Number(query.data?.meta?.totalItems ?? items.length ?? 0);
+  const totalPages = Math.max(Number(query.data?.meta?.totalPages ?? 1), 1);
+
+  const refreshRelated = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['payment-review-queue'] }),
+      queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+      queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
+      queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+    ]);
+  };
+
+  const approveMutation = useMutation({
+    mutationFn: async (submissionId: number) => approvePaymentSubmission(submissionId),
+    onSuccess: async () => {
+      setSelected(null);
+      setActionError(null);
+      await refreshRelated();
+    },
+    onError: (error: any) => {
+      setActionError(error?.response?.data?.message ?? 'Gagal menyetujui bukti pembayaran.');
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({ submissionId, reviewNotes }: { submissionId: number; reviewNotes: string }) => rejectPaymentSubmission(submissionId, reviewNotes),
+    onSuccess: async () => {
+      setSelected(null);
+      setActionError(null);
+      await refreshRelated();
+    },
+    onError: (error: any) => {
+      setActionError(error?.response?.data?.message ?? 'Gagal menolak bukti pembayaran.');
+    },
+  });
+
+  return (
+    <div>
+      <PageHeader
+        title="Verifikasi Bayar"
+        description="Review bukti pembayaran tenant, lalu putuskan approve atau reject secara operasional-friendly."
+      />
+
+      <Card className="content-card border-0 mb-4">
+        <Card.Body>
+          <div className="row g-3 align-items-end">
+            <div className="col-md-3">
+              <Form.Group>
+                <Form.Label>Status</Form.Label>
+                <Form.Select value={status} onChange={(e) => { setStatus(e.currentTarget.value as typeof status); setPage(1); }}>
+                  <option value="PENDING_REVIEW">Menunggu Review</option>
+                  <option value="APPROVED">Disetujui</option>
+                  <option value="REJECTED">Ditolak</option>
+                  <option value="EXPIRED">Kadaluarsa</option>
+                </Form.Select>
+              </Form.Group>
+            </div>
+            <div className="col-md-3">
+              <Form.Group>
+                <Form.Label>Metode</Form.Label>
+                <Form.Select value={paymentMethod} onChange={(e) => { setPaymentMethod(e.currentTarget.value as PaymentMethod | ''); setPage(1); }}>
+                  <option value="">Semua Metode</option>
+                  <option value="TRANSFER">Transfer</option>
+                  <option value="QRIS">QRIS</option>
+                  <option value="EWALLET">E-Wallet</option>
+                  <option value="CASH">Tunai</option>
+                  <option value="OTHER">Lainnya</option>
+                </Form.Select>
+              </Form.Group>
+            </div>
+            <div className="col-md-4">
+              <Form.Group>
+                <Form.Label>Pencarian</Form.Label>
+                <Form.Control value={search} onChange={(e) => { setSearch(e.currentTarget.value); setPage(1); }} placeholder="Cari tenant, kamar, invoice, atau nomor referensi" />
+              </Form.Group>
+            </div>
+            <div className="col-md-2">
+              <Button variant="outline-secondary" className="w-100" onClick={() => query.refetch()}>Refresh</Button>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="content-card border-0">
+        <Card.Body>
+          {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
+          {query.isError ? <Alert variant="danger">Gagal memuat queue review pembayaran.</Alert> : null}
+          {!query.isLoading && !query.isError && !items.length ? (
+            <EmptyState icon="💸" title="Belum ada submission" description="Queue review pembayaran akan muncul di sini saat tenant mengirim bukti bayar." />
+          ) : null}
+
+          {!query.isLoading && !query.isError && items.length > 0 ? (
+            <>
+              <Table responsive hover>
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Kamar</th>
+                    <th>Invoice</th>
+                    <th>Nominal</th>
+                    <th>Sisa Invoice</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => {
+                    const remainingAmount = getRemainingAmount(item);
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="fw-semibold">{item.tenant?.fullName ?? '-'}</div>
+                          <div className="small text-muted">{item.tenant?.phone ?? '-'}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.room?.code ?? '-'}</div>
+                          <div className="small text-muted">{item.room?.name ?? 'Nama kamar belum tersedia'}</div>
+                          {item.stay?.expiresAt ? <div className="small text-muted">Expired booking: {formatDate(item.stay.expiresAt)}</div> : null}
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.invoice?.invoiceNumber ?? `INV-${item.invoiceId}`}</div>
+                          <div className="small text-muted">{item.referenceNumber || 'Tanpa ref'}</div>
+                          <div className="small text-muted">{item.paymentMethod}</div>
+                        </td>
+                        <td><CurrencyDisplay amount={item.amountRupiah} /></td>
+                        <td>{remainingAmount !== null ? <CurrencyDisplay amount={remainingAmount} /> : <span className="text-muted">-</span>}</td>
+                        <td>{formatDate(item.paidAt)}</td>
+                        <td>
+                          <div className="d-flex gap-2 flex-wrap">
+                            <StatusBadge status={item.status} />
+                            {item.invoice?.status ? <StatusBadge status={item.invoice.status} /> : null}
+                          </div>
+                          {item.reviewNotes ? <div className="small text-muted mt-1">Catatan: {item.reviewNotes}</div> : null}
+                        </td>
+                        <td>
+                          <div className="d-flex gap-2 flex-wrap">
+                            {item.fileUrl ? <Button as="a" href={item.fileUrl} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">Buka Bukti</Button> : null}
+                            {item.status === 'PENDING_REVIEW' ? (
+                              <>
+                                <Button size="sm" onClick={() => { setSelected(item); setModalMode('approve'); setActionError(null); }}>Approve</Button>
+                                <Button size="sm" variant="outline-danger" onClick={() => { setSelected(item); setModalMode('reject'); setActionError(null); }}>Reject</Button>
+                              </>
+                            ) : (
+                              <Button size="sm" variant="outline-secondary" onClick={() => { setSelected(item); setModalMode('view'); setActionError(null); }}>
+                                Lihat Detail
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+
+              <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap mt-3">
+                <div className="small text-muted">Menampilkan {items.length} dari {totalItems} submission.</div>
+                <PaginationControls currentPage={page} totalPages={totalPages} totalItems={totalItems} pageSize={20} isLoading={query.isFetching} onPageChange={setPage} />
+              </div>
+            </>
+          ) : null}
+        </Card.Body>
+      </Card>
+
+      <ReviewPaymentModal
+        show={Boolean(selected)}
+        mode={selected?.status === 'PENDING_REVIEW' ? modalMode : 'view'}
+        submission={selected}
+        busy={approveMutation.isPending || rejectMutation.isPending}
+        errorMessage={actionError}
+        onHide={() => setSelected(null)}
+        onApprove={() => selected && approveMutation.mutate(selected.id)}
+        onReject={(reviewNotes) => selected && rejectMutation.mutate({ submissionId: selected.id, reviewNotes })}
+      />
+    </div>
+  );
+}
+
+
 --- src/pages/portal/MyAnnouncementsPage.tsx ---
 
 import { useQuery } from '@tanstack/react-query';
@@ -10755,103 +11188,139 @@ export default function MyAnnouncementsPage() {
 
 --- src/pages/portal/MyBookingsPage.tsx ---
 
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import axios from 'axios';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { listMyTenantBookings } from '../../api/bookings';
-import { listResource } from '../../api/resources';
+import { createPaymentSubmission, listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
-import type { Invoice, TenantBooking } from '../../types';
-
-function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function daysLeft(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
+import SubmitPaymentModal from '../../components/portal/SubmitPaymentModal';
+import type { CreatePaymentSubmissionPayload, PaymentSubmission, TenantBooking } from '../../types';
+import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 
 function ExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
-  const remaining = daysLeft(expiresAt);
-  if (remaining === null) return <StatusBadge status="SECONDARY" customLabel="Tanpa Batas Waktu" />;
-  if (remaining < 0) return <StatusBadge status="DANGER" customLabel="Masa Berlaku Lewat" />;
-  if (remaining === 0) return <StatusBadge status="DANGER" customLabel="Berakhir Hari Ini" />;
-  if (remaining <= 3) return <StatusBadge status="WARNING" customLabel={`Berakhir ${remaining} hari lagi`} />;
-  return <StatusBadge status="INFO" customLabel={`Berlaku ${remaining} hari lagi`} />;
+  const expiryMeta = getBookingExpiryMeta(expiresAt);
+  return <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />;
+}
+
+function getPortalBookingStatus(booking: TenantBooking) {
+  const hasInitialInvoice = Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
+
+  if (hasInitialInvoice) {
+    return {
+      badgeStatus: 'INFO',
+      label: 'Menunggu Pembayaran',
+      helper:
+        booking.latestInvoiceNumber
+          ? `Admin sudah menyetujui booking ini. Invoice awal ${booking.latestInvoiceNumber} sudah terbentuk dan menunggu pembayaran.`
+          : 'Admin sudah menyetujui booking ini. Invoice awal booking sudah terbentuk dan menunggu pembayaran.',
+    };
+  }
+
+  return {
+    badgeStatus: 'WARNING',
+    label: 'Menunggu Approval',
+    helper: 'Booking Anda masih menunggu persetujuan admin sebelum invoice awal dibuat.',
+  };
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (Array.isArray(message)) return message.join(', ');
+    if (typeof message === 'string' && message.trim()) return message;
+  }
+  return fallback;
 }
 
 export default function MyBookingsPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+  const [selectedBooking, setSelectedBooking] = useState<TenantBooking | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
   const successMessage = (location.state as { successMessage?: string } | null)?.successMessage;
 
-  const query = useQuery({
+  const bookingsQuery = useQuery({
     queryKey: ['tenant-bookings'],
     queryFn: () => listMyTenantBookings({ limit: 100 }),
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  const invoicesQuery = useQuery({
-    queryKey: ['portal-invoices'],
-    queryFn: () => listResource<Invoice>('/invoices/my'),
-    staleTime: 30_000, // Kurangi dari 60 detik menjadi 30 detik untuk refresh lebih cepat
-    refetchInterval: 45_000, // Auto-refresh setiap 45 detik saat halaman aktif
-    refetchOnWindowFocus: true, // Refresh saat user kembali ke tab
+  const submissionsQuery = useQuery({
+    queryKey: ['payment-submissions', 'mine'],
+    queryFn: () => listMyPaymentSubmissions({ limit: 200 }),
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const invoiceStayIds = useMemo(
-    () => new Set(
-      (invoicesQuery.data?.items ?? [])
-        .filter((invoice) => invoice.status !== 'CANCELLED') // Exclude cancelled invoices
-        .map((invoice) => Number(invoice.stayId))
-        .filter(Boolean)
-    ),
-    [invoicesQuery.data],
-  );
+  const createSubmissionMutation = useMutation({
+    mutationFn: async (payload: CreatePaymentSubmissionPayload) => createPaymentSubmission(payload),
+    onSuccess: async () => {
+      setSubmissionError(null);
+      setSelectedBooking(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
+      ]);
+    },
+    onError: (error) => {
+      setSubmissionError(getErrorMessage(error, 'Gagal mengirim bukti pembayaran. Silakan coba lagi.'));
+    },
+  });
+
+  const items = useMemo(() => bookingsQuery.data?.items ?? [], [bookingsQuery.data]);
+  const submissions = useMemo(() => submissionsQuery.data?.items ?? [], [submissionsQuery.data]);
+  const submissionByBooking = useMemo(() => {
+    const map = new Map<number, PaymentSubmission[]>();
+    submissions.forEach((submission) => {
+      const current = map.get(submission.stayId) ?? [];
+      current.push(submission);
+      map.set(submission.stayId, current);
+    });
+    return map;
+  }, [submissions]);
+
+  const bookingErrorMessage = useMemo(() => getErrorMessage(bookingsQuery.error, 'Gagal memuat daftar booking Anda. Silakan coba lagi.'), [bookingsQuery.error]);
+  const submissionListError = useMemo(() => submissionsQuery.isError ? getErrorMessage(submissionsQuery.error, 'Gagal memuat riwayat bukti pembayaran.') : null, [submissionsQuery.error, submissionsQuery.isError]);
 
   return (
     <div>
       <PageHeader
         title="Pemesanan Saya"
-        description="Pantau booking kamar Anda secara jujur: masih menunggu approval admin atau sudah masuk tahap menunggu pembayaran."
+        description="Pantau status booking Anda secara jujur, mulai dari menunggu approval admin sampai menunggu pembayaran booking awal."
         secondaryAction={<Button onClick={() => navigate('/rooms')}>Cari Kamar Lagi</Button>}
       />
 
       {successMessage ? <Alert variant="success">{successMessage}</Alert> : null}
-      {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {query.isError ? <Alert variant="danger">Gagal memuat daftar booking Anda. Silakan coba lagi.</Alert> : null}
-      {!query.isLoading && !query.isError && invoicesQuery.isError ? (
-        <Alert variant="warning" className="small">Status booking Anda belum bisa diperkaya penuh dari data tagihan. Halaman tetap menampilkan status booking dasar.</Alert>
-      ) : null}
-      {!query.isLoading && !query.isError && !items.length ? (
+      <Alert variant="info" className="small">
+        Status di halaman ini mengikuti kondisi nyata booking reserved Anda. Booking yang belum punya invoice awal berarti <strong>Menunggu Approval</strong>, sedangkan booking yang sudah punya invoice awal berarti <strong>Menunggu Pembayaran</strong>.
+      </Alert>
+      {submissionListError ? <Alert variant="warning">{submissionListError}</Alert> : null}
+      {bookingsQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
+      {bookingsQuery.isError ? <Alert variant="danger">{bookingErrorMessage}</Alert> : null}
+      {!bookingsQuery.isLoading && !bookingsQuery.isError && !items.length ? (
         <EmptyState
           icon="📅"
           title="Belum ada booking aktif"
-          description="Setelah Anda memesan kamar dari katalog publik, booking yang masih reserved akan muncul di halaman ini."
+          description="Setelah Anda memesan kamar dari katalog publik, booking reserved akan muncul di halaman ini."
           action={{ label: 'Lihat Katalog Kamar', onClick: () => navigate('/rooms') }}
         />
       ) : null}
 
       <div className="d-grid gap-3">
         {items.map((booking: TenantBooking) => {
-          const isApproved = invoiceStayIds.has(booking.id);
+          const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
+          const portalStatus = getPortalBookingStatus(booking);
+          const relatedSubmissions = [...(submissionByBooking.get(booking.id) ?? [])].sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+          const pendingSubmission = relatedSubmissions.find((item) => item.status === 'PENDING_REVIEW') ?? null;
           return (
             <Card className="content-card border-0" key={booking.id}>
               <Card.Body>
@@ -10861,9 +11330,8 @@ export default function MyBookingsPage() {
                     <div className="text-muted small">{booking.room?.name || 'Nama kamar belum tersedia'}{booking.room?.floor ? ` · Lantai ${booking.room.floor}` : ''}</div>
                   </div>
                   <div className="d-flex gap-2 flex-wrap">
-                    <StatusBadge status={booking.status} customLabel="Booking Aktif" />
+                    <StatusBadge status={portalStatus.badgeStatus} customLabel={portalStatus.label} />
                     <StatusBadge status={booking.room?.status ?? 'RESERVED'} />
-                    <StatusBadge status={isApproved ? 'INFO' : 'WARNING'} customLabel={isApproved ? 'Menunggu Pembayaran' : 'Menunggu Approval'} />
                     <ExpiryBadge expiresAt={booking.expiresAt} />
                   </div>
                 </div>
@@ -10871,7 +11339,7 @@ export default function MyBookingsPage() {
                 <div className="booking-summary-grid">
                   <div>
                     <div className="card-title-soft mb-1">Check-in</div>
-                    <div className="fw-semibold">{formatDate(booking.checkInDate)}</div>
+                    <div className="fw-semibold">{formatDateId(booking.checkInDate, { day: '2-digit', month: 'long', year: 'numeric' })}</div>
                   </div>
                   <div>
                     <div className="card-title-soft mb-1">Pricing Term</div>
@@ -10883,33 +11351,78 @@ export default function MyBookingsPage() {
                   </div>
                   <div>
                     <div className="card-title-soft mb-1">Masa Berlaku Booking</div>
-                    <div className="fw-semibold">{formatDate(booking.expiresAt)}</div>
+                    <div className="fw-semibold">{formatDateId(booking.expiresAt, { day: '2-digit', month: 'long', year: 'numeric' })}</div>
                   </div>
                 </div>
 
-                <Alert variant={isApproved ? 'info' : 'secondary'} className="mt-3 mb-0 small">
-                  {isApproved ? (
-                    <>
-                      <strong>Booking Anda sudah disetujui admin.</strong> Saat ini statusnya masih reserved dan masuk tahap <strong>menunggu pembayaran</strong>.
-                      {' '}Silakan pantau halaman <Button variant="link" className="p-0 align-baseline" onClick={() => navigate('/portal/invoices')}>Tagihan Saya</Button> untuk konteks tagihan awal. Fitur upload bukti bayar belum dibuka pada fase ini.
-                    </>
-                  ) : (
-                    <>
-                      <strong>Booking Anda masih menunggu approval admin.</strong> Selama belum disetujui, kamar tetap berada di status reserved dan belum menjadi hunian aktif penuh.
-                    </>
-                  )}
+                <Alert variant={expiryMeta.isExpired ? 'warning' : 'secondary'} className="mt-3 mb-0 small">
+                  <strong>{portalStatus.label}.</strong> {portalStatus.helper} {expiryMeta.helperText}
                 </Alert>
 
                 <div className="mt-3 small text-muted">
-                  {booking.plannedCheckOutDate ? `Rencana checkout ${formatDate(booking.plannedCheckOutDate)}.` : 'Belum ada rencana checkout.'}
+                  {booking.latestInvoiceNumber
+                    ? `Invoice booking awal: ${booking.latestInvoiceNumber}${booking.latestInvoiceStatus ? ` (${getStatusLabel(booking.latestInvoiceStatus)})` : ''}. `
+                    : ''}
+                  {booking.plannedCheckOutDate ? `Rencana checkout ${formatDateId(booking.plannedCheckOutDate, { day: '2-digit', month: 'long', year: 'numeric' })}.` : 'Belum ada rencana checkout.'}
                   {booking.stayPurpose ? ` Tujuan tinggal: ${getStatusLabel(booking.stayPurpose)}.` : ''}
                   {booking.notes ? ` Catatan: ${booking.notes}` : ''}
                 </div>
+
+                {portalStatus.label === 'Menunggu Pembayaran' ? (
+                  <div className="mt-3 d-flex gap-2 flex-wrap align-items-center">
+                    <Button
+                      onClick={() => {
+                        setSubmissionError(null);
+                        setSelectedBooking(booking);
+                      }}
+                      disabled={expiryMeta.isExpired || createSubmissionMutation.isPending}
+                    >
+                      Upload Bukti Bayar
+                    </Button>
+                    {pendingSubmission ? <StatusBadge status={pendingSubmission.status} /> : null}
+                    {pendingSubmission ? <span className="small text-muted">Sudah ada submission yang sedang menunggu review admin.</span> : null}
+                  </div>
+                ) : null}
+
+                {relatedSubmissions.length ? (
+                  <div className="mt-4">
+                    <div className="card-title-soft mb-2">Riwayat Bukti Bayar</div>
+                    <div className="d-grid gap-2">
+                      {relatedSubmissions.map((submission) => (
+                        <div key={submission.id} className="border rounded p-3 bg-light-subtle">
+                          <div className="d-flex justify-content-between gap-2 flex-wrap mb-2">
+                            <div className="fw-semibold"><CurrencyDisplay amount={submission.amountRupiah} /></div>
+                            <div className="d-flex gap-2 flex-wrap">
+                              <StatusBadge status={submission.status} />
+                              {submission.invoice?.status ? <StatusBadge status={submission.invoice.status} /> : null}
+                            </div>
+                          </div>
+                          <div className="small text-muted">
+                            Dibayar pada {formatDateId(submission.paidAt, { day: '2-digit', month: 'long', year: 'numeric' })}
+                            {submission.referenceNumber ? ` · Ref ${submission.referenceNumber}` : ''}
+                            {submission.fileUrl ? ' · Bukti tersedia via link' : ''}
+                          </div>
+                          {submission.reviewNotes ? <div className="small text-soft-danger mt-2">Alasan review: {submission.reviewNotes}</div> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </Card.Body>
             </Card>
           );
         })}
       </div>
+
+      <SubmitPaymentModal
+        show={Boolean(selectedBooking)}
+        booking={selectedBooking}
+        existingPending={selectedBooking ? (submissionByBooking.get(selectedBooking.id) ?? []).find((item) => item.status === 'PENDING_REVIEW') ?? null : null}
+        submitting={createSubmissionMutation.isPending}
+        errorMessage={submissionError}
+        onHide={() => setSelectedBooking(null)}
+        onSubmit={(payload) => createSubmissionMutation.mutate(payload)}
+      />
     </div>
   );
 }
@@ -10917,15 +11430,19 @@ export default function MyBookingsPage() {
 
 --- src/pages/portal/MyInvoicesPage.tsx ---
 
-import React, { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstrap';
+import { useMemo, useState } from 'react';
+import axios from 'axios';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, Button, Card, Spinner, Table } from 'react-bootstrap';
+import { listMyTenantBookings } from '../../api/bookings';
 import { listResource } from '../../api/resources';
+import { createPaymentSubmission, listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
-import type { Invoice } from '../../types';
+import SubmitPaymentModal from '../../components/portal/SubmitPaymentModal';
+import type { CreatePaymentSubmissionPayload, Invoice, TenantBooking } from '../../types';
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
@@ -10957,17 +11474,77 @@ function isOverdue(invoice: Invoice) {
   return dueDate.getTime() < today.getTime();
 }
 
-export default function MyInvoicesPage() {
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+function getErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (Array.isArray(message)) return message.join(', ');
+    if (typeof message === 'string' && message.trim()) return message;
+  }
+  return fallback;
+}
 
-  const query = useQuery({
+export default function MyInvoicesPage() {
+  const queryClient = useQueryClient();
+  const [selectedBooking, setSelectedBooking] = useState<TenantBooking | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  const invoicesQuery = useQuery({
     queryKey: ['portal-invoices'],
     queryFn: () => listResource<Invoice>('/invoices/my'),
   });
 
-  const allItems = query.data?.items ?? [];
+  const bookingsQuery = useQuery({
+    queryKey: ['tenant-bookings', 'for-invoice-linking'],
+    queryFn: () => listMyTenantBookings({ limit: 100 }),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const submissionsQuery = useQuery({
+    queryKey: ['payment-submissions', 'mine', 'invoice-page'],
+    queryFn: () => listMyPaymentSubmissions({ limit: 200 }),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const createSubmissionMutation = useMutation({
+    mutationFn: async (payload: CreatePaymentSubmissionPayload) => createPaymentSubmission(payload),
+    onSuccess: async () => {
+      setSubmissionError(null);
+      setSelectedBooking(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
+      ]);
+    },
+    onError: (error) => {
+      setSubmissionError(getErrorMessage(error, 'Gagal mengirim bukti pembayaran. Silakan coba lagi.'));
+    },
+  });
+
+  const allItems = invoicesQuery.data?.items ?? [];
+  const bookings = bookingsQuery.data?.items ?? [];
+  const submissions = submissionsQuery.data?.items ?? [];
+
+  const bookingByInvoiceId = useMemo(() => {
+    const map = new Map<number, TenantBooking>();
+    bookings.forEach((booking) => {
+      if (booking.latestInvoiceId) map.set(booking.latestInvoiceId, booking);
+    });
+    return map;
+  }, [bookings]);
+
+  const pendingSubmissionByBookingId = useMemo(() => {
+    const map = new Map<number, string>();
+    submissions.forEach((submission) => {
+      if (submission.status === 'PENDING_REVIEW') {
+        map.set(submission.stayId, submission.status);
+      }
+    });
+    return map;
+  }, [submissions]);
+
   const sortedItems = useMemo(() => {
     return [...allItems].sort((a, b) => {
       const aRank = isOverdue(a) ? 0 : ['PAID', 'CANCELLED'].includes(a.status) ? 2 : 1;
@@ -10977,18 +11554,11 @@ export default function MyInvoicesPage() {
     });
   }, [allItems]);
 
-  const handleSelectFile = (file: File | null) => {
-    setSelectedFile(file);
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
-    setPreviewUrl(URL.createObjectURL(file));
-  };
+  const pendingCount = useMemo(() => submissions.filter((item) => item.status === 'PENDING_REVIEW').length, [submissions]);
 
   return (
     <div>
-      <PageHeader title="Invoice Saya" description="Riwayat tagihan, status pembayaran, dan dummy upload bukti transfer Anda." />
+      <PageHeader title="Invoice Saya" description="Riwayat tagihan tenant dan jalur upload bukti pembayaran untuk booking reserved yang sudah disetujui admin." />
 
       <Card className="content-card border-0 mb-4">
         <Card.Body>
@@ -11005,18 +11575,24 @@ export default function MyInvoicesPage() {
               <span className="summary-chip-label">Overdue</span>
               <span className="summary-chip-value">{allItems.filter(isOverdue).length}</span>
             </div>
+            <div className="summary-chip">
+              <span className="summary-chip-label">Menunggu review</span>
+              <span className="summary-chip-value">{pendingCount}</span>
+            </div>
           </div>
         </Card.Body>
       </Card>
 
+      {submissionsQuery.isError ? <Alert variant="warning">Riwayat bukti bayar belum dapat dimuat penuh. Tombol upload hanya aktif untuk invoice yang masih bisa dipetakan ke booking reserved.</Alert> : null}
+
       <Card className="content-card border-0">
         <Card.Body>
-          {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-          {query.isError ? <Alert variant="danger">Gagal memuat invoice Anda. Silakan coba lagi.</Alert> : null}
-          {!query.isLoading && !query.isError && !sortedItems.length ? (
+          {invoicesQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
+          {invoicesQuery.isError ? <Alert variant="danger">Gagal memuat invoice Anda. Silakan coba lagi.</Alert> : null}
+          {!invoicesQuery.isLoading && !invoicesQuery.isError && !sortedItems.length ? (
             <EmptyState icon="🧾" title="Belum ada invoice" description="Tagihan Anda akan muncul di halaman ini saat sudah dibuat." />
           ) : null}
-          {!query.isLoading && !query.isError && sortedItems.length > 0 ? (
+          {!invoicesQuery.isLoading && !invoicesQuery.isError && sortedItems.length > 0 ? (
             <Table hover responsive>
               <thead>
                 <tr>
@@ -11025,12 +11601,17 @@ export default function MyInvoicesPage() {
                   <th>Jatuh Tempo</th>
                   <th>Total</th>
                   <th>Status</th>
-                  <th>Upload Bukti</th>
+                  <th>Submission</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedItems.map((item) => {
                   const overdue = isOverdue(item);
+                  const linkedBooking = bookingByInvoiceId.get(item.id) ?? null;
+                  const pendingStatus = linkedBooking ? pendingSubmissionByBookingId.get(linkedBooking.id) : null;
+                  const uploadAllowed = Boolean(linkedBooking) && ['ISSUED', 'PARTIAL'].includes(item.status);
+
                   return (
                     <tr key={item.id}>
                       <td className="fw-semibold">{item.invoiceNumber || `INV-${item.id}`}</td>
@@ -11039,9 +11620,20 @@ export default function MyInvoicesPage() {
                       <td><CurrencyDisplay amount={item.totalAmountRupiah} /></td>
                       <td><StatusBadge status={overdue ? 'OVERDUE' : item.status} /></td>
                       <td>
-                        <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoice(item)}>
-                          Upload
-                        </Button>
+                        {pendingStatus ? <StatusBadge status={pendingStatus} /> : <span className="small text-muted">Belum ada</span>}
+                      </td>
+                      <td>
+                        {uploadAllowed ? (
+                          <Button size="sm" variant="outline-primary" onClick={() => { setSubmissionError(null); setSelectedBooking(linkedBooking); }}>
+                            {pendingStatus ? 'Lihat Submission' : 'Upload Bukti'}
+                          </Button>
+                        ) : (
+                          <span className="small text-muted">
+                            {['PAID', 'CANCELLED'].includes(item.status)
+                              ? 'Tidak perlu upload'
+                              : 'Belum tersedia di fase ini'}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -11052,56 +11644,15 @@ export default function MyInvoicesPage() {
         </Card.Body>
       </Card>
 
-      <Modal show={selectedInvoice !== null} onHide={() => setSelectedInvoice(null)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Upload Bukti Pembayaran</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="light">
-            <div className="fw-semibold mb-1">Preview dummy frontend</div>
-            <div className="small">
-              Form ini hanya menyiapkan UX upload bukti pembayaran.
-              {' '}
-              {/* TODO: Integrate with backend upload endpoint */}
-              Integrasi backend upload akan disambungkan pada fase approval pembayaran berikutnya.
-            </div>
-          </Alert>
-
-          <div className="mb-3">
-            <div className="text-muted small">Invoice</div>
-            <div className="fw-semibold">{selectedInvoice?.invoiceNumber || `INV-${selectedInvoice?.id ?? '-'}`}</div>
-          </div>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Pilih file gambar atau PDF</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSelectFile(event.currentTarget.files?.[0] ?? null)}
-            />
-          </Form.Group>
-
-          {selectedFile ? (
-            <Card className="border-0 bg-light">
-              <Card.Body>
-                <div className="fw-semibold mb-2">Preview lokal</div>
-                <div className="small text-muted mb-3">{selectedFile.name}</div>
-                {selectedFile.type.startsWith('image/') && previewUrl ? (
-                  <img src={previewUrl} alt="Preview bukti bayar" className="img-fluid rounded border" />
-                ) : selectedFile.type === 'application/pdf' && previewUrl ? (
-                  <iframe title="Preview PDF" src={previewUrl} style={{ width: '100%', minHeight: 420, border: 0 }} />
-                ) : (
-                  <Alert variant="secondary" className="mb-0">Preview file ini belum tersedia, tetapi file sudah dipilih.</Alert>
-                )}
-              </Card.Body>
-            </Card>
-          ) : null}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setSelectedInvoice(null)}>Tutup</Button>
-          <Button disabled>Submit Bukti (dummy)</Button>
-        </Modal.Footer>
-      </Modal>
+      <SubmitPaymentModal
+        show={Boolean(selectedBooking)}
+        booking={selectedBooking}
+        existingPending={selectedBooking ? submissions.find((item) => item.stayId === selectedBooking.id && item.status === 'PENDING_REVIEW') ?? null : null}
+        submitting={createSubmissionMutation.isPending}
+        errorMessage={submissionError}
+        onHide={() => setSelectedBooking(null)}
+        onSubmit={(payload) => createSubmissionMutation.mutate(payload)}
+      />
     </div>
   );
 }
@@ -11111,12 +11662,14 @@ export default function MyInvoicesPage() {
 
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import { getResource } from '../../api/resources';
+import { listMyTenantBookings } from '../../api/bookings';
 import type { Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
@@ -11144,9 +11697,22 @@ export default function MyStayPage() {
   const query = useQuery({
     queryKey: ['portal-stay'],
     queryFn: () => getResource<Stay>('/stays/me/current'),
+    retry: false,
   });
 
   const stay = query.data;
+  const stayError = query.error as any;
+  const stayNotFound = query.isError && stayError?.response?.status === 404;
+
+  const bookingsQuery = useQuery({
+    queryKey: ['tenant-bookings', 'portal-stay-fallback'],
+    queryFn: () => listMyTenantBookings({ limit: 10 }),
+    enabled: stayNotFound,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const latestBooking = bookingsQuery.data?.items?.[0];
 
   return (
     <div>
@@ -11154,12 +11720,36 @@ export default function MyStayPage() {
 
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? (() => {
-        // Bedakan antara error "tidak ada stay aktif" (404) dengan error operasional lain
-        // Gunakan type assertion untuk mengakses properti response jika ada
-        const error = query.error as any;
-        const status = error?.response?.status;
-        const message = error?.response?.data?.message;
-        
+        const status = stayError?.response?.status;
+        const message = stayError?.response?.data?.message;
+
+        if (status === 404 && latestBooking) {
+          return (
+            <Card className="content-card border-0 mt-4">
+              <Card.Body>
+                <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                  <div>
+                    <div className="eyebrow-text">Belum ada hunian aktif</div>
+                    <h5 className="mb-2">Booking Anda masih dalam proses</h5>
+                    <p className="text-muted mb-3">
+                      Hunian aktif belum muncul karena booking Anda belum berubah menjadi stay operasional.
+                      Selama kamar masih berstatus reserved, silakan pantau prosesnya dari halaman Pemesanan Saya.
+                    </p>
+                    <div className="d-flex flex-wrap gap-2">
+                      <StatusBadge status={Number(latestBooking.invoiceCount ?? 0) > 0 || Boolean(latestBooking.latestInvoiceId) ? 'INFO' : 'WARNING'} customLabel={Number(latestBooking.invoiceCount ?? 0) > 0 || Boolean(latestBooking.latestInvoiceId) ? 'Menunggu Pembayaran' : 'Menunggu Approval'} />
+                      {latestBooking.expiresAt ? <span className="small text-muted">Masa berlaku booking: {formatDate(latestBooking.expiresAt)}</span> : null}
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2 flex-wrap">
+                    <Link to="/portal/bookings" className="btn btn-primary">Lihat Pemesanan Saya</Link>
+                    <Link to="/portal/invoices" className="btn btn-outline-secondary">Lihat Tagihan Saya</Link>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          );
+        }
+
         return status === 404 ? (
           <EmptyState icon="🏠" title="Anda belum memiliki hunian aktif" description="Silakan hubungi pengelola jika data stay Anda belum muncul." />
         ) : (
@@ -11976,31 +12566,38 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
 
   const requiredReferencePaths = useMemo(() => getRequiredReferencePaths(config.path), [config.path]);
 
+  const supportsIsActiveFilter = useMemo(
+    () => config.supportsIsActiveFilter ?? config.fields.some((field) => field.name === 'isActive'),
+    [config.fields, config.supportsIsActiveFilter],
+  );
+
   const query = useQuery({
     queryKey: [config.path, 'list', page, searchTerm, showActiveOnly],
     queryFn: () => listResource<Record<string, unknown>>(config.path, {
       page,
       limit: PAGE_SIZE,
       ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
-      ...(showActiveOnly ? { isActive: 'true' } : {}),
+      ...(supportsIsActiveFilter && showActiveOnly ? { isActive: 'true' } : {}),
     }),
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const tenantsRefQuery = useQuery({
     queryKey: ['resource-ref', '/tenants'],
-    queryFn: () => listResource<Record<string, unknown>>('/tenants', { limit: 500, isActive: true }),
+    queryFn: () => listResource<Record<string, unknown>>('/tenants', { limit: 500, isActive: 'true' }),
     enabled: requiredReferencePaths.includes('/tenants'),
   });
 
   const roomsRefQuery = useQuery({
     queryKey: ['resource-ref', '/rooms'],
-    queryFn: () => listResource<Record<string, unknown>>('/rooms', { limit: 500, isActive: true }),
+    queryFn: () => listResource<Record<string, unknown>>('/rooms', { limit: 500, isActive: 'true' }),
     enabled: requiredReferencePaths.includes('/rooms'),
   });
 
   const inventoryItemsRefQuery = useQuery({
     queryKey: ['resource-ref', '/inventory-items'],
-    queryFn: () => listResource<Record<string, unknown>>('/inventory-items', { limit: 500, isActive: true }),
+    queryFn: () => listResource<Record<string, unknown>>('/inventory-items', { limit: 500, isActive: 'true' }),
     enabled: requiredReferencePaths.includes('/inventory-items'),
   });
 
@@ -12949,7 +13546,7 @@ export default function CheckInWizard() {
       phone: inlineTenant.phone || undefined,
       email: inlineTenant.email || undefined,
       gender: inlineTenant.gender || undefined,
-      isActive: true,
+      isActive: 'true',
     }),
     onSuccess: (tenant) => {
       form.setValue('tenantId', tenant.id);
@@ -13624,7 +14221,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { listInvoices } from '../../api/invoices';
 import { listStays } from '../../api/stays';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
@@ -13633,35 +14229,15 @@ import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import StatCard from '../../components/common/StatCard';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
-import type { Stay } from '../../types';
+import type { PaginatedResponse, Stay } from '../../types';
+import { daysUntilDate, formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  if (!dateValue) return '-';
-  try {
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return '-';
-  }
+  return formatDateId(dateValue);
 }
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
-  if (!targetDate) return null;
-  try {
-    const date = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-    if (Number.isNaN(date.getTime())) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  } catch {
-    return null;
-  }
+  return daysUntilDate(targetDate);
 }
 
 function getCheckoutReminderBadge(stay: Stay): { label: string; status: string } | null {
@@ -13671,6 +14247,57 @@ function getCheckoutReminderBadge(stay: Stay): { label: string; status: string }
   if (daysLeft >= 8) return { label: 'H-10', status: 'WARNING' };
   if (daysLeft >= 4) return { label: 'H-7', status: 'INFO' };
   return { label: 'H-3', status: 'DANGER' };
+}
+
+function getBookingApprovalMeta(stay: Stay) {
+  const hasInitialInvoice = Number(stay.invoiceCount ?? 0) > 0 || Boolean(stay.latestInvoiceId);
+
+  if (hasInitialInvoice) {
+    return {
+      isPendingApproval: false,
+      label: 'Menunggu Pembayaran',
+      variant: 'INFO',
+      helper:
+        stay.latestInvoiceNumber
+          ? `Invoice awal ${stay.latestInvoiceNumber} sudah terbentuk. Booking ini tidak lagi menunggu approval.`
+          : 'Invoice awal booking sudah terbentuk. Booking ini tidak lagi menunggu approval.',
+    };
+  }
+
+  return {
+    isPendingApproval: true,
+    label: 'Menunggu Approval',
+    variant: 'WARNING',
+    helper: 'Booking reserved ini masih menunggu approval admin dan pembentukan invoice awal.',
+  };
+}
+
+async function listAllActiveStaysForBookings(maxPages = 50): Promise<PaginatedResponse<Stay>> {
+  const pageSize = 100;
+  const items: Stay[] = [];
+  let page = 1;
+  let totalPages = 1;
+  let totalItems = 0;
+
+  do {
+    const response = await listStays({ status: 'ACTIVE', page, limit: pageSize });
+    items.push(...(response.items ?? []));
+    totalPages = response.meta?.totalPages ?? 1;
+    totalItems = response.meta?.totalItems ?? items.length;
+
+    if (!(response.items ?? []).length) break;
+    page += 1;
+  } while (page <= totalPages && page <= maxPages);
+
+  return {
+    items,
+    meta: {
+      page: 1,
+      limit: items.length || pageSize,
+      totalItems,
+      totalPages,
+    },
+  };
 }
 
 type StayViewFilter = 'ACTIVE' | 'BOOKINGS' | 'ALL';
@@ -13688,37 +14315,18 @@ export default function StaysPage() {
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
   const apiStatusFilter = statusFilter === 'ALL' ? undefined : 'ACTIVE';
-  const effectivePage = isBookingsMode ? 1 : page;
-  const effectiveLimit = isBookingsMode ? 200 : PAGE_SIZE;
-
   const query = useQuery({
-    queryKey: ['stays', statusFilter, effectivePage, effectiveLimit],
-    queryFn: () => listStays({ status: apiStatusFilter, page: effectivePage, limit: effectiveLimit }),
-  });
-
-  const invoicesQuery = useQuery({
-    queryKey: ['booking-approval-invoices'],
-    queryFn: () => listInvoices({ limit: 1000 }),
-    staleTime: 60_000,
+    queryKey: ['stays', statusFilter, isBookingsMode ? 'bookings-all' : page],
+    queryFn: () => (
+      isBookingsMode
+        ? listAllActiveStaysForBookings()
+        : listStays({ status: apiStatusFilter, page, limit: PAGE_SIZE })
+    ),
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
   const reservedBookings = useMemo(() => items.filter((item) => item.status === 'ACTIVE' && item.room?.status === 'RESERVED'), [items]);
   const operationalActive = useMemo(() => items.filter((item) => item.status === 'ACTIVE' && item.room?.status !== 'RESERVED'), [items]);
-  const approvedBookingStayIds = useMemo(
-    () => new Set((invoicesQuery.data?.items ?? []).map((invoice) => Number(invoice.stayId)).filter(Boolean)),
-    [invoicesQuery.data],
-  );
-
-  const pendingApprovalCount = useMemo(
-    () => reservedBookings.filter((item) => !approvedBookingStayIds.has(item.id)).length,
-    [approvedBookingStayIds, reservedBookings],
-  );
-
-  const approvedReservedCount = useMemo(
-    () => reservedBookings.filter((item) => approvedBookingStayIds.has(item.id)).length,
-    [approvedBookingStayIds, reservedBookings],
-  );
 
   const filteredItems = useMemo(() => {
     const baseItems = statusFilter === 'BOOKINGS'
@@ -13736,6 +14344,7 @@ export default function StaysPage() {
         item.pricingTerm,
         item.bookingSource,
         item.stayPurpose,
+        item.latestInvoiceNumber,
       ].some((value) => String(value ?? '').toLowerCase().includes(term)),
     );
   }, [items, keyword, operationalActive, reservedBookings, statusFilter]);
@@ -13753,12 +14362,21 @@ export default function StaysPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [statusFilter]);
+  }, [statusFilter, keyword]);
 
   const checkoutSoonCount = operationalActive.filter((item) => getCheckoutReminderBadge(item)?.label).length;
+  const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
+  const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
+  const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
   const meta = query.data?.meta;
+  const paginatedFilteredItems = isBookingsMode
+    ? filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    : filteredItems;
+  const bookingsTotalItems = isBookingsMode ? filteredItems.length : 0;
+  const bookingsTotalPages = isBookingsMode ? Math.max(1, Math.ceil(bookingsTotalItems / PAGE_SIZE)) : 1;
+  const visibleItems = isBookingsMode ? paginatedFilteredItems : filteredItems;
   const tableCountText = isBookingsMode
-    ? `Menampilkan ${filteredItems.length} booking reserved` + (effectiveLimit > PAGE_SIZE ? ' terbaru untuk approval' : '')
+    ? `Menampilkan ${visibleItems.length} dari ${bookingsTotalItems} booking reserved`
     : `Menampilkan ${filteredItems.length} dari ${meta?.totalItems ?? items.length} data`;
 
   return (
@@ -13766,16 +14384,24 @@ export default function StaysPage() {
       <PageHeader
         eyebrow="Stay management"
         title="Stays"
-        description="Surface ini tetap fokus ke stay operasional, dengan tambahan queue approval booking untuk OWNER dan ADMIN di dalam mode booking reserved."
+        description="Surface ini memisahkan stay operasional dari queue booking reserved, sehingga admin bisa melihat mana yang masih menunggu approval dan mana yang sudah menunggu pembayaran."
+        secondaryAction={
+          <Button
+            variant={isBookingsMode ? 'outline-secondary' : 'outline-primary'}
+            onClick={() => handleStatusFilterChange(isBookingsMode ? 'ACTIVE' : 'BOOKINGS')}
+          >
+            {isBookingsMode ? 'Lihat Stay Aktif' : 'Booking Reserved'}
+          </Button>
+        }
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
 
       <Row className="g-4 mb-4">
-        <Col md={3}><StatCard title="Total hasil filter" value={filteredItems.length} subtitle="Baris yang sedang ditampilkan" icon="📋" /></Col>
+        <Col md={3}><StatCard title="Total hasil filter" value={isBookingsMode ? bookingsTotalItems : filteredItems.length} subtitle="Baris yang sedang terfilter" icon="📋" /></Col>
         <Col md={3}><StatCard title="Stay aktif" value={operationalActive.length} subtitle="Tenant yang sedang menempati kamar" icon="✅" /></Col>
-        <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle="Booking reserved yang masih perlu ditinjau" icon="🗓️" /></Col>
-        <Col md={3}><StatCard title="Perlu reminder" value={checkoutSoonCount} subtitle="Checkout ≤ 10 hari" icon="⏳" /></Col>
+        <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle={expiredBookingsCount ? `${expiredBookingsCount} expired / perlu tindak lanjut` : 'Booking reserved tanpa invoice awal'} icon="🗓️" /></Col>
+        <Col md={3}><StatCard title="Menunggu pembayaran" value={waitingPaymentCount} subtitle="Booking approved dengan invoice awal" icon="💳" /></Col>
       </Row>
 
       <Card className="content-card border-0 mb-4">
@@ -13783,7 +14409,7 @@ export default function StaysPage() {
           <div className="table-meta">
             <div>
               <div className="panel-title">Filter & pencarian</div>
-              <div className="panel-subtitle">Gunakan mode tampilan untuk membedakan stay operasional dengan booking reserved yang membutuhkan approval admin.</div>
+              <div className="panel-subtitle">Gunakan mode tampilan untuk membedakan stay operasional dengan queue booking reserved.</div>
             </div>
             <div className="summary-strip">
               <div className="summary-chip">
@@ -13791,8 +14417,8 @@ export default function StaysPage() {
                 <span className="summary-chip-value">{reservedBookings.length}</span>
               </div>
               <div className="summary-chip">
-                <span className="summary-chip-label">Sudah di-approve</span>
-                <span className="summary-chip-value">{approvedReservedCount}</span>
+                <span className="summary-chip-label">Operasional</span>
+                <span className="summary-chip-value">{operationalActive.length}</span>
               </div>
             </div>
           </div>
@@ -13813,7 +14439,7 @@ export default function StaysPage() {
                 <Form.Group>
                   <Form.Label>Pencarian</Form.Label>
                   <Form.Control
-                    placeholder="Cari tenant, kamar, source, atau tujuan stay"
+                    placeholder="Cari tenant, kamar, source, tujuan stay, atau nomor invoice"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
@@ -13830,86 +14456,107 @@ export default function StaysPage() {
       <Card className="content-card border-0">
         <Card.Body>
           {isBookingsMode ? (
-            <Alert variant="info" className="small">
-              Queue approval ini hanya untuk <strong>OWNER</strong> dan <strong>ADMIN</strong>. Setelah booking disetujui, kamar tetap <strong>reserved</strong> pada fase ini dan tenant hanya melihat status <strong>Menunggu Pembayaran</strong> tanpa flow upload bukti bayar.
+            <Alert variant={expiredBookingsCount ? 'warning' : 'info'} className="small mb-4">
+              Mode ini sekarang berfungsi sebagai <strong>queue approval booking</strong>. Booking tanpa invoice awal berarti masih <strong>Menunggu Approval</strong>, sedangkan booking yang sudah punya invoice awal berarti <strong>Menunggu Pembayaran</strong>.
+              {expiredBookingsCount ? ` Saat ini ada ${expiredBookingsCount} booking yang sudah expired dan perlu ditinjau.` : ''}
             </Alert>
           ) : null}
 
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
           {query.isError ? <Alert variant="danger">Gagal mengambil data stay. Silakan coba lagi.</Alert> : null}
-          {!query.isLoading && !query.isError && invoicesQuery.isError ? (
-            <Alert variant="warning" className="small">Status approval booking belum bisa diperkaya penuh karena daftar invoice belum berhasil dimuat. Data queue tetap ditampilkan seadanya.</Alert>
-          ) : null}
-          {!query.isLoading && !query.isError && filteredItems.length === 0 ? (
+          {!query.isLoading && !query.isError && visibleItems.length === 0 ? (
             <EmptyState
               icon={statusFilter === 'BOOKINGS' ? '🗓️' : '🏠'}
-              title={statusFilter === 'BOOKINGS' ? 'Belum ada booking reserved yang perlu ditinjau' : 'Belum ada data stay'}
+              title={statusFilter === 'BOOKINGS' ? 'Belum ada booking reserved' : 'Belum ada data stay'}
               description={statusFilter === 'BOOKINGS'
-                ? 'Booking tenant yang masih reserved akan muncul di mode ini. Setelah disetujui admin, booking tidak lagi terasa sebagai antrean approval.'
+                ? 'Booking tenant yang masih reserved akan muncul di mode ini.'
                 : 'Coba ubah filter atau mulai check-in tenant baru.'}
               action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />
           ) : null}
 
-          {!query.isLoading && !query.isError && filteredItems.length > 0 && isBookingsMode ? (
-            <Table hover responsive className="mb-0">
-              <thead>
-                <tr>
-                  <th>Tenant</th>
-                  <th>Kamar</th>
-                  <th>Check-in</th>
-                  <th>Pricing</th>
-                  <th>Masa Berlaku</th>
-                  <th>Status Booking</th>
-                  <th style={{ minWidth: 150 }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => {
-                  const isApproved = approvedBookingStayIds.has(item.id);
-                  return (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
-                        <div className="small text-muted">{item.bookingSource ? `Source: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
-                      </td>
-                      <td>
-                        <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
-                        <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}{item.room?.floor ? ` · Lantai ${item.room.floor}` : ''}</div>
-                      </td>
-                      <td>
-                        <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
-                        <div className="small text-muted">Checkout plan: {formatDateSafe(item.plannedCheckOutDate)}</div>
-                      </td>
-                      <td>
-                        <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
-                        <div className="small text-muted">Deposit <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
-                      </td>
-                      <td>
-                        <div className="fw-semibold">{formatDateSafe(item.expiresAt)}</div>
-                        <div className="small text-muted">Reserved hingga tanggal ini</div>
-                      </td>
-                      <td>
-                        <div className="d-flex flex-column gap-2">
-                          <StatusBadge status="RESERVED" />
-                          <StatusBadge status={isApproved ? 'INFO' : 'WARNING'} customLabel={isApproved ? 'Menunggu Pembayaran' : 'Menunggu Approval'} />
-                        </div>
-                      </td>
-                      <td>
-                        {isApproved ? (
-                          <div className="small text-muted">Booking sudah disetujui admin. Tenant tinggal menunggu langkah pembayaran pada fase berikutnya.</div>
-                        ) : (
-                          <Button size="sm" onClick={() => setSelectedBooking(item)}>Approval Booking</Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && isBookingsMode ? (
+            <>
+              <Table hover responsive className="mb-0">
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Kamar</th>
+                    <th>Check-in</th>
+                    <th>Pricing</th>
+                    <th>Masa Berlaku</th>
+                    <th>Status Booking</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleItems.map((item) => {
+                    const expiryMeta = getBookingExpiryMeta(item.expiresAt);
+                    const approvalMeta = getBookingApprovalMeta(item);
+                    const canApprove = approvalMeta.isPendingApproval && !expiryMeta.isExpired;
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
+                          <div className="small text-muted">{item.bookingSource ? `Source: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
+                          <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}{item.room?.floor ? ` · Lantai ${item.room.floor}` : ''}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
+                          <div className="small text-muted">Checkout plan: {formatDateSafe(item.plannedCheckOutDate)}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
+                          <div className="small text-muted">Deposit <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{formatDateSafe(item.expiresAt)}</div>
+                          <div className="small text-muted">{expiryMeta.helperText}</div>
+                        </td>
+                        <td>
+                          <div className="d-flex flex-column gap-2">
+                            <StatusBadge status="RESERVED" />
+                            <StatusBadge status={approvalMeta.variant} customLabel={approvalMeta.label} />
+                            <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />
+                          </div>
+                          <div className="small text-muted mt-2">
+                            {approvalMeta.helper}
+                            {item.latestInvoiceNumber ? ` Invoice: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
+                          </div>
+                        </td>
+                        <td>
+                          {canApprove ? (
+                            <Button size="sm" onClick={() => setSelectedBooking(item)}>
+                              Approve
+                            </Button>
+                          ) : (
+                            <div className="small text-muted">
+                              {expiryMeta.isExpired ? 'Booking expired' : 'Tidak ada aksi approval'}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <div className="mt-3">
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={bookingsTotalPages}
+                  totalItems={bookingsTotalItems}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setPage}
+                  isLoading={query.isLoading}
+                />
+              </div>
+            </>
           ) : null}
 
-          {!query.isLoading && !query.isError && filteredItems.length > 0 && !isBookingsMode ? (
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && !isBookingsMode ? (
             <Table hover responsive className="mb-0">
               <thead>
                 <tr>
@@ -13923,10 +14570,10 @@ export default function StaysPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => {
+                {visibleItems.map((item) => {
                   const reminderBadge = getCheckoutReminderBadge(item);
                   const isReservedBooking = item.room?.status === 'RESERVED';
-                  const isApproved = approvedBookingStayIds.has(item.id);
+                  const expiryMeta = getBookingExpiryMeta(item.expiresAt);
                   const onOpen = () => navigate(`/stays/${item.id}`);
                   return (
                     <tr
@@ -13954,13 +14601,14 @@ export default function StaysPage() {
                         <div className="d-flex flex-column gap-2">
                           <StatusBadge status={item.status} customLabel={isReservedBooking ? 'Booking Aktif' : undefined} />
                           {isReservedBooking ? <StatusBadge status="RESERVED" /> : null}
-                          {isReservedBooking ? <StatusBadge status={isApproved ? 'INFO' : 'WARNING'} customLabel={isApproved ? 'Menunggu Pembayaran' : 'Menunggu Approval'} /> : null}
+                          {isReservedBooking ? <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} /> : null}
+                          {isReservedBooking ? <StatusBadge status="WARNING" customLabel="Lihat Mode Booking" /> : null}
                           {reminderBadge ? <StatusBadge status={reminderBadge.status} customLabel={reminderBadge.label} /> : null}
                         </div>
                       </td>
                       <td>
                         <div>{item.checkInDate ? formatDateSafe(item.checkInDate) : 'Belum Check-in'}</div>
-                        {isReservedBooking ? <div className="small text-muted">Berlaku s.d. {formatDateSafe(item.expiresAt)}</div> : null}
+                        {isReservedBooking ? <div className="small text-muted">Berlaku s.d. {formatDateSafe(item.expiresAt)} · {expiryMeta.helperText}</div> : null}
                       </td>
                       <td>
                         <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
@@ -13982,7 +14630,7 @@ export default function StaysPage() {
                       </td>
                       <td>
                         {isReservedBooking ? (
-                          isApproved ? <div className="small text-muted">Sudah disetujui</div> : <Button size="sm" onClick={() => setSelectedBooking(item)}>Approval</Button>
+                          <div className="small text-muted">Lihat di mode booking</div>
                         ) : (
                           <div style={{ width: 32, textAlign: 'center', color: 'var(--text-muted)' }}>›</div>
                         )}
@@ -14009,11 +14657,7 @@ export default function StaysPage() {
         </Card.Body>
       </Card>
 
-      <ApproveBookingModal
-        show={selectedBooking !== null}
-        onHide={() => setSelectedBooking(null)}
-        booking={selectedBooking}
-      />
+      <ApproveBookingModal show={Boolean(selectedBooking)} onHide={() => setSelectedBooking(null)} booking={selectedBooking} />
     </div>
   );
 }
@@ -15617,6 +16261,10 @@ export type Stay = {
   roomStatusAfterSync?: string;
   openInvoiceCount?: number;
   invoices?: Invoice[];
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: InvoiceStatus | null;
 };
 
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED' | string;
@@ -15815,14 +16463,27 @@ export type TenantBooking = {
   updatedAt?: string;
   tenant?: Pick<Tenant, 'id' | 'fullName' | 'phone' | 'email'> | null;
   room?: Pick<Room, 'id' | 'code' | 'name' | 'floor' | 'status'> | null;
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: InvoiceStatus | null;
 };
-
 
 export type ApproveBookingPayload = {
   agreedRentAmountRupiah: number;
   depositAmountRupiah: number;
-  initialElectricityKwh: number;
-  initialWaterM3: number;
+  initialElectricityKwh: string;
+  initialWaterM3: string;
+};
+
+export type ApproveBookingResult = {
+  stay: Stay;
+  invoice: Pick<Invoice, 'id' | 'invoiceNumber' | 'status' | 'periodStart' | 'periodEnd' | 'dueDate'>;
+  baselineMeters: {
+    electricityId: number;
+    waterId: number;
+    readingAt: string;
+  };
 };
 
 export type CreateTenantBookingPayload = {
@@ -15833,6 +16494,164 @@ export type CreateTenantBookingPayload = {
   stayPurpose?: 'WORK' | 'STUDY' | 'TRANSIT' | 'FAMILY' | 'MEDICAL' | 'PROJECT' | 'OTHER';
   notes?: string;
 };
+
+
+export type PaymentSubmissionStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | string;
+
+export type PaymentSubmission = {
+  id: number;
+  stayId: number;
+  invoiceId: number;
+  tenantId: number;
+  amountRupiah: number;
+  paidAt: string;
+  paymentMethod: PaymentMethod;
+  senderName?: string | null;
+  senderBankName?: string | null;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  fileKey?: string | null;
+  fileUrl?: string | null;
+  originalFilename?: string | null;
+  mimeType?: string | null;
+  fileSizeBytes?: number | null;
+  status: PaymentSubmissionStatus;
+  reviewedAt?: string | null;
+  reviewNotes?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  tenant?: Pick<Tenant, 'id' | 'fullName' | 'phone'> | null;
+  room?: Pick<Room, 'id' | 'code' | 'name' | 'status'> | null;
+  stay?: Pick<Stay, 'id' | 'status' | 'expiresAt'> | null;
+  invoice?: {
+    id: number;
+    invoiceNumber?: string | null;
+    status: InvoiceStatus;
+    totalAmountRupiah?: number;
+    paidAmountRupiah?: number;
+    remainingAmountRupiah?: number;
+  } | null;
+  submittedBy?: { id: number; fullName?: string | null } | null;
+  reviewedBy?: { id: number; fullName?: string | null } | null;
+};
+
+export type CreatePaymentSubmissionPayload = {
+  stayId: number;
+  invoiceId: number;
+  amountRupiah: number;
+  paidAt: string;
+  paymentMethod: PaymentMethod;
+  senderName?: string;
+  senderBankName?: string;
+  referenceNumber?: string;
+  notes?: string;
+  fileKey?: string;
+  fileUrl?: string;
+  originalFilename?: string;
+  mimeType?: string;
+  fileSizeBytes?: number;
+};
+
+export type ReviewQueueQuery = {
+  page?: number;
+  limit?: number;
+  status?: PaymentSubmissionStatus;
+  search?: string;
+  paymentMethod?: PaymentMethod;
+  roomId?: number | string;
+  tenantId?: number | string;
+};
+
+
+--- src/utils/bookingExpiry.ts ---
+
+export function parseDateSafe(value?: string | Date | null): Date | null {
+  if (!value) return null;
+  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function formatDateId(value?: string | Date | null, options?: Intl.DateTimeFormatOptions): string {
+  const date = parseDateSafe(value);
+  if (!date) return '-';
+  return date.toLocaleDateString('id-ID', options ?? {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+export function daysUntilDate(value?: string | Date | null): number | null {
+  const date = parseDateSafe(value);
+  if (!date) return null;
+
+  const target = new Date(date.getTime());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  return Math.floor((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export type BookingExpiryMeta = {
+  variant: 'SECONDARY' | 'INFO' | 'WARNING' | 'DANGER';
+  badgeLabel: string;
+  helperText: string;
+  daysRemaining: number | null;
+  isExpired: boolean;
+};
+
+export function getBookingExpiryMeta(expiresAt?: string | Date | null): BookingExpiryMeta {
+  const daysRemaining = daysUntilDate(expiresAt);
+
+  if (daysRemaining === null) {
+    return {
+      variant: 'SECONDARY',
+      badgeLabel: 'Tanpa Batas Waktu',
+      helperText: 'Masa berlaku booking belum tersedia',
+      daysRemaining: null,
+      isExpired: false,
+    };
+  }
+
+  if (daysRemaining < 0) {
+    return {
+      variant: 'DANGER',
+      badgeLabel: 'Expired',
+      helperText: 'Booking sudah lewat masa berlaku',
+      daysRemaining,
+      isExpired: true,
+    };
+  }
+
+  if (daysRemaining == 0) {
+    return {
+      variant: 'DANGER',
+      badgeLabel: 'Berakhir Hari Ini',
+      helperText: 'Booking berakhir hari ini',
+      daysRemaining,
+      isExpired: false,
+    };
+  }
+
+  if (daysRemaining <= 3) {
+    return {
+      variant: 'WARNING',
+      badgeLabel: `Sisa ${daysRemaining} Hari`,
+      helperText: `Booking masih berlaku ${daysRemaining} hari lagi`,
+      daysRemaining,
+      isExpired: false,
+    };
+  }
+
+  return {
+    variant: 'INFO',
+    badgeLabel: 'Masih Berlaku',
+    helperText: `Booking masih berlaku ${daysRemaining} hari lagi`,
+    daysRemaining,
+    isExpired: false,
+  };
+}
 
 
 --- src/utils/formatCurrency.ts ---
@@ -15946,6 +16765,10 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     FAMILY: 'Keluarga',
     MEDICAL: 'Medis',
     PROJECT: 'Proyek',
+    PENDING_REVIEW: 'Menunggu Review',
+    APPROVED: 'Disetujui',
+    REJECTED: 'Ditolak',
+    EXPIRED: 'Kadaluarsa',
   };
 
   if (normalized === 'INACTIVE') return labels.INACTIVE;
@@ -15956,11 +16779,11 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
 export function getStatusVariant(status?: string): 'success' | 'warning' | 'danger' | 'info' | 'secondary' | 'primary' | 'dark' {
   const normalized = String(status ?? '').toUpperCase();
 
-  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE'].includes(normalized)) return 'success';
-  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED'].includes(normalized)) return 'warning';
-  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE'].includes(normalized)) return 'danger';
+  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED'].includes(normalized)) return 'success';
+  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW'].includes(normalized)) return 'warning';
+  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS'].includes(normalized)) return 'info';
-  if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE'].includes(normalized)) return 'secondary';
+  if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';
   return 'secondary';
 }
@@ -15969,3 +16792,448 @@ export function getStatusVariant(status?: string): 'success' | 'warning' | 'dang
 --- src/vite-env.d.ts ---
 
 /// <reference types="vite/client" />
+
+
+--- FINAL_FRONTEND_FEATURES.md ---
+
+# KOST48 — Final Frontend Feature Set (Updated)
+
+**Versi:** 2026-04-21 (Sinkronisasi dengan Frontend V4 Fase 4.0 + 4.1B Approval Surface)
+
+## Ringkasan
+
+Frontend KOST48 adalah workspace gabungan untuk **backoffice**, **tenant portal**, dan kini juga **surface publik terbatas** untuk mendukung flow **booking mandiri tenant** dan **approval booking backoffice** pada roadmap V4.
+
+Frontend ini dibangun dengan prinsip:
+- **role-first**
+- **tenant-first di portal**
+- **compact over clutter**
+- **jujur terhadap kontrak backend yang benar-benar tersedia**
+- **patch pragmatis, bukan rewrite total**
+
+Stack utama:
+- **Vite + React 18 + TypeScript**
+- **React-Bootstrap**
+- **TanStack Query**
+
+Route, tipe data, label status, dan surface utama frontend telah diselaraskan dengan kontrak aktif proyek, termasuk dukungan terhadap:
+- `RoomStatus.RESERVED`
+- `Stay.expiresAt`
+- `GET /public/rooms`
+- `POST /tenant/bookings`
+- `GET /tenant/bookings/my`
+- `PATCH /admin/bookings/:stayId/approve`
+
+---
+
+## Role & Workspace
+
+### 1. Guest / Public
+Guest dapat mengakses katalog kamar publik melalui route `/rooms`. Surface ini dipakai untuk menampilkan kamar aktif yang tersedia dan menjadi pintu masuk flow booking mandiri.
+
+### 2. OWNER / ADMIN / STAFF
+Role backoffice tetap memakai workspace operasional utama. Route `/rooms` untuk mereka tetap membuka surface rooms backoffice, bukan katalog publik.
+
+### 3. TENANT
+Tenant memakai **portal tenant** untuk kebutuhan harian seperti hunian, tagihan, tiket, pengumuman, profil, dan kini juga **pemesanan/booking**.
+
+Pemisahan role tetap dijaga agar portal tenant tidak bocor ke surface backoffice.
+
+---
+
+## Fitur Inti Backoffice
+
+### 1. Dashboard Operasional
+Dashboard dipisahkan per role:
+- **Owner Dashboard**
+- **Admin Dashboard**
+- **Staff Dashboard**
+
+Fungsinya meliputi:
+- KPI kamar terisi / kosong
+- stay aktif dan reminder operasional
+- invoice overdue / due soon
+- deposit queue
+- tabel pemantauan stay dan invoice prioritas
+
+Batch pagination + UAT readiness juga menyesuaikan fetch limit agar pembacaan data besar lebih realistis.
+
+### 2. Tenants & Portal Access
+Modul tenant mendukung:
+- CRUD tenant
+- pencarian
+- filter tenant aktif
+- guard UI untuk tenant yang sedang punya stay aktif
+
+Untuk **OWNER / ADMIN**, tersedia **Portal Access Management**:
+- lihat portal summary tenant
+- buat akun portal
+- toggle aktif/nonaktif akses portal
+- reset password portal
+
+Relasi tenant ↔ user tenant dibuat lebih jujur dan mudah dibaca dari context tenant.
+
+### 3. Rooms
+Modul room mendukung:
+- CRUD room
+- status kamar
+- info tenant aktif
+- guard UI untuk room yang sedang ditempati
+
+Route `/rooms` kini mendukung **dua surface**:
+- backoffice rooms untuk OWNER / ADMIN / STAFF
+- katalog publik untuk guest / TENANT
+
+Keputusan ini menjaga kompatibilitas route lama tanpa mematahkan flow baru.
+
+### 4. Stays
+Modul stay tetap menjadi pusat flow operasional existing:
+- list stay aktif
+- filter status dan pencarian
+- check-in wizard multi-step
+- detail stay dengan tab:
+  - **Info**
+  - **Meteran**
+  - **Keuangan**
+  - **Catatan**
+
+Aksi existing yang masih aktif:
+- Checkout
+- Perpanjang Stay
+- Batalkan Stay
+- Proses Deposit
+
+Selain itu, halaman stays kini juga memuat:
+- **surface read-only booking reserved**
+- **queue approval booking**
+- **modal approval booking**
+
+Semua ini di-embed ke surface existing agar tidak membuka menu besar baru.
+
+### 5. Invoices
+Modul invoice mendukung:
+- list invoice dengan filter status, keyword, dan rentang tanggal
+- detail invoice dengan line items dan riwayat pembayaran
+- issue invoice dari draft
+- batalkan invoice
+
+Invoice tetap mengikuti baseline bahwa total dikelola otomatis dari `InvoiceLine`, dan frontend hanya membaca kontrak yang ada tanpa memalsukan angka.
+
+### 6. Invoice Payments
+Modul pembayaran invoice mendukung:
+- CRUD pembayaran
+- blokir overpay di UI
+- preview status invoice setelah pembayaran
+
+Flow ini masih memakai mekanisme pembayaran existing, bukan payment submission V4.
+
+### 7. Tickets
+Backoffice ticket difokuskan untuk tindak lanjut operasional:
+- list tiket
+- filter status
+- assign ke staff/admin
+- update progress
+- penutupan tiket
+
+Backoffice bukan lagi surface utama untuk create ticket tenant; create ticket tenant diarahkan ke portal tenant sesuai redesign tenant-first.
+
+### 8. Announcements
+Modul pengumuman mendukung:
+- CRUD announcement
+- audience
+- publish
+- pinned
+- masa berlaku
+
+### 9. Meter Readings
+Modul meter readings mendukung:
+- CRUD pembacaan meter listrik dan air
+- penggunaan sebagai modul terpisah
+- embedding di detail stay / room bila diperlukan
+
+### 10. Inventory
+Modul inventory mencakup:
+- **Inventory Items**
+- **Room Items**
+- **Inventory Movements**
+
+### 11. WiFi Sales
+Modul WiFi Sales mendukung pencatatan penjualan paket WiFi dan integrasi dasar ke invoice sesuai fase yang sudah selesai.
+
+### 12. Expenses
+Modul expenses mendukung pencatatan pengeluaran operasional.
+
+### 13. Users
+Modul users mendukung manajemen akun dan role, dengan pembatasan keamanan bahwa admin tidak dapat:
+- mengedit akun owner
+- menghapus akun owner
+- mengubah role menjadi OWNER
+
+---
+
+## Fitur Tenant Portal
+
+### 1. Pengumuman
+Tenant dapat melihat daftar pengumuman aktif yang relevan untuk mereka, termasuk pinned badge dan tanggal berlaku.
+
+### 2. Hunian Saya
+Tenant dapat melihat stay aktif mereka, termasuk:
+- kamar
+- sewa
+- deposit
+- rencana checkout
+
+Surface ini dijaga tetap sederhana dan hanya menampilkan data yang relevan untuk tenant.
+
+### 3. Tagihan Saya
+Tenant dapat melihat daftar invoice sendiri, termasuk:
+- status invoice
+- overdue state
+- ringkasan total
+- sisa pembayaran
+
+### 4. Tiket Saya
+Tenant dapat:
+- melihat daftar tiket sendiri
+- membuat tiket baru tanpa input ID teknis
+- memantau progres tiket
+
+Ini mengikuti pendekatan tenant-first di mana context tiket otomatis diisi dari tenant/stay/room yang sesuai.
+
+### 5. Profil Saya
+Tenant dapat melihat profil sendiri dan mengganti password sesuai kontrak backend yang tersedia.
+
+### 6. Pemesanan Saya (V4 Fase 4.0 + 4.1B)
+Tenant kini memiliki halaman **Pemesanan Saya** di route `/portal/bookings`.
+
+Halaman ini menampilkan:
+- kamar
+- tanggal check-in
+- pricing term
+- tarif utama / tarif relevan
+- masa berlaku booking (`expiresAt`)
+- status booking yang jujur:
+  - **Menunggu Approval**
+  - **Menunggu Pembayaran**
+
+Tenant tidak diberi kesan kamar sudah aktif penuh / `OCCUPIED`, dan tidak diarahkan ke payment submission flow karena fase itu belum dibuka.
+
+---
+
+## Surface Publik Baru (V4 Fase 4.0)
+
+### 1. Katalog Kamar Publik — `/rooms`
+Guest dan tenant dapat melihat kamar aktif yang tersedia dari katalog publik.
+
+Informasi utama yang ditampilkan:
+- kode / nama kamar
+- lantai
+- tarif utama yang relevan
+- daftar pricing term tersedia
+- CTA **Pesan Sekarang**
+
+Filter yang tersedia:
+- `search`
+- `floor`
+- `pricingTerm`
+
+Jika gambar belum tersedia, frontend memakai placeholder netral agar tetap jujur terhadap data yang benar-benar ada.
+
+### 2. Resolver Route `/rooms`
+Route `/rooms` bertindak sebagai resolver:
+- backoffice user masuk ke workspace rooms existing
+- guest / tenant masuk ke katalog publik
+
+Keputusan ini menjaga kompatibilitas route lama dan menghindari duplikasi jalur yang membingungkan.
+
+### 3. Form Booking Tenant — `/booking/:roomId`
+Frontend menyediakan halaman booking tenant yang menampilkan ringkasan kamar dan form booking dalam satu layar.
+
+Field yang didukung:
+- `checkInDate`
+- `pricingTerm`
+- `plannedCheckOutDate`
+- `stayPurpose`
+- `notes`
+
+Submit terhubung ke kontrak backend booking mandiri. Setelah sukses:
+- query terkait di-refresh
+- tenant diarahkan ke `/portal/bookings`
+
+Error backend ditampilkan secara aman tanpa wording palsu.
+
+---
+
+## Surface Backoffice Baru untuk Approval Booking
+
+### 1. Booking Reserved Read-Only
+Surface booking reserved tetap di-embed ke halaman **Stays** sebagai mode/filter tambahan.
+
+Karakteristiknya:
+- stay masih aktif secara booking
+- room berstatus `RESERVED`
+- tidak otomatis membuka detail operasional penuh
+
+### 2. Approval Booking Queue
+Backoffice kini memiliki queue approval booking yang di-embed ke halaman **Stays** melalui mode **Booking Reserved**.
+
+Queue ini menampilkan konteks manusiawi:
+- tenant
+- kamar
+- check-in
+- pricing term
+- `expiresAt`
+- status approval
+
+Reserved booking yang sudah memiliki invoice awal tidak lagi terasa “masih menunggu approval”.
+
+### 3. Approval Booking Modal
+Backoffice memiliki modal approval booking yang terhubung ke endpoint backend existing:
+- `PATCH /admin/bookings/:stayId/approve`
+
+Field minimum:
+- `agreedRentAmountRupiah`
+- `depositAmountRupiah`
+- `initialElectricityKwh`
+- `initialWaterM3`
+
+Validasi frontend bersifat defensif:
+- semua field wajib angka valid
+- meter tidak boleh negatif
+
+Setelah approval sukses:
+- query stays / invoices / dashboard terkait di-invalidasi
+- queue approval menjadi sinkron
+- flow tetap jujur dan tidak membuka payment submission
+
+---
+
+## Pagination & UAT Readiness Improvements
+
+Batch terbaru juga menambahkan penyempurnaan untuk kesiapan UAT:
+
+### 1. Server-Side Pagination
+Pola fetch-all dengan limit besar mulai diganti ke pagination server-side yang lebih proper pada:
+- `SimpleCrudPage`
+- `StaysPage`
+- `InvoicesPage`
+- `ResourceTable`
+
+Komponen `PaginationControls` ditambahkan untuk navigasi halaman.
+
+### 2. Dashboard Data Fetch Tuning
+Owner dan admin dashboard mendapat penyesuaian fetch limit yang lebih realistis untuk pembacaan data saat UAT.
+
+### 3. Booking Reserved UX Guard
+`StayDetailPage` membedakan booking mandiri dari stay operasional:
+- booking reserved diberi info badge
+- tombol aksi operasional disembunyikan
+- stay operasional dengan room `OCCUPIED` tetap berjalan seperti biasa
+
+---
+
+## Sinkronisasi Kontrak Frontend
+
+Frontend saat ini sudah diselaraskan dengan kontrak aktif berikut:
+- `cancelReason` untuk cancel stay
+- login error generik
+- password portal minimal 8 karakter
+- role-aware global search
+- `RoomStatus.RESERVED`
+- `Stay.expiresAt`
+- endpoint booking mandiri:
+  - `GET /public/rooms`
+  - `POST /tenant/bookings`
+  - `GET /tenant/bookings/my`
+- endpoint approval booking:
+  - `PATCH /admin/bookings/:stayId/approve`
+
+Yang **belum** dibuka:
+- payment submission / approval (Fase 4.2)
+- notifikasi / reminder WhatsApp (Fase 4.3)
+- registrasi fleksibel email/HP (Fase 4.4)
+- forgot/reset password self-service tenant (Fase 4.5)
+
+---
+
+## UI/UX
+
+Frontend memakai:
+- sidebar desktop + offcanvas mobile
+- breadcrumb topbar
+- page header konsisten
+- status badge Bahasa Indonesia
+- format Rupiah
+- empty state aman
+- loading state / skeleton aman
+- responsive layout
+- navigasi role-aware
+- embedding modul kecil jika lebih tepat daripada menjadikannya menu utama
+
+Tenant portal tetap dijaga sederhana dan tidak bocor ke surface backoffice. Prinsip **honest UX** tetap dipertahankan, termasuk untuk booking reserved dan approval booking yang belum boleh terasa seperti flow pembayaran penuh.
+
+---
+
+## Status Terkini & Catatan Penting
+
+### ✅ Sudah Ditutup
+- Status `PENDING` dihapus dari UI aktif
+- `activateStay` legacy dihapus
+- portal access reactivity dibenahi
+- login redirect sudah role-aware
+- global search sudah role-aware
+- cancel stay memakai `cancelReason`
+- tenant portal lebih jujur dan sederhana
+- frontend V4 Fase 4.0 sudah masuk:
+  - `/rooms`
+  - `/booking/:roomId`
+  - `/portal/bookings`
+  - booking reserved read-only di backoffice
+- frontend V4 Fase 4.1B sudah masuk:
+  - queue approval booking di `Stays`
+  - modal approval booking
+  - status tenant portal `Menunggu Approval` / `Menunggu Pembayaran`
+- pagination + beberapa guard UAT readiness sudah ditambahkan
+
+### ⏳ Belum Dinilai Lolos Penuh
+- UAT end-to-end Fase 4.0 masih belum dinyatakan lolos penuh
+- UAT approval booking Fase 4.1 juga masih belum dinyatakan lolos penuh
+- Karena itu Fase 4.0 dan 4.1 masih berstatus ⏳, bukan freeze-ready penuh
+
+### ⬜ Belum Dibuka
+- upload bukti bayar booking
+- aktivasi otomatis `RESERVED` → `OCCUPIED`
+- reminder / notifikasi WhatsApp
+- galeri kamar publik penuh
+- registrasi fleksibel email / nomor HP
+- self-service forgot/reset password tenant
+
+### ⚠️ Catatan
+- Route `/rooms` memegang dua surface berbeda
+- booking reserved dan approval booking tetap di-embed ke surface existing, bukan menu besar baru
+- warning bundle size dari Vite masih bisa muncul, tetapi bukan blocker build/runtime pada batch ini
+
+---
+
+## Catatan Paket
+
+Zip final frontend idealnya memuat:
+- source code frontend lengkap
+- artifact build yang lolos kompilasi
+- `CHANGELOG.md` yang diperbarui
+- dokumen fitur ini yang sinkron dengan status resmi terbaru
+
+--- index.html ---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kost48 Surabaya V3</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

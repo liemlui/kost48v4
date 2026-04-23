@@ -130,6 +130,7 @@ exports.Prisma.UserScalarFieldEnum = {
   tenantId: 'tenantId',
   isActive: 'isActive',
   lastLoginAt: 'lastLoginAt',
+  passwordChangedAt: 'passwordChangedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -254,6 +255,41 @@ exports.Prisma.InvoicePaymentScalarFieldEnum = {
   referenceNo: 'referenceNo',
   note: 'note',
   capturedById: 'capturedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PaymentSubmissionScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  invoiceId: 'invoiceId',
+  tenantId: 'tenantId',
+  submittedById: 'submittedById',
+  amountRupiah: 'amountRupiah',
+  paidAt: 'paidAt',
+  paymentMethod: 'paymentMethod',
+  senderName: 'senderName',
+  senderBankName: 'senderBankName',
+  referenceNumber: 'referenceNumber',
+  notes: 'notes',
+  fileKey: 'fileKey',
+  fileUrl: 'fileUrl',
+  originalFilename: 'originalFilename',
+  mimeType: 'mimeType',
+  fileSizeBytes: 'fileSizeBytes',
+  status: 'status',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNotes: 'reviewNotes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -490,6 +526,13 @@ exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   OTHER: 'OTHER'
 };
 
+exports.PaymentSubmissionStatus = exports.$Enums.PaymentSubmissionStatus = {
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED'
+};
+
 exports.TicketStatus = exports.$Enums.TicketStatus = {
   OPEN: 'OPEN',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -546,6 +589,8 @@ exports.Prisma.ModelName = {
   Invoice: 'Invoice',
   InvoiceLine: 'InvoiceLine',
   InvoicePayment: 'InvoicePayment',
+  PasswordResetToken: 'PasswordResetToken',
+  PaymentSubmission: 'PaymentSubmission',
   Ticket: 'Ticket',
   Announcement: 'Announcement',
   InventoryItem: 'InventoryItem',

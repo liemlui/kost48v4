@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addInvoiceLine, createInvoice, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
+import { addInvoiceLine, cancelInvoice, createInvoice, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
 
 export function useInvoices(stayId?: number | string, enabled = true) {
   const queryClient = useQueryClient();
   const key = ['stay', stayId, 'invoices'];
 
-  // Validasi stayId: harus angka valid, bukan "undefined" string atau NaN
   const isValidStayId = stayId !== undefined && stayId !== null && stayId !== 'undefined' && stayId !== 'null' && !isNaN(Number(stayId));
 
   const query = useQuery({
@@ -40,7 +39,17 @@ export function useInvoices(stayId?: number | string, enabled = true) {
     },
   });
 
-  return { ...query, createMutation, addLineMutation, issueMutation };
+  const cancelMutation = useMutation({
+    mutationFn: ({ invoiceId, payload }: { invoiceId: number | string; payload: { cancelReason: string } }) =>
+      cancelInvoice(invoiceId, payload),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: key });
+      await queryClient.invalidateQueries({ queryKey: ['invoice', variables.invoiceId] });
+      await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    },
+  });
+
+  return { ...query, createMutation, addLineMutation, issueMutation, cancelMutation };
 }
 
 export function useInvoice(invoiceId?: number | string, enabled = true) {

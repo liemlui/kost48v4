@@ -18,6 +18,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/dashboard', label: 'Dashboard Owner', icon: '📈', hint: 'KPI properti, koleksi, dan arah keputusan bisnis.' },
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau billed, collected, overdue, dan follow-up utama.' },
+      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
       { to: '/expenses', label: 'Pengeluaran', icon: '💸', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
       { to: '/users', label: 'Users', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
@@ -56,6 +57,7 @@ const adminSections: NavigationSection[] = [
     links: [
       { to: '/invoices', label: 'Invoices', icon: '💳', hint: 'Tagihan, line item, dan status pembayaran.' },
       { to: '/invoice-payments', label: 'Invoice Payments', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
+      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Queue review bukti bayar booking reserved tenant.' },
       { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
       { to: '/expenses', label: 'Expenses', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Pengumuman tenant dan internal.' },

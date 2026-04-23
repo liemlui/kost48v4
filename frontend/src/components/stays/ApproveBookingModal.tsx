@@ -1,16 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
-import { approveTenantBooking } from '../../api/bookings';
-import type { ApproveBookingPayload, Stay, TenantBooking } from '../../types';
+import { approveBooking } from '../../api/bookings';
+import type { ApproveBookingPayload, Stay } from '../../types';
+import { formatDateId } from '../../utils/bookingExpiry';
 
-function isDashboardKey(value: unknown) {
-  return typeof value === 'string' && value.startsWith('dashboard');
-}
-
-function toNumber(value: string) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+function formatNumberInput(value: string) {
+  return value.replace(/[^0-9.]/g, '');
 }
 
 export default function ApproveBookingModal({
@@ -20,160 +16,150 @@ export default function ApproveBookingModal({
 }: {
   show: boolean;
   onHide: () => void;
-  booking: TenantBooking | Stay | null;
+  booking: Stay | null;
 }) {
   const queryClient = useQueryClient();
   const [agreedRentAmountRupiah, setAgreedRentAmountRupiah] = useState('');
   const [depositAmountRupiah, setDepositAmountRupiah] = useState('');
-  const [initialElectricityKwh, setInitialElectricityKwh] = useState('');
-  const [initialWaterM3, setInitialWaterM3] = useState('');
+  const [initialElectricityKwh, setInitialElectricityKwh] = useState('0');
+  const [initialWaterM3, setInitialWaterM3] = useState('0');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!show || !booking) return;
-    setAgreedRentAmountRupiah(String(booking.agreedRentAmountRupiah ?? ''));
-    setDepositAmountRupiah(String(booking.depositAmountRupiah ?? ''));
-    setInitialElectricityKwh('0');
-    setInitialWaterM3('0');
-    setError('');
-  }, [booking, show]);
-
-  const payload = useMemo<ApproveBookingPayload | null>(() => {
-    const agreed = toNumber(agreedRentAmountRupiah);
-    const deposit = toNumber(depositAmountRupiah);
-    const electricity = toNumber(initialElectricityKwh);
-    const water = toNumber(initialWaterM3);
-
-    if (agreed === null || deposit === null || electricity === null || water === null) return null;
-    return {
-      agreedRentAmountRupiah: agreed,
-      depositAmountRupiah: deposit,
-      initialElectricityKwh: electricity,
-      initialWaterM3: water,
-    };
-  }, [agreedRentAmountRupiah, depositAmountRupiah, initialElectricityKwh, initialWaterM3]);
-
   const mutation = useMutation({
-    mutationFn: (nextPayload: ApproveBookingPayload) => approveTenantBooking(booking?.id ?? 0, nextPayload),
+    mutationFn: ({ stayId, payload }: { stayId: number; payload: ApproveBookingPayload }) => approveBooking(stayId, payload),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['stays'] });
-      await queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] });
-      await queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
-      await queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      await queryClient.invalidateQueries({ queryKey: ['tenants'] });
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const firstKey = Array.isArray(query.queryKey) ? query.queryKey[0] : undefined;
-          return isDashboardKey(firstKey);
-        },
-      });
-      onHide();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        queryClient.invalidateQueries({
+          predicate: (query) => typeof query.queryKey?.[0] === 'string' && String(query.queryKey[0]).startsWith('dashboard-'),
+        }),
+      ]);
+      handleClose();
     },
   });
 
+  const roomLabel = useMemo(() => {
+    if (!booking) return '-';
+    return booking.room?.code ?? `Kamar #${booking.roomId}`;
+  }, [booking]);
+
   const handleClose = () => {
-    if (mutation.isPending) return;
-    setError('');
-    onHide();
+    if (!mutation.isPending) {
+      setAgreedRentAmountRupiah('');
+      setDepositAmountRupiah('');
+      setInitialElectricityKwh('0');
+      setInitialWaterM3('0');
+      setError('');
+      onHide();
+    }
   };
 
-  const validatePayload = () => {
-    if (!payload) {
-      return 'Semua field approval wajib diisi dengan angka yang valid.';
-    }
+  const validate = () => {
+    const rent = Number(agreedRentAmountRupiah);
+    const deposit = Number(depositAmountRupiah);
+    const electricity = Number(initialElectricityKwh);
+    const water = Number(initialWaterM3);
 
-    if (payload.agreedRentAmountRupiah < 0) return 'Tarif sewa disepakati tidak boleh negatif.';
-    if (payload.depositAmountRupiah < 0) return 'Deposit tidak boleh negatif.';
-    if (payload.initialElectricityKwh < 0) return 'Meter awal listrik tidak boleh negatif.';
-    if (payload.initialWaterM3 < 0) return 'Meter awal air tidak boleh negatif.';
-
+    if (!Number.isFinite(rent) || rent <= 0) return 'Tarif sewa disepakati harus lebih besar dari 0.';
+    if (!Number.isFinite(deposit) || deposit < 0) return 'Deposit tidak boleh negatif.';
+    if (!Number.isFinite(electricity) || electricity < 0) return 'Meter awal listrik tidak boleh negatif.';
+    if (!Number.isFinite(water) || water < 0) return 'Meter awal air tidak boleh negatif.';
     return '';
   };
 
   const handleSubmit = async () => {
-    const validationError = validatePayload();
+    if (!booking) return;
+
+    const validationError = validate();
     setError(validationError);
-    if (validationError || !payload || !booking) return;
+    if (validationError) return;
 
     try {
-      await mutation.mutateAsync(payload);
+      await mutation.mutateAsync({
+        stayId: booking.id,
+        payload: {
+          agreedRentAmountRupiah: Number(agreedRentAmountRupiah),
+          depositAmountRupiah: Number(depositAmountRupiah),
+          initialElectricityKwh,
+          initialWaterM3,
+        },
+      });
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal menyetujui booking. Silakan coba lagi.');
+      const message = err?.response?.data?.message;
+      setError(Array.isArray(message) ? message.join(', ') : message || 'Gagal menyetujui booking.');
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Approval Booking</Modal.Title>
+        <Modal.Title>Setujui Booking</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Alert variant="info" className="small">
-          Booking akan tetap berstatus <strong>reserved</strong> pada fase ini. Sistem akan membuat 2 baseline meter reading dan invoice awal <strong>DRAFT</strong>, tanpa membuka flow pembayaran.
-        </Alert>
-
         {booking ? (
-          <div className="mb-3 small text-muted">
+          <Alert variant="light" className="border small">
             <div><strong>Tenant:</strong> {booking.tenant?.fullName ?? `Tenant #${booking.tenantId}`}</div>
-            <div><strong>Kamar:</strong> {booking.room?.code ?? `Room #${booking.roomId}`} {booking.room?.name ? `· ${booking.room.name}` : ''}</div>
-          </div>
+            <div><strong>Kamar:</strong> {roomLabel}</div>
+            <div><strong>Check-in:</strong> {formatDateId(booking.checkInDate)}</div>
+            <div><strong>Pricing term:</strong> {booking.pricingTerm ?? '-'}</div>
+            <div><strong>Expires at:</strong> {formatDateId(booking.expiresAt)}</div>
+          </Alert>
         ) : null}
 
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tarif Sewa Disepakati</Form.Label>
+          <Form.Label>Tarif Sewa Disepakati <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="1"
+            min={1}
+            step={1}
             value={agreedRentAmountRupiah}
-            onChange={(event) => setAgreedRentAmountRupiah(event.target.value)}
-            placeholder="Contoh: 1500000"
+            onChange={(e) => setAgreedRentAmountRupiah(formatNumberInput(e.target.value))}
+            placeholder="Contoh: 1200000"
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Deposit</Form.Label>
+          <Form.Label>Deposit <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="1"
+            min={0}
+            step={1}
             value={depositAmountRupiah}
-            onChange={(event) => setDepositAmountRupiah(event.target.value)}
+            onChange={(e) => setDepositAmountRupiah(formatNumberInput(e.target.value))}
             placeholder="Contoh: 500000"
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Meter Awal Listrik (kWh)</Form.Label>
+          <Form.Label>Meter Awal Listrik (kWh) <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="0.01"
+            min={0}
+            step="0.001"
             value={initialElectricityKwh}
-            onChange={(event) => setInitialElectricityKwh(event.target.value)}
-            placeholder="Contoh: 0"
+            onChange={(e) => setInitialElectricityKwh(formatNumberInput(e.target.value))}
           />
         </Form.Group>
 
         <Form.Group>
-          <Form.Label>Meter Awal Air (m³)</Form.Label>
+          <Form.Label>Meter Awal Air (m3) <span className="text-danger">*</span></Form.Label>
           <Form.Control
             type="number"
-            min="0"
-            step="0.01"
+            min={0}
+            step="0.001"
             value={initialWaterM3}
-            onChange={(event) => setInitialWaterM3(event.target.value)}
-            placeholder="Contoh: 0"
+            onChange={(e) => setInitialWaterM3(formatNumberInput(e.target.value))}
           />
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>Tutup</Button>
+        <Button variant="secondary" onClick={handleClose} disabled={mutation.isPending}>Batal</Button>
         <Button onClick={handleSubmit} disabled={mutation.isPending || !booking}>
-          {mutation.isPending ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Setujui Booking'}
+          {mutation.isPending ? <><Spinner size="sm" className="me-2" />Menyetujui...</> : 'Setujui Booking'}
         </Button>
       </Modal.Footer>
     </Modal>

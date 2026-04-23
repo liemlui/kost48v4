@@ -310,3 +310,41 @@ Hasil audit codebase (dari sesi terpisah):
   - Fase 4.2+
 - Build frontend dinyatakan sukses.
 - Setelah entry ini, backend 4.1A + frontend 4.1B sudah tertutup di level patch kode, tetapi UAT approval booking end-to-end masih menjadi langkah berikutnya sebelum Fase 4.2 dibuka.
+
+
+## 2026-04-22 — Sinkronisasi Dokumen Detail Fase 4.2–4.5
+
+- Dokumen proyek disinkronkan ulang agar blueprint implementasi Fase 4.2, 4.3, 4.4, dan 4.5 menjadi jauh lebih detail dan siap dipakai sebagai acuan ACT bertahap.
+- `02_PLAN.md` diperluas untuk memecah tiap fase menjadi scope resmi, ACT backend/frontend rinci, dan acceptance criteria.
+- `01_CONTRACTS.md` diperluas untuk menjelaskan kontrak vNext payment submission, reminder WhatsApp, room detail publik, registrasi fleksibel, soft delete akun, tenant renew request, dan forgot/reset password.
+- `03_DECISIONS_LOG.md` ditambah freeze keputusan arsitektur untuk 4.2–4.5 agar eksekusi berikutnya tidak liar.
+- `CHECKLIST.md` dipecah menjadi subtugas yang lebih granular untuk 4.2–4.5.
+- `00_GROUND_STATE.md` ditegaskan kembali bahwa blueprint 4.2–4.5 sudah siap, tetapi implementasi kode tetap menunggu urutan resmi: UAT 4.0 → UAT 4.1 → Fase 4.2.
+- Entry ini adalah **sinkronisasi dokumentasi**, bukan klaim bahwa kode 4.2–4.5 sudah live.
+
+
+---
+
+## 2026-04-23 — UAT Parsial V4 4.0–4.1 + Patch Korektif + Refactor Struktur
+
+- UAT parsial dimulai pada flow aktif V4 dan menghasilkan temuan nyata:
+  - `/rooms` publik dinyatakan aman
+  - `/rooms` untuk ADMIN berhasil masuk ke workspace backoffice
+  - tenant berhasil membuat booking baru
+- Temuan bug selama UAT parsial:
+  - `check-in` dan `expiresAt` sempat tampil `-` pada surface admin/tenant
+  - approval booking sempat terkena `409` karena booking terasa kedaluwarsa terlalu cepat
+  - modal approve/review frontend sempat tidak menutup walau aksi backend sukses
+  - pada prototype flow payment submission, approval payment sempat menabrak constraint invoice (`invoice_status_consistency_chk`)
+- Patch korektif yang dibuat selama rangkaian ini:
+  - backend fix `calculateBookingExpiry()` agar expiry jatuh ke akhir hari
+  - backend fix serialisasi `Date`
+  - backend fix coercion boolean tertentu pada payload/admin form
+  - backend fix `issuedAt` consistency saat invoice bergerak dari `DRAFT`
+  - frontend patch close-modal / invalidate query pada review payment disiapkan
+- Refactor struktur source juga dikerjakan:
+  - backend: beberapa service besar dipecah agar file source utama turun ke kisaran <= 500 baris
+  - frontend: `resources.ts` dan `CheckInWizard.tsx` dipecah ke file config/sections yang lebih kecil
+- Kesimpulan sesi:
+  - fondasi 4.0–4.1 semakin dekat stabil, tetapi gate UAT tetap belum dinyatakan lulus penuh
+  - 4.2 sempat diprototipekan untuk menutup blocker integrasi, namun masih harus dianggap non-baseline sampai gate resmi lolos

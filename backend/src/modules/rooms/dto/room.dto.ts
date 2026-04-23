@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { RoomStatus } from '../../../common/enums/app.enums';
 
 export class CreateRoomDto {
@@ -12,6 +12,7 @@ export class CreateRoomDto {
   @IsOptional() @IsInt() @Min(0) defaultDepositRupiah?: number;
   @IsOptional() @IsInt() @Min(0) electricityTariffPerKwhRupiah?: number;
   @IsOptional() @IsInt() @Min(0) waterTariffPerM3Rupiah?: number;
+  @IsOptional() @IsArray() @IsString({ each: true }) images?: string[];
   @IsOptional() @IsString() notes?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
 }

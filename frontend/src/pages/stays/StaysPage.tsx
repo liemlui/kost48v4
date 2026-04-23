@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -9,35 +9,16 @@ import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import StatCard from '../../components/common/StatCard';
-import type { Stay } from '../../types';
+import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
+import type { PaginatedResponse, Stay } from '../../types';
+import { daysUntilDate, formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  if (!dateValue) return '-';
-  try {
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return '-';
-  }
+  return formatDateId(dateValue);
 }
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
-  if (!targetDate) return null;
-  try {
-    const date = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-    if (Number.isNaN(date.getTime())) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  } catch {
-    return null;
-  }
+  return daysUntilDate(targetDate);
 }
 
 function getCheckoutReminderBadge(stay: Stay): { label: string; status: string } | null {
@@ -47,6 +28,57 @@ function getCheckoutReminderBadge(stay: Stay): { label: string; status: string }
   if (daysLeft >= 8) return { label: 'H-10', status: 'WARNING' };
   if (daysLeft >= 4) return { label: 'H-7', status: 'INFO' };
   return { label: 'H-3', status: 'DANGER' };
+}
+
+function getBookingApprovalMeta(stay: Stay) {
+  const hasInitialInvoice = Number(stay.invoiceCount ?? 0) > 0 || Boolean(stay.latestInvoiceId);
+
+  if (hasInitialInvoice) {
+    return {
+      isPendingApproval: false,
+      label: 'Menunggu Pembayaran',
+      variant: 'INFO',
+      helper:
+        stay.latestInvoiceNumber
+          ? `Invoice awal ${stay.latestInvoiceNumber} sudah terbentuk. Booking ini tidak lagi menunggu approval.`
+          : 'Invoice awal booking sudah terbentuk. Booking ini tidak lagi menunggu approval.',
+    };
+  }
+
+  return {
+    isPendingApproval: true,
+    label: 'Menunggu Approval',
+    variant: 'WARNING',
+    helper: 'Booking reserved ini masih menunggu approval admin dan pembentukan invoice awal.',
+  };
+}
+
+async function listAllActiveStaysForBookings(maxPages = 50): Promise<PaginatedResponse<Stay>> {
+  const pageSize = 100;
+  const items: Stay[] = [];
+  let page = 1;
+  let totalPages = 1;
+  let totalItems = 0;
+
+  do {
+    const response = await listStays({ status: 'ACTIVE', page, limit: pageSize });
+    items.push(...(response.items ?? []));
+    totalPages = response.meta?.totalPages ?? 1;
+    totalItems = response.meta?.totalItems ?? items.length;
+
+    if (!(response.items ?? []).length) break;
+    page += 1;
+  } while (page <= totalPages && page <= maxPages);
+
+  return {
+    items,
+    meta: {
+      page: 1,
+      limit: items.length || pageSize,
+      totalItems,
+      totalPages,
+    },
+  };
 }
 
 type StayViewFilter = 'ACTIVE' | 'BOOKINGS' | 'ALL';
@@ -59,16 +91,18 @@ export default function StaysPage() {
   const [statusFilter, setStatusFilter] = useState<StayViewFilter>(initialFilter);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedBooking, setSelectedBooking] = useState<Stay | null>(null);
   const PAGE_SIZE = 20;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
   const apiStatusFilter = statusFilter === 'ALL' ? undefined : 'ACTIVE';
-  const effectivePage = isBookingsMode ? 1 : page;
-  const effectiveLimit = isBookingsMode ? 200 : PAGE_SIZE;
-
   const query = useQuery({
-    queryKey: ['stays', statusFilter, effectivePage, effectiveLimit],
-    queryFn: () => listStays({ status: apiStatusFilter, page: effectivePage, limit: effectiveLimit }),
+    queryKey: ['stays', statusFilter, isBookingsMode ? 'bookings-all' : page],
+    queryFn: () => (
+      isBookingsMode
+        ? listAllActiveStaysForBookings()
+        : listStays({ status: apiStatusFilter, page, limit: PAGE_SIZE })
+    ),
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
@@ -91,6 +125,7 @@ export default function StaysPage() {
         item.pricingTerm,
         item.bookingSource,
         item.stayPurpose,
+        item.latestInvoiceNumber,
       ].some((value) => String(value ?? '').toLowerCase().includes(term)),
     );
   }, [items, keyword, operationalActive, reservedBookings, statusFilter]);
@@ -108,12 +143,21 @@ export default function StaysPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [statusFilter]);
+  }, [statusFilter, keyword]);
 
   const checkoutSoonCount = operationalActive.filter((item) => getCheckoutReminderBadge(item)?.label).length;
+  const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
+  const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
+  const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
   const meta = query.data?.meta;
+  const paginatedFilteredItems = isBookingsMode
+    ? filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+    : filteredItems;
+  const bookingsTotalItems = isBookingsMode ? filteredItems.length : 0;
+  const bookingsTotalPages = isBookingsMode ? Math.max(1, Math.ceil(bookingsTotalItems / PAGE_SIZE)) : 1;
+  const visibleItems = isBookingsMode ? paginatedFilteredItems : filteredItems;
   const tableCountText = isBookingsMode
-    ? `Menampilkan ${filteredItems.length} booking reserved` + (effectiveLimit > PAGE_SIZE ? ' terbaru (read-only)' : '')
+    ? `Menampilkan ${visibleItems.length} dari ${bookingsTotalItems} booking reserved`
     : `Menampilkan ${filteredItems.length} dari ${meta?.totalItems ?? items.length} data`;
 
   return (
@@ -121,16 +165,24 @@ export default function StaysPage() {
       <PageHeader
         eyebrow="Stay management"
         title="Stays"
-        description="Surface ini tetap fokus ke stay operasional, dengan tambahan tampilan read-only untuk booking reserved pada Fase 4.0."
+        description="Surface ini memisahkan stay operasional dari queue booking reserved, sehingga admin bisa melihat mana yang masih menunggu approval dan mana yang sudah menunggu pembayaran."
+        secondaryAction={
+          <Button
+            variant={isBookingsMode ? 'outline-secondary' : 'outline-primary'}
+            onClick={() => handleStatusFilterChange(isBookingsMode ? 'ACTIVE' : 'BOOKINGS')}
+          >
+            {isBookingsMode ? 'Lihat Stay Aktif' : 'Booking Reserved'}
+          </Button>
+        }
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
 
       <Row className="g-4 mb-4">
-        <Col md={3}><StatCard title="Total hasil filter" value={filteredItems.length} subtitle="Baris yang sedang ditampilkan" icon="📋" /></Col>
+        <Col md={3}><StatCard title="Total hasil filter" value={isBookingsMode ? bookingsTotalItems : filteredItems.length} subtitle="Baris yang sedang terfilter" icon="📋" /></Col>
         <Col md={3}><StatCard title="Stay aktif" value={operationalActive.length} subtitle="Tenant yang sedang menempati kamar" icon="✅" /></Col>
-        <Col md={3}><StatCard title="Booking reserved" value={reservedBookings.length} subtitle="Masuk mode baca tanpa approval" icon="🗓️" /></Col>
-        <Col md={3}><StatCard title="Perlu reminder" value={checkoutSoonCount} subtitle="Checkout ≤ 10 hari" icon="⏳" /></Col>
+        <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle={expiredBookingsCount ? `${expiredBookingsCount} expired / perlu tindak lanjut` : 'Booking reserved tanpa invoice awal'} icon="🗓️" /></Col>
+        <Col md={3}><StatCard title="Menunggu pembayaran" value={waitingPaymentCount} subtitle="Booking approved dengan invoice awal" icon="💳" /></Col>
       </Row>
 
       <Card className="content-card border-0 mb-4">
@@ -138,7 +190,7 @@ export default function StaysPage() {
           <div className="table-meta">
             <div>
               <div className="panel-title">Filter & pencarian</div>
-              <div className="panel-subtitle">Gunakan mode tampilan untuk membedakan stay operasional dengan booking reserved read-only.</div>
+              <div className="panel-subtitle">Gunakan mode tampilan untuk membedakan stay operasional dengan queue booking reserved.</div>
             </div>
             <div className="summary-strip">
               <div className="summary-chip">
@@ -168,7 +220,7 @@ export default function StaysPage() {
                 <Form.Group>
                   <Form.Label>Pencarian</Form.Label>
                   <Form.Control
-                    placeholder="Cari tenant, kamar, source, atau tujuan stay"
+                    placeholder="Cari tenant, kamar, source, tujuan stay, atau nomor invoice"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                   />
@@ -185,76 +237,107 @@ export default function StaysPage() {
       <Card className="content-card border-0">
         <Card.Body>
           {isBookingsMode ? (
-            <Alert variant="info" className="small mb-4">
-              Booking reserved pada Fase 4.0 bersifat <strong>read-only</strong>. Approval admin, invoice awal booking, dan pembayaran mandiri tetap ditahan sampai Fase 4.1+ resmi dibuka.
+            <Alert variant={expiredBookingsCount ? 'warning' : 'info'} className="small mb-4">
+              Mode ini sekarang berfungsi sebagai <strong>queue approval booking</strong>. Booking tanpa invoice awal berarti masih <strong>Menunggu Approval</strong>, sedangkan booking yang sudah punya invoice awal berarti <strong>Menunggu Pembayaran</strong>.
+              {expiredBookingsCount ? ` Saat ini ada ${expiredBookingsCount} booking yang sudah expired dan perlu ditinjau.` : ''}
             </Alert>
           ) : null}
 
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
           {query.isError ? <Alert variant="danger">Gagal mengambil data stay. Silakan coba lagi.</Alert> : null}
-          {!query.isLoading && !query.isError && filteredItems.length === 0 ? (
+          {!query.isLoading && !query.isError && visibleItems.length === 0 ? (
             <EmptyState
               icon={statusFilter === 'BOOKINGS' ? '🗓️' : '🏠'}
               title={statusFilter === 'BOOKINGS' ? 'Belum ada booking reserved' : 'Belum ada data stay'}
               description={statusFilter === 'BOOKINGS'
-                ? 'Booking tenant yang masih reserved akan muncul di mode ini sebagai daftar baca.'
+                ? 'Booking tenant yang masih reserved akan muncul di mode ini.'
                 : 'Coba ubah filter atau mulai check-in tenant baru.'}
               action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />
           ) : null}
 
-          {!query.isLoading && !query.isError && filteredItems.length > 0 && isBookingsMode ? (
-            <Table hover responsive className="mb-0">
-              <thead>
-                <tr>
-                  <th>Tenant</th>
-                  <th>Kamar</th>
-                  <th>Check-in</th>
-                  <th>Pricing</th>
-                  <th>Masa Berlaku</th>
-                  <th>Status Booking</th>
-                  <th>Keterangan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
-                      <div className="small text-muted">{item.bookingSource ? `Source: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
-                    </td>
-                    <td>
-                      <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
-                      <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}{item.room?.floor ? ` · Lantai ${item.room.floor}` : ''}</div>
-                    </td>
-                    <td>
-                      <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
-                      <div className="small text-muted">Checkout plan: {formatDateSafe(item.plannedCheckOutDate)}</div>
-                    </td>
-                    <td>
-                      <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
-                      <div className="small text-muted">Deposit <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
-                    </td>
-                    <td>
-                      <div className="fw-semibold">{formatDateSafe(item.expiresAt)}</div>
-                      <div className="small text-muted">Reserved hingga tanggal ini</div>
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column gap-2">
-                        <StatusBadge status="RESERVED" />
-                        <StatusBadge status="WARNING" customLabel="Menunggu Fase 4.1" />
-                      </div>
-                    </td>
-                    <td>
-                      <div className="small text-muted">Belum ada aksi approval pada fase ini.</div>
-                    </td>
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && isBookingsMode ? (
+            <>
+              <Table hover responsive className="mb-0">
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Kamar</th>
+                    <th>Check-in</th>
+                    <th>Pricing</th>
+                    <th>Masa Berlaku</th>
+                    <th>Status Booking</th>
+                    <th>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {visibleItems.map((item) => {
+                    const expiryMeta = getBookingExpiryMeta(item.expiresAt);
+                    const approvalMeta = getBookingApprovalMeta(item);
+                    const canApprove = approvalMeta.isPendingApproval && !expiryMeta.isExpired;
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
+                          <div className="small text-muted">{item.bookingSource ? `Source: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
+                          <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}{item.room?.floor ? ` · Lantai ${item.room.floor}` : ''}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
+                          <div className="small text-muted">Checkout plan: {formatDateSafe(item.plannedCheckOutDate)}</div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
+                          <div className="small text-muted">Deposit <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
+                        </td>
+                        <td>
+                          <div className="fw-semibold">{formatDateSafe(item.expiresAt)}</div>
+                          <div className="small text-muted">{expiryMeta.helperText}</div>
+                        </td>
+                        <td>
+                          <div className="d-flex flex-column gap-2">
+                            <StatusBadge status="RESERVED" />
+                            <StatusBadge status={approvalMeta.variant} customLabel={approvalMeta.label} />
+                            <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />
+                          </div>
+                          <div className="small text-muted mt-2">
+                            {approvalMeta.helper}
+                            {item.latestInvoiceNumber ? ` Invoice: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
+                          </div>
+                        </td>
+                        <td>
+                          {canApprove ? (
+                            <Button size="sm" onClick={() => setSelectedBooking(item)}>
+                              Approve
+                            </Button>
+                          ) : (
+                            <div className="small text-muted">
+                              {expiryMeta.isExpired ? 'Booking expired' : 'Tidak ada aksi approval'}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <div className="mt-3">
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={bookingsTotalPages}
+                  totalItems={bookingsTotalItems}
+                  pageSize={PAGE_SIZE}
+                  onPageChange={setPage}
+                  isLoading={query.isLoading}
+                />
+              </div>
+            </>
           ) : null}
 
-          {!query.isLoading && !query.isError && filteredItems.length > 0 && !isBookingsMode ? (
+          {!query.isLoading && !query.isError && visibleItems.length > 0 && !isBookingsMode ? (
             <Table hover responsive className="mb-0">
               <thead>
                 <tr>
@@ -268,9 +351,10 @@ export default function StaysPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => {
+                {visibleItems.map((item) => {
                   const reminderBadge = getCheckoutReminderBadge(item);
                   const isReservedBooking = item.room?.status === 'RESERVED';
+                  const expiryMeta = getBookingExpiryMeta(item.expiresAt);
                   const onOpen = () => navigate(`/stays/${item.id}`);
                   return (
                     <tr
@@ -298,13 +382,14 @@ export default function StaysPage() {
                         <div className="d-flex flex-column gap-2">
                           <StatusBadge status={item.status} customLabel={isReservedBooking ? 'Booking Aktif' : undefined} />
                           {isReservedBooking ? <StatusBadge status="RESERVED" /> : null}
-                          {isReservedBooking ? <StatusBadge status="WARNING" customLabel="Read-only" /> : null}
+                          {isReservedBooking ? <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} /> : null}
+                          {isReservedBooking ? <StatusBadge status="WARNING" customLabel="Lihat Mode Booking" /> : null}
                           {reminderBadge ? <StatusBadge status={reminderBadge.status} customLabel={reminderBadge.label} /> : null}
                         </div>
                       </td>
                       <td>
                         <div>{item.checkInDate ? formatDateSafe(item.checkInDate) : 'Belum Check-in'}</div>
-                        {isReservedBooking ? <div className="small text-muted">Berlaku s.d. {formatDateSafe(item.expiresAt)}</div> : null}
+                        {isReservedBooking ? <div className="small text-muted">Berlaku s.d. {formatDateSafe(item.expiresAt)} · {expiryMeta.helperText}</div> : null}
                       </td>
                       <td>
                         <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
@@ -352,6 +437,8 @@ export default function StaysPage() {
           ) : null}
         </Card.Body>
       </Card>
+
+      <ApproveBookingModal show={Boolean(selectedBooking)} onHide={() => setSelectedBooking(null)} booking={selectedBooking} />
     </div>
   );
 }

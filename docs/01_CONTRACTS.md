@@ -121,7 +121,7 @@ Wajib gunakan `prisma.$transaction()` untuk:
 | Process deposit | Stay (deposit fields) |
 | Create/update/delete invoice line | InvoiceLine + recalc total invoice |
 | Create payment | InvoicePayment + invoice status sync |
-| Approve payment submission (vNext) | PaymentSubmission + InvoicePayment + invoice status sync |
+| Approve payment submission (vNext) | PaymentSubmission + proof metadata finalization + InvoicePayment + invoice status sync + stay/room activation sync + audit log |
 | Inventory movement | InventoryMovement + qtyOnHand sync + RoomItem sync |
 | Create portal account | User (TENANT role) + Tenant link (bila perlu atomicity) |
 
@@ -226,21 +226,201 @@ Gunakan Bahasa Indonesia yang konsisten dan operasional-friendly.
 ### 7.1 Phase C — Ticket Tenant-First (✅ SELESAI)
 - `POST /tickets/portal` — **Sudah tersedia.**
 
-### 7.2 Phase E — Payment Submission + Approval Queue
+### 7.2 Phase E / Fase 4.2 — Payment Submission + Approval Queue
 
-Target endpoints:
-- `POST /payment-submissions` — tenant submit bukti bayar
-- `GET /payment-submissions/my` — tenant lihat submission sendiri
-- `GET /payment-submissions/review-queue` — admin lihat queue pending review
-- `POST /payment-submissions/:id/approve` — admin approve → create InvoicePayment final
-- `POST /payment-submissions/:id/reject` — admin reject → tenant lihat status reject
+#### Tujuan kontrak
+Tenant **tidak** menulis langsung ke `InvoicePayment`. Tenant hanya membuat `PaymentSubmission`. `InvoicePayment` final tetap dibuat oleh sistem **setelah admin approve**, agar alur operasional tetap sesuai model human approval.
 
-Constraints vNext:
-- Overpay final tetap dilarang
-- Approval harus idempotent / race-safe
-- Attachment/proof metadata harus aman
+#### Endpoint target
+- `POST /payment-submissions`
+- `GET /payment-submissions/my`
+- `GET /payment-submissions/review-queue`
+- `GET /payment-submissions/:id`
+- `POST /payment-submissions/:id/approve`
+- `POST /payment-submissions/:id/reject`
 
-### 7.3 Phase F — Owner Reports
+#### Payload minimal `POST /payment-submissions`
+- `stayId`
+- `invoiceId`
+- `amountRupiah`
+- `paidAt`
+- `paymentMethod`
+- `senderName?`
+- `senderBankName?`
+- `referenceNumber?`
+- `notes?`
+- attachment / proof metadata (`fileKey`, `fileUrl`, `originalFilename`, `mimeType`, `fileSizeBytes`) lewat storage adapter yang dipakai proyek
+
+#### Response shape minimal
+- `id`
+- `status` (`PENDING_REVIEW | APPROVED | REJECTED | EXPIRED`)
+- `amountRupiah`
+- `paidAt`
+- `paymentMethod`
+- proof metadata aman untuk frontend
+- ringkasan stay / room / invoice
+- `reviewedById?`
+- `reviewedAt?`
+- `reviewNotes?`
+
+#### Aturan bisnis wajib
+- Tenant hanya dapat submit untuk booking miliknya sendiri
+- Submission hanya boleh untuk booking/stay dengan room `RESERVED`
+- Invoice target harus milik stay yang sama
+- Approval final tetap **overpay-safe**
+- Approval harus **idempotent / race-safe**
+- Satu submission yang sudah `APPROVED` atau `REJECTED` tidak boleh diproses ulang secara liar
+- Sistem tidak boleh membuat dua `InvoicePayment` final dari satu submission yang sama
+- Jika `expiresAt` booking terlewati sebelum approval final, submission baru harus ditolak atau booking harus di-expire sesuai rule fase 4.2
+
+#### Dampak approve
+Saat `POST /payment-submissions/:id/approve` berhasil:
+1. `PaymentSubmission.status = APPROVED`
+2. record `InvoicePayment` final dibuat
+3. status invoice disinkronkan (`ISSUED/PARTIAL/PAID` sesuai total terbayar)
+4. jika invoice booking awal sudah lunas, room berubah `RESERVED -> OCCUPIED`
+5. stay booking berubah dari konteks booking menjadi stay aktif operasional sesuai rule fase 4.2
+6. audit log approval dibuat
+7. tenant mendapat notifikasi sukses / akses portal penuh sesuai rule fase V4
+
+#### Dampak reject
+Saat `POST /payment-submissions/:id/reject` berhasil:
+- `PaymentSubmission.status = REJECTED`
+- `reviewNotes` wajib disimpan
+- tenant tetap melihat riwayat reject di portal
+- booking tetap `RESERVED` selama belum expired dan admin belum membatalkan
+
+#### Query admin review queue
+`GET /payment-submissions/review-queue` minimal mendukung:
+- `status`
+- `search`
+- `page`
+- `limit`
+- `paymentMethod?`
+- `roomId?`
+- `tenantId?`
+- sort default: pending paling lama lebih dulu
+
+#### Query tenant list
+`GET /payment-submissions/my` minimal mendukung:
+- `page`
+- `limit`
+- `status?`
+- `search?`
+
+#### Constraints vNext
+- proof metadata harus aman
+- file type dibatasi
+- approval final tetap dilarang overpay
+- transaksi approval memakai `prisma.$transaction()`
+- attachment/proof tidak boleh menjadi jalur eskalasi akses file lintas tenant
+
+### 7.3 Phase G / Fase 4.3 — Notification & Reminder (WhatsApp)
+
+#### Tujuan kontrak
+Reminder operasional tidak lagi hanya badge frontend. Pada fase ini sistem boleh mengirim notifikasi keluar, **tetapi tetap fokus dan terukur**, bukan automation engine liar.
+
+#### Endpoint / surface internal yang direkomendasikan
+- `POST /internal/reminders/run-booking-expiry-check`
+- `POST /internal/reminders/run-invoice-due-check`
+- `POST /internal/reminders/run-checkout-check`
+- `GET /notifications/logs?type=...` (opsional backoffice read-only, bukan wajib di batch pertama)
+
+> Endpoint internal boleh diganti scheduler langsung, tetapi kontrak pengiriman dan idempotensi tetap harus jelas.
+
+#### Event reminder yang wajib ditutup
+- booking hampir kadaluarsa (`expiresAt - 1 hari`, dan/atau H-0 jika masih relevan)
+- invoice due H-3 dan H-1
+- checkout H-10 / H-7 / H-3
+
+#### Aturan bisnis
+- channel prioritas: WhatsApp
+- email bersifat sekunder / fallback
+- reminder tidak boleh spam; event yang sama harus punya guard idempotensi
+- reminder hanya dikirim untuk entitas yang masih aktif / relevan
+- isi pesan harus bahasa Indonesia operasional-friendly
+- kegagalan gateway tidak boleh menjatuhkan transaksi bisnis utama
+
+### 7.4 Phase H / Fase 4.4 — Marketing Display & Registrasi Fleksibel
+
+#### Tujuan kontrak
+Public surface tidak lagi hanya katalog list. Sistem mulai mendukung room detail marketing, registrasi fleksibel, dan soft delete akun tenant.
+
+#### Public room detail
+Target endpoint:
+- `GET /public/rooms/:id`
+
+Response minimal:
+- identitas kamar
+- deskripsi singkat
+- lantai
+- tarif utama
+- term tersedia
+- `images`
+- fasilitas / highlight yang aman dipublikasikan
+- status publik apakah masih bisa dibooking
+
+#### Registrasi fleksibel
+Target endpoint:
+- `POST /auth/register-flex`
+- atau perluasan aman pada `POST /auth/register` jika tidak mematahkan kontrak existing
+
+Rule minimal:
+- user dapat mendaftar dengan **email** atau **nomor HP**
+- minimal salah satu wajib ada
+- jika HP dipakai, format harus dinormalisasi
+- uniqueness email dan HP harus jelas
+- role public signup tetap dibatasi aman (TENANT / calon tenant)
+- tidak boleh mematahkan guard tenant portal access existing
+
+#### Soft delete akun tenant
+Target endpoint:
+- `POST /portal/profile/deactivate`
+- atau `DELETE /portal/profile` yang secara implementasi melakukan soft delete
+
+Rule minimal:
+- `isActive = false`
+- histori stay / invoice / ticket tetap utuh
+- login berikutnya diblok dengan pesan operasional-friendly
+- aksi harus tercatat di audit log
+
+### 7.5 Phase I / Fase 4.5 — Tenant Self-Service Lanjutan
+
+#### Tujuan kontrak
+Tenant dapat mengajukan perpanjangan stay dan dapat mereset password sendiri tanpa campur tangan operator pada happy path.
+
+#### Renewal request tenant
+Target endpoint:
+- `POST /tenant/stays/renew`
+- `GET /tenant/stays/renew/my-requests` (direkomendasikan)
+- `POST /admin/stay-renew-requests/:id/approve` (direkomendasikan)
+- `POST /admin/stay-renew-requests/:id/reject` (direkomendasikan)
+
+Payload minimal:
+- `stayId`
+- `requestedPricingTerm`
+- `requestedNewEndDate?`
+- `notes?`
+
+Rule minimal:
+- tenant hanya bisa mengajukan untuk stay miliknya yang masih aktif
+- approval admin tetap diperlukan
+- request tidak boleh membuat paralel stay baru
+- jika disetujui, tetap mengikuti fondasi renewal existing: extend stay aktif + buat invoice renewal `DRAFT`
+
+#### Forgot / reset password self-service
+Target endpoint:
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
+
+Rule minimal:
+- token / OTP dikirim via WhatsApp atau email sesuai kanal akun
+- token ada masa berlaku
+- token sekali pakai
+- response lupa password harus generik agar tidak membocorkan apakah akun ada
+- reset sukses harus memperbarui `passwordChangedAt`
+
+### 7.6 Phase F — Owner Reports
 
 Target endpoints:
 - `GET /finance-reports/summary` — aggregate billed/collected/overdue
@@ -262,26 +442,21 @@ Catatan: label sebagai "management report", bukan laporan akuntansi final.
 - `POST /tenant/bookings` — booking mandiri tenant
 - `GET /tenant/bookings/my` — daftar booking milik tenant
 
-**Catatan kontrak Fase 4.0:**
+#### Sudah tersedia / dipatch pada Fase 4.1
+- `PATCH /admin/bookings/:stayId/approve` — approval booking + pelengkapan data awal
+- invoice booking awal `DRAFT` saat approval
+- tenant portal membaca status konservatif `Menunggu Approval` / `Menunggu Pembayaran`
+
+**Catatan kontrak resmi sampai 4.1:**
 - Booking mandiri memakai `RoomStatus.RESERVED` dan `Stay.expiresAt`
-- Flow ini tetap tenant-first, tetapi approval akhir admin belum dibuka pada fase ini
-- Surface backoffice untuk booking reserved pada fase ini bersifat read-only
-
-#### Sudah tersedia / dipatch pada Fase 4.1A backend-only
-- `PATCH /admin/bookings/:stayId/approve` — admin approval booking reserved + pelengkapan data inti + 2 baseline meter + invoice awal `DRAFT`
-
-**Catatan kontrak Fase 4.1A:**
-- Approval hanya untuk `OWNER` / `ADMIN`
-- Actor diambil dari JWT auth context
-- Booking harus valid sebagai booking reserved tenant-first
-- `Room.status` tetap `RESERVED` sampai pembayaran diverifikasi pada fase berikutnya
-- Batch ini tidak membuka payment submission atau auto activation pembayaran
+- Flow tetap tenant-first, tetapi kendali akhir approval tetap di admin
+- Surface backoffice booking reserved dan approval queue sudah ada, tetapi payment submission **belum live**
 
 #### Target berikutnya (belum live)
-- `POST /payment-submissions` — upload bukti bayar
-- `POST /auth/forgot-password`, `POST /auth/reset-password` — self-service reset password
-- `POST /tenant/stays/renew` — pengajuan perpanjangan oleh tenant
-- Notifikasi WhatsApp (cron job internal, bukan endpoint publik)
+- Fase 4.2: payment submission + approval queue + activation sync
+- Fase 4.3: WhatsApp reminder
+- Fase 4.4: room detail public + registrasi fleksibel + soft delete akun
+- Fase 4.5: renewal request tenant + forgot/reset password self-service
 ---
 
 ## 8. Hal yang Tidak Boleh Diasumsikan Sudah Ada
@@ -301,3 +476,37 @@ Jika ada rule baru, tanyakan:
 2. Apakah ini harus aman walau backend bug? → `bootstrap.sql`
 3. Apakah ini alur bisnis / validasi / kalkulasi? → service contract (dokumen ini)
 4. Apakah ini target vNext? → tandai eksplisit sebagai **target**, jangan dianggap live
+
+
+---
+
+## 2026-04-23 — Catatan Sinkronisasi Kontrak Pasca UAT Parsial & Prototype 4.2
+
+### A. Status kontrak aktif yang tetap berlaku
+- Kontrak resmi yang boleh dianggap **live baseline** tetap:
+  - Booking mandiri V4 Fase 4.0
+  - Approval booking admin V4 Fase 4.1
+- Kontrak payment submission V4 Fase 4.2 tetap diperlakukan sebagai:
+  - **target vNext yang sudah mulai diprototipekan pada source tertentu**
+  - **belum baseline resmi**
+  - **belum boleh dijadikan asumsi live penuh** sebelum gate UAT 4.0 dan 4.1 selesai
+
+### B. Temuan UAT yang memperkuat kontrak
+- `expiresAt` adalah field sensitif operasional dan harus:
+  - terisi konsisten
+  - terserialisasi benar ke frontend
+  - tidak jatuh ke awal hari bila rule bisnis menuntut masa berlaku sampai akhir hari
+- Surface frontend/backoffice tidak boleh menyamarkan tanggal booking menjadi `-` bila data sesungguhnya ada; response backend harus jujur terhadap field `Date`
+
+### C. Tambahan pedoman implementasi service
+- Prinsip service tetap:
+  - controller tipis
+  - service memegang validasi/alur bisnis
+  - transaksi penting memakai `prisma.$transaction()`
+- Raw SQL **bukan** default arsitektur.
+  - Raw SQL hanya boleh dipakai bila benar-benar dibutuhkan untuk locking/compatibility/constraint yang sulit diekspresikan aman dengan Prisma
+  - arah refactor terbaru adalah kembali ke **Prisma-first** sejauh memungkinkan
+
+### D. Catatan approval payment / invoice consistency
+- Pada flow approval payment submission, jika invoice bergerak dari `DRAFT` ke `ISSUED/PARTIAL/PAID`, maka field yang diwajibkan constraint DB harus ikut sinkron, khususnya `issuedAt`
+- Service approval payment tidak boleh melanggar pagar integritas invoice yang dijaga oleh `bootstrap.sql`

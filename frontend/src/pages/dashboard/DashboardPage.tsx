@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -10,6 +11,40 @@ import { listResource } from '../../api/resources';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import type { Invoice, Room, Stay } from '../../types';
+
+type DashboardListSummary<T> = {
+  items: T[];
+  totalItems: number;
+  isTruncated: boolean;
+};
+
+async function fetchAllPagesForDashboard<T>(
+  path: string,
+  params?: Record<string, unknown>,
+  pageSize = 100,
+  maxPages = 50,
+): Promise<DashboardListSummary<T>> {
+  const items: T[] = [];
+  let totalPages = 1;
+  let totalItems = 0;
+  let page = 1;
+
+  do {
+    const response = await listResource<T>(path, { ...(params ?? {}), page, limit: pageSize });
+    items.push(...(response.items ?? []));
+    totalPages = response.meta?.totalPages ?? 1;
+    totalItems = response.meta?.totalItems ?? items.length;
+
+    if (!(response.items ?? []).length) break;
+    page += 1;
+  } while (page <= totalPages && page <= maxPages);
+
+  return {
+    items,
+    totalItems,
+    isTruncated: totalItems > items.length || totalPages > maxPages,
+  };
+}
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
   if (!dateValue) return '-';
@@ -54,7 +89,7 @@ function SmallTable({ title, subtitle, headers, rows, emptyTitle, emptyDescripti
   title: string;
   subtitle: string;
   headers: string[];
-  rows: React.ReactNode;
+  rows: ReactNode;
   emptyTitle: string;
   emptyDescription: string;
 }) {
@@ -83,8 +118,8 @@ function OwnerDashboard() {
   const navigate = useNavigate();
   const roomsQuery = useQuery({ queryKey: ['dashboard-owner', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
   const staysQuery = useQuery({ queryKey: ['dashboard-owner', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 1000 }) });
-  const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses'], queryFn: () => listResource<any>('/expenses', { limit: 1000 }) });
+  const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices-summary'], queryFn: () => fetchAllPagesForDashboard<Invoice>('/invoices') });
+  const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses-summary'], queryFn: () => fetchAllPagesForDashboard<any>('/expenses') });
 
   if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading) return <LoadingDashboard />;
   if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
@@ -92,9 +127,11 @@ function OwnerDashboard() {
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
   const invoices = invoicesQuery.data?.items ?? [];
-  const invoiceTotalItems = invoicesQuery.data?.meta?.totalItems ?? 0;
-  const invoiceIsTruncated = invoiceTotalItems > 0 && invoiceTotalItems > invoices.length;
+  const invoiceTotalItems = invoicesQuery.data?.totalItems ?? invoices.length;
+  const invoiceIsTruncated = Boolean(invoicesQuery.data?.isTruncated);
   const expenses = expensesQuery.data?.items ?? [];
+  const expenseTotalItems = expensesQuery.data?.totalItems ?? expenses.length;
+  const expenseIsTruncated = Boolean(expensesQuery.data?.isTruncated);
 
   const occupiedRooms = rooms.filter((room) => room.status === 'OCCUPIED').length;
   const availableRooms = rooms.filter((room) => room.status === 'AVAILABLE').length;
@@ -114,10 +151,13 @@ function OwnerDashboard() {
 
       {invoiceIsTruncated ? (
         <Alert variant="warning" className="mb-3 py-2 small">
-          Data finansial dihitung dari <strong>{invoices.length}</strong> invoice terbaru.
-          Total invoice di database: <strong>{invoiceTotalItems}</strong>.
-          Angka billed dan collected di bawah bersifat estimasi.{' '}
-          <a href="/invoices">Lihat semua invoice →</a>
+Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{invoices.length}</strong> invoice, sementara total di database <strong>{invoiceTotalItems}</strong>.
+        </Alert>
+      ) : null}
+
+      {expenseIsTruncated ? (
+        <Alert variant="warning" className="mb-3 py-2 small">
+          Ringkasan expense belum memuat semua data. Total expense saat ini dihitung dari <strong>{expenses.length}</strong> data, sementara total di database <strong>{expenseTotalItems}</strong>.
         </Alert>
       ) : null}
 

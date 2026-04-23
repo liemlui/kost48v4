@@ -79,6 +79,7 @@ export type Room = {
   defaultDepositRupiah?: number | null;
   electricityTariffPerKwhRupiah?: number | null;
   waterTariffPerM3Rupiah?: number | null;
+  images?: string[];
   notes?: string | null;
   isActive?: boolean;
   activeStayId?: number | null;
@@ -119,6 +120,10 @@ export type Stay = {
   roomStatusAfterSync?: string;
   openInvoiceCount?: number;
   invoices?: Invoice[];
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: InvoiceStatus | null;
 };
 
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED' | string;
@@ -282,6 +287,8 @@ export type PublicRoom = {
   floor?: string | null;
   status: string;
   notes?: string | null;
+  images?: string[];
+  isAvailable?: boolean;
   pricing: {
     dailyRateRupiah?: number | null;
     weeklyRateRupiah?: number | null;
@@ -317,8 +324,28 @@ export type TenantBooking = {
   updatedAt?: string;
   tenant?: Pick<Tenant, 'id' | 'fullName' | 'phone' | 'email'> | null;
   room?: Pick<Room, 'id' | 'code' | 'name' | 'floor' | 'status'> | null;
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: InvoiceStatus | null;
 };
 
+export type ApproveBookingPayload = {
+  agreedRentAmountRupiah: number;
+  depositAmountRupiah: number;
+  initialElectricityKwh: string;
+  initialWaterM3: string;
+};
+
+export type ApproveBookingResult = {
+  stay: Stay;
+  invoice: Pick<Invoice, 'id' | 'invoiceNumber' | 'status' | 'periodStart' | 'periodEnd' | 'dueDate'>;
+  baselineMeters: {
+    electricityId: number;
+    waterId: number;
+    readingAt: string;
+  };
+};
 
 export type CreateTenantBookingPayload = {
   roomId: number;
@@ -327,4 +354,71 @@ export type CreateTenantBookingPayload = {
   plannedCheckOutDate?: string;
   stayPurpose?: 'WORK' | 'STUDY' | 'TRANSIT' | 'FAMILY' | 'MEDICAL' | 'PROJECT' | 'OTHER';
   notes?: string;
+};
+
+
+export type PaymentSubmissionStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | string;
+
+export type PaymentSubmission = {
+  id: number;
+  stayId: number;
+  invoiceId: number;
+  tenantId: number;
+  amountRupiah: number;
+  paidAt: string;
+  paymentMethod: PaymentMethod;
+  senderName?: string | null;
+  senderBankName?: string | null;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  fileKey?: string | null;
+  fileUrl?: string | null;
+  originalFilename?: string | null;
+  mimeType?: string | null;
+  fileSizeBytes?: number | null;
+  status: PaymentSubmissionStatus;
+  reviewedAt?: string | null;
+  reviewNotes?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  tenant?: Pick<Tenant, 'id' | 'fullName' | 'phone'> | null;
+  room?: Pick<Room, 'id' | 'code' | 'name' | 'status'> | null;
+  stay?: Pick<Stay, 'id' | 'status' | 'expiresAt'> | null;
+  invoice?: {
+    id: number;
+    invoiceNumber?: string | null;
+    status: InvoiceStatus;
+    totalAmountRupiah?: number;
+    paidAmountRupiah?: number;
+    remainingAmountRupiah?: number;
+  } | null;
+  submittedBy?: { id: number; fullName?: string | null } | null;
+  reviewedBy?: { id: number; fullName?: string | null } | null;
+};
+
+export type CreatePaymentSubmissionPayload = {
+  stayId: number;
+  invoiceId: number;
+  amountRupiah: number;
+  paidAt: string;
+  paymentMethod: PaymentMethod;
+  senderName?: string;
+  senderBankName?: string;
+  referenceNumber?: string;
+  notes?: string;
+  fileKey?: string;
+  fileUrl?: string;
+  originalFilename?: string;
+  mimeType?: string;
+  fileSizeBytes?: number;
+};
+
+export type ReviewQueueQuery = {
+  page?: number;
+  limit?: number;
+  status?: PaymentSubmissionStatus;
+  search?: string;
+  paymentMethod?: PaymentMethod;
+  roomId?: number | string;
+  tenantId?: number | string;
 };

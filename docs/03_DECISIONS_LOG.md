@@ -128,3 +128,37 @@
 | 70 | Frontend booking mandiri tenant dibuka melalui `/booking/:roomId` dan `/portal/bookings` | Tenant mendapat flow booking tanpa melihat ID teknis mentah |
 | 71 | Surface booking reserved di backoffice cukup read-only pada Fase 4.0 | Approval admin sengaja ditunda ke Fase 4.1 |
 | 72 | Setelah backend dan frontend inti Fase 4.0 tertutup, fokus resmi kembali ke UAT sebelum membuka Fase 4.1 | Mengurangi risiko false progress ke approval/payment flow |
+
+---
+
+## 2026-04-22 — Freeze Blueprint Implementasi Detail Fase 4.2–4.5
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 73 | Tenant tidak menulis langsung ke `InvoicePayment`; tenant membuat `PaymentSubmission` terlebih dahulu | Approval manusia tetap menjadi pagar operasional utama |
+| 74 | `InvoicePayment` final hanya dibuat saat admin approve submission | Sinkronisasi invoice lebih aman dan audit trail lebih jelas |
+| 75 | Approval payment submission harus idempotent dan race-safe | Mencegah duplicate payment final / double activation |
+| 76 | Approval pembayaran yang melunasi invoice booking awal menjadi titik aktivasi resmi `RESERVED -> OCCUPIED` | Aktivasi kamar tidak boleh terjadi hanya karena upload proof |
+| 77 | Expiry booking tetap ditangani sebagai job/scheduler sempit khusus booking | Tidak membuka automation engine umum yang terlalu besar |
+| 78 | Reminder eksternal fase 4.3 memakai adapter WhatsApp terpusat dengan logging hasil kirim | Integrasi provider bisa diganti tanpa membongkar flow bisnis |
+| 79 | Reminder 4.3 harus idempotent dan tidak boleh menjatuhkan transaksi bisnis utama | Kegagalan gateway tidak boleh memblok operasional inti |
+| 80 | Room marketing detail fase 4.4 dibuka lewat endpoint publik terpisah `GET /public/rooms/:id` | Public surface bisa tumbuh tanpa mengotori workspace backoffice |
+| 81 | Registrasi fleksibel fase 4.4 menerima email atau nomor HP; minimal salah satu wajib | Onboarding calon tenant lebih realistis di lapangan |
+| 82 | Hapus akun tenant pada fase 4.4 berarti soft delete (`isActive = false`) | Histori stay/invoice/ticket tetap aman untuk audit |
+| 83 | Self-service renew tenant pada fase 4.5 adalah **request + admin approval**, bukan renewal otomatis | Fondasi renewal existing tetap dihormati |
+| 84 | Forgot/reset password self-service fase 4.5 memakai token/OTP dengan response generik | Keamanan auth tetap terjaga dan tidak membuka account enumeration |
+
+
+---
+
+## 2026-04-23 — Freeze Kejujuran Status Gate + Refactor Kerapian File
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 85 | Prototype 4.2 yang sempat dipatch untuk debugging integrasi **tidak otomatis mengubah** status gate resmi | Dokumentasi tetap harus jujur bahwa 4.2 belum baseline resmi |
+| 86 | Hasil UAT parsial menang atas asumsi patch; bug tanggal/expiry/modal-close harus dicatat sebagai temuan nyata | Fokus tetap pada stabilisasi 4.0–4.1 |
+| 87 | `expiresAt` untuk booking mandiri diperlakukan sensitif operasional dan lebih aman bila jatuh ke akhir hari daripada awal hari | Mengurangi false-expired saat approval |
+| 88 | Serialisasi `Date` ke frontend harus dianggap bagian dari kontrak integrasi, bukan detail kosmetik | Surface admin/tenant tidak boleh kehilangan check-in / expiresAt |
+| 89 | Refactor struktur source menjadi prioritas kebersihan aktif; target praktis file source manual diusahakan `<= 500` baris | Patch berikutnya lebih mudah dan risiko drift turun |
+| 90 | Arah refactor backend = Prisma-first; raw SQL hanya untuk kebutuhan locking/compatibility yang jelas | Service baru tidak boleh liar berbasis raw SQL sebagai default |
+| 91 | Refactor frontend mengikuti pola sections / helpers / config / types agar page besar lebih mudah dibaca | Wizard/config padat dipisah sebelum menambah fitur baru |

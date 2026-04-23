@@ -122,6 +122,7 @@ export class RoomsService {
 
     return {
       ...item,
+      images: (item as any).images ?? [],
       currentStay: activeStay
         ? {
             id: activeStay.id,
@@ -143,6 +144,42 @@ export class RoomsService {
         water: this.buildMeterSummary(latestWaterReadings),
       },
       stays: undefined,
+    };
+  }
+
+
+
+  async findPublicOne(id: number) {
+    const room = await this.prisma.room.findUnique({
+      where: { id },
+    });
+
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+    if (!room.isActive) throw new NotFoundException('Kamar tidak tersedia');
+
+    const pricingTerms = this.getAvailablePricingTerms(room as any);
+
+    return {
+      id: room.id,
+      code: room.code,
+      name: room.name,
+      floor: room.floor,
+      status: room.status,
+      isAvailable: room.status === 'AVAILABLE',
+      notes: room.notes,
+      images: (room as any).images ?? [],
+      pricing: {
+        dailyRateRupiah: room.dailyRateRupiah,
+        weeklyRateRupiah: room.weeklyRateRupiah,
+        biWeeklyRateRupiah: room.biWeeklyRateRupiah,
+        monthlyRateRupiah: room.monthlyRateRupiah,
+      },
+      defaultDepositRupiah: room.defaultDepositRupiah,
+      electricityTariffPerKwhRupiah: room.electricityTariffPerKwhRupiah,
+      waterTariffPerM3Rupiah: room.waterTariffPerM3Rupiah,
+      availablePricingTerms: pricingTerms,
+      highlightedPricingTerm: pricingTerms[0] ?? 'MONTHLY',
+      highlightedRateRupiah: this.resolveRent(room as any, (pricingTerms[0] ?? 'MONTHLY') as any),
     };
   }
 
@@ -211,6 +248,31 @@ export class RoomsService {
     });
 
     return updated;
+  }
+
+
+
+  private getAvailablePricingTerms(room: any) {
+    const terms: string[] = [];
+    if (room.dailyRateRupiah && room.dailyRateRupiah > 0) terms.push('DAILY');
+    if (room.weeklyRateRupiah && room.weeklyRateRupiah > 0) terms.push('WEEKLY');
+    if (room.biWeeklyRateRupiah && room.biWeeklyRateRupiah > 0) terms.push('BIWEEKLY');
+    if (room.monthlyRateRupiah && room.monthlyRateRupiah > 0) terms.push('MONTHLY');
+    return terms;
+  }
+
+  private resolveRent(room: any, pricingTerm: string) {
+    switch (pricingTerm) {
+      case 'DAILY':
+        return room.dailyRateRupiah ?? room.monthlyRateRupiah ?? 0;
+      case 'WEEKLY':
+        return room.weeklyRateRupiah ?? room.monthlyRateRupiah ?? 0;
+      case 'BIWEEKLY':
+        return room.biWeeklyRateRupiah ?? room.monthlyRateRupiah ?? 0;
+      case 'MONTHLY':
+      default:
+        return room.monthlyRateRupiah ?? 0;
+    }
   }
 
   private buildMeterSummary(readings: Array<{ id: number; readingAt: Date; readingValue: any }>) {

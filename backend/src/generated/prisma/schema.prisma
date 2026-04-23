@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -82,6 +83,13 @@ enum PaymentMethod {
   OTHER
 }
 
+enum PaymentSubmissionStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -153,28 +161,32 @@ enum ExpenseCategory {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  fullName     String
-  email        String    @unique
-  passwordHash String
-  role         UserRole
-  tenantId     Int?      @unique
-  isActive     Boolean   @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  fullName          String
+  email             String    @unique
+  passwordHash      String
+  role              UserRole
+  tenantId          Int?      @unique
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  tenant                    Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  announcementsCreated      Announcement[]      @relation("AnnouncementCreatedBy")
-  staysCreated              Stay[]              @relation("StayCreatedBy")
-  invoicesCreated           Invoice[]           @relation("InvoiceCreatedBy")
-  paymentsCaptured          InvoicePayment[]    @relation("InvoicePaymentCapturedBy")
-  ticketsAssigned           Ticket[]            @relation("TicketAssignedTo")
-  meterReadingsRecorded     MeterReading[]      @relation("MeterReadingRecordedBy")
-  inventoryMovementsCreated InventoryMovement[] @relation("InventoryMovementCreatedBy")
-  wifiSalesCreated          WifiSale[]          @relation("WifiSaleCreatedBy")
-  expensesCreated           Expense[]           @relation("ExpenseCreatedBy")
-  auditLogs                 AuditLog[]          @relation("AuditLogActor")
+  tenant                      Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  announcementsCreated        Announcement[]       @relation("AnnouncementCreatedBy")
+  staysCreated                Stay[]               @relation("StayCreatedBy")
+  invoicesCreated             Invoice[]            @relation("InvoiceCreatedBy")
+  paymentsCaptured            InvoicePayment[]     @relation("InvoicePaymentCapturedBy")
+  ticketsAssigned             Ticket[]             @relation("TicketAssignedTo")
+  meterReadingsRecorded       MeterReading[]       @relation("MeterReadingRecordedBy")
+  inventoryMovementsCreated   InventoryMovement[]  @relation("InventoryMovementCreatedBy")
+  wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
+  expensesCreated             Expense[]            @relation("ExpenseCreatedBy")
+  auditLogs                   AuditLog[]           @relation("AuditLogActor")
+  paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
+  paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
+  passwordResetTokens         PasswordResetToken[]
 
   @@index([role])
   @@index([isActive])
@@ -200,9 +212,10 @@ model Tenant {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  user    User?
-  stays   Stay[]
-  tickets Ticket[]
+  user               User?
+  stays              Stay[]
+  tickets            Ticket[]
+  paymentSubmissions PaymentSubmission[]
 
   @@index([fullName])
   @@index([phone])
@@ -284,9 +297,10 @@ model Stay {
   room      Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
   createdBy User?  @relation("StayCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
-  invoices Invoice[]
-  tickets  Ticket[]
-  expenses Expense[]
+  invoices           Invoice[]
+  tickets            Ticket[]
+  expenses           Expense[]
+  paymentSubmissions PaymentSubmission[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -337,8 +351,9 @@ model Invoice {
   stay      Stay  @relation(fields: [stayId], references: [id], onDelete: Restrict)
   createdBy User? @relation("InvoiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
-  lines    InvoiceLine[]
-  payments InvoicePayment[]
+  lines              InvoiceLine[]
+  payments           InvoicePayment[]
+  paymentSubmissions PaymentSubmission[]
 
   @@index([stayId])
   @@index([status])
@@ -385,6 +400,58 @@ model InvoicePayment {
 
   @@index([invoiceId])
   @@index([paymentDate])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    Int
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PaymentSubmission {
+  id               Int                     @id @default(autoincrement())
+  stayId           Int
+  invoiceId        Int
+  tenantId         Int
+  submittedById    Int
+  amountRupiah     Int
+  paidAt           DateTime                @db.Date
+  paymentMethod    PaymentMethod
+  senderName       String?
+  senderBankName   String?
+  referenceNumber  String?
+  notes            String?
+  fileKey          String?
+  fileUrl          String?
+  originalFilename String?
+  mimeType         String?
+  fileSizeBytes    Int?
+  status           PaymentSubmissionStatus @default(PENDING_REVIEW)
+  reviewedById     Int?
+  reviewedAt       DateTime?
+  reviewNotes      String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  stay        Stay    @relation(fields: [stayId], references: [id], onDelete: Restrict)
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  submittedBy User    @relation("PaymentSubmissionSubmittedBy", fields: [submittedById], references: [id], onDelete: Restrict)
+  reviewedBy  User?   @relation("PaymentSubmissionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
+  @@index([invoiceId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([invoiceId, status])
 }
 
 model Ticket {

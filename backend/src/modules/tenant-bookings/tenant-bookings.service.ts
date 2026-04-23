@@ -25,6 +25,7 @@ interface RoomPricingSnapshot {
   defaultDepositRupiah: number;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
+  images?: string[] | null;
   notes: string | null;
 }
 
@@ -54,6 +55,10 @@ interface BookingRow {
   roomName: string | null;
   roomFloor: string | null;
   roomStatus: string;
+  invoiceCount?: number;
+  latestInvoiceId?: number | null;
+  latestInvoiceNumber?: string | null;
+  latestInvoiceStatus?: string | null;
 }
 
 interface ApprovalBookingSnapshot {
@@ -127,6 +132,7 @@ export class TenantBookingsService {
       name: room.name,
       floor: room.floor,
       status: room.status,
+      images: (room as any).images ?? [],
       notes: room.notes,
       pricing: {
         dailyRateRupiah: room.dailyRateRupiah,
@@ -147,6 +153,48 @@ export class TenantBookingsService {
       meta: buildMeta(page, limit, totalItems),
     };
   }
+
+
+
+  async getPublicRoomDetail(id: number) {
+    if (!(await this.isBookingSchemaReady())) {
+      throw new ServiceUnavailableException(
+        'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
+      );
+    }
+
+    const room = await this.prisma.room.findUnique({ where: { id } });
+    if (!room || !room.isActive) {
+      throw new NotFoundException('Kamar tidak ditemukan atau tidak aktif');
+    }
+
+    const availablePricingTerms = this.getAvailablePricingTerms(room as any);
+    const highlightedPricingTerm = availablePricingTerms[0] ?? PricingTerm.MONTHLY;
+
+    return serializePrismaResult({
+      id: room.id,
+      code: room.code,
+      name: room.name,
+      floor: room.floor,
+      status: room.status,
+      notes: room.notes,
+      images: (room as any).images ?? [],
+      pricing: {
+        dailyRateRupiah: room.dailyRateRupiah,
+        weeklyRateRupiah: room.weeklyRateRupiah,
+        biWeeklyRateRupiah: room.biWeeklyRateRupiah,
+        monthlyRateRupiah: room.monthlyRateRupiah,
+      },
+      defaultDepositRupiah: room.defaultDepositRupiah,
+      electricityTariffPerKwhRupiah: room.electricityTariffPerKwhRupiah,
+      waterTariffPerM3Rupiah: room.waterTariffPerM3Rupiah,
+      highlightedPricingTerm,
+      highlightedRateRupiah: this.resolveRent(room as any, highlightedPricingTerm),
+      availablePricingTerms,
+      isAvailable: room.status === RoomStatus.AVAILABLE,
+    });
+  }
+
 
   async createBooking(dto: CreateTenantBookingDto, user: CurrentUserPayload) {
     if (!(await this.isBookingSchemaReady())) {
@@ -620,7 +668,15 @@ export class TenantBookingsService {
       };
     }
 
-    const whereSearch = query.search ? `%${query.search.trim()}%` : null;
+    const whereSearch = query.search?.trim() ? `%${query.search.trim()}%` : null;
+    const searchFilter = whereSearch
+      ? Prisma.sql`
+          AND (
+            r.code ILIKE ${whereSearch}
+            OR COALESCE(r.name, '') ILIKE ${whereSearch}
+          )
+        `
+      : Prisma.empty;
 
     try {
       const items = await this.prisma.$queryRaw<BookingRow[]>(Prisma.sql`
@@ -649,18 +705,40 @@ export class TenantBookingsService {
         r.code AS "roomCode",
         r.name AS "roomName",
         r.floor AS "roomFloor",
-        r.status AS "roomStatus"
+        r.status AS "roomStatus",
+        (
+          SELECT COUNT(*)::int
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+        ) AS "invoiceCount",
+        (
+          SELECT i.id
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+          ORDER BY i.id DESC
+          LIMIT 1
+        ) AS "latestInvoiceId",
+        (
+          SELECT i."invoiceNumber"
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+          ORDER BY i.id DESC
+          LIMIT 1
+        ) AS "latestInvoiceNumber",
+        (
+          SELECT i.status
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+          ORDER BY i.id DESC
+          LIMIT 1
+        ) AS "latestInvoiceStatus"
       FROM "Stay" s
       INNER JOIN "Tenant" t ON t.id = s."tenantId"
       INNER JOIN "Room" r ON r.id = s."roomId"
       WHERE s."tenantId" = ${tenantId}
         AND s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
         AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
-        AND (
-          ${whereSearch} IS NULL
-          OR r.code ILIKE ${whereSearch}
-          OR COALESCE(r.name, '') ILIKE ${whereSearch}
-        )
+      ${searchFilter}
       ORDER BY s."createdAt" DESC, s.id DESC
       LIMIT ${take}
       OFFSET ${skip}
@@ -673,11 +751,7 @@ export class TenantBookingsService {
       WHERE s."tenantId" = ${tenantId}
         AND s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
         AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
-        AND (
-          ${whereSearch} IS NULL
-          OR r.code ILIKE ${whereSearch}
-          OR COALESCE(r.name, '') ILIKE ${whereSearch}
-        )
+      ${searchFilter}
     `);
 
       const totalItems = Number(countRows[0]?.total ?? 0);
@@ -843,6 +917,10 @@ export class TenantBookingsService {
         floor: row.roomFloor,
         status: row.roomStatus,
       },
+      invoiceCount: Number(row.invoiceCount ?? 0),
+      latestInvoiceId: row.latestInvoiceId ?? null,
+      latestInvoiceNumber: row.latestInvoiceNumber ?? null,
+      latestInvoiceStatus: row.latestInvoiceStatus ?? null,
     };
   }
 

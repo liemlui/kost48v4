@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
 import { TenantBookingsService } from './tenant-bookings.service';
@@ -13,6 +13,14 @@ export class PublicRoomsController {
     return {
       message: 'Daftar kamar publik berhasil diambil',
       data: await this.tenantBookingsService.getPublicRooms(query),
+    };
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return {
+      message: 'Detail kamar publik berhasil diambil',
+      data: await this.tenantBookingsService.getPublicRoomDetail(id),
     };
   }
 }

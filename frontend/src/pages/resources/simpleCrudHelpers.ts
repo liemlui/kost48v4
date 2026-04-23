@@ -89,7 +89,20 @@ export function normalizeFormDataForSubmit(formState: Record<string, any>, field
     }
     // Untuk field lain, hanya kirim jika bukan empty string
     else if (value !== '') {
-      payload[field.name] = value;
+      if (field.name === 'images') {
+        if (Array.isArray(value)) {
+          payload[field.name] = value.filter(Boolean);
+        } else if (typeof value === 'string') {
+          payload[field.name] = value
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean);
+        } else {
+          payload[field.name] = value;
+        }
+      } else {
+        payload[field.name] = value;
+      }
     }
     // Empty string tidak dikirim (field dihapus dari payload)
   });

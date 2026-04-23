@@ -24,7 +24,7 @@ export class AdminBookingsController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return {
-      message: 'Booking tenant berhasil disetujui',
+      message: 'Booking berhasil disetujui',
       data: await this.tenantBookingsService.approveBooking(stayId, dto, user),
     };
   }

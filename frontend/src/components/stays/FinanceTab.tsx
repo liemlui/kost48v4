@@ -17,22 +17,18 @@ function isOverdue(invoice: Invoice) {
 }
 
 function paidAmount(invoice: Invoice): number | null {
-  // Prioritas 1: pakai paidAmountRupiah jika tersedia dan valid
   if (typeof invoice.paidAmountRupiah === 'number' && !isNaN(invoice.paidAmountRupiah)) {
     return invoice.paidAmountRupiah;
   }
-  
-  // Prioritas 2: hitung dari payments jika ada dan valid
+
   if (Array.isArray(invoice.payments) && invoice.payments.length > 0) {
     const sum = invoice.payments.reduce((sum, item) => {
       const amount = Number(item?.amountRupiah ?? 0);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-    // Hanya kembalikan sum jika > 0 atau ada data payments yang valid
     return sum > 0 ? sum : null;
   }
-  
-  // Prioritas 3: tidak ada data yang cukup untuk menghitung
+
   return null;
 }
 
@@ -41,9 +37,40 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'ALL' | 'OPEN' | 'OVERDUE' | 'PAID'>('ALL');
-  const { data, isLoading, isError } = useInvoices(stay.id, enabled);
+  const [actionError, setActionError] = useState('');
+  const { data, isLoading, isError, cancelMutation } = useInvoices(stay.id, enabled);
   const invoices = data?.items ?? [];
   const overdueCount = useMemo(() => invoices.filter(isOverdue).length, [invoices]);
+
+  const handleCancelInvoice = async (invoice: Invoice) => {
+    const defaultReason = `Dibatalkan dari stay ${stay.id}`;
+    const input = window.prompt(
+      `Masukkan alasan pembatalan untuk ${invoice.invoiceNumber || `INV-${invoice.id}`}`,
+      defaultReason,
+    );
+
+    if (input === null) return;
+
+    const cancelReason = input.trim();
+    if (!cancelReason) {
+      setActionError('Alasan pembatalan invoice wajib diisi.');
+      return;
+    }
+
+    setActionError('');
+    try {
+      await cancelMutation.mutateAsync({ invoiceId: invoice.id, payload: { cancelReason } });
+      if (selectedInvoiceId === invoice.id) {
+        setSelectedInvoiceId(null);
+      }
+    } catch (error: unknown) {
+      const message = error && typeof error === 'object' && 'response' in error
+        ? ((error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Gagal membatalkan invoice.')
+        : 'Gagal membatalkan invoice.';
+      setActionError(Array.isArray(message) ? message.join(', ') : message);
+    }
+  };
+
   const filteredInvoices = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return invoices.filter((invoice) => {
@@ -117,6 +144,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
 
         <div className="table-meta-count mb-3">Menampilkan {filteredInvoices.length} dari {invoices.length} invoice</div>
 
+        {actionError ? <Alert variant="danger" className="mb-3">{actionError}</Alert> : null}
         {isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
         {isError ? <Alert variant="danger">Gagal mengambil data invoice.</Alert> : null}
         {!isLoading && !isError && !filteredInvoices.length ? (
@@ -155,7 +183,21 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                     <td><CurrencyDisplay amount={paidAmount(invoice)} /></td>
                     <td className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
                     <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status)} /></td>
-                    <td><Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button></td>
+                    <td>
+                      <div className="d-flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button>
+                        {invoice.status === 'DRAFT' ? (
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => void handleCancelInvoice(invoice)}
+                            disabled={cancelMutation.isPending}
+                          >
+                            {cancelMutation.isPending ? 'Membatalkan...' : 'Cancel Invoice'}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}

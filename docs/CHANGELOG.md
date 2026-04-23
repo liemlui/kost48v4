@@ -397,3 +397,32 @@ Dan sudah diverifikasi build dengan:
 ```bash
 npm run build
 ```
+
+
+---
+
+## KOST48 Frontend Refactor — 2026-04-23 (Kerapian Struktur Source)
+
+### Tujuan
+Merapikan source frontend tanpa mengubah arah bisnis aktif, agar file besar lebih mudah dipatch dan dijaga konsistensinya selama UAT 4.0–4.1.
+
+### Batch refactor ini
+- `src/config/resources.ts` dipecah menjadi beberapa file domain:
+  - `resourceTypes.ts`
+  - `resourceCommon.ts`
+  - `coreResourceConfigs.ts`
+  - `operationsResourceConfigs.ts`
+  - `financeResourceConfigs.ts`
+- `src/pages/stays/CheckInWizard.tsx` dipecah menjadi:
+  - `check-in-wizard/types.ts`
+  - `check-in-wizard/constants.ts`
+  - `check-in-wizard/sections.tsx`
+
+### Dampak
+- File source manual besar menjadi lebih pendek dan lebih mudah dipelihara
+- Tidak membuka kontrak backend baru
+- Tidak mengubah status resmi gate UAT
+- Refactor ini bersifat struktur/kebersihan, bukan klaim bahwa fitur baru fase berikutnya sudah live
+
+### Catatan
+- Surface review pembayaran / approval booking sempat mendapat patch UX tambahan selama debugging integrasi, tetapi gate resmi tetap mengacu pada hasil UAT, bukan pada keberadaan patch semata

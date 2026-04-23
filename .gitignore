@@ -54,5 +54,3 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
-# Keep docs and source-of-truth files versioned.
-# Do not ignore schema.prisma, bootstrap.sql, package.json, or project docs.

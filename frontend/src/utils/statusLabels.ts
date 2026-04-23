@@ -67,6 +67,10 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     FAMILY: 'Keluarga',
     MEDICAL: 'Medis',
     PROJECT: 'Proyek',
+    PENDING_REVIEW: 'Menunggu Review',
+    APPROVED: 'Disetujui',
+    REJECTED: 'Ditolak',
+    EXPIRED: 'Kadaluarsa',
   };
 
   if (normalized === 'INACTIVE') return labels.INACTIVE;
@@ -77,11 +81,11 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
 export function getStatusVariant(status?: string): 'success' | 'warning' | 'danger' | 'info' | 'secondary' | 'primary' | 'dark' {
   const normalized = String(status ?? '').toUpperCase();
 
-  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE'].includes(normalized)) return 'success';
-  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED'].includes(normalized)) return 'warning';
-  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE'].includes(normalized)) return 'danger';
+  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED'].includes(normalized)) return 'success';
+  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW'].includes(normalized)) return 'warning';
+  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS'].includes(normalized)) return 'info';
-  if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE'].includes(normalized)) return 'secondary';
+  if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';
   return 'secondary';
 }

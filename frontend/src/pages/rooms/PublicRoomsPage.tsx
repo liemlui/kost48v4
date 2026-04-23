@@ -20,6 +20,10 @@ const pricingOptions: Array<{ value: '' | PricingTerm; label: string }> = [
 ];
 
 function RoomPlaceholder({ room }: { room: PublicRoom }) {
+  const firstImage = room.images?.[0];
+  if (firstImage) {
+    return <img src={firstImage} alt={room.code} className="public-room-image" />;
+  }
   const code = room.code || `R${room.id}`;
   const initials = code.slice(0, 3).toUpperCase();
 
@@ -210,7 +214,8 @@ export default function PublicRoomsPage() {
 
                   {room.notes ? <div className="app-caption">Catatan: {room.notes}</div> : <div className="app-caption">Placeholder netral dipakai sampai foto kamar tersedia di backend publik.</div>}
 
-                  <div className="mt-auto d-grid">
+                  <div className="mt-auto d-grid gap-2">
+                    <Button variant="outline-secondary" onClick={() => navigate(`/rooms/${room.id}/detail`)}>Lihat Detail</Button>
                     <Button onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}>Pesan Sekarang</Button>
                   </div>
                 </Card.Body>

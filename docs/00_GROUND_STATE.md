@@ -1,5 +1,5 @@
 # KOST48 V3 — Ground State
-**Versi:** Synced 2026-04-21 (Pasca Frontend Fase 2 & Audit Backend) | **Baca ini pertama kali di setiap sesi.**
+**Versi:** Synced 2026-04-23 (Pasca UAT parsial, patch korektif, dan refactor struktur) | **Baca ini pertama kali di setiap sesi.**
 
 ---
 
@@ -83,7 +83,7 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 - Reminder lifecycle tetap computed display ringan (frontend-only)
 
 ---
-## 5. Status Freeze per Fase (Update 2026-04-21 — Pasca Frontend V4 Fase 4.0 Patch)
+## 5. Status Freeze per Fase (Update 2026-04-22 — Pasca Patch 4.1 dan Sinkronisasi Detail 4.2–4.5)
 
 | Fase | Nama | Status |
 |------|------|--------|
@@ -92,18 +92,18 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 | 2 | Penyempurnaan UX & Integrasi Modul | ✅ Selesai |
 | 3 | Ticket Tenant-Only Redesign | ✅ Selesai |
 | **3.5** | **Backend Stabilization & API Gap Closure** | ✅ **Selesai** |
-| **4.0** | **Booking Mandiri & Status RESERVED** | ⏳ **Backend + frontend inti sudah dipatch; UAT belum selesai** |
-| 4.1 | Admin Approval & Pelengkapan Data | ⏳ Backend 4.1A + frontend 4.1B sudah dipatch; UAT approval belum selesai |
-| 4.2 | Pembayaran Mandiri & Aktivasi Otomatis | ⬜ Belum |
-| 4.3 | Notifikasi & Reminder (WhatsApp) | ⬜ Belum |
-| 4.4 | Marketing Display & Registrasi Fleksibel | ⬜ Belum |
-| 4.5 | Tenant Self-Service Lanjutan | ⬜ Belum |
+| **4.0** | **Booking Mandiri & Status RESERVED** | ⏳ Backend + frontend inti sudah dipatch; UAT booking belum dinyatakan lolos penuh |
+| **4.1** | **Admin Approval & Pelengkapan Data** | ⏳ Backend 4.1A + frontend 4.1B sudah dipatch; UAT approval belum dinyatakan lolos penuh |
+| **4.2** | **Pembayaran Mandiri & Aktivasi Otomatis** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
+| **4.3** | **Notifikasi & Reminder (WhatsApp)** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
+| **4.4** | **Marketing Display & Registrasi Fleksibel** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
+| **4.5** | **Tenant Self-Service Lanjutan** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
 
 ---
 
-## 6. Fokus Aktif Sekarang — UAT 4.0, LALU LANJUT 4.1
+## 6. Fokus Aktif Sekarang — UAT 4.0 + 4.1, lalu buka 4.2 secara resmi
 
-**Tujuan saat ini:** Memverifikasi bahwa slice V4 Fase 4.0 yang sudah tertutup di level kode benar-benar stabil secara end-to-end, sebelum membuka approval booking di Fase 4.1.
+**Tujuan saat ini:** memastikan slice V4 Fase 4.0 dan 4.1 yang sudah tertutup di level source/build benar-benar stabil secara end-to-end, sebelum membuka payment submission dan flow otomatis berikutnya.
 
 **Status penting saat ini:**
 1. Backend inti V4 sudah dipatch:
@@ -112,12 +112,12 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
    - `GET /public/rooms`
    - `POST /tenant/bookings`
    - `GET /tenant/bookings/my`
-2. Frontend inti V4 juga sudah dipatch:
-   - katalog publik `/rooms`
-   - form booking `/booking/:roomId`
-   - tenant `Pemesanan Saya`
-   - booking reserved read-only di backoffice
-3. UAT penuh flow booking mandiri belum dinyatakan lolos.
+2. Approval booking Fase 4.1 juga sudah dipatch di level source/build:
+   - `PATCH /admin/bookings/:stayId/approve`
+   - invoice awal `DRAFT` saat approval
+   - queue approval booking di backoffice
+   - status tenant portal `Menunggu Approval` / `Menunggu Pembayaran`
+3. Fase 4.2–4.5 **belum live**, tetapi detail implementasinya sekarang sudah dibakukan di dokumen proyek agar eksekusi nanti tidak melebar.
 
 **Urutan kerja aktif:**
 1. **Lakukan UAT end-to-end Fase 4.0**
@@ -125,40 +125,36 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
    - flow tenant booking
    - flow tenant `Pemesanan Saya`
    - flow backoffice read-only booking reserved
-   - regression check existing flow yang masih aktif
-2. **Fase 4.1 saat ini sudah mulai dipatch secara terkontrol**
-   - backend 4.1A: approval booking core
-   - frontend 4.1B: queue approval + form approval + status tenant portal setelah approval
-   - UAT approval booking masih perlu dijalankan
-3. **Fase 4.2+ tetap belum dibuka**
+2. **Lanjutkan UAT end-to-end Fase 4.1**
+   - approval admin
+   - pelengkapan data kontrak
+   - invoice awal booking
+   - tenant status `Menunggu Pembayaran`
+3. **Baru setelah UAT 4.0 + 4.1 cukup aman, buka Fase 4.2**
+   - payment submission
+   - approval/reject bukti bayar
+   - sinkronisasi `RESERVED -> OCCUPIED`
+   - expiry booking
+4. **Fase 4.3–4.5 tetap mengikuti urutan berlapis**
+   - 4.3 sesudah 4.2 inti stabil
+   - 4.4 sesudah public surface & auth contract siap
+   - 4.5 sesudah self-service tenant aman dibuka
 
-**Catatan arah kerja:**
-- Mode kerja tetap pragmatis: patch dulu, lalu UAT.
-- Untuk Fase 4.0, patch backend + frontend inti sudah tertutup.
-- Status “selesai” penuh tetap membutuhkan verifikasi runtime/UAT.
-
----
-
-## 7. Do Not Open dalam Sesi Aktif
-
+**Do Not Open dalam batch aktif:**
 1. Debt flow / hutang
-2. Scheduler reminder otomatis umum di luar scope booking
-3. Payment approval vNext penuh sebelum Fase 4.1 resmi dibuka
-4. Owner finance dashboard penuh
-5. Redesign accounting formal
-6. Rewrite total backend + frontend sekaligus
-7. Fase 4.2+ sebelum UAT Fase 4.0 selesai
-8. UI palsu yang belum punya kontrak backend jelas
+2. Scheduler reminder otomatis umum di luar scope booking/reminder yang sudah dispesifikkan
+3. Owner finance dashboard penuh
+4. Redesign accounting formal
+5. Rewrite total backend + frontend sekaligus
+6. Fase 4.3–4.5 sebelum fondasi 4.2 stabil
+7. UI palsu yang belum punya kontrak backend jelas
 
----
-
-## 8. Prinsip Kerja
-
+**Prinsip kerja:**
 - Maksimal **1 flow utama** per batch coding
 - Patch nyata menang atas rencana besar yang belum dieksekusi
 - Build success tetap wajib
-- UAT sekarang kembali menjadi prioritas sebelum membuka Fase 4.1
-- Semua perubahan yang mengubah status resmi harus disinkronkan minimal ke:
+- UAT tetap menjadi gate sebelum membuka fase berikutnya
+- Semua perubahan status resmi minimal harus disinkronkan ke:
   - `CHECKLIST.md`
   - `02_PLAN.md`
   - `04_JOURNAL.md`
@@ -166,4 +162,43 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 - Untuk task yang benar-benar butuh DB / Prisma / PowerShell runtime, boleh pakai Cline
 - Untuk task yang tidak butuh DB, utamakan patch langsung di chat / artifact
 
-**Catatan sinkronisasi:** Dokumen ini memakai mode kerja pragmatis: patch inti ditutup dulu agar slice 4.0 lengkap di level kode, lalu UAT end-to-end dilakukan sebelum masuk ke approval booking Fase 4.1.
+**Catatan sinkronisasi:** dokumen ini kini menegaskan bahwa blueprint 4.2–4.5 sudah detail, tetapi implementasi kode tetap menunggu urutan resmi: UAT 4.0 → UAT 4.1 → ACT 4.2 → 4.3 → 4.4 → 4.5.
+
+
+---
+
+## 2026-04-23 — Update Sinkronisasi Status Nyata Pasca UAT Parsial + Refactor Struktur
+
+### Ringkasan posisi nyata saat ini
+- UAT parsial V4 Fase 4.0 mulai menghasilkan bukti konkret:
+  - skenario katalog publik `/rooms` dinyatakan aman
+  - login ADMIN ke `/rooms` berhasil masuk ke surface backoffice yang benar
+  - tenant berhasil membuat booking baru
+- UAT juga menemukan bug integrasi nyata:
+  - nilai `check-in` dan `expiresAt` sempat tampil `-`
+  - approval booking sempat terkena `409` karena expiry terlalu agresif / data tanggal tidak jujur di surface
+  - modal review/approval frontend sempat tidak menutup setelah aksi sukses
+- Sejumlah patch korektif telah dibuat sesudah UAT parsial:
+  - backend: perbaikan kalkulasi `expiresAt` agar jatuh ke akhir hari
+  - backend: perbaikan serialisasi `Date` agar `checkInDate` / `expiresAt` tidak hilang di response
+  - backend: perbaikan kompatibilitas update invoice saat approval payment (`issuedAt` / constraint invoice)
+  - frontend: patch close-modal / invalidation pada flow review pembayaran dibahas dan disiapkan
+- Refactor struktur juga sudah dilakukan:
+  - backend: file source utama yang terlalu besar telah dipecah agar target praktis `<= 500` baris per file lebih tercapai
+  - frontend: `resources.ts` dan `CheckInWizard.tsx` telah dipecah ke file yang lebih kecil
+
+### Status resmi yang tetap harus dipegang
+- Gate UAT 4.0 dan 4.1 **masih belum dinyatakan lolos penuh**
+- Slice 4.2 sempat diprototipekan/diujicoba pada level source untuk menutup blocker integrasi, tetapi **belum boleh dianggap baseline resmi**
+- Semua eksekusi resmi tetap mengikuti urutan:
+  1. tuntaskan UAT 4.0
+  2. tuntaskan UAT 4.1
+  3. baru buka 4.2 sebagai baseline resmi
+
+### Implikasi operasional
+- Jika ada konflik antara kode eksperimen/prototype 4.2 dengan dokumen gate, yang menang tetap:
+  - `schema.prisma`
+  - `bootstrap.sql`
+  - `01_CONTRACTS.md`
+  - status gate di dokumen aktif
+- Refactor struktur tidak mengubah arah bisnis; refactor hanya untuk menjaga file source lebih rapi, terbaca, dan aman dipatch lanjut

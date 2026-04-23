@@ -42,9 +42,20 @@ export class StaysService {
         include: {
           tenant: true,
           room: true,
+          _count: {
+            select: {
+              invoices: {
+                where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+              },
+            },
+          },
           invoices: {
-            where: {
-              status: { in: ['ISSUED', 'PARTIAL'] as any },
+            orderBy: { id: 'desc' },
+            take: 1,
+            select: {
+              id: true,
+              invoiceNumber: true,
+              status: true,
             },
           },
         },
@@ -56,7 +67,11 @@ export class StaysService {
     const itemsWithOpenInvoiceCount = items.map((stay) =>
       this.normalizeStayForResponse({
         ...stay,
-        openInvoiceCount: stay.invoices.length,
+        openInvoiceCount: stay._count?.invoices ?? 0,
+        invoiceCount: stay._count?.invoices ?? 0,
+        latestInvoiceId: stay.invoices[0]?.id ?? null,
+        latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
+        latestInvoiceStatus: stay.invoices[0]?.status ?? null,
       }),
     );
 
@@ -79,8 +94,21 @@ export class StaysService {
       include: {
         tenant: true,
         room: true,
+        _count: {
+          select: {
+            invoices: {
+              where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+            },
+          },
+        },
         invoices: {
-          where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+          orderBy: { id: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            invoiceNumber: true,
+            status: true,
+          },
         },
       },
     });
@@ -91,7 +119,11 @@ export class StaysService {
     return serializePrismaResult(
       this.normalizeStayForResponse({
         ...stay,
-        openInvoiceCount: stay.invoices.length,
+        openInvoiceCount: stay._count?.invoices ?? 0,
+        invoiceCount: stay._count?.invoices ?? 0,
+        latestInvoiceId: stay.invoices[0]?.id ?? null,
+        latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
+        latestInvoiceStatus: stay.invoices[0]?.status ?? null,
       }),
     );
   }
@@ -400,21 +432,30 @@ export class StaysService {
     if (existing.status !== 'ACTIVE') throw new ConflictException('Stay bukan status ACTIVE');
 
     const updated = await this.prisma.$transaction(async (tx) => {
-      const stay = await tx.stay.update({
-        where: { id },
-        data: {
-          status: 'CANCELLED' as any,
-          checkoutReason: dto.cancelReason,
-          notes: dto.notes ?? existing.notes,
-        },
-      });
+      await tx.$executeRaw(Prisma.sql`
+        UPDATE "Stay"
+        SET
+          status = CAST(${'CANCELLED'} AS "StayStatus"),
+          "cancelReason" = ${dto.cancelReason},
+          notes = ${dto.notes ?? existing.notes},
+          "updatedAt" = NOW()
+        WHERE id = ${id}
+      `);
+
+      const stay = await tx.stay.findUnique({ where: { id } });
+      if (!stay) {
+        throw new NotFoundException('Stay tidak ditemukan setelah pembatalan');
+      }
 
       const otherActive = await tx.stay.count({ where: { roomId: existing.roomId, status: 'ACTIVE' as any, id: { not: id } } });
       if (otherActive === 0) {
         await tx.room.update({ where: { id: existing.roomId }, data: { status: 'AVAILABLE' as any } });
       }
 
-      return stay;
+      return {
+        ...stay,
+        cancelReason: dto.cancelReason,
+      };
     });
 
     await this.audit.log({ actorUserId: actor.id, action: 'CANCEL', entityType: 'Stay', entityId: String(updated.id), oldData: existing, newData: updated });

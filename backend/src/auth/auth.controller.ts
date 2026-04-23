@@ -5,7 +5,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUserPayload } from '../common/interfaces/current-user.interface';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,6 +26,19 @@ export class AuthController {
   async me(@CurrentUser() user: CurrentUserPayload) {
     const data = await this.authService.me(user.id);
     return { message: 'Profil user berhasil diambil', data };
+  }
+
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const data = await this.authService.forgotPassword(dto);
+    return { message: 'Jika akun ditemukan, instruksi reset password telah dikirim.', data };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    const data = await this.authService.resetPassword(dto);
+    return { message: 'Password berhasil diperbarui. Silakan login dengan password baru Anda.', data };
   }
 
   @Post('change-password')

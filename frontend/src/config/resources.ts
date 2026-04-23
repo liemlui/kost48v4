@@ -266,6 +266,12 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         required: true,
       },
       {
+        name: 'images',
+        label: 'Galeri Gambar (1 URL per baris)',
+        type: 'textarea',
+        placeholder: 'https://.../gambar-1.jpg\nhttps://.../gambar-2.jpg',
+      },
+      {
         name: 'notes',
         label: 'Catatan',
         type: 'textarea',

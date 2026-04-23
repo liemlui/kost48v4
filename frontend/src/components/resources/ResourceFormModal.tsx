@@ -388,7 +388,7 @@ export default function ResourceFormModal({
                               type="password"
                               value={createFormData.password}
                               onChange={(event) => setCreateFormData((prev) => ({ ...prev, password: event.target.value }))}
-                              placeholder="Minimal 6 karakter"
+                              placeholder="Minimal 8 karakter"
                             />
                           </Form.Group>
                           <Form.Group className="mb-3">

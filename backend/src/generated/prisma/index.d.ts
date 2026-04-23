@@ -54,6 +54,16 @@ export type InvoiceLine = $Result.DefaultSelection<Prisma.$InvoiceLinePayload>
  */
 export type InvoicePayment = $Result.DefaultSelection<Prisma.$InvoicePaymentPayload>
 /**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = $Result.DefaultSelection<Prisma.$PasswordResetTokenPayload>
+/**
+ * Model PaymentSubmission
+ * 
+ */
+export type PaymentSubmission = $Result.DefaultSelection<Prisma.$PaymentSubmissionPayload>
+/**
  * Model Ticket
  * 
  */
@@ -202,6 +212,16 @@ export const PaymentMethod: {
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
 
+export const PaymentSubmissionStatus: {
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED'
+};
+
+export type PaymentSubmissionStatus = (typeof PaymentSubmissionStatus)[keyof typeof PaymentSubmissionStatus]
+
+
 export const TicketStatus: {
   OPEN: 'OPEN',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -336,6 +356,10 @@ export const InvoiceLineType: typeof $Enums.InvoiceLineType
 export type PaymentMethod = $Enums.PaymentMethod
 
 export const PaymentMethod: typeof $Enums.PaymentMethod
+
+export type PaymentSubmissionStatus = $Enums.PaymentSubmissionStatus
+
+export const PaymentSubmissionStatus: typeof $Enums.PaymentSubmissionStatus
 
 export type TicketStatus = $Enums.TicketStatus
 
@@ -566,6 +590,26 @@ export class PrismaClient<
     * ```
     */
   get invoicePayment(): Prisma.InvoicePaymentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.passwordResetToken`: Exposes CRUD operations for the **PasswordResetToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PasswordResetTokens
+    * const passwordResetTokens = await prisma.passwordResetToken.findMany()
+    * ```
+    */
+  get passwordResetToken(): Prisma.PasswordResetTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.paymentSubmission`: Exposes CRUD operations for the **PaymentSubmission** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PaymentSubmissions
+    * const paymentSubmissions = await prisma.paymentSubmission.findMany()
+    * ```
+    */
+  get paymentSubmission(): Prisma.PaymentSubmissionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.ticket`: Exposes CRUD operations for the **Ticket** model.
@@ -1095,6 +1139,8 @@ export namespace Prisma {
     Invoice: 'Invoice',
     InvoiceLine: 'InvoiceLine',
     InvoicePayment: 'InvoicePayment',
+    PasswordResetToken: 'PasswordResetToken',
+    PaymentSubmission: 'PaymentSubmission',
     Ticket: 'Ticket',
     Announcement: 'Announcement',
     InventoryItem: 'InventoryItem',
@@ -1121,7 +1167,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "wifiSale" | "expense" | "auditLog"
+      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "wifiSale" | "expense" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1714,6 +1760,154 @@ export namespace Prisma {
           count: {
             args: Prisma.InvoicePaymentCountArgs<ExtArgs>
             result: $Utils.Optional<InvoicePaymentCountAggregateOutputType> | number
+          }
+        }
+      }
+      PasswordResetToken: {
+        payload: Prisma.$PasswordResetTokenPayload<ExtArgs>
+        fields: Prisma.PasswordResetTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PasswordResetTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PasswordResetTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.PasswordResetTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PasswordResetTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          findMany: {
+            args: Prisma.PasswordResetTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+          }
+          create: {
+            args: Prisma.PasswordResetTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          createMany: {
+            args: Prisma.PasswordResetTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PasswordResetTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.PasswordResetTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          update: {
+            args: Prisma.PasswordResetTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.PasswordResetTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PasswordResetTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PasswordResetTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.PasswordResetTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.PasswordResetTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePasswordResetToken>
+          }
+          groupBy: {
+            args: Prisma.PasswordResetTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PasswordResetTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PasswordResetTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<PasswordResetTokenCountAggregateOutputType> | number
+          }
+        }
+      }
+      PaymentSubmission: {
+        payload: Prisma.$PaymentSubmissionPayload<ExtArgs>
+        fields: Prisma.PaymentSubmissionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PaymentSubmissionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PaymentSubmissionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          findFirst: {
+            args: Prisma.PaymentSubmissionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PaymentSubmissionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          findMany: {
+            args: Prisma.PaymentSubmissionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>[]
+          }
+          create: {
+            args: Prisma.PaymentSubmissionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          createMany: {
+            args: Prisma.PaymentSubmissionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PaymentSubmissionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>[]
+          }
+          delete: {
+            args: Prisma.PaymentSubmissionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          update: {
+            args: Prisma.PaymentSubmissionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          deleteMany: {
+            args: Prisma.PaymentSubmissionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PaymentSubmissionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PaymentSubmissionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>[]
+          }
+          upsert: {
+            args: Prisma.PaymentSubmissionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PaymentSubmissionPayload>
+          }
+          aggregate: {
+            args: Prisma.PaymentSubmissionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePaymentSubmission>
+          }
+          groupBy: {
+            args: Prisma.PaymentSubmissionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PaymentSubmissionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PaymentSubmissionCountArgs<ExtArgs>
+            result: $Utils.Optional<PaymentSubmissionCountAggregateOutputType> | number
           }
         }
       }
@@ -2413,6 +2607,8 @@ export namespace Prisma {
     invoice?: InvoiceOmit
     invoiceLine?: InvoiceLineOmit
     invoicePayment?: InvoicePaymentOmit
+    passwordResetToken?: PasswordResetTokenOmit
+    paymentSubmission?: PaymentSubmissionOmit
     ticket?: TicketOmit
     announcement?: AnnouncementOmit
     inventoryItem?: InventoryItemOmit
@@ -2511,6 +2707,9 @@ export namespace Prisma {
     wifiSalesCreated: number
     expensesCreated: number
     auditLogs: number
+    paymentSubmissionsSubmitted: number
+    paymentSubmissionsReviewed: number
+    passwordResetTokens: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2524,6 +2723,9 @@ export namespace Prisma {
     wifiSalesCreated?: boolean | UserCountOutputTypeCountWifiSalesCreatedArgs
     expensesCreated?: boolean | UserCountOutputTypeCountExpensesCreatedArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+    paymentSubmissionsSubmitted?: boolean | UserCountOutputTypeCountPaymentSubmissionsSubmittedArgs
+    paymentSubmissionsReviewed?: boolean | UserCountOutputTypeCountPaymentSubmissionsReviewedArgs
+    passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   }
 
   // Custom InputTypes
@@ -2607,6 +2809,27 @@ export namespace Prisma {
     where?: AuditLogWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPaymentSubmissionsSubmittedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPaymentSubmissionsReviewedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PasswordResetTokenWhereInput
+  }
+
 
   /**
    * Count Type TenantCountOutputType
@@ -2615,11 +2838,13 @@ export namespace Prisma {
   export type TenantCountOutputType = {
     stays: number
     tickets: number
+    paymentSubmissions: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | TenantCountOutputTypeCountStaysArgs
     tickets?: boolean | TenantCountOutputTypeCountTicketsArgs
+    paymentSubmissions?: boolean | TenantCountOutputTypeCountPaymentSubmissionsArgs
   }
 
   // Custom InputTypes
@@ -2645,6 +2870,13 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
   }
 
 
@@ -2732,12 +2964,14 @@ export namespace Prisma {
     invoices: number
     tickets: number
     expenses: number
+    paymentSubmissions: number
   }
 
   export type StayCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     invoices?: boolean | StayCountOutputTypeCountInvoicesArgs
     tickets?: boolean | StayCountOutputTypeCountTicketsArgs
     expenses?: boolean | StayCountOutputTypeCountExpensesArgs
+    paymentSubmissions?: boolean | StayCountOutputTypeCountPaymentSubmissionsArgs
   }
 
   // Custom InputTypes
@@ -2772,6 +3006,13 @@ export namespace Prisma {
     where?: ExpenseWhereInput
   }
 
+  /**
+   * StayCountOutputType without action
+   */
+  export type StayCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
+  }
+
 
   /**
    * Count Type InvoiceCountOutputType
@@ -2780,11 +3021,13 @@ export namespace Prisma {
   export type InvoiceCountOutputType = {
     lines: number
     payments: number
+    paymentSubmissions: number
   }
 
   export type InvoiceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     lines?: boolean | InvoiceCountOutputTypeCountLinesArgs
     payments?: boolean | InvoiceCountOutputTypeCountPaymentsArgs
+    paymentSubmissions?: boolean | InvoiceCountOutputTypeCountPaymentSubmissionsArgs
   }
 
   // Custom InputTypes
@@ -2810,6 +3053,13 @@ export namespace Prisma {
    */
   export type InvoiceCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InvoicePaymentWhereInput
+  }
+
+  /**
+   * InvoiceCountOutputType without action
+   */
+  export type InvoiceCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
   }
 
 
@@ -2888,6 +3138,7 @@ export namespace Prisma {
     tenantId: number | null
     isActive: boolean | null
     lastLoginAt: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2901,6 +3152,7 @@ export namespace Prisma {
     tenantId: number | null
     isActive: boolean | null
     lastLoginAt: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2914,6 +3166,7 @@ export namespace Prisma {
     tenantId: number
     isActive: number
     lastLoginAt: number
+    passwordChangedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2939,6 +3192,7 @@ export namespace Prisma {
     tenantId?: true
     isActive?: true
     lastLoginAt?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2952,6 +3206,7 @@ export namespace Prisma {
     tenantId?: true
     isActive?: true
     lastLoginAt?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2965,6 +3220,7 @@ export namespace Prisma {
     tenantId?: true
     isActive?: true
     lastLoginAt?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3065,6 +3321,7 @@ export namespace Prisma {
     tenantId: number | null
     isActive: boolean
     lastLoginAt: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -3097,6 +3354,7 @@ export namespace Prisma {
     tenantId?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -3110,6 +3368,9 @@ export namespace Prisma {
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
     expensesCreated?: boolean | User$expensesCreatedArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
+    paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
+    passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3122,6 +3383,7 @@ export namespace Prisma {
     tenantId?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -3136,6 +3398,7 @@ export namespace Prisma {
     tenantId?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -3150,11 +3413,12 @@ export namespace Prisma {
     tenantId?: boolean
     isActive?: boolean
     lastLoginAt?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "passwordChangedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | User$tenantArgs<ExtArgs>
     announcementsCreated?: boolean | User$announcementsCreatedArgs<ExtArgs>
@@ -3167,6 +3431,9 @@ export namespace Prisma {
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
     expensesCreated?: boolean | User$expensesCreatedArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
+    paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
+    passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3190,6 +3457,9 @@ export namespace Prisma {
       wifiSalesCreated: Prisma.$WifiSalePayload<ExtArgs>[]
       expensesCreated: Prisma.$ExpensePayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+      paymentSubmissionsSubmitted: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
+      paymentSubmissionsReviewed: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
+      passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3200,6 +3470,7 @@ export namespace Prisma {
       tenantId: number | null
       isActive: boolean
       lastLoginAt: Date | null
+      passwordChangedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -3607,6 +3878,9 @@ export namespace Prisma {
     wifiSalesCreated<T extends User$wifiSalesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$wifiSalesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WifiSalePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expensesCreated<T extends User$expensesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$expensesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    paymentSubmissionsSubmitted<T extends User$paymentSubmissionsSubmittedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsSubmittedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    paymentSubmissionsReviewed<T extends User$paymentSubmissionsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    passwordResetTokens<T extends User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3644,6 +3918,7 @@ export namespace Prisma {
     readonly tenantId: FieldRef<"User", 'Int'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly lastLoginAt: FieldRef<"User", 'DateTime'>
+    readonly passwordChangedAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -4301,6 +4576,78 @@ export namespace Prisma {
   }
 
   /**
+   * User.paymentSubmissionsSubmitted
+   */
+  export type User$paymentSubmissionsSubmittedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    cursor?: PaymentSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * User.paymentSubmissionsReviewed
+   */
+  export type User$paymentSubmissionsReviewedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    cursor?: PaymentSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * User.passwordResetTokens
+   */
+  export type User$passwordResetTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    where?: PasswordResetTokenWhereInput
+    orderBy?: PasswordResetTokenOrderByWithRelationInput | PasswordResetTokenOrderByWithRelationInput[]
+    cursor?: PasswordResetTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4608,6 +4955,7 @@ export namespace Prisma {
     user?: boolean | Tenant$userArgs<ExtArgs>
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
+    paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -4673,6 +5021,7 @@ export namespace Prisma {
     user?: boolean | Tenant$userArgs<ExtArgs>
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
+    paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4684,6 +5033,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs> | null
       stays: Prisma.$StayPayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
+      paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5099,6 +5449,7 @@ export namespace Prisma {
     user<T extends Tenant$userArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     stays<T extends Tenant$staysArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$staysArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Tenant$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    paymentSubmissions<T extends Tenant$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5596,6 +5947,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.paymentSubmissions
+   */
+  export type Tenant$paymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    cursor?: PaymentSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
   }
 
   /**
@@ -7440,6 +7815,7 @@ export namespace Prisma {
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
+    paymentSubmissions?: boolean | Stay$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
@@ -7544,6 +7920,7 @@ export namespace Prisma {
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
+    paymentSubmissions?: boolean | Stay$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type StayIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7566,6 +7943,7 @@ export namespace Prisma {
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
+      paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7994,6 +8372,7 @@ export namespace Prisma {
     invoices<T extends Stay$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Stay$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Stay$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    paymentSubmissions<T extends Stay$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8533,6 +8912,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ExpenseScalarFieldEnum | ExpenseScalarFieldEnum[]
+  }
+
+  /**
+   * Stay.paymentSubmissions
+   */
+  export type Stay$paymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    cursor?: PaymentSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
   }
 
   /**
@@ -10018,6 +10421,7 @@ export namespace Prisma {
     createdBy?: boolean | Invoice$createdByArgs<ExtArgs>
     lines?: boolean | Invoice$linesArgs<ExtArgs>
     payments?: boolean | Invoice$paymentsArgs<ExtArgs>
+    paymentSubmissions?: boolean | Invoice$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | InvoiceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["invoice"]>
 
@@ -10085,6 +10489,7 @@ export namespace Prisma {
     createdBy?: boolean | Invoice$createdByArgs<ExtArgs>
     lines?: boolean | Invoice$linesArgs<ExtArgs>
     payments?: boolean | Invoice$paymentsArgs<ExtArgs>
+    paymentSubmissions?: boolean | Invoice$paymentSubmissionsArgs<ExtArgs>
     _count?: boolean | InvoiceCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InvoiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10103,6 +10508,7 @@ export namespace Prisma {
       createdBy: Prisma.$UserPayload<ExtArgs> | null
       lines: Prisma.$InvoiceLinePayload<ExtArgs>[]
       payments: Prisma.$InvoicePaymentPayload<ExtArgs>[]
+      paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -10518,6 +10924,7 @@ export namespace Prisma {
     createdBy<T extends Invoice$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Invoice$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     lines<T extends Invoice$linesArgs<ExtArgs> = {}>(args?: Subset<T, Invoice$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoiceLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends Invoice$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Invoice$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    paymentSubmissions<T extends Invoice$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Invoice$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11022,6 +11429,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InvoicePaymentScalarFieldEnum | InvoicePaymentScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice.paymentSubmissions
+   */
+  export type Invoice$paymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    cursor?: PaymentSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
   }
 
   /**
@@ -13439,6 +13870,2516 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: InvoicePaymentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PasswordResetToken
+   */
+
+  export type AggregatePasswordResetToken = {
+    _count: PasswordResetTokenCountAggregateOutputType | null
+    _avg: PasswordResetTokenAvgAggregateOutputType | null
+    _sum: PasswordResetTokenSumAggregateOutputType | null
+    _min: PasswordResetTokenMinAggregateOutputType | null
+    _max: PasswordResetTokenMaxAggregateOutputType | null
+  }
+
+  export type PasswordResetTokenAvgAggregateOutputType = {
+    userId: number | null
+  }
+
+  export type PasswordResetTokenSumAggregateOutputType = {
+    userId: number | null
+  }
+
+  export type PasswordResetTokenMinAggregateOutputType = {
+    id: string | null
+    userId: number | null
+    token: string | null
+    expiresAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type PasswordResetTokenMaxAggregateOutputType = {
+    id: string | null
+    userId: number | null
+    token: string | null
+    expiresAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type PasswordResetTokenCountAggregateOutputType = {
+    id: number
+    userId: number
+    token: number
+    expiresAt: number
+    usedAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PasswordResetTokenAvgAggregateInputType = {
+    userId?: true
+  }
+
+  export type PasswordResetTokenSumAggregateInputType = {
+    userId?: true
+  }
+
+  export type PasswordResetTokenMinAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+  }
+
+  export type PasswordResetTokenMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+  }
+
+  export type PasswordResetTokenCountAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PasswordResetTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PasswordResetToken to aggregate.
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasswordResetTokens to fetch.
+     */
+    orderBy?: PasswordResetTokenOrderByWithRelationInput | PasswordResetTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PasswordResetTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasswordResetTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasswordResetTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PasswordResetTokens
+    **/
+    _count?: true | PasswordResetTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PasswordResetTokenAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PasswordResetTokenSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PasswordResetTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PasswordResetTokenMaxAggregateInputType
+  }
+
+  export type GetPasswordResetTokenAggregateType<T extends PasswordResetTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregatePasswordResetToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePasswordResetToken[P]>
+      : GetScalarType<T[P], AggregatePasswordResetToken[P]>
+  }
+
+
+
+
+  export type PasswordResetTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PasswordResetTokenWhereInput
+    orderBy?: PasswordResetTokenOrderByWithAggregationInput | PasswordResetTokenOrderByWithAggregationInput[]
+    by: PasswordResetTokenScalarFieldEnum[] | PasswordResetTokenScalarFieldEnum
+    having?: PasswordResetTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PasswordResetTokenCountAggregateInputType | true
+    _avg?: PasswordResetTokenAvgAggregateInputType
+    _sum?: PasswordResetTokenSumAggregateInputType
+    _min?: PasswordResetTokenMinAggregateInputType
+    _max?: PasswordResetTokenMaxAggregateInputType
+  }
+
+  export type PasswordResetTokenGroupByOutputType = {
+    id: string
+    userId: number
+    token: string
+    expiresAt: Date
+    usedAt: Date | null
+    createdAt: Date
+    _count: PasswordResetTokenCountAggregateOutputType | null
+    _avg: PasswordResetTokenAvgAggregateOutputType | null
+    _sum: PasswordResetTokenSumAggregateOutputType | null
+    _min: PasswordResetTokenMinAggregateOutputType | null
+    _max: PasswordResetTokenMaxAggregateOutputType | null
+  }
+
+  type GetPasswordResetTokenGroupByPayload<T extends PasswordResetTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PasswordResetTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PasswordResetTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PasswordResetTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], PasswordResetTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PasswordResetTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["passwordResetToken"]>
+
+  export type PasswordResetTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["passwordResetToken"]>
+
+  export type PasswordResetTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["passwordResetToken"]>
+
+  export type PasswordResetTokenSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type PasswordResetTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "token" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["passwordResetToken"]>
+  export type PasswordResetTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PasswordResetTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PasswordResetTokenIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $PasswordResetTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PasswordResetToken"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: number
+      token: string
+      expiresAt: Date
+      usedAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["passwordResetToken"]>
+    composites: {}
+  }
+
+  type PasswordResetTokenGetPayload<S extends boolean | null | undefined | PasswordResetTokenDefaultArgs> = $Result.GetResult<Prisma.$PasswordResetTokenPayload, S>
+
+  type PasswordResetTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PasswordResetTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PasswordResetTokenCountAggregateInputType | true
+    }
+
+  export interface PasswordResetTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PasswordResetToken'], meta: { name: 'PasswordResetToken' } }
+    /**
+     * Find zero or one PasswordResetToken that matches the filter.
+     * @param {PasswordResetTokenFindUniqueArgs} args - Arguments to find a PasswordResetToken
+     * @example
+     * // Get one PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PasswordResetTokenFindUniqueArgs>(args: SelectSubset<T, PasswordResetTokenFindUniqueArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PasswordResetToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PasswordResetTokenFindUniqueOrThrowArgs} args - Arguments to find a PasswordResetToken
+     * @example
+     * // Get one PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PasswordResetTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, PasswordResetTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PasswordResetToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenFindFirstArgs} args - Arguments to find a PasswordResetToken
+     * @example
+     * // Get one PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PasswordResetTokenFindFirstArgs>(args?: SelectSubset<T, PasswordResetTokenFindFirstArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PasswordResetToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenFindFirstOrThrowArgs} args - Arguments to find a PasswordResetToken
+     * @example
+     * // Get one PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PasswordResetTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, PasswordResetTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PasswordResetTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PasswordResetTokens
+     * const passwordResetTokens = await prisma.passwordResetToken.findMany()
+     * 
+     * // Get first 10 PasswordResetTokens
+     * const passwordResetTokens = await prisma.passwordResetToken.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const passwordResetTokenWithIdOnly = await prisma.passwordResetToken.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PasswordResetTokenFindManyArgs>(args?: SelectSubset<T, PasswordResetTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PasswordResetToken.
+     * @param {PasswordResetTokenCreateArgs} args - Arguments to create a PasswordResetToken.
+     * @example
+     * // Create one PasswordResetToken
+     * const PasswordResetToken = await prisma.passwordResetToken.create({
+     *   data: {
+     *     // ... data to create a PasswordResetToken
+     *   }
+     * })
+     * 
+     */
+    create<T extends PasswordResetTokenCreateArgs>(args: SelectSubset<T, PasswordResetTokenCreateArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PasswordResetTokens.
+     * @param {PasswordResetTokenCreateManyArgs} args - Arguments to create many PasswordResetTokens.
+     * @example
+     * // Create many PasswordResetTokens
+     * const passwordResetToken = await prisma.passwordResetToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PasswordResetTokenCreateManyArgs>(args?: SelectSubset<T, PasswordResetTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PasswordResetTokens and returns the data saved in the database.
+     * @param {PasswordResetTokenCreateManyAndReturnArgs} args - Arguments to create many PasswordResetTokens.
+     * @example
+     * // Create many PasswordResetTokens
+     * const passwordResetToken = await prisma.passwordResetToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PasswordResetTokens and only return the `id`
+     * const passwordResetTokenWithIdOnly = await prisma.passwordResetToken.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PasswordResetTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, PasswordResetTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PasswordResetToken.
+     * @param {PasswordResetTokenDeleteArgs} args - Arguments to delete one PasswordResetToken.
+     * @example
+     * // Delete one PasswordResetToken
+     * const PasswordResetToken = await prisma.passwordResetToken.delete({
+     *   where: {
+     *     // ... filter to delete one PasswordResetToken
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PasswordResetTokenDeleteArgs>(args: SelectSubset<T, PasswordResetTokenDeleteArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PasswordResetToken.
+     * @param {PasswordResetTokenUpdateArgs} args - Arguments to update one PasswordResetToken.
+     * @example
+     * // Update one PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PasswordResetTokenUpdateArgs>(args: SelectSubset<T, PasswordResetTokenUpdateArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PasswordResetTokens.
+     * @param {PasswordResetTokenDeleteManyArgs} args - Arguments to filter PasswordResetTokens to delete.
+     * @example
+     * // Delete a few PasswordResetTokens
+     * const { count } = await prisma.passwordResetToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PasswordResetTokenDeleteManyArgs>(args?: SelectSubset<T, PasswordResetTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PasswordResetTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PasswordResetTokens
+     * const passwordResetToken = await prisma.passwordResetToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PasswordResetTokenUpdateManyArgs>(args: SelectSubset<T, PasswordResetTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PasswordResetTokens and returns the data updated in the database.
+     * @param {PasswordResetTokenUpdateManyAndReturnArgs} args - Arguments to update many PasswordResetTokens.
+     * @example
+     * // Update many PasswordResetTokens
+     * const passwordResetToken = await prisma.passwordResetToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PasswordResetTokens and only return the `id`
+     * const passwordResetTokenWithIdOnly = await prisma.passwordResetToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PasswordResetTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, PasswordResetTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PasswordResetToken.
+     * @param {PasswordResetTokenUpsertArgs} args - Arguments to update or create a PasswordResetToken.
+     * @example
+     * // Update or create a PasswordResetToken
+     * const passwordResetToken = await prisma.passwordResetToken.upsert({
+     *   create: {
+     *     // ... data to create a PasswordResetToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PasswordResetToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PasswordResetTokenUpsertArgs>(args: SelectSubset<T, PasswordResetTokenUpsertArgs<ExtArgs>>): Prisma__PasswordResetTokenClient<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PasswordResetTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenCountArgs} args - Arguments to filter PasswordResetTokens to count.
+     * @example
+     * // Count the number of PasswordResetTokens
+     * const count = await prisma.passwordResetToken.count({
+     *   where: {
+     *     // ... the filter for the PasswordResetTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends PasswordResetTokenCountArgs>(
+      args?: Subset<T, PasswordResetTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PasswordResetTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PasswordResetToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PasswordResetTokenAggregateArgs>(args: Subset<T, PasswordResetTokenAggregateArgs>): Prisma.PrismaPromise<GetPasswordResetTokenAggregateType<T>>
+
+    /**
+     * Group by PasswordResetToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PasswordResetTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PasswordResetTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PasswordResetTokenGroupByArgs['orderBy'] }
+        : { orderBy?: PasswordResetTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PasswordResetTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPasswordResetTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PasswordResetToken model
+   */
+  readonly fields: PasswordResetTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PasswordResetToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PasswordResetTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PasswordResetToken model
+   */
+  interface PasswordResetTokenFieldRefs {
+    readonly id: FieldRef<"PasswordResetToken", 'String'>
+    readonly userId: FieldRef<"PasswordResetToken", 'Int'>
+    readonly token: FieldRef<"PasswordResetToken", 'String'>
+    readonly expiresAt: FieldRef<"PasswordResetToken", 'DateTime'>
+    readonly usedAt: FieldRef<"PasswordResetToken", 'DateTime'>
+    readonly createdAt: FieldRef<"PasswordResetToken", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PasswordResetToken findUnique
+   */
+  export type PasswordResetTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which PasswordResetToken to fetch.
+     */
+    where: PasswordResetTokenWhereUniqueInput
+  }
+
+  /**
+   * PasswordResetToken findUniqueOrThrow
+   */
+  export type PasswordResetTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which PasswordResetToken to fetch.
+     */
+    where: PasswordResetTokenWhereUniqueInput
+  }
+
+  /**
+   * PasswordResetToken findFirst
+   */
+  export type PasswordResetTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which PasswordResetToken to fetch.
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasswordResetTokens to fetch.
+     */
+    orderBy?: PasswordResetTokenOrderByWithRelationInput | PasswordResetTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PasswordResetTokens.
+     */
+    cursor?: PasswordResetTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasswordResetTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasswordResetTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PasswordResetTokens.
+     */
+    distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * PasswordResetToken findFirstOrThrow
+   */
+  export type PasswordResetTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which PasswordResetToken to fetch.
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasswordResetTokens to fetch.
+     */
+    orderBy?: PasswordResetTokenOrderByWithRelationInput | PasswordResetTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PasswordResetTokens.
+     */
+    cursor?: PasswordResetTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasswordResetTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasswordResetTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PasswordResetTokens.
+     */
+    distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * PasswordResetToken findMany
+   */
+  export type PasswordResetTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which PasswordResetTokens to fetch.
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PasswordResetTokens to fetch.
+     */
+    orderBy?: PasswordResetTokenOrderByWithRelationInput | PasswordResetTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PasswordResetTokens.
+     */
+    cursor?: PasswordResetTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PasswordResetTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PasswordResetTokens.
+     */
+    skip?: number
+    distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * PasswordResetToken create
+   */
+  export type PasswordResetTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PasswordResetToken.
+     */
+    data: XOR<PasswordResetTokenCreateInput, PasswordResetTokenUncheckedCreateInput>
+  }
+
+  /**
+   * PasswordResetToken createMany
+   */
+  export type PasswordResetTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PasswordResetTokens.
+     */
+    data: PasswordResetTokenCreateManyInput | PasswordResetTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PasswordResetToken createManyAndReturn
+   */
+  export type PasswordResetTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many PasswordResetTokens.
+     */
+    data: PasswordResetTokenCreateManyInput | PasswordResetTokenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PasswordResetToken update
+   */
+  export type PasswordResetTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PasswordResetToken.
+     */
+    data: XOR<PasswordResetTokenUpdateInput, PasswordResetTokenUncheckedUpdateInput>
+    /**
+     * Choose, which PasswordResetToken to update.
+     */
+    where: PasswordResetTokenWhereUniqueInput
+  }
+
+  /**
+   * PasswordResetToken updateMany
+   */
+  export type PasswordResetTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PasswordResetTokens.
+     */
+    data: XOR<PasswordResetTokenUpdateManyMutationInput, PasswordResetTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which PasswordResetTokens to update
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * Limit how many PasswordResetTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PasswordResetToken updateManyAndReturn
+   */
+  export type PasswordResetTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update PasswordResetTokens.
+     */
+    data: XOR<PasswordResetTokenUpdateManyMutationInput, PasswordResetTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which PasswordResetTokens to update
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * Limit how many PasswordResetTokens to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PasswordResetToken upsert
+   */
+  export type PasswordResetTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PasswordResetToken to update in case it exists.
+     */
+    where: PasswordResetTokenWhereUniqueInput
+    /**
+     * In case the PasswordResetToken found by the `where` argument doesn't exist, create a new PasswordResetToken with this data.
+     */
+    create: XOR<PasswordResetTokenCreateInput, PasswordResetTokenUncheckedCreateInput>
+    /**
+     * In case the PasswordResetToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PasswordResetTokenUpdateInput, PasswordResetTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * PasswordResetToken delete
+   */
+  export type PasswordResetTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+    /**
+     * Filter which PasswordResetToken to delete.
+     */
+    where: PasswordResetTokenWhereUniqueInput
+  }
+
+  /**
+   * PasswordResetToken deleteMany
+   */
+  export type PasswordResetTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PasswordResetTokens to delete
+     */
+    where?: PasswordResetTokenWhereInput
+    /**
+     * Limit how many PasswordResetTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PasswordResetToken without action
+   */
+  export type PasswordResetTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PasswordResetToken
+     */
+    select?: PasswordResetTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PasswordResetToken
+     */
+    omit?: PasswordResetTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PasswordResetTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PaymentSubmission
+   */
+
+  export type AggregatePaymentSubmission = {
+    _count: PaymentSubmissionCountAggregateOutputType | null
+    _avg: PaymentSubmissionAvgAggregateOutputType | null
+    _sum: PaymentSubmissionSumAggregateOutputType | null
+    _min: PaymentSubmissionMinAggregateOutputType | null
+    _max: PaymentSubmissionMaxAggregateOutputType | null
+  }
+
+  export type PaymentSubmissionAvgAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    invoiceId: number | null
+    tenantId: number | null
+    submittedById: number | null
+    amountRupiah: number | null
+    fileSizeBytes: number | null
+    reviewedById: number | null
+  }
+
+  export type PaymentSubmissionSumAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    invoiceId: number | null
+    tenantId: number | null
+    submittedById: number | null
+    amountRupiah: number | null
+    fileSizeBytes: number | null
+    reviewedById: number | null
+  }
+
+  export type PaymentSubmissionMinAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    invoiceId: number | null
+    tenantId: number | null
+    submittedById: number | null
+    amountRupiah: number | null
+    paidAt: Date | null
+    paymentMethod: $Enums.PaymentMethod | null
+    senderName: string | null
+    senderBankName: string | null
+    referenceNumber: string | null
+    notes: string | null
+    fileKey: string | null
+    fileUrl: string | null
+    originalFilename: string | null
+    mimeType: string | null
+    fileSizeBytes: number | null
+    status: $Enums.PaymentSubmissionStatus | null
+    reviewedById: number | null
+    reviewedAt: Date | null
+    reviewNotes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaymentSubmissionMaxAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    invoiceId: number | null
+    tenantId: number | null
+    submittedById: number | null
+    amountRupiah: number | null
+    paidAt: Date | null
+    paymentMethod: $Enums.PaymentMethod | null
+    senderName: string | null
+    senderBankName: string | null
+    referenceNumber: string | null
+    notes: string | null
+    fileKey: string | null
+    fileUrl: string | null
+    originalFilename: string | null
+    mimeType: string | null
+    fileSizeBytes: number | null
+    status: $Enums.PaymentSubmissionStatus | null
+    reviewedById: number | null
+    reviewedAt: Date | null
+    reviewNotes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PaymentSubmissionCountAggregateOutputType = {
+    id: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: number
+    paymentMethod: number
+    senderName: number
+    senderBankName: number
+    referenceNumber: number
+    notes: number
+    fileKey: number
+    fileUrl: number
+    originalFilename: number
+    mimeType: number
+    fileSizeBytes: number
+    status: number
+    reviewedById: number
+    reviewedAt: number
+    reviewNotes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PaymentSubmissionAvgAggregateInputType = {
+    id?: true
+    stayId?: true
+    invoiceId?: true
+    tenantId?: true
+    submittedById?: true
+    amountRupiah?: true
+    fileSizeBytes?: true
+    reviewedById?: true
+  }
+
+  export type PaymentSubmissionSumAggregateInputType = {
+    id?: true
+    stayId?: true
+    invoiceId?: true
+    tenantId?: true
+    submittedById?: true
+    amountRupiah?: true
+    fileSizeBytes?: true
+    reviewedById?: true
+  }
+
+  export type PaymentSubmissionMinAggregateInputType = {
+    id?: true
+    stayId?: true
+    invoiceId?: true
+    tenantId?: true
+    submittedById?: true
+    amountRupiah?: true
+    paidAt?: true
+    paymentMethod?: true
+    senderName?: true
+    senderBankName?: true
+    referenceNumber?: true
+    notes?: true
+    fileKey?: true
+    fileUrl?: true
+    originalFilename?: true
+    mimeType?: true
+    fileSizeBytes?: true
+    status?: true
+    reviewedById?: true
+    reviewedAt?: true
+    reviewNotes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaymentSubmissionMaxAggregateInputType = {
+    id?: true
+    stayId?: true
+    invoiceId?: true
+    tenantId?: true
+    submittedById?: true
+    amountRupiah?: true
+    paidAt?: true
+    paymentMethod?: true
+    senderName?: true
+    senderBankName?: true
+    referenceNumber?: true
+    notes?: true
+    fileKey?: true
+    fileUrl?: true
+    originalFilename?: true
+    mimeType?: true
+    fileSizeBytes?: true
+    status?: true
+    reviewedById?: true
+    reviewedAt?: true
+    reviewNotes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PaymentSubmissionCountAggregateInputType = {
+    id?: true
+    stayId?: true
+    invoiceId?: true
+    tenantId?: true
+    submittedById?: true
+    amountRupiah?: true
+    paidAt?: true
+    paymentMethod?: true
+    senderName?: true
+    senderBankName?: true
+    referenceNumber?: true
+    notes?: true
+    fileKey?: true
+    fileUrl?: true
+    originalFilename?: true
+    mimeType?: true
+    fileSizeBytes?: true
+    status?: true
+    reviewedById?: true
+    reviewedAt?: true
+    reviewNotes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PaymentSubmissionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaymentSubmission to aggregate.
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentSubmissions to fetch.
+     */
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PaymentSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PaymentSubmissions
+    **/
+    _count?: true | PaymentSubmissionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PaymentSubmissionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PaymentSubmissionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PaymentSubmissionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PaymentSubmissionMaxAggregateInputType
+  }
+
+  export type GetPaymentSubmissionAggregateType<T extends PaymentSubmissionAggregateArgs> = {
+        [P in keyof T & keyof AggregatePaymentSubmission]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePaymentSubmission[P]>
+      : GetScalarType<T[P], AggregatePaymentSubmission[P]>
+  }
+
+
+
+
+  export type PaymentSubmissionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PaymentSubmissionWhereInput
+    orderBy?: PaymentSubmissionOrderByWithAggregationInput | PaymentSubmissionOrderByWithAggregationInput[]
+    by: PaymentSubmissionScalarFieldEnum[] | PaymentSubmissionScalarFieldEnum
+    having?: PaymentSubmissionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PaymentSubmissionCountAggregateInputType | true
+    _avg?: PaymentSubmissionAvgAggregateInputType
+    _sum?: PaymentSubmissionSumAggregateInputType
+    _min?: PaymentSubmissionMinAggregateInputType
+    _max?: PaymentSubmissionMaxAggregateInputType
+  }
+
+  export type PaymentSubmissionGroupByOutputType = {
+    id: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date
+    paymentMethod: $Enums.PaymentMethod
+    senderName: string | null
+    senderBankName: string | null
+    referenceNumber: string | null
+    notes: string | null
+    fileKey: string | null
+    fileUrl: string | null
+    originalFilename: string | null
+    mimeType: string | null
+    fileSizeBytes: number | null
+    status: $Enums.PaymentSubmissionStatus
+    reviewedById: number | null
+    reviewedAt: Date | null
+    reviewNotes: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PaymentSubmissionCountAggregateOutputType | null
+    _avg: PaymentSubmissionAvgAggregateOutputType | null
+    _sum: PaymentSubmissionSumAggregateOutputType | null
+    _min: PaymentSubmissionMinAggregateOutputType | null
+    _max: PaymentSubmissionMaxAggregateOutputType | null
+  }
+
+  type GetPaymentSubmissionGroupByPayload<T extends PaymentSubmissionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PaymentSubmissionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PaymentSubmissionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PaymentSubmissionGroupByOutputType[P]>
+            : GetScalarType<T[P], PaymentSubmissionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PaymentSubmissionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    invoiceId?: boolean
+    tenantId?: boolean
+    submittedById?: boolean
+    amountRupiah?: boolean
+    paidAt?: boolean
+    paymentMethod?: boolean
+    senderName?: boolean
+    senderBankName?: boolean
+    referenceNumber?: boolean
+    notes?: boolean
+    fileKey?: boolean
+    fileUrl?: boolean
+    originalFilename?: boolean
+    mimeType?: boolean
+    fileSizeBytes?: boolean
+    status?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    reviewNotes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentSubmission"]>
+
+  export type PaymentSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    invoiceId?: boolean
+    tenantId?: boolean
+    submittedById?: boolean
+    amountRupiah?: boolean
+    paidAt?: boolean
+    paymentMethod?: boolean
+    senderName?: boolean
+    senderBankName?: boolean
+    referenceNumber?: boolean
+    notes?: boolean
+    fileKey?: boolean
+    fileUrl?: boolean
+    originalFilename?: boolean
+    mimeType?: boolean
+    fileSizeBytes?: boolean
+    status?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    reviewNotes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentSubmission"]>
+
+  export type PaymentSubmissionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    invoiceId?: boolean
+    tenantId?: boolean
+    submittedById?: boolean
+    amountRupiah?: boolean
+    paidAt?: boolean
+    paymentMethod?: boolean
+    senderName?: boolean
+    senderBankName?: boolean
+    referenceNumber?: boolean
+    notes?: boolean
+    fileKey?: boolean
+    fileUrl?: boolean
+    originalFilename?: boolean
+    mimeType?: boolean
+    fileSizeBytes?: boolean
+    status?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    reviewNotes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["paymentSubmission"]>
+
+  export type PaymentSubmissionSelectScalar = {
+    id?: boolean
+    stayId?: boolean
+    invoiceId?: boolean
+    tenantId?: boolean
+    submittedById?: boolean
+    amountRupiah?: boolean
+    paidAt?: boolean
+    paymentMethod?: boolean
+    senderName?: boolean
+    senderBankName?: boolean
+    referenceNumber?: boolean
+    notes?: boolean
+    fileKey?: boolean
+    fileUrl?: boolean
+    originalFilename?: boolean
+    mimeType?: boolean
+    fileSizeBytes?: boolean
+    status?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    reviewNotes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PaymentSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "invoiceId" | "tenantId" | "submittedById" | "amountRupiah" | "paidAt" | "paymentMethod" | "senderName" | "senderBankName" | "referenceNumber" | "notes" | "fileKey" | "fileUrl" | "originalFilename" | "mimeType" | "fileSizeBytes" | "status" | "reviewedById" | "reviewedAt" | "reviewNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["paymentSubmission"]>
+  export type PaymentSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }
+  export type PaymentSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }
+  export type PaymentSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    submittedBy?: boolean | UserDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
+  }
+
+  export type $PaymentSubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PaymentSubmission"
+    objects: {
+      stay: Prisma.$StayPayload<ExtArgs>
+      invoice: Prisma.$InvoicePayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
+      submittedBy: Prisma.$UserPayload<ExtArgs>
+      reviewedBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      stayId: number
+      invoiceId: number
+      tenantId: number
+      submittedById: number
+      amountRupiah: number
+      paidAt: Date
+      paymentMethod: $Enums.PaymentMethod
+      senderName: string | null
+      senderBankName: string | null
+      referenceNumber: string | null
+      notes: string | null
+      fileKey: string | null
+      fileUrl: string | null
+      originalFilename: string | null
+      mimeType: string | null
+      fileSizeBytes: number | null
+      status: $Enums.PaymentSubmissionStatus
+      reviewedById: number | null
+      reviewedAt: Date | null
+      reviewNotes: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["paymentSubmission"]>
+    composites: {}
+  }
+
+  type PaymentSubmissionGetPayload<S extends boolean | null | undefined | PaymentSubmissionDefaultArgs> = $Result.GetResult<Prisma.$PaymentSubmissionPayload, S>
+
+  type PaymentSubmissionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PaymentSubmissionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PaymentSubmissionCountAggregateInputType | true
+    }
+
+  export interface PaymentSubmissionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PaymentSubmission'], meta: { name: 'PaymentSubmission' } }
+    /**
+     * Find zero or one PaymentSubmission that matches the filter.
+     * @param {PaymentSubmissionFindUniqueArgs} args - Arguments to find a PaymentSubmission
+     * @example
+     * // Get one PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PaymentSubmissionFindUniqueArgs>(args: SelectSubset<T, PaymentSubmissionFindUniqueArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PaymentSubmission that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PaymentSubmissionFindUniqueOrThrowArgs} args - Arguments to find a PaymentSubmission
+     * @example
+     * // Get one PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PaymentSubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, PaymentSubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaymentSubmission that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionFindFirstArgs} args - Arguments to find a PaymentSubmission
+     * @example
+     * // Get one PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PaymentSubmissionFindFirstArgs>(args?: SelectSubset<T, PaymentSubmissionFindFirstArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PaymentSubmission that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionFindFirstOrThrowArgs} args - Arguments to find a PaymentSubmission
+     * @example
+     * // Get one PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PaymentSubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, PaymentSubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PaymentSubmissions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PaymentSubmissions
+     * const paymentSubmissions = await prisma.paymentSubmission.findMany()
+     * 
+     * // Get first 10 PaymentSubmissions
+     * const paymentSubmissions = await prisma.paymentSubmission.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const paymentSubmissionWithIdOnly = await prisma.paymentSubmission.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PaymentSubmissionFindManyArgs>(args?: SelectSubset<T, PaymentSubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PaymentSubmission.
+     * @param {PaymentSubmissionCreateArgs} args - Arguments to create a PaymentSubmission.
+     * @example
+     * // Create one PaymentSubmission
+     * const PaymentSubmission = await prisma.paymentSubmission.create({
+     *   data: {
+     *     // ... data to create a PaymentSubmission
+     *   }
+     * })
+     * 
+     */
+    create<T extends PaymentSubmissionCreateArgs>(args: SelectSubset<T, PaymentSubmissionCreateArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PaymentSubmissions.
+     * @param {PaymentSubmissionCreateManyArgs} args - Arguments to create many PaymentSubmissions.
+     * @example
+     * // Create many PaymentSubmissions
+     * const paymentSubmission = await prisma.paymentSubmission.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PaymentSubmissionCreateManyArgs>(args?: SelectSubset<T, PaymentSubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PaymentSubmissions and returns the data saved in the database.
+     * @param {PaymentSubmissionCreateManyAndReturnArgs} args - Arguments to create many PaymentSubmissions.
+     * @example
+     * // Create many PaymentSubmissions
+     * const paymentSubmission = await prisma.paymentSubmission.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PaymentSubmissions and only return the `id`
+     * const paymentSubmissionWithIdOnly = await prisma.paymentSubmission.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PaymentSubmissionCreateManyAndReturnArgs>(args?: SelectSubset<T, PaymentSubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PaymentSubmission.
+     * @param {PaymentSubmissionDeleteArgs} args - Arguments to delete one PaymentSubmission.
+     * @example
+     * // Delete one PaymentSubmission
+     * const PaymentSubmission = await prisma.paymentSubmission.delete({
+     *   where: {
+     *     // ... filter to delete one PaymentSubmission
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PaymentSubmissionDeleteArgs>(args: SelectSubset<T, PaymentSubmissionDeleteArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PaymentSubmission.
+     * @param {PaymentSubmissionUpdateArgs} args - Arguments to update one PaymentSubmission.
+     * @example
+     * // Update one PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PaymentSubmissionUpdateArgs>(args: SelectSubset<T, PaymentSubmissionUpdateArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PaymentSubmissions.
+     * @param {PaymentSubmissionDeleteManyArgs} args - Arguments to filter PaymentSubmissions to delete.
+     * @example
+     * // Delete a few PaymentSubmissions
+     * const { count } = await prisma.paymentSubmission.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PaymentSubmissionDeleteManyArgs>(args?: SelectSubset<T, PaymentSubmissionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaymentSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PaymentSubmissions
+     * const paymentSubmission = await prisma.paymentSubmission.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PaymentSubmissionUpdateManyArgs>(args: SelectSubset<T, PaymentSubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PaymentSubmissions and returns the data updated in the database.
+     * @param {PaymentSubmissionUpdateManyAndReturnArgs} args - Arguments to update many PaymentSubmissions.
+     * @example
+     * // Update many PaymentSubmissions
+     * const paymentSubmission = await prisma.paymentSubmission.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PaymentSubmissions and only return the `id`
+     * const paymentSubmissionWithIdOnly = await prisma.paymentSubmission.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PaymentSubmissionUpdateManyAndReturnArgs>(args: SelectSubset<T, PaymentSubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PaymentSubmission.
+     * @param {PaymentSubmissionUpsertArgs} args - Arguments to update or create a PaymentSubmission.
+     * @example
+     * // Update or create a PaymentSubmission
+     * const paymentSubmission = await prisma.paymentSubmission.upsert({
+     *   create: {
+     *     // ... data to create a PaymentSubmission
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PaymentSubmission we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PaymentSubmissionUpsertArgs>(args: SelectSubset<T, PaymentSubmissionUpsertArgs<ExtArgs>>): Prisma__PaymentSubmissionClient<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PaymentSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionCountArgs} args - Arguments to filter PaymentSubmissions to count.
+     * @example
+     * // Count the number of PaymentSubmissions
+     * const count = await prisma.paymentSubmission.count({
+     *   where: {
+     *     // ... the filter for the PaymentSubmissions we want to count
+     *   }
+     * })
+    **/
+    count<T extends PaymentSubmissionCountArgs>(
+      args?: Subset<T, PaymentSubmissionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PaymentSubmissionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PaymentSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PaymentSubmissionAggregateArgs>(args: Subset<T, PaymentSubmissionAggregateArgs>): Prisma.PrismaPromise<GetPaymentSubmissionAggregateType<T>>
+
+    /**
+     * Group by PaymentSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PaymentSubmissionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PaymentSubmissionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PaymentSubmissionGroupByArgs['orderBy'] }
+        : { orderBy?: PaymentSubmissionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PaymentSubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPaymentSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PaymentSubmission model
+   */
+  readonly fields: PaymentSubmissionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PaymentSubmission.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PaymentSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    stay<T extends StayDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StayDefaultArgs<ExtArgs>>): Prisma__StayClient<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    invoice<T extends InvoiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InvoiceDefaultArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    submittedBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    reviewedBy<T extends PaymentSubmission$reviewedByArgs<ExtArgs> = {}>(args?: Subset<T, PaymentSubmission$reviewedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PaymentSubmission model
+   */
+  interface PaymentSubmissionFieldRefs {
+    readonly id: FieldRef<"PaymentSubmission", 'Int'>
+    readonly stayId: FieldRef<"PaymentSubmission", 'Int'>
+    readonly invoiceId: FieldRef<"PaymentSubmission", 'Int'>
+    readonly tenantId: FieldRef<"PaymentSubmission", 'Int'>
+    readonly submittedById: FieldRef<"PaymentSubmission", 'Int'>
+    readonly amountRupiah: FieldRef<"PaymentSubmission", 'Int'>
+    readonly paidAt: FieldRef<"PaymentSubmission", 'DateTime'>
+    readonly paymentMethod: FieldRef<"PaymentSubmission", 'PaymentMethod'>
+    readonly senderName: FieldRef<"PaymentSubmission", 'String'>
+    readonly senderBankName: FieldRef<"PaymentSubmission", 'String'>
+    readonly referenceNumber: FieldRef<"PaymentSubmission", 'String'>
+    readonly notes: FieldRef<"PaymentSubmission", 'String'>
+    readonly fileKey: FieldRef<"PaymentSubmission", 'String'>
+    readonly fileUrl: FieldRef<"PaymentSubmission", 'String'>
+    readonly originalFilename: FieldRef<"PaymentSubmission", 'String'>
+    readonly mimeType: FieldRef<"PaymentSubmission", 'String'>
+    readonly fileSizeBytes: FieldRef<"PaymentSubmission", 'Int'>
+    readonly status: FieldRef<"PaymentSubmission", 'PaymentSubmissionStatus'>
+    readonly reviewedById: FieldRef<"PaymentSubmission", 'Int'>
+    readonly reviewedAt: FieldRef<"PaymentSubmission", 'DateTime'>
+    readonly reviewNotes: FieldRef<"PaymentSubmission", 'String'>
+    readonly createdAt: FieldRef<"PaymentSubmission", 'DateTime'>
+    readonly updatedAt: FieldRef<"PaymentSubmission", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PaymentSubmission findUnique
+   */
+  export type PaymentSubmissionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentSubmission to fetch.
+     */
+    where: PaymentSubmissionWhereUniqueInput
+  }
+
+  /**
+   * PaymentSubmission findUniqueOrThrow
+   */
+  export type PaymentSubmissionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentSubmission to fetch.
+     */
+    where: PaymentSubmissionWhereUniqueInput
+  }
+
+  /**
+   * PaymentSubmission findFirst
+   */
+  export type PaymentSubmissionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentSubmission to fetch.
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentSubmissions to fetch.
+     */
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaymentSubmissions.
+     */
+    cursor?: PaymentSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaymentSubmissions.
+     */
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentSubmission findFirstOrThrow
+   */
+  export type PaymentSubmissionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentSubmission to fetch.
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentSubmissions to fetch.
+     */
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PaymentSubmissions.
+     */
+    cursor?: PaymentSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PaymentSubmissions.
+     */
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentSubmission findMany
+   */
+  export type PaymentSubmissionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which PaymentSubmissions to fetch.
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PaymentSubmissions to fetch.
+     */
+    orderBy?: PaymentSubmissionOrderByWithRelationInput | PaymentSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PaymentSubmissions.
+     */
+    cursor?: PaymentSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PaymentSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PaymentSubmissions.
+     */
+    skip?: number
+    distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * PaymentSubmission create
+   */
+  export type PaymentSubmissionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PaymentSubmission.
+     */
+    data: XOR<PaymentSubmissionCreateInput, PaymentSubmissionUncheckedCreateInput>
+  }
+
+  /**
+   * PaymentSubmission createMany
+   */
+  export type PaymentSubmissionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PaymentSubmissions.
+     */
+    data: PaymentSubmissionCreateManyInput | PaymentSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PaymentSubmission createManyAndReturn
+   */
+  export type PaymentSubmissionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to create many PaymentSubmissions.
+     */
+    data: PaymentSubmissionCreateManyInput | PaymentSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaymentSubmission update
+   */
+  export type PaymentSubmissionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PaymentSubmission.
+     */
+    data: XOR<PaymentSubmissionUpdateInput, PaymentSubmissionUncheckedUpdateInput>
+    /**
+     * Choose, which PaymentSubmission to update.
+     */
+    where: PaymentSubmissionWhereUniqueInput
+  }
+
+  /**
+   * PaymentSubmission updateMany
+   */
+  export type PaymentSubmissionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PaymentSubmissions.
+     */
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which PaymentSubmissions to update
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * Limit how many PaymentSubmissions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaymentSubmission updateManyAndReturn
+   */
+  export type PaymentSubmissionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to update PaymentSubmissions.
+     */
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which PaymentSubmissions to update
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * Limit how many PaymentSubmissions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PaymentSubmission upsert
+   */
+  export type PaymentSubmissionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PaymentSubmission to update in case it exists.
+     */
+    where: PaymentSubmissionWhereUniqueInput
+    /**
+     * In case the PaymentSubmission found by the `where` argument doesn't exist, create a new PaymentSubmission with this data.
+     */
+    create: XOR<PaymentSubmissionCreateInput, PaymentSubmissionUncheckedCreateInput>
+    /**
+     * In case the PaymentSubmission was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PaymentSubmissionUpdateInput, PaymentSubmissionUncheckedUpdateInput>
+  }
+
+  /**
+   * PaymentSubmission delete
+   */
+  export type PaymentSubmissionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter which PaymentSubmission to delete.
+     */
+    where: PaymentSubmissionWhereUniqueInput
+  }
+
+  /**
+   * PaymentSubmission deleteMany
+   */
+  export type PaymentSubmissionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PaymentSubmissions to delete
+     */
+    where?: PaymentSubmissionWhereInput
+    /**
+     * Limit how many PaymentSubmissions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PaymentSubmission.reviewedBy
+   */
+  export type PaymentSubmission$reviewedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * PaymentSubmission without action
+   */
+  export type PaymentSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PaymentSubmission
+     */
+    select?: PaymentSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PaymentSubmission
+     */
+    omit?: PaymentSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PaymentSubmissionInclude<ExtArgs> | null
   }
 
 
@@ -23184,6 +26125,7 @@ export namespace Prisma {
     tenantId: 'tenantId',
     isActive: 'isActive',
     lastLoginAt: 'lastLoginAt',
+    passwordChangedAt: 'passwordChangedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -23334,6 +26276,47 @@ export namespace Prisma {
   };
 
   export type InvoicePaymentScalarFieldEnum = (typeof InvoicePaymentScalarFieldEnum)[keyof typeof InvoicePaymentScalarFieldEnum]
+
+
+  export const PasswordResetTokenScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    token: 'token',
+    expiresAt: 'expiresAt',
+    usedAt: 'usedAt',
+    createdAt: 'createdAt'
+  };
+
+  export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+  export const PaymentSubmissionScalarFieldEnum: {
+    id: 'id',
+    stayId: 'stayId',
+    invoiceId: 'invoiceId',
+    tenantId: 'tenantId',
+    submittedById: 'submittedById',
+    amountRupiah: 'amountRupiah',
+    paidAt: 'paidAt',
+    paymentMethod: 'paymentMethod',
+    senderName: 'senderName',
+    senderBankName: 'senderBankName',
+    referenceNumber: 'referenceNumber',
+    notes: 'notes',
+    fileKey: 'fileKey',
+    fileUrl: 'fileUrl',
+    originalFilename: 'originalFilename',
+    mimeType: 'mimeType',
+    fileSizeBytes: 'fileSizeBytes',
+    status: 'status',
+    reviewedById: 'reviewedById',
+    reviewedAt: 'reviewedAt',
+    reviewNotes: 'reviewNotes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PaymentSubmissionScalarFieldEnum = (typeof PaymentSubmissionScalarFieldEnum)[keyof typeof PaymentSubmissionScalarFieldEnum]
 
 
   export const TicketScalarFieldEnum: {
@@ -23748,6 +26731,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PaymentSubmissionStatus'
+   */
+  export type EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentSubmissionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentSubmissionStatus[]'
+   */
+  export type ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentSubmissionStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'TicketStatus'
    */
   export type EnumTicketStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketStatus'>
@@ -23874,6 +26871,7 @@ export namespace Prisma {
     tenantId?: IntNullableFilter<"User"> | number | null
     isActive?: BoolFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -23887,6 +26885,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleListRelationFilter
     expensesCreated?: ExpenseListRelationFilter
     auditLogs?: AuditLogListRelationFilter
+    paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
+    paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
+    passwordResetTokens?: PasswordResetTokenListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -23898,6 +26899,7 @@ export namespace Prisma {
     tenantId?: SortOrderInput | SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tenant?: TenantOrderByWithRelationInput
@@ -23911,6 +26913,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleOrderByRelationAggregateInput
     expensesCreated?: ExpenseOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionOrderByRelationAggregateInput
+    paymentSubmissionsReviewed?: PaymentSubmissionOrderByRelationAggregateInput
+    passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -23925,6 +26930,7 @@ export namespace Prisma {
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     isActive?: BoolFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -23938,6 +26944,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleListRelationFilter
     expensesCreated?: ExpenseListRelationFilter
     auditLogs?: AuditLogListRelationFilter
+    paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
+    paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
+    passwordResetTokens?: PasswordResetTokenListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -23949,6 +26958,7 @@ export namespace Prisma {
     tenantId?: SortOrderInput | SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -23970,6 +26980,7 @@ export namespace Prisma {
     tenantId?: IntNullableWithAggregatesFilter<"User"> | number | null
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -23997,6 +27008,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -24019,6 +27031,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     stays?: StayOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
+    paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -24044,6 +27057,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }, "id">
 
   export type TenantOrderByWithAggregationInput = {
@@ -24255,6 +27269,7 @@ export namespace Prisma {
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }
 
   export type StayOrderByWithRelationInput = {
@@ -24290,6 +27305,7 @@ export namespace Prisma {
     invoices?: InvoiceOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
+    paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
   }
 
   export type StayWhereUniqueInput = Prisma.AtLeast<{
@@ -24328,6 +27344,7 @@ export namespace Prisma {
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }, "id">
 
   export type StayOrderByWithAggregationInput = {
@@ -24495,6 +27512,7 @@ export namespace Prisma {
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     lines?: InvoiceLineListRelationFilter
     payments?: InvoicePaymentListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }
 
   export type InvoiceOrderByWithRelationInput = {
@@ -24517,6 +27535,7 @@ export namespace Prisma {
     createdBy?: UserOrderByWithRelationInput
     lines?: InvoiceLineOrderByRelationAggregateInput
     payments?: InvoicePaymentOrderByRelationAggregateInput
+    paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
   }
 
   export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
@@ -24542,6 +27561,7 @@ export namespace Prisma {
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     lines?: InvoiceLineListRelationFilter
     payments?: InvoicePaymentListRelationFilter
+    paymentSubmissions?: PaymentSubmissionListRelationFilter
   }, "id" | "invoiceNumber">
 
   export type InvoiceOrderByWithAggregationInput = {
@@ -24763,6 +27783,227 @@ export namespace Prisma {
     capturedById?: IntNullableWithAggregatesFilter<"InvoicePayment"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"InvoicePayment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"InvoicePayment"> | Date | string
+  }
+
+  export type PasswordResetTokenWhereInput = {
+    AND?: PasswordResetTokenWhereInput | PasswordResetTokenWhereInput[]
+    OR?: PasswordResetTokenWhereInput[]
+    NOT?: PasswordResetTokenWhereInput | PasswordResetTokenWhereInput[]
+    id?: StringFilter<"PasswordResetToken"> | string
+    userId?: IntFilter<"PasswordResetToken"> | number
+    token?: StringFilter<"PasswordResetToken"> | string
+    expiresAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"PasswordResetToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type PasswordResetTokenOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type PasswordResetTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    token?: string
+    AND?: PasswordResetTokenWhereInput | PasswordResetTokenWhereInput[]
+    OR?: PasswordResetTokenWhereInput[]
+    NOT?: PasswordResetTokenWhereInput | PasswordResetTokenWhereInput[]
+    userId?: IntFilter<"PasswordResetToken"> | number
+    expiresAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"PasswordResetToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "token">
+
+  export type PasswordResetTokenOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: PasswordResetTokenCountOrderByAggregateInput
+    _avg?: PasswordResetTokenAvgOrderByAggregateInput
+    _max?: PasswordResetTokenMaxOrderByAggregateInput
+    _min?: PasswordResetTokenMinOrderByAggregateInput
+    _sum?: PasswordResetTokenSumOrderByAggregateInput
+  }
+
+  export type PasswordResetTokenScalarWhereWithAggregatesInput = {
+    AND?: PasswordResetTokenScalarWhereWithAggregatesInput | PasswordResetTokenScalarWhereWithAggregatesInput[]
+    OR?: PasswordResetTokenScalarWhereWithAggregatesInput[]
+    NOT?: PasswordResetTokenScalarWhereWithAggregatesInput | PasswordResetTokenScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PasswordResetToken"> | string
+    userId?: IntWithAggregatesFilter<"PasswordResetToken"> | number
+    token?: StringWithAggregatesFilter<"PasswordResetToken"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"PasswordResetToken"> | Date | string
+    usedAt?: DateTimeNullableWithAggregatesFilter<"PasswordResetToken"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PasswordResetToken"> | Date | string
+  }
+
+  export type PaymentSubmissionWhereInput = {
+    AND?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
+    OR?: PaymentSubmissionWhereInput[]
+    NOT?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
+    id?: IntFilter<"PaymentSubmission"> | number
+    stayId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    tenantId?: IntFilter<"PaymentSubmission"> | number
+    submittedById?: IntFilter<"PaymentSubmission"> | number
+    amountRupiah?: IntFilter<"PaymentSubmission"> | number
+    paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
+    notes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileKey?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileUrl?: StringNullableFilter<"PaymentSubmission"> | string | null
+    originalFilename?: StringNullableFilter<"PaymentSubmission"> | string | null
+    mimeType?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileSizeBytes?: IntNullableFilter<"PaymentSubmission"> | number | null
+    status?: EnumPaymentSubmissionStatusFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionStatus
+    reviewedById?: IntNullableFilter<"PaymentSubmission"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"PaymentSubmission"> | Date | string | null
+    reviewNotes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    createdAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    submittedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type PaymentSubmissionOrderByWithRelationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    paidAt?: SortOrder
+    paymentMethod?: SortOrder
+    senderName?: SortOrderInput | SortOrder
+    senderBankName?: SortOrderInput | SortOrder
+    referenceNumber?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    fileKey?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    originalFilename?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    fileSizeBytes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    reviewedById?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    reviewNotes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    stay?: StayOrderByWithRelationInput
+    invoice?: InvoiceOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+    submittedBy?: UserOrderByWithRelationInput
+    reviewedBy?: UserOrderByWithRelationInput
+  }
+
+  export type PaymentSubmissionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
+    OR?: PaymentSubmissionWhereInput[]
+    NOT?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
+    stayId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    tenantId?: IntFilter<"PaymentSubmission"> | number
+    submittedById?: IntFilter<"PaymentSubmission"> | number
+    amountRupiah?: IntFilter<"PaymentSubmission"> | number
+    paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
+    notes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileKey?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileUrl?: StringNullableFilter<"PaymentSubmission"> | string | null
+    originalFilename?: StringNullableFilter<"PaymentSubmission"> | string | null
+    mimeType?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileSizeBytes?: IntNullableFilter<"PaymentSubmission"> | number | null
+    status?: EnumPaymentSubmissionStatusFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionStatus
+    reviewedById?: IntNullableFilter<"PaymentSubmission"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"PaymentSubmission"> | Date | string | null
+    reviewNotes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    createdAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    submittedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type PaymentSubmissionOrderByWithAggregationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    paidAt?: SortOrder
+    paymentMethod?: SortOrder
+    senderName?: SortOrderInput | SortOrder
+    senderBankName?: SortOrderInput | SortOrder
+    referenceNumber?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    fileKey?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    originalFilename?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    fileSizeBytes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    reviewedById?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    reviewNotes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PaymentSubmissionCountOrderByAggregateInput
+    _avg?: PaymentSubmissionAvgOrderByAggregateInput
+    _max?: PaymentSubmissionMaxOrderByAggregateInput
+    _min?: PaymentSubmissionMinOrderByAggregateInput
+    _sum?: PaymentSubmissionSumOrderByAggregateInput
+  }
+
+  export type PaymentSubmissionScalarWhereWithAggregatesInput = {
+    AND?: PaymentSubmissionScalarWhereWithAggregatesInput | PaymentSubmissionScalarWhereWithAggregatesInput[]
+    OR?: PaymentSubmissionScalarWhereWithAggregatesInput[]
+    NOT?: PaymentSubmissionScalarWhereWithAggregatesInput | PaymentSubmissionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    stayId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    invoiceId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    tenantId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    submittedById?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    amountRupiah?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    paidAt?: DateTimeWithAggregatesFilter<"PaymentSubmission"> | Date | string
+    paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    senderName?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    senderBankName?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    referenceNumber?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    fileKey?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    fileUrl?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    originalFilename?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    mimeType?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    fileSizeBytes?: IntNullableWithAggregatesFilter<"PaymentSubmission"> | number | null
+    status?: EnumPaymentSubmissionStatusWithAggregatesFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionStatus
+    reviewedById?: IntNullableWithAggregatesFilter<"PaymentSubmission"> | number | null
+    reviewedAt?: DateTimeNullableWithAggregatesFilter<"PaymentSubmission"> | Date | string | null
+    reviewNotes?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PaymentSubmission"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PaymentSubmission"> | Date | string
   }
 
   export type TicketWhereInput = {
@@ -25486,6 +28727,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -25499,6 +28741,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -25510,6 +28755,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -25522,6 +28768,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -25531,6 +28780,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -25544,6 +28794,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -25555,6 +28808,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -25567,6 +28821,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -25578,6 +28835,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -25589,6 +28847,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25602,6 +28861,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25625,6 +28885,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutTenantInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -25647,6 +28908,7 @@ export namespace Prisma {
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -25668,6 +28930,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutTenantNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -25690,6 +28953,7 @@ export namespace Prisma {
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -25931,6 +29195,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateInput = {
@@ -25963,6 +29228,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayUpdateInput = {
@@ -25994,6 +29260,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateInput = {
@@ -26026,6 +29293,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayCreateManyInput = {
@@ -26200,6 +29468,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutInvoicesCreatedInput
     lines?: InvoiceLineCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateInput = {
@@ -26220,6 +29489,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     lines?: InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentUncheckedCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUpdateInput = {
@@ -26239,6 +29509,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutInvoicesCreatedNestedInput
     lines?: InvoiceLineUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateInput = {
@@ -26259,6 +29530,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUncheckedUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceCreateManyInput = {
@@ -26495,6 +29767,242 @@ export namespace Prisma {
     referenceNo?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     capturedById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenCreateInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutPasswordResetTokensInput
+  }
+
+  export type PasswordResetTokenUncheckedCreateInput = {
+    id?: string
+    userId: number
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type PasswordResetTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput
+  }
+
+  export type PasswordResetTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenCreateManyInput = {
+    id?: string
+    userId: number
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type PasswordResetTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionCreateInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
+    submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
+    reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionUpdateInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
+    reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionCreateManyInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionUpdateManyMutationInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -27374,6 +30882,18 @@ export namespace Prisma {
     none?: AuditLogWhereInput
   }
 
+  export type PaymentSubmissionListRelationFilter = {
+    every?: PaymentSubmissionWhereInput
+    some?: PaymentSubmissionWhereInput
+    none?: PaymentSubmissionWhereInput
+  }
+
+  export type PasswordResetTokenListRelationFilter = {
+    every?: PasswordResetTokenWhereInput
+    some?: PasswordResetTokenWhereInput
+    none?: PasswordResetTokenWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -27419,6 +30939,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type PaymentSubmissionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PasswordResetTokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     fullName?: SortOrder
@@ -27428,6 +30956,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -27446,6 +30975,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -27459,6 +30989,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     isActive?: SortOrder
     lastLoginAt?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -28367,6 +31898,163 @@ export namespace Prisma {
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type PasswordResetTokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PasswordResetTokenAvgOrderByAggregateInput = {
+    userId?: SortOrder
+  }
+
+  export type PasswordResetTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PasswordResetTokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PasswordResetTokenSumOrderByAggregateInput = {
+    userId?: SortOrder
+  }
+
+  export type EnumPaymentSubmissionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+  }
+
+  export type PaymentSubmissionCountOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    paidAt?: SortOrder
+    paymentMethod?: SortOrder
+    senderName?: SortOrder
+    senderBankName?: SortOrder
+    referenceNumber?: SortOrder
+    notes?: SortOrder
+    fileKey?: SortOrder
+    fileUrl?: SortOrder
+    originalFilename?: SortOrder
+    mimeType?: SortOrder
+    fileSizeBytes?: SortOrder
+    status?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    reviewNotes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentSubmissionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    fileSizeBytes?: SortOrder
+    reviewedById?: SortOrder
+  }
+
+  export type PaymentSubmissionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    paidAt?: SortOrder
+    paymentMethod?: SortOrder
+    senderName?: SortOrder
+    senderBankName?: SortOrder
+    referenceNumber?: SortOrder
+    notes?: SortOrder
+    fileKey?: SortOrder
+    fileUrl?: SortOrder
+    originalFilename?: SortOrder
+    mimeType?: SortOrder
+    fileSizeBytes?: SortOrder
+    status?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    reviewNotes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentSubmissionMinOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    paidAt?: SortOrder
+    paymentMethod?: SortOrder
+    senderName?: SortOrder
+    senderBankName?: SortOrder
+    referenceNumber?: SortOrder
+    notes?: SortOrder
+    fileKey?: SortOrder
+    fileUrl?: SortOrder
+    originalFilename?: SortOrder
+    mimeType?: SortOrder
+    fileSizeBytes?: SortOrder
+    status?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    reviewNotes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PaymentSubmissionSumOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    invoiceId?: SortOrder
+    tenantId?: SortOrder
+    submittedById?: SortOrder
+    amountRupiah?: SortOrder
+    fileSizeBytes?: SortOrder
+    reviewedById?: SortOrder
+  }
+
+  export type EnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel>
+    _max?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel>
+  }
+
   export type EnumTicketStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
@@ -29044,6 +32732,27 @@ export namespace Prisma {
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
   }
 
+  export type PaymentSubmissionCreateNestedManyWithoutSubmittedByInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput> | PaymentSubmissionCreateWithoutSubmittedByInput[] | PaymentSubmissionUncheckedCreateWithoutSubmittedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutSubmittedByInput | PaymentSubmissionCreateOrConnectWithoutSubmittedByInput[]
+    createMany?: PaymentSubmissionCreateManySubmittedByInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionCreateNestedManyWithoutReviewedByInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput> | PaymentSubmissionCreateWithoutReviewedByInput[] | PaymentSubmissionUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutReviewedByInput | PaymentSubmissionCreateOrConnectWithoutReviewedByInput[]
+    createMany?: PaymentSubmissionCreateManyReviewedByInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type PasswordResetTokenCreateNestedManyWithoutUserInput = {
+    create?: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput> | PasswordResetTokenCreateWithoutUserInput[] | PasswordResetTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
+    createMany?: PasswordResetTokenCreateManyUserInputEnvelope
+    connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -29112,6 +32821,27 @@ export namespace Prisma {
     connectOrCreate?: AuditLogCreateOrConnectWithoutActorUserInput | AuditLogCreateOrConnectWithoutActorUserInput[]
     createMany?: AuditLogCreateManyActorUserInputEnvelope
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput> | PaymentSubmissionCreateWithoutSubmittedByInput[] | PaymentSubmissionUncheckedCreateWithoutSubmittedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutSubmittedByInput | PaymentSubmissionCreateOrConnectWithoutSubmittedByInput[]
+    createMany?: PaymentSubmissionCreateManySubmittedByInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput> | PaymentSubmissionCreateWithoutReviewedByInput[] | PaymentSubmissionUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutReviewedByInput | PaymentSubmissionCreateOrConnectWithoutReviewedByInput[]
+    createMany?: PaymentSubmissionCreateManyReviewedByInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput> | PasswordResetTokenCreateWithoutUserInput[] | PasswordResetTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
+    createMany?: PasswordResetTokenCreateManyUserInputEnvelope
+    connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -29284,6 +33014,48 @@ export namespace Prisma {
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
   }
 
+  export type PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput> | PaymentSubmissionCreateWithoutSubmittedByInput[] | PaymentSubmissionUncheckedCreateWithoutSubmittedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutSubmittedByInput | PaymentSubmissionCreateOrConnectWithoutSubmittedByInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutSubmittedByInput | PaymentSubmissionUpsertWithWhereUniqueWithoutSubmittedByInput[]
+    createMany?: PaymentSubmissionCreateManySubmittedByInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutSubmittedByInput | PaymentSubmissionUpdateWithWhereUniqueWithoutSubmittedByInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutSubmittedByInput | PaymentSubmissionUpdateManyWithWhereWithoutSubmittedByInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type PaymentSubmissionUpdateManyWithoutReviewedByNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput> | PaymentSubmissionCreateWithoutReviewedByInput[] | PaymentSubmissionUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutReviewedByInput | PaymentSubmissionCreateOrConnectWithoutReviewedByInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput | PaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput[]
+    createMany?: PaymentSubmissionCreateManyReviewedByInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutReviewedByInput | PaymentSubmissionUpdateWithWhereUniqueWithoutReviewedByInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput | PaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type PasswordResetTokenUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput> | PasswordResetTokenCreateWithoutUserInput[] | PasswordResetTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
+    upsert?: PasswordResetTokenUpsertWithWhereUniqueWithoutUserInput | PasswordResetTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PasswordResetTokenCreateManyUserInputEnvelope
+    set?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    disconnect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    delete?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    update?: PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput | PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PasswordResetTokenUpdateManyWithWhereWithoutUserInput | PasswordResetTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -29440,6 +33212,48 @@ export namespace Prisma {
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
   }
 
+  export type PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput> | PaymentSubmissionCreateWithoutSubmittedByInput[] | PaymentSubmissionUncheckedCreateWithoutSubmittedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutSubmittedByInput | PaymentSubmissionCreateOrConnectWithoutSubmittedByInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutSubmittedByInput | PaymentSubmissionUpsertWithWhereUniqueWithoutSubmittedByInput[]
+    createMany?: PaymentSubmissionCreateManySubmittedByInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutSubmittedByInput | PaymentSubmissionUpdateWithWhereUniqueWithoutSubmittedByInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutSubmittedByInput | PaymentSubmissionUpdateManyWithWhereWithoutSubmittedByInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput> | PaymentSubmissionCreateWithoutReviewedByInput[] | PaymentSubmissionUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutReviewedByInput | PaymentSubmissionCreateOrConnectWithoutReviewedByInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput | PaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput[]
+    createMany?: PaymentSubmissionCreateManyReviewedByInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutReviewedByInput | PaymentSubmissionUpdateWithWhereUniqueWithoutReviewedByInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput | PaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput> | PasswordResetTokenCreateWithoutUserInput[] | PasswordResetTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
+    upsert?: PasswordResetTokenUpsertWithWhereUniqueWithoutUserInput | PasswordResetTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PasswordResetTokenCreateManyUserInputEnvelope
+    set?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    disconnect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    delete?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+    update?: PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput | PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PasswordResetTokenUpdateManyWithWhereWithoutUserInput | PasswordResetTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -29460,6 +33274,13 @@ export namespace Prisma {
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
   }
 
+  export type PaymentSubmissionCreateNestedManyWithoutTenantInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput> | PaymentSubmissionCreateWithoutTenantInput[] | PaymentSubmissionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutTenantInput | PaymentSubmissionCreateOrConnectWithoutTenantInput[]
+    createMany?: PaymentSubmissionCreateManyTenantInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -29478,6 +33299,13 @@ export namespace Prisma {
     connectOrCreate?: TicketCreateOrConnectWithoutTenantInput | TicketCreateOrConnectWithoutTenantInput[]
     createMany?: TicketCreateManyTenantInputEnvelope
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput> | PaymentSubmissionCreateWithoutTenantInput[] | PaymentSubmissionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutTenantInput | PaymentSubmissionCreateOrConnectWithoutTenantInput[]
+    createMany?: PaymentSubmissionCreateManyTenantInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -29526,6 +33354,20 @@ export namespace Prisma {
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
   }
 
+  export type PaymentSubmissionUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput> | PaymentSubmissionCreateWithoutTenantInput[] | PaymentSubmissionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutTenantInput | PaymentSubmissionCreateOrConnectWithoutTenantInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutTenantInput | PaymentSubmissionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: PaymentSubmissionCreateManyTenantInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput | PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutTenantInput | PaymentSubmissionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateOneWithoutTenantNestedInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -29562,6 +33404,20 @@ export namespace Prisma {
     update?: TicketUpdateWithWhereUniqueWithoutTenantInput | TicketUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutTenantInput | TicketUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput> | PaymentSubmissionCreateWithoutTenantInput[] | PaymentSubmissionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutTenantInput | PaymentSubmissionCreateOrConnectWithoutTenantInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutTenantInput | PaymentSubmissionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: PaymentSubmissionCreateManyTenantInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput | PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutTenantInput | PaymentSubmissionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
   export type StayCreateNestedManyWithoutRoomInput = {
@@ -29859,6 +33715,13 @@ export namespace Prisma {
     connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
   }
 
+  export type PaymentSubmissionCreateNestedManyWithoutStayInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput> | PaymentSubmissionCreateWithoutStayInput[] | PaymentSubmissionUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutStayInput | PaymentSubmissionCreateOrConnectWithoutStayInput[]
+    createMany?: PaymentSubmissionCreateManyStayInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
   export type InvoiceUncheckedCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -29878,6 +33741,13 @@ export namespace Prisma {
     connectOrCreate?: ExpenseCreateOrConnectWithoutStayInput | ExpenseCreateOrConnectWithoutStayInput[]
     createMany?: ExpenseCreateManyStayInputEnvelope
     connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput> | PaymentSubmissionCreateWithoutStayInput[] | PaymentSubmissionUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutStayInput | PaymentSubmissionCreateOrConnectWithoutStayInput[]
+    createMany?: PaymentSubmissionCreateManyStayInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
   }
 
   export type EnumStayStatusFieldUpdateOperationsInput = {
@@ -29968,6 +33838,20 @@ export namespace Prisma {
     deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
   }
 
+  export type PaymentSubmissionUpdateManyWithoutStayNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput> | PaymentSubmissionCreateWithoutStayInput[] | PaymentSubmissionUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutStayInput | PaymentSubmissionCreateOrConnectWithoutStayInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutStayInput | PaymentSubmissionUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: PaymentSubmissionCreateManyStayInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput | PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutStayInput | PaymentSubmissionUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
   export type InvoiceUncheckedUpdateManyWithoutStayNestedInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -30008,6 +33892,20 @@ export namespace Prisma {
     update?: ExpenseUpdateWithWhereUniqueWithoutStayInput | ExpenseUpdateWithWhereUniqueWithoutStayInput[]
     updateMany?: ExpenseUpdateManyWithWhereWithoutStayInput | ExpenseUpdateManyWithWhereWithoutStayInput[]
     deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput> | PaymentSubmissionCreateWithoutStayInput[] | PaymentSubmissionUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutStayInput | PaymentSubmissionCreateOrConnectWithoutStayInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutStayInput | PaymentSubmissionUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: PaymentSubmissionCreateManyStayInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput | PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutStayInput | PaymentSubmissionUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
   export type RoomCreateNestedOneWithoutMeterReadingsInput = {
@@ -30078,6 +33976,13 @@ export namespace Prisma {
     connect?: InvoicePaymentWhereUniqueInput | InvoicePaymentWhereUniqueInput[]
   }
 
+  export type PaymentSubmissionCreateNestedManyWithoutInvoiceInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput> | PaymentSubmissionCreateWithoutInvoiceInput[] | PaymentSubmissionUncheckedCreateWithoutInvoiceInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutInvoiceInput | PaymentSubmissionCreateOrConnectWithoutInvoiceInput[]
+    createMany?: PaymentSubmissionCreateManyInvoiceInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
   export type InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput = {
     create?: XOR<InvoiceLineCreateWithoutInvoiceInput, InvoiceLineUncheckedCreateWithoutInvoiceInput> | InvoiceLineCreateWithoutInvoiceInput[] | InvoiceLineUncheckedCreateWithoutInvoiceInput[]
     connectOrCreate?: InvoiceLineCreateOrConnectWithoutInvoiceInput | InvoiceLineCreateOrConnectWithoutInvoiceInput[]
@@ -30090,6 +33995,13 @@ export namespace Prisma {
     connectOrCreate?: InvoicePaymentCreateOrConnectWithoutInvoiceInput | InvoicePaymentCreateOrConnectWithoutInvoiceInput[]
     createMany?: InvoicePaymentCreateManyInvoiceInputEnvelope
     connect?: InvoicePaymentWhereUniqueInput | InvoicePaymentWhereUniqueInput[]
+  }
+
+  export type PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput> | PaymentSubmissionCreateWithoutInvoiceInput[] | PaymentSubmissionUncheckedCreateWithoutInvoiceInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutInvoiceInput | PaymentSubmissionCreateOrConnectWithoutInvoiceInput[]
+    createMany?: PaymentSubmissionCreateManyInvoiceInputEnvelope
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
   }
 
   export type EnumInvoiceStatusFieldUpdateOperationsInput = {
@@ -30142,6 +34054,20 @@ export namespace Prisma {
     deleteMany?: InvoicePaymentScalarWhereInput | InvoicePaymentScalarWhereInput[]
   }
 
+  export type PaymentSubmissionUpdateManyWithoutInvoiceNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput> | PaymentSubmissionCreateWithoutInvoiceInput[] | PaymentSubmissionUncheckedCreateWithoutInvoiceInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutInvoiceInput | PaymentSubmissionCreateOrConnectWithoutInvoiceInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutInvoiceInput | PaymentSubmissionUpsertWithWhereUniqueWithoutInvoiceInput[]
+    createMany?: PaymentSubmissionCreateManyInvoiceInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutInvoiceInput | PaymentSubmissionUpdateWithWhereUniqueWithoutInvoiceInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutInvoiceInput | PaymentSubmissionUpdateManyWithWhereWithoutInvoiceInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
   export type InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput = {
     create?: XOR<InvoiceLineCreateWithoutInvoiceInput, InvoiceLineUncheckedCreateWithoutInvoiceInput> | InvoiceLineCreateWithoutInvoiceInput[] | InvoiceLineUncheckedCreateWithoutInvoiceInput[]
     connectOrCreate?: InvoiceLineCreateOrConnectWithoutInvoiceInput | InvoiceLineCreateOrConnectWithoutInvoiceInput[]
@@ -30168,6 +34094,20 @@ export namespace Prisma {
     update?: InvoicePaymentUpdateWithWhereUniqueWithoutInvoiceInput | InvoicePaymentUpdateWithWhereUniqueWithoutInvoiceInput[]
     updateMany?: InvoicePaymentUpdateManyWithWhereWithoutInvoiceInput | InvoicePaymentUpdateManyWithWhereWithoutInvoiceInput[]
     deleteMany?: InvoicePaymentScalarWhereInput | InvoicePaymentScalarWhereInput[]
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput = {
+    create?: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput> | PaymentSubmissionCreateWithoutInvoiceInput[] | PaymentSubmissionUncheckedCreateWithoutInvoiceInput[]
+    connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutInvoiceInput | PaymentSubmissionCreateOrConnectWithoutInvoiceInput[]
+    upsert?: PaymentSubmissionUpsertWithWhereUniqueWithoutInvoiceInput | PaymentSubmissionUpsertWithWhereUniqueWithoutInvoiceInput[]
+    createMany?: PaymentSubmissionCreateManyInvoiceInputEnvelope
+    set?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    disconnect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    delete?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+    update?: PaymentSubmissionUpdateWithWhereUniqueWithoutInvoiceInput | PaymentSubmissionUpdateWithWhereUniqueWithoutInvoiceInput[]
+    updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutInvoiceInput | PaymentSubmissionUpdateManyWithWhereWithoutInvoiceInput[]
+    deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
   export type InvoiceCreateNestedOneWithoutLinesInput = {
@@ -30224,6 +34164,96 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPaymentsCapturedInput, UserUpdateWithoutPaymentsCapturedInput>, UserUncheckedUpdateWithoutPaymentsCapturedInput>
+  }
+
+  export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+    create?: XOR<UserCreateWithoutPasswordResetTokensInput, UserUncheckedCreateWithoutPasswordResetTokensInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPasswordResetTokensInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+    create?: XOR<UserCreateWithoutPasswordResetTokensInput, UserUncheckedCreateWithoutPasswordResetTokensInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPasswordResetTokensInput
+    upsert?: UserUpsertWithoutPasswordResetTokensInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, UserUpdateWithoutPasswordResetTokensInput>, UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  }
+
+  export type StayCreateNestedOneWithoutPaymentSubmissionsInput = {
+    create?: XOR<StayCreateWithoutPaymentSubmissionsInput, StayUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: StayCreateOrConnectWithoutPaymentSubmissionsInput
+    connect?: StayWhereUniqueInput
+  }
+
+  export type InvoiceCreateNestedOneWithoutPaymentSubmissionsInput = {
+    create?: XOR<InvoiceCreateWithoutPaymentSubmissionsInput, InvoiceUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutPaymentSubmissionsInput
+    connect?: InvoiceWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutPaymentSubmissionsInput = {
+    create?: XOR<TenantCreateWithoutPaymentSubmissionsInput, TenantUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPaymentSubmissionsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput = {
+    create?: XOR<UserCreateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput = {
+    create?: XOR<UserCreateWithoutPaymentSubmissionsReviewedInput, UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumPaymentSubmissionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentSubmissionStatus
+  }
+
+  export type StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput = {
+    create?: XOR<StayCreateWithoutPaymentSubmissionsInput, StayUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: StayCreateOrConnectWithoutPaymentSubmissionsInput
+    upsert?: StayUpsertWithoutPaymentSubmissionsInput
+    connect?: StayWhereUniqueInput
+    update?: XOR<XOR<StayUpdateToOneWithWhereWithoutPaymentSubmissionsInput, StayUpdateWithoutPaymentSubmissionsInput>, StayUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput = {
+    create?: XOR<InvoiceCreateWithoutPaymentSubmissionsInput, InvoiceUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutPaymentSubmissionsInput
+    upsert?: InvoiceUpsertWithoutPaymentSubmissionsInput
+    connect?: InvoiceWhereUniqueInput
+    update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutPaymentSubmissionsInput, InvoiceUpdateWithoutPaymentSubmissionsInput>, InvoiceUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput = {
+    create?: XOR<TenantCreateWithoutPaymentSubmissionsInput, TenantUncheckedCreateWithoutPaymentSubmissionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPaymentSubmissionsInput
+    upsert?: TenantUpsertWithoutPaymentSubmissionsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutPaymentSubmissionsInput, TenantUpdateWithoutPaymentSubmissionsInput>, TenantUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput = {
+    create?: XOR<UserCreateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput
+    upsert?: UserUpsertWithoutPaymentSubmissionsSubmittedInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPaymentSubmissionsSubmittedInput, UserUpdateWithoutPaymentSubmissionsSubmittedInput>, UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput>
+  }
+
+  export type UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput = {
+    create?: XOR<UserCreateWithoutPaymentSubmissionsReviewedInput, UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput
+    upsert?: UserUpsertWithoutPaymentSubmissionsReviewedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPaymentSubmissionsReviewedInput, UserUpdateWithoutPaymentSubmissionsReviewedInput>, UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput>
   }
 
   export type TenantCreateNestedOneWithoutTicketsInput = {
@@ -31015,6 +35045,23 @@ export namespace Prisma {
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
+  export type NestedEnumPaymentSubmissionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+  }
+
+  export type NestedEnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel>
+    _max?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumTicketStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TicketStatus | EnumTicketStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TicketStatus[] | ListEnumTicketStatusFieldRefInput<$PrismaModel>
@@ -31158,6 +35205,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUserInput = {
@@ -31179,6 +35227,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUserInput = {
@@ -31251,6 +35300,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCreatedByInput = {
@@ -31282,6 +35332,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCreatedByInput = {
@@ -31310,6 +35361,7 @@ export namespace Prisma {
     stay: StayCreateNestedOneWithoutInvoicesInput
     lines?: InvoiceLineCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutCreatedByInput = {
@@ -31329,6 +35381,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     lines?: InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentUncheckedCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceCreateOrConnectWithoutCreatedByInput = {
@@ -31578,6 +35631,150 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaymentSubmissionCreateWithoutSubmittedByInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
+    reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateWithoutSubmittedByInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateOrConnectWithoutSubmittedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    create: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput>
+  }
+
+  export type PaymentSubmissionCreateManySubmittedByInputEnvelope = {
+    data: PaymentSubmissionCreateManySubmittedByInput | PaymentSubmissionCreateManySubmittedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PaymentSubmissionCreateWithoutReviewedByInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
+    submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateWithoutReviewedByInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateOrConnectWithoutReviewedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    create: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput>
+  }
+
+  export type PaymentSubmissionCreateManyReviewedByInputEnvelope = {
+    data: PaymentSubmissionCreateManyReviewedByInput | PaymentSubmissionCreateManyReviewedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PasswordResetTokenCreateWithoutUserInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type PasswordResetTokenUncheckedCreateWithoutUserInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type PasswordResetTokenCreateOrConnectWithoutUserInput = {
+    where: PasswordResetTokenWhereUniqueInput
+    create: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type PasswordResetTokenCreateManyUserInputEnvelope = {
+    data: PasswordResetTokenCreateManyUserInput | PasswordResetTokenCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutUserInput = {
     update: XOR<TenantUpdateWithoutUserInput, TenantUncheckedUpdateWithoutUserInput>
     create: XOR<TenantCreateWithoutUserInput, TenantUncheckedCreateWithoutUserInput>
@@ -31607,6 +35804,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUserInput = {
@@ -31628,6 +35826,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AnnouncementUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -31976,6 +36175,95 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
   }
 
+  export type PaymentSubmissionUpsertWithWhereUniqueWithoutSubmittedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    update: XOR<PaymentSubmissionUpdateWithoutSubmittedByInput, PaymentSubmissionUncheckedUpdateWithoutSubmittedByInput>
+    create: XOR<PaymentSubmissionCreateWithoutSubmittedByInput, PaymentSubmissionUncheckedCreateWithoutSubmittedByInput>
+  }
+
+  export type PaymentSubmissionUpdateWithWhereUniqueWithoutSubmittedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    data: XOR<PaymentSubmissionUpdateWithoutSubmittedByInput, PaymentSubmissionUncheckedUpdateWithoutSubmittedByInput>
+  }
+
+  export type PaymentSubmissionUpdateManyWithWhereWithoutSubmittedByInput = {
+    where: PaymentSubmissionScalarWhereInput
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByInput>
+  }
+
+  export type PaymentSubmissionScalarWhereInput = {
+    AND?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+    OR?: PaymentSubmissionScalarWhereInput[]
+    NOT?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+    id?: IntFilter<"PaymentSubmission"> | number
+    stayId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    tenantId?: IntFilter<"PaymentSubmission"> | number
+    submittedById?: IntFilter<"PaymentSubmission"> | number
+    amountRupiah?: IntFilter<"PaymentSubmission"> | number
+    paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
+    referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
+    notes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileKey?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileUrl?: StringNullableFilter<"PaymentSubmission"> | string | null
+    originalFilename?: StringNullableFilter<"PaymentSubmission"> | string | null
+    mimeType?: StringNullableFilter<"PaymentSubmission"> | string | null
+    fileSizeBytes?: IntNullableFilter<"PaymentSubmission"> | number | null
+    status?: EnumPaymentSubmissionStatusFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionStatus
+    reviewedById?: IntNullableFilter<"PaymentSubmission"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"PaymentSubmission"> | Date | string | null
+    reviewNotes?: StringNullableFilter<"PaymentSubmission"> | string | null
+    createdAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
+  }
+
+  export type PaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    update: XOR<PaymentSubmissionUpdateWithoutReviewedByInput, PaymentSubmissionUncheckedUpdateWithoutReviewedByInput>
+    create: XOR<PaymentSubmissionCreateWithoutReviewedByInput, PaymentSubmissionUncheckedCreateWithoutReviewedByInput>
+  }
+
+  export type PaymentSubmissionUpdateWithWhereUniqueWithoutReviewedByInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    data: XOR<PaymentSubmissionUpdateWithoutReviewedByInput, PaymentSubmissionUncheckedUpdateWithoutReviewedByInput>
+  }
+
+  export type PaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput = {
+    where: PaymentSubmissionScalarWhereInput
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutReviewedByInput>
+  }
+
+  export type PasswordResetTokenUpsertWithWhereUniqueWithoutUserInput = {
+    where: PasswordResetTokenWhereUniqueInput
+    update: XOR<PasswordResetTokenUpdateWithoutUserInput, PasswordResetTokenUncheckedUpdateWithoutUserInput>
+    create: XOR<PasswordResetTokenCreateWithoutUserInput, PasswordResetTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput = {
+    where: PasswordResetTokenWhereUniqueInput
+    data: XOR<PasswordResetTokenUpdateWithoutUserInput, PasswordResetTokenUncheckedUpdateWithoutUserInput>
+  }
+
+  export type PasswordResetTokenUpdateManyWithWhereWithoutUserInput = {
+    where: PasswordResetTokenScalarWhereInput
+    data: XOR<PasswordResetTokenUpdateManyMutationInput, PasswordResetTokenUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type PasswordResetTokenScalarWhereInput = {
+    AND?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
+    OR?: PasswordResetTokenScalarWhereInput[]
+    NOT?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
+    id?: StringFilter<"PasswordResetToken"> | string
+    userId?: IntFilter<"PasswordResetToken"> | number
+    token?: StringFilter<"PasswordResetToken"> | string
+    expiresAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"PasswordResetToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+  }
+
   export type UserCreateWithoutTenantInput = {
     fullName: string
     email: string
@@ -31983,6 +36271,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
@@ -31995,6 +36284,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -32005,6 +36297,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -32017,6 +36310,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
@@ -32052,6 +36348,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTenantInput = {
@@ -32083,6 +36380,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTenantInput = {
@@ -32138,6 +36436,65 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaymentSubmissionCreateWithoutTenantInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
+    reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateWithoutTenantInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateOrConnectWithoutTenantInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    create: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type PaymentSubmissionCreateManyTenantInputEnvelope = {
+    data: PaymentSubmissionCreateManyTenantInput | PaymentSubmissionCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutTenantInput = {
     update: XOR<UserUpdateWithoutTenantInput, UserUncheckedUpdateWithoutTenantInput>
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
@@ -32156,6 +36513,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
@@ -32168,6 +36526,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -32178,6 +36539,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -32190,6 +36552,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -32224,6 +36589,22 @@ export namespace Prisma {
     data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutTenantInput>
   }
 
+  export type PaymentSubmissionUpsertWithWhereUniqueWithoutTenantInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    update: XOR<PaymentSubmissionUpdateWithoutTenantInput, PaymentSubmissionUncheckedUpdateWithoutTenantInput>
+    create: XOR<PaymentSubmissionCreateWithoutTenantInput, PaymentSubmissionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    data: XOR<PaymentSubmissionUpdateWithoutTenantInput, PaymentSubmissionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type PaymentSubmissionUpdateManyWithWhereWithoutTenantInput = {
+    where: PaymentSubmissionScalarWhereInput
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutTenantInput>
+  }
+
   export type StayCreateWithoutRoomInput = {
     status?: $Enums.StayStatus
     pricingTerm: $Enums.PricingTerm
@@ -32252,6 +36633,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRoomInput = {
@@ -32283,6 +36665,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRoomInput = {
@@ -32594,6 +36977,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutStaysInput = {
@@ -32615,6 +36999,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutStaysInput = {
@@ -32681,6 +37066,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -32693,6 +37079,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -32704,6 +37093,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -32715,6 +37105,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -32738,6 +37131,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutInvoicesCreatedInput
     lines?: InvoiceLineCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutStayInput = {
@@ -32757,6 +37151,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     lines?: InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput
     payments?: InvoicePaymentUncheckedCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceCreateOrConnectWithoutStayInput = {
@@ -32851,6 +37246,65 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaymentSubmissionCreateWithoutStayInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
+    submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
+    reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateWithoutStayInput = {
+    id?: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateOrConnectWithoutStayInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    create: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput>
+  }
+
+  export type PaymentSubmissionCreateManyStayInputEnvelope = {
+    data: PaymentSubmissionCreateManyStayInput | PaymentSubmissionCreateManyStayInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutStaysInput = {
     update: XOR<TenantUpdateWithoutStaysInput, TenantUncheckedUpdateWithoutStaysInput>
     create: XOR<TenantCreateWithoutStaysInput, TenantUncheckedCreateWithoutStaysInput>
@@ -32880,6 +37334,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaysInput = {
@@ -32901,6 +37356,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutStaysInput = {
@@ -32979,6 +37435,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -32991,6 +37448,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -33002,6 +37462,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -33013,6 +37474,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -33061,6 +37525,22 @@ export namespace Prisma {
   export type ExpenseUpdateManyWithWhereWithoutStayInput = {
     where: ExpenseScalarWhereInput
     data: XOR<ExpenseUpdateManyMutationInput, ExpenseUncheckedUpdateManyWithoutStayInput>
+  }
+
+  export type PaymentSubmissionUpsertWithWhereUniqueWithoutStayInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    update: XOR<PaymentSubmissionUpdateWithoutStayInput, PaymentSubmissionUncheckedUpdateWithoutStayInput>
+    create: XOR<PaymentSubmissionCreateWithoutStayInput, PaymentSubmissionUncheckedCreateWithoutStayInput>
+  }
+
+  export type PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    data: XOR<PaymentSubmissionUpdateWithoutStayInput, PaymentSubmissionUncheckedUpdateWithoutStayInput>
+  }
+
+  export type PaymentSubmissionUpdateManyWithWhereWithoutStayInput = {
+    where: PaymentSubmissionScalarWhereInput
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutStayInput>
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -33122,6 +37602,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -33134,6 +37615,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -33145,6 +37629,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -33156,6 +37641,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -33239,6 +37727,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -33251,6 +37740,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -33262,6 +37754,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -33273,6 +37766,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -33303,6 +37799,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInvoicesInput = {
@@ -33334,6 +37831,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInvoicesInput = {
@@ -33348,6 +37846,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -33360,6 +37859,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -33371,6 +37873,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -33382,6 +37885,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -33459,6 +37965,65 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaymentSubmissionCreateWithoutInvoiceInput = {
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
+    tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
+    submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
+    reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
+  }
+
+  export type PaymentSubmissionUncheckedCreateWithoutInvoiceInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateOrConnectWithoutInvoiceInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    create: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput>
+  }
+
+  export type PaymentSubmissionCreateManyInvoiceInputEnvelope = {
+    data: PaymentSubmissionCreateManyInvoiceInput | PaymentSubmissionCreateManyInvoiceInput[]
+    skipDuplicates?: boolean
+  }
+
   export type StayUpsertWithoutInvoicesInput = {
     update: XOR<StayUpdateWithoutInvoicesInput, StayUncheckedUpdateWithoutInvoicesInput>
     create: XOR<StayCreateWithoutInvoicesInput, StayUncheckedCreateWithoutInvoicesInput>
@@ -33498,6 +38063,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInvoicesInput = {
@@ -33529,6 +38095,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutInvoicesCreatedInput = {
@@ -33549,6 +38116,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -33561,6 +38129,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -33572,6 +38143,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -33583,6 +38155,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -33635,6 +38210,22 @@ export namespace Prisma {
     data: XOR<InvoicePaymentUpdateManyMutationInput, InvoicePaymentUncheckedUpdateManyWithoutInvoiceInput>
   }
 
+  export type PaymentSubmissionUpsertWithWhereUniqueWithoutInvoiceInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    update: XOR<PaymentSubmissionUpdateWithoutInvoiceInput, PaymentSubmissionUncheckedUpdateWithoutInvoiceInput>
+    create: XOR<PaymentSubmissionCreateWithoutInvoiceInput, PaymentSubmissionUncheckedCreateWithoutInvoiceInput>
+  }
+
+  export type PaymentSubmissionUpdateWithWhereUniqueWithoutInvoiceInput = {
+    where: PaymentSubmissionWhereUniqueInput
+    data: XOR<PaymentSubmissionUpdateWithoutInvoiceInput, PaymentSubmissionUncheckedUpdateWithoutInvoiceInput>
+  }
+
+  export type PaymentSubmissionUpdateManyWithWhereWithoutInvoiceInput = {
+    where: PaymentSubmissionScalarWhereInput
+    data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutInvoiceInput>
+  }
+
   export type InvoiceCreateWithoutLinesInput = {
     invoiceNumber: string
     status?: $Enums.InvoiceStatus
@@ -33651,6 +38242,7 @@ export namespace Prisma {
     stay: StayCreateNestedOneWithoutInvoicesInput
     createdBy?: UserCreateNestedOneWithoutInvoicesCreatedInput
     payments?: InvoicePaymentCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutLinesInput = {
@@ -33670,6 +38262,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: InvoicePaymentUncheckedCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceCreateOrConnectWithoutLinesInput = {
@@ -33704,6 +38297,7 @@ export namespace Prisma {
     stay?: StayUpdateOneRequiredWithoutInvoicesNestedInput
     createdBy?: UserUpdateOneWithoutInvoicesCreatedNestedInput
     payments?: InvoicePaymentUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutLinesInput = {
@@ -33723,6 +38317,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: InvoicePaymentUncheckedUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceCreateWithoutPaymentsInput = {
@@ -33741,6 +38336,7 @@ export namespace Prisma {
     stay: StayCreateNestedOneWithoutInvoicesInput
     createdBy?: UserCreateNestedOneWithoutInvoicesCreatedInput
     lines?: InvoiceLineCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutPaymentsInput = {
@@ -33760,6 +38356,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     lines?: InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutInvoiceInput
   }
 
   export type InvoiceCreateOrConnectWithoutPaymentsInput = {
@@ -33774,6 +38371,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -33786,6 +38384,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -33797,6 +38398,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -33808,6 +38410,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -33842,6 +38447,7 @@ export namespace Prisma {
     stay?: StayUpdateOneRequiredWithoutInvoicesNestedInput
     createdBy?: UserUpdateOneWithoutInvoicesCreatedNestedInput
     lines?: InvoiceLineUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutPaymentsInput = {
@@ -33861,6 +38467,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput
   }
 
   export type UserUpsertWithoutPaymentsCapturedInput = {
@@ -33881,6 +38488,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -33893,6 +38501,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -33904,6 +38515,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -33915,6 +38527,701 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutPasswordResetTokensInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+  }
+
+  export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPasswordResetTokensInput, UserUncheckedCreateWithoutPasswordResetTokensInput>
+  }
+
+  export type UserUpsertWithoutPasswordResetTokensInput = {
+    update: XOR<UserUpdateWithoutPasswordResetTokensInput, UserUncheckedUpdateWithoutPasswordResetTokensInput>
+    create: XOR<UserCreateWithoutPasswordResetTokensInput, UserUncheckedCreateWithoutPasswordResetTokensInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPasswordResetTokensInput, UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  }
+
+  export type UserUpdateWithoutPasswordResetTokensInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+  }
+
+  export type StayCreateWithoutPaymentSubmissionsInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutPaymentSubmissionsInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutPaymentSubmissionsInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutPaymentSubmissionsInput, StayUncheckedCreateWithoutPaymentSubmissionsInput>
+  }
+
+  export type InvoiceCreateWithoutPaymentSubmissionsInput = {
+    invoiceNumber: string
+    status?: $Enums.InvoiceStatus
+    periodStart: Date | string
+    periodEnd: Date | string
+    issuedAt?: Date | string | null
+    dueDate?: Date | string | null
+    paidAt?: Date | string | null
+    totalAmountRupiah?: number
+    notes?: string | null
+    cancelReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutInvoicesInput
+    createdBy?: UserCreateNestedOneWithoutInvoicesCreatedInput
+    lines?: InvoiceLineCreateNestedManyWithoutInvoiceInput
+    payments?: InvoicePaymentCreateNestedManyWithoutInvoiceInput
+  }
+
+  export type InvoiceUncheckedCreateWithoutPaymentSubmissionsInput = {
+    id?: number
+    invoiceNumber: string
+    stayId: number
+    status?: $Enums.InvoiceStatus
+    periodStart: Date | string
+    periodEnd: Date | string
+    issuedAt?: Date | string | null
+    dueDate?: Date | string | null
+    paidAt?: Date | string | null
+    totalAmountRupiah?: number
+    notes?: string | null
+    cancelReason?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: InvoiceLineUncheckedCreateNestedManyWithoutInvoiceInput
+    payments?: InvoicePaymentUncheckedCreateNestedManyWithoutInvoiceInput
+  }
+
+  export type InvoiceCreateOrConnectWithoutPaymentSubmissionsInput = {
+    where: InvoiceWhereUniqueInput
+    create: XOR<InvoiceCreateWithoutPaymentSubmissionsInput, InvoiceUncheckedCreateWithoutPaymentSubmissionsInput>
+  }
+
+  export type TenantCreateWithoutPaymentSubmissionsInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutTenantInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutPaymentSubmissionsInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutPaymentSubmissionsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutPaymentSubmissionsInput, TenantUncheckedCreateWithoutPaymentSubmissionsInput>
+  }
+
+  export type UserCreateWithoutPaymentSubmissionsSubmittedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput>
+  }
+
+  export type UserCreateWithoutPaymentSubmissionsReviewedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPaymentSubmissionsReviewedInput, UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput>
+  }
+
+  export type StayUpsertWithoutPaymentSubmissionsInput = {
+    update: XOR<StayUpdateWithoutPaymentSubmissionsInput, StayUncheckedUpdateWithoutPaymentSubmissionsInput>
+    create: XOR<StayCreateWithoutPaymentSubmissionsInput, StayUncheckedCreateWithoutPaymentSubmissionsInput>
+    where?: StayWhereInput
+  }
+
+  export type StayUpdateToOneWithWhereWithoutPaymentSubmissionsInput = {
+    where?: StayWhereInput
+    data: XOR<StayUpdateWithoutPaymentSubmissionsInput, StayUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type StayUpdateWithoutPaymentSubmissionsInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutPaymentSubmissionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type InvoiceUpsertWithoutPaymentSubmissionsInput = {
+    update: XOR<InvoiceUpdateWithoutPaymentSubmissionsInput, InvoiceUncheckedUpdateWithoutPaymentSubmissionsInput>
+    create: XOR<InvoiceCreateWithoutPaymentSubmissionsInput, InvoiceUncheckedCreateWithoutPaymentSubmissionsInput>
+    where?: InvoiceWhereInput
+  }
+
+  export type InvoiceUpdateToOneWithWhereWithoutPaymentSubmissionsInput = {
+    where?: InvoiceWhereInput
+    data: XOR<InvoiceUpdateWithoutPaymentSubmissionsInput, InvoiceUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type InvoiceUpdateWithoutPaymentSubmissionsInput = {
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalAmountRupiah?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutInvoicesNestedInput
+    createdBy?: UserUpdateOneWithoutInvoicesCreatedNestedInput
+    lines?: InvoiceLineUpdateManyWithoutInvoiceNestedInput
+    payments?: InvoicePaymentUpdateManyWithoutInvoiceNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateWithoutPaymentSubmissionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    stayId?: IntFieldUpdateOperationsInput | number
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    totalAmountRupiah?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput
+    payments?: InvoicePaymentUncheckedUpdateManyWithoutInvoiceNestedInput
+  }
+
+  export type TenantUpsertWithoutPaymentSubmissionsInput = {
+    update: XOR<TenantUpdateWithoutPaymentSubmissionsInput, TenantUncheckedUpdateWithoutPaymentSubmissionsInput>
+    create: XOR<TenantCreateWithoutPaymentSubmissionsInput, TenantUncheckedCreateWithoutPaymentSubmissionsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutPaymentSubmissionsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutPaymentSubmissionsInput, TenantUncheckedUpdateWithoutPaymentSubmissionsInput>
+  }
+
+  export type TenantUpdateWithoutPaymentSubmissionsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutTenantNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutPaymentSubmissionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type UserUpsertWithoutPaymentSubmissionsSubmittedInput = {
+    update: XOR<UserUpdateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput>
+    create: XOR<UserCreateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPaymentSubmissionsSubmittedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPaymentSubmissionsSubmittedInput, UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput>
+  }
+
+  export type UserUpdateWithoutPaymentSubmissionsSubmittedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
+    update: XOR<UserUpdateWithoutPaymentSubmissionsReviewedInput, UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput>
+    create: XOR<UserCreateWithoutPaymentSubmissionsReviewedInput, UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPaymentSubmissionsReviewedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPaymentSubmissionsReviewedInput, UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput>
+  }
+
+  export type UserUpdateWithoutPaymentSubmissionsReviewedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -33935,6 +39242,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
     stays?: StayCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutTicketsInput = {
@@ -33956,6 +39264,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutTicketsInput = {
@@ -34043,6 +39352,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTicketsInput = {
@@ -34074,6 +39384,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTicketsInput = {
@@ -34088,6 +39399,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -34100,6 +39412,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -34111,6 +39426,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -34122,6 +39438,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -34158,6 +39477,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutTicketsInput = {
@@ -34179,6 +39499,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutTicketsInput = {
@@ -34278,6 +39599,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTicketsInput = {
@@ -34309,6 +39631,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutTicketsAssignedInput = {
@@ -34329,6 +39652,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -34341,6 +39665,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -34352,6 +39679,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -34363,6 +39691,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -34372,6 +39703,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -34384,6 +39716,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -34395,6 +39730,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
@@ -34406,6 +39742,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -34431,6 +39770,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -34443,6 +39783,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -34454,6 +39797,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -34465,6 +39809,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -34836,6 +40183,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -34848,6 +40196,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -34859,6 +40210,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -34870,6 +40222,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -34993,6 +40348,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -35005,6 +40361,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -35016,6 +40375,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -35027,6 +40387,9 @@ export namespace Prisma {
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -35036,6 +40399,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -35048,6 +40412,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -35059,6 +40426,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -35070,6 +40438,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -35095,6 +40466,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -35107,6 +40479,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -35118,6 +40493,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -35129,6 +40505,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -35211,6 +40590,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutExpensesInput = {
@@ -35242,6 +40622,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutExpensesInput = {
@@ -35256,6 +40637,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -35268,6 +40650,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -35279,6 +40664,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -35290,6 +40676,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -35394,6 +40783,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutExpensesInput = {
@@ -35425,6 +40815,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutExpensesCreatedInput = {
@@ -35445,6 +40836,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -35457,6 +40849,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -35468,6 +40863,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -35479,6 +40875,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -35488,6 +40887,7 @@ export namespace Prisma {
     role: $Enums.UserRole
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -35500,6 +40900,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -35511,6 +40914,7 @@ export namespace Prisma {
     tenantId?: number | null
     isActive?: boolean
     lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -35522,6 +40926,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -35547,6 +40954,7 @@ export namespace Prisma {
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -35559,6 +40967,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -35570,6 +40981,7 @@ export namespace Prisma {
     tenantId?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -35581,6 +40993,9 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AnnouncementCreateManyCreatedByInput = {
@@ -35729,6 +41144,64 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type PaymentSubmissionCreateManySubmittedByInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateManyReviewedByInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PasswordResetTokenCreateManyUserInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
   export type AnnouncementUpdateWithoutCreatedByInput = {
     title?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
@@ -35798,6 +41271,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCreatedByInput = {
@@ -35829,6 +41303,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutCreatedByInput = {
@@ -35875,6 +41350,7 @@ export namespace Prisma {
     stay?: StayUpdateOneRequiredWithoutInvoicesNestedInput
     lines?: InvoiceLineUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutCreatedByInput = {
@@ -35894,6 +41370,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUncheckedUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateManyWithoutCreatedByInput = {
@@ -36167,6 +41644,178 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaymentSubmissionUpdateWithoutSubmittedByInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateWithoutSubmittedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUpdateWithoutReviewedByInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateWithoutReviewedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutReviewedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PasswordResetTokenUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StayCreateManyTenantInput = {
     id?: number
     roomId: number
@@ -36212,6 +41861,31 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type PaymentSubmissionCreateManyTenantInput = {
+    id?: number
+    stayId: number
+    invoiceId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type StayUpdateWithoutTenantInput = {
     status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
     pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
@@ -36240,6 +41914,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTenantInput = {
@@ -36271,6 +41946,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutTenantInput = {
@@ -36347,6 +42023,80 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUpdateWithoutTenantInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
+    reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -36470,6 +42220,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRoomInput = {
@@ -36501,6 +42252,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutRoomInput = {
@@ -36764,6 +42516,31 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type PaymentSubmissionCreateManyStayInput = {
+    id?: number
+    invoiceId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type InvoiceUpdateWithoutStayInput = {
     invoiceNumber?: StringFieldUpdateOperationsInput | string
     status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -36780,6 +42557,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutInvoicesCreatedNestedInput
     lines?: InvoiceLineUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutStayInput = {
@@ -36799,6 +42577,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: InvoiceLineUncheckedUpdateManyWithoutInvoiceNestedInput
     payments?: InvoicePaymentUncheckedUpdateManyWithoutInvoiceNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateManyWithoutStayInput = {
@@ -36912,6 +42691,80 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PaymentSubmissionUpdateWithoutStayInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
+    reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type InvoiceLineCreateManyInvoiceInput = {
     id?: number
     lineType: $Enums.InvoiceLineType
@@ -36934,6 +42787,31 @@ export namespace Prisma {
     referenceNo?: string | null
     note?: string | null
     capturedById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PaymentSubmissionCreateManyInvoiceInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    submittedById: number
+    amountRupiah: number
+    paidAt: Date | string
+    paymentMethod: $Enums.PaymentMethod
+    senderName?: string | null
+    senderBankName?: string | null
+    referenceNumber?: string | null
+    notes?: string | null
+    fileKey?: string | null
+    fileUrl?: string | null
+    originalFilename?: string | null
+    mimeType?: string | null
+    fileSizeBytes?: number | null
+    status?: $Enums.PaymentSubmissionStatus
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    reviewNotes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37010,6 +42888,80 @@ export namespace Prisma {
     referenceNo?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     capturedById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUpdateWithoutInvoiceInput = {
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
+    reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
+  }
+
+  export type PaymentSubmissionUncheckedUpdateWithoutInvoiceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PaymentSubmissionUncheckedUpdateManyWithoutInvoiceInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    submittedById?: IntFieldUpdateOperationsInput | number
+    amountRupiah?: IntFieldUpdateOperationsInput | number
+    paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    senderName?: NullableStringFieldUpdateOperationsInput | string | null
+    senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    fileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    fileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumPaymentSubmissionStatusFieldUpdateOperationsInput | $Enums.PaymentSubmissionStatus
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

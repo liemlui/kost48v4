@@ -18,3 +18,13 @@ export async function changePassword(payload: {
   const response = await client.post<ApiEnvelope<{ success: boolean }>>('/auth/change-password', payload);
   return response.data.data;
 }
+
+export async function forgotPassword(payload: { identifier: string }) {
+  const response = await client.post<ApiEnvelope<{ success: boolean; resetTokenPreview?: string; expiresAt?: string; channel?: string; destination?: string | null }>>('/auth/forgot-password', payload);
+  return response.data.data;
+}
+
+export async function resetPassword(payload: { token: string; newPassword: string }) {
+  const response = await client.post<ApiEnvelope<{ success: boolean; userId?: number }>>('/auth/reset-password', payload);
+  return response.data.data;
+}

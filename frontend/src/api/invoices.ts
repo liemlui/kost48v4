@@ -34,3 +34,10 @@ export async function addInvoiceLine(invoiceId: number | string, payload: {
 export async function issueInvoice(invoiceId: number | string) {
   return postAction<Invoice>(`/invoices/${invoiceId}/issue`);
 }
+
+export async function cancelInvoice(
+  invoiceId: number | string,
+  payload: { cancelReason: string },
+) {
+  return postAction<Invoice>(`/invoices/${invoiceId}/cancel`, payload as unknown as Record<string, unknown>);
+}

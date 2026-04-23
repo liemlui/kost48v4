@@ -19,6 +19,7 @@ import { WifiSalesModule } from './modules/wifi-sales/wifi-sales.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.module';
+import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-submissions.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.
     ExpensesModule,
     AnalyticsModule,
     TenantBookingsModule,
+    PaymentSubmissionsModule,
   ],
 })
 export class AppModule {}

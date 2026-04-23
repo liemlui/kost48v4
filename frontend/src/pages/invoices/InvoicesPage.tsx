@@ -9,9 +9,10 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import SearchableSelect from '../../components/common/SearchableSelect';
-import { createResource, listResource, postAction } from '../../api/resources';
+import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
+import { cancelInvoice, issueInvoice } from '../../api/invoices';
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -82,12 +83,12 @@ export default function InvoicesPage() {
   });
 
   const issueMutation = useMutation({
-    mutationFn: (id: number) => postAction(`/invoices/${id}/issue`),
+    mutationFn: (id: number) => issueInvoice(id),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: number) => postAction(`/invoices/${id}/cancel`, { cancelReason: 'Dibatalkan dari workspace invoice' }),
+    mutationFn: (id: number) => cancelInvoice(id, { cancelReason: 'Dibatalkan dari workspace invoice' }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
   });
 

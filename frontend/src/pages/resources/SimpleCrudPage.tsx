@@ -249,6 +249,9 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       if (field.type === 'date' && formattedItem[field.name]) {
         formattedItem[field.name] = formatDateForInput(formattedItem[field.name] as string | Date | null | undefined);
       }
+      if (field.name === 'images' && Array.isArray(formattedItem[field.name])) {
+        formattedItem[field.name] = (formattedItem[field.name] as string[]).join('\n');
+      }
     });
 
     setEditingItem(item);

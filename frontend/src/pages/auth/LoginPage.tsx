@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getDefaultRoute } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
 
@@ -81,7 +81,11 @@ export default function LoginPage() {
               <Form.Control value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Masukkan password" />
             </Form.Group>
 
-            <div className="form-helper mb-4">Gunakan akun owner/admin/staff/tenant yang sudah tersedia di backend Anda.</div>
+            <div className="form-helper mb-3">Gunakan akun owner/admin/staff/tenant yang sudah tersedia di backend Anda.</div>
+
+            <div className="d-flex justify-content-end mb-4">
+              <Link to="/forgot-password" className="small text-decoration-none">Lupa password?</Link>
+            </div>
 
             <Button type="submit" disabled={submitting} className="w-100">
               {submitting ? 'Memproses...' : 'Masuk ke Dashboard'}

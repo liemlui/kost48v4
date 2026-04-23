@@ -5,10 +5,13 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import { resourceConfigs } from './config/resources';
 import { getDefaultRoute } from './config/navigation';
 import { useAuth } from './context/AuthContext';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
+import PaymentReviewPage from './pages/payments/PaymentReviewPage';
 import MyAnnouncementsPage from './pages/portal/MyAnnouncementsPage';
 import MyInvoicesPage from './pages/portal/MyInvoicesPage';
 import MyBookingsPage from './pages/portal/MyBookingsPage';
@@ -19,6 +22,7 @@ import SimpleCrudPage from './pages/resources/SimpleCrudPage';
 import BookingPage from './pages/bookings/BookingPage';
 import RoomDetailPage from './pages/rooms/RoomDetailPage';
 import RoomsRouteEntry from './pages/rooms/RoomsRouteEntry';
+import PublicRoomDetailPage from './pages/rooms/PublicRoomDetailPage';
 import CheckInWizard from './pages/stays/CheckInWizard';
 import StayDetailPage from './pages/stays/StayDetailPage';
 import StaysPage from './pages/stays/StaysPage';
@@ -41,7 +45,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/rooms" element={<RoomsRouteEntry />} />
+      <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<RootRedirect />} />
@@ -80,6 +87,7 @@ export default function App() {
           <Route path="/stays/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StayDetailPage /></RequireRoles>} />
           <Route path="/invoices" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoicesPage /></RequireRoles>} />
           <Route path="/invoice-payments" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['invoice-payments']} /></RequireRoles>} />
+          <Route path="/payment-submissions/review" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><PaymentReviewPage /></RequireRoles>} />
           <Route path="/invoices/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><InvoiceDetailPage /></RequireRoles>} />
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.announcements} /></RequireRoles>} />
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['meter-readings']} /></RequireRoles>} />

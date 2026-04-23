@@ -1,0 +1,285 @@
+import type { ResourceConfig } from './resourceTypes';
+import { userRoles, announcementAudienceOptions } from './resourceCommon';
+
+export const operationsResourceConfigs: Record<string, ResourceConfig> = {
+  announcements: {
+    title: 'Pengumuman & Komunikasi',
+    supportsIsActiveFilter: true,
+    path: '/announcements',
+    createLabel: 'Buat Pengumuman',
+    columns: [
+      { key: 'id', label: 'ID' },
+      { key: 'title', label: 'Judul' },
+      { key: 'audience', label: 'Audiens' },
+      { key: 'isPublished', label: 'Published' },
+      { key: 'isPinned', label: 'Pinned' },
+      { key: 'publishedAt', label: 'Tgl Publish' },
+    ],
+    fields: [
+      {
+        name: 'title',
+        label: 'Judul',
+        type: 'text',
+        placeholder: 'Judul pengumuman',
+        required: true,
+      },
+      {
+        name: 'content',
+        label: 'Konten',
+        type: 'textarea',
+        placeholder: 'Isi pengumuman',
+        required: true,
+      },
+      {
+        name: 'audience',
+        label: 'Audiens',
+        type: 'select',
+        options: announcementAudienceOptions,
+        required: true,
+      },
+      { name: 'isPublished', label: 'Published', type: 'checkbox' },
+      { name: 'isPinned', label: 'Pinned', type: 'checkbox' },
+      {
+        name: 'startsAt',
+        label: 'Mulai Tayang',
+        type: 'date',
+        placeholder: 'Tanggal mulai tayang',
+      },
+      {
+        name: 'expiresAt',
+        label: 'Berakhir',
+        type: 'date',
+        placeholder: 'Tanggal berakhir',
+      },
+    ],
+  },
+
+  'meter-readings': {
+    title: 'Riwayat Meter & Input Manual',
+    path: '/meter-readings',
+    createLabel: 'Catat Meter Manual',
+    columns: [
+      { key: 'roomId', label: 'Kamar' },
+      { key: 'utilityType', label: 'Utilitas' },
+      { key: 'readingAt', label: 'Tanggal' },
+      { key: 'readingValue', label: 'Nilai' },
+    ],
+    fields: [
+      {
+        name: 'roomId',
+        label: 'Kamar',
+        type: 'number',
+        placeholder: 'Pilih kamar',
+        required: true,
+      },
+      {
+        name: 'utilityType',
+        label: 'Utilitas',
+        type: 'select',
+        options: [
+          { value: 'ELECTRICITY', label: 'Listrik' },
+          { value: 'WATER', label: 'Air' },
+        ],
+        required: true,
+      },
+      {
+        name: 'readingAt',
+        label: 'Tanggal',
+        type: 'date',
+        placeholder: 'Tanggal pembacaan meter',
+        required: true,
+      },
+      {
+        name: 'readingValue',
+        label: 'Nilai Meter',
+        type: 'text',
+        placeholder: 'Nilai meter (angka)',
+        required: true,
+      },
+      {
+        name: 'note',
+        label: 'Catatan',
+        type: 'textarea',
+        placeholder: 'Catatan tambahan',
+      },
+    ],
+  },
+
+  'inventory-items': {
+    title: 'Inventory Items',
+    path: '/inventory-items',
+    columns: [
+      { key: 'id', label: 'ID' },
+      { key: 'sku', label: 'SKU' },
+      { key: 'name', label: 'Nama' },
+      { key: 'category', label: 'Kategori' },
+      { key: 'qtyOnHand', label: 'Stok' },
+      { key: 'minQty', label: 'Min Stok' },
+    ],
+    fields: [
+      {
+        name: 'sku',
+        label: 'SKU',
+        type: 'text',
+        placeholder: 'Kode SKU barang',
+        required: true,
+      },
+      {
+        name: 'name',
+        label: 'Nama Barang',
+        type: 'text',
+        placeholder: 'Nama barang',
+        required: true,
+      },
+      {
+        name: 'category',
+        label: 'Kategori',
+        type: 'text',
+        placeholder: 'Kategori barang',
+        required: true,
+      },
+      {
+        name: 'unit',
+        label: 'Satuan',
+        type: 'text',
+        placeholder: 'pcs, unit, liter, set, dll',
+        required: true,
+      },
+      {
+        name: 'qtyOnHand',
+        label: 'Stok Saat Ini',
+        type: 'text',
+        placeholder: 'Jumlah stok saat ini',
+        required: true,
+      },
+      {
+        name: 'minQty',
+        label: 'Batas Minimum',
+        type: 'text',
+        placeholder: 'Jumlah minimum stok',
+      },
+      {
+        name: 'notes',
+        label: 'Catatan',
+        type: 'textarea',
+        placeholder: 'Catatan tambahan tentang barang',
+      },
+      { name: 'isActive', label: 'Barang Aktif', type: 'checkbox' },
+    ],
+  },
+
+  'room-items': {
+    title: 'Inventaris per Kamar',
+    path: '/room-items',
+    createLabel: 'Catat Inventaris Kamar',
+    columns: [
+      { key: 'roomId', label: 'Kamar' },
+      { key: 'itemId', label: 'Barang' },
+      { key: 'qty', label: 'Qty' },
+      { key: 'status', label: 'Status' },
+    ],
+    fields: [
+      {
+        name: 'roomId',
+        label: 'Kamar',
+        type: 'number',
+        placeholder: 'Pilih kamar',
+        required: true,
+      },
+      {
+        name: 'itemId',
+        label: 'Barang',
+        type: 'number',
+        placeholder: 'Pilih barang',
+        required: true,
+      },
+      {
+        name: 'qty',
+        label: 'Qty',
+        type: 'text',
+        placeholder: 'Jumlah barang',
+        required: true,
+      },
+      {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [
+          { value: 'GOOD', label: 'Baik' },
+          { value: 'DAMAGED', label: 'Rusak' },
+          { value: 'MAINTENANCE', label: 'Maintenance' },
+          { value: 'MISSING', label: 'Hilang' },
+        ],
+        required: true,
+      },
+      {
+        name: 'note',
+        label: 'Catatan',
+        type: 'textarea',
+        placeholder: 'Catatan kondisi barang',
+      },
+    ],
+  },
+
+  'invoice-payments': {
+    title: 'Invoice Payments',
+    path: '/invoice-payments',
+    allowDelete: true,
+    columns: [
+      { key: 'id', label: 'ID' },
+      { key: 'invoiceId', label: 'Invoice' },
+      { key: 'paymentDate', label: 'Tanggal' },
+      { key: 'amountRupiah', label: 'Nominal' },
+      { key: 'method', label: 'Metode' },
+    ],
+    fields: [
+      {
+        name: 'invoiceId',
+        label: 'Invoice',
+        type: 'number',
+        placeholder: 'Pilih invoice',
+        required: true,
+      },
+      {
+        name: 'paymentDate',
+        label: 'Tanggal Pembayaran',
+        type: 'date',
+        placeholder: 'Tanggal pembayaran',
+        required: true,
+      },
+      {
+        name: 'amountRupiah',
+        label: 'Nominal',
+        type: 'currency',
+        placeholder: 'Jumlah pembayaran dalam Rupiah',
+        required: true,
+      },
+      {
+        name: 'method',
+        label: 'Metode',
+        type: 'select',
+        options: [
+          { value: 'CASH', label: 'Tunai' },
+          { value: 'TRANSFER', label: 'Transfer' },
+          { value: 'QRIS', label: 'QRIS' },
+          { value: 'EWALLET', label: 'E-Wallet' },
+          { value: 'OTHER', label: 'Lainnya' },
+        ],
+        required: true,
+      },
+      {
+        name: 'referenceNo',
+        label: 'Nomor Referensi',
+        type: 'text',
+        placeholder: 'Nomor referensi pembayaran',
+      },
+      {
+        name: 'note',
+        label: 'Catatan',
+        type: 'textarea',
+        placeholder: 'Catatan pembayaran',
+      },
+    ],
+  },
+
+};
