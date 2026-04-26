@@ -18,6 +18,7 @@ import { InventoryMovementsModule } from './modules/inventory-movements/inventor
 import { WifiSalesModule } from './modules/wifi-sales/wifi-sales.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.module';
 import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-submissions.module';
 
@@ -42,6 +43,7 @@ import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-
     WifiSalesModule,
     ExpensesModule,
     AnalyticsModule,
+    NotificationsModule,
     TenantBookingsModule,
     PaymentSubmissionsModule,
   ],

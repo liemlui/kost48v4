@@ -13,6 +13,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
 import PaymentReviewPage from './pages/payments/PaymentReviewPage';
+import ReminderPreviewPage from './pages/reminders/ReminderPreviewPage';
 import MyAnnouncementsPage from './pages/portal/MyAnnouncementsPage';
 import MyInvoicesPage from './pages/portal/MyInvoicesPage';
 import MyBookingsPage from './pages/portal/MyBookingsPage';
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['inventory-movements']} /></RequireRoles>} />
           <Route path="/wifi-sales" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['wifi-sales']} /></RequireRoles>} />
           <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.expenses} /></RequireRoles>} />
+          <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />
 
           <Route path="/portal/announcements" element={<RequireRoles allowed={['TENANT']}><MyAnnouncementsPage /></RequireRoles>} />
           <Route path="/portal/stay" element={<RequireRoles allowed={['TENANT']}><MyStayPage /></RequireRoles>} />
