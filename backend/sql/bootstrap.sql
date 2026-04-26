@@ -43,6 +43,7 @@ DROP INDEX IF EXISTS stay_one_active_per_room_uidx;
 
 ALTER TABLE "User" DROP CONSTRAINT IF EXISTS user_tenant_role_consistency_chk;
 ALTER TABLE "Room" DROP CONSTRAINT IF EXISTS room_rate_non_negative_chk;
+ALTER TABLE "Room" DROP CONSTRAINT IF EXISTS room_rate_active_check;
 ALTER TABLE "Stay" DROP CONSTRAINT IF EXISTS stay_date_consistency_chk;
 ALTER TABLE "Stay" DROP CONSTRAINT IF EXISTS stay_amount_non_negative_chk;
 ALTER TABLE "Stay" DROP CONSTRAINT IF EXISTS stay_deposit_amount_consistency_chk;

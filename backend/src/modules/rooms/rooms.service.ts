@@ -1,10 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
+import { InvoiceStatus, PricingTerm, RoomStatus, UtilityType } from '../../common/enums/app.enums';
 
 @Injectable()
 export class RoomsService {
@@ -12,20 +14,20 @@ export class RoomsService {
 
   async findAll(query: RoomsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.RoomWhereInput = {
       AND: [
         query.search
           ? {
               OR: [
-                { code: { contains: query.search, mode: 'insensitive' } },
-                { name: { contains: query.search, mode: 'insensitive' } },
+                { code: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                { name: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
               ],
             }
-          : {},
-        query.status ? { status: query.status } : {},
-        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : {},
-        query.floor ? { floor: query.floor } : {},
-      ],
+          : undefined,
+        query.status ? { status: query.status } : undefined,
+        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : undefined,
+        query.floor ? { floor: query.floor } : undefined,
+      ].filter(Boolean),
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -95,7 +97,7 @@ export class RoomsService {
               },
             },
             invoices: {
-              where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+              where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
               select: { id: true },
             },
           },
@@ -107,12 +109,12 @@ export class RoomsService {
 
     const [latestElectricityReadings, latestWaterReadings] = await Promise.all([
       this.prisma.meterReading.findMany({
-        where: { roomId: id, utilityType: 'ELECTRICITY' as any },
+        where: { roomId: id, utilityType: UtilityType.ELECTRICITY },
         orderBy: { readingAt: 'desc' },
         take: 2,
       }),
       this.prisma.meterReading.findMany({
-        where: { roomId: id, utilityType: 'WATER' as any },
+        where: { roomId: id, utilityType: UtilityType.WATER },
         orderBy: { readingAt: 'desc' },
         take: 2,
       }),
@@ -122,7 +124,7 @@ export class RoomsService {
 
     return {
       ...item,
-      images: (item as any).images ?? [],
+      images: (item.images as unknown as Array<Record<string, unknown>>) ?? [],
       currentStay: activeStay
         ? {
             id: activeStay.id,
@@ -157,7 +159,7 @@ export class RoomsService {
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
     if (!room.isActive) throw new NotFoundException('Kamar tidak tersedia');
 
-    const pricingTerms = this.getAvailablePricingTerms(room as any);
+    const pricingTerms = this.getAvailablePricingTerms(room);
 
     return {
       id: room.id,
@@ -167,7 +169,7 @@ export class RoomsService {
       status: room.status,
       isAvailable: room.status === 'AVAILABLE',
       notes: room.notes,
-      images: (room as any).images ?? [],
+      images: (room.images as unknown as Array<Record<string, unknown>>) ?? [],
       pricing: {
         dailyRateRupiah: room.dailyRateRupiah,
         weeklyRateRupiah: room.weeklyRateRupiah,
@@ -179,7 +181,7 @@ export class RoomsService {
       waterTariffPerM3Rupiah: room.waterTariffPerM3Rupiah,
       availablePricingTerms: pricingTerms,
       highlightedPricingTerm: pricingTerms[0] ?? 'MONTHLY',
-      highlightedRateRupiah: this.resolveRent(room as any, (pricingTerms[0] ?? 'MONTHLY') as any),
+      highlightedRateRupiah: this.resolveRent(room, (pricingTerms[0] ?? 'MONTHLY') as PricingTerm),
     };
   }
 
@@ -187,12 +189,12 @@ export class RoomsService {
     const exists = await this.prisma.room.findUnique({ where: { code: dto.code } });
     if (exists) throw new ConflictException('Kode kamar sudah digunakan');
 
-    const createData = {
+    const createData: Prisma.RoomCreateInput = {
       ...dto,
       status: 'AVAILABLE',
     };
 
-    const created = await this.prisma.room.create({ data: createData as any });
+    const created = await this.prisma.room.create({ data: createData });
     await this.audit.log({
       actorUserId: actor.id,
       action: 'CREATE',
@@ -233,9 +235,13 @@ export class RoomsService {
       throw new ConflictException('Kamar aktif wajib memiliki monthlyRateRupiah > 0');
     }
 
+    const updateData: Prisma.RoomUpdateInput = {
+      ...dto,
+    };
+
     const updated = await this.prisma.room.update({
       where: { id },
-      data: dto as any,
+      data: updateData,
     });
 
     await this.audit.log({
@@ -252,7 +258,12 @@ export class RoomsService {
 
 
 
-  private getAvailablePricingTerms(room: any) {
+  private getAvailablePricingTerms(room: {
+    dailyRateRupiah: number | null;
+    weeklyRateRupiah: number | null;
+    biWeeklyRateRupiah: number | null;
+    monthlyRateRupiah: number | null;
+  }) {
     const terms: string[] = [];
     if (room.dailyRateRupiah && room.dailyRateRupiah > 0) terms.push('DAILY');
     if (room.weeklyRateRupiah && room.weeklyRateRupiah > 0) terms.push('WEEKLY');
@@ -261,7 +272,15 @@ export class RoomsService {
     return terms;
   }
 
-  private resolveRent(room: any, pricingTerm: string) {
+  private resolveRent(
+    room: {
+      dailyRateRupiah: number | null;
+      weeklyRateRupiah: number | null;
+      biWeeklyRateRupiah: number | null;
+      monthlyRateRupiah: number | null;
+    },
+    pricingTerm: string,
+  ) {
     switch (pricingTerm) {
       case 'DAILY':
         return room.dailyRateRupiah ?? room.monthlyRateRupiah ?? 0;
@@ -275,7 +294,7 @@ export class RoomsService {
     }
   }
 
-  private buildMeterSummary(readings: Array<{ id: number; readingAt: Date; readingValue: any }>) {
+  private buildMeterSummary(readings: Array<{ id: number; readingAt: Date; readingValue: Prisma.Decimal }>) {
     const latest = readings[0] ?? null;
     const previous = readings[1] ?? null;
 

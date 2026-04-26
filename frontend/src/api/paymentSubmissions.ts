@@ -1,3 +1,4 @@
+import apiClient from './client';
 import { createResource, listResource, postAction } from './resources';
 import type {
   CreatePaymentSubmissionPayload,
@@ -24,4 +25,23 @@ export async function approvePaymentSubmission(id: number | string) {
 
 export async function rejectPaymentSubmission(id: number | string, reviewNotes: string) {
   return postAction<PaymentSubmission>(`/payment-submissions/${id}/reject`, { reviewNotes });
+}
+
+export async function runPaymentSubmissionExpiryCheck() {
+  return postAction<{ expiredCount: number; stayIds: number[] }>(`/payment-submissions/internal/run-expiry-check`);
+}
+
+
+export async function expireReservedBooking(stayId: number | string) {
+  return postAction<{ expiredCount: number; stayIds: number[] }>(`/payment-submissions/internal/expire-booking/${stayId}`);
+}
+
+
+export async function uploadPaymentProof(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await apiClient.post('/payment-submissions/upload-proof', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data as { fileKey: string; fileUrl: string; originalFilename: string; mimeType: string; fileSizeBytes: number };
 }

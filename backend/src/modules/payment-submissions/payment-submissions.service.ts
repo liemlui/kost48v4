@@ -8,9 +8,11 @@ import {
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from 'src/generated/prisma';
 import {
+  BookingDepositPaymentStatus,
   InvoiceStatus,
   PaymentMethod,
   PaymentSubmissionStatus,
+  PaymentSubmissionTargetType,
   RoomStatus,
   StayStatus,
 } from '../../common/enums/app.enums';
@@ -20,82 +22,14 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
-
-interface SubmissionBaseRow {
-  id: number;
-  stayId: number;
-  invoiceId: number;
-  tenantId: number;
-  submittedById: number;
-  amountRupiah: number;
-  paidAt: Date;
-  paymentMethod: string;
-  senderName: string | null;
-  senderBankName: string | null;
-  referenceNumber: string | null;
-  notes: string | null;
-  fileKey: string | null;
-  fileUrl: string | null;
-  originalFilename: string | null;
-  mimeType: string | null;
-  fileSizeBytes: number | null;
-  status: string;
-  reviewedById: number | null;
-  reviewedAt: Date | null;
-  reviewNotes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface SubmissionListRow extends SubmissionBaseRow {
-  tenantFullName: string;
-  tenantPhone: string;
-  roomId: number;
-  roomCode: string;
-  roomName: string | null;
-  roomStatus: string;
-  stayStatus: string;
-  stayExpiresAt: Date | null;
-  invoiceNumber: string;
-  invoiceStatus: string;
-  invoiceTotalAmountRupiah: number;
-  invoicePaidAmountRupiah: number;
-  invoiceRemainingAmountRupiah: number;
-  submittedByName: string;
-  reviewedByName: string | null;
-}
-
-interface SubmissionLockRow extends SubmissionBaseRow {
-  tenantFullName: string;
-  roomId: number;
-  roomCode: string;
-  roomStatus: string;
-  roomIsActive: boolean;
-  stayStatus: string;
-  stayExpiresAt: Date | null;
-  invoiceNumber: string;
-  invoiceStatus: string;
-  invoiceIssuedAt: Date | null;
-  invoiceTotalAmountRupiah: number;
-  invoicePaidAmountRupiah: number;
-}
-
-interface SubmissionEligibilityRow {
-  stayId: number;
-  invoiceId: number;
-  tenantId: number;
-  tenantFullName: string;
-  roomId: number;
-  roomCode: string;
-  roomName: string | null;
-  roomStatus: string;
-  stayStatus: string;
-  stayExpiresAt: Date | null;
-  invoiceNumber: string;
-  invoiceStatus: string;
-  invoiceTotalAmountRupiah: number;
-  invoicePaidAmountRupiah: number;
-}
+import {
+  SubmissionDetail,
+  SubmissionLockRow,
+  mapSubmissionFromPrisma,
+  buildApprovalPaymentNote,
+  parseDateOnly,
+  endOfDay,
+} from './payment-submissions.helpers';
 
 @Injectable()
 export class PaymentSubmissionsService {
@@ -107,8 +41,8 @@ export class PaymentSubmissionsService {
       throw new ConflictException('Akun tenant belum terhubung ke data tenant');
     }
 
-    const paidAt = this.parseDateOnly(dto.paidAt, 'Tanggal bayar tidak valid');
-    if (paidAt > this.endOfDay(new Date())) {
+    const paidAt = parseDateOnly(dto.paidAt, 'Tanggal bayar tidak valid');
+    if (paidAt > endOfDay(new Date())) {
       throw new BadRequestException('Tanggal bayar tidak boleh di masa depan');
     }
 
@@ -134,101 +68,85 @@ export class PaymentSubmissionsService {
         throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
       }
 
-      const remainingAmount = Math.max(
+      const invoiceRemaining = Math.max(
         eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
         0,
       );
 
-      if (remainingAmount <= 0) {
-        throw new ConflictException('Invoice ini sudah lunas');
+      const depositRemaining = Math.max(
+        (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0),
+        0,
+      );
+
+      const combinedRemaining = invoiceRemaining + depositRemaining;
+
+      if (combinedRemaining <= 0) {
+        throw new ConflictException('Pembayaran awal (sewa + deposit) sudah lunas');
       }
 
-      if (dto.amountRupiah > remainingAmount) {
-        throw new ConflictException('Bukti pembayaran melebihi sisa tagihan invoice');
+      if (dto.amountRupiah !== combinedRemaining) {
+        throw new ConflictException(
+          `Pembayaran harus tepat sebesar total yang tersisa: Rp ${combinedRemaining.toLocaleString('id-ID')}`,
+        );
       }
 
-      const existingPending = await this.prisma.$queryRaw<Array<{ id: number }>>(Prisma.sql`
-        SELECT id
-        FROM "PaymentSubmission"
-        WHERE "stayId" = ${dto.stayId}
-          AND "invoiceId" = ${dto.invoiceId}
-          AND status = CAST(${PaymentSubmissionStatus.PENDING_REVIEW} AS "PaymentSubmissionStatus")
-        LIMIT 1
-      `);
+      const existingPending = await this.prisma.paymentSubmission.findFirst({
+        where: {
+          stayId: dto.stayId,
+          invoiceId: dto.invoiceId,
+          status: PaymentSubmissionStatus.PENDING_REVIEW,
+        },
+        select: { id: true },
+      });
 
-      if (existingPending.length > 0) {
+      if (existingPending) {
         throw new ConflictException(
           'Masih ada bukti pembayaran lain yang sedang menunggu review untuk invoice ini',
         );
       }
 
       const created = await this.prisma.$transaction(async (tx) => {
-        const insertedRows = await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
-          INSERT INTO "PaymentSubmission" (
-            "stayId",
-            "invoiceId",
-            "tenantId",
-            "submittedById",
-            "amountRupiah",
-            "paidAt",
-            "paymentMethod",
-            "senderName",
-            "senderBankName",
-            "referenceNumber",
-            notes,
-            "fileKey",
-            "fileUrl",
-            "originalFilename",
-            "mimeType",
-            "fileSizeBytes",
-            status,
-            "createdAt",
-            "updatedAt"
-          ) VALUES (
-            ${dto.stayId},
-            ${dto.invoiceId},
-            ${tenantId},
-            ${user.id},
-            ${dto.amountRupiah},
-            ${paidAt},
-            CAST(${dto.paymentMethod} AS "PaymentMethod"),
-            ${dto.senderName ?? null},
-            ${dto.senderBankName ?? null},
-            ${dto.referenceNumber ?? null},
-            ${dto.notes ?? null},
-            ${dto.fileKey ?? null},
-            ${dto.fileUrl ?? null},
-            ${dto.originalFilename ?? null},
-            ${dto.mimeType ?? null},
-            ${dto.fileSizeBytes ?? null},
-            CAST(${PaymentSubmissionStatus.PENDING_REVIEW} AS "PaymentSubmissionStatus"),
-            NOW(),
-            NOW()
-          ) RETURNING id
-        `);
-
-        const submissionId = insertedRows[0]?.id;
-        if (!submissionId) {
-          throw new ConflictException('Bukti pembayaran gagal dibuat');
-        }
+        const submission = await tx.paymentSubmission.create({
+          data: {
+            stayId: dto.stayId,
+            invoiceId: dto.invoiceId,
+            tenantId,
+            submittedById: user.id,
+            amountRupiah: dto.amountRupiah,
+            paidAt,
+            paymentMethod: dto.paymentMethod as PaymentMethod,
+            targetType: PaymentSubmissionTargetType.INVOICE,
+            targetId: dto.invoiceId,
+            senderName: dto.senderName ?? null,
+            senderBankName: dto.senderBankName ?? null,
+            referenceNumber: dto.referenceNumber ?? null,
+            notes: dto.notes ?? null,
+            fileKey: dto.fileKey ?? null,
+            fileUrl: dto.fileUrl ?? null,
+            originalFilename: dto.originalFilename ?? null,
+            mimeType: dto.mimeType ?? null,
+            fileSizeBytes: dto.fileSizeBytes ?? null,
+            status: PaymentSubmissionStatus.PENDING_REVIEW,
+          },
+        });
 
         await tx.auditLog.create({
           data: {
             actorUserId: user.id,
             action: 'CREATE_PAYMENT_SUBMISSION',
             entityType: 'PaymentSubmission',
-            entityId: String(submissionId),
+            entityId: String(submission.id),
             meta: {
               stayId: dto.stayId,
               invoiceId: dto.invoiceId,
               tenantId,
               amountRupiah: dto.amountRupiah,
               paymentMethod: dto.paymentMethod,
-            } as any,
+            } as unknown as Prisma.InputJsonValue,
           },
         });
 
-        return this.findSubmissionByIdTx(tx, submissionId);
+        return this.findSubmissionByIdTx(tx, submission.id);
       });
 
       return serializePrismaResult(created);
@@ -245,91 +163,51 @@ export class PaymentSubmissionsService {
     }
 
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const searchPattern = query.search?.trim() ? `%${query.search.trim()}%` : null;
-    const statusFilter = query.status
-      ? Prisma.sql` AND ps.status = CAST(${query.status} AS "PaymentSubmissionStatus")`
-      : Prisma.empty;
-    const searchFilter = searchPattern
-      ? Prisma.sql`
-          AND (
-            r.code ILIKE ${searchPattern}
-            OR COALESCE(r.name, '') ILIKE ${searchPattern}
-            OR i."invoiceNumber" ILIKE ${searchPattern}
-            OR COALESCE(ps."referenceNumber", '') ILIKE ${searchPattern}
-          )
-        `
-      : Prisma.empty;
+    const search = query.search?.trim() ?? null;
+    const status = query.status ?? undefined;
 
     try {
-      const items = await this.prisma.$queryRaw<SubmissionListRow[]>(Prisma.sql`
-        SELECT
-          ps.id,
-          ps."stayId",
-          ps."invoiceId",
-          ps."tenantId",
-          ps."submittedById",
-          ps."amountRupiah",
-          ps."paidAt",
-          ps."paymentMethod",
-          ps."senderName",
-          ps."senderBankName",
-          ps."referenceNumber",
-          ps.notes,
-          ps."fileKey",
-          ps."fileUrl",
-          ps."originalFilename",
-          ps."mimeType",
-          ps."fileSizeBytes",
-          ps.status,
-          ps."reviewedById",
-          ps."reviewedAt",
-          ps."reviewNotes",
-          ps."createdAt",
-          ps."updatedAt",
-          t."fullName" AS "tenantFullName",
-          t.phone AS "tenantPhone",
-          r.id AS "roomId",
-          r.code AS "roomCode",
-          r.name AS "roomName",
-          r.status AS "roomStatus",
-          s.status AS "stayStatus",
-          s."expiresAt" AS "stayExpiresAt",
-          i."invoiceNumber",
-          i.status AS "invoiceStatus",
-          i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
-          COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-          GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
-          submitter."fullName" AS "submittedByName",
-          reviewer."fullName" AS "reviewedByName"
-        FROM "PaymentSubmission" ps
-        INNER JOIN "Stay" s ON s.id = ps."stayId"
-        INNER JOIN "Room" r ON r.id = s."roomId"
-        INNER JOIN "Tenant" t ON t.id = ps."tenantId"
-        INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
-        INNER JOIN "User" submitter ON submitter.id = ps."submittedById"
-        LEFT JOIN "User" reviewer ON reviewer.id = ps."reviewedById"
-        WHERE ps."tenantId" = ${tenantId}
-        ${statusFilter}
-        ${searchFilter}
-        ORDER BY ps."createdAt" DESC, ps.id DESC
-        LIMIT ${take}
-        OFFSET ${skip}
-      `);
+      const where: Prisma.PaymentSubmissionWhereInput = {
+        tenantId,
+        ...(status ? { status } : {}),
+        ...(search
+          ? {
+              OR: [
+                { stay: { room: { code: { contains: search, mode: Prisma.QueryMode.insensitive } } } },
+                { stay: { room: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } } },
+                { invoice: { invoiceNumber: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+                { referenceNumber: { contains: search, mode: Prisma.QueryMode.insensitive } },
+              ],
+            }
+          : {}),
+      };
 
-      const countRows = await this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
-        SELECT COUNT(*)::bigint AS total
-        FROM "PaymentSubmission" ps
-        INNER JOIN "Stay" s ON s.id = ps."stayId"
-        INNER JOIN "Room" r ON r.id = s."roomId"
-        INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
-        WHERE ps."tenantId" = ${tenantId}
-        ${statusFilter}
-        ${searchFilter}
-      `);
+      const [items, totalItems] = await this.prisma.$transaction([
+        this.prisma.paymentSubmission.findMany({
+          where,
+          skip,
+          take,
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          include: {
+            stay: {
+              include: { room: true },
+            },
+            invoice: {
+              include: {
+                payments: { select: { amountRupiah: true } },
+              },
+            },
+            tenant: { select: { id: true, fullName: true, phone: true } },
+            submittedBy: { select: { id: true, fullName: true } },
+            reviewedBy: { select: { id: true, fullName: true } },
+          },
+        }),
+        this.prisma.paymentSubmission.count({ where }),
+      ]);
 
       return {
-        items: serializePrismaResult(items.map((item) => this.mapSubmissionRow(item))),
-        meta: buildMeta(page, limit, Number(countRows[0]?.total ?? 0)),
+        items: serializePrismaResult(items.map((item) => mapSubmissionFromPrisma(item))),
+        meta: buildMeta(page, limit, totalItems),
       };
     } catch (error) {
       this.handleSchemaError(error);
@@ -339,105 +217,58 @@ export class PaymentSubmissionsService {
 
   async findReviewQueue(query: ReviewQueueQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const searchPattern = query.search?.trim() ? `%${query.search.trim()}%` : null;
-    const paymentMethod = query.paymentMethod ?? null;
-    const roomId = query.roomId ? Number(query.roomId) : null;
-    const tenantId = query.tenantId ? Number(query.tenantId) : null;
+    const search = query.search?.trim() ?? null;
+    const paymentMethod = query.paymentMethod ?? undefined;
+    const roomId = query.roomId ? Number(query.roomId) : undefined;
+    const tenantId = query.tenantId ? Number(query.tenantId) : undefined;
     const status = query.status ?? PaymentSubmissionStatus.PENDING_REVIEW;
 
-    const paymentMethodFilter = paymentMethod
-      ? Prisma.sql` AND ps."paymentMethod" = CAST(${paymentMethod} AS "PaymentMethod")`
-      : Prisma.empty;
-    const roomFilter = roomId ? Prisma.sql` AND r.id = ${roomId}` : Prisma.empty;
-    const tenantFilter = tenantId ? Prisma.sql` AND t.id = ${tenantId}` : Prisma.empty;
-    const searchFilter = searchPattern
-      ? Prisma.sql`
-          AND (
-            r.code ILIKE ${searchPattern}
-            OR COALESCE(r.name, '') ILIKE ${searchPattern}
-            OR t."fullName" ILIKE ${searchPattern}
-            OR t.phone ILIKE ${searchPattern}
-            OR i."invoiceNumber" ILIKE ${searchPattern}
-            OR COALESCE(ps."referenceNumber", '') ILIKE ${searchPattern}
-          )
-        `
-      : Prisma.empty;
-
     try {
-      const items = await this.prisma.$queryRaw<SubmissionListRow[]>(Prisma.sql`
-        SELECT
-          ps.id,
-          ps."stayId",
-          ps."invoiceId",
-          ps."tenantId",
-          ps."submittedById",
-          ps."amountRupiah",
-          ps."paidAt",
-          ps."paymentMethod",
-          ps."senderName",
-          ps."senderBankName",
-          ps."referenceNumber",
-          ps.notes,
-          ps."fileKey",
-          ps."fileUrl",
-          ps."originalFilename",
-          ps."mimeType",
-          ps."fileSizeBytes",
-          ps.status,
-          ps."reviewedById",
-          ps."reviewedAt",
-          ps."reviewNotes",
-          ps."createdAt",
-          ps."updatedAt",
-          t."fullName" AS "tenantFullName",
-          t.phone AS "tenantPhone",
-          r.id AS "roomId",
-          r.code AS "roomCode",
-          r.name AS "roomName",
-          r.status AS "roomStatus",
-          s.status AS "stayStatus",
-          s."expiresAt" AS "stayExpiresAt",
-          i."invoiceNumber",
-          i.status AS "invoiceStatus",
-          i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
-          COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-          GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
-          submitter."fullName" AS "submittedByName",
-          reviewer."fullName" AS "reviewedByName"
-        FROM "PaymentSubmission" ps
-        INNER JOIN "Stay" s ON s.id = ps."stayId"
-        INNER JOIN "Room" r ON r.id = s."roomId"
-        INNER JOIN "Tenant" t ON t.id = ps."tenantId"
-        INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
-        INNER JOIN "User" submitter ON submitter.id = ps."submittedById"
-        LEFT JOIN "User" reviewer ON reviewer.id = ps."reviewedById"
-        WHERE ps.status = CAST(${status} AS "PaymentSubmissionStatus")
-        ${paymentMethodFilter}
-        ${roomFilter}
-        ${tenantFilter}
-        ${searchFilter}
-        ORDER BY ps."createdAt" ASC, ps.id ASC
-        LIMIT ${take}
-        OFFSET ${skip}
-      `);
+      const where: Prisma.PaymentSubmissionWhereInput = {
+        status,
+        ...(paymentMethod ? { paymentMethod } : {}),
+        ...(roomId ? { stay: { roomId } } : {}),
+        ...(tenantId ? { tenantId } : {}),
+        ...(search
+          ? {
+              OR: [
+                { stay: { room: { code: { contains: search, mode: Prisma.QueryMode.insensitive } } } },
+                { stay: { room: { name: { contains: search, mode: Prisma.QueryMode.insensitive } } } },
+                { tenant: { fullName: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+                { tenant: { phone: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+                { invoice: { invoiceNumber: { contains: search, mode: Prisma.QueryMode.insensitive } } },
+                { referenceNumber: { contains: search, mode: Prisma.QueryMode.insensitive } },
+              ],
+            }
+          : {}),
+      };
 
-      const countRows = await this.prisma.$queryRaw<Array<{ total: bigint | number }>>(Prisma.sql`
-        SELECT COUNT(*)::bigint AS total
-        FROM "PaymentSubmission" ps
-        INNER JOIN "Stay" s ON s.id = ps."stayId"
-        INNER JOIN "Room" r ON r.id = s."roomId"
-        INNER JOIN "Tenant" t ON t.id = ps."tenantId"
-        INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
-        WHERE ps.status = CAST(${status} AS "PaymentSubmissionStatus")
-        ${paymentMethodFilter}
-        ${roomFilter}
-        ${tenantFilter}
-        ${searchFilter}
-      `);
+      const [items, totalItems] = await this.prisma.$transaction([
+        this.prisma.paymentSubmission.findMany({
+          where,
+          skip,
+          take,
+          orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+          include: {
+            stay: {
+              include: { room: true },
+            },
+            invoice: {
+              include: {
+                payments: { select: { amountRupiah: true } },
+              },
+            },
+            tenant: { select: { id: true, fullName: true, phone: true } },
+            submittedBy: { select: { id: true, fullName: true } },
+            reviewedBy: { select: { id: true, fullName: true } },
+          },
+        }),
+        this.prisma.paymentSubmission.count({ where }),
+      ]);
 
       return {
-        items: serializePrismaResult(items.map((item) => this.mapSubmissionRow(item))),
-        meta: buildMeta(page, limit, Number(countRows[0]?.total ?? 0)),
+        items: serializePrismaResult(items.map((item) => mapSubmissionFromPrisma(item))),
+        meta: buildMeta(page, limit, totalItems),
       };
     } catch (error) {
       this.handleSchemaError(error);
@@ -477,28 +308,35 @@ export class PaymentSubmissionsService {
           throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat disetujui');
         }
 
+        const freshPayments = await tx.invoicePayment.aggregate({
+          where: { invoiceId: submission.invoiceId },
+          _sum: { amountRupiah: true },
+        });
+        const freshPaidAmount = freshPayments._sum.amountRupiah ?? 0;
+
         const remainingAmount = Math.max(
-          submission.invoiceTotalAmountRupiah - submission.invoicePaidAmountRupiah,
+          submission.invoiceTotalAmountRupiah - freshPaidAmount,
           0,
         );
 
-        if (submission.amountRupiah > remainingAmount) {
-          throw new ConflictException('Approval pembayaran melebihi sisa tagihan invoice');
+        const rentPortion = Math.min(submission.amountRupiah, remainingAmount);
+        const depositPortion = Math.max(0, submission.amountRupiah - rentPortion);
+
+        if (rentPortion > 0) {
+          await tx.invoicePayment.create({
+            data: {
+              invoiceId: submission.invoiceId,
+              paymentDate: new Date(submission.paidAt),
+              amountRupiah: rentPortion,
+              method: submission.paymentMethod as PaymentMethod,
+              referenceNo: submission.referenceNumber,
+              note: buildApprovalPaymentNote(submission),
+              capturedById: user.id,
+            },
+          });
         }
 
-        const payment = await tx.invoicePayment.create({
-          data: {
-            invoiceId: submission.invoiceId,
-            paymentDate: new Date(submission.paidAt),
-            amountRupiah: submission.amountRupiah,
-            method: submission.paymentMethod as PaymentMethod,
-            referenceNo: submission.referenceNumber,
-            note: this.buildApprovalPaymentNote(submission),
-            capturedById: user.id,
-          },
-        });
-
-        const nextPaidAmount = submission.invoicePaidAmountRupiah + submission.amountRupiah;
+        const nextPaidAmount = freshPaidAmount + rentPortion;
 
         const nextInvoiceStatus =
           nextPaidAmount >= submission.invoiceTotalAmountRupiah
@@ -519,26 +357,44 @@ export class PaymentSubmissionsService {
         await tx.invoice.update({
           where: { id: submission.invoiceId },
           data: {
-            status: nextInvoiceStatus as any,
+            status: nextInvoiceStatus,
             issuedAt: nextIssuedAt,
             paidAt: nextPaidAt,
           },
         });
 
-        await tx.$executeRaw(Prisma.sql`
-          UPDATE "PaymentSubmission"
-          SET status = CAST(${PaymentSubmissionStatus.APPROVED} AS "PaymentSubmissionStatus"),
-              "reviewedById" = ${user.id},
-              "reviewedAt" = NOW(),
-              "updatedAt" = NOW()
-          WHERE id = ${submissionId}
-            AND status = CAST(${PaymentSubmissionStatus.PENDING_REVIEW} AS "PaymentSubmissionStatus")
-        `);
+        await tx.paymentSubmission.update({
+          where: { id: submissionId },
+          data: {
+            status: PaymentSubmissionStatus.APPROVED,
+            reviewedById: user.id,
+            reviewedAt: new Date(),
+          },
+        });
+
+        const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
+        const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
+        const stayDepositPaidAfter = stayDepositPaidBefore + depositPortion;
+
+        const stayDepositPaymentStatus: BookingDepositPaymentStatus =
+          stayDepositPaidAfter >= stayDepositAmount && stayDepositAmount > 0
+            ? BookingDepositPaymentStatus.PAID
+            : stayDepositPaidAfter > 0
+              ? BookingDepositPaymentStatus.PARTIAL
+              : BookingDepositPaymentStatus.UNPAID;
+
+        await tx.stay.update({
+          where: { id: submission.stayId },
+          data: {
+            depositPaidAmountRupiah: stayDepositPaidAfter,
+            depositPaymentStatus: stayDepositPaymentStatus,
+          },
+        });
 
         if (nextInvoiceStatus === InvoiceStatus.PAID) {
           await tx.room.update({
             where: { id: submission.roomId },
-            data: { status: RoomStatus.OCCUPIED as any },
+            data: { status: RoomStatus.OCCUPIED },
           });
         }
 
@@ -552,9 +408,9 @@ export class PaymentSubmissionsService {
               stayId: submission.stayId,
               roomId: submission.roomId,
               invoiceId: submission.invoiceId,
-              invoicePaymentId: payment.id,
+              invoicePayment: { rentPortion, depositPortion },
               invoiceStatusAfter: nextInvoiceStatus,
-            } as any,
+            } as unknown as Prisma.InputJsonValue,
           },
         });
 
@@ -583,16 +439,15 @@ export class PaymentSubmissionsService {
           throw new ConflictException('Bukti pembayaran ini sudah pernah diproses');
         }
 
-        await tx.$executeRaw(Prisma.sql`
-          UPDATE "PaymentSubmission"
-          SET status = CAST(${PaymentSubmissionStatus.REJECTED} AS "PaymentSubmissionStatus"),
-              "reviewedById" = ${user.id},
-              "reviewedAt" = NOW(),
-              "reviewNotes" = ${reviewNotes},
-              "updatedAt" = NOW()
-          WHERE id = ${submissionId}
-            AND status = CAST(${PaymentSubmissionStatus.PENDING_REVIEW} AS "PaymentSubmissionStatus")
-        `);
+        await tx.paymentSubmission.update({
+          where: { id: submissionId },
+          data: {
+            status: PaymentSubmissionStatus.REJECTED,
+            reviewedById: user.id,
+            reviewedAt: new Date(),
+            reviewNotes,
+          },
+        });
 
         await tx.auditLog.create({
           data: {
@@ -604,7 +459,7 @@ export class PaymentSubmissionsService {
               stayId: submission.stayId,
               invoiceId: submission.invoiceId,
               reviewNotes,
-            } as any,
+            } as unknown as Prisma.InputJsonValue,
           },
         });
 
@@ -618,48 +473,135 @@ export class PaymentSubmissionsService {
     }
   }
 
+  async expireBooking(stayId: number, user: CurrentUserPayload) {
+    try {
+      const booking = await this.prisma.stay.findUnique({
+        where: { id: stayId },
+        select: { id: true, roomId: true, status: true },
+      });
+
+      if (!booking) {
+        throw new NotFoundException('Booking tidak ditemukan');
+      }
+
+      if (booking.status !== StayStatus.ACTIVE) {
+        throw new ConflictException('Hanya booking dengan status ACTIVE yang dapat ditutup manual');
+      }
+
+      const room = await this.prisma.room.findUnique({
+        where: { id: booking.roomId },
+        select: { status: true },
+      });
+
+      if (room?.status !== RoomStatus.RESERVED) {
+        throw new ConflictException('Booking ini sudah tidak dalam status reserved');
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.paymentSubmission.updateMany({
+          where: {
+            stayId,
+            status: PaymentSubmissionStatus.PENDING_REVIEW,
+          },
+          data: { status: PaymentSubmissionStatus.EXPIRED },
+        });
+
+        await tx.invoice.updateMany({
+          where: {
+            stayId,
+            status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] },
+          },
+          data: {
+            status: 'CANCELLED',
+            cancelReason: 'Booking ditutup manual oleh admin',
+          },
+        });
+
+        await tx.stay.update({
+          where: { id: stayId },
+          data: {
+            status: StayStatus.CANCELLED,
+            checkoutReason: 'Booking ditutup manual oleh admin',
+          },
+        });
+
+        await tx.room.update({
+          where: { id: booking.roomId },
+          data: { status: RoomStatus.AVAILABLE },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: 'EXPIRE_BOOKING',
+            entityType: 'Stay',
+            entityId: String(stayId),
+            meta: {
+              roomId: booking.roomId,
+              source: 'MANUAL_EXPIRY',
+            } as unknown as Prisma.InputJsonValue,
+          },
+        });
+      });
+
+      return { message: 'Booking berhasil ditutup', stayId };
+    } catch (error) {
+      this.handleSchemaError(error);
+      throw error;
+    }
+  }
+
   async runExpiryCheck(user?: CurrentUserPayload) {
     try {
-      const expiredBookings = await this.prisma.$queryRaw<Array<{ stayId: number; roomId: number }>>(Prisma.sql`
-        SELECT s.id AS "stayId", s."roomId"
-        FROM "Stay" s
-        INNER JOIN "Room" r ON r.id = s."roomId"
-        WHERE s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-          AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
-          AND s."expiresAt" IS NOT NULL
-          AND s."expiresAt" < NOW()
-          AND NOT EXISTS (
-            SELECT 1
-            FROM "PaymentSubmission" ps
-            WHERE ps."stayId" = s.id
-              AND ps.status = CAST(${PaymentSubmissionStatus.APPROVED} AS "PaymentSubmissionStatus")
-              AND ps."reviewedAt" >= NOW() - INTERVAL '1 minute'
-          )
-      `);
+      const expiredBookings = await this.prisma.stay.findMany({
+        where: {
+          status: StayStatus.ACTIVE,
+          room: { status: RoomStatus.RESERVED },
+          expiresAt: { not: null, lt: new Date() },
+          paymentSubmissions: {
+            none: {
+              status: PaymentSubmissionStatus.APPROVED,
+              reviewedAt: { gte: new Date(Date.now() - 60 * 1000) },
+            },
+          },
+        },
+        select: { id: true, roomId: true },
+      });
 
       const processedStayIds: number[] = [];
 
       for (const booking of expiredBookings) {
         await this.prisma.$transaction(async (tx) => {
-          await tx.$executeRaw(Prisma.sql`
-            UPDATE "PaymentSubmission"
-            SET status = CAST(${PaymentSubmissionStatus.EXPIRED} AS "PaymentSubmissionStatus"),
-                "updatedAt" = NOW()
-            WHERE "stayId" = ${booking.stayId}
-              AND status = CAST(${PaymentSubmissionStatus.PENDING_REVIEW} AS "PaymentSubmissionStatus")
-          `);
+          await tx.paymentSubmission.updateMany({
+            where: {
+              stayId: booking.id,
+              status: PaymentSubmissionStatus.PENDING_REVIEW,
+            },
+            data: { status: PaymentSubmissionStatus.EXPIRED },
+          });
 
-          await tx.$executeRaw(Prisma.sql`
-            UPDATE "Stay"
-            SET status = CAST(${StayStatus.CANCELLED} AS "StayStatus"),
-                "checkoutReason" = ${'Booking kadaluarsa otomatis'},
-                "updatedAt" = NOW()
-            WHERE id = ${booking.stayId}
-          `);
+          await tx.invoice.updateMany({
+            where: {
+              stayId: booking.id,
+              status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] },
+            },
+            data: {
+              status: 'CANCELLED',
+              cancelReason: 'Booking kadaluarsa otomatis',
+            },
+          });
+
+          await tx.stay.update({
+            where: { id: booking.id },
+            data: {
+              status: StayStatus.CANCELLED,
+              checkoutReason: 'Booking kadaluarsa otomatis',
+            },
+          });
 
           await tx.room.update({
             where: { id: booking.roomId },
-            data: { status: RoomStatus.AVAILABLE as any },
+            data: { status: RoomStatus.AVAILABLE },
           });
 
           await tx.auditLog.create({
@@ -667,16 +609,16 @@ export class PaymentSubmissionsService {
               actorUserId: user?.id ?? null,
               action: 'EXPIRE_BOOKING',
               entityType: 'Stay',
-              entityId: String(booking.stayId),
+              entityId: String(booking.id),
               meta: {
                 roomId: booking.roomId,
                 source: user ? 'MANUAL_EXPIRY_CHECK' : 'SYSTEM_EXPIRY_CHECK',
-              } as any,
+              } as unknown as Prisma.InputJsonValue,
             },
           });
         });
 
-        processedStayIds.push(booking.stayId);
+        processedStayIds.push(booking.id);
       }
 
       return {
@@ -690,33 +632,58 @@ export class PaymentSubmissionsService {
   }
 
   private async findEligibleSubmissionTarget(tenantId: number, stayId: number, invoiceId: number) {
-    const rows = await this.prisma.$queryRaw<SubmissionEligibilityRow[]>(Prisma.sql`
-      SELECT
-        s.id AS "stayId",
-        i.id AS "invoiceId",
-        s."tenantId",
-        t."fullName" AS "tenantFullName",
-        r.id AS "roomId",
-        r.code AS "roomCode",
-        r.name AS "roomName",
-        r.status AS "roomStatus",
-        s.status AS "stayStatus",
-        s."expiresAt" AS "stayExpiresAt",
-        i."invoiceNumber",
-        i.status AS "invoiceStatus",
-        i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
-        COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah"
-      FROM "Stay" s
-      INNER JOIN "Tenant" t ON t.id = s."tenantId"
-      INNER JOIN "Room" r ON r.id = s."roomId"
-      INNER JOIN "Invoice" i ON i."stayId" = s.id
-      WHERE s.id = ${stayId}
-        AND i.id = ${invoiceId}
-        AND s."tenantId" = ${tenantId}
-      LIMIT 1
-    `);
+    const stay = await this.prisma.stay.findUnique({
+      where: { id: stayId },
+      select: {
+        id: true,
+        tenantId: true,
+        status: true,
+        expiresAt: true,
+        depositAmountRupiah: true,
+        depositPaidAmountRupiah: true,
+        depositPaymentStatus: true,
+        roomId: true,
+        room: { select: { id: true, code: true, name: true, status: true } },
+        tenant: { select: { id: true, fullName: true } },
+        invoices: {
+          where: { id: invoiceId },
+          select: {
+            id: true,
+            invoiceNumber: true,
+            status: true,
+            totalAmountRupiah: true,
+            payments: { select: { amountRupiah: true } },
+          },
+        },
+      },
+    });
 
-    return rows[0] ?? null;
+    if (!stay || stay.tenantId !== tenantId) return null;
+
+    const invoice = stay.invoices[0];
+    if (!invoice) return null;
+
+    const paidAmount = invoice.payments.reduce((sum, p) => sum + p.amountRupiah, 0);
+
+    return {
+      stayId: stay.id,
+      invoiceId: invoice.id,
+      tenantId: stay.tenantId,
+      tenantFullName: stay.tenant.fullName,
+      roomId: stay.roomId,
+      roomCode: stay.room.code,
+      roomName: stay.room.name,
+      roomStatus: stay.room.status,
+      stayStatus: stay.status,
+      stayExpiresAt: stay.expiresAt,
+      invoiceNumber: invoice.invoiceNumber,
+      invoiceStatus: invoice.status,
+      invoiceTotalAmountRupiah: invoice.totalAmountRupiah,
+      invoicePaidAmountRupiah: paidAmount,
+      stayDepositAmountRupiah: stay.depositAmountRupiah,
+      stayDepositPaidAmountRupiah: stay.depositPaidAmountRupiah,
+      stayDepositPaymentStatus: stay.depositPaymentStatus,
+    };
   }
 
   private async lockSubmissionTx(tx: Prisma.TransactionClient, submissionId: number) {
@@ -751,6 +718,8 @@ export class PaymentSubmissionsService {
         r.status AS "roomStatus",
         r."isActive" AS "roomIsActive",
         s.status AS "stayStatus",
+        s."depositAmountRupiah" AS "stayDepositAmountRupiah",
+        s."depositPaidAmountRupiah" AS "stayDepositPaidAmountRupiah",
         s."expiresAt" AS "stayExpiresAt",
         i."invoiceNumber",
         i.status AS "invoiceStatus",
@@ -763,155 +732,41 @@ export class PaymentSubmissionsService {
       INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
       INNER JOIN "Tenant" t ON t.id = ps."tenantId"
       WHERE ps.id = ${submissionId}
-      FOR UPDATE OF ps, s, r, i
+      FOR UPDATE OF ps
     `);
 
     return rows[0] ?? null;
   }
 
-  private async findSubmissionByIdTx(tx: Prisma.TransactionClient, submissionId: number) {
-    const rows = await tx.$queryRaw<SubmissionListRow[]>(Prisma.sql`
-      SELECT
-        ps.id,
-        ps."stayId",
-        ps."invoiceId",
-        ps."tenantId",
-        ps."submittedById",
-        ps."amountRupiah",
-        ps."paidAt",
-        ps."paymentMethod",
-        ps."senderName",
-        ps."senderBankName",
-        ps."referenceNumber",
-        ps.notes,
-        ps."fileKey",
-        ps."fileUrl",
-        ps."originalFilename",
-        ps."mimeType",
-        ps."fileSizeBytes",
-        ps.status,
-        ps."reviewedById",
-        ps."reviewedAt",
-        ps."reviewNotes",
-        ps."createdAt",
-        ps."updatedAt",
-        t."fullName" AS "tenantFullName",
-        t.phone AS "tenantPhone",
-        r.id AS "roomId",
-        r.code AS "roomCode",
-        r.name AS "roomName",
-        r.status AS "roomStatus",
-        s.status AS "stayStatus",
-        s."expiresAt" AS "stayExpiresAt",
-        i."invoiceNumber",
-        i.status AS "invoiceStatus",
-        i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
-        COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-        GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
-        submitter."fullName" AS "submittedByName",
-        reviewer."fullName" AS "reviewedByName"
-      FROM "PaymentSubmission" ps
-      INNER JOIN "Stay" s ON s.id = ps."stayId"
-      INNER JOIN "Room" r ON r.id = s."roomId"
-      INNER JOIN "Tenant" t ON t.id = ps."tenantId"
-      INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
-      INNER JOIN "User" submitter ON submitter.id = ps."submittedById"
-      LEFT JOIN "User" reviewer ON reviewer.id = ps."reviewedById"
-      WHERE ps.id = ${submissionId}
-      LIMIT 1
-    `);
+  private async findSubmissionByIdTx(tx: Prisma.TransactionClient, submissionId: number): Promise<SubmissionDetail> {
+    const submission = await tx.paymentSubmission.findUnique({
+      where: { id: submissionId },
+      include: {
+        stay: {
+          include: { room: true },
+        },
+        invoice: {
+          include: {
+            payments: { select: { amountRupiah: true } },
+          },
+        },
+        tenant: { select: { id: true, fullName: true, phone: true } },
+        submittedBy: { select: { id: true, fullName: true } },
+        reviewedBy: { select: { id: true, fullName: true } },
+      },
+    });
 
-    if (!rows[0]) {
+    if (!submission) {
       throw new NotFoundException('Bukti pembayaran tidak ditemukan');
     }
 
-    return this.mapSubmissionRow(rows[0]);
-  }
-
-  private mapSubmissionRow(row: SubmissionListRow) {
-    return {
-      id: row.id,
-      stayId: row.stayId,
-      invoiceId: row.invoiceId,
-      tenantId: row.tenantId,
-      amountRupiah: row.amountRupiah,
-      paidAt: row.paidAt,
-      paymentMethod: row.paymentMethod,
-      senderName: row.senderName,
-      senderBankName: row.senderBankName,
-      referenceNumber: row.referenceNumber,
-      notes: row.notes,
-      fileKey: row.fileKey,
-      fileUrl: row.fileUrl,
-      originalFilename: row.originalFilename,
-      mimeType: row.mimeType,
-      fileSizeBytes: row.fileSizeBytes,
-      status: row.status,
-      reviewedAt: row.reviewedAt,
-      reviewNotes: row.reviewNotes,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      tenant: {
-        id: row.tenantId,
-        fullName: row.tenantFullName,
-        phone: row.tenantPhone,
-      },
-      room: {
-        id: row.roomId,
-        code: row.roomCode,
-        name: row.roomName,
-        status: row.roomStatus,
-      },
-      stay: {
-        id: row.stayId,
-        status: row.stayStatus,
-        expiresAt: row.stayExpiresAt,
-      },
-      invoice: {
-        id: row.invoiceId,
-        invoiceNumber: row.invoiceNumber,
-        status: row.invoiceStatus,
-        totalAmountRupiah: row.invoiceTotalAmountRupiah,
-        paidAmountRupiah: row.invoicePaidAmountRupiah,
-        remainingAmountRupiah: row.invoiceRemainingAmountRupiah,
-      },
-      submittedBy: {
-        id: row.submittedById,
-        fullName: row.submittedByName,
-      },
-      reviewedBy: row.reviewedById
-        ? {
-            id: row.reviewedById,
-            fullName: row.reviewedByName,
-          }
-        : null,
-    };
-  }
-
-  private buildApprovalPaymentNote(submission: SubmissionLockRow) {
-    const fragments = ['Pembayaran hasil approval bukti bayar tenant'];
-    if (submission.referenceNumber) fragments.push(`Ref: ${submission.referenceNumber}`);
-    if (submission.senderName) fragments.push(`Pengirim: ${submission.senderName}`);
-    return fragments.join(' | ');
-  }
-
-  private parseDateOnly(value: string, errorMessage: string) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      throw new BadRequestException(errorMessage);
-    }
-    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-  }
-
-  private endOfDay(date: Date) {
-    const clone = new Date(date);
-    clone.setHours(23, 59, 59, 999);
-    return clone;
+    return mapSubmissionFromPrisma(submission);
   }
 
   private isPaymentSubmissionSchemaError(error: any) {
     const message = String(error?.message ?? '');
     const code = String(error?.code ?? error?.meta?.code ?? '');
+    console.error('=== PAYMENT SUBMISSION ERROR ===', { code, message: message.slice(0, 500) });
     return code === '42P01' || code === '42704' || /PaymentSubmission|paymentsubmission/i.test(message);
   }
 

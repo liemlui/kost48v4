@@ -12,13 +12,15 @@ export type NavigationSection = {
   links: NavigationLink[];
 };
 
+export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
+
 const ownerSections: NavigationSection[] = [
   {
     title: 'Owner Surface',
     links: [
       { to: '/dashboard', label: 'Dashboard Owner', icon: '📈', hint: 'KPI properti, koleksi, dan arah keputusan bisnis.' },
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau billed, collected, overdue, dan follow-up utama.' },
-      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
+      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
       { to: '/expenses', label: 'Pengeluaran', icon: '💸', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
       { to: '/users', label: 'Users', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
@@ -55,9 +57,9 @@ const adminSections: NavigationSection[] = [
   {
     title: 'Keuangan & Kontrol',
     links: [
-      { to: '/invoices', label: 'Invoices', icon: '💳', hint: 'Tagihan, line item, dan status pembayaran.' },
-      { to: '/invoice-payments', label: 'Invoice Payments', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
-      { to: '/payment-submissions/review', label: 'Verifikasi Bayar', icon: '💸', hint: 'Queue review bukti bayar booking reserved tenant.' },
+      { to: '/invoices', label: 'Tagihan', icon: '💳', hint: 'Tagihan, line item, dan status pembayaran.' },
+      { to: '/invoice-payments', label: 'Pembayaran Manual', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
+      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Queue review bukti bayar booking reserved tenant.' },
       { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
       { to: '/expenses', label: 'Expenses', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
       { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
@@ -105,21 +107,43 @@ const staffSections: NavigationSection[] = [
   },
 ];
 
-const tenantSections: NavigationSection[] = [
-  {
+function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSection[] {
+  if (stage === 'browsing') {
+    return [{
+      title: 'Portal Tenant',
+      links: [
+        { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Lihat kamar yang tersedia dan mulai booking.' },
+        { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
+      ],
+    }];
+  }
+
+  if (stage === 'booking') {
+    return [{
+      title: 'Portal Tenant',
+      links: [
+        { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Cari kamar lain atau lihat katalog yang tersedia.' },
+        { to: '/portal/bookings', label: 'Pemesanan Saya', icon: '🗓️', hint: 'Pantau booking reserved, approval, dan pembayaran awal.' },
+        { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Lihat tagihan awal hasil approval booking.' },
+        { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
+      ],
+    }];
+  }
+
+  return [{
     title: 'Portal Tenant',
     links: [
       { to: '/portal/stay', label: 'Hunian Saya', icon: '🏠', hint: 'Ringkasan kamar, masa tinggal, dan konteks hunian.' },
-      { to: '/portal/bookings', label: 'Pemesanan Saya', icon: '🗓️', hint: 'Pantau booking kamar yang masih reserved dan masa berlakunya.' },
       { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Tiket Saya', icon: '🎫', hint: 'Ajukan tiket dan pantau progres bantuan.' },
       { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola kos.' },
+      { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
       { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
     ],
-  },
-];
+  }];
+}
 
-export function getNavigationSections(role?: Role): NavigationSection[] {
+export function getNavigationSections(role?: Role, tenantStage: TenantPortalStage = 'occupied'): NavigationSection[] {
   switch (role) {
     case 'OWNER':
       return ownerSections;
@@ -128,16 +152,21 @@ export function getNavigationSections(role?: Role): NavigationSection[] {
     case 'STAFF':
       return staffSections;
     case 'TENANT':
-      return tenantSections;
+      return getTenantSections(tenantStage);
     default:
       return adminSections;
   }
 }
 
-export function getNavigationLinks(role?: Role): NavigationLink[] {
-  return getNavigationSections(role).flatMap((section) => section.links);
+export function getNavigationLinks(role?: Role, tenantStage: TenantPortalStage = 'occupied'): NavigationLink[] {
+  return getNavigationSections(role, tenantStage).flatMap((section) => section.links);
 }
 
-export function getDefaultRoute(role?: Role): string {
-  return role === 'TENANT' ? '/portal/stay' : '/dashboard';
+export function getDefaultRoute(role?: Role, tenantStage: TenantPortalStage = 'occupied'): string {
+  if (role === 'TENANT') {
+    if (tenantStage === 'browsing') return '/rooms';
+    if (tenantStage === 'booking') return '/portal/bookings';
+    return '/portal/stay';
+  }
+  return '/dashboard';
 }

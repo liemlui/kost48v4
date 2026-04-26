@@ -135,6 +135,12 @@ export const coreResourceConfigs: Record<string, ResourceConfig> = {
         placeholder: 'Nama perusahaan atau kampus',
       },
       {
+        name: 'images',
+        label: 'Galeri Gambar',
+        type: 'text',
+        placeholder: 'Unggah gambar kamar',
+      },
+      {
         name: 'notes',
         label: 'Catatan',
         type: 'textarea',
@@ -224,6 +230,12 @@ export const coreResourceConfigs: Record<string, ResourceConfig> = {
         type: 'currency',
         placeholder: '8000 untuk Rp 8.000 per m³',
         required: true,
+      },
+      {
+        name: 'images',
+        label: 'Galeri Gambar',
+        type: 'text',
+        placeholder: 'Unggah gambar kamar',
       },
       {
         name: 'notes',
@@ -326,6 +338,12 @@ export const coreResourceConfigs: Record<string, ResourceConfig> = {
           { value: 'OTHER', label: 'Lainnya' },
         ],
         placeholder: 'Pilih sumber booking',
+      },
+      {
+        name: 'images',
+        label: 'Galeri Gambar',
+        type: 'text',
+        placeholder: 'Unggah gambar kamar',
       },
       {
         name: 'notes',

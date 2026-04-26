@@ -74,13 +74,11 @@ export default function BookingPage() {
   const mutation = useMutation({
     mutationFn: (payload: CreateTenantBookingPayload) => createTenantBooking(payload),
     onSuccess: async () => {
+      sessionStorage.setItem('portal-bookings-success-message', 'Booking kamar berhasil dibuat. Pantau masa berlaku booking Anda di halaman ini.');
       await queryClient.invalidateQueries({ queryKey: ['public-rooms'] });
       await queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['stays'] });
-      navigate('/portal/bookings', {
-        replace: true,
-        state: { successMessage: 'Booking kamar berhasil dibuat. Pantau masa berlaku booking Anda di halaman ini.' },
-      });
+      navigate('/portal/bookings', { replace: true });
     },
     onError: (err: unknown) => {
       const message = err && typeof err === 'object' && 'response' in err
@@ -104,6 +102,14 @@ export default function BookingPage() {
         return pricing.monthlyRateRupiah;
     }
   }, [room, formState.pricingTerm]);
+
+
+
+  const initialTotal = useMemo(() => {
+    const rent = Number(selectedRate ?? 0);
+    const deposit = Number(room?.defaultDepositRupiah ?? 0);
+    return rent + deposit;
+  }, [room, selectedRate]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -159,7 +165,8 @@ export default function BookingPage() {
                 <div className="border rounded-4 p-3 mb-3 bg-light-subtle">
                   <div className="small text-muted mb-1">Tarif yang dipilih</div>
                   <div className="fs-4 fw-bold"><CurrencyDisplay amount={selectedRate} /></div>
-                  <div className="small text-muted mt-1">Deposit default <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
+                  <div className="small text-muted mt-1">Deposit booking <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
+                  <div className="small text-muted mt-1">Total awal booking <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong></div>
                 </div>
 
                 <div className="d-grid gap-3">
@@ -256,8 +263,8 @@ export default function BookingPage() {
                     </Col>
                   </Row>
 
-                  <Alert variant="light" className="small mt-4 mb-0">
-                    Form ini hanya membuat booking tenant. Approval admin, pembayaran, dan aktivasi penuh tetap masuk fase berikutnya.
+                  <Alert variant="info" className="small mt-4 mb-0">
+                    Ringkasan awal: sewa sesuai term <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong> = total awal <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong>. Nilai ini akan terlihat oleh admin saat approval dan oleh tenant saat pembayaran awal.
                   </Alert>
 
                   <div className="d-flex gap-2 justify-content-end mt-4 flex-wrap">

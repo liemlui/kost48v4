@@ -2,7 +2,7 @@ import { IsInt, IsNotEmpty, IsNumberString, Min } from 'class-validator';
 
 export class ApproveBookingDto {
   @IsInt()
-  @Min(0)
+  @Min(1)
   agreedRentAmountRupiah!: number;
 
   @IsInt()

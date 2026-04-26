@@ -1,4 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react';
+import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
@@ -112,13 +113,13 @@ function SidebarContent({
 
   return (
     <>
-      <div className="brand-block">
+      <button type="button" className="brand-block border-0 bg-transparent text-start w-100" onClick={onNavigate}>
         <div className="brand-mark" aria-hidden="true">K48</div>
         <div>
           <div className="brand-title">Kost48 Surabaya</div>
           <div className="brand-subtitle">Role-based workspace</div>
         </div>
-      </div>
+      </button>
 
       <div className="glass-card p-3 rounded-4 border-0 shadow-none">
         <div className="sidebar-section-label mb-2">{getWorkspaceTitle(userRole)}</div>
@@ -163,16 +164,17 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sections = useMemo(() => getNavigationSections(user?.role), [user?.role]);
-  const links = useMemo(() => getNavigationLinks(user?.role), [user?.role]);
+  const { stage: tenantStage } = useTenantPortalStage();
+  const sections = useMemo(() => getNavigationSections(user?.role, tenantStage), [user?.role, tenantStage]);
+  const links = useMemo(() => getNavigationLinks(user?.role, tenantStage), [user?.role, tenantStage]);
   const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
-  const defaultRoute = getDefaultRoute(user?.role);
+  const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
   return (
     <div className="app-shell">
       <div className="app-shell-grid">
         <aside className="app-sidebar d-none d-xl-flex">
-          <SidebarContent sections={sections} links={links} userRole={user?.role} />
+          <SidebarContent sections={sections} links={links} userRole={user?.role} onNavigate={() => navigate(defaultRoute)} />
         </aside>
 
         <Offcanvas show={sidebarOpen} onHide={() => setSidebarOpen(false)} placement="start" className="app-sidebar-offcanvas">
@@ -181,7 +183,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <div className="app-sidebar app-sidebar-mobile">
-              <SidebarContent sections={sections} links={links} userRole={user?.role} onNavigate={() => setSidebarOpen(false)} />
+              <SidebarContent sections={sections} links={links} userRole={user?.role} onNavigate={() => { setSidebarOpen(false); navigate(defaultRoute); }} />
             </div>
           </Offcanvas.Body>
         </Offcanvas>

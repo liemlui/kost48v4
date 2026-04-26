@@ -348,3 +348,115 @@ Hasil audit codebase (dari sesi terpisah):
 - Kesimpulan sesi:
   - fondasi 4.0–4.1 semakin dekat stabil, tetapi gate UAT tetap belum dinyatakan lulus penuh
   - 4.2 sempat diprototipekan untuk menutup blocker integrasi, namun masih harus dianggap non-baseline sampai gate resmi lolos
+
+---
+
+## 2026-04-24 — Deep Patch Booking → Approval → Payment + Sinkronisasi Dokumen
+
+- Source patch lanjutan untuk alur booking/payment disiapkan lebih dalam pada artifact kerja terbaru.
+- Fokus utama batch:
+  - hardening integritas booking
+  - perbaikan expiry cleanup
+  - fondasi split payment `INVOICE | DEPOSIT`
+  - UX tenant/admin yang lebih jujur
+- Error constraint invoice yang sempat muncul pada approval (`detail invoice hanya boleh diubah saat status DRAFT`) ditangani secara desain dengan rule: invoice tetap/masuk `DRAFT` saat edit detail, lalu baru bergerak ke status operasional yang benar.
+- Sinkronisasi dokumentasi dilakukan pada seluruh dokumen inti agar:
+  - status 4.2 tidak lagi dibaca sebagai nol mutlak
+  - tetapi tetap belum diklaim resmi/live penuh tanpa verifikasi lokal dan UAT
+- Output sesi dokumentasi:
+  - `00_GROUND_STATE.md`
+  - `01_CONTRACTS.md`
+  - `02_PLAN.md`
+  - `03_DECISIONS_LOG.md`
+  - `04_JOURNAL.md`
+  - `05_V4_MASTER_PLAN.md`
+  - `CHANGELOG.md`
+  - `CHANGELOG_BACKEND.md`
+  - `CHECKLIST.md`
+  - `FINAL_FRONTEND_FEATURES.md`
+  diselaraskan dengan posisi source terbaru.
+
+
+## 2026-04-24 — Finalisasi Combined Booking Payment 4.2
+
+- Setelah UAT dan patch lanjutan, alur pembayaran awal booking difinalkan menjadi **combined booking payment**.
+- Tenant melihat satu tombol **Bayar Sewa & Deposit** di `Pemesanan Saya`.
+- Nominal pembayaran dikunci sebagai total sisa sewa invoice booking awal + sisa deposit booking awal.
+- Backend tetap menjaga pemisahan akuntabilitas internal:
+  - rent portion masuk ke `InvoicePayment` dan invoice booking awal menjadi `PAID`
+  - deposit portion masuk ke tracking deposit awal pada `Stay` dan `depositPaymentStatus` menjadi `PAID`
+- Keputusan ini menggantikan interpretasi tenant-facing sebelumnya yang menampilkan dua aksi upload terpisah: **Upload Bukti Sewa** dan **Upload Bukti Deposit**.
+- Field target-aware lama, jika masih ada di schema/source, dibaca sebagai compatibility/internal metadata, bukan UX final tenant.
+- UAT berikutnya harus fokus pada: submit combined payment, reject, wrong amount, double approve, expiry, dan aktivasi `RESERVED -> OCCUPIED`.
+
+
+---
+
+## 2026-04-26 — UAT Gate 1/2 PASS, 4.2 Happy Path PASS, dan Temuan P0 Cache Tenant
+
+### Hasil UAT yang sudah diterima
+- **Gate 1 / UAT 4.0 PASS** setelah patch:
+  - fallback gambar publik berhasil; tidak ada broken image,
+  - Booking Reserved tidak tercampur dengan Stay Aktif,
+  - stay `RESERVED` tidak memblok CheckInWizard untuk tenant/room operasional lain,
+  - `checkInDate` dan `expiresAt` tampil benar.
+- **Gate 2 / UAT 4.1 PASS**:
+  - admin approve booking berhasil,
+  - modal menutup setelah sukses,
+  - invoice awal `DRAFT` terbentuk,
+  - meter awal tersimpan,
+  - room tetap `RESERVED`,
+  - tenant melihat status `Menunggu Pembayaran`.
+- **UAT 4.2 happy path PASS**:
+  - tenant upload satu bukti pembayaran awal,
+  - submission muncul di review queue admin,
+  - admin bisa melihat preview bukti,
+  - approve berhasil,
+  - `InvoicePayment` terbentuk,
+  - invoice menjadi `PAID`,
+  - room berubah `RESERVED -> OCCUPIED`,
+  - tenant melihat K02 sebagai hunian aktif di `Hunian Saya`.
+
+### Temuan P0 baru
+- Setelah logout dari tenant yang punya stay aktif dan login sebagai tenant baru yang tidak punya stay aktif, `/api/stays/me/current` mengembalikan 404 tetapi UI sempat menampilkan data stay tenant sebelumnya.
+- Ini diklasifikasikan sebagai **P0 tenant data leak / stale cache**, kemungkinan besar dari TanStack Query cache atau state portal yang belum dibersihkan saat logout/login.
+
+### Keputusan tindak lanjut
+- Tidak mengulang UAT yang sudah PASS.
+- Patch berikutnya wajib fokus pada **tenant portal cache isolation**.
+- Setelah patch, lakukan targeted retest: Tenant A punya stay → logout → Tenant B tanpa stay → empty state jujur, tidak ada data Tenant A, tidak ada request flood.
+- Setelah targeted retest PASS, lanjutkan UAT 4.2 reject path, wrong amount path, expiry path, dan double approve prevention.
+
+---
+
+## 2026-04-26 — UAT 4.2 CORE PASS dan Penutupan P0 Cache Tenant
+
+- P0 tenant portal cache isolation berhasil ditutup melalui targeted retest:
+  - Tenant A dengan stay aktif tetap melihat data sendiri,
+  - setelah logout/login sebagai Tenant B tanpa stay aktif, portal menampilkan empty state,
+  - `/portal/bookings` dan `/portal/invoices` tidak bocor data lama,
+  - tidak ada request flood dari `/stays/me/current`.
+- UAT 4.2 reject path PASS:
+  - admin reject dengan alasan,
+  - submission hilang dari pending queue,
+  - tenant melihat alasan penolakan dan bisa upload ulang,
+  - room tetap `RESERVED`, invoice belum `PAID`.
+- UAT 4.2 wrong amount path PASS:
+  - backend menolak nominal salah dengan pesan `Pembayaran harus tepat sebesar total yang tersisa`,
+  - tidak ada partial payment.
+- UAT 4.2 double approve prevention PASS:
+  - approve pertama sukses,
+  - approve kedua ditolak,
+  - tidak ada `InvoicePayment` ganda.
+- UAT 4.2 expiry core PASS:
+  - expiry job menghasilkan `expiredCount=1`,
+  - stay berubah `CANCELLED`,
+  - room kembali `AVAILABLE`,
+  - invoice tidak mengaktifkan room.
+
+### Catatan P1 sebelum Phase 4.3
+- Invoice awal booking yang expired masih bisa tertinggal `ISSUED`; perlu cleanup agar menjadi `CANCELLED` bila belum final.
+- Room `RESERVED` masih perlu label `Pemesan` / `Booking oleh`, bukan `Penghuni`.
+- Pricing term `Semester` / `Tahunan` tidak boleh tampil bila tidak ada rate nyata.
+- Response error production tidak boleh mengirim stack trace.
+- Phase 3A meter awal perlu diverifikasi code-level agar create stay backoffice tetap wajib meter listrik/air.

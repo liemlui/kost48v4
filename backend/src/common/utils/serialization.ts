@@ -1,10 +1,11 @@
 /**
- * Utility untuk menangani serialization data Prisma, khususnya Decimal
+ * Utility untuk menangani serialization data Prisma, khususnya Decimal dan Date.
  */
 
 /**
- * Mengonversi objek Prisma dengan field Decimal menjadi objek JSON yang aman
- * Decimal di-convert ke string atau number untuk menghindari serialization error
+ * Mengonversi objek Prisma menjadi format yang aman untuk JSON.
+ * - Decimal -> number (fallback string)
+ * - Date -> ISO string
  */
 export function safeSerialize<T>(data: T): T {
   if (data === null || data === undefined) {
@@ -12,17 +13,19 @@ export function safeSerialize<T>(data: T): T {
   }
 
   if (Array.isArray(data)) {
-    return data.map(item => safeSerialize(item)) as any;
+    return data.map((item) => safeSerialize(item)) as any;
+  }
+
+  if (data instanceof Date) {
+    return data.toISOString() as any;
   }
 
   if (typeof data === 'object' && data !== null) {
     // Handle Prisma Decimal type
     if (data.constructor && data.constructor.name === 'Decimal') {
-      // Convert Decimal to number
       try {
         return (data as any).toNumber() as any;
       } catch {
-        // Fallback to string
         return (data as any).toString() as any;
       }
     }
@@ -36,7 +39,6 @@ export function safeSerialize<T>(data: T): T {
       }
     }
 
-    // Recursively process object properties
     const result: any = {};
     for (const [key, value] of Object.entries(data)) {
       result[key] = safeSerialize(value);
@@ -48,7 +50,7 @@ export function safeSerialize<T>(data: T): T {
 }
 
 /**
- * Mengonversi array hasil Prisma findMany menjadi format yang aman untuk JSON
+ * Mengonversi hasil Prisma menjadi format yang aman untuk JSON.
  */
 export function serializePrismaResult<T>(result: T): T {
   return safeSerialize(result);

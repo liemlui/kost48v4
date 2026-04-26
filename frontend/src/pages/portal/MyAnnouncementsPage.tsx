@@ -35,6 +35,7 @@ export default function MyAnnouncementsPage() {
     audience: item?.audience === 'ALL' || item?.audience === 'TENANT' ? item.audience : undefined,
     publishedAt: item?.publishedAt || item?.createdAt || null,
     expiresAt: item?.expiresAt || null,
+    imageUrl: item?.imageUrl || null,
   })).filter((item) => item.id > 0); // Filter out items dengan ID tidak valid
 
   return (
@@ -78,6 +79,7 @@ export default function MyAnnouncementsPage() {
                 </div>
               </div>
 
+              {item.imageUrl ? <div className="mb-3"><img src={item.imageUrl} alt={item.title} style={{ width: 180, maxWidth: '100%', height: 110, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
               <div className="announcement-body-text">{item.content || '(Tidak ada konten)'}</div>
             </Card.Body>
           </Card>

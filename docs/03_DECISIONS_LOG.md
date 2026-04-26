@@ -162,3 +162,58 @@
 | 89 | Refactor struktur source menjadi prioritas kebersihan aktif; target praktis file source manual diusahakan `<= 500` baris | Patch berikutnya lebih mudah dan risiko drift turun |
 | 90 | Arah refactor backend = Prisma-first; raw SQL hanya untuk kebutuhan locking/compatibility yang jelas | Service baru tidak boleh liar berbasis raw SQL sebagai default |
 | 91 | Refactor frontend mengikuti pola sections / helpers / config / types agar page besar lebih mudah dibaca | Wizard/config padat dipisah sebelum menambah fitur baru |
+
+---
+
+## 2026-04-24 — Freeze Sinkronisasi Deep Patch Booking/Payment
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 92 | Payment submission booking bergerak ke model **target-aware** (`INVOICE | DEPOSIT`) | Admin/tenant tidak lagi membaca payment booking sebagai satu keranjang ambigu |
+| 93 | Tracking pembayaran deposit awal booking dipisah dari lifecycle proses refund/forfeit deposit existing | Aktivasi booking bisa lebih jujur tanpa membongkar flow deposit pasca checkout |
+| 94 | Approval booking/payment yang membuat invoice line wajib menghormati urutan `DRAFT -> edit line -> status operasional` | Mencegah error trigger DB “Detail invoice hanya boleh diubah saat status DRAFT” |
+| 95 | Expiry booking yang sudah sempat di-approve boleh melakukan cleanup invoice awal dan baseline meter yang relevan | Mengurangi orphan invoice / bentrok meter bila kamar dibooking ulang |
+| 96 | Manual expire booking di backoffice boleh dibuka sebagai action administratif terbatas | Admin tidak harus menunggu job expiry otomatis untuk kasus tertentu |
+| 97 | 4.2 dianggap sudah punya source patch lanjutan, tetapi **belum baseline resmi** sampai sinkronisasi schema + build lokal + UAT selesai | Dokumentasi tetap jujur, namun tidak lagi membaca 4.2 sebagai nol mutlak |
+
+
+## 2026-04-24 — Freeze Combined Booking Payment 4.2
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 98 | **Workflow booking payment final menggunakan satu submission gabungan untuk sewa + deposit.** | Tenant tidak memilih target teknis; UX lebih sederhana dan tidak ada salah apply bukti deposit ke sewa. |
+| 99 | **Nominal pembayaran awal wajib sama persis dengan sisa sewa + sisa deposit.** | Tidak ada underpay, overpay, atau partial pada workflow booking 4.2. |
+| 100 | **Backend membagi combined payment secara internal.** | Rent portion membuat `InvoicePayment`; deposit portion mengupdate tracking deposit awal pada `Stay`. |
+| 101 | **Room `RESERVED -> OCCUPIED` hanya setelah invoice sewa dan deposit sama-sama `PAID`.** | Aktivasi kamar tetap jujur dan tidak terjadi hanya karena upload proof. |
+| 102 | **`targetType` / `targetId` bila masih ada diperlakukan sebagai compatibility/internal metadata, bukan pilihan tenant.** | Dokumen dan UI tidak lagi mendorong split Sewa/Deposit sebagai dua flow tenant-facing. |
+| 103 | **Status `PARTIAL` tidak digunakan di workflow booking payment 4.2.** | Jika nominal tidak sesuai, submission ditolak; bukan diproses sebagian. |
+
+
+---
+
+## 2026-04-26 — Freeze Status UAT & Tenant Cache Isolation
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 104 | Gate 1 / UAT 4.0 diterima sebagai PASS setelah patch klasifikasi stay dan fallback gambar publik | UAT 4.0 tidak perlu diulang dari awal; cukup regression bila file terkait disentuh lagi |
+| 105 | Gate 2 / UAT 4.1 diterima sebagai PASS setelah admin approval booking berhasil end-to-end | UAT 4.1 tidak perlu diulang dari awal; approval booking menjadi baseline stabil |
+| 106 | UAT 4.2 happy path diterima sebagai PASS | Submit bukti bayar → approve admin → invoice PAID → room OCCUPIED dianggap terbukti untuk happy path |
+| 107 | 4.2 belum full PASS sampai reject, wrong amount, expiry, dan double approve prevention ditutup | Tidak boleh lanjut 4.3 sebelum sisa UAT 4.2 selesai |
+| 108 | Tenant portal cache isolation menjadi P0 sebelum UAT 4.2 dilanjutkan | Stale data tenant lama tidak boleh muncul untuk tenant baru; query cache wajib dibersihkan/di-scope per user |
+| 109 | Setelah patch cache isolation, verifikasi cukup targeted retest, bukan mengulang semua UAT | Menghemat waktu dan menjaga bukti UAT yang sudah PASS tetap berlaku |
+| 110 | `/stays/me/current` 404 untuk tenant tanpa stay aktif adalah state valid, bukan error UI yang boleh menampilkan cache lama | Portal harus menampilkan empty state jujur dan tidak request flood |
+| 111 | Success message portal tidak boleh lintas tenant | `sessionStorage` success message harus di-clear saat logout/login atau di-namespace per tenant |
+
+---
+
+## 2026-04-26 — Freeze UAT 4.2 CORE PASS + P1 Cleanup Before 4.3
+
+| # | Keputusan | Dampak |
+|---|-----------|--------|
+| 112 | P0 tenant portal cache isolation dinyatakan CLOSED setelah targeted retest PASS | Tenant tanpa stay aktif tidak lagi melihat data tenant sebelumnya; UAT tidak perlu diulang dari awal |
+| 113 | UAT 4.2 reject path dinyatakan PASS | Reject tidak membuat payment final, room tetap RESERVED, tenant dapat upload ulang |
+| 114 | UAT 4.2 wrong amount path dinyatakan PASS | Nominal tidak tepat ditolak; workflow booking tetap no-partial |
+| 115 | UAT 4.2 double approve prevention dinyatakan PASS | Tidak ada `InvoicePayment` ganda dan approval kedua ditolak |
+| 116 | UAT 4.2 expiry core dinyatakan PASS | Booking expired membatalkan stay dan me-release room; invoice orphan menjadi P1 cleanup |
+| 117 | 4.2 dibaca sebagai CORE PASS / accepted with P1 cleanup notes | Boleh lanjut ke 4.3 hanya setelah P1 cleanup kecil dan targeted retest selesai |
+| 118 | P1 cleanup sebelum 4.3 mencakup invoice expiry cleanup, label RESERVED, pricing honesty, production error stack, dan verifikasi Phase 3A meter | Scope cleanup tetap kecil dan tidak membuka fitur baru |

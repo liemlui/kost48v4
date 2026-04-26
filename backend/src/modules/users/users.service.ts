@@ -1,5 +1,6 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
@@ -14,19 +15,19 @@ export class UsersService {
 
   async findAll(query: UsersQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.UserWhereInput = {
       AND: [
         query.search
           ? {
               OR: [
-                { fullName: { contains: query.search, mode: 'insensitive' } },
-                { email: { contains: query.search, mode: 'insensitive' } },
+                { fullName: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                { email: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
               ],
             }
-          : {},
-        query.role ? { role: query.role } : {},
-        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : {},
-      ],
+          : undefined,
+        query.role ? { role: query.role } : undefined,
+        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : undefined,
+      ].filter(Boolean),
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.user.findMany({

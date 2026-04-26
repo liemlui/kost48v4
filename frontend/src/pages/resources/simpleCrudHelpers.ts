@@ -165,7 +165,7 @@ export function getCountdownStatus(dueDate: string | Date | null | undefined, ch
 
 export function buildInitialState(config: { fields: Array<{ name: string; type: string }> }) {
   return config.fields.reduce((acc: Record<string, any>, field) => {
-    acc[field.name] = field.type === 'checkbox' ? false : '';
+    acc[field.name] = field.type === 'checkbox' ? false : field.name === 'images' ? [] : '';
     return acc;
   }, {} as Record<string, any>);
 }

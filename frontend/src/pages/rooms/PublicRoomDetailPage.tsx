@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -6,10 +7,20 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import type { PublicRoom } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+
+function SafeImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  const resolved = src ? resolveAbsoluteFileUrl(src) : null;
+  if (!resolved || failed) return null;
+  return <img src={resolved} alt={alt} className={className} onError={() => setFailed(true)} />;
+}
 
 function RoomImageBlock({ room }: { room: PublicRoom }) {
   const images = room.images ?? [];
-  if (!images.length) {
+  const resolvedImages = images.map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
+
+  if (!resolvedImages.length) {
     return (
       <div className="public-room-placeholder public-room-detail-placeholder">
         <div className="public-room-placeholder-mark">{room.code.slice(0, 3).toUpperCase()}</div>
@@ -18,15 +29,15 @@ function RoomImageBlock({ room }: { room: PublicRoom }) {
     );
   }
 
-  if (images.length === 1) {
-    return <img src={images[0]} alt={room.code} className="public-room-image" />;
+  if (resolvedImages.length === 1) {
+    return <SafeImage src={resolvedImages[0]} alt={room.code} className="public-room-image" />;
   }
 
   return (
-    <Carousel interval={null} indicators={images.length > 1}>
-      {images.map((imageUrl, index) => (
+    <Carousel interval={null} indicators={resolvedImages.length > 1}>
+      {resolvedImages.map((imageUrl, index) => (
         <Carousel.Item key={`${room.id}-${index}`}>
-          <img src={imageUrl} alt={`${room.code}-${index + 1}`} className="public-room-image" />
+          <SafeImage src={imageUrl} alt={`${room.code}-${index + 1}`} className="public-room-image" />
         </Carousel.Item>
       ))}
     </Carousel>

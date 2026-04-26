@@ -8,6 +8,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
 import { StaysQueryDto } from './dto/stays-query.dto';
+import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
 
 @ApiTags('stays')
@@ -15,18 +16,21 @@ import { StaysService } from './stays.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('stays')
 export class StaysController {
-  constructor(private readonly staysService: StaysService) {}
+  constructor(
+    private readonly staysService: StaysService,
+    private readonly staysQueryService: StaysQueryService,
+  ) {}
 
   @Get()
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query() query: StaysQueryDto) {
-    return { message: 'Daftar stay berhasil diambil', data: await this.staysService.findAll(query) };
+    return { message: 'Daftar stay berhasil diambil', data: await this.staysQueryService.findAll(query) };
   }
 
   @Get('me/current')
   @Roles(UserRole.TENANT)
   async meCurrent(@CurrentUser() user: CurrentUserPayload) {
-    return { message: 'Stay aktif berhasil diambil', data: await this.staysService.findCurrentForTenant(user) };
+    return { message: 'Stay aktif berhasil diambil', data: await this.staysQueryService.findCurrentForTenant(user) };
   }
 
   @Post()
@@ -38,7 +42,7 @@ export class StaysController {
   @Get(':id')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
-    return { message: 'Detail stay berhasil diambil', data: await this.staysService.findOne(id, user) };
+    return { message: 'Detail stay berhasil diambil', data: await this.staysQueryService.findOne(id, user) };
   }
 
   @Get(':id/invoice-suggestion')
@@ -46,7 +50,7 @@ export class StaysController {
   async getInvoiceSuggestion(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return {
       message: 'Saran invoice berhasil diambil',
-      data: await this.staysService.getInvoiceSuggestion(id, user),
+      data: await this.staysQueryService.getInvoiceSuggestion(id, user),
     };
   }
 

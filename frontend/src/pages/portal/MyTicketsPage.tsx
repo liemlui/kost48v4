@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { createResource, listResource } from '../../api/resources';
+import { uploadTicketImage } from '../../api/mediaUploads';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 
 type PortalTicket = {
+  issueImageUrl?: string | null;
+  resolutionImageUrl?: string | null;
   id: number;
   ticketNumber?: string;
   title?: string;
@@ -30,13 +33,32 @@ function formatDate(value?: string) {
   });
 }
 
-const initialForm = { title: '', description: '', category: 'GENERAL' };
+const initialForm = { title: '', description: '', category: 'GENERAL', issueImageUrl: '', issueImageFileKey: '', issueImageOriginalFilename: '', issueImageMimeType: '', issueImageFileSizeBytes: 0 };
+
+async function compressImageFile(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1600;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+  bitmap.close();
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+}
 
 export default function MyTicketsPage() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: ['portal-tickets'],
@@ -61,6 +83,23 @@ export default function MyTicketsPage() {
   });
 
   const tickets = useMemo(() => query.data?.items ?? [], [query.data]);
+
+  const handleTicketImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingImage(true);
+      const compressed = await compressImageFile(file);
+      const uploaded = await uploadTicketImage(compressed);
+      setImagePreview(uploaded.fileUrl);
+      setFormState((prev) => ({ ...prev, issueImageUrl: uploaded.fileUrl, issueImageFileKey: uploaded.fileKey, issueImageOriginalFilename: uploaded.originalFilename, issueImageMimeType: uploaded.mimeType, issueImageFileSizeBytes: uploaded.fileSizeBytes }));
+    } catch (err: any) {
+      setError(err?.message ?? 'Gagal mengunggah foto tiket.');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
 
   return (
     <div>
@@ -95,6 +134,8 @@ export default function MyTicketsPage() {
                   {ticket.priority ? <StatusBadge status="SECONDARY" customLabel={ticket.priority} /> : null}
                 </div>
               </div>
+              {ticket.issueImageUrl ? <div className="mb-2"><img src={ticket.issueImageUrl} alt="Bukti tiket" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
+              {ticket.resolutionImageUrl ? <div className="mb-2"><img src={ticket.resolutionImageUrl} alt="Bukti selesai" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
               <div className="app-caption">{ticket.lastMessage || ticket.description || 'Belum ada pembaruan tambahan.'}</div>
             </Card.Body>
           </Card>
@@ -124,9 +165,15 @@ export default function MyTicketsPage() {
               <option value="OTHER">Lainnya</option>
             </Form.Select>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Deskripsi</Form.Label>
             <Form.Control as="textarea" rows={4} value={formState.description} onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Foto Masalah (opsional)</Form.Label>
+            <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleTicketImage} disabled={uploadingImage} />
+            <Form.Text muted>Preview akan dibuat kecil. Klik setelah tiket dibuat untuk melihat hasil di daftar tiket.</Form.Text>
+            {imagePreview ? <div className="mt-2"><img src={imagePreview} alt="Preview tiket" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

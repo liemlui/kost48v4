@@ -24,7 +24,11 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const invalidCredentialsMessage = 'Email atau password salah';
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+
+    const identifier = dto.identifier.trim();
+    const normalizedPhone = this.normalizePhone(identifier);
+
+    const user = await this.findUserForLogin(identifier, normalizedPhone);
 
     if (!user) {
       throw new UnauthorizedException(invalidCredentialsMessage);
@@ -39,7 +43,10 @@ export class AuthService {
       throw new UnauthorizedException(invalidCredentialsMessage);
     }
 
-    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
 
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
@@ -63,8 +70,15 @@ export class AuthService {
 
   async me(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User pada token tidak ditemukan');
-    if (!user.isActive) throw new ForbiddenException('User tidak aktif atau akses dicabut');
+
+    if (!user) {
+      throw new NotFoundException('User pada token tidak ditemukan');
+    }
+
+    if (!user.isActive) {
+      throw new ForbiddenException('User tidak aktif atau akses dicabut');
+    }
+
     return {
       id: user.id,
       fullName: user.fullName,
@@ -119,7 +133,6 @@ export class AuthService {
 
     return {
       success: true,
-      // Untuk MVP/dev: token dikembalikan agar bisa dites tanpa gateway eksternal.
       resetTokenPreview: token,
       expiresAt,
       channel: user.email ? 'EMAIL' : 'PHONE',
@@ -133,7 +146,9 @@ export class AuthService {
       throw new UnauthorizedException('Token reset tidak valid');
     }
 
-    const rows = await this.prisma.$queryRaw<Array<{ userId: number; usedAt: Date | null; expiresAt: Date }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ userId: number; usedAt: Date | null; expiresAt: Date }>
+    >(Prisma.sql`
       SELECT "userId", "usedAt", "expiresAt"
       FROM "PasswordResetToken"
       WHERE token = ${token}
@@ -210,6 +225,7 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+
     await this.prisma.$executeRaw(Prisma.sql`
       UPDATE "User"
       SET "passwordHash" = ${passwordHash},
@@ -221,31 +237,104 @@ export class AuthService {
     return { userId: user.id };
   }
 
-  private async findUserForForgotPassword(identifier: string, normalizedPhone: string | null) {
-    const lowered = identifier.toLowerCase();
+  private async findUserForLogin(identifier: string, normalizedPhone: string | null) {
+    const lowered = identifier.trim().toLowerCase();
 
-    const users = await this.prisma.user.findMany({
+    const userByEmail = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { email: lowered },
-          normalizedPhone
-            ? {
-                tenant: {
-                  phone: {
-                    in: [normalizedPhone, this.denormalizePhone(normalizedPhone)],
-                  },
-                },
-              }
-            : undefined,
-        ].filter(Boolean) as any,
+        email: {
+          equals: lowered,
+          mode: 'insensitive',
+        },
+        isActive: true,
       },
       include: {
         tenant: true,
       },
-      take: 1,
     });
 
-    return users[0] ?? null;
+    if (userByEmail) {
+      return userByEmail;
+    }
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
+    const tenant = await this.prisma.tenant.findFirst({
+      where: {
+        OR: [
+          { phone: normalizedPhone },
+          { phone: this.denormalizePhone(normalizedPhone) },
+        ],
+        isActive: true,
+      },
+    });
+
+    if (!tenant) {
+      return null;
+    }
+
+    return this.prisma.user.findFirst({
+      where: {
+        tenantId: tenant.id,
+        role: 'TENANT',
+        isActive: true,
+      },
+      include: {
+        tenant: true,
+      },
+    });
+  }
+
+  private async findUserForForgotPassword(identifier: string, normalizedPhone: string | null) {
+    const lowered = identifier.trim().toLowerCase();
+
+    const userByEmail = await this.prisma.user.findFirst({
+      where: {
+        email: {
+          equals: lowered,
+          mode: 'insensitive',
+        },
+        isActive: true,
+      },
+      include: {
+        tenant: true,
+      },
+    });
+
+    if (userByEmail) {
+      return userByEmail;
+    }
+
+    if (!normalizedPhone) {
+      return null;
+    }
+
+    const tenant = await this.prisma.tenant.findFirst({
+      where: {
+        OR: [
+          { phone: normalizedPhone },
+          { phone: this.denormalizePhone(normalizedPhone) },
+        ],
+        isActive: true,
+      },
+    });
+
+    if (!tenant) {
+      return null;
+    }
+
+    return this.prisma.user.findFirst({
+      where: {
+        tenantId: tenant.id,
+        role: 'TENANT',
+        isActive: true,
+      },
+      include: {
+        tenant: true,
+      },
+    });
   }
 
   private normalizePhone(value: string): string | null {

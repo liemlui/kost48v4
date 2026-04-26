@@ -1,11 +1,14 @@
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import { getResource } from '../../api/resources';
+import { useAuth } from '../../context/AuthContext';
+import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
@@ -30,12 +33,41 @@ function DataField({ label, value }: { label: string; value: ReactNode }) {
 }
 
 export default function MyStayPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { stage } = useTenantPortalStage();
+
+  const userId = user?.id;
+  const tenantId = user?.tenantId;
+
   const query = useQuery({
-    queryKey: ['portal-stay'],
+    queryKey: ['portal-stay', { userId, tenantId }],
     queryFn: () => getResource<Stay>('/stays/me/current'),
+    enabled: Boolean(userId),
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60_000,
   });
 
   const stay = query.data;
+
+  // Validate that returned stay belongs to current user
+  const stayBelongsToUser = stay
+    ? stay.tenantId === tenantId
+    : false;
+
+  if (stay && !stayBelongsToUser && import.meta.env.DEV) {
+    console.warn(
+      '[MyStayPage] Returned stay tenantId mismatch:',
+      { stayTenantId: stay.tenantId, currentUserTenantId: tenantId },
+    );
+  }
+
+  const roomStatusOccupied = stay && stayBelongsToUser
+    ? (stay.room?.status ?? '').toUpperCase() === 'OCCUPIED'
+    : false;
 
   return (
     <div>
@@ -43,15 +75,33 @@ export default function MyStayPage() {
 
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? (() => {
-        // Bedakan antara error "tidak ada stay aktif" (404) dengan error operasional lain
-        // Gunakan type assertion untuk mengakses properti response jika ada
         const error = query.error as any;
         const status = error?.response?.status;
         const message = error?.response?.data?.message;
-        
-        return status === 404 ? (
-          <EmptyState icon="🏠" title="Anda belum memiliki hunian aktif" description="Silakan hubungi pengelola jika data stay Anda belum muncul." />
-        ) : (
+
+        if (status === 404) {
+          // Tidak ada stay aktif — tampilkan CTA sesuai stage tenant
+          if (stage === 'booking') {
+            return (
+              <EmptyState
+                icon="📅"
+                title="Anda memiliki pemesanan aktif"
+                description="Selesaikan proses booking Anda terlebih dahulu sebelum dapat mengakses halaman hunian."
+                action={{ label: 'Lihat Pemesanan Saya', onClick: () => navigate('/portal/bookings') }}
+              />
+            );
+          }
+          return (
+            <EmptyState
+              icon="🛏️"
+              title="Anda belum menempati kamar"
+              description="Silakan pilih kamar dari katalog publik untuk memulai proses booking."
+              action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }}
+            />
+          );
+        }
+
+        return (
           <Alert variant="danger" className="mt-4">
             <div className="fw-semibold">Gagal memuat data hunian</div>
             <div className="small mt-1">
@@ -61,7 +111,25 @@ export default function MyStayPage() {
         );
       })() : null}
 
-      {stay ? (
+      {stay && !stayBelongsToUser ? (
+        <EmptyState
+          icon="🔒"
+          title="Anda belum memiliki hunian"
+          description="Silakan pilih kamar dari katalog publik untuk memulai proses booking."
+          action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }}
+        />
+      ) : null}
+
+      {stay && stayBelongsToUser && !roomStatusOccupied ? (
+        <EmptyState
+          icon="📅"
+          title="Booking Anda masih menunggu pembayaran atau verifikasi."
+          description="Kamar Anda masih berstatus RESERVED / Dipesan. Selesaikan proses booking dan pembayaran awal dari halaman Pemesanan Saya sebelum mengakses halaman hunian."
+          action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }}
+        />
+      ) : null}
+
+      {stay && stayBelongsToUser && roomStatusOccupied ? (
         <>
           <Card className="detail-hero border-0 mb-4">
             <Card.Body>

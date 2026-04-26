@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
+import { expireReservedBooking, runPaymentSubmissionExpiryCheck } from '../../api/paymentSubmissions';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
@@ -11,6 +12,7 @@ import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge
 import StatCard from '../../components/common/StatCard';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
 import type { PaginatedResponse, Stay } from '../../types';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { daysUntilDate, formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
@@ -21,8 +23,21 @@ function daysFromToday(targetDate: string | Date | null | undefined): number | n
   return daysUntilDate(targetDate);
 }
 
+function isReservedBooking(stay: Stay): boolean {
+  return (
+    stay.status === 'ACTIVE' &&
+    stay.room?.status === 'RESERVED' &&
+    stay.bookingSource === 'WEBSITE' &&
+    Boolean(stay.expiresAt)
+  );
+}
+
+function isOperationalActiveStay(stay: Stay): boolean {
+  return stay.status === 'ACTIVE' && stay.room?.status === 'OCCUPIED';
+}
+
 function getCheckoutReminderBadge(stay: Stay): { label: string; status: string } | null {
-  if (stay.status !== 'ACTIVE' || stay.room?.status === 'RESERVED' || !stay.plannedCheckOutDate) return null;
+  if (stay.status !== 'ACTIVE' || stay.room?.status !== 'OCCUPIED' || !stay.plannedCheckOutDate) return null;
   const daysLeft = daysFromToday(stay.plannedCheckOutDate);
   if (daysLeft === null || daysLeft < 0 || daysLeft > 10) return null;
   if (daysLeft >= 8) return { label: 'H-10', status: 'WARNING' };
@@ -85,9 +100,10 @@ type StayViewFilter = 'ACTIVE' | 'BOOKINGS' | 'ALL';
 
 export default function StaysPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get('status') || undefined;
-  const initialFilter: StayViewFilter = statusFromUrl === 'ACTIVE' || statusFromUrl === 'BOOKINGS' ? statusFromUrl : 'ALL';
+  const initialFilter: StayViewFilter = statusFromUrl === 'ACTIVE' || statusFromUrl === 'BOOKINGS' ? statusFromUrl : 'BOOKINGS';
   const [statusFilter, setStatusFilter] = useState<StayViewFilter>(initialFilter);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
@@ -96,6 +112,18 @@ export default function StaysPage() {
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
   const apiStatusFilter = statusFilter === 'ALL' ? undefined : 'ACTIVE';
+
+  const expireMutation = useMutation({
+    mutationFn: async (stayId?: number) => (stayId ? expireReservedBooking(stayId) : runPaymentSubmissionExpiryCheck()),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+      ]);
+    },
+  });
+
   const query = useQuery({
     queryKey: ['stays', statusFilter, isBookingsMode ? 'bookings-all' : page],
     queryFn: () => (
@@ -106,8 +134,8 @@ export default function StaysPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const reservedBookings = useMemo(() => items.filter((item) => item.status === 'ACTIVE' && item.room?.status === 'RESERVED'), [items]);
-  const operationalActive = useMemo(() => items.filter((item) => item.status === 'ACTIVE' && item.room?.status !== 'RESERVED'), [items]);
+  const reservedBookings = useMemo(() => items.filter((item) => isReservedBooking(item)), [items]);
+  const operationalActive = useMemo(() => items.filter((item) => isOperationalActiveStay(item)), [items]);
 
   const filteredItems = useMemo(() => {
     const baseItems = statusFilter === 'BOOKINGS'
@@ -166,14 +194,6 @@ export default function StaysPage() {
         eyebrow="Stay management"
         title="Stays"
         description="Surface ini memisahkan stay operasional dari queue booking reserved, sehingga admin bisa melihat mana yang masih menunggu approval dan mana yang sudah menunggu pembayaran."
-        secondaryAction={
-          <Button
-            variant={isBookingsMode ? 'outline-secondary' : 'outline-primary'}
-            onClick={() => handleStatusFilterChange(isBookingsMode ? 'ACTIVE' : 'BOOKINGS')}
-          >
-            {isBookingsMode ? 'Lihat Stay Aktif' : 'Booking Reserved'}
-          </Button>
-        }
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
@@ -190,17 +210,7 @@ export default function StaysPage() {
           <div className="table-meta">
             <div>
               <div className="panel-title">Filter & pencarian</div>
-              <div className="panel-subtitle">Gunakan mode tampilan untuk membedakan stay operasional dengan queue booking reserved.</div>
-            </div>
-            <div className="summary-strip">
-              <div className="summary-chip">
-                <span className="summary-chip-label">Reserved</span>
-                <span className="summary-chip-value">{reservedBookings.length}</span>
-              </div>
-              <div className="summary-chip">
-                <span className="summary-chip-label">Operasional</span>
-                <span className="summary-chip-value">{operationalActive.length}</span>
-              </div>
+              <div className="panel-subtitle">Pantau approval booking dan stay operasional dari satu halaman yang lebih ringkas.</div>
             </div>
           </div>
 
@@ -208,11 +218,11 @@ export default function StaysPage() {
             <Row className="g-3 align-items-end">
               <Col md={3}>
                 <Form.Group>
-                  <Form.Label>Mode Tampilan</Form.Label>
+                  <Form.Label>Fokus Data</Form.Label>
                   <Form.Select value={statusFilter} onChange={(e) => handleStatusFilterChange(e.target.value as StayViewFilter)}>
-                    <option value="ALL">Semua Stay</option>
+                    <option value="BOOKINGS">Perlu Approval</option>
                     <option value="ACTIVE">Stay Aktif</option>
-                    <option value="BOOKINGS">Booking Reserved</option>
+                    <option value="ALL">Semua Stay</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -234,11 +244,18 @@ export default function StaysPage() {
         </Card.Body>
       </Card>
 
+      {!isBookingsMode && reservedBookings.length > 0 ? (
+        <Alert variant="info" className="mb-4">
+          Ada <strong>{reservedBookings.length}</strong> booking reserved yang sengaja tidak ditampilkan di mode Stay Aktif agar operasional tidak tercampur.
+          <Button size="sm" variant="outline-secondary" className="ms-3" onClick={() => handleStatusFilterChange('BOOKINGS')}>Buka Mode Booking</Button>
+        </Alert>
+      ) : null}
+
       <Card className="content-card border-0">
         <Card.Body>
           {isBookingsMode ? (
             <Alert variant={expiredBookingsCount ? 'warning' : 'info'} className="small mb-4">
-              Mode ini sekarang berfungsi sebagai <strong>queue approval booking</strong>. Booking tanpa invoice awal berarti masih <strong>Menunggu Approval</strong>, sedangkan booking yang sudah punya invoice awal berarti <strong>Menunggu Pembayaran</strong>.
+              Baris di bawah ini adalah booking yang perlu ditindaklanjuti. Jika invoice awal belum ada berarti <strong>Menunggu Approval</strong>, dan jika invoice awal sudah ada berarti <strong>Menunggu Pembayaran</strong>.
               {expiredBookingsCount ? ` Saat ini ada ${expiredBookingsCount} booking yang sudah expired dan perlu ditinjau.` : ''}
             </Alert>
           ) : null}
@@ -299,12 +316,11 @@ export default function StaysPage() {
                         </td>
                         <td>
                           <div className="d-flex flex-column gap-2">
-                            <StatusBadge status="RESERVED" />
                             <StatusBadge status={approvalMeta.variant} customLabel={approvalMeta.label} />
-                            <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />
                           </div>
                           <div className="small text-muted mt-2">
                             {approvalMeta.helper}
+                            {expiryMeta.badgeLabel ? ` ${expiryMeta.badgeLabel}.` : ''}
                             {item.latestInvoiceNumber ? ` Invoice: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
                           </div>
                         </td>
@@ -313,9 +329,13 @@ export default function StaysPage() {
                             <Button size="sm" onClick={() => setSelectedBooking(item)}>
                               Approve
                             </Button>
+                          ) : expiryMeta.isExpired ? (
+                            <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
+                              {expireMutation.isPending ? 'Memproses...' : 'Jalankan Expire'}
+                            </Button>
                           ) : (
                             <div className="small text-muted">
-                              {expiryMeta.isExpired ? 'Booking expired' : 'Tidak ada aksi approval'}
+                              Tidak ada approval
                             </div>
                           )}
                         </td>
@@ -380,10 +400,7 @@ export default function StaysPage() {
                       </td>
                       <td>
                         <div className="d-flex flex-column gap-2">
-                          <StatusBadge status={item.status} customLabel={isReservedBooking ? 'Booking Aktif' : undefined} />
-                          {isReservedBooking ? <StatusBadge status="RESERVED" /> : null}
-                          {isReservedBooking ? <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} /> : null}
-                          {isReservedBooking ? <StatusBadge status="WARNING" customLabel="Lihat Mode Booking" /> : null}
+                          <StatusBadge status={item.status} />
                           {reminderBadge ? <StatusBadge status={reminderBadge.status} customLabel={reminderBadge.label} /> : null}
                         </div>
                       </td>
@@ -411,7 +428,7 @@ export default function StaysPage() {
                       </td>
                       <td>
                         {isReservedBooking ? (
-                          <div className="small text-muted">Lihat di mode booking</div>
+                          <Button size="sm" variant="outline-secondary" onClick={(event) => { event.stopPropagation(); handleStatusFilterChange('BOOKINGS'); }}>Mode Booking</Button>
                         ) : (
                           <div style={{ width: 32, textAlign: 'center', color: 'var(--text-muted)' }}>›</div>
                         )}

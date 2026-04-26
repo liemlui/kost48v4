@@ -119,23 +119,26 @@ export default function CheckInWizard() {
 
   const selectedRoom = useMemo(() => roomsQuery.data?.items?.find((room) => room.id === Number(watchedRoomId)), [roomsQuery.data, watchedRoomId]);
 
-  // Tenant dengan stay aktif (tidak eligible untuk check-in baru)
-  const tenantsWithActiveStay = useMemo(() => {
-    // Hanya hitung setelah query sukses dan ada data
-    if (!activeStaysQuery.data?.items) {
-      return null; // belum siap
-    }
-    return new Set(activeStaysQuery.data.items.map(stay => stay.tenantId));
+  // Hanya stay operasional (room.status === 'OCCUPIED') yang benar-benar memblokir check-in.
+  // Stay RESERVED (booking website) tidak boleh dianggap sebagai penghuni kamar.
+  const trulyOccupiedActiveStays = useMemo(() => {
+    if (!activeStaysQuery.data?.items) return null;
+    return activeStaysQuery.data.items.filter(
+      (stay) => stay.room?.status === 'OCCUPIED',
+    );
   }, [activeStaysQuery.data]);
 
-  // Room dengan stay aktif (tidak eligible untuk check-in baru)
+  // Tenant dengan stay operasional aktif (tidak eligible untuk check-in baru)
+  const tenantsWithActiveStay = useMemo(() => {
+    if (!trulyOccupiedActiveStays) return null;
+    return new Set(trulyOccupiedActiveStays.map((stay) => stay.tenantId));
+  }, [trulyOccupiedActiveStays]);
+
+  // Room dengan stay operasional aktif (tidak eligible untuk check-in baru)
   const roomsWithActiveStay = useMemo(() => {
-    // Hanya hitung setelah query sukses dan ada data
-    if (!activeStaysQuery.data?.items) {
-      return null; // belum siap
-    }
-    return new Set(activeStaysQuery.data.items.map(stay => stay.roomId));
-  }, [activeStaysQuery.data]);
+    if (!trulyOccupiedActiveStays) return null;
+    return new Set(trulyOccupiedActiveStays.map((stay) => stay.roomId));
+  }, [trulyOccupiedActiveStays]);
 
   // Filter rooms: hanya yang AVAILABLE dan tidak memiliki stay aktif
   const eligibleRooms = useMemo(() => {
@@ -238,11 +241,10 @@ export default function CheckInWizard() {
   });
 
   const loadTenantOptions = async (inputValue: string) => {
-    // Jika query stays aktif masih loading, jangan kembalikan array kosong
-    // karena akan membuat dropdown kosong. Lebih baik tetap panggil API tenant
-    // dan filter dengan data stays yang mungkin belum siap (anggap semua tenant eligible sementara)
-    const activeTenantIds = activeStaysQuery.data?.items 
-      ? new Set(activeStaysQuery.data.items.map(stay => stay.tenantId))
+    // Hanya tenant yang benar-benar menempati kamar (room.status === 'OCCUPIED') yang diblokir.
+    // Tenant dengan booking RESERVED tetap boleh dipilih untuk check-in manual.
+    const activeTenantIds = trulyOccupiedActiveStays 
+      ? new Set(trulyOccupiedActiveStays.map(stay => stay.tenantId))
       : new Set<number>(); // Jika data belum ada, anggap kosong (semua tenant eligible)
     
     const result = await listResource<Tenant>('/tenants', { limit: 20, search: inputValue || undefined });

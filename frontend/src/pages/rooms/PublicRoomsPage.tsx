@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -8,6 +8,8 @@ import EmptyState from '../../components/common/EmptyState';
 import type { PricingTerm, PublicRoom } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 
 const pricingOptions: Array<{ value: '' | PricingTerm; label: string }> = [
   { value: '', label: 'Semua term' },
@@ -15,15 +17,24 @@ const pricingOptions: Array<{ value: '' | PricingTerm; label: string }> = [
   { value: 'WEEKLY', label: 'Mingguan' },
   { value: 'BIWEEKLY', label: '2 Mingguan' },
   { value: 'DAILY', label: 'Harian' },
-  { value: 'SMESTERLY', label: 'Semester' },
-  { value: 'YEARLY', label: 'Tahunan' },
 ];
 
 function RoomPlaceholder({ room }: { room: PublicRoom }) {
   const firstImage = room.images?.[0];
-  if (firstImage) {
-    return <img src={firstImage} alt={room.code} className="public-room-image" />;
+  const [imgFailed, setImgFailed] = useState(false);
+  const resolved = firstImage ? resolveAbsoluteFileUrl(firstImage) : null;
+
+  if (resolved && !imgFailed) {
+    return (
+      <img
+        src={resolved}
+        alt={room.code}
+        className="public-room-image"
+        onError={() => setImgFailed(true)}
+      />
+    );
   }
+
   const code = room.code || `R${room.id}`;
   const initials = code.slice(0, 3).toUpperCase();
 
@@ -68,6 +79,8 @@ function PublicTopbar() {
 export default function PublicRoomsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
+  const { stage } = useTenantPortalStage();
   const search = searchParams.get('search') ?? '';
   const floor = searchParams.get('floor') ?? '';
   const pricingTerm = (searchParams.get('pricingTerm') ?? '') as '' | PricingTerm;
@@ -104,6 +117,10 @@ export default function PublicRoomsPage() {
     <div className="public-page-shell">
       <Container fluid="xl" className="py-4 py-lg-5">
         <PublicTopbar />
+
+        {user?.role === 'TENANT' && stage === 'booking' ? (
+          <Alert variant="info" className="mt-4">Anda masih punya booking reserved yang aktif. Jika ingin memantau approval atau pembayaran awal, buka <Button variant="link" className="p-0 align-baseline" onClick={() => navigate('/portal/bookings')}>Pemesanan Saya</Button>.</Alert>
+        ) : null}
 
         <Card className="content-card border-0 public-hero-card mt-4">
           <Card.Body>

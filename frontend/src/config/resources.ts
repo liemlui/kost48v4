@@ -267,7 +267,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'images',
-        label: 'Galeri Gambar (1 URL per baris)',
+        label: 'Galeri Gambar',
         type: 'textarea',
         placeholder: 'https://.../gambar-1.jpg\nhttps://.../gambar-2.jpg',
       },

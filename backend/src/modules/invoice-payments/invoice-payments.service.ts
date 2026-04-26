@@ -1,10 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInvoicePaymentDto, UpdateInvoicePaymentDto } from './dto/invoice-payment.dto';
 import { InvoicePaymentsQueryDto } from './dto/invoice-payments-query.dto';
+import { InvoiceStatus, PaymentMethod } from '../../common/enums/app.enums';
 
 @Injectable()
 export class InvoicePaymentsService {
@@ -15,10 +17,10 @@ export class InvoicePaymentsService {
 
   async findAll(query: InvoicePaymentsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.InvoicePaymentWhereInput = {
       AND: [
-        query.invoiceId ? { invoiceId: Number(query.invoiceId) } : {},
-        query.method ? { method: query.method } : {},
+        query.invoiceId ? { invoiceId: Number(query.invoiceId) } : undefined,
+        query.method ? { method: query.method } : undefined,
         query.paymentDateFrom || query.paymentDateTo
           ? {
               paymentDate: {
@@ -26,8 +28,8 @@ export class InvoicePaymentsService {
                 lte: query.paymentDateTo ? new Date(query.paymentDateTo) : undefined,
               },
             }
-          : {},
-      ],
+          : undefined,
+      ].filter(Boolean),
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -72,13 +74,13 @@ export class InvoicePaymentsService {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
-    const created = await this.prisma.$transaction(async (tx) => {
+    const created = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const payment = await tx.invoicePayment.create({
         data: {
           invoiceId: dto.invoiceId,
           paymentDate: new Date(dto.paymentDate),
           amountRupiah: dto.amountRupiah,
-          method: dto.method as any,
+          method: dto.method as PaymentMethod,
           referenceNo: dto.referenceNo,
           note: dto.note,
           capturedById: actor.id,
@@ -111,13 +113,13 @@ export class InvoicePaymentsService {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const payment = await tx.invoicePayment.update({
         where: { id },
         data: {
           paymentDate: dto.paymentDate ? new Date(dto.paymentDate) : undefined,
           amountRupiah: dto.amountRupiah,
-          method: dto.method as any,
+          method: dto.method as PaymentMethod,
           referenceNo: dto.referenceNo,
           note: dto.note,
         },
@@ -135,7 +137,7 @@ export class InvoicePaymentsService {
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
 
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.invoicePayment.delete({ where: { id } });
       await this.syncInvoiceStatus(tx, existing.invoiceId);
       return tx.invoice.findUnique({ where: { id: existing.invoiceId } });
@@ -145,20 +147,20 @@ export class InvoicePaymentsService {
     return { deletedPaymentId: existing.id, invoiceId: existing.invoiceId, invoiceStatusAfterSync: result?.status, invoicePaidAt: result?.paidAt };
   }
 
-  private async syncInvoiceStatus(tx: any, invoiceId: number) {
+  private async syncInvoiceStatus(tx: Prisma.TransactionClient, invoiceId: number) {
     const invoice = await tx.invoice.findUnique({ where: { id: invoiceId }, include: { payments: true } });
     if (!invoice) return;
 
     const totalPaid = invoice.payments.reduce((sum, payment) => sum + payment.amountRupiah, 0);
-    let status: any = invoice.status;
+    let status: InvoiceStatus = invoice.status as InvoiceStatus;
     let paidAt: Date | null = null;
 
     if (totalPaid === 0) {
-      status = 'ISSUED';
+      status = InvoiceStatus.ISSUED;
     } else if (totalPaid < invoice.totalAmountRupiah) {
-      status = 'PARTIAL';
+      status = InvoiceStatus.PARTIAL;
     } else {
-      status = 'PAID';
+      status = InvoiceStatus.PAID;
       paidAt = new Date();
     }
 

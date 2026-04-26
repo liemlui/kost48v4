@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreatePortalAccessDto } from './dto/create-portal-access.dto';
@@ -31,15 +32,23 @@ export class TenantsService {
 
   async findAll(query: TenantsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.TenantWhereInput = {
       AND: [
-        query.search ? { OR: [{ fullName: { contains: query.search, mode: 'insensitive' } }, { phone: { contains: query.search, mode: 'insensitive' } }, { email: { contains: query.search, mode: 'insensitive' } }] } : {},
-        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : {},
-        query.gender ? { gender: query.gender } : {},
-        query.originCity ? { originCity: { contains: query.originCity, mode: 'insensitive' } } : {},
-        query.occupation ? { occupation: { contains: query.occupation, mode: 'insensitive' } } : {},
-        query.companyOrCampus ? { companyOrCampus: { contains: query.companyOrCampus, mode: 'insensitive' } } : {},
-      ],
+        query.search
+          ? {
+              OR: [
+                { fullName: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                { phone: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                { email: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+              ],
+            }
+          : undefined,
+        typeof query.isActive === 'string' ? { isActive: query.isActive === 'true' } : undefined,
+        query.gender ? { gender: query.gender } : undefined,
+        query.originCity ? { originCity: { contains: query.originCity, mode: Prisma.QueryMode.insensitive } } : undefined,
+        query.occupation ? { occupation: { contains: query.occupation, mode: Prisma.QueryMode.insensitive } } : undefined,
+        query.companyOrCampus ? { companyOrCampus: { contains: query.companyOrCampus, mode: Prisma.QueryMode.insensitive } } : undefined,
+      ].filter(Boolean),
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.tenant.findMany({
@@ -122,7 +131,7 @@ export class TenantsService {
 
   async create(dto: CreateTenantDto, actor: CurrentUserPayload) {
     const data = this.normalizeTenantData(dto);
-    const created = await this.prisma.tenant.create({ data: data as any });
+    const created = await this.prisma.tenant.create({ data: data as Prisma.TenantCreateInput });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Tenant', entityId: String(created.id), newData: created });
     return created;
   }
@@ -131,13 +140,13 @@ export class TenantsService {
     const existing = await this.prisma.tenant.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Tenant tidak ditemukan');
     const data = this.normalizeTenantData(dto);
-    const updated = await this.prisma.tenant.update({ where: { id }, data: data as any });
+    const updated = await this.prisma.tenant.update({ where: { id }, data: data as Prisma.TenantUpdateInput });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Tenant', entityId: String(updated.id), oldData: existing, newData: updated });
     return updated;
   }
 
-  private normalizeTenantData(dto: CreateTenantDto | UpdateTenantDto): Record<string, any> {
-    const data: Record<string, any> = { ...dto };
+  private normalizeTenantData(dto: CreateTenantDto | UpdateTenantDto): Record<string, unknown> {
+    const data: Record<string, unknown> = { ...dto };
 
     if (data.birthDate !== undefined && data.birthDate !== null) {
       if (typeof data.birthDate === 'string' && data.birthDate.trim() !== '') {

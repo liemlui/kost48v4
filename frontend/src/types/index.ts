@@ -100,6 +100,8 @@ export type Stay = {
   pricingTerm?: PricingTerm;
   agreedRentAmountRupiah?: number | null;
   depositAmountRupiah?: number | null;
+  depositPaidAmountRupiah?: number | null;
+  depositPaymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
   depositDeductionRupiah?: number | null;
   depositRefundedRupiah?: number | null;
   depositStatus?: DepositStatus;
@@ -124,6 +126,9 @@ export type Stay = {
   latestInvoiceId?: number | null;
   latestInvoiceNumber?: string | null;
   latestInvoiceStatus?: InvoiceStatus | null;
+  invoiceTotalAmountRupiah?: number | null;
+  invoicePaidAmountRupiah?: number | null;
+  invoiceRemainingAmountRupiah?: number | null;
 };
 
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED' | string;
@@ -271,6 +276,11 @@ export type Announcement = {
   audience: string;
   isPublished: boolean;
   isPinned: boolean;
+  imageUrl?: string | null;
+  imageFileKey?: string | null;
+  imageOriginalFilename?: string | null;
+  imageMimeType?: string | null;
+  imageFileSizeBytes?: number | null;
   publishedAt?: string | null;
   startsAt?: string | null;
   expiresAt?: string | null;
@@ -314,6 +324,8 @@ export type TenantBooking = {
   plannedCheckOutDate?: string | null;
   expiresAt?: string | null;
   depositAmountRupiah?: number | null;
+  depositPaidAmountRupiah?: number | null;
+  depositPaymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
   electricityTariffPerKwhRupiah?: number | null;
   waterTariffPerM3Rupiah?: number | null;
   bookingSource?: string | null;
@@ -328,6 +340,9 @@ export type TenantBooking = {
   latestInvoiceId?: number | null;
   latestInvoiceNumber?: string | null;
   latestInvoiceStatus?: InvoiceStatus | null;
+  invoiceTotalAmountRupiah?: number | null;
+  invoicePaidAmountRupiah?: number | null;
+  invoiceRemainingAmountRupiah?: number | null;
 };
 
 export type ApproveBookingPayload = {
@@ -358,6 +373,7 @@ export type CreateTenantBookingPayload = {
 
 
 export type PaymentSubmissionStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | string;
+export type PaymentTargetType = 'INVOICE' | 'DEPOSIT';
 
 export type PaymentSubmission = {
   id: number;
@@ -367,6 +383,7 @@ export type PaymentSubmission = {
   amountRupiah: number;
   paidAt: string;
   paymentMethod: PaymentMethod;
+  targetType?: PaymentTargetType;
   senderName?: string | null;
   senderBankName?: string | null;
   referenceNumber?: string | null;
@@ -392,6 +409,12 @@ export type PaymentSubmission = {
     paidAmountRupiah?: number;
     remainingAmountRupiah?: number;
   } | null;
+  deposit?: {
+    amountRupiah?: number | null;
+    paidAmountRupiah?: number | null;
+    remainingAmountRupiah?: number | null;
+    paymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
+  } | null;
   submittedBy?: { id: number; fullName?: string | null } | null;
   reviewedBy?: { id: number; fullName?: string | null } | null;
 };
@@ -399,6 +422,7 @@ export type PaymentSubmission = {
 export type CreatePaymentSubmissionPayload = {
   stayId: number;
   invoiceId: number;
+  targetType: PaymentTargetType;
   amountRupiah: number;
   paidAt: string;
   paymentMethod: PaymentMethod;
@@ -406,8 +430,8 @@ export type CreatePaymentSubmissionPayload = {
   senderBankName?: string;
   referenceNumber?: string;
   notes?: string;
-  fileKey?: string;
   fileUrl?: string;
+  fileKey?: string;
   originalFilename?: string;
   mimeType?: string;
   fileSizeBytes?: number;
@@ -421,4 +445,33 @@ export type ReviewQueueQuery = {
   paymentMethod?: PaymentMethod;
   roomId?: number | string;
   tenantId?: number | string;
+};
+
+
+export type Ticket = {
+  id: number;
+  ticketNumber?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  status: string;
+  tenantId?: number;
+  roomId?: number | null;
+  stayId?: number | null;
+  assignedToId?: number | null;
+  resolutionNote?: string | null;
+  issueImageUrl?: string | null;
+  issueImageFileKey?: string | null;
+  issueImageOriginalFilename?: string | null;
+  issueImageMimeType?: string | null;
+  issueImageFileSizeBytes?: number | null;
+  resolutionImageUrl?: string | null;
+  resolutionImageFileKey?: string | null;
+  resolutionImageOriginalFilename?: string | null;
+  resolutionImageMimeType?: string | null;
+  resolutionImageFileSizeBytes?: number | null;
+  tenant?: { id: number; fullName?: string; email?: string } | null;
+  room?: { id: number; code?: string; name?: string } | null;
+  createdAt?: string;
+  updatedAt?: string;
 };

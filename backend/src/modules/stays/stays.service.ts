@@ -2,204 +2,25 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { RoomStatus } from '../../common/enums/app.enums';
-import { buildMeta, buildPagination } from '../../common/utils/pagination';
+import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, DepositStatus, UtilityType } from '../../common/enums/app.enums';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
-import { StaysQueryDto } from './dto/stays-query.dto';
 import { Prisma } from 'src/generated/prisma';
+import {
+  normalizeStayForResponse,
+  startOfDay,
+  addDays,
+  maxDate,
+  resolveRent,
+  mapPricingTermToUnit,
+  calculatePeriodEnd,
+  calculateDueDate,
+} from './stays.helpers';
 
 @Injectable()
 export class StaysService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
-
-  async findAll(query: StaysQueryDto) {
-    const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
-      AND: [
-        query.tenantId ? { tenantId: Number(query.tenantId) } : {},
-        query.roomId ? { roomId: Number(query.roomId) } : {},
-        query.status ? { status: query.status } : {},
-        query.bookingSource ? { bookingSource: query.bookingSource as any } : {},
-        query.checkInDateFrom || query.checkInDateTo
-          ? {
-              checkInDate: {
-                gte: query.checkInDateFrom ? new Date(query.checkInDateFrom) : undefined,
-                lte: query.checkInDateTo ? new Date(query.checkInDateTo) : undefined,
-              },
-            }
-          : {},
-        query.depositStatus ? { depositStatus: query.depositStatus } : {},
-      ],
-    };
-
-    const [items, totalItems] = await this.prisma.$transaction([
-      this.prisma.stay.findMany({
-        where,
-        skip,
-        take,
-        include: {
-          tenant: true,
-          room: true,
-          _count: {
-            select: {
-              invoices: {
-                where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
-              },
-            },
-          },
-          invoices: {
-            orderBy: { id: 'desc' },
-            take: 1,
-            select: {
-              id: true,
-              invoiceNumber: true,
-              status: true,
-            },
-          },
-        },
-        orderBy: { id: 'desc' },
-      }),
-      this.prisma.stay.count({ where }),
-    ]);
-
-    const itemsWithOpenInvoiceCount = items.map((stay) =>
-      this.normalizeStayForResponse({
-        ...stay,
-        openInvoiceCount: stay._count?.invoices ?? 0,
-        invoiceCount: stay._count?.invoices ?? 0,
-        latestInvoiceId: stay.invoices[0]?.id ?? null,
-        latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
-        latestInvoiceStatus: stay.invoices[0]?.status ?? null,
-      }),
-    );
-
-    return { items: serializePrismaResult(itemsWithOpenInvoiceCount), meta: buildMeta(page, limit, totalItems) };
-  }
-
-  async findCurrentForTenant(user: CurrentUserPayload) {
-    const stay = await this.prisma.stay.findFirst({
-      where: { tenantId: user.tenantId ?? -1, status: 'ACTIVE' as any },
-      include: { room: true },
-    });
-
-    if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
-    return this.normalizeStayForResponse(stay);
-  }
-
-  async findOne(id: number, user: CurrentUserPayload) {
-    const stay = await this.prisma.stay.findUnique({
-      where: { id },
-      include: {
-        tenant: true,
-        room: true,
-        _count: {
-          select: {
-            invoices: {
-              where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
-            },
-          },
-        },
-        invoices: {
-          orderBy: { id: 'desc' },
-          take: 1,
-          select: {
-            id: true,
-            invoiceNumber: true,
-            status: true,
-          },
-        },
-      },
-    });
-
-    if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (user.role === 'TENANT' && user.tenantId !== stay.tenantId) throw new NotFoundException('Stay tidak ditemukan');
-
-    return serializePrismaResult(
-      this.normalizeStayForResponse({
-        ...stay,
-        openInvoiceCount: stay._count?.invoices ?? 0,
-        invoiceCount: stay._count?.invoices ?? 0,
-        latestInvoiceId: stay.invoices[0]?.id ?? null,
-        latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
-        latestInvoiceStatus: stay.invoices[0]?.status ?? null,
-      }),
-    );
-  }
-
-  async getInvoiceSuggestion(id: number, user: CurrentUserPayload) {
-    const stay = await this.prisma.stay.findUnique({
-      where: { id },
-      include: {
-        room: true,
-        tenant: true,
-      },
-    });
-
-    if (!stay) {
-      throw new NotFoundException('Stay tidak ditemukan');
-    }
-
-    if (user.role === 'TENANT' && user.tenantId !== stay.tenantId) {
-      throw new NotFoundException('Stay tidak ditemukan');
-    }
-
-    const [latestElectricityReadings, latestWaterReadings] = await Promise.all([
-      this.prisma.meterReading.findMany({
-        where: { roomId: stay.roomId, utilityType: 'ELECTRICITY' as any },
-        orderBy: { readingAt: 'desc' },
-        take: 2,
-      }),
-      this.prisma.meterReading.findMany({
-        where: { roomId: stay.roomId, utilityType: 'WATER' as any },
-        orderBy: { readingAt: 'desc' },
-        take: 2,
-      }),
-    ]);
-
-    const suggestions: Array<Record<string, unknown>> = [
-      {
-        lineType: 'RENT',
-        utilityType: null,
-        description: `Sewa kamar ${stay.room.code}`,
-        qty: '1.00',
-        unit: this.mapPricingTermToUnit(stay.pricingTerm),
-        unitPriceRupiah: stay.agreedRentAmountRupiah,
-        lineAmountRupiah: stay.agreedRentAmountRupiah,
-        sortOrder: 0,
-        source: 'STAY_RENT',
-      },
-    ];
-
-    const electricitySuggestion = this.buildUtilitySuggestion({
-      lineType: 'ELECTRICITY',
-      description: `Tagihan listrik kamar ${stay.room.code}`,
-      unit: 'kWh',
-      unitPriceRupiah: stay.electricityTariffPerKwhRupiah,
-      latestReadings: latestElectricityReadings,
-      source: 'METER_READING',
-      sortOrder: 10,
-    });
-    if (electricitySuggestion) {
-      suggestions.push(electricitySuggestion);
-    }
-
-    const waterSuggestion = this.buildUtilitySuggestion({
-      lineType: 'WATER',
-      description: `Tagihan air kamar ${stay.room.code}`,
-      unit: 'm3',
-      unitPriceRupiah: stay.waterTariffPerM3Rupiah,
-      latestReadings: latestWaterReadings,
-      source: 'METER_READING',
-      sortOrder: 20,
-    });
-    if (waterSuggestion) {
-      suggestions.push(waterSuggestion);
-    }
-
-    return serializePrismaResult(suggestions);
-  }
 
   async update(id: number, dto: UpdateStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
@@ -234,18 +55,18 @@ export class StaysService {
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
     const existingTenantStay = await this.prisma.stay.findFirst({
-      where: { tenantId: dto.tenantId, status: 'ACTIVE' as any },
+      where: { tenantId: dto.tenantId, status: StayStatus.ACTIVE },
     });
     if (existingTenantStay) {
       throw new ConflictException('Tenant masih memiliki stay aktif');
     }
 
-    if (room.status === RoomStatus.OCCUPIED as any || room.status === RoomStatus.RESERVED as any) {
+    if (room.status === RoomStatus.OCCUPIED || room.status === RoomStatus.RESERVED) {
       throw new ConflictException('Kamar sudah ditempati stay aktif lain atau sedang dipesan');
     }
 
     const existingRoomStay = await this.prisma.stay.findFirst({
-      where: { roomId: dto.roomId, status: 'ACTIVE' as any },
+      where: { roomId: dto.roomId, status: StayStatus.ACTIVE },
     });
     if (existingRoomStay) {
       throw new ConflictException('Kamar sudah ditempati stay aktif lain');
@@ -255,7 +76,7 @@ export class StaysService {
       throw new ConflictException('Tanggal tidak konsisten');
     }
 
-    const agreed = dto.agreedRentAmountRupiah || this.resolveRent(room, dto.pricingTerm);
+    const agreed = dto.agreedRentAmountRupiah || resolveRent(room, dto.pricingTerm);
     const deposit = dto.depositAmountRupiah ?? room.defaultDepositRupiah;
     const electricity = dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;
@@ -272,17 +93,17 @@ export class StaysService {
           data: {
             tenantId: dto.tenantId,
             roomId: dto.roomId,
-            status: 'ACTIVE' as any,
-            pricingTerm: dto.pricingTerm as any,
+            status: StayStatus.ACTIVE,
+            pricingTerm: dto.pricingTerm as PricingTerm,
             agreedRentAmountRupiah: agreed,
             checkInDate: new Date(dto.checkInDate),
             plannedCheckOutDate: dto.plannedCheckOutDate ? new Date(dto.plannedCheckOutDate) : undefined,
             depositAmountRupiah: deposit,
             electricityTariffPerKwhRupiah: electricity,
             waterTariffPerM3Rupiah: water,
-            bookingSource: dto.bookingSource as any,
+            bookingSource: dto.bookingSource as LeadSource,
             bookingSourceDetail: dto.bookingSourceDetail,
-            stayPurpose: dto.stayPurpose as any,
+            stayPurpose: dto.stayPurpose as StayPurpose,
             notes: dto.notes,
             createdById: actor.id,
           },
@@ -290,20 +111,20 @@ export class StaysService {
 
         await tx.room.update({
           where: { id: dto.roomId },
-          data: { status: 'OCCUPIED' as any },
+          data: { status: RoomStatus.OCCUPIED },
         });
 
         const invoiceNumber = `INV-${stay.id}-${Date.now().toString().slice(-6)}`;
         const checkInDate = new Date(dto.checkInDate);
         const plannedCheckOutDate = dto.plannedCheckOutDate ? new Date(dto.plannedCheckOutDate) : undefined;
-        const periodEnd = this.calculatePeriodEnd(checkInDate, dto.pricingTerm, plannedCheckOutDate);
-        const dueDate = this.calculateDueDate(periodEnd);
+        const periodEnd = calculatePeriodEnd(checkInDate, dto.pricingTerm, plannedCheckOutDate);
+        const dueDate = calculateDueDate(periodEnd);
 
         const invoice = await tx.invoice.create({
           data: {
             invoiceNumber,
             stayId: stay.id,
-            status: 'DRAFT' as any,
+            status: InvoiceStatus.DRAFT,
             periodStart: checkInDate,
             periodEnd,
             dueDate,
@@ -311,7 +132,7 @@ export class StaysService {
           },
         });
 
-        const unit = this.mapPricingTermToUnit(dto.pricingTerm);
+        const unit = mapPricingTermToUnit(dto.pricingTerm);
         await tx.invoiceLine.create({
           data: {
             invoiceId: invoice.id,
@@ -331,7 +152,7 @@ export class StaysService {
         const existingElectricityReading = await tx.meterReading.findFirst({
           where: {
             roomId: dto.roomId,
-            utilityType: 'ELECTRICITY',
+            utilityType: UtilityType.ELECTRICITY,
             readingAt: baselineDate,
           },
         });
@@ -344,7 +165,7 @@ export class StaysService {
         const existingWaterReading = await tx.meterReading.findFirst({
           where: {
             roomId: dto.roomId,
-            utilityType: 'WATER',
+            utilityType: UtilityType.WATER,
             readingAt: baselineDate,
           },
         });
@@ -357,7 +178,7 @@ export class StaysService {
         await tx.meterReading.create({
           data: {
             roomId: dto.roomId,
-            utilityType: 'ELECTRICITY',
+            utilityType: UtilityType.ELECTRICITY,
             readingAt: baselineDate,
             readingValue: initialElectricity,
             recordedById: actor.id,
@@ -368,7 +189,7 @@ export class StaysService {
         await tx.meterReading.create({
           data: {
             roomId: dto.roomId,
-            utilityType: 'WATER',
+            utilityType: UtilityType.WATER,
             readingAt: baselineDate,
             readingValue: initialWater,
             recordedById: actor.id,
@@ -401,55 +222,65 @@ export class StaysService {
   async complete(id: number, dto: CompleteStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
-    if (existing.status !== 'ACTIVE') throw new ConflictException('Stay bukan status ACTIVE');
+    if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const stay = await tx.stay.update({
         where: { id },
         data: {
-          status: 'COMPLETED' as any,
+          status: StayStatus.COMPLETED,
           actualCheckOutDate: new Date(dto.actualCheckOutDate),
           checkoutReason: dto.checkoutReason,
           notes: dto.notes ?? existing.notes,
         },
       });
 
-      const otherActive = await tx.stay.count({ where: { roomId: existing.roomId, status: 'ACTIVE' as any, id: { not: id } } });
+      const otherActive = await tx.stay.count({ where: { roomId: existing.roomId, status: StayStatus.ACTIVE, id: { not: id } } });
       if (otherActive === 0) {
-        await tx.room.update({ where: { id: existing.roomId }, data: { status: 'AVAILABLE' as any } });
+        await tx.room.update({ where: { id: existing.roomId }, data: { status: RoomStatus.AVAILABLE } });
       }
 
       return stay;
     });
 
     await this.audit.log({ actorUserId: actor.id, action: 'COMPLETE', entityType: 'Stay', entityId: String(updated.id), oldData: existing, newData: updated });
-    return this.normalizeStayForResponse({ ...updated, roomStatusAfterSync: 'AVAILABLE' });
+    return normalizeStayForResponse({ ...updated, roomStatusAfterSync: 'AVAILABLE' });
   }
 
   async cancel(id: number, dto: CancelStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
-    if (existing.status !== 'ACTIVE') throw new ConflictException('Stay bukan status ACTIVE');
+    if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
 
     const updated = await this.prisma.$transaction(async (tx) => {
-      await tx.$executeRaw(Prisma.sql`
-        UPDATE "Stay"
-        SET
-          status = CAST(${'CANCELLED'} AS "StayStatus"),
-          "cancelReason" = ${dto.cancelReason},
-          notes = ${dto.notes ?? existing.notes},
-          "updatedAt" = NOW()
-        WHERE id = ${id}
-      `);
+      await tx.stay.update({
+        where: { id },
+        data: {
+          status: StayStatus.CANCELLED,
+          checkoutReason: dto.cancelReason,
+          notes: dto.notes ?? existing.notes,
+        },
+      });
+
+      await tx.invoice.updateMany({
+        where: {
+          stayId: id,
+          status: { in: [InvoiceStatus.DRAFT, InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
+        },
+        data: {
+          status: InvoiceStatus.CANCELLED,
+          cancelReason: dto.cancelReason,
+        },
+      });
 
       const stay = await tx.stay.findUnique({ where: { id } });
       if (!stay) {
         throw new NotFoundException('Stay tidak ditemukan setelah pembatalan');
       }
 
-      const otherActive = await tx.stay.count({ where: { roomId: existing.roomId, status: 'ACTIVE' as any, id: { not: id } } });
+      const otherActive = await tx.stay.count({ where: { roomId: existing.roomId, status: StayStatus.ACTIVE, id: { not: id } } });
       if (otherActive === 0) {
-        await tx.room.update({ where: { id: existing.roomId }, data: { status: 'AVAILABLE' as any } });
+        await tx.room.update({ where: { id: existing.roomId }, data: { status: RoomStatus.AVAILABLE } });
       }
 
       return {
@@ -459,32 +290,32 @@ export class StaysService {
     });
 
     await this.audit.log({ actorUserId: actor.id, action: 'CANCEL', entityType: 'Stay', entityId: String(updated.id), oldData: existing, newData: updated });
-    return this.normalizeStayForResponse({ ...updated, roomStatusAfterSync: 'AVAILABLE' });
+    return normalizeStayForResponse({ ...updated, roomStatusAfterSync: 'AVAILABLE' });
   }
 
   async processDeposit(id: number, dto: ProcessDepositDto, actor: CurrentUserPayload) {
     const stay = await this.prisma.stay.findUnique({ where: { id } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (!['COMPLETED', 'CANCELLED'].includes(stay.status)) throw new ConflictException('Deposit belum boleh diproses');
+    if (stay.status !== 'COMPLETED' && stay.status !== 'CANCELLED') throw new ConflictException('Deposit belum boleh diproses');
     if (stay.depositStatus !== 'HELD') throw new ConflictException('Deposit sudah diproses sebelumnya');
 
-    const openInvoices = await this.prisma.invoice.count({ where: { stayId: id, status: { in: ['ISSUED', 'PARTIAL'] as any } } });
+    const openInvoices = await this.prisma.invoice.count({ where: { stayId: id, status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } } });
     if (openInvoices > 0) throw new ConflictException('Deposit tidak dapat diproses karena masih ada tagihan terbuka');
 
-    let depositStatus: any = stay.depositStatus;
     let deduction = dto.depositDeductionRupiah ?? 0;
     let refunded = dto.depositRefundedRupiah ?? 0;
 
+    let depositStatus: DepositStatus;
     if (dto.action === 'FULL_REFUND') {
       deduction = 0;
       refunded = stay.depositAmountRupiah;
-      depositStatus = 'REFUNDED';
+      depositStatus = DepositStatus.REFUNDED;
     } else if (dto.action === 'FORFEIT') {
       deduction = stay.depositAmountRupiah;
       refunded = 0;
-      depositStatus = 'FORFEITED';
+      depositStatus = DepositStatus.FORFEITED;
     } else {
-      depositStatus = 'PARTIALLY_REFUNDED';
+      depositStatus = DepositStatus.PARTIALLY_REFUNDED;
     }
 
     if (deduction + refunded > stay.depositAmountRupiah) {
@@ -511,13 +342,13 @@ export class StaysService {
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (stay.status !== 'ACTIVE') throw new ConflictException('Stay tidak aktif, tidak dapat diperpanjang');
 
-    const today = this.startOfDay(new Date());
-    const currentPlannedCheckOut = stay.plannedCheckOutDate ? this.startOfDay(stay.plannedCheckOutDate) : null;
-    const logicalPeriodStart = currentPlannedCheckOut ? this.maxDate(this.addDays(currentPlannedCheckOut, 1), today) : today;
+    const today = startOfDay(new Date());
+    const currentPlannedCheckOut = stay.plannedCheckOutDate ? startOfDay(stay.plannedCheckOutDate) : null;
+    const logicalPeriodStart = currentPlannedCheckOut ? maxDate(addDays(currentPlannedCheckOut, 1), today) : today;
 
     const newPlannedCheckOut = dto.plannedCheckOutDate
-      ? this.startOfDay(new Date(dto.plannedCheckOutDate))
-      : this.calculatePeriodEnd(logicalPeriodStart, stay.pricingTerm);
+      ? startOfDay(new Date(dto.plannedCheckOutDate))
+      : calculatePeriodEnd(logicalPeriodStart, stay.pricingTerm);
 
     if (Number.isNaN(newPlannedCheckOut.getTime())) {
       throw new BadRequestException('Tanggal perpanjangan tidak valid');
@@ -539,13 +370,13 @@ export class StaysService {
         const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
         const periodStart = logicalPeriodStart;
         const periodEnd = newPlannedCheckOut;
-        const dueDate = this.calculateDueDate(periodEnd);
+        const dueDate = calculateDueDate(periodEnd);
 
         const invoice = await tx.invoice.create({
           data: {
             invoiceNumber,
             stayId: stay.id,
-            status: 'DRAFT' as any,
+            status: InvoiceStatus.DRAFT,
             periodStart,
             periodEnd,
             dueDate,
@@ -553,7 +384,7 @@ export class StaysService {
           },
         });
 
-        const unit = this.mapPricingTermToUnit(stay.pricingTerm);
+        const unit = mapPricingTermToUnit(stay.pricingTerm);
         await tx.invoiceLine.create({
           data: {
             invoiceId: invoice.id,
@@ -593,136 +424,5 @@ export class StaysService {
       }
       throw error;
     }
-  }
-
-
-  private normalizeStayForResponse<T extends Record<string, any>>(stay: T): T & { cancelReason: string | null } {
-    return {
-      ...stay,
-      cancelReason:
-        stay.status === 'CANCELLED'
-          ? ((stay as any).cancelReason ?? (stay as any).checkoutReason ?? null)
-          : ((stay as any).cancelReason ?? null),
-    };
-  }
-
-  private buildUtilitySuggestion(input: {
-    lineType: 'ELECTRICITY' | 'WATER';
-    description: string;
-    unit: string;
-    unitPriceRupiah: number;
-    latestReadings: Array<{ readingValue: Prisma.Decimal; readingAt: Date }>;
-    source: string;
-    sortOrder: number;
-  }) {
-    if (input.unitPriceRupiah <= 0 || input.latestReadings.length < 2) {
-      return null;
-    }
-
-    const [latest, previous] = input.latestReadings;
-    const usage = latest.readingValue.minus(previous.readingValue);
-    if (usage.lte(0)) {
-      return null;
-    }
-
-    const usageNumber = usage.toNumber();
-    const lineAmountRupiah = Math.round(usageNumber * input.unitPriceRupiah);
-
-    return {
-      lineType: input.lineType,
-      utilityType: input.lineType,
-      description: input.description,
-      qty: usage.toFixed(3),
-      unit: input.unit,
-      unitPriceRupiah: input.unitPriceRupiah,
-      lineAmountRupiah,
-      sortOrder: input.sortOrder,
-      source: input.source,
-      meterPeriod: {
-        previousReadingAt: previous.readingAt,
-        latestReadingAt: latest.readingAt,
-      },
-    };
-  }
-
-  private startOfDay(value: Date) {
-    const result = new Date(value);
-    result.setHours(0, 0, 0, 0);
-    return result;
-  }
-
-  private addDays(value: Date, days: number) {
-    const result = new Date(value);
-    result.setDate(result.getDate() + days);
-    return result;
-  }
-
-  private maxDate(a: Date, b: Date) {
-    return a.getTime() >= b.getTime() ? a : b;
-  }
-
-  private resolveRent(room: any, pricingTerm: string) {
-    if (pricingTerm === 'DAILY') return room.dailyRateRupiah ?? 0;
-    if (pricingTerm === 'WEEKLY') return room.weeklyRateRupiah ?? 0;
-    if (pricingTerm === 'BIWEEKLY') return room.biWeeklyRateRupiah ?? 0;
-    return room.monthlyRateRupiah;
-  }
-
-  private mapPricingTermToUnit(pricingTerm: string): string {
-    switch (pricingTerm) {
-      case 'DAILY':
-        return 'hari';
-      case 'WEEKLY':
-        return 'minggu';
-      case 'BIWEEKLY':
-        return '2 minggu';
-      case 'MONTHLY':
-        return 'bulan';
-      case 'SMESTERLY':
-        return 'semester';
-      case 'YEARLY':
-        return 'tahun';
-      default:
-        return 'bulan';
-    }
-  }
-
-  private calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plannedCheckOutDate?: Date): Date {
-    if (plannedCheckOutDate) {
-      return plannedCheckOutDate;
-    }
-
-    const result = new Date(checkInDate);
-
-    switch (pricingTerm) {
-      case 'DAILY':
-        result.setDate(result.getDate() + 1);
-        break;
-      case 'WEEKLY':
-        result.setDate(result.getDate() + 7);
-        break;
-      case 'BIWEEKLY':
-        result.setDate(result.getDate() + 14);
-        break;
-      case 'MONTHLY':
-        result.setMonth(result.getMonth() + 1);
-        break;
-      case 'SMESTERLY':
-        result.setMonth(result.getMonth() + 6);
-        break;
-      case 'YEARLY':
-        result.setFullYear(result.getFullYear() + 1);
-        break;
-      default:
-        result.setMonth(result.getMonth() + 1);
-    }
-
-    return result;
-  }
-
-  private calculateDueDate(periodEnd: Date): Date {
-    const dueDate = new Date(periodEnd);
-    dueDate.setDate(dueDate.getDate() + 3);
-    return dueDate;
   }
 }

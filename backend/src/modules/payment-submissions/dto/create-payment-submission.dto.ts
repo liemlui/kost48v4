@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { PaymentMethod } from '../../../common/enums/app.enums';
+import { PaymentMethod, PaymentSubmissionTargetType } from '../../../common/enums/app.enums';
 
 export class CreatePaymentSubmissionDto {
   @IsInt()
@@ -9,6 +9,9 @@ export class CreatePaymentSubmissionDto {
   @IsInt()
   @Min(1)
   invoiceId!: number;
+
+  @IsEnum(PaymentSubmissionTargetType)
+  targetType: PaymentSubmissionTargetType = PaymentSubmissionTargetType.INVOICE;
 
   @IsInt()
   @Min(1)
@@ -38,11 +41,11 @@ export class CreatePaymentSubmissionDto {
 
   @IsOptional()
   @IsString()
-  fileKey?: string;
+  fileUrl?: string;
 
   @IsOptional()
   @IsString()
-  fileUrl?: string;
+  fileKey?: string;
 
   @IsOptional()
   @IsString()
@@ -57,3 +60,4 @@ export class CreatePaymentSubmissionDto {
   @Min(0)
   fileSizeBytes?: number;
 }
+

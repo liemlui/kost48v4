@@ -145,7 +145,12 @@ export default function ResourceTable({
         return (
           <div>
             <div className="fw-semibold">{formatValue(value)}{item.name ? ` - ${formatValue(item.name)}` : ''}</div>
-            <div className="small">{occupant ? `Penghuni: ${occupant}` : 'Kosong'}</div>
+            <div className="small">
+              {occupant
+                ? (String(item.status || '') === 'RESERVED' ? `Pemesan: ${occupant}` : `Penghuni: ${occupant}`)
+                : 'Kosong'
+              }
+            </div>
           </div>
         );
       }

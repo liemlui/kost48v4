@@ -1,12 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { approveBooking } from '../../api/bookings';
+import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import type { ApproveBookingPayload, Stay } from '../../types';
 import { formatDateId } from '../../utils/bookingExpiry';
 
 function formatNumberInput(value: string) {
   return value.replace(/[^0-9.]/g, '');
+}
+
+function displayCurrencyInput(value: string) {
+  if (!value) return '';
+  return formatRupiahWithoutSymbol(value);
+}
+
+function resolveRateFromPricingTerm(booking: Stay | null) {
+  if (!booking?.room || !booking?.pricingTerm) return null;
+  switch (booking.pricingTerm) {
+    case 'DAILY': return booking.room.dailyRateRupiah ?? null;
+    case 'WEEKLY': return booking.room.weeklyRateRupiah ?? null;
+    case 'BIWEEKLY': return booking.room.biWeeklyRateRupiah ?? null;
+    case 'MONTHLY': return booking.room.monthlyRateRupiah ?? null;
+    default: return booking.agreedRentAmountRupiah ?? null;
+  }
 }
 
 export default function ApproveBookingModal({
@@ -25,8 +42,13 @@ export default function ApproveBookingModal({
   const [initialWaterM3, setInitialWaterM3] = useState('0');
   const [error, setError] = useState('');
 
+  const submittingRef = useRef(false);
+
   const mutation = useMutation({
     mutationFn: ({ stayId, payload }: { stayId: number; payload: ApproveBookingPayload }) => approveBooking(stayId, payload),
+    onMutate: () => {
+      submittingRef.current = true;
+    },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
@@ -36,7 +58,11 @@ export default function ApproveBookingModal({
           predicate: (query) => typeof query.queryKey?.[0] === 'string' && String(query.queryKey[0]).startsWith('dashboard-'),
         }),
       ]);
+      submittingRef.current = false;
       handleClose();
+    },
+    onError: () => {
+      submittingRef.current = false;
     },
   });
 
@@ -45,8 +71,18 @@ export default function ApproveBookingModal({
     return booking.room?.code ?? `Kamar #${booking.roomId}`;
   }, [booking]);
 
+  useEffect(() => {
+    if (!booking || !show) return;
+    const rateFromSelectedTerm = resolveRateFromPricingTerm(booking);
+    setAgreedRentAmountRupiah(String(booking.agreedRentAmountRupiah ?? rateFromSelectedTerm ?? ''));
+    setDepositAmountRupiah(String(booking.depositAmountRupiah ?? booking.room?.defaultDepositRupiah ?? ''));
+    setInitialElectricityKwh('0');
+    setInitialWaterM3('0');
+    setError('');
+  }, [booking, show]);
+
   const handleClose = () => {
-    if (!mutation.isPending) {
+    if (!submittingRef.current) {
       setAgreedRentAmountRupiah('');
       setDepositAmountRupiah('');
       setInitialElectricityKwh('0');
@@ -68,6 +104,8 @@ export default function ApproveBookingModal({
     if (!Number.isFinite(water) || water < 0) return 'Meter awal air tidak boleh negatif.';
     return '';
   };
+
+  const computedTotalAwal = (Number(agreedRentAmountRupiah || 0) + Number(depositAmountRupiah || 0));
 
   const handleSubmit = async () => {
     if (!booking) return;
@@ -110,28 +148,32 @@ export default function ApproveBookingModal({
 
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
+        <Alert variant="info" className="small">
+          Pricing term tenant: <strong>{booking?.pricingTerm ?? '-'}</strong> · Default sewa sesuai term: <strong>{displayCurrencyInput(String(resolveRateFromPricingTerm(booking) ?? '')) || '-'}</strong> · Total awal: <strong>{formatRupiahWithoutSymbol(String(computedTotalAwal || 0))}</strong>
+        </Alert>
+
         <Form.Group className="mb-3">
           <Form.Label>Tarif Sewa Disepakati <span className="text-danger">*</span></Form.Label>
           <Form.Control
-            type="number"
-            min={1}
-            step={1}
-            value={agreedRentAmountRupiah}
+            type="text"
+            inputMode="numeric"
+            value={displayCurrencyInput(agreedRentAmountRupiah)}
             onChange={(e) => setAgreedRentAmountRupiah(formatNumberInput(e.target.value))}
-            placeholder="Contoh: 1200000"
+            placeholder="Otomatis mengikuti tarif booking, bisa diubah bila perlu"
           />
+          <Form.Text muted>Default mengikuti harga kamar sesuai pricing term yang sudah dipilih tenant saat booking, lalu masih boleh disesuaikan admin bila memang ada negosiasi khusus.</Form.Text>
         </Form.Group>
 
         <Form.Group className="mb-3">
           <Form.Label>Deposit <span className="text-danger">*</span></Form.Label>
           <Form.Control
-            type="number"
-            min={0}
-            step={1}
-            value={depositAmountRupiah}
+            type="text"
+            inputMode="numeric"
+            value={displayCurrencyInput(depositAmountRupiah)}
             onChange={(e) => setDepositAmountRupiah(formatNumberInput(e.target.value))}
-            placeholder="Contoh: 500000"
+            placeholder="Otomatis mengikuti deposit booking, bisa diubah bila perlu"
           />
+          <Form.Text muted>Deposit booking ditampilkan terpisah dari sewa agar tenant melihat total awal dengan jujur.</Form.Text>
         </Form.Group>
 
         <Form.Group className="mb-3">

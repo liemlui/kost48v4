@@ -8,7 +8,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -20,11 +20,11 @@ export default function LoginPage() {
     setError('');
     setSubmitting(true);
     try {
-      const user = await login(email, password);
+      const user = await login(identifier, password);
       navigate(from || getDefaultRoute(user.role), { replace: true });
     } catch (err: any) {
       const message = err?.response?.data?.message;
-      setError(Array.isArray(message) ? message.join(', ') : (message || 'Email atau password salah'));
+      setError(Array.isArray(message) ? message.join(', ') : (message || 'Email/No. HP atau password salah'));
     } finally {
       setSubmitting(false);
     }
@@ -72,8 +72,8 @@ export default function LoginPage() {
 
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="nama@kost48.com" />
+              <Form.Label>Email atau No. HP</Form.Label>
+              <Form.Control value={identifier} onChange={(e) => setIdentifier(e.target.value)} type="text" placeholder="nama@kost48.com atau 0812xxxxxxx" autoCapitalize="none" autoCorrect="off" />
             </Form.Group>
 
             <Form.Group className="mb-3">

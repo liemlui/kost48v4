@@ -1,15 +1,18 @@
-import { useMemo, useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Modal, Row, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatCard from '../../components/common/StatCard';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listResource, postAction } from '../../api/resources';
+import { uploadTicketImage } from '../../api/mediaUploads';
 import { useAuth } from '../../context/AuthContext';
 
 type TicketItem = {
+  issueImageUrl?: string | null;
+  resolutionImageUrl?: string | null;
   id: number;
   ticketNumber?: string;
   title?: string;
@@ -67,6 +70,22 @@ function formatRelations(item: TicketItem): string {
   return parts.length > 0 ? parts.join(' · ') : 'Tidak ada relasi';
 }
 
+
+async function compressImageFile(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1600;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+  const ctx = canvas.getContext('2d'); if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+  bitmap.close();
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+}
+
 function formatIdSummary(item: TicketItem): string {
   const parts: string[] = [];
   if (item.tenantId) parts.push(`Tenant #${item.tenantId}`);
@@ -81,6 +100,10 @@ export default function TicketsPage() {
   const [assignMap, setAssignMap] = useState<Record<number, string>>({});
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [keyword, setKeyword] = useState('');
+  const [doneTicket, setDoneTicket] = useState<TicketItem | null>(null);
+  const [resolutionNote, setResolutionNote] = useState('Selesai ditangani');
+  const [resolutionImageMeta, setResolutionImageMeta] = useState<any>(null);
+  const [resolutionPreview, setResolutionPreview] = useState<string | null>(null);
 
   const ticketsQuery = useQuery({ queryKey: ['tickets'], queryFn: () => listResource<TicketItem>('/tickets') });
   const usersQuery = useQuery({ queryKey: ['ticket-assignees'], queryFn: () => listResource<UserOption>('/users', { limit: 100 }) });
@@ -111,6 +134,25 @@ export default function TicketsPage() {
   const actionError = simpleAction.error ? 'Gagal menjalankan aksi tiket. Coba lagi.' : '';
   const canAssign = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const canProgress = user?.role === 'OWNER' || user?.role === 'ADMIN' || user?.role === 'STAFF';
+
+  const handleResolutionImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const compressed = await compressImageFile(file);
+    const uploaded = await uploadTicketImage(compressed);
+    setResolutionImageMeta(uploaded);
+    setResolutionPreview(uploaded.fileUrl);
+    event.target.value = '';
+  };
+
+  const submitMarkDone = () => {
+    if (!doneTicket) return;
+    simpleAction.mutate({ path: `/tickets/${doneTicket.id}/mark-done`, payload: { resolutionNote, resolutionImageUrl: resolutionImageMeta?.fileUrl, resolutionImageFileKey: resolutionImageMeta?.fileKey, resolutionImageOriginalFilename: resolutionImageMeta?.originalFilename, resolutionImageMimeType: resolutionImageMeta?.mimeType, resolutionImageFileSizeBytes: resolutionImageMeta?.fileSizeBytes } });
+    setDoneTicket(null);
+    setResolutionPreview(null);
+    setResolutionImageMeta(null);
+    setResolutionNote('Selesai ditangani');
+  };
 
   return (
     <div>
@@ -203,7 +245,7 @@ export default function TicketsPage() {
                     </td>
                     <td>
                       <div className="fw-semibold">{item.title || `Tiket #${item.id}`}</div>
-                      <div className="small text-muted text-truncate" style={{ maxWidth: 280 }}>{item.description || 'Tidak ada deskripsi tambahan.'}</div>
+                      <div className="small text-muted text-truncate" style={{ maxWidth: 280 }}>{item.description || 'Tidak ada deskripsi tambahan.'}</div>{item.issueImageUrl ? <div className="mt-1"><img src={item.issueImageUrl} alt="Foto masalah" style={{ width: 84, height: 56, objectFit: 'cover', borderRadius: 6 }} /></div> : null}{item.resolutionImageUrl ? <div className="mt-1"><img src={item.resolutionImageUrl} alt="Foto selesai" style={{ width: 84, height: 56, objectFit: 'cover', borderRadius: 6 }} /></div> : null}
                     </td>
                     <td><StatusBadge status={item.status} /></td>
                     <td>
@@ -230,7 +272,7 @@ export default function TicketsPage() {
                       <div className="d-flex flex-wrap gap-2">
                         {canAssign ? <Button size="sm" variant="outline-primary" disabled={!assignMap[item.id] || simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/assign`, payload: { assignedToId: Number(assignMap[item.id]) } })}>Assign</Button> : null}
                         {canProgress && item.status === 'OPEN' ? <Button size="sm" variant="outline-secondary" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/start` })}>Mulai</Button> : null}
-                        {canProgress && item.status === 'IN_PROGRESS' ? <Button size="sm" variant="outline-success" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/mark-done`, payload: { resolutionNote: 'Selesai ditangani' } })}>Tandai Selesai</Button> : null}
+                        {canProgress && item.status === 'IN_PROGRESS' ? <Button size="sm" variant="outline-success" disabled={simpleAction.isPending} onClick={() => setDoneTicket(item)}>Tandai Selesai</Button> : null}
                         {canProgress && item.status === 'DONE' ? <Button size="sm" variant="success" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/close`, payload: { action: 'CLOSE' } })}>Tutup Ticket</Button> : null}
                       </div>
                     </td>
@@ -241,6 +283,25 @@ export default function TicketsPage() {
           ) : null}
         </Card.Body>
       </Card>
+      <Modal show={Boolean(doneTicket)} onHide={() => setDoneTicket(null)} centered>
+        <Modal.Header closeButton><Modal.Title>Bukti Penyelesaian Ticket</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Catatan Penyelesaian</Form.Label>
+            <Form.Control as="textarea" rows={3} value={resolutionNote} onChange={(e) => setResolutionNote(e.currentTarget.value)} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Foto Penyelesaian</Form.Label>
+            <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleResolutionImage} />
+            <Form.Text muted>Preview kecil. Foto besar cukup dibuka saat dibutuhkan.</Form.Text>
+            {resolutionPreview ? <div className="mt-2"><img src={resolutionPreview} alt="Preview penyelesaian" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setDoneTicket(null)}>Batal</Button>
+          <Button variant="success" onClick={submitMarkDone} disabled={!resolutionImageMeta || simpleAction.isPending}>Simpan & Tandai Selesai</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

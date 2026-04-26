@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
@@ -6,7 +7,7 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
 import { InvoicesQueryDto } from './dto/invoices-query.dto';
-import { Prisma } from 'src/generated/prisma';
+import { InvoiceLineType, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
 
 @Injectable()
 export class InvoicesService {
@@ -14,15 +15,15 @@ export class InvoicesService {
 
   async findAll(query: InvoicesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.InvoiceWhereInput = {
       AND: [
-        query.search ? { invoiceNumber: { contains: query.search, mode: 'insensitive' } } : {},
+        query.search ? { invoiceNumber: { contains: query.search, mode: Prisma.QueryMode.insensitive } } : undefined,
         // Validasi stayId: hanya tambah filter jika stayId valid (bukan undefined/null/NaN)
-        query.stayId && !isNaN(Number(query.stayId)) ? { stayId: Number(query.stayId) } : {},
-        query.status ? { status: query.status } : {},
-        query.periodStartFrom || query.periodEndTo ? { periodStart: { gte: query.periodStartFrom ? new Date(query.periodStartFrom) : undefined }, periodEnd: { lte: query.periodEndTo ? new Date(query.periodEndTo) : undefined } } : {},
-        query.dueDateFrom || query.dueDateTo ? { dueDate: { gte: query.dueDateFrom ? new Date(query.dueDateFrom) : undefined, lte: query.dueDateTo ? new Date(query.dueDateTo) : undefined } } : {},
-      ],
+        query.stayId && !isNaN(Number(query.stayId)) ? { stayId: Number(query.stayId) } : undefined,
+        query.status ? { status: query.status } : undefined,
+        query.periodStartFrom || query.periodEndTo ? { periodStart: { gte: query.periodStartFrom ? new Date(query.periodStartFrom) : undefined }, periodEnd: { lte: query.periodEndTo ? new Date(query.periodEndTo) : undefined } } : undefined,
+        query.dueDateFrom || query.dueDateTo ? { dueDate: { gte: query.dueDateFrom ? new Date(query.dueDateFrom) : undefined, lte: query.dueDateTo ? new Date(query.dueDateTo) : undefined } } : undefined,
+      ].filter(Boolean),
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.invoice.findMany({ where, skip, take, include: { stay: { include: { tenant: true, room: true } } }, orderBy: { id: 'desc' } }),
@@ -33,16 +34,16 @@ export class InvoicesService {
 
   async findMine(user: CurrentUserPayload, query: InvoicesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.InvoiceWhereInput = {
       AND: [
         { stay: { tenantId: user.tenantId ?? -1 } },
-        query.status ? { status: query.status } : {},
+        query.status ? { status: query.status } : undefined,
         query.periodStartFrom || query.periodEndTo
           ? {
               periodStart: { gte: query.periodStartFrom ? new Date(query.periodStartFrom) : undefined },
               periodEnd: { lte: query.periodEndTo ? new Date(query.periodEndTo) : undefined },
             }
-          : {},
+          : undefined,
         query.dueDateFrom || query.dueDateTo
           ? {
               dueDate: {
@@ -50,8 +51,8 @@ export class InvoicesService {
                 lte: query.dueDateTo ? new Date(query.dueDateTo) : undefined,
               },
             }
-          : {},
-      ],
+          : undefined,
+      ].filter(Boolean),
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -115,7 +116,7 @@ export class InvoicesService {
     if (invoice.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
     const qtyDecimal = new Prisma.Decimal(dto.qty);
     const lineAmountRupiah = qtyDecimal.times(dto.unitPriceRupiah).toNumber();
-    const line = await this.prisma.invoiceLine.create({ data: { invoiceId: id, lineType: dto.lineType as any, utilityType: dto.utilityType as any, description: dto.description, qty: qtyDecimal, unit: dto.unit, unitPriceRupiah: dto.unitPriceRupiah, lineAmountRupiah, sortOrder: dto.sortOrder ?? 0 } });
+    const line = await this.prisma.invoiceLine.create({ data: { invoiceId: id, lineType: dto.lineType as InvoiceLineType, utilityType: dto.utilityType as UtilityType, description: dto.description, qty: qtyDecimal, unit: dto.unit, unitPriceRupiah: dto.unitPriceRupiah, lineAmountRupiah, sortOrder: dto.sortOrder ?? 0 } });
     await this.audit.log({ actorUserId: actor.id, action: 'ADD_LINE', entityType: 'InvoiceLine', entityId: String(line.id), newData: line, meta: { invoiceId: id } });
     return line;
   }
@@ -128,9 +129,9 @@ export class InvoicesService {
     if (!line || line.invoiceId !== invoiceId) throw new NotFoundException('Invoice atau line tidak ditemukan');
     
     // Hitung lineAmountRupiah jika qty atau unitPriceRupiah berubah
-    const updateData: any = { 
-      lineType: dto.lineType as any, 
-      utilityType: dto.utilityType as any, 
+    const updateData: Prisma.InvoiceLineUpdateInput = { 
+      lineType: dto.lineType as InvoiceLineType, 
+      utilityType: dto.utilityType as UtilityType, 
       description: dto.description, 
       sortOrder: dto.sortOrder 
     };
@@ -175,7 +176,7 @@ export class InvoicesService {
     if (invoice.status !== 'DRAFT') throw new ConflictException('Transisi status tidak valid');
     if (!invoice.lines.length) throw new ConflictException('Invoice draft belum valid untuk diterbitkan');
     if ((invoice.totalAmountRupiah ?? 0) <= 0) throw new ConflictException('Invoice tidak valid: total harus lebih dari 0');
-    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: 'ISSUED' as any, issuedAt: new Date() } });
+    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.ISSUED, issuedAt: new Date() } });
     await this.audit.log({ actorUserId: actor.id, action: 'ISSUE', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
     return updated;
   }
@@ -186,7 +187,7 @@ export class InvoicesService {
     if (!dto.cancelReason) throw new ConflictException('Alasan pembatalan wajib diisi');
     if (invoice.status === 'PARTIAL' || invoice.status === 'PAID') throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
     if (invoice.status === 'ISSUED' && invoice.payments.length > 0) throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
-    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: 'CANCELLED' as any, cancelReason: dto.cancelReason } });
+    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.CANCELLED, cancelReason: dto.cancelReason } });
     await this.audit.log({ actorUserId: actor.id, action: 'CANCEL', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
     return updated;
   }

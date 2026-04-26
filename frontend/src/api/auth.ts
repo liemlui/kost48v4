@@ -1,8 +1,8 @@
 import client from './client';
 import { ApiEnvelope, AuthUser } from '../types';
 
-export async function login(email: string, password: string) {
-  const response = await client.post<ApiEnvelope<{ accessToken: string; user: AuthUser }>>('/auth/login', { email, password });
+export async function login(identifier: string, password: string) {
+  const response = await client.post<ApiEnvelope<{ accessToken: string; user: AuthUser }>>('/auth/login', { identifier, password });
   return response.data.data;
 }
 

@@ -40,6 +40,8 @@ interface BookingRow {
   plannedCheckOutDate: Date | null;
   expiresAt: Date | null;
   depositAmountRupiah: number;
+  depositPaidAmountRupiah?: number | null;
+  depositPaymentStatus?: string | null;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
   bookingSource: string | null;
@@ -59,6 +61,9 @@ interface BookingRow {
   latestInvoiceId?: number | null;
   latestInvoiceNumber?: string | null;
   latestInvoiceStatus?: string | null;
+  invoiceTotalAmountRupiah?: number | null;
+  invoicePaidAmountRupiah?: number | null;
+  invoiceRemainingAmountRupiah?: number | null;
 }
 
 interface ApprovalBookingSnapshot {
@@ -217,9 +222,16 @@ export class TenantBookingsService {
       throw new BadRequestException('Tanggal rencana checkout tidak boleh sebelum check-in');
     }
 
-    const today = this.startOfDay(new Date());
+    const now = new Date();
+    const today = this.startOfDay(now);
     if (checkInDate < today) {
       throw new BadRequestException('Tanggal check-in tidak boleh di masa lalu');
+    }
+
+    const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
+    const minimumBookingWindowMs = 3 * 60 * 60 * 1000;
+    if (isSameDayCheckIn && (this.endOfDay(checkInDate).getTime() - now.getTime()) < minimumBookingWindowMs) {
+      throw new BadRequestException('Booking untuk check-in hari ini hanya dapat dibuat jika masih ada minimal 3 jam sebelum hari berganti');
     }
 
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
@@ -227,19 +239,26 @@ export class TenantBookingsService {
       throw new NotFoundException('Tenant tidak ditemukan atau sudah nonaktif');
     }
 
-    const existingActiveStay = await this.prisma.stay.findFirst({
-      where: {
-        tenantId,
-        status: StayStatus.ACTIVE as any,
-      },
-      select: { id: true },
-    });
-    if (existingActiveStay) {
-      throw new ConflictException('Tenant masih memiliki stay aktif');
-    }
-
     try {
       const createdBooking = await this.prisma.$transaction(async (tx) => {
+        await tx.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+          SELECT id
+          FROM "Tenant"
+          WHERE id = ${tenantId}
+          FOR UPDATE
+        `);
+
+        const existingActiveStay = await tx.stay.findFirst({
+          where: {
+            tenantId,
+            status: StayStatus.ACTIVE as any,
+          },
+          select: { id: true },
+        });
+        if (existingActiveStay) {
+          throw new ConflictException('Tenant masih memiliki stay aktif');
+        }
+
         const lockedRooms = await tx.$queryRaw<RoomPricingSnapshot[]>(Prisma.sql`
           SELECT
             id,
@@ -399,8 +418,8 @@ export class TenantBookingsService {
       throw new BadRequestException('Nilai meter tidak boleh negatif');
     }
 
-    if (dto.agreedRentAmountRupiah < 0) {
-      throw new BadRequestException('Tarif sewa disepakati tidak boleh negatif');
+    if (dto.agreedRentAmountRupiah <= 0) {
+      throw new BadRequestException('Tarif sewa disepakati harus lebih besar dari 0');
     }
 
     if (dto.depositAmountRupiah < 0) {
@@ -510,7 +529,7 @@ export class TenantBookingsService {
           booking.plannedCheckOutDate ? new Date(booking.plannedCheckOutDate) : undefined,
         );
         const dueDate = this.calculateDueDate(periodEnd);
-        const invoiceNumber = `INV-${stayId}-A-${Date.now()}`;
+        const invoiceNumber = `INV-${stayId}-A-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
         const invoice = await tx.invoice.create({
           data: {
@@ -520,21 +539,32 @@ export class TenantBookingsService {
             periodStart: new Date(booking.checkInDate),
             periodEnd,
             dueDate,
+            issuedAt: null,
             notes: 'Invoice awal hasil approval booking admin',
             createdById: actor.id,
           },
         });
 
-        await tx.invoiceLine.create({
+        await tx.invoiceLine.createMany({
+          data: [
+            {
+              invoiceId: invoice.id,
+              lineType: 'RENT' as any,
+              description: `Sewa kamar ${booking.roomCode} - ${booking.pricingTerm}`,
+              qty: 1,
+              unit: this.mapPricingTermToUnit(booking.pricingTerm),
+              unitPriceRupiah: dto.agreedRentAmountRupiah,
+              lineAmountRupiah: dto.agreedRentAmountRupiah,
+              sortOrder: 0,
+            },
+          ],
+        });
+
+        await tx.invoice.update({
+          where: { id: invoice.id },
           data: {
-            invoiceId: invoice.id,
-            lineType: 'RENT' as any,
-            description: `Sewa kamar ${booking.roomCode} - ${booking.pricingTerm}`,
-            qty: 1,
-            unit: this.mapPricingTermToUnit(booking.pricingTerm),
-            unitPriceRupiah: dto.agreedRentAmountRupiah,
-            lineAmountRupiah: dto.agreedRentAmountRupiah,
-            sortOrder: 0,
+            status: 'ISSUED' as any,
+            issuedAt: new Date(),
           },
         });
 
@@ -616,7 +646,7 @@ export class TenantBookingsService {
           invoice: {
             id: invoice.id,
             invoiceNumber: invoice.invoiceNumber,
-            status: invoice.status,
+            status: 'ISSUED' as any,
             periodStart: invoice.periodStart,
             periodEnd: invoice.periodEnd,
             dueDate: invoice.dueDate,
@@ -691,6 +721,8 @@ export class TenantBookingsService {
         s."plannedCheckOutDate",
         s."expiresAt",
         s."depositAmountRupiah",
+        COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
+        COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
         s."electricityTariffPerKwhRupiah",
         s."waterTariffPerM3Rupiah",
         s."bookingSource",
@@ -731,7 +763,32 @@ export class TenantBookingsService {
           WHERE i."stayId" = s.id
           ORDER BY i.id DESC
           LIMIT 1
-        ) AS "latestInvoiceStatus"
+        ) AS "latestInvoiceStatus",
+        (
+          SELECT i."totalAmountRupiah"
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+          ORDER BY i.id DESC
+          LIMIT 1
+        ) AS "invoiceTotalAmountRupiah",
+        (
+          SELECT COALESCE(SUM(ip."amountRupiah")::int, 0)
+          FROM "InvoicePayment" ip
+          WHERE ip."invoiceId" = (
+            SELECT i.id
+            FROM "Invoice" i
+            WHERE i."stayId" = s.id
+            ORDER BY i.id DESC
+            LIMIT 1
+          )
+        ) AS "invoicePaidAmountRupiah",
+        (
+          SELECT GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0)
+          FROM "Invoice" i
+          WHERE i."stayId" = s.id
+          ORDER BY i.id DESC
+          LIMIT 1
+        ) AS "invoiceRemainingAmountRupiah"
       FROM "Stay" s
       INNER JOIN "Tenant" t ON t.id = s."tenantId"
       INNER JOIN "Room" r ON r.id = s."roomId"
@@ -811,6 +868,8 @@ export class TenantBookingsService {
         s."plannedCheckOutDate",
         s."expiresAt",
         s."depositAmountRupiah",
+        COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
+        COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
         s."electricityTariffPerKwhRupiah",
         s."waterTariffPerM3Rupiah",
         s."bookingSource",
@@ -877,6 +936,8 @@ export class TenantBookingsService {
       code === 'P2010'
       || message.includes('expiresat')
       || message.includes('roomstatus')
+      || message.includes('depositpaidamountrupiah')
+      || message.includes('depositpaymentstatus')
       || message.includes('enum roomstatus')
       || message.includes('invalid input value for enum')
       || message.includes('column') && message.includes('does not exist')
@@ -896,6 +957,8 @@ export class TenantBookingsService {
       plannedCheckOutDate: row.plannedCheckOutDate,
       expiresAt: row.expiresAt,
       depositAmountRupiah: row.depositAmountRupiah,
+      depositPaidAmountRupiah: row.depositPaidAmountRupiah ?? 0,
+      depositPaymentStatus: row.depositPaymentStatus ?? 'UNPAID',
       electricityTariffPerKwhRupiah: row.electricityTariffPerKwhRupiah,
       waterTariffPerM3Rupiah: row.waterTariffPerM3Rupiah,
       bookingSource: row.bookingSource,
@@ -921,6 +984,9 @@ export class TenantBookingsService {
       latestInvoiceId: row.latestInvoiceId ?? null,
       latestInvoiceNumber: row.latestInvoiceNumber ?? null,
       latestInvoiceStatus: row.latestInvoiceStatus ?? null,
+      invoiceTotalAmountRupiah: row.invoiceTotalAmountRupiah ?? null,
+      invoicePaidAmountRupiah: row.invoicePaidAmountRupiah ?? null,
+      invoiceRemainingAmountRupiah: row.invoiceRemainingAmountRupiah ?? null,
     };
   }
 
@@ -1017,14 +1083,13 @@ export class TenantBookingsService {
     return dueDate;
   }
 
-  private calculateBookingExpiry(checkInDate: Date) {
-    const today = this.startOfDay(new Date());
-    const hMinusTen = this.addDays(checkInDate, -10);
-    const hMinusOne = this.addDays(checkInDate, -1);
+  private calculateBookingExpiry(_checkInDate: Date) {
+    const now = new Date();
+    return new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  }
 
-    if (hMinusTen > today) return hMinusTen;
-    if (hMinusOne > today) return hMinusOne;
-    return today;
+  private endOfDay(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
   }
 
   private addDays(date: Date, days: number) {

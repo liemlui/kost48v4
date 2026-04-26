@@ -4,6 +4,7 @@ import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { resourceConfigs } from './config/resources';
 import { getDefaultRoute } from './config/navigation';
+import { useTenantPortalStage } from './hooks/useTenantPortalStage';
 import { useAuth } from './context/AuthContext';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -18,6 +19,7 @@ import MyBookingsPage from './pages/portal/MyBookingsPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import MyStayPage from './pages/portal/MyStayPage';
 import MyTicketsPage from './pages/portal/MyTicketsPage';
+import WifiOrderPage from './pages/portal/WifiOrderPage';
 import SimpleCrudPage from './pages/resources/SimpleCrudPage';
 import BookingPage from './pages/bookings/BookingPage';
 import RoomDetailPage from './pages/rooms/RoomDetailPage';
@@ -32,13 +34,15 @@ type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
 function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactNode }) {
   const { user } = useAuth();
+  const { stage } = useTenantPortalStage();
   if (!user) return null;
-  return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role)} replace />;
+  return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role, stage)} replace />;
 }
 
 function RootRedirect() {
   const { user } = useAuth();
-  return <Navigate to={getDefaultRoute(user?.role)} replace />;
+  const { stage } = useTenantPortalStage();
+  return <Navigate to={getDefaultRoute(user?.role, stage)} replace />;
 }
 
 export default function App() {
@@ -103,6 +107,7 @@ export default function App() {
           <Route path="/portal/bookings" element={<RequireRoles allowed={['TENANT']}><MyBookingsPage /></RequireRoles>} />
           <Route path="/portal/invoices" element={<RequireRoles allowed={['TENANT']}><MyInvoicesPage /></RequireRoles>} />
           <Route path="/portal/tickets" element={<RequireRoles allowed={['TENANT']}><MyTicketsPage /></RequireRoles>} />
+          <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
         </Route>
       </Route>
     </Routes>

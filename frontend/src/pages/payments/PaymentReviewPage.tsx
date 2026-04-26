@@ -12,12 +12,17 @@ import {
   rejectPaymentSubmission,
 } from '../../api/paymentSubmissions';
 import type { PaymentSubmission } from '../../types';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function getTargetLabel(item: PaymentSubmission) {
+  return item.targetType === 'DEPOSIT' ? 'Deposit' : 'Sewa Awal';
 }
 
 export default function PaymentReviewPage() {
@@ -40,9 +45,15 @@ export default function PaymentReviewPage() {
       queryClient.invalidateQueries({ queryKey: ['payment-review-queue'] }),
       queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
       queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      queryClient.invalidateQueries({ queryKey: ['rooms'] }),
       queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-stay'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
       queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+      queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+      queryClient.invalidateQueries({ queryKey: ['invoice-payments'] }),
+      queryClient.invalidateQueries({ queryKey: ['analytics'] }),
     ]);
   };
 
@@ -59,7 +70,8 @@ export default function PaymentReviewPage() {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async ({ submissionId, reviewNotes }: { submissionId: number; reviewNotes: string }) => rejectPaymentSubmission(submissionId, reviewNotes),
+    mutationFn: async ({ submissionId, reviewNotes }: { submissionId: number; reviewNotes: string }) =>
+      rejectPaymentSubmission(submissionId, reviewNotes),
     onSuccess: async () => {
       setSelected(null);
       setActionError(null);
@@ -73,8 +85,8 @@ export default function PaymentReviewPage() {
   return (
     <div>
       <PageHeader
-        title="Verifikasi Bayar"
-        description="Review bukti pembayaran tenant, lalu putuskan approve atau reject secara operasional-friendly."
+        title="Review Pembayaran"
+        description={`Satu queue kerja untuk bukti bayar booking tenant. Di sinilah admin memeriksa gambar bukti, lalu memutuskan approve atau reject. ${items.length ? `Saat ini ada ${items.length} submission pada filter aktif.` : ''}`}
       />
 
       <Card className="content-card border-0 mb-4">
@@ -93,11 +105,17 @@ export default function PaymentReviewPage() {
             <div className="col-md-5">
               <Form.Group>
                 <Form.Label>Pencarian</Form.Label>
-                <Form.Control value={search} onChange={(e) => setSearch(e.currentTarget.value)} placeholder="Cari tenant, kamar, invoice, atau nomor referensi" />
+                <Form.Control
+                  value={search}
+                  onChange={(e) => setSearch(e.currentTarget.value)}
+                  placeholder="Cari tenant, kamar, invoice, atau nomor referensi"
+                />
               </Form.Group>
             </div>
             <div className="col-md-2">
-              <Button variant="outline-secondary" className="w-100" onClick={() => query.refetch()}>Refresh</Button>
+              <Button variant="outline-secondary" className="w-100" onClick={() => query.refetch()}>
+                Refresh
+              </Button>
             </div>
           </div>
         </Card.Body>
@@ -108,7 +126,11 @@ export default function PaymentReviewPage() {
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
           {query.isError ? <Alert variant="danger">Gagal memuat queue review pembayaran.</Alert> : null}
           {!query.isLoading && !query.isError && !items.length ? (
-            <EmptyState icon="💸" title="Belum ada submission" description="Queue review pembayaran akan muncul di sini saat tenant mengirim bukti bayar." />
+            <EmptyState
+              icon="💸"
+              title="Belum ada submission"
+              description="Queue review pembayaran akan muncul di sini saat tenant mengirim bukti bayar."
+            />
           ) : null}
 
           {!query.isLoading && !query.isError && items.length > 0 ? (
@@ -117,7 +139,8 @@ export default function PaymentReviewPage() {
                 <tr>
                   <th>Tenant</th>
                   <th>Kamar</th>
-                  <th>Invoice</th>
+                  <th>Target</th>
+                  <th>Invoice/Konteks</th>
                   <th>Nominal</th>
                   <th>Tanggal Bayar</th>
                   <th>Status</th>
@@ -136,19 +159,54 @@ export default function PaymentReviewPage() {
                       <div className="small text-muted">{item.room?.name ?? 'Nama kamar belum tersedia'}</div>
                     </td>
                     <td>
-                      <div className="fw-semibold">{item.invoice?.invoiceNumber ?? `INV-${item.invoiceId}`}</div>
-                      <div className="small text-muted">{item.referenceNumber || 'Tanpa ref'}</div>
+                      <div className="fw-semibold">{getTargetLabel(item)}</div>
+                      <div className="small text-muted">{item.paymentMethod}</div>
+                    </td>
+                    <td>
+                      <div className="fw-semibold">
+                        {item.targetType === 'DEPOSIT'
+                          ? `Deposit ${item.room?.code ?? ''}`.trim()
+                          : (item.invoice?.invoiceNumber ?? `INV-${item.invoiceId}`)}
+                      </div>
+                      <div className="small text-muted">
+                        {item.targetType === 'DEPOSIT'
+                          ? `Status deposit: ${item.deposit?.paymentStatus ?? 'UNPAID'}`
+                          : `Status invoice: ${item.invoice?.status ?? 'ISSUED'}`}
+                      </div>
                     </td>
                     <td><CurrencyDisplay amount={item.amountRupiah} /></td>
                     <td>{formatDate(item.paidAt)}</td>
                     <td><StatusBadge status={item.status} /></td>
                     <td>
                       <div className="d-flex gap-2 flex-wrap">
-                        {item.fileUrl ? <Button as="a" href={item.fileUrl} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">Buka Bukti</Button> : null}
+                        {item.fileUrl ? (
+                          <Button as="a" href={resolveAbsoluteFileUrl(item.fileUrl) ?? '#'} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">
+                            Buka Bukti
+                          </Button>
+                        ) : null}
                         {item.status === 'PENDING_REVIEW' ? (
                           <>
-                            <Button size="sm" onClick={() => { setSelected(item); setModalMode('approve'); setActionError(null); }}>Approve</Button>
-                            <Button size="sm" variant="outline-danger" onClick={() => { setSelected(item); setModalMode('reject'); setActionError(null); }}>Reject</Button>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelected(item);
+                                setModalMode('approve');
+                                setActionError(null);
+                              }}
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => {
+                                setSelected(item);
+                                setModalMode('reject');
+                                setActionError(null);
+                              }}
+                            >
+                              Reject
+                            </Button>
                           </>
                         ) : null}
                       </div>

@@ -34,6 +34,11 @@ function normalizeTenantBooking(raw: TenantBooking): TenantBooking {
     latestInvoiceId: readAlias<number | null>(raw, 'latestInvoiceId', 'latest_invoice_id') ?? raw.latestInvoiceId ?? null,
     latestInvoiceNumber: readAlias<string | null>(raw, 'latestInvoiceNumber', 'latest_invoice_number') ?? raw.latestInvoiceNumber ?? null,
     latestInvoiceStatus: readAlias<string | null>(raw, 'latestInvoiceStatus', 'latest_invoice_status') ?? raw.latestInvoiceStatus ?? null,
+    invoiceTotalAmountRupiah: Number(readAlias<number | string>(raw, 'invoiceTotalAmountRupiah', 'invoice_total_amount_rupiah') ?? (raw as any).invoiceTotalAmountRupiah ?? 0) || undefined,
+    invoicePaidAmountRupiah: Number(readAlias<number | string>(raw, 'invoicePaidAmountRupiah', 'invoice_paid_amount_rupiah') ?? (raw as any).invoicePaidAmountRupiah ?? 0) || undefined,
+    invoiceRemainingAmountRupiah: Number(readAlias<number | string>(raw, 'invoiceRemainingAmountRupiah', 'invoice_remaining_amount_rupiah') ?? (raw as any).invoiceRemainingAmountRupiah ?? 0) || undefined,
+    depositPaidAmountRupiah: Number(readAlias<number | string>(raw, 'depositPaidAmountRupiah', 'deposit_paid_amount_rupiah') ?? (raw as any).depositPaidAmountRupiah ?? 0) || 0,
+    depositPaymentStatus: readAlias<string | null>(raw, 'depositPaymentStatus', 'deposit_payment_status') ?? (raw as any).depositPaymentStatus ?? 'UNPAID',
     room: raw.room
       ? {
           ...raw.room,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Modal, Row } from 'react-bootstrap';
 import { createPortalAccess, resetPortalPassword, togglePortalAccess } from '../../api/tenants';
 import { getFieldOptionsForContext, ResourceConfig } from '../../config/resources';
@@ -7,6 +7,34 @@ import { getRelationSpec, getReferenceLabel, ReferenceOption } from '../../pages
 import type { PortalUserSummary } from '../../types';
 import CurrencyInput from '../common/CurrencyInput';
 import SearchableSelect from '../common/SearchableSelect';
+import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
+
+async function compressImageFile(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1600;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+  bitmap.close();
+  if (!blob) return file;
+  const nextName = file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg';
+  return new File([blob], nextName, { type: 'image/jpeg' });
+}
+
+function resolveAbsoluteFileUrl(fileUrl?: string | null) {
+  if (!fileUrl) return null;
+  if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+  const origin = apiBase.replace(/\/api\/?$/, '');
+  return `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+}
 
 interface ResourceFormModalProps {
   showModal: boolean;
@@ -52,6 +80,9 @@ export default function ResourceFormModal({
   const [resetSuccess, setResetSuccess] = useState<string | null>(null);
   const [showResetForm, setShowResetForm] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [roomImageUploading, setRoomImageUploading] = useState(false);
+  const [roomImageError, setRoomImageError] = useState<string | null>(null);
+  const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const nextSummary = (editingItem?.portalUserSummary as PortalUserSummary | null | undefined)
@@ -185,7 +216,60 @@ export default function ResourceFormModal({
     }
   };
 
+  const handleRoomImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+    setRoomImageError(null);
+    setRoomImageUploading(true);
+    try {
+      const existing = Array.isArray(formState.images) ? (formState.images as string[]) : [];
+      const uploadedUrls: string[] = [];
+      for (const file of files) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+          throw new Error('Galeri kamar hanya menerima JPG, PNG, atau WebP.');
+        }
+        const compressed = await compressImageFile(file);
+        const uploaded = await uploadRoomImage(compressed);
+        uploadedUrls.push(uploaded.fileUrl);
+      }
+      setFormState({ ...formState, images: [...existing, ...uploadedUrls] });
+    } catch (err: any) {
+      setRoomImageError(err?.message ?? 'Gagal mengunggah gambar kamar.');
+    } finally {
+      setRoomImageUploading(false);
+      event.target.value = '';
+    }
+  };
+
+
+  const handleAnnouncementImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setRoomImageError(null);
+    setRoomImageUploading(true);
+    try {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error('Gambar pengumuman hanya menerima JPG, PNG, atau WebP.');
+      }
+      const compressed = await compressImageFile(file);
+      const uploaded = await uploadAnnouncementImage(compressed);
+      setFormState({ ...formState, imageUrl: uploaded.fileUrl, imageFileKey: uploaded.fileKey, imageOriginalFilename: uploaded.originalFilename, imageMimeType: uploaded.mimeType, imageFileSizeBytes: uploaded.fileSizeBytes });
+    } catch (err: any) {
+      setRoomImageError(err?.message ?? 'Gagal mengunggah gambar pengumuman.');
+    } finally {
+      setRoomImageUploading(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleRemoveRoomImage = (index: number) => {
+    const existing = Array.isArray(formState.images) ? [...(formState.images as string[])] : [];
+    existing.splice(index, 1);
+    setFormState({ ...formState, images: existing });
+  };
+
   return (
+    <>
     <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>{editingItem ? 'Edit Data' : 'Tambah Data'} — {config.title}</Modal.Title>
@@ -219,7 +303,59 @@ export default function ResourceFormModal({
               return null;
             }
 
-            return (
+            const handleRoomImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+    setRoomImageError(null);
+    setRoomImageUploading(true);
+    try {
+      const existing = Array.isArray(formState.images) ? (formState.images as string[]) : [];
+      const uploadedUrls: string[] = [];
+      for (const file of files) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+          throw new Error('Galeri kamar hanya menerima JPG, PNG, atau WebP.');
+        }
+        const compressed = await compressImageFile(file);
+        const uploaded = await uploadRoomImage(compressed);
+        uploadedUrls.push(uploaded.fileUrl);
+      }
+      setFormState({ ...formState, images: [...existing, ...uploadedUrls] });
+    } catch (err: any) {
+      setRoomImageError(err?.message ?? 'Gagal mengunggah gambar kamar.');
+    } finally {
+      setRoomImageUploading(false);
+      event.target.value = '';
+    }
+  };
+
+
+  const handleAnnouncementImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setRoomImageError(null);
+    setRoomImageUploading(true);
+    try {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error('Gambar pengumuman hanya menerima JPG, PNG, atau WebP.');
+      }
+      const compressed = await compressImageFile(file);
+      const uploaded = await uploadAnnouncementImage(compressed);
+      setFormState({ ...formState, imageUrl: uploaded.fileUrl, imageFileKey: uploaded.fileKey, imageOriginalFilename: uploaded.originalFilename, imageMimeType: uploaded.mimeType, imageFileSizeBytes: uploaded.fileSizeBytes });
+    } catch (err: any) {
+      setRoomImageError(err?.message ?? 'Gagal mengunggah gambar pengumuman.');
+    } finally {
+      setRoomImageUploading(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleRemoveRoomImage = (index: number) => {
+    const existing = Array.isArray(formState.images) ? [...(formState.images as string[])] : [];
+    existing.splice(index, 1);
+    setFormState({ ...formState, images: existing });
+  };
+
+  return (
               <Col md={field.type === 'textarea' ? 12 : 6} key={field.name}>
                 <Form.Group>
                   <Form.Label>
@@ -256,6 +392,43 @@ export default function ResourceFormModal({
                         <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </Form.Select>
+                  ) : config.path === '/rooms' && field.name === 'images' ? (
+                    <div>
+                      <Form.Control type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleRoomImageUpload} disabled={roomImageUploading} />
+                      <Form.Text muted>Unggah gambar kamar langsung. Gambar akan dikompres lebih dulu di browser agar lebih hemat storage server.</Form.Text>
+                      {roomImageError ? <Alert variant="danger" className="mt-2 mb-0 py-2">{roomImageError}</Alert> : null}
+                      {roomImageUploading ? <div className="small mt-2 text-muted">Mengunggah gambar kamar...</div> : null}
+                      {Array.isArray(currentValue) && currentValue.length ? (
+                        <div className="d-flex flex-wrap gap-2 mt-3">
+                          {(currentValue as string[]).map((url, index) => {
+                            const absoluteUrl = resolveAbsoluteFileUrl(url);
+                            return (
+                              <div key={`${url}-${index}`} style={{ width: 120 }}>
+                                <button type="button" className="btn btn-link p-0 border rounded overflow-hidden w-100 bg-white" onClick={() => setZoomImageUrl(absoluteUrl ?? url)}>
+                                  <img src={absoluteUrl ?? url} alt={`Gambar kamar ${index + 1}`} style={{ width: '100%', height: 90, objectFit: 'cover', display: 'block' }} />
+                                </button>
+                                <Button size="sm" variant="outline-danger" className="w-100 mt-1" onClick={() => handleRemoveRoomImage(index)}>Hapus</Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : config.path === '/announcements' && field.name === 'imageUrl' ? (
+                    <div>
+                      <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAnnouncementImageUpload} disabled={roomImageUploading} />
+                      <Form.Text muted>Unggah satu gambar cover pengumuman. Preview akan tampil kecil dan bisa di-zoom.</Form.Text>
+                      {roomImageError ? <Alert variant="danger" className="mt-2 mb-0 py-2">{roomImageError}</Alert> : null}
+                      {roomImageUploading ? <div className="small mt-2 text-muted">Mengunggah gambar pengumuman...</div> : null}
+                      {typeof currentValue === 'string' && currentValue ? (() => { const absoluteUrl = resolveAbsoluteFileUrl(currentValue); return (
+                        <div className="mt-3" style={{ width: 140 }}>
+                          <button type="button" className="btn btn-link p-0 border rounded overflow-hidden w-100 bg-white" onClick={() => setZoomImageUrl(absoluteUrl ?? currentValue)}>
+                            <img src={absoluteUrl ?? currentValue} alt="Gambar pengumuman" style={{ width: '100%', height: 96, objectFit: 'cover', display: 'block' }} />
+                          </button>
+                          <Button size="sm" variant="outline-danger" className="w-100 mt-1" onClick={() => setFormState({ ...formState, imageUrl: '', imageFileKey: '', imageOriginalFilename: '', imageMimeType: '', imageFileSizeBytes: '' })}>Hapus</Button>
+                        </div>
+                      ); })() : null}
+                    </div>
                   ) : field.type === 'textarea' ? (
                     <Form.Control
                       as="textarea"
@@ -424,5 +597,15 @@ export default function ResourceFormModal({
         <Button onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? 'Menyimpan...' : 'Simpan'}</Button>
       </Modal.Footer>
     </Modal>
+
+    <Modal show={Boolean(zoomImageUrl)} onHide={() => setZoomImageUrl(null)} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Preview Gambar Kamar</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="text-center">
+        {zoomImageUrl ? <img src={zoomImageUrl} alt="Preview gambar kamar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
+      </Modal.Body>
+    </Modal>
+    </>
   );
 }

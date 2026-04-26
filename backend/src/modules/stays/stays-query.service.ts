@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { RoomStatus } from '../../common/enums/app.enums';
+import { RoomStatus, StayStatus, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -13,12 +14,12 @@ export class StaysQueryService {
 
   async findAll(query: StaysQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.StayWhereInput = {
       AND: [
-        query.tenantId ? { tenantId: Number(query.tenantId) } : {},
-        query.roomId ? { roomId: Number(query.roomId) } : {},
-        query.status ? { status: query.status } : {},
-        query.bookingSource ? { bookingSource: query.bookingSource as any } : {},
+        query.tenantId ? { tenantId: Number(query.tenantId) } : undefined,
+        query.roomId ? { roomId: Number(query.roomId) } : undefined,
+        query.status ? { status: query.status } : undefined,
+        query.bookingSource ? { bookingSource: query.bookingSource } : undefined,
         query.checkInDateFrom || query.checkInDateTo
           ? {
               checkInDate: {
@@ -26,9 +27,9 @@ export class StaysQueryService {
                 lte: query.checkInDateTo ? new Date(query.checkInDateTo) : undefined,
               },
             }
-          : {},
-        query.depositStatus ? { depositStatus: query.depositStatus } : {},
-      ],
+          : undefined,
+        query.depositStatus ? { depositStatus: query.depositStatus } : undefined,
+      ].filter(Boolean),
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -42,7 +43,7 @@ export class StaysQueryService {
           _count: {
             select: {
               invoices: {
-                where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+                where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
               },
             },
           },
@@ -77,7 +78,7 @@ export class StaysQueryService {
 
   async findCurrentForTenant(user: CurrentUserPayload) {
     const stay = await this.prisma.stay.findFirst({
-      where: { tenantId: user.tenantId ?? -1, status: 'ACTIVE' as any },
+      where: { tenantId: user.tenantId ?? -1, status: StayStatus.ACTIVE },
       include: { room: true },
     });
 
@@ -94,7 +95,7 @@ export class StaysQueryService {
         _count: {
           select: {
             invoices: {
-              where: { status: { in: ['ISSUED', 'PARTIAL'] as any } },
+              where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
             },
           },
         },
@@ -144,12 +145,12 @@ export class StaysQueryService {
 
     const [latestElectricityReadings, latestWaterReadings] = await Promise.all([
       this.prisma.meterReading.findMany({
-        where: { roomId: stay.roomId, utilityType: 'ELECTRICITY' as any },
+        where: { roomId: stay.roomId, utilityType: UtilityType.ELECTRICITY },
         orderBy: { readingAt: 'desc' },
         take: 2,
       }),
       this.prisma.meterReading.findMany({
-        where: { roomId: stay.roomId, utilityType: 'WATER' as any },
+        where: { roomId: stay.roomId, utilityType: UtilityType.WATER },
         orderBy: { readingAt: 'desc' },
         take: 2,
       }),

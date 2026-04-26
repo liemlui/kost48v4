@@ -1,12 +1,19 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthUser } from '../types';
 import { login as loginRequest, me as meRequest } from '../api/auth';
+import { queryClient } from '../lib/queryClient';
+
+const TENANT_SESSION_KEYS = ['portal-bookings-success-message'];
+
+function clearTenantSessionStorage() {
+  TENANT_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
+}
 
 type AuthContextValue = {
   user: AuthUser | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (identifier: string, password: string) => Promise<AuthUser>;
   logout: () => void;
   refreshMe: () => Promise<void>;
 };
@@ -42,8 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     token,
     loading,
-    async login(email: string, password: string) {
-      const result = await loginRequest(email, password);
+    async login(identifier: string, password: string) {
+      clearTenantSessionStorage();
+      queryClient.clear();
+      const result = await loginRequest(identifier, password);
       localStorage.setItem('kost48_access_token', result.accessToken);
       setToken(result.accessToken);
       setUser(result.user);
@@ -51,6 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     logout() {
       localStorage.removeItem('kost48_access_token');
+      clearTenantSessionStorage();
+      queryClient.clear();
       setToken(null);
       setUser(null);
     },

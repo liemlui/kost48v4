@@ -1,10 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateMeterReadingDto, UpdateMeterReadingDto } from './dto/meter-reading.dto';
 import { MeterReadingsQueryDto } from './dto/meter-readings-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { UtilityType } from '../../common/enums/app.enums';
 
 @Injectable()
 export class MeterReadingsService {
@@ -12,12 +14,14 @@ export class MeterReadingsService {
 
   async findAll(query: MeterReadingsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.MeterReadingWhereInput = {
       AND: [
-        query.roomId ? { roomId: Number(query.roomId) } : {},
-        query.utilityType ? { utilityType: query.utilityType } : {},
-        query.from || query.to ? { readingAt: { gte: query.from ? new Date(query.from) : undefined, lte: query.to ? new Date(query.to) : undefined } } : {},
-      ],
+        query.roomId ? { roomId: Number(query.roomId) } : undefined,
+        query.utilityType ? { utilityType: query.utilityType } : undefined,
+        query.from || query.to
+          ? { readingAt: { gte: query.from ? new Date(query.from) : undefined, lte: query.to ? new Date(query.to) : undefined } }
+          : undefined,
+      ].filter(Boolean),
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.meterReading.findMany({
@@ -41,7 +45,15 @@ export class MeterReadingsService {
   async create(dto: CreateMeterReadingDto, actor: CurrentUserPayload) {
     const room = await this.prisma.room.findUnique({ where: { id: Number(dto.roomId) } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
-    const created = await this.prisma.meterReading.create({ data: { roomId: Number(dto.roomId), utilityType: dto.utilityType as any, readingAt: new Date(dto.readingAt), readingValue: dto.readingValue as any, note: dto.note, recordedById: actor.id } });
+    const createData: Prisma.MeterReadingCreateInput = {
+      room: { connect: { id: Number(dto.roomId) } },
+      utilityType: dto.utilityType as UtilityType,
+      readingAt: new Date(dto.readingAt),
+      readingValue: dto.readingValue,
+      note: dto.note,
+      recordedBy: { connect: { id: actor.id } },
+    };
+    const created = await this.prisma.meterReading.create({ data: createData });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(created.id), newData: created });
     return created;
   }
@@ -49,7 +61,13 @@ export class MeterReadingsService {
   async update(id: number, dto: UpdateMeterReadingDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.meterReading.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Meter reading tidak ditemukan');
-    const updated = await this.prisma.meterReading.update({ where: { id }, data: { readingAt: dto.readingAt ? new Date(dto.readingAt) : undefined, readingValue: dto.readingValue as any, note: dto.note, recordedById: actor.id } });
+    const updateData: Prisma.MeterReadingUpdateInput = {
+      readingAt: dto.readingAt ? new Date(dto.readingAt) : undefined,
+      readingValue: dto.readingValue ?? undefined,
+      note: dto.note ?? undefined,
+      recordedBy: { connect: { id: actor.id } },
+    };
+    const updated = await this.prisma.meterReading.update({ where: { id }, data: updateData });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'MeterReading', entityId: String(updated.id), oldData: existing, newData: updated });
     return updated;
   }

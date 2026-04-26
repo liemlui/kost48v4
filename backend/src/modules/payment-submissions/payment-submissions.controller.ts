@@ -1,6 +1,10 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -17,6 +21,50 @@ import { PaymentSubmissionsService } from './payment-submissions.service';
 @Controller('payment-submissions')
 export class PaymentSubmissionsController {
   constructor(private readonly paymentSubmissionsService: PaymentSubmissionsService) {}
+
+
+  @Post('upload-proof')
+  @Roles(UserRole.TENANT)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const targetDir = join(process.cwd(), 'uploads', 'payment-proofs');
+          if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
+          cb(null, targetDir);
+        },
+        filename: (_req, file, cb) => {
+          const safeBase = (file.originalname || 'proof')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9-_]+/g, '-')
+            .slice(0, 60) || 'proof';
+          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        },
+      }),
+      fileFilter: (_req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(new BadRequestException('Bukti bayar hanya menerima JPG, PNG, atau WebP'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  async uploadProof(@UploadedFile() file: any) {
+    if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
+    return {
+      message: 'Bukti bayar berhasil diunggah',
+      data: {
+        fileKey: file.filename,
+        fileUrl: `/uploads/payment-proofs/${file.filename}`,
+        originalFilename: file.originalname,
+        mimeType: file.mimetype,
+        fileSizeBytes: file.size,
+      },
+    };
+  }
 
   @Post()
   @Roles(UserRole.TENANT)
@@ -42,6 +90,19 @@ export class PaymentSubmissionsController {
     return {
       message: 'Queue review pembayaran berhasil diambil',
       data: await this.paymentSubmissionsService.findReviewQueue(query),
+    };
+  }
+
+
+  @Post('internal/expire-booking/:stayId')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async expireBooking(
+    @Param('stayId', ParseIntPipe) stayId: number,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return {
+      message: 'Booking reserved berhasil ditutup manual',
+      data: await this.paymentSubmissionsService.expireBooking(stayId, user),
     };
   }
 

@@ -1,5 +1,6 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -19,22 +20,22 @@ export class TicketsService {
 
   async findAll(query: TicketsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.TicketWhereInput = {
       AND: [
         query.search
           ? {
               OR: [
-                { ticketNumber: { contains: query.search, mode: 'insensitive' } },
-                { title: { contains: query.search, mode: 'insensitive' } },
+                { ticketNumber: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                { title: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
               ],
             }
-          : {},
-        query.status ? { status: query.status } : {},
-        query.tenantId ? { tenantId: Number(query.tenantId) } : {},
-        query.roomId ? { roomId: Number(query.roomId) } : {},
-        query.stayId ? { stayId: Number(query.stayId) } : {},
-        query.assignedToId ? { assignedToId: Number(query.assignedToId) } : {},
-      ],
+          : undefined,
+        query.status ? { status: query.status } : undefined,
+        query.tenantId ? { tenantId: Number(query.tenantId) } : undefined,
+        query.roomId ? { roomId: Number(query.roomId) } : undefined,
+        query.stayId ? { stayId: Number(query.stayId) } : undefined,
+        query.assignedToId ? { assignedToId: Number(query.assignedToId) } : undefined,
+      ].filter(Boolean),
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -60,7 +61,7 @@ export class TicketsService {
 
   async findMine(user: CurrentUserPayload, query: TicketsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
-    const where: any = {
+    const where: Prisma.TicketWhereInput = {
       tenantId: user.tenantId ?? -1,
       ...(query.status ? { status: query.status } : {}),
     };
@@ -210,7 +211,7 @@ export class TicketsService {
     if (!ticket) throw new NotFoundException('Tiket tidak ditemukan');
     if (ticket.status !== 'OPEN') throw new ConflictException('Transisi status tidak valid');
 
-    const updated = await this.prisma.ticket.update({ where: { id }, data: { status: 'IN_PROGRESS' as any } });
+    const updated = await this.prisma.ticket.update({ where: { id }, data: { status: 'IN_PROGRESS' } });
     await this.audit.log({ actorUserId: actor.id, action: 'START', entityType: 'Ticket', entityId: String(updated.id), oldData: ticket, newData: updated });
     return updated;
   }
@@ -222,7 +223,7 @@ export class TicketsService {
 
     const updated = await this.prisma.ticket.update({
       where: { id },
-      data: { status: 'DONE' as any, resolutionNote: dto.resolutionNote, resolvedAt: new Date() },
+      data: { status: 'DONE', resolutionNote: dto.resolutionNote, resolvedAt: new Date() },
     });
 
     await this.audit.log({
@@ -247,7 +248,7 @@ export class TicketsService {
       const updated = await this.prisma.ticket.update({
         where: { id },
         data: {
-          status: 'CLOSED' as any,
+          status: 'CLOSED',
           resolutionNote: dto.resolutionNote ?? ticket.resolutionNote,
           closedAt: new Date(),
         },
@@ -271,7 +272,7 @@ export class TicketsService {
     const updated = await this.prisma.ticket.update({
       where: { id },
       data: {
-        status: 'CANCELLED' as any,
+        status: 'CANCELLED',
         resolutionNote: dto.resolutionNote ?? ticket.resolutionNote,
       },
     });
