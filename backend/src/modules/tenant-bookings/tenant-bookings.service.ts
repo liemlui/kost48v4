@@ -231,7 +231,7 @@ export class TenantBookingsService {
     const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
     const minimumBookingWindowMs = 3 * 60 * 60 * 1000;
     if (isSameDayCheckIn && (this.endOfDay(checkInDate).getTime() - now.getTime()) < minimumBookingWindowMs) {
-      throw new BadRequestException('Booking untuk check-in hari ini hanya dapat dibuat jika masih ada minimal 3 jam sebelum hari berganti');
+      throw new BadRequestException('Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir. Silakan pilih tanggal check-in mulai besok. Jam operasional booking hari ini: 08.00–21.00 WIB.');
     }
 
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });

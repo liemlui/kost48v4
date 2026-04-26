@@ -209,6 +209,9 @@ export default function BookingPage() {
                           onChange={(event) => setFormState((prev) => ({ ...prev, checkInDate: event.target.value }))}
                           required
                         />
+                        <Form.Text muted>
+                          Booking hari ini hanya tersedia selama jam operasional 08.00–21.00 WIB. Di luar jam tersebut, pilih tanggal check-in mulai besok.
+                        </Form.Text>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
