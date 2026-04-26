@@ -6,6 +6,7 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
+import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from './pricing.helper';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
@@ -991,38 +992,30 @@ export class TenantBookingsService {
   }
 
   private buildPricingAvailabilityWhere(pricingTerm?: PricingTerm): Prisma.RoomWhereInput {
-    switch (pricingTerm) {
-      case PricingTerm.DAILY:
-        return { dailyRateRupiah: { gt: 0 } };
-      case PricingTerm.WEEKLY:
-        return { weeklyRateRupiah: { gt: 0 } };
-      case PricingTerm.BIWEEKLY:
-        return { biWeeklyRateRupiah: { gt: 0 } };
-      case PricingTerm.MONTHLY:
-      case PricingTerm.SMESTERLY:
-      case PricingTerm.YEARLY:
-        return { monthlyRateRupiah: { gt: 0 } };
-      default:
-        return {};
+    if (pricingTerm) {
+      return { monthlyRateRupiah: { gt: 0 } };
     }
+    return {};
   }
 
   private getAvailablePricingTerms(room: RoomPricingSnapshot | Prisma.RoomGetPayload<{}>) {
-    const terms: PricingTerm[] = [];
-    if ((room as any).dailyRateRupiah && (room as any).dailyRateRupiah > 0) terms.push(PricingTerm.DAILY);
-    if ((room as any).weeklyRateRupiah && (room as any).weeklyRateRupiah > 0) terms.push(PricingTerm.WEEKLY);
-    if ((room as any).biWeeklyRateRupiah && (room as any).biWeeklyRateRupiah > 0) terms.push(PricingTerm.BIWEEKLY);
-    if ((room as any).monthlyRateRupiah && (room as any).monthlyRateRupiah > 0) {
-      terms.push(PricingTerm.MONTHLY, PricingTerm.SMESTERLY, PricingTerm.YEARLY);
-    }
-    return terms;
+    const monthlyRate = Number((room as any).monthlyRateRupiah ?? 0);
+    if (monthlyRate <= 0) return [];
+
+    return [
+      PricingTerm.DAILY,
+      PricingTerm.WEEKLY,
+      PricingTerm.BIWEEKLY,
+      PricingTerm.MONTHLY,
+      PricingTerm.SMESTERLY,
+      PricingTerm.YEARLY,
+    ];
   }
 
   private resolveRent(room: RoomPricingSnapshot | Prisma.RoomGetPayload<{}>, pricingTerm: PricingTerm): number {
-    if (pricingTerm === PricingTerm.DAILY) return Number((room as any).dailyRateRupiah ?? 0);
-    if (pricingTerm === PricingTerm.WEEKLY) return Number((room as any).weeklyRateRupiah ?? 0);
-    if (pricingTerm === PricingTerm.BIWEEKLY) return Number((room as any).biWeeklyRateRupiah ?? 0);
-    return Number((room as any).monthlyRateRupiah ?? 0);
+    const monthlyRate = Number((room as any).monthlyRateRupiah ?? 0);
+    if (!monthlyRate || monthlyRate <= 0) return 0;
+    return calculateRentByPricingTerm(monthlyRate, pricingTerm);
   }
 
   private mapPricingTermToUnit(pricingTerm: string): string {

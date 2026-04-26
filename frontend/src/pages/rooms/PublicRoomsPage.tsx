@@ -10,13 +10,16 @@ import { getStatusLabel } from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { isUtilitiesIncludedForPricingTerm } from '../../utils/pricing';
 
 const pricingOptions: Array<{ value: '' | PricingTerm; label: string }> = [
   { value: '', label: 'Semua term' },
-  { value: 'MONTHLY', label: 'Bulanan' },
-  { value: 'WEEKLY', label: 'Mingguan' },
-  { value: 'BIWEEKLY', label: '2 Mingguan' },
-  { value: 'DAILY', label: 'Harian' },
+  { value: 'DAILY', label: 'Harian (flat, termasuk listrik & air)' },
+  { value: 'WEEKLY', label: 'Mingguan (flat, termasuk listrik & air)' },
+  { value: 'BIWEEKLY', label: '2 Mingguan (flat, termasuk listrik & air)' },
+  { value: 'MONTHLY', label: 'Bulanan (meteran terpisah)' },
+  { value: 'SMESTERLY', label: 'Semesteran (meteran terpisah)' },
+  { value: 'YEARLY', label: 'Tahunan (meteran terpisah)' },
 ];
 
 function RoomPlaceholder({ room }: { room: PublicRoom }) {
@@ -208,7 +211,10 @@ export default function PublicRoomsPage() {
                   <div className="d-flex flex-wrap gap-2">
                     {room.floor ? <Badge bg="secondary" className="status-badge">Lantai {room.floor}</Badge> : null}
                     {room.highlightedPricingTerm ? (
-                      <Badge bg="info" className="status-badge">{getStatusLabel(room.highlightedPricingTerm)}</Badge>
+                      <Badge bg="info" className="status-badge">
+                        {getStatusLabel(room.highlightedPricingTerm)}
+                        {isUtilitiesIncludedForPricingTerm(room.highlightedPricingTerm) ? ' · flat' : ''}
+                      </Badge>
                     ) : null}
                   </div>
 

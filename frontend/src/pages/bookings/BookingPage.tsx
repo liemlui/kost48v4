@@ -8,6 +8,7 @@ import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import type { CreateTenantBookingPayload, PricingTerm, PublicRoom } from '../../types';
+import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 
 type BookingFormState = {
   roomId: number;
@@ -89,21 +90,13 @@ export default function BookingPage() {
   });
 
   const selectedRate = useMemo(() => {
-    if (!room) return null;
-    const pricing = room.pricing;
-    switch (formState.pricingTerm) {
-      case 'DAILY':
-        return pricing.dailyRateRupiah;
-      case 'WEEKLY':
-        return pricing.weeklyRateRupiah;
-      case 'BIWEEKLY':
-        return pricing.biWeeklyRateRupiah;
-      default:
-        return pricing.monthlyRateRupiah;
-    }
+    if (!room || !room.pricing?.monthlyRateRupiah) return null;
+    return calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, formState.pricingTerm);
   }, [room, formState.pricingTerm]);
 
 
+
+  const selectedUtilitiesIncluded = isUtilitiesIncludedForPricingTerm(formState.pricingTerm);
 
   const initialTotal = useMemo(() => {
     const rent = Number(selectedRate ?? 0);
@@ -181,8 +174,12 @@ export default function BookingPage() {
                     </div>
                   </div>
                   <div>
-                    <div className="card-title-soft mb-1">Utilitas</div>
-                    <div className="app-caption">Listrik <CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /> / kWh · Air <CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /> / m³</div>
+                      <div className="card-title-soft mb-1">Utilitas</div>
+                      {selectedUtilitiesIncluded ? (
+                        <div className="app-caption text-success fw-medium">Listrik & air sudah termasuk dalam tarif {getStatusLabel(formState.pricingTerm).toLowerCase()} (flat)</div>
+                      ) : (
+                        <div className="app-caption">Listrik <CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /> / kWh · Air <CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /> / m³ (meteran terpisah)</div>
+                      )}
                   </div>
                   {room.notes ? (
                     <Alert variant="light" className="mb-0">
@@ -222,7 +219,15 @@ export default function BookingPage() {
                           onChange={(event) => setFormState((prev) => ({ ...prev, pricingTerm: event.target.value as PricingTerm }))}
                           required
                         >
-                          {availableTerms.map((term) => <option key={term} value={term}>{getStatusLabel(term)}</option>)}
+                          {ALL_PRICING_TERMS.map((term) => {
+                            const rent = room?.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
+                            const incUtil = isUtilitiesIncludedForPricingTerm(term);
+                            return (
+                              <option key={term} value={term}>
+                                {getStatusLabel(term)}{rent ? ` — ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(rent)}` : ''}{incUtil ? ' (termasuk listrik & air)' : ''}
+                              </option>
+                            );
+                          })}
                         </Form.Select>
                       </Form.Group>
                     </Col>

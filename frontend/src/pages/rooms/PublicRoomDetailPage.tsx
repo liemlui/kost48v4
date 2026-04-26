@@ -8,6 +8,7 @@ import EmptyState from '../../components/common/EmptyState';
 import type { PublicRoom } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 
 function SafeImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
@@ -100,10 +101,12 @@ export default function PublicRoomDetailPage() {
                     </Badge>
                   </div>
 
-                  <div className="d-flex flex-wrap gap-2">
+                   <div className="d-flex flex-wrap gap-2">
                     {room.floor ? <Badge bg="secondary" className="status-badge">Lantai {room.floor}</Badge> : null}
                     {(room.availablePricingTerms ?? []).map((term) => (
-                      <Badge bg="light" text="dark" key={term} className="border">{getStatusLabel(term)}</Badge>
+                      <Badge bg="light" text="dark" key={term} className="border">
+                        {getStatusLabel(term)}{isUtilitiesIncludedForPricingTerm(term) ? ' · flat' : ''}
+                      </Badge>
                     ))}
                   </div>
 
@@ -114,11 +117,25 @@ export default function PublicRoomDetailPage() {
                   </div>
 
                   <Table size="sm" className="mb-0">
+                    <thead>
+                      <tr>
+                        <th className="text-muted">Term</th>
+                        <th className="text-end">Tarif</th>
+                        <th className="text-muted small">Utilitas</th>
+                      </tr>
+                    </thead>
                     <tbody>
-                      <tr><td className="text-muted">Tarif Harian</td><td><CurrencyDisplay amount={room.pricing?.dailyRateRupiah} showZero={false} /></td></tr>
-                      <tr><td className="text-muted">Tarif Mingguan</td><td><CurrencyDisplay amount={room.pricing?.weeklyRateRupiah} showZero={false} /></td></tr>
-                      <tr><td className="text-muted">Tarif 2 Mingguan</td><td><CurrencyDisplay amount={room.pricing?.biWeeklyRateRupiah} showZero={false} /></td></tr>
-                      <tr><td className="text-muted">Tarif Bulanan</td><td><CurrencyDisplay amount={room.pricing?.monthlyRateRupiah} showZero={false} /></td></tr>
+                      {ALL_PRICING_TERMS.map((term) => {
+                        const rent = room.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
+                        const incUtil = isUtilitiesIncludedForPricingTerm(term);
+                        return (
+                          <tr key={term}>
+                            <td className="text-muted">{getStatusLabel(term)}</td>
+                            <td className="text-end fw-semibold"><CurrencyDisplay amount={rent} showZero={false} /></td>
+                            <td className="small">{incUtil ? 'Termasuk (flat)' : 'Meteran terpisah'}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </Table>
 
