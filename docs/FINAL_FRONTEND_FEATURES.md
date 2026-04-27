@@ -1,6 +1,6 @@
 # KOST48 — Final Frontend Feature Set (Updated)
 
-**Versi:** 2026-04-23 (Pasca refactor struktur frontend + catatan sinkronisasi status gate)
+**Versi:** 2026-04-27 (Pasca Phase 4.3-C Notification Center + keputusan Payment Urgency Chip)
 
 ## Ringkasan
 Frontend ini adalah workspace untuk **backoffice** dan **tenant portal** KOST48, dengan tambahan surface publik untuk mendukung **booking mandiri tenant** pada V4 Fase 4.0.
@@ -156,6 +156,27 @@ Frontend dijaga tetap:
 
 ---
 
+
+
+### 7. Notifikasi (**V4 Phase 4.3-C**)
+- Tenant memiliki menu **Notifikasi** di portal.
+- Semua role authenticated memiliki bell notification di header.
+- Dropdown bell menampilkan 5 notifikasi terbaru.
+- Halaman `/notifications` menampilkan list penuh dengan status:
+  - **Belum dibaca**
+  - **Sudah dibaca**
+- Tenant/admin/owner/staff hanya melihat notifikasi miliknya sendiri melalui endpoint `/me/notifications`.
+- Admin/Owner/Staff tidak diberi sidebar menu Notifikasi agar backoffice tetap compact; akses cukup via bell/header.
+
+### 8. Payment Urgency Chip (**Target V4 Phase 4.3-D**)
+- Reminder keuangan tidak cukup hanya berupa notification read/unread.
+- Header tenant akan memiliki chip countdown/urgency di sebelah bell untuk kondisi aktif seperti:
+  - invoice overdue,
+  - invoice due soon,
+  - booking payment deadline,
+  - kontrak/sewa mendekat.
+- Chip tetap muncul sampai kondisi bisnis selesai, bukan sampai notification dibaca.
+
 ## Surface Publik Baru (V4 Fase 4.0)
 
 ### 1. Katalog Kamar Publik — `/rooms`
@@ -218,7 +239,7 @@ Frontend ini sudah diselaraskan dengan kontrak aktif berikut:
 
 Yang **belum** dibuka:
 - payment submission / approval (Fase 4.2)
-- notifikasi / reminder WhatsApp (Fase 4.3)
+- real WhatsApp / scheduler / PWA push (deferred setelah Notification Center MVP)
 - registrasi fleksibel email/HP (Fase 4.4)
 - forgot/reset password self-service tenant (Fase 4.5)
 
@@ -308,7 +329,7 @@ Yang **belum** dibuka:
 - Approval booking admin
 - Upload bukti bayar booking
 - Aktivasi otomatis `RESERVED` → `OCCUPIED`
-- Reminder / notifikasi WhatsApp
+- Real WhatsApp / scheduler / PWA push
 - Galeri kamar publik penuh
 - Registrasi fleksibel email / nomor HP
 - Self-service forgot/reset password tenant

@@ -1,5 +1,33 @@
 # KOST48 V3 — Ground State
-**Versi:** Synced 2026-04-26 (Pasca UAT Gate 1/2 PASS, 4.2 CORE PASS, P0 cache isolation CLOSED, dan P1 cleanup sebelum 4.3) | **Baca ini pertama kali di setiap sesi.**
+**Versi:** Synced 2026-04-27 (Pasca Phase 4.3-C In-app Notification Center COMPLETE, AppNotification foundation, frontend bell/page, dan decision Payment Urgency Chip) | **Baca ini pertama kali di setiap sesi.**
+
+---
+
+## Update Aktif — 2026-04-27: Phase 4.3-C Notification Center + Keputusan Urgency Chip
+
+Dokumen ini sudah disinkronkan dengan kondisi terbaru setelah **Phase 4.3-C — In-app Notification Center MVP** selesai dan dipush pada branch `checkpoint/uat-4-2-before-cancelstay-fix`.
+
+### Status resmi terbaru
+
+| Area | Status |
+|---|---|
+| Gate 1 / UAT 4.0 | ✅ PASS |
+| Gate 2 / UAT 4.1 | ✅ PASS |
+| UAT 4.2 Core | ✅ CORE PASS / accepted |
+| Phase 4.3-A Reminder Preview | ✅ PASS / committed |
+| Phase 4.3-B Reminder Mock Send | ✅ PASS / committed |
+| Phase 4.3-C1a AppNotification Backend Foundation | ✅ UAT PASS / committed |
+| Phase 4.3-C1b Frontend Notification Center | ✅ Build + visual smoke PASS / committed |
+| Phase 4.3-C Overall | ✅ In-app Notification Center MVP COMPLETE |
+| Next ACT | 🟡 Phase 4.3-D — Tenant Payment Urgency Header Chip |
+
+### Keputusan UX/arsitektur yang dibekukan
+
+1. **Announcement ≠ AppNotification.** Announcement adalah konten/papan pengumuman; AppNotification adalah inbox personal/read-unread per user.
+2. **PWA Push adalah channel**, bukan sumber data utama. Nantinya Announcement dan AppNotification bisa dikirim lewat PWA, tetapi tetap dipisahkan di database dan kontrak.
+3. **Finance-critical reminder tidak boleh hanya bergantung pada read/unread notification.** Untuk tagihan, pembayaran booking, overdue, dan kontrak/sewa mendekat, tenant perlu melihat **persistent urgency/countdown chip** di header sampai kondisi bisnis selesai.
+4. **Tenant punya menu sidebar `Notifikasi`.** OWNER/ADMIN/STAFF cukup akses dari bell/header dan route `/notifications`; tidak perlu sidebar menu baru.
+5. Real WhatsApp provider, scheduler/cron otomatis, browser push/service worker, SSE/websocket tetap **deferred** sampai foundation stabil.
 
 ---
 
@@ -92,18 +120,18 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 | 2 | Penyempurnaan UX & Integrasi Modul | ✅ Selesai |
 | 3 | Ticket Tenant-Only Redesign | ✅ Selesai |
 | **3.5** | **Backend Stabilization & API Gap Closure** | ✅ **Selesai** |
-| **4.0** | **Booking Mandiri & Status RESERVED** | ✅ Patch + UAT Gate 1 PASS |
-| **4.1** | **Admin Approval & Pelengkapan Data** | ✅ Patch + UAT Gate 2 PASS |
-| **4.2** | **Pembayaran Mandiri & Aktivasi Otomatis** | ✅ CORE PASS / accepted; P1 cleanup pending sebelum 4.3 |
-| **4.3** | **Notifikasi & Reminder (WhatsApp)** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
+| **4.0** | **Booking Mandiri & Status RESERVED** | ⏳ Backend + frontend inti sudah dipatch; UAT booking belum dinyatakan lolos penuh |
+| **4.1** | **Admin Approval & Pelengkapan Data** | ⏳ Backend 4.1A + frontend 4.1B sudah dipatch; UAT approval belum dinyatakan lolos penuh |
+| **4.2** | **Pembayaran Mandiri & Aktivasi Otomatis** | ⏳ Source patch lanjutan sudah ada di artifact/source kerja, tetapi baseline resmi + UAT/local verify belum dinyatakan lolos |
+| **4.3** | **Notifikasi & Reminder (WhatsApp)** | 🟡 4.3-A Reminder Preview PASS; 4.3-B Mock Send next |
 | **4.4** | **Marketing Display & Registrasi Fleksibel** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
 | **4.5** | **Tenant Self-Service Lanjutan** | ⬜ Belum dibuka di kode; blueprint implementasi sudah disinkronkan |
 
 ---
 
-## 6. Fokus Aktif Sekarang — P1 Cleanup Pasca UAT 4.2, lalu Phase 4.3
+## 6. Fokus Aktif Sekarang — UAT 4.0 + 4.1, lalu buka 4.2 secara resmi
 
-**Tujuan saat ini:** mempertahankan hasil UAT yang sudah PASS, menutup P1 cleanup kecil pasca 4.2, lalu membuka Phase 4.3 WhatsApp reminder secara aman.
+**Tujuan saat ini:** memastikan slice V4 Fase 4.0 dan 4.1 yang sudah tertutup di level source/build benar-benar stabil secara end-to-end, sebelum membuka payment submission dan flow otomatis berikutnya.
 
 **Status penting saat ini:**
 1. Backend inti V4 sudah dipatch:
@@ -120,21 +148,25 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 3. Fase 4.2–4.5 **belum live**, tetapi detail implementasinya sekarang sudah dibakukan di dokumen proyek agar eksekusi nanti tidak melebar.
 
 **Urutan kerja aktif:**
-1. **Selesaikan P1 cleanup pasca 4.2**
-   - invoice awal booking expired ikut `CANCELLED` bila belum final,
-   - label room `RESERVED` memakai `Pemesan` / `Booking oleh`, bukan `Penghuni`,
-   - pricing term hanya menampilkan rate nyata,
-   - production error response tidak expose stack,
-   - Phase 3A initial meter requirement diverifikasi code-level.
-2. **Targeted retest cleanup saja**
-   - jangan ulang Gate 1/2/4.2 core dari awal.
-3. **Buka Phase 4.3 setelah cleanup PASS**
-   - WhatsApp adapter,
-   - reminder booking expiry / invoice due / checkout,
-   - idempotency dan notification log.
-4. **Fase 4.4–4.5 tetap mengikuti urutan berlapis**
-   - 4.4 setelah 4.3 stabil,
-   - 4.5 setelah public/auth/self-service contract aman.
+1. **Lakukan UAT end-to-end Fase 4.0**
+   - flow publik `/rooms`
+   - flow tenant booking
+   - flow tenant `Pemesanan Saya`
+   - flow backoffice read-only booking reserved
+2. **Lanjutkan UAT end-to-end Fase 4.1**
+   - approval admin
+   - pelengkapan data kontrak
+   - invoice awal booking
+   - tenant status `Menunggu Pembayaran`
+3. **Baru setelah UAT 4.0 + 4.1 cukup aman, buka Fase 4.2**
+   - payment submission
+   - approval/reject bukti bayar
+   - sinkronisasi `RESERVED -> OCCUPIED`
+   - expiry booking
+4. **Fase 4.3–4.5 tetap mengikuti urutan berlapis**
+   - 4.3 sesudah 4.2 inti stabil
+   - 4.4 sesudah public surface & auth contract siap
+   - 4.5 sesudah self-service tenant aman dibuka
 
 **Do Not Open dalam batch aktif:**
 1. Debt flow / hutang
@@ -205,7 +237,7 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 
 ### Ringkasan posisi terbaru
 - Source patch lanjutan untuk fase 4.2 sudah masuk di artifact kerja terbaru:
-  - payment submission booking awal bergerak ke combined payment: satu bukti untuk sewa + deposit
+  - payment submission mulai dipisah berdasarkan target `INVOICE | DEPOSIT`
   - tracking deposit payment pada booking/stay mulai diperkenalkan
   - flow approval invoice diperkeras agar patuh pada constraint DB: invoice dibuat `DRAFT`, line dibuat saat masih `DRAFT`, lalu baru bergerak ke status operasional yang benar
   - expiry booking dibersihkan lebih agresif agar tidak meninggalkan orphan invoice / orphan meter baseline
@@ -219,7 +251,7 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 - 4.2 **sudah memiliki source patch lanjutan**, tetapi belum boleh dianggap baseline resmi sebelum:
   1. sinkronisasi schema / Prisma selesai di environment lokal
   2. build lokal backend/frontend lolos penuh
-  3. UAT happy path + reject + wrong amount + expiry ditutup
+  3. UAT happy path + reject + partial + expiry ditutup
 
 ### Pedoman interpretasi
 - Jika ada perbedaan antara dokumen lama yang menyebut 4.2 “belum dibuka” dan artifact/source terbaru yang sudah mengandung patch 4.2, maka yang benar adalah:
@@ -231,70 +263,36 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
   - **siap dipakai sebagai kandidat baseline setelah verifikasi lokal**
 
 
-### Catatan Operasional 4.2 — Combined Booking Payment
-- Pembayaran booking awal dibaca tenant sebagai satu journey **Pembayaran Awal**.
-- Tenant mengirim satu bukti **Bayar Sewa & Deposit** dengan nominal dikunci penuh.
-- Nominal wajib sama dengan sisa sewa invoice booking awal + sisa deposit booking awal.
-- Backend membagi efek pembayaran secara internal: rent portion ke `InvoicePayment` dan deposit portion ke tracking deposit awal pada `Stay`.
-- Tidak ada pembayaran parsial pada workflow booking 4.2.
-- Room hanya berubah `RESERVED -> OCCUPIED` saat invoice sewa `PAID` dan deposit payment status `PAID`.
-
-
 ---
 
-## 2026-04-26 — Status Aktual UAT Pasca Gate 1, Gate 2, dan Happy Path 4.2
+## 2026-04-26 — Update Phase 4.3-A Reminder Preview PASS
 
-### Ringkasan status yang sekarang harus dipegang
-- **Gate 1 / UAT 4.0 dinyatakan PASS** setelah patch klasifikasi stay dan fallback gambar publik.
-- **Gate 2 / UAT 4.1 dinyatakan PASS** setelah admin approve booking berhasil, invoice awal terbentuk, meter awal tersimpan, dan room tetap `RESERVED` sampai pembayaran diverifikasi.
-- **UAT 4.2 happy path dinyatakan PASS**: tenant submit bukti pembayaran awal, admin approve, `InvoicePayment` terbentuk, invoice menjadi `PAID`, room berubah `RESERVED -> OCCUPIED`, dan tenant masuk ke `Hunian Saya`.
-- **4.2 belum boleh dinyatakan lulus penuh** karena reject path, wrong amount path, expiry path, dan double approve prevention belum ditutup.
-- **P0 aktif sebelum lanjut UAT 4.2 lainnya:** tenant portal cache isolation. Saat login berpindah dari tenant lama ke tenant baru, `/api/stays/me/current` dapat 404 tetapi UI masih sempat menampilkan data stay tenant sebelumnya. Ini wajib dipatch sebelum reject/wrong amount/expiry dilanjutkan.
+### Status terbaru
+- **Phase 4.3-A Reminder Preview dinyatakan PASS** setelah backend endpoint preview, frontend page `/reminders`, route OWNER/ADMIN, dan menu **Pengingat WhatsApp** berhasil diverifikasi.
+- Endpoint preview bersifat **read-only** dan tidak mengirim WhatsApp.
+- Tidak ada `NotificationLog` write pada 4.3-A.
+- Tidak ada scheduler/cron pada 4.3-A.
+- TENANT tidak melihat menu **Pengingat WhatsApp**.
 
-### Keputusan operasional penting
-- **Tidak perlu mengulang UAT 4.0, 4.1, dan 4.2 happy path dari awal.** Bukti UAT yang sudah PASS diterima sebagai baseline verifikasi.
-- Setelah patch cache isolation, lakukan **targeted retest saja**:
-  1. login Tenant A yang punya stay aktif → `/portal/stay` tampil stay Tenant A,
-  2. logout,
-  3. login Tenant B yang tidak punya stay aktif → `/portal/stay` harus empty state, bukan data Tenant A,
-  4. `/portal/bookings`, `/portal/invoices`, dan success message tidak boleh membawa data tenant lama,
-  5. tidak ada request flood dari `/api/stays/me/current`.
-- Setelah targeted retest cache isolation PASS, lanjutkan UAT 4.2 yang tersisa: reject path, wrong amount path, expiry path, double approve prevention.
+### Perubahan status fase
+| Fase | Status terbaru |
+|---|---|
+| 4.3-A Reminder Preview | ✅ PASS / committed |
+| 4.3-B Reminder Queue / Mock Send | ⏭️ Next |
+| Real WhatsApp provider send | ⬜ Belum dibuka |
+| Scheduler reminder | ⬜ Belum dibuka |
 
-### Catatan minor non-blocker
-- Label room `RESERVED` di backoffice sebaiknya memakai kata **Pemesan** / **Booking oleh**, bukan **Penghuni**.
-- Badge booking di mode “Semua Stay” sebaiknya lebih eksplisit sebagai **Booking Reserved** / **Menunggu Pembayaran**, bukan sekadar `Aktif`.
-- Bukti bayar sudah bisa dilihat dalam modal review admin; new tab proof bukan blocker.
+### Prinsip fase 4.3 yang dibekukan
+1. Preview dulu sebelum send.
+2. Mock/internal send dulu sebelum provider WhatsApp asli.
+3. Tidak ada automation engine umum.
+4. Kegagalan reminder tidak boleh menjatuhkan flow bisnis utama.
+5. OWNER/ADMIN boleh melihat reminder; TENANT tidak melihat backoffice reminder surface.
 
----
-
-## 2026-04-26 — Update Terbaru: UAT 4.2 CORE PASS + P1 Cleanup Sebelum 4.3
-
-### Status resmi terbaru
-- **Gate 1 / UAT 4.0: PASS** — tidak perlu diulang dari awal.
-- **Gate 2 / UAT 4.1: PASS** — tidak perlu diulang dari awal.
-- **P0 tenant portal cache isolation: CLOSED / PASS** setelah query cache dibersihkan saat login/logout, query tenant di-scope berdasarkan user/tenant, dan `/stays/me/current` 404 dirender sebagai empty state.
-- **UAT 4.2 happy path: PASS** — tenant submit pembayaran awal, admin approve, `InvoicePayment` terbentuk, invoice `PAID`, room `RESERVED -> OCCUPIED`, tenant melihat hunian aktif.
-- **UAT 4.2 reject path: PASS** — admin reject dengan alasan, tenant melihat alasan dan bisa upload ulang, room tetap `RESERVED`, invoice belum `PAID`.
-- **UAT 4.2 wrong amount path: PASS** — backend menolak nominal tidak tepat dengan pesan operasional-friendly; tidak ada partial payment.
-- **UAT 4.2 double approve prevention: PASS** — approval kedua ditolak dan tidak ada `InvoicePayment` ganda.
-- **UAT 4.2 expiry core: PASS** — booking expired berubah `CANCELLED`, room kembali `AVAILABLE`, pending submission menjadi `EXPIRED` bila ada, dan invoice tidak mengaktifkan room.
-
-### Pembacaan status 4.2
-Fase 4.2 sekarang dibaca sebagai **CORE PASS / operationally accepted**, dengan catatan P1 cleanup sebelum membuka 4.3. Ini bukan berarti semua polish selesai, tetapi flow inti booking → approval → payment → activation → reject/wrong amount/double approve/expiry sudah terbukti.
-
-### P1 cleanup sebelum 4.3
-- **P1.1 Expiry invoice cleanup:** saat booking expired, invoice awal yang masih `DRAFT` / `ISSUED` dan belum `PAID` sebaiknya ikut `CANCELLED` agar tidak orphan.
-- **P1.2 Label room RESERVED:** backoffice rooms harus menampilkan `Pemesan` / `Booking oleh`, bukan `Penghuni`, untuk kamar `RESERVED`.
-- **P1.3 Pricing term honesty:** jangan tampilkan `Semester` / `Tahunan` di public room / booking form jika room tidak punya rate nyata untuk term tersebut; jangan fallback ke monthly.
-- **P1.4 Production-safe error response:** stack trace boleh muncul di development, tetapi tidak boleh dikirim ke client di production.
-- **P1.5 Phase 3A verification:** verifikasi code-level bahwa backoffice create stay tetap mewajibkan meter awal listrik/air dan membuat 2 `MeterReading` atomik.
-
-### Urutan kerja berikutnya
-1. Tunggu / selesaikan ACT Cline P1 cleanup kecil.
-2. Retest targeted saja untuk item P1 yang disentuh.
-3. Jika cleanup build dan targeted retest PASS, baru buka **Phase 4.3 — WhatsApp Reminder**.
-
-### Instruksi penting
-- Jangan ulang Gate 1, Gate 2, atau UAT 4.2 happy/reject/wrong/double/expiry dari awal kecuali patch baru menyentuh flow terkait secara langsung.
-- Jangan buka Phase 4.3 sebelum P1 cleanup selesai dan build backend/frontend PASS.
+### ACT berikutnya
+**Phase 4.3-B — Reminder Queue / Mock Send** dengan scope sempit:
+- gunakan kandidat dari preview,
+- sediakan aksi simulasi/mock send,
+- belum kirim WhatsApp sungguhan,
+- belum scheduler,
+- belum provider credential.

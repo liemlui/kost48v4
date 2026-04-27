@@ -1,3 +1,42 @@
+# KOST48 Backend Patch — 2026-04-27 (Phase 4.3-C1a AppNotification Backend Foundation)
+
+## Tujuan
+Menambahkan foundation backend untuk in-app notification center sebagai inbox personal/read-unread per user, terpisah dari AuditLog dan Announcement.
+
+## File utama
+- `prisma/schema.prisma`
+- `src/modules/notifications/app-notification.controller.ts`
+- `src/modules/notifications/app-notification.service.ts`
+- `src/modules/notifications/dto/notification.dto.ts`
+- `src/modules/notifications/notifications.module.ts`
+- `src/modules/notifications/reminder-mock.service.ts`
+
+## Endpoint aktif
+- `GET /api/me/notifications`
+- `PATCH /api/me/notifications/:id/read`
+- `PATCH /api/me/notifications/read-all`
+
+## Perubahan utama
+- Model `AppNotification` dibuat untuk menyimpan notifikasi personal user.
+- Query list/mark-read selalu scoped ke user login.
+- Mock reminder membuat AppNotification untuk tenant target bila tenant memiliki portal user.
+- Kegagalan AppNotification create tidak menggagalkan mock send.
+- Role isolation dan tenant isolation sudah diuji.
+
+## Verifikasi
+- C1a smoke/UAT PASS.
+- Mock send berhasil membuat AppNotification tenant target.
+- Route order `read-all` aman dan tidak tertangkap sebagai `:id/read`.
+- Tenant B tidak bisa mark-read notifikasi Tenant A.
+
+## Deferred
+- Real WhatsApp provider
+- Scheduler/cron reminder otomatis
+- Browser push/service worker/PWA push
+- SSE/websocket
+
+---
+
 # CHANGELOG_BACKEND.md
 
 ## Sinkronisasi Dokumen — 2026-04-22 (Blueprint Detail 4.2–4.5)

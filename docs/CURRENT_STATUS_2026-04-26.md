@@ -1,6 +1,6 @@
 # KOST48 V3 — Current Status Snapshot
 **Tanggal:** 26 April 2026  
-**Tujuan:** Membekukan kondisi terbaru agar UAT yang sudah PASS tidak perlu diulang.
+**Tujuan:** Membekukan kondisi terbaru agar UAT yang sudah PASS tidak perlu diulang dan Phase 4.3-A tercatat resmi.
 
 ## Status Resmi Saat Ini
 
@@ -14,9 +14,13 @@
 | UAT 4.2 Wrong Amount Path | ✅ PASS |
 | UAT 4.2 Double Approve Prevention | ✅ PASS |
 | UAT 4.2 Expiry Core | ✅ PASS |
-| UAT 4.2 Overall | ✅ CORE PASS / accepted with P1 cleanup notes |
-| Next ACT | P1 cleanup kecil sebelum Phase 4.3 |
-| Phase 4.3 | ⬜ Belum dibuka |
+| UAT 4.2 Overall | ✅ CORE PASS / operationally accepted |
+| Pricing Policy V1 | ✅ PASS |
+| Approve Booking Money Input | ✅ PASS |
+| Phase 4.3-A Reminder Preview | ✅ PASS / committed |
+| Phase 4.3-B | ⏭️ Next: Reminder Queue / Mock Send |
+| Real WhatsApp Provider Send | ⬜ Belum dibuka |
+| Scheduler / Cron Reminder | ⬜ Belum dibuka |
 
 ## Bukti UAT yang Diterima
 
@@ -44,37 +48,94 @@
 - Double approve prevention: approval kedua ditolak; tidak ada `InvoicePayment` ganda.
 - Expiry core: booking expired menjadi `CANCELLED`, room kembali `AVAILABLE`, pending submission menjadi `EXPIRED` bila ada, dan invoice tidak mengaktifkan room.
 
+### Pricing Policy V1 PASS
+- Harga dasar = `monthlyRateRupiah`.
+- Harian = 13% × bulanan, Mingguan = 45%, Dua Mingguan = 75%.
+- Bulanan = 100%, Semester = 5,5×, Tahunan = 10×.
+- Short-term (`DAILY`, `WEEKLY`, `BIWEEKLY`) = flat, listrik dan air termasuk.
+- Long-term (`MONTHLY`, `SMESTERLY`, `YEARLY`) = meteran terpisah.
+- Semua harga dibulatkan naik ke Rp5.000 terdekat.
+- Admin tetap bisa override harga saat approval booking.
+
+### Phase 4.3-A Reminder Preview PASS
+- Backend preview endpoint tersedia:
+  - `GET /api/admin/reminders/preview/booking-expiry`
+  - `GET /api/admin/reminders/preview/invoice-due`
+  - `GET /api/admin/reminders/preview/invoice-overdue`
+  - `GET /api/admin/reminders/preview/checkout`
+  - `GET /api/admin/reminders/preview/all`
+- Endpoint dijaga JWT + role OWNER/ADMIN.
+- Frontend `/reminders` tersedia untuk OWNER/ADMIN.
+- Menu **Pengingat WhatsApp** muncul untuk OWNER/ADMIN dan tidak muncul untuk TENANT.
+- Halaman menampilkan 4 kartu: booking hampir kadaluarsa, invoice jatuh tempo, invoice terlambat, checkout mendekat.
+- Preview bersifat read-only.
+- Tidak ada tombol kirim.
+- Tidak ada WhatsApp send.
+- Tidak ada `NotificationLog` write.
+- Tidak ada cron/scheduler.
+
 ## P0 yang Sudah Ditutup
 
 **Tenant portal cache isolation** sudah PASS. Retest membuktikan tenant baru tanpa stay aktif tidak lagi melihat stay tenant sebelumnya; `/stays/me/current` 404 dirender sebagai empty state; tidak ada request flood; `/portal/bookings` dan `/portal/invoices` tidak bocor data tenant lama.
 
-## P1 Cleanup Sebelum Phase 4.3
+## P1 Cleanup Sebelum / Saat 4.3
 
-1. **Expiry invoice cleanup** — saat booking expired, invoice awal yang masih `DRAFT` / `ISSUED` dan belum `PAID` sebaiknya ikut `CANCELLED` agar tidak orphan.
-2. **Rooms label polish** — untuk room `RESERVED`, tampilkan `Pemesan` / `Booking oleh`, bukan `Penghuni`.
-3. **Pricing term honesty** — sembunyikan `Semester` / `Tahunan` jika tidak ada rate nyata; jangan fallback ke monthly.
-4. **Production-safe error response** — jangan kirim stack trace ke client di production.
-5. **Phase 3A verification** — verifikasi create stay backoffice tetap mewajibkan meter awal listrik/air dan membuat 2 `MeterReading` atomik.
+Item P1 yang sudah tertutup melalui patch dan retest:
+1. Expiry invoice cleanup pada booking expired.
+2. Label room `RESERVED` menggunakan `Pemesan` / `Booking oleh`, bukan `Penghuni`.
+3. Pricing Policy V1 menggantikan pricing honesty lama: semua term dihitung jujur dari harga bulanan, tidak fallback diam-diam.
+4. Production-safe error response: stack trace hanya development.
+5. Phase 3A meter awal tetap wajib dan telah diverifikasi dalam flow approval/check-in yang relevan.
 
 ## ACT Berikutnya
 
-**ACT P1 — Post-UAT 4.2 Cleanup Before 4.3**
+**Phase 4.3-B — Reminder Queue / Mock Send**
 
-Scope:
-- Backend expiry cleanup invoice.
-- Frontend room label RESERVED vs OCCUPIED.
-- Frontend pricing term honesty.
-- Error response hardening.
-- Phase 3A initial meter verification.
+Scope yang disarankan:
+- Admin bisa memilih kandidat dari preview.
+- Admin klik aksi simulasi / mock send.
+- Sistem mencatat hasil mock/internal log jika schema mendukung, atau mengembalikan result tanpa side effect permanen jika belum ada schema final.
+- Belum real WhatsApp provider.
+- Belum scheduler.
+- Belum external credential.
 
 ## Instruksi UAT Berikutnya
 
-Tidak perlu ulang Gate 1, Gate 2, atau UAT 4.2 core dari awal. Setelah P1 cleanup, lakukan targeted retest saja:
+Tidak perlu ulang Gate 1, Gate 2, atau UAT 4.2 core dari awal. Setelah Phase 4.3-B, lakukan targeted retest saja:
 
-- Expire booking baru → stay `CANCELLED`, room `AVAILABLE`, invoice ikut `CANCELLED` jika belum final.
-- Room `RESERVED` menampilkan label `Pemesan` / `Booking oleh`.
-- `Semester` / `Tahunan` tidak muncul kalau tidak ada rate nyata.
-- Production error response tidak expose stack.
+- `/reminders` tetap menampilkan 4 kategori preview.
+- OWNER/ADMIN dapat melihat preview.
+- TENANT tidak melihat menu preview.
+- Mock send tidak mengirim WhatsApp sungguhan.
+- Jika ada log, log tidak duplikat untuk event yang sama.
 - Build backend dan frontend PASS.
 
-Jika targeted retest PASS, lanjut **Phase 4.3 — WhatsApp Reminder**.
+
+---
+
+## Update 2026-04-27 — Phase 4.3-C Notification Center COMPLETE
+
+| Area | Status |
+|---|---|
+| Phase 4.3-B Reminder Mock Send | ✅ PASS / committed |
+| Phase 4.3-C1a AppNotification Backend Foundation | ✅ UAT PASS / committed (`cf51077`) |
+| Phase 4.3-C1b Frontend Notification Center | ✅ Build + visual PASS / committed (`a8ac7a5`) |
+| Phase 4.3-C Overall | ✅ COMPLETE — In-app Notification Center MVP |
+| Working Tree | ✅ Clean setelah leftover files diamankan di `stash@{0}` |
+| Next ACT | 🟡 Phase 4.3-D — Tenant Payment Urgency Header Chip |
+
+### Keputusan yang dibekukan
+
+1. `Announcement` tetap konten broadcast/pengumuman.
+2. `AppNotification` menjadi inbox personal/read-unread per user.
+3. PWA Push adalah channel nanti, bukan pengganti Announcement/AppNotification.
+4. Tenant punya menu **Notifikasi**; admin/owner/staff cukup lewat bell/header.
+5. Reminder keuangan perlu **persistent urgency/countdown chip** agar kewajiban bayar tetap terlihat sampai kondisi bisnis selesai.
+
+### Targeted retest berikutnya
+
+Untuk 4.3-D, tidak perlu mengulang Gate 1/2/4.2 core. Cukup uji:
+- tenant dengan invoice overdue melihat chip `Terlambat X hari`,
+- tenant dengan invoice due soon melihat chip `Tagihan H-X`,
+- chip tetap muncul walau notification sudah read,
+- chip hilang setelah invoice paid / booking resolved / stay resolved.

@@ -226,20 +226,10 @@ Gunakan Bahasa Indonesia yang konsisten dan operasional-friendly.
 ### 7.1 Phase C — Ticket Tenant-First (✅ SELESAI)
 - `POST /tickets/portal` — **Sudah tersedia.**
 
-### 7.2 Phase E / Fase 4.2 — Payment Submission + Approval Queue (COMBINED BOOKING PAYMENT / TANPA PARSIAL)
+### 7.2 Phase E / Fase 4.2 — Payment Submission + Approval Queue
 
 #### Tujuan kontrak
-Tenant **tidak** menulis langsung ke `InvoicePayment`. Tenant hanya membuat `PaymentSubmission`. `InvoicePayment` final tetap dibuat oleh sistem **setelah admin approve**. **Pembayaran parsial tidak diizinkan.**
-
-Pembayaran booking awal dibaca sebagai satu journey **Pembayaran Awal** dan satu submission gabungan:
-
-> **Total Pembayaran Awal = sisa sewa invoice booking awal + sisa deposit booking awal**
-
-Tenant tidak memilih target `INVOICE` atau `DEPOSIT` di UI. Backend yang membagi efek pembayaran secara internal:
-- bagian sewa → `InvoicePayment` + invoice booking awal menjadi `PAID`
-- bagian deposit → tracking deposit awal pada `Stay` menjadi `PAID`
-
-Catatan kompatibilitas: bila model `PaymentSubmission` masih memiliki `targetType` / `targetId`, field tersebut diperlakukan sebagai metadata internal/compatibility anchor, bukan pilihan tenant. Untuk flow booking awal, source of truth nominal tetap `stay + invoice awal + deposit tracking`.
+Tenant **tidak** menulis langsung ke `InvoicePayment`. Tenant hanya membuat `PaymentSubmission`. `InvoicePayment` final tetap dibuat oleh sistem **setelah admin approve**, agar alur operasional tetap sesuai model human approval.
 
 #### Endpoint target
 - `POST /payment-submissions`
@@ -251,8 +241,8 @@ Catatan kompatibilitas: bila model `PaymentSubmission` masih memiliki `targetTyp
 
 #### Payload minimal `POST /payment-submissions`
 - `stayId`
-- `invoiceId` untuk invoice booking awal
-- `amountRupiah` — wajib sama dengan total sisa sewa + sisa deposit
+- `invoiceId`
+- `amountRupiah`
 - `paidAt`
 - `paymentMethod`
 - `senderName?`
@@ -261,70 +251,44 @@ Catatan kompatibilitas: bila model `PaymentSubmission` masih memiliki `targetTyp
 - `notes?`
 - attachment / proof metadata (`fileKey`, `fileUrl`, `originalFilename`, `mimeType`, `fileSizeBytes`) lewat storage adapter yang dipakai proyek
 
-Field internal/legacy yang boleh tetap ada bila schema sudah memakai:
-- `targetType?`
-- `targetId?`
-
-Namun untuk tenant booking payment, UI tidak boleh mengekspos target terpisah kepada tenant.
-
 #### Response shape minimal
 - `id`
 - `status` (`PENDING_REVIEW | APPROVED | REJECTED | EXPIRED`)
 - `amountRupiah`
-- `expectedAmountRupiah` / `combinedRemainingAmountRupiah` bila tersedia
-- `rentRemainingAmountRupiah` bila tersedia
-- `depositRemainingAmountRupiah` bila tersedia
 - `paidAt`
 - `paymentMethod`
 - proof metadata aman untuk frontend
-- ringkasan stay / room / invoice / deposit
+- ringkasan stay / room / invoice
 - `reviewedById?`
 - `reviewedAt?`
 - `reviewNotes?`
 
 #### Aturan bisnis wajib
-- Tenant hanya dapat submit untuk booking miliknya sendiri.
-- Submission hanya boleh untuk booking/stay dengan room `RESERVED`.
-- Invoice booking awal harus milik stay yang sama.
-- **Nominal submission wajib sama persis dengan total sisa pembayaran awal:**
-  - `amountRupiah == (invoiceTotalAmountRupiah - invoicePaidAmountRupiah) + (depositAmountRupiah - depositPaidAmountRupiah)`
-- Jika nominal kurang atau lebih, request ditolak; tidak ada partial payment.
-- Jika sudah ada submission `PENDING_REVIEW` untuk booking yang sama, tenant tidak boleh membuat submission baru sampai admin approve/reject.
-- Approval final tetap **overpay-safe** dan menghitung ulang sisa sewa + deposit di dalam transaksi.
-- Approval harus **idempotent / race-safe**.
-- Satu submission yang sudah `APPROVED`, `REJECTED`, atau `EXPIRED` tidak boleh diproses ulang secara liar.
-- Sistem tidak boleh membuat dua `InvoicePayment` final dari satu submission yang sama.
-- Deposit tidak boleh dicatat sebagai pembayaran sewa; deposit portion harus masuk ke tracking deposit awal pada `Stay`.
-- Jika `expiresAt` booking terlewati sebelum approval final, submission baru harus ditolak atau booking harus di-expire sesuai rule fase 4.2.
+- Tenant hanya dapat submit untuk booking miliknya sendiri
+- Submission hanya boleh untuk booking/stay dengan room `RESERVED`
+- Invoice target harus milik stay yang sama
+- Approval final tetap **overpay-safe**
+- Approval harus **idempotent / race-safe**
+- Satu submission yang sudah `APPROVED` atau `REJECTED` tidak boleh diproses ulang secara liar
+- Sistem tidak boleh membuat dua `InvoicePayment` final dari satu submission yang sama
+- Jika `expiresAt` booking terlewati sebelum approval final, submission baru harus ditolak atau booking harus di-expire sesuai rule fase 4.2
 
 #### Dampak approve
 Saat `POST /payment-submissions/:id/approve` berhasil:
-1. `PaymentSubmission.status = APPROVED`.
-2. Backend menghitung ulang dalam transaksi:
-   - `rentRemaining = invoiceTotal - freshPaidAmount`
-   - `depositRemaining = depositAmount - depositPaidAmount`
-   - `combinedRemaining = rentRemaining + depositRemaining`
-3. `submission.amountRupiah` harus sama dengan `combinedRemaining`. Jika tidak sama, approval ditolak.
-4. Untuk rent portion:
-   - `InvoicePayment` final dibuat hanya untuk `rentRemaining` jika nilainya > 0.
-   - Invoice booking awal langsung menjadi `PAID`.
-   - `paidAt` di-set sesuai kontrak invoice.
-5. Untuk deposit portion:
-   - `Stay.depositPaidAmountRupiah` di-update menjadi `depositAmountRupiah`.
-   - `Stay.depositPaymentStatus` menjadi `PAID`.
-   - Tidak membuat `InvoicePayment` untuk deposit kecuali schema/source memang memodelkan deposit sebagai invoice.
-6. Karena submission gabungan melunasi sewa dan deposit sekaligus, room dapat berubah `RESERVED -> OCCUPIED` setelah kedua kewajiban terbukti `PAID`.
-7. Audit log approval dibuat, termasuk ringkasan rent portion dan deposit portion.
+1. `PaymentSubmission.status = APPROVED`
+2. record `InvoicePayment` final dibuat
+3. status invoice disinkronkan (`ISSUED/PARTIAL/PAID` sesuai total terbayar)
+4. jika invoice booking awal sudah lunas, room berubah `RESERVED -> OCCUPIED`
+5. stay booking berubah dari konteks booking menjadi stay aktif operasional sesuai rule fase 4.2
+6. audit log approval dibuat
+7. tenant mendapat notifikasi sukses / akses portal penuh sesuai rule fase V4
 
 #### Dampak reject
 Saat `POST /payment-submissions/:id/reject` berhasil:
 - `PaymentSubmission.status = REJECTED`
 - `reviewNotes` wajib disimpan
-- Tenant melihat alasan penolakan di portal
-- Tidak ada `InvoicePayment` dibuat
-- Tidak ada perubahan deposit status
-- Booking tetap `RESERVED` selama belum expired dan admin belum membatalkan
-- Tenant dapat submit ulang satu bukti gabungan dengan nominal yang benar
+- tenant tetap melihat riwayat reject di portal
+- booking tetap `RESERVED` selama belum expired dan admin belum membatalkan
 
 #### Query admin review queue
 `GET /payment-submissions/review-queue` minimal mendukung:
@@ -336,7 +300,6 @@ Saat `POST /payment-submissions/:id/reject` berhasil:
 - `roomId?`
 - `tenantId?`
 - sort default: pending paling lama lebih dulu
-- tampilan nominal: total gabungan, rent portion, deposit portion bila tersedia
 
 #### Query tenant list
 `GET /payment-submissions/my` minimal mendukung:
@@ -351,10 +314,8 @@ Saat `POST /payment-submissions/:id/reject` berhasil:
 - approval final tetap dilarang overpay
 - transaksi approval memakai `prisma.$transaction()`
 - attachment/proof tidak boleh menjadi jalur eskalasi akses file lintas tenant
-- workflow booking payment tidak memiliki jalur `PARTIAL`
-- tenant tidak melihat split target teknis; tenant hanya melihat satu CTA **Bayar Sewa & Deposit**
 
-### 7.3 Phase G### 7.3 Phase G / Fase 4.3 — Notification & Reminder (WhatsApp)
+### 7.3 Phase G / Fase 4.3 — Notification & Reminder (WhatsApp)
 
 #### Tujuan kontrak
 Reminder operasional tidak lagi hanya badge frontend. Pada fase ini sistem boleh mengirim notifikasi keluar, **tetapi tetap fokus dan terukur**, bukan automation engine liar.
@@ -552,36 +513,38 @@ Jika ada rule baru, tanyakan:
 
 ---
 
-## 2026-04-24 — Addendum Sinkronisasi Kontrak Pasca Combined Payment 4.2
+## 2026-04-24 — Addendum Sinkronisasi Kontrak Pasca Deep Patch 4.2
 
-### A. Payment submission booking menjadi combined payment
-Kontrak payment submission terbaru untuk booking awal bergerak ke arah **combined booking payment**:
+### A. Payment submission split target
+Kontrak payment submission terbaru bergerak ke arah **target-aware submission**:
 
-- tenant mengirim **satu bukti pembayaran awal**
-- nominal dikunci ke total sisa sewa + sisa deposit
-- tenant tidak memilih target pembayaran teknis
-- backend membagi efek pembayaran secara internal ke rent portion dan deposit portion
-
-Field tambahan yang tetap dapat dipertahankan sebagai compatibility/internal metadata bila sudah ada di schema:
-- `targetType`
+Field tambahan yang harus diperlakukan sebagai kontrak kandidat aktif:
+- `targetType` = `INVOICE | DEPOSIT`
 - `targetId`
+- `amountRupiah`
+- `paidAt`
+- `paymentMethod`
+- proof metadata minimum (`fileUrl` atau metadata file lain yang aman)
+- `notes?`
 
-Namun, untuk flow tenant booking, field tersebut tidak boleh menjadi pilihan UI yang membingungkan tenant.
+Makna:
+- target `INVOICE` = pembayaran untuk tagihan sewa/invoice booking
+- target `DEPOSIT` = pembayaran deposit booking yang dipisah dari jalur invoice biasa
 
 ### B. Tracking deposit payment pada booking/stay
-Untuk booking yang sudah di-approve tetapi belum aktif operasional penuh, stay membutuhkan tracking deposit payment awal, minimal:
+Untuk booking yang sudah di-approve tetapi belum aktif operasional penuh, stay mulai membutuhkan tracking deposit payment terpisah, minimal:
 - `depositPaidAmountRupiah`
-- `depositPaymentStatus` (`UNPAID | PAID`)
+- `depositPaymentStatus` (`UNPAID | PARTIAL | PAID`)
 
 Catatan penting:
 - ini **bukan** menggantikan lifecycle proses refund/forfeit deposit existing saat checkout
-- ini hanya menambah tracking pembayaran deposit awal agar aktivasi `RESERVED -> OCCUPIED` bisa jujur
+- ini hanya menambah tracking pembayaran deposit awal agar aktivasi `RESERVED -> OCCUPIED` bisa lebih jujur
 
 ### C. Rule approval invoice pada booking
 Karena constraint DB menolak perubahan detail invoice saat status bukan `DRAFT`, maka rule approval booking/approval payment yang benar adalah:
 1. invoice awal booking dibuat / dipastikan dalam status `DRAFT`
 2. `InvoiceLine` dibuat/diubah saat invoice masih `DRAFT`
-3. setelah detail final aman, invoice booking payment bergerak langsung ke status operasional yang benar (`PAID`) saat combined payment disetujui
+3. setelah detail final aman, invoice bergerak ke status operasional yang benar (`ISSUED` / `PARTIAL` / `PAID`) sesuai konteks
 
 Implikasi:
 - sistem **tidak boleh** langsung menulis detail invoice ke invoice berstatus `ISSUED`
@@ -589,11 +552,10 @@ Implikasi:
 
 ### D. Activation sync resmi yang dituju
 Arah kontrak terbaru untuk aktivasi booking:
-- combined payment harus melunasi sewa booking awal dan deposit booking awal sekaligus
-- rent portion sinkron ke invoice booking awal sampai `PAID`
-- deposit portion sinkron ke tracking deposit sampai `PAID`
-- kamar baru boleh `RESERVED -> OCCUPIED` hanya saat sewa dan deposit sama-sama `PAID`
-- approval payment harus idempotent dan overpay-safe
+- pembayaran sewa booking awal harus sinkron ke invoice
+- pembayaran deposit harus sinkron ke tracking deposit
+- kamar baru boleh `RESERVED -> OCCUPIED` saat syarat aktivasi yang disepakati terpenuhi
+- approval payment harus idempotent dan overpay-safe di kedua jalur
 
 ### E. Expiry cleanup
 Rule expiry booking yang lebih aman:
@@ -604,72 +566,114 @@ Rule expiry booking yang lebih aman:
 
 ### F. Status kontrak
 Addendum ini berarti:
-- kontrak 4.2 **sudah didefinisikan tegas sebagai no-partial dan combined booking payment**
-- target-aware split lama dibaca sebagai keputusan historis/prototype, bukan UX final tenant
-- status tetap **belum authoritative/live penuh** sampai verifikasi lokal dan UAT selesai
+- kontrak 4.2 **sudah lebih dari sekadar blueprint murni**
+- tetapi tetap **belum authoritative/live penuh** sampai verifikasi lokal dan UAT selesai
 
 
 ---
 
-## 2026-04-26 — Addendum Kontrak Tenant Portal Cache Isolation
+## 2026-04-26 — Addendum Kontrak Phase 4.3-A Reminder Preview
 
-### A. Prinsip keamanan portal tenant
-Tenant portal tidak boleh menampilkan data dari tenant lain dalam kondisi apa pun, termasuk setelah logout/login cepat, reload parsial, error 404, atau stale query cache.
+### A. Tujuan kontrak preview
+Sebelum sistem mengirim WhatsApp sungguhan, admin/owner harus dapat melihat kandidat reminder secara aman. Preview tidak memiliki side effect.
 
-### B. Kontrak `/stays/me/current`
-- `GET /stays/me/current` yang menghasilkan 404 untuk tenant tanpa stay aktif adalah **state valid**.
-- Frontend harus membaca 404 ini sebagai **tidak ada hunian aktif**, bukan sebagai alasan untuk mempertahankan data tenant sebelumnya.
-- UI wajib menampilkan empty state yang jujur.
+### B. Endpoint preview resmi 4.3-A
+- `GET /admin/reminders/preview/booking-expiry`
+- `GET /admin/reminders/preview/invoice-due`
+- `GET /admin/reminders/preview/invoice-overdue`
+- `GET /admin/reminders/preview/checkout`
+- `GET /admin/reminders/preview/all`
 
-### C. Kontrak frontend cache
-- Saat logout, token dan seluruh cache query tenant-sensitive wajib dibersihkan.
-- Saat login sebagai user baru, cache lama tidak boleh dirender sebelum user context baru siap.
-- Query tenant portal wajib di-scope berdasarkan identitas user/tenant bila memungkinkan.
-- Query tenant-sensitive mencakup minimal:
-  - current stay,
-  - tenant portal stage,
-  - my bookings,
-  - my invoices,
-  - my tickets,
-  - my payment submissions,
-  - success/flash message portal yang tersimpan di `sessionStorage`.
+Dengan prefix global API, endpoint diakses sebagai `/api/admin/reminders/preview/*`.
 
-### D. Defensive rendering
-Jika response stay memiliki `tenantId` dan auth context juga memiliki `tenantId`, frontend wajib menolak render jika tidak cocok. Ketidakcocokan ini harus diperlakukan sebagai error keamanan/stale cache, bukan data normal.
+### C. Guard dan role
+- JWT wajib.
+- Role hanya `OWNER` dan `ADMIN`.
+- TENANT tidak boleh melihat endpoint atau menu backoffice reminder.
 
-### E. Implikasi UAT
-Setelah patch cache isolation, retest cukup targeted:
-1. login Tenant A yang memiliki stay aktif,
-2. logout,
-3. login Tenant B yang tidak memiliki stay aktif,
-4. `/portal/stay` harus empty state,
-5. `/portal/bookings` dan `/portal/invoices` tidak boleh membawa data Tenant A,
-6. tidak ada request flood dari `/stays/me/current`.
+### D. Aturan preview
+- Preview hanya membaca data.
+- Preview tidak mengirim WhatsApp.
+- Preview tidak menulis `NotificationLog`.
+- Preview tidak menjalankan scheduler.
+- Preview harus tetap aman jika data kandidat kosong.
+
+### E. Kategori kandidat
+1. Booking expiry: stay `ACTIVE`, room `RESERVED`, `expiresAt` dalam 24 jam.
+2. Invoice due: invoice `ISSUED` / `PARTIAL`, due date hari ini sampai H+3.
+3. Invoice overdue: invoice `ISSUED` / `PARTIAL`, due date lewat.
+4. Checkout approaching: stay `ACTIVE`, `plannedCheckOutDate` dalam H+10.
+
+### F. Next contract 4.3-B
+Reminder Queue / Mock Send boleh dibuka setelah preview PASS, tetapi tetap belum boleh mengirim WhatsApp sungguhan sampai mock flow dan idempotency aman.
+
 
 ---
 
-## 2026-04-26 — Addendum Kontrak Pasca UAT 4.2 CORE PASS
+## 2026-04-27 — Addendum Kontrak Phase 4.3-C/D: AppNotification, Announcement, dan Payment Urgency Chip
 
-### A. Status kontrak payment submission terbaru
-Flow 4.2 sudah terbukti secara UAT core:
-- happy path approved membuat `InvoicePayment`, invoice `PAID`, dan room `RESERVED -> OCCUPIED`,
-- reject path tidak membuat payment final dan tenant dapat submit ulang,
-- wrong amount ditolak; tidak ada partial payment,
-- double approve ditolak; tidak ada `InvoicePayment` ganda,
-- expiry core membatalkan stay dan me-release room.
+### A. AppNotification Center — sudah live sebagai MVP
 
-Kontrak 4.2 sekarang dibaca sebagai **operationally accepted**, dengan P1 cleanup sebelum 4.3.
+`AppNotification` adalah inbox personal/read-unread per user. Ia **bukan** pengganti Announcement, bukan scheduler, dan bukan channel PWA. Ia menyimpan pesan yang ditujukan kepada user tertentu.
 
-### B. Expiry invoice cleanup
-Saat booking expired, service expiry harus membatalkan invoice awal booking yang masih `DRAFT` atau `ISSUED` dan belum `PAID`, agar tidak meninggalkan invoice orphan. Invoice `PAID` tidak boleh disentuh.
+Field minimum yang dibekukan:
+- `id`
+- `recipientUserId`
+- `title`
+- `body`
+- `linkTo?`
+- `entityType?`
+- `entityId?`
+- `isRead`
+- `readAt?`
+- `createdAt`
+- `updatedAt`
 
-### C. UI label dan pricing honesty
-- Room `RESERVED` harus ditampilkan sebagai `Pemesan` / `Booking oleh`, bukan `Penghuni`.
-- Public room / booking form hanya boleh menampilkan pricing term yang memiliki rate nyata.
-- `Semester` / `Tahunan` tidak boleh fallback ke monthly jika tidak ada field/rate nyata.
+Endpoint aktif:
+- `GET /me/notifications` — list notifikasi user sendiri + `unreadCount`
+- `PATCH /me/notifications/:id/read` — mark satu notifikasi milik user sendiri sebagai read
+- `PATCH /me/notifications/read-all` — mark semua unread milik user sendiri sebagai read
 
-### D. Error response production
-Global error response boleh memuat stack trace di development, tetapi production response hanya boleh memuat field aman seperti `success`, `statusCode`, `message`, `path`, `method`, `requestId`, dan `timestamp`.
+Rule kontrak:
+1. Semua query notification wajib scoped ke `recipientUserId = currentUser.id`.
+2. User tidak boleh membaca atau mark-read notifikasi user lain.
+3. `read/unread` hanya status inbox; tidak boleh dipakai sebagai bukti bahwa kewajiban bisnis sudah selesai.
+4. Jika `linkTo` ada, frontend boleh navigate setelah mark-read. Jika `linkTo` kosong, action tetap aman dan tidak crash.
+5. Mock reminder boleh membuat AppNotification untuk tenant target, tetapi kegagalan create notification tidak boleh menggagalkan mock-send.
 
-### E. Phase 3A meter requirement
-Backoffice create stay tetap wajib memvalidasi `initialElectricityKwh` dan `initialWaterM3`, menolak missing/invalid/negative values, dan membuat 2 baseline `MeterReading` dalam transaksi create stay.
+### B. Announcement tetap konten utama
+
+Announcement tetap entity broadcast/content source dengan field seperti `title`, `content`, `audience`, `isPublished`, `isPinned`, `publishedAt`, `startsAt`, dan `expiresAt`.
+
+Keputusan:
+- Announcement adalah **papan pengumuman digital**.
+- AppNotification adalah **inbox personal/read-unread**.
+- PWA Push adalah **channel pengiriman ke device/browser**.
+- WhatsApp adalah **channel eksternal untuk reminder kritis**.
+
+Relasi target ke depan:
+```
+Admin publish Announcement
+    -> Announcement tersimpan sebagai konten utama
+    -> sistem optional membuat AppNotification untuk audience relevan
+    -> tenant melihat bell unread
+    -> bila PWA dibuka, push dikirim dari event yang sama
+    -> klik notif mengarah ke halaman Pengumuman
+```
+
+### C. Payment Urgency Header Chip — kontrak frontend-first berikutnya
+
+Finance-critical reminders tidak boleh hanya menjadi notifikasi yang bisa dibaca lalu hilang. Untuk kondisi bisnis aktif, frontend perlu menghitung dan menampilkan urgency chip di header tenant.
+
+Sumber data chip harus berasal dari data bisnis live, bukan dari AppNotification read/unread:
+- invoice `ISSUED` / `PARTIAL` + `dueDate`
+- booking/payment deadline + `expiresAt`
+- stay/contract ending + `plannedCheckOutDate`
+
+Prioritas tampilan:
+1. Invoice overdue → `Terlambat X hari`
+2. Booking payment hampir expired → `Bayar sebelum X jam`
+3. Invoice due soon → `Tagihan H-X` / `Jatuh tempo hari ini`
+4. Stay/contract ending soon → `Kontrak H-X`
+
+Chip hilang hanya jika kondisi bisnis selesai, misalnya invoice `PAID`, booking expired/cancelled/activated, atau stay renewed/checkout resolved.

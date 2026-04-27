@@ -1,3 +1,40 @@
+# KOST48 Frontend Patch — 2026-04-27 (Phase 4.3-C1b Frontend Notification Center)
+
+## Tujuan
+Menambahkan frontend Notification Center MVP setelah backend AppNotification foundation UAT PASS, tanpa membuka browser push, service worker, SSE/websocket, scheduler, atau real WhatsApp.
+
+## File yang dibuat
+- `src/api/notifications.ts`
+- `src/hooks/useNotifications.ts`
+- `src/components/notifications/NotificationBell.tsx`
+- `src/pages/notifications/NotificationsPage.tsx`
+
+## File yang diubah
+- `src/App.tsx`
+- `src/components/layout/AppLayout.tsx`
+- `src/config/navigation.ts`
+- `src/styles.css`
+
+## Perubahan utama
+- Bell notification muncul di header untuk semua authenticated roles.
+- Badge unread count muncul bila ada notifikasi belum dibaca.
+- Dropdown bell menampilkan notifikasi terbaru dan tombol **Tandai semua dibaca**.
+- Route `/notifications` tersedia untuk semua role authenticated.
+- Tenant portal mendapat menu sidebar **Notifikasi**.
+- OWNER/ADMIN/STAFF tidak mendapat menu sidebar Notifikasi; akses cukup lewat bell/header.
+- Halaman notifikasi menampilkan status **Belum dibaca** / **Sudah dibaca**.
+- Breadcrumb route `/notifications` diterjemahkan menjadi **Notifikasi**.
+
+## Keputusan UX lanjutan
+- Announcement tetap berbeda dari AppNotification.
+- Finance-related reminder akan dilanjutkan dengan **Payment Urgency Header Chip** agar kewajiban bayar tetap terlihat sampai selesai.
+
+## Verifikasi
+- `npm run build` ✅ PASS
+- Visual smoke: bell, dropdown, `/notifications`, tenant sidebar **Notifikasi** ✅ PASS
+
+---
+
 ## KOST48 Frontend Patch — 2026-04-21 (V4 Fase 4.1B Frontend Approval Booking)
 
 ### Tujuan

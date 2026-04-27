@@ -377,86 +377,65 @@ Hasil audit codebase (dari sesi terpisah):
   diselaraskan dengan posisi source terbaru.
 
 
-## 2026-04-24 — Finalisasi Combined Booking Payment 4.2
+---
 
-- Setelah UAT dan patch lanjutan, alur pembayaran awal booking difinalkan menjadi **combined booking payment**.
-- Tenant melihat satu tombol **Bayar Sewa & Deposit** di `Pemesanan Saya`.
-- Nominal pembayaran dikunci sebagai total sisa sewa invoice booking awal + sisa deposit booking awal.
-- Backend tetap menjaga pemisahan akuntabilitas internal:
-  - rent portion masuk ke `InvoicePayment` dan invoice booking awal menjadi `PAID`
-  - deposit portion masuk ke tracking deposit awal pada `Stay` dan `depositPaymentStatus` menjadi `PAID`
-- Keputusan ini menggantikan interpretasi tenant-facing sebelumnya yang menampilkan dua aksi upload terpisah: **Upload Bukti Sewa** dan **Upload Bukti Deposit**.
-- Field target-aware lama, jika masih ada di schema/source, dibaca sebagai compatibility/internal metadata, bukan UX final tenant.
-- UAT berikutnya harus fokus pada: submit combined payment, reject, wrong amount, double approve, expiry, dan aktivasi `RESERVED -> OCCUPIED`.
+## 2026-04-26 — Phase 4.3-A Reminder Preview PASS
+
+- Phase 4.3 dibuka secara bertahap dengan pendekatan **preview-first**.
+- Backend menambahkan endpoint preview reminder untuk:
+  - booking hampir kadaluarsa,
+  - invoice jatuh tempo,
+  - invoice terlambat,
+  - checkout mendekat,
+  - agregasi semua preview.
+- Endpoint preview dijaga oleh JWT dan role OWNER/ADMIN.
+- Frontend menambahkan halaman `/reminders` dengan 4 kartu preview dan empty/loading/error state.
+- Navigation menambahkan menu **Pengingat WhatsApp** untuk OWNER/ADMIN.
+- Manual retest PASS:
+  - ADMIN melihat menu dan halaman `/reminders`,
+  - 4 kartu tampil,
+  - kandidat checkout muncul,
+  - TENANT tidak melihat menu,
+  - tidak ada tombol Kirim/Send.
+- Batch ini sengaja tidak membuka:
+  - WhatsApp send asli,
+  - `NotificationLog` write,
+  - scheduler/cron,
+  - provider credential.
+- Commit referensi: `4025a54 add reminder preview phase 4.3a`.
+
+**Next:** Phase 4.3-B — Reminder Queue / Mock Send.
 
 
 ---
 
-## 2026-04-26 — UAT Gate 1/2 PASS, 4.2 Happy Path PASS, dan Temuan P0 Cache Tenant
+## 2026-04-27 — Phase 4.3-C Notification Center MVP Complete + Working Tree Clean
 
-### Hasil UAT yang sudah diterima
-- **Gate 1 / UAT 4.0 PASS** setelah patch:
-  - fallback gambar publik berhasil; tidak ada broken image,
-  - Booking Reserved tidak tercampur dengan Stay Aktif,
-  - stay `RESERVED` tidak memblok CheckInWizard untuk tenant/room operasional lain,
-  - `checkInDate` dan `expiresAt` tampil benar.
-- **Gate 2 / UAT 4.1 PASS**:
-  - admin approve booking berhasil,
-  - modal menutup setelah sukses,
-  - invoice awal `DRAFT` terbentuk,
-  - meter awal tersimpan,
-  - room tetap `RESERVED`,
-  - tenant melihat status `Menunggu Pembayaran`.
-- **UAT 4.2 happy path PASS**:
-  - tenant upload satu bukti pembayaran awal,
-  - submission muncul di review queue admin,
-  - admin bisa melihat preview bukti,
-  - approve berhasil,
-  - `InvoicePayment` terbentuk,
-  - invoice menjadi `PAID`,
-  - room berubah `RESERVED -> OCCUPIED`,
-  - tenant melihat K02 sebagai hunian aktif di `Hunian Saya`.
-
-### Temuan P0 baru
-- Setelah logout dari tenant yang punya stay aktif dan login sebagai tenant baru yang tidak punya stay aktif, `/api/stays/me/current` mengembalikan 404 tetapi UI sempat menampilkan data stay tenant sebelumnya.
-- Ini diklasifikasikan sebagai **P0 tenant data leak / stale cache**, kemungkinan besar dari TanStack Query cache atau state portal yang belum dibersihkan saat logout/login.
-
-### Keputusan tindak lanjut
-- Tidak mengulang UAT yang sudah PASS.
-- Patch berikutnya wajib fokus pada **tenant portal cache isolation**.
-- Setelah patch, lakukan targeted retest: Tenant A punya stay → logout → Tenant B tanpa stay → empty state jujur, tidak ada data Tenant A, tidak ada request flood.
-- Setelah targeted retest PASS, lanjutkan UAT 4.2 reject path, wrong amount path, expiry path, dan double approve prevention.
-
----
-
-## 2026-04-26 — UAT 4.2 CORE PASS dan Penutupan P0 Cache Tenant
-
-- P0 tenant portal cache isolation berhasil ditutup melalui targeted retest:
-  - Tenant A dengan stay aktif tetap melihat data sendiri,
-  - setelah logout/login sebagai Tenant B tanpa stay aktif, portal menampilkan empty state,
-  - `/portal/bookings` dan `/portal/invoices` tidak bocor data lama,
-  - tidak ada request flood dari `/stays/me/current`.
-- UAT 4.2 reject path PASS:
-  - admin reject dengan alasan,
-  - submission hilang dari pending queue,
-  - tenant melihat alasan penolakan dan bisa upload ulang,
-  - room tetap `RESERVED`, invoice belum `PAID`.
-- UAT 4.2 wrong amount path PASS:
-  - backend menolak nominal salah dengan pesan `Pembayaran harus tepat sebesar total yang tersisa`,
-  - tidak ada partial payment.
-- UAT 4.2 double approve prevention PASS:
-  - approve pertama sukses,
-  - approve kedua ditolak,
-  - tidak ada `InvoicePayment` ganda.
-- UAT 4.2 expiry core PASS:
-  - expiry job menghasilkan `expiredCount=1`,
-  - stay berubah `CANCELLED`,
-  - room kembali `AVAILABLE`,
-  - invoice tidak mengaktifkan room.
-
-### Catatan P1 sebelum Phase 4.3
-- Invoice awal booking yang expired masih bisa tertinggal `ISSUED`; perlu cleanup agar menjadi `CANCELLED` bila belum final.
-- Room `RESERVED` masih perlu label `Pemesan` / `Booking oleh`, bukan `Penghuni`.
-- Pricing term `Semester` / `Tahunan` tidak boleh tampil bila tidak ada rate nyata.
-- Response error production tidak boleh mengirim stack trace.
-- Phase 3A meter awal perlu diverifikasi code-level agar create stay backoffice tetap wajib meter listrik/air.
+- Phase 4.3-C dibagi menjadi dua slice:
+  - **4.3-C1a Backend AppNotification Foundation**
+  - **4.3-C1b Frontend Notification Center**
+- Backend C1a UAT PASS:
+  - `GET /api/me/notifications`
+  - `PATCH /api/me/notifications/:id/read`
+  - `PATCH /api/me/notifications/read-all`
+  - role isolation PASS
+  - tenant isolation PASS
+  - mock send berhasil membuat AppNotification untuk tenant target
+- Frontend C1b build PASS dan visual smoke PASS:
+  - bell notification di header
+  - unread badge
+  - dropdown latest notifications
+  - route `/notifications`
+  - page full notification list
+  - tenant sidebar menu **Notifikasi**
+  - breadcrumb Bahasa Indonesia **Notifikasi**
+- Keputusan product/UX dibekukan:
+  - Announcement tetap berbeda dari AppNotification.
+  - PWA Push adalah channel ke device/browser, bukan pengganti data Announcement/AppNotification.
+  - Finance-related reminder perlu persistent urgency/countdown chip di sebelah bell agar tenant tidak menganggap kewajiban selesai hanya karena notification sudah read.
+- Commit yang diterima:
+  - `cf51077 add app notification backend foundation phase 4.3-c1a`
+  - `a8ac7a5 add frontend notification center phase 4.3-c1b`
+- Branch `checkpoint/uat-4-2-before-cancelstay-fix` sudah sinkron dengan remote sampai C1b.
+- Sisa dirty/untracked lama diamankan dalam `stash@{0}` dengan label `wip leftover files after phase 4.3-c notification center`.
+- Working tree bersih setelah stash.

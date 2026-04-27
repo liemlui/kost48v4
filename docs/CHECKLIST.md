@@ -1,3 +1,42 @@
+
+
+---
+
+## 2026-04-27 — Checklist Update: Phase 4.3-C Complete + 4.3-D Next
+
+### Phase 4.3-C — In-app Notification Center MVP
+
+| # | Tugas | Status |
+|---|-------|--------|
+| 4.3-C1a.1 | Schema/model `AppNotification` | ✅ PASS / committed |
+| 4.3-C1a.2 | Endpoint `GET /me/notifications` | ✅ PASS / committed |
+| 4.3-C1a.3 | Endpoint `PATCH /me/notifications/:id/read` | ✅ PASS / committed |
+| 4.3-C1a.4 | Endpoint `PATCH /me/notifications/read-all` | ✅ PASS / committed |
+| 4.3-C1a.5 | Mock send membuat AppNotification untuk tenant target | ✅ PASS / committed |
+| 4.3-C1a.6 | Tenant/user isolation test | ✅ PASS |
+| 4.3-C1b.1 | Frontend API client notifications | ✅ Build PASS / committed |
+| 4.3-C1b.2 | Hook TanStack Query + optimistic mark read | ✅ Build PASS / committed |
+| 4.3-C1b.3 | Notification bell + unread badge + dropdown | ✅ Visual PASS / committed |
+| 4.3-C1b.4 | `/notifications` page | ✅ Visual PASS / committed |
+| 4.3-C1b.5 | Tenant sidebar menu **Notifikasi** | ✅ Visual PASS / committed |
+| 4.3-C1b.6 | Admin/Owner/Staff access via bell/header only | ✅ Decision frozen |
+
+### Phase 4.3-D — Tenant Payment Urgency Header Chip
+
+| # | Tugas | Status |
+|---|-------|--------|
+| 4.3-D.1 | PLAN: audit existing tenant invoice/booking/stay data for urgency chip | ⬜ NEXT |
+| 4.3-D.2 | ACT: frontend urgency chip beside bell | ⬜ |
+| 4.3-D.3 | ACT: priority calculation overdue/booking due/invoice due/contract ending | ⬜ |
+| 4.3-D.4 | UAT: chip stays visible until business condition resolved | ⬜ |
+
+### Deferred tetap belum dibuka
+- [ ] Real WhatsApp provider
+- [ ] Scheduler/cron reminder otomatis
+- [ ] Browser push/service worker/PWA push
+- [ ] SSE/websocket notification stream
+- [ ] Announcement → AppNotification integration
+
 ## Integrasi & UAT Aktif (Fokus Saat Ini)
 
 | # | Tugas | Status |
@@ -11,15 +50,15 @@
 | U7 | UAT Quick Actions di tabel Tenant & Room | ⏳ |
 | U8 | UAT keamanan: Admin tidak bisa edit/hapus Owner | ⏳ |
 | U9 | UAT keamanan: login salah memberi pesan generik | ⏳ |
-| U10 | UAT flow booking mandiri: `/rooms` → `/booking/:roomId` → `/portal/bookings` | ✅ PASS — Gate 1 diterima; tidak perlu ulang |
-| U11 | UAT backoffice read-only booking reserved di halaman Stays | ✅ PASS — klasifikasi RESERVED vs OCCUPIED sudah dipatch dan diverifikasi |
-| U12 | UAT approval booking: queue backoffice → approve booking → tenant melihat status `Menunggu Pembayaran` | ✅ PASS — Gate 2 diterima; modal close, invoice DRAFT, meter awal, room RESERVED sudah diverifikasi |
-| U13 | Regression check setelah approval: booking reserved tidak lagi terasa “menunggu approval”, invoice awal `DRAFT` terbentuk, room tetap `RESERVED` | ✅ PASS — tenant melihat Menunggu Pembayaran, belum OCCUPIED sebelum pembayaran |
+| U10 | UAT flow booking mandiri: `/rooms` → `/booking/:roomId` → `/portal/bookings` | ⚠️ Parsial: create booking sukses; gate belum lulus penuh |
+| U11 | UAT backoffice read-only booking reserved di halaman Stays | ⚠️ Parsial: surface muncul, tetapi sempat ada gap tanggal/expiry |
+| U12 | UAT approval booking: queue backoffice → approve booking → tenant melihat status `Menunggu Pembayaran` | ⚠️ Parsial: approval pernah sukses, tetapi masih ada bug integrasi/modals |
+| U13 | Regression check setelah approval: booking reserved tidak lagi terasa “menunggu approval”, invoice awal `DRAFT` terbentuk, room tetap `RESERVED` | ⚠️ Belum ditutup penuh |
 
 **Catatan status:**  
 - Backend dan frontend booking mandiri V4 inti sudah dipatch pada level source/build.  
 - Backend core approval booking 4.1A dan frontend approval surface 4.1B juga sudah dipatch pada level source/build.  
-- UAT end-to-end Fase 4.0 dan 4.1 sudah dinyatakan PASS pada 2026-04-26; jangan ulang dari awal kecuali ada regresi baru.
+- UAT end-to-end Fase 4.0 dan UAT approval booking Fase 4.1 belum dinyatakan lolos penuh.
 
 ---
 
@@ -42,7 +81,7 @@
 **Catatan status Fase 4.0:**  
 - Backend inti 4.0.1–4.0.5 sudah dipatch.  
 - Frontend 4.0.6–4.0.9 sudah dipatch.  
-- Fase 4.0 sudah PASS pada UAT Gate 1 setelah patch klasifikasi stay dan fallback image publik.
+- Fase 4.0 pada level kode sudah tertutup, tetapi verifikasi runtime/UAT penuh belum dinyatakan lolos.
 
 ---
 
@@ -59,42 +98,47 @@
 **Catatan status Fase 4.1:**  
 - Backend 4.1A core sudah dipatch pada level source/build.  
 - Frontend 4.1B approval surface juga sudah dipatch pada level source/build.  
-- UAT approval booking end-to-end sudah PASS pada Gate 2.  
-- Payment submission dan aktivasi `RESERVED → OCCUPIED` sudah lolos happy path, tetapi 4.2 belum full PASS karena reject/wrong amount/expiry/double approve belum selesai.
+- UAT approval booking end-to-end masih belum dinyatakan lolos penuh.  
+- Payment submission dan aktivasi penuh `RESERVED → OCCUPIED` tetap belum dibuka.
 
 ---
 
-### Fase 4.2 — Pembayaran Mandiri & Aktivasi Otomatis (COMBINED BOOKING PAYMENT / TANPA PARSIAL)
+### Fase 4.2 — Pembayaran Mandiri & Aktivasi Otomatis
 
 | # | Tugas | Status |
 |---|-------|--------|
-| 4.2.1 | Schema/model `PaymentSubmission` + enum status + proof metadata + compatibility fields bila ada | ✅ Terpakai pada happy path UAT |
-| 4.2.2 | Backend: `POST /payment-submissions` validasi nominal pas = sisa sewa + sisa deposit | ✅ Happy path PASS; wrong amount path belum dites |
-| 4.2.3 | Backend: `GET /payment-submissions/my` | ✅ Riwayat submission tenant tampil |
-| 4.2.4 | Backend: `GET /payment-submissions/review-queue` | ✅ Queue admin tampil dan proof bisa dibuka |
-| 4.2.5 | Backend: `POST /payment-submissions/:id/approve` split otomatis rent portion + deposit portion | ✅ Happy path approve PASS |
-| 4.2.6 | Backend: `POST /payment-submissions/:id/reject` | ⏳ Pending — lanjut setelah P0 cache isolation |
-| 4.2.7 | Backend: sinkronisasi `InvoicePayment` final untuk sewa + tracking deposit awal pada `Stay` | ✅ InvoicePayment terbentuk dan invoice PAID pada happy path |
-| 4.2.8 | Backend: aktivasi `RESERVED -> OCCUPIED` setelah combined payment valid disetujui | ✅ PASS pada happy path |
-| 4.2.9 | Backend: expiry booking saat `expiresAt` terlewati | ⏳ Pending — belum UAT |
-| 4.2.10 | Frontend tenant: section **Pembayaran Awal** + satu CTA **Bayar Sewa & Deposit** | ✅ PASS pada happy path |
-| 4.2.11 | Frontend tenant: riwayat/status submission di booking detail | ✅ PASS pada happy path |
-| 4.2.12 | Frontend admin: queue verifikasi pembayaran combined | ✅ PASS pada happy path |
-| 4.2.13 | Frontend admin: modal approve/reject pembayaran | ⚠️ Approve PASS; reject pending |
-| 4.2.14 | UAT happy path / reject / wrong amount / expiry / regression | ⚠️ Happy path PASS; reject/wrong amount/expiry/double approve pending; P0 tenant cache isolation blocks continuation |
+| 4.2.1 | Schema/model `PaymentSubmission` + enum status + proof metadata | ⚠️ Source patch/artifact sudah ada; sinkronisasi schema lokal masih pending |
+| 4.2.2 | Backend: `POST /payment-submissions` | ⚠️ Source patch ada; local verify pending |
+| 4.2.3 | Backend: `GET /payment-submissions/my` | ⚠️ Source patch ada; local verify pending |
+| 4.2.4 | Backend: `GET /payment-submissions/review-queue` | ⚠️ Source patch ada; local verify pending |
+| 4.2.5 | Backend: `POST /payment-submissions/:id/approve` | ⚠️ Source patch ada; local verify pending |
+| 4.2.6 | Backend: `POST /payment-submissions/:id/reject` | ⚠️ Source patch ada; local verify pending |
+| 4.2.7 | Backend: sinkronisasi invoice payment final + invoice status | ⚠️ Source patch ada; local verify pending |
+| 4.2.8 | Backend: aktivasi `RESERVED -> OCCUPIED` setelah invoice booking awal lunas | ⚠️ Source patch ada; local verify pending |
+| 4.2.9 | Backend: expiry booking saat `expiresAt` terlewati | ⚠️ Source patch ada; local verify pending |
+| 4.2.10 | Frontend tenant: form upload bukti bayar | ⚠️ Source patch ada; local verify pending |
+| 4.2.11 | Frontend tenant: riwayat/status submission di booking detail | ⚠️ Source patch ada; local verify pending |
+| 4.2.12 | Frontend admin: queue verifikasi pembayaran | ⚠️ Source patch ada; local verify pending |
+| 4.2.13 | Frontend admin: modal approve/reject pembayaran | ⚠️ Source patch ada; local verify pending |
+| 4.2.14 | UAT happy path / reject / partial / expiry / regression | ⏳ |
 
-### Fase 4.3### Fase 4.3 — Notifikasi & Reminder (WhatsApp)
+### Fase 4.3 — Notifikasi & Reminder (WhatsApp)
 
 | # | Tugas | Status |
 |---|-------|--------|
-| 4.3.1 | Adapter WhatsApp gateway + konfigurasi environment | ⬜ |
-| 4.3.2 | Job reminder booking hampir kadaluarsa | ⬜ |
-| 4.3.3 | Job reminder invoice H-3 / H-1 | ⬜ |
-| 4.3.4 | Job reminder checkout H-10 / H-7 / H-3 | ⬜ |
-| 4.3.5 | Idempotency guard reminder | ⬜ |
-| 4.3.6 | Logging hasil kirim notifikasi | ⬜ |
-| 4.3.7 | Badge reminder di portal tenant | ⬜ |
-| 4.3.8 | UAT reminder sukses/gagal tanpa spam | ⬜ |
+| 4.3.A1 | Backend reminder preview endpoint `/api/admin/reminders/preview/*` | ✅ PASS |
+| 4.3.A2 | Frontend page `/reminders` dengan 4 kartu preview | ✅ PASS |
+| 4.3.A3 | Navigation entry **Pengingat WhatsApp** OWNER/ADMIN only | ✅ PASS |
+| 4.3.A4 | Manual retest preview: ADMIN bisa akses, TENANT tidak melihat menu, no send button | ✅ PASS |
+| 4.3.B1 | Reminder Queue / Mock Send | ⏭️ Next |
+| 4.3.C1 | Adapter WhatsApp gateway + konfigurasi environment untuk real send | ⬜ |
+| 4.3.C2 | Job reminder booking hampir kadaluarsa real/send path | ⬜ |
+| 4.3.C3 | Job reminder invoice H-3 / H-1 real/send path | ⬜ |
+| 4.3.C4 | Job reminder checkout H-10 / H-7 / H-3 real/send path | ⬜ |
+| 4.3.C5 | Idempotency guard reminder | ⬜ |
+| 4.3.C6 | Logging hasil kirim notifikasi | ⬜ |
+| 4.3.D1 | Badge reminder di portal tenant | ⬜ |
+| 4.3.UAT | UAT reminder sukses/gagal tanpa spam | ⬜ |
 
 ### Fase 4.4 — Marketing Display & Registrasi Fleksibel
 
@@ -137,14 +181,14 @@
 | 2 | ✅ 100% |
 | 3 | ✅ 100% |
 | 3.5 | ✅ 100% |
-| Integrasi & UAT | ✅ Gate 1/2 PASS; 4.2 CORE PASS; P1 cleanup pending |
-| 4.0 | ✅ Gate 1 PASS |
-| 4.1 | ✅ Gate 2 PASS |
-| 4.2 | ✅ CORE PASS; P1 cleanup pending sebelum 4.3 |
+| Integrasi & UAT | ⏳ Belum lolos penuh |
+| 4.0 | ⏳ 100% di level patch kode, UAT belum penuh |
+| 4.1 | ⏳ Backend 4.1A + frontend 4.1B dipatch; UAT approval belum penuh |
+| 4.2 | ⚠️ Source patch lanjutan/deep patch sudah ada; baseline resmi masih pending verifikasi lokal/UAT |
 | 4.3 | ⬜ 0% |
 | 4.4 | ⬜ 0% |
 | 4.5 | ⬜ 0% |
-| V4 total | ⏳ ±65–70% (4.0/4.1 PASS, 4.2 CORE PASS, P1 cleanup sebelum 4.3) |
+| V4 total | ⏳ ±50% (4.2 sudah punya source patch lanjutan; status resmi tetap menunggu verifikasi lokal/UAT) |
 
 ---
 
@@ -168,10 +212,10 @@
 - [x] Tenant dapat membuat booking baru
 
 ### Temuan bug yang masih perlu dipastikan tertutup
-- [x] `checkInDate` / `expiresAt` tampil jujur di semua surface admin/tenant
-- [x] Approval booking tidak lagi gagal karena expiry terlalu agresif
-- [x] Modal approval/review frontend menutup diri dengan benar setelah success
-- [x] Regression invoice/status tetap sinkron setelah patch korektif terbaru
+- [ ] `checkInDate` / `expiresAt` tampil jujur di semua surface admin/tenant
+- [ ] Approval booking tidak lagi gagal karena expiry terlalu agresif
+- [ ] Modal approval/review frontend menutup diri dengan benar setelah success
+- [ ] Regression invoice/status tetap sinkron setelah patch korektif terbaru
 
 ### Refactor hygiene
 - [x] Backend source utama yang terlalu besar mulai dipecah
@@ -187,57 +231,25 @@
 - [x] Dokumen tetap jujur bahwa 4.2 belum resmi/live penuh
 - [ ] Sinkronisasi schema Prisma dijalankan di environment lokal
 - [ ] `npx prisma generate` lokal sukses
-- [x] Build backend lokal sukses / aplikasi lokal berjalan untuk UAT
-- [x] Build frontend lokal sukses / aplikasi lokal berjalan untuk UAT
-- [x] UAT 4.2 happy path ditutup
-- [x] UAT 4.2 reject / wrong amount / expiry core / double approve ditutup
-- [ ] P1 cleanup pasca 4.2: invoice expiry cleanup, label RESERVED, pricing honesty, production error response, Phase 3A verification
+- [ ] Build backend lokal sukses
+- [ ] Build frontend lokal sukses
+- [ ] UAT 4.2 happy path ditutup
+- [ ] UAT 4.2 reject / partial / expiry ditutup
 
 
 ---
 
-## 2026-04-26 — Current UAT Snapshot / Tidak Perlu Ulang UAT
+## 2026-04-26 — Checklist Tambahan Phase 4.3-A PASS
 
-### Sudah diterima sebagai PASS
-- [x] Gate 1 / UAT 4.0: katalog publik, booking tenant, `/portal/bookings`, backoffice Booking Reserved, image fallback, klasifikasi RESERVED vs OCCUPIED, dan CheckInWizard tidak terblokir booking reserved.
-- [x] Gate 2 / UAT 4.1: admin approve booking, invoice awal terbentuk, meter awal tersimpan, tenant melihat `Menunggu Pembayaran`, dan room tetap `RESERVED`.
-- [x] UAT 4.2 happy path: tenant upload bukti pembayaran awal, admin approve, `InvoicePayment` terbentuk, invoice `PAID`, room `OCCUPIED`, tenant masuk `Hunian Saya`.
+- [x] Backend preview endpoint `/api/admin/reminders/preview/all` mengembalikan 4 section: `bookingExpiry`, `invoiceDue`, `invoiceOverdue`, `checkout`.
+- [x] Halaman `/reminders` menampilkan 4 card preview.
+- [x] Empty state tampil untuk kategori kosong.
+- [x] Candidate checkout dapat muncul.
+- [x] Menu **Pengingat WhatsApp** muncul untuk ADMIN/OWNER.
+- [x] Menu **Pengingat WhatsApp** tidak muncul untuk TENANT.
+- [x] Tidak ada tombol Kirim/Send.
+- [x] Tidak ada WhatsApp send.
+- [x] Tidak ada scheduler.
 
-### P0 aktif sebelum UAT 4.2 dilanjutkan
-- [ ] **Tenant portal cache isolation:** setelah login tenant berbeda, UI tidak boleh menampilkan data tenant sebelumnya saat `/stays/me/current` menghasilkan 404.
-- [ ] Clear query cache saat logout/login.
-- [ ] Scope query key tenant portal berdasarkan user/tenant.
-- [ ] Clear atau namespace `sessionStorage` success message agar tidak lintas tenant.
-- [ ] `/portal/stay`, `/portal/bookings`, `/portal/invoices` tidak boleh menampilkan stale data lintas tenant.
-
-### UAT yang masih tersisa setelah P0 fix
-- [ ] 4.2 reject path.
-- [ ] 4.2 wrong amount path.
-- [ ] 4.2 expiry path.
-- [ ] 4.2 double approve prevention.
-
-**Instruksi:** Jangan ulang Gate 1, Gate 2, atau 4.2 happy path dari awal kecuali patch berikutnya menyentuh flow tersebut secara langsung.
-
----
-
-## 2026-04-26 — Current UAT Snapshot Setelah 4.2 CORE PASS
-
-### Sudah diterima sebagai PASS
-- [x] Gate 1 / UAT 4.0.
-- [x] Gate 2 / UAT 4.1.
-- [x] P0 tenant portal cache isolation.
-- [x] UAT 4.2 happy path.
-- [x] UAT 4.2 reject path.
-- [x] UAT 4.2 wrong amount path.
-- [x] UAT 4.2 double approve prevention.
-- [x] UAT 4.2 expiry core.
-
-### P1 cleanup sebelum 4.3
-- [ ] Expiry booking membatalkan invoice awal yang masih `DRAFT` / `ISSUED` dan belum `PAID`.
-- [ ] Room `RESERVED` menampilkan `Pemesan` / `Booking oleh`, bukan `Penghuni`.
-- [ ] Public rooms / booking form tidak menampilkan `Semester` / `Tahunan` tanpa rate nyata.
-- [ ] Production error response tidak mengirim stack trace ke client.
-- [ ] Phase 3A initial meter requirement diverifikasi code-level.
-
-### Instruksi
-Jangan ulang Gate 1, Gate 2, atau UAT 4.2 core dari awal. Setelah P1 cleanup, lakukan targeted retest item yang disentuh, lalu lanjut Phase 4.3.
+Next:
+- [ ] 4.3-B Reminder Queue / Mock Send.

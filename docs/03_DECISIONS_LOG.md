@@ -191,29 +191,32 @@
 
 ---
 
-## 2026-04-26 — Freeze Status UAT & Tenant Cache Isolation
+## 2026-04-26 — Freeze Phase 4.3-A Reminder Preview
 
 | # | Keputusan | Dampak |
 |---|-----------|--------|
-| 104 | Gate 1 / UAT 4.0 diterima sebagai PASS setelah patch klasifikasi stay dan fallback gambar publik | UAT 4.0 tidak perlu diulang dari awal; cukup regression bila file terkait disentuh lagi |
-| 105 | Gate 2 / UAT 4.1 diterima sebagai PASS setelah admin approval booking berhasil end-to-end | UAT 4.1 tidak perlu diulang dari awal; approval booking menjadi baseline stabil |
-| 106 | UAT 4.2 happy path diterima sebagai PASS | Submit bukti bayar → approve admin → invoice PAID → room OCCUPIED dianggap terbukti untuk happy path |
-| 107 | 4.2 belum full PASS sampai reject, wrong amount, expiry, dan double approve prevention ditutup | Tidak boleh lanjut 4.3 sebelum sisa UAT 4.2 selesai |
-| 108 | Tenant portal cache isolation menjadi P0 sebelum UAT 4.2 dilanjutkan | Stale data tenant lama tidak boleh muncul untuk tenant baru; query cache wajib dibersihkan/di-scope per user |
-| 109 | Setelah patch cache isolation, verifikasi cukup targeted retest, bukan mengulang semua UAT | Menghemat waktu dan menjaga bukti UAT yang sudah PASS tetap berlaku |
-| 110 | `/stays/me/current` 404 untuk tenant tanpa stay aktif adalah state valid, bukan error UI yang boleh menampilkan cache lama | Portal harus menampilkan empty state jujur dan tidak request flood |
-| 111 | Success message portal tidak boleh lintas tenant | `sessionStorage` success message harus di-clear saat logout/login atau di-namespace per tenant |
+| 119 | Phase 4.3 dibuka dengan pola preview-first, bukan langsung WhatsApp send | Risiko gateway dan spam ditekan sebelum provider asli dipasang |
+| 120 | Reminder Preview 4.3-A bersifat read-only | Tidak ada WhatsApp send, tidak ada `NotificationLog` write, tidak ada scheduler |
+| 121 | Preview reminder hanya untuk OWNER/ADMIN | TENANT tidak melihat surface backoffice reminder |
+| 122 | `/api/admin/reminders/preview/*` menjadi surface admin untuk kandidat reminder | Admin dapat melihat booking expiry, invoice due, invoice overdue, dan checkout approaching sebelum aksi kirim |
+| 123 | Halaman `/reminders` menjadi pusat preview backoffice | Menu **Pengingat WhatsApp** masuk OWNER/ADMIN, tetapi belum memiliki tombol kirim |
+| 124 | Phase 4.3-B berikutnya adalah Reminder Queue / Mock Send | Real provider WhatsApp dan scheduler tetap ditunda sampai mock flow aman |
+| 125 | Reminder 4.3 tidak boleh berubah menjadi automation engine umum | Scope tetap booking, invoice, dan checkout reminder yang relevan |
+
 
 ---
 
-## 2026-04-26 — Freeze UAT 4.2 CORE PASS + P1 Cleanup Before 4.3
+## 2026-04-27 — Freeze Phase 4.3-C Notification Center + Payment Urgency Direction
 
 | # | Keputusan | Dampak |
 |---|-----------|--------|
-| 112 | P0 tenant portal cache isolation dinyatakan CLOSED setelah targeted retest PASS | Tenant tanpa stay aktif tidak lagi melihat data tenant sebelumnya; UAT tidak perlu diulang dari awal |
-| 113 | UAT 4.2 reject path dinyatakan PASS | Reject tidak membuat payment final, room tetap RESERVED, tenant dapat upload ulang |
-| 114 | UAT 4.2 wrong amount path dinyatakan PASS | Nominal tidak tepat ditolak; workflow booking tetap no-partial |
-| 115 | UAT 4.2 double approve prevention dinyatakan PASS | Tidak ada `InvoicePayment` ganda dan approval kedua ditolak |
-| 116 | UAT 4.2 expiry core dinyatakan PASS | Booking expired membatalkan stay dan me-release room; invoice orphan menjadi P1 cleanup |
-| 117 | 4.2 dibaca sebagai CORE PASS / accepted with P1 cleanup notes | Boleh lanjut ke 4.3 hanya setelah P1 cleanup kecil dan targeted retest selesai |
-| 118 | P1 cleanup sebelum 4.3 mencakup invoice expiry cleanup, label RESERVED, pricing honesty, production error stack, dan verifikasi Phase 3A meter | Scope cleanup tetap kecil dan tidak membuka fitur baru |
+| 126 | Phase 4.3-C memakai tabel baru `AppNotification`, bukan reuse `AuditLog` | AuditLog tetap untuk jejak aksi; AppNotification menjadi inbox/read-unread user |
+| 127 | AppNotification wajib user-scoped memakai `recipientUserId = currentUser.id` | User tidak bisa membaca atau mark-read notifikasi milik user lain |
+| 128 | Mock reminder membuat AppNotification untuk tenant target, bukan admin pengirim | Notifikasi mencerminkan kebutuhan penerima bisnis, bukan aktivitas operator |
+| 129 | Kegagalan create AppNotification tidak boleh menggagalkan mock send | Reminder/mock send tetap fail-safe dan tidak menjatuhkan flow utama |
+| 130 | Tenant mendapat sidebar menu **Notifikasi**; OWNER/ADMIN/STAFF cukup lewat bell/header | Backoffice tetap compact; tenant portal tetap jelas untuk user non-teknis |
+| 131 | Announcement dan AppNotification tetap dipisahkan | Announcement = konten broadcast; AppNotification = inbox personal/read-unread |
+| 132 | PWA Push diperlakukan sebagai channel, bukan entity pengganti Announcement/AppNotification | Ke depan Announcement dan AppNotification bisa dikirim via PWA tanpa mencampur model data |
+| 133 | Finance-critical reminder tidak boleh hanya bergantung pada notification read/unread | Tenant tetap melihat urgency bisnis sampai invoice/booking/contract selesai |
+| 134 | Phase 4.3-D berikutnya adalah Tenant Payment Urgency Header Chip | Prioritas bisnis bergeser dari sekadar inbox ke reminder pembayaran yang terus terlihat |
+| 135 | Real WhatsApp, scheduler/cron, service worker, push, SSE/websocket tetap deferred | Foundation notification distabilkan dulu sebelum membuka automation/channel eksternal |
