@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
+import { Navigate } from 'react-router-dom';
 import { Alert, Badge, Card } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { HeroSkeleton } from '../../components/common/SkeletonLoader';
 import { getResource } from '../../api/resources';
+import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { Announcement } from '../../types';
 
 function formatDate(value?: string | null) {
@@ -18,10 +20,17 @@ function formatDate(value?: string | null) {
 }
 
 export default function MyAnnouncementsPage() {
+  const { stage, isLoading: isStageLoading } = useTenantPortalStage();
+
   const query = useQuery({
     queryKey: ['portal-announcements'],
     queryFn: () => getResource<{ items: Announcement[] }>('/announcements/active'),
   });
+
+  // Guard: tenant tanpa stay occupied tidak boleh akses halaman ini
+  if (!isStageLoading && stage !== 'occupied') {
+    return <Navigate to="/portal/bookings" replace />;
+  }
 
   // Defensive handling untuk data yang mungkin tidak sesuai contract
   const items = Array.isArray(query.data?.items) ? query.data.items : [];

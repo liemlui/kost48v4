@@ -129,15 +129,35 @@ export class AnnouncementsService {
   }
 
   private async notifyPublished(announcement: Announcement) {
-    const audienceRoleFilter =
-      announcement.audience === AnnouncementAudience.TENANT
-        ? { role: UserRole.TENANT, isActive: true }
-        : { isActive: true };
+    const isTenantAudience = announcement.audience === AnnouncementAudience.TENANT;
 
-    const recipients = await this.prisma.user.findMany({
-      where: audienceRoleFilter,
-      select: { id: true, role: true },
-    });
+    let recipients: { id: number; role: string }[];
+
+    if (isTenantAudience) {
+      // Hanya tenant dengan stay aktif dan room OCCUPIED yang menerima pengumuman operasional TENANT
+      recipients = await this.prisma.user.findMany({
+        where: {
+          role: UserRole.TENANT,
+          isActive: true,
+          tenant: {
+            stays: {
+              some: {
+                status: 'ACTIVE' as any,
+                room: {
+                  status: 'OCCUPIED' as any,
+                },
+              },
+            },
+          },
+        },
+        select: { id: true, role: true },
+      });
+    } else {
+      recipients = await this.prisma.user.findMany({
+        where: { isActive: true },
+        select: { id: true, role: true },
+      });
+    }
 
     for (const user of recipients) {
       try {
