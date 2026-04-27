@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateAnnouncementDto, UpdateAnnouncementDto } from './dto/announcement.dto';
@@ -6,10 +6,18 @@ import { AnnouncementsQueryDto } from './dto/announcements-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AnnouncementAudience, UserRole } from '../../common/enums/app.enums';
+import { AppNotificationService } from '../notifications/app-notification.service';
+import { Announcement } from '../../generated/prisma';
 
 @Injectable()
 export class AnnouncementsService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  private readonly logger = new Logger(AnnouncementsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly notificationService: AppNotificationService,
+  ) {}
 
   async findAll(query: AnnouncementsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -60,17 +68,53 @@ export class AnnouncementsService {
 
   async create(dto: CreateAnnouncementDto, actor: CurrentUserPayload) {
     this.validateWindow(dto.startsAt, dto.expiresAt);
-    const created = await this.prisma.announcement.create({ data: { ...dto, startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined, expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined, createdById: actor.id, publishedAt: dto.isPublished ? new Date() : null } });
+    const isPublishing = !!dto.isPublished;
+    const created = await this.prisma.announcement.create({
+      data: {
+        ...dto,
+        startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+        createdById: actor.id,
+        publishedAt: isPublishing ? new Date() : null,
+      },
+    });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Announcement', entityId: String(created.id), newData: created });
+    if (isPublishing) {
+      this.notifyPublished(created).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
+    }
     return created;
   }
 
   async update(id: number, dto: UpdateAnnouncementDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.announcement.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Announcement tidak ditemukan');
-    this.validateWindow(dto.startsAt ?? existing.startsAt?.toISOString(), dto.expiresAt ?? existing.expiresAt?.toISOString());
-    const updated = await this.prisma.announcement.update({ where: { id }, data: { ...dto, startsAt: dto.startsAt ? new Date(dto.startsAt) : dto.startsAt === undefined ? undefined : null, expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : dto.expiresAt === undefined ? undefined : null } });
+
+    const wasUnpublished = !existing.isPublished;
+    const isNowPublishing = typeof dto.isPublished === 'boolean' ? dto.isPublished : existing.isPublished;
+    const transitionedToPublished = wasUnpublished && isNowPublishing;
+
+    this.validateWindow(
+      dto.startsAt ?? existing.startsAt?.toISOString(),
+      dto.expiresAt ?? existing.expiresAt?.toISOString(),
+    );
+
+    const updateData: any = { ...dto };
+    if (dto.startsAt !== undefined) {
+      updateData.startsAt = dto.startsAt ? new Date(dto.startsAt) : null;
+    }
+    if (dto.expiresAt !== undefined) {
+      updateData.expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
+    }
+    if (transitionedToPublished) {
+      updateData.publishedAt = new Date();
+    }
+
+    const updated = await this.prisma.announcement.update({ where: { id }, data: updateData });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
+
+    if (transitionedToPublished) {
+      this.notifyPublished(updated).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
+    }
     return updated;
   }
 
@@ -80,7 +124,54 @@ export class AnnouncementsService {
     if (existing.isPublished) throw new ConflictException('Announcement sudah dipublikasikan');
     const updated = await this.prisma.announcement.update({ where: { id }, data: { isPublished: true, publishedAt: new Date() } });
     await this.audit.log({ actorUserId: actor.id, action: 'PUBLISH', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
+    this.notifyPublished(updated).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
     return updated;
+  }
+
+  private async notifyPublished(announcement: Announcement) {
+    const audienceRoleFilter =
+      announcement.audience === AnnouncementAudience.TENANT
+        ? { role: UserRole.TENANT, isActive: true }
+        : { isActive: true };
+
+    const recipients = await this.prisma.user.findMany({
+      where: audienceRoleFilter,
+      select: { id: true, role: true },
+    });
+
+    for (const user of recipients) {
+      try {
+        const existingNotification = await this.prisma.appNotification.findFirst({
+          where: {
+            recipientUserId: user.id,
+            entityType: 'ANNOUNCEMENT',
+            entityId: String(announcement.id),
+          },
+          select: { id: true },
+        });
+
+        if (existingNotification) {
+          continue;
+        }
+
+        const linkTo = user.role === UserRole.TENANT ? '/portal/announcements' : '/announcements';
+
+        await this.notificationService.create({
+          recipientUserId: user.id,
+          title: 'Pengumuman baru',
+          body: announcement.title,
+          linkTo,
+          entityType: 'ANNOUNCEMENT',
+          entityId: String(announcement.id),
+        });
+      } catch (err) {
+        this.logger.error(
+          `Gagal membuat notifikasi untuk user ${user.id} pada pengumuman ${announcement.id}`,
+          err,
+        );
+        // jangan rethrow agar satu penerima gagal tidak memblok penerima lain
+      }
+    }
   }
 
   private validateWindow(startsAt?: string | null, expiresAt?: string | null) {
