@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
-import { getReminderPreviewAll } from '../../api/reminders';
+import { getReminderPreviewAll, mockSendReminder } from '../../api/reminders';
 import type {
   BookingExpiryCandidate,
   CheckoutCandidate,
   InvoiceDueCandidate,
   InvoiceOverdueCandidate,
+  MockReminderType,
 } from '../../api/reminders';
 
 // ── Helpers ──────────────────────────────────────
@@ -28,6 +30,54 @@ function formatRupiah(value: number | null | undefined): string {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 }
 
+// ── Mock send button ─────────────────────────────
+
+function SimulasiKirimButton({
+  type,
+  candidateId,
+  phone,
+  message,
+  sendingId,
+  onSend,
+}: {
+  type: MockReminderType;
+  candidateId: string;
+  phone: string | null;
+  message: string;
+  sendingId: string | null;
+  onSend: (id: string) => void;
+}) {
+  const id = `${type}-${candidateId}`;
+  const isSending = sendingId === id;
+  const canSend = Boolean(phone && phone.trim() && message.trim());
+
+  if (!canSend) {
+    return (
+      <Button variant="outline-secondary" size="sm" disabled title="Nomor HP/pesan belum tersedia.">
+        Simulasi Kirim
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline-primary"
+      size="sm"
+      disabled={isSending}
+      onClick={() => onSend(id)}
+    >
+      {isSending ? (
+        <>
+          <Spinner animation="border" size="sm" className="me-1" />
+          Mengirim...
+        </>
+      ) : (
+        'Simulasi Kirim'
+      )}
+    </Button>
+  );
+}
+
 // ── Card sub-components ──────────────────────────
 
 function CandidateTable({ children }: { children: React.ReactNode }) {
@@ -41,6 +91,7 @@ function CandidateTable({ children }: { children: React.ReactNode }) {
           <th>Detail</th>
           <th>Waktu</th>
           <th>Pratinjau Pesan</th>
+          <th style={{ width: 130 }}>Aksi</th>
         </tr>
       </thead>
       <tbody>{children}</tbody>
@@ -48,7 +99,15 @@ function CandidateTable({ children }: { children: React.ReactNode }) {
   );
 }
 
-function BookingExpiryRow({ item }: { item: BookingExpiryCandidate }) {
+function BookingExpiryRow({
+  item,
+  sendingId,
+  onSend,
+}: {
+  item: BookingExpiryCandidate;
+  sendingId: string | null;
+  onSend: (id: string) => void;
+}) {
   return (
     <tr>
       <td>{item.tenantName}</td>
@@ -56,12 +115,30 @@ function BookingExpiryRow({ item }: { item: BookingExpiryCandidate }) {
       <td>{item.roomCode ?? '-'}</td>
       <td>Stay #{item.stayId}</td>
       <td>{item.hoursRemaining} jam lagi</td>
-      <td style={{ maxWidth: 300, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td style={{ maxWidth: 250, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td>
+        <SimulasiKirimButton
+          type="BOOKING_EXPIRY"
+          candidateId={String(item.stayId)}
+          phone={item.phone}
+          message={item.messagePreview}
+          sendingId={sendingId}
+          onSend={onSend}
+        />
+      </td>
     </tr>
   );
 }
 
-function InvoiceDueRow({ item }: { item: InvoiceDueCandidate }) {
+function InvoiceDueRow({
+  item,
+  sendingId,
+  onSend,
+}: {
+  item: InvoiceDueCandidate;
+  sendingId: string | null;
+  onSend: (id: string) => void;
+}) {
   return (
     <tr>
       <td>{item.tenantName}</td>
@@ -69,12 +146,30 @@ function InvoiceDueRow({ item }: { item: InvoiceDueCandidate }) {
       <td>{item.roomCode ?? '-'}</td>
       <td>{item.invoiceNumber ?? '-'}<br /><small className="text-muted">{formatRupiah(item.amountRupiah)}</small></td>
       <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Jatuh tempo {formatDate(item.dueDate)}</small></td>
-      <td style={{ maxWidth: 300, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td style={{ maxWidth: 250, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td>
+        <SimulasiKirimButton
+          type="INVOICE_DUE"
+          candidateId={String(item.invoiceId)}
+          phone={item.phone}
+          message={item.messagePreview}
+          sendingId={sendingId}
+          onSend={onSend}
+        />
+      </td>
     </tr>
   );
 }
 
-function InvoiceOverdueRow({ item }: { item: InvoiceOverdueCandidate }) {
+function InvoiceOverdueRow({
+  item,
+  sendingId,
+  onSend,
+}: {
+  item: InvoiceOverdueCandidate;
+  sendingId: string | null;
+  onSend: (id: string) => void;
+}) {
   return (
     <tr>
       <td>{item.tenantName}</td>
@@ -82,12 +177,30 @@ function InvoiceOverdueRow({ item }: { item: InvoiceOverdueCandidate }) {
       <td>{item.roomCode ?? '-'}</td>
       <td>{item.invoiceNumber ?? '-'}<br /><small className="text-muted">{formatRupiah(item.amountRupiah)}</small></td>
       <td className="text-danger fw-semibold">Terlambat {item.daysOverdue} hari<br /><small className="text-muted">Jatuh tempo {formatDate(item.dueDate)}</small></td>
-      <td style={{ maxWidth: 300, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td style={{ maxWidth: 250, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td>
+        <SimulasiKirimButton
+          type="INVOICE_OVERDUE"
+          candidateId={String(item.invoiceId)}
+          phone={item.phone}
+          message={item.messagePreview}
+          sendingId={sendingId}
+          onSend={onSend}
+        />
+      </td>
     </tr>
   );
 }
 
-function CheckoutRow({ item }: { item: CheckoutCandidate }) {
+function CheckoutRow({
+  item,
+  sendingId,
+  onSend,
+}: {
+  item: CheckoutCandidate;
+  sendingId: string | null;
+  onSend: (id: string) => void;
+}) {
   return (
     <tr>
       <td>{item.tenantName}</td>
@@ -95,7 +208,17 @@ function CheckoutRow({ item }: { item: CheckoutCandidate }) {
       <td>{item.roomCode ?? '-'}</td>
       <td>Stay #{item.stayId}</td>
       <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Checkout {formatDate(item.plannedCheckOutDate)}</small></td>
-      <td style={{ maxWidth: 300, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td style={{ maxWidth: 250, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
+      <td>
+        <SimulasiKirimButton
+          type="CHECKOUT"
+          candidateId={String(item.stayId)}
+          phone={item.phone}
+          message={item.messagePreview}
+          sendingId={sendingId}
+          onSend={onSend}
+        />
+      </td>
     </tr>
   );
 }
@@ -140,6 +263,62 @@ export default function ReminderPreviewPage() {
     queryFn: getReminderPreviewAll,
   });
 
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ variant: 'success' | 'danger'; message: string } | null>(null);
+
+  const handleMockSend = async (id: string) => {
+    setSendingId(id);
+    setFeedback(null);
+
+    // Parse type and candidateId from the composite id
+    const prefix = id.split('-')[0];
+    const candidateId = id.slice(prefix.length + 1);
+
+    let type: MockReminderType;
+    let phone: string | null = null;
+    let message = '';
+
+    // Find the candidate data from the query result
+    if (!data) return;
+
+    if (prefix === 'BOOKING_EXPIRY') {
+      type = 'BOOKING_EXPIRY';
+      const item = data.bookingExpiry.find((c) => String(c.stayId) === candidateId);
+      if (item) { phone = item.phone; message = item.messagePreview; }
+    } else if (prefix === 'INVOICE_DUE') {
+      type = 'INVOICE_DUE';
+      const item = data.invoiceDue.find((c) => String(c.invoiceId) === candidateId);
+      if (item) { phone = item.phone; message = item.messagePreview; }
+    } else if (prefix === 'INVOICE_OVERDUE') {
+      type = 'INVOICE_OVERDUE';
+      const item = data.invoiceOverdue.find((c) => String(c.invoiceId) === candidateId);
+      if (item) { phone = item.phone; message = item.messagePreview; }
+    } else if (prefix === 'CHECKOUT') {
+      type = 'CHECKOUT';
+      const item = data.checkout.find((c) => String(c.stayId) === candidateId);
+      if (item) { phone = item.phone; message = item.messagePreview; }
+    } else {
+      setSendingId(null);
+      return;
+    }
+
+    if (!phone || !message) {
+      setFeedback({ variant: 'danger', message: 'Nomor HP atau pesan tidak tersedia untuk kandidat ini.' });
+      setSendingId(null);
+      return;
+    }
+
+    try {
+      await mockSendReminder({ type, candidateId, phone, message });
+      setFeedback({ variant: 'success', message: 'Simulasi pengingat berhasil. WhatsApp belum dikirim sungguhan.' });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Gagal mengirim simulasi.';
+      setFeedback({ variant: 'danger', message: msg });
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <>
@@ -172,13 +351,24 @@ export default function ReminderPreviewPage() {
     <>
       <PageHeader title="Pratinjau Pengingat WhatsApp" description="Lihat kandidat pengingat sebelum pengiriman WhatsApp diaktifkan." />
 
+      {feedback && (
+        <Alert
+          variant={feedback.variant}
+          dismissible
+          onClose={() => setFeedback(null)}
+          className="mb-3"
+        >
+          {feedback.message}
+        </Alert>
+      )}
+
       <Row>
         <Col xs={12}>
           {/* A. Booking hampir kadaluarsa */}
           <ReminderCard title="Booking Hampir Kadaluarsa" variant="warning" count={bookingExpiry.length}>
             <CandidateTable>
               {bookingExpiry.map((item) => (
-                <BookingExpiryRow key={`booking-${item.stayId}`} item={item} />
+                <BookingExpiryRow key={`booking-${item.stayId}`} item={item} sendingId={sendingId} onSend={handleMockSend} />
               ))}
             </CandidateTable>
           </ReminderCard>
@@ -187,7 +377,7 @@ export default function ReminderPreviewPage() {
           <ReminderCard title="Invoice Jatuh Tempo (H-3)" variant="info" count={invoiceDue.length}>
             <CandidateTable>
               {invoiceDue.map((item) => (
-                <InvoiceDueRow key={`due-${item.invoiceId}`} item={item} />
+                <InvoiceDueRow key={`due-${item.invoiceId}`} item={item} sendingId={sendingId} onSend={handleMockSend} />
               ))}
             </CandidateTable>
           </ReminderCard>
@@ -196,7 +386,7 @@ export default function ReminderPreviewPage() {
           <ReminderCard title="Invoice Terlambat" variant="danger" count={invoiceOverdue.length}>
             <CandidateTable>
               {invoiceOverdue.map((item) => (
-                <InvoiceOverdueRow key={`overdue-${item.invoiceId}`} item={item} />
+                <InvoiceOverdueRow key={`overdue-${item.invoiceId}`} item={item} sendingId={sendingId} onSend={handleMockSend} />
               ))}
             </CandidateTable>
           </ReminderCard>
@@ -205,7 +395,7 @@ export default function ReminderPreviewPage() {
           <ReminderCard title="Checkout Mendekat (H-10)" variant="info" count={checkout.length}>
             <CandidateTable>
               {checkout.map((item) => (
-                <CheckoutRow key={`checkout-${item.stayId}`} item={item} />
+                <CheckoutRow key={`checkout-${item.stayId}`} item={item} sendingId={sendingId} onSend={handleMockSend} />
               ))}
             </CandidateTable>
           </ReminderCard>
