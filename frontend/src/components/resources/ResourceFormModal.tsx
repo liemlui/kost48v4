@@ -121,6 +121,16 @@ export default function ResourceFormModal({
   const hasPortalUser = Boolean(portalSummary?.portalUserId);
 
   const updateField = (name: string, value: unknown) => {
+    if (config.path === '/announcements' && name === 'startsAt') {
+      const newStartsAt = value as string;
+      const currentExpiresAt = formState.expiresAt as string | undefined;
+      if (newStartsAt && (!currentExpiresAt || currentExpiresAt <= newStartsAt)) {
+        const nextDay = new Date(newStartsAt);
+        nextDay.setDate(nextDay.getDate() + 1);
+        setFormState({ ...formState, [name]: value, expiresAt: nextDay.toISOString().slice(0, 10) });
+        return;
+      }
+    }
     setFormState({ ...formState, [name]: value });
   };
 
@@ -449,6 +459,26 @@ export default function ResourceFormModal({
                     <CurrencyInput
                       value={typeof currentValue === 'number' ? currentValue : currentValue ? Number(currentValue) : undefined}
                       onChange={(value) => updateField(field.name, value ?? '')}
+                      placeholder={field.placeholder}
+                    />
+                  ) : config.path === '/announcements' && field.name === 'startsAt' ? (
+                    <Form.Control
+                      type="date"
+                      value={String(currentValue ?? '')}
+                      min={new Date().toISOString().slice(0, 10)}
+                      onChange={(event) => updateField(field.name, event.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                  ) : config.path === '/announcements' && field.name === 'expiresAt' ? (
+                    <Form.Control
+                      type="date"
+                      value={String(currentValue ?? '')}
+                      min={
+                        formState.startsAt
+                          ? (() => { const next = new Date(formState.startsAt as string); next.setDate(next.getDate() + 1); return next.toISOString().slice(0, 10); })()
+                          : new Date().toISOString().slice(0, 10)
+                      }
+                      onChange={(event) => updateField(field.name, event.target.value)}
                       placeholder={field.placeholder}
                     />
                   ) : (

@@ -175,8 +175,25 @@ export class AnnouncementsService {
   }
 
   private validateWindow(startsAt?: string | null, expiresAt?: string | null) {
-    if (startsAt && expiresAt && new Date(expiresAt) < new Date(startsAt)) {
-      throw new ConflictException('Window tanggal tidak konsisten');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (startsAt) {
+      const startsDate = new Date(startsAt);
+      startsDate.setHours(0, 0, 0, 0);
+      if (startsDate < today) {
+        throw new ConflictException('Tanggal mulai tayang tidak boleh di masa lalu.');
+      }
+    }
+
+    if (startsAt && expiresAt) {
+      const startsDate = new Date(startsAt);
+      startsDate.setHours(0, 0, 0, 0);
+      const expiresDate = new Date(expiresAt);
+      expiresDate.setHours(0, 0, 0, 0);
+      if (expiresDate <= startsDate) {
+        throw new ConflictException('Tanggal berakhir harus setelah tanggal mulai tayang.');
+      }
     }
   }
 }
