@@ -1262,3 +1262,72 @@ a {
 .notification-bell-toggle::after {
   display: none !important;
 }
+
+/* ===== Payment Urgency Chip ===== */
+.payment-urgency-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px 5px 10px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  white-space: nowrap;
+  background: var(--surface-soft);
+  border-color: var(--border-soft);
+  color: var(--text-main);
+}
+
+.payment-urgency-chip:hover {
+  box-shadow: var(--shadow-subtle);
+}
+
+.payment-urgency-chip .payment-urgency-chip-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.payment-urgency-chip .payment-urgency-chip-label {
+  line-height: 1.2;
+}
+
+/* Danger variant - overdue invoice / imminent booking deadline */
+.payment-urgency-chip-danger {
+  background: var(--color-danger-bg);
+  border-color: rgba(185, 28, 28, 0.25);
+  color: var(--color-danger);
+}
+
+.payment-urgency-chip-danger:hover {
+  background: rgba(185, 28, 28, 0.17);
+  border-color: rgba(185, 28, 28, 0.35);
+}
+
+/* Warning variant - due soon / booking deadline */
+.payment-urgency-chip-warning {
+  background: var(--color-warning-bg);
+  border-color: rgba(180, 83, 9, 0.25);
+  color: var(--color-warning);
+}
+
+.payment-urgency-chip-warning:hover {
+  background: rgba(180, 83, 9, 0.22);
+  border-color: rgba(180, 83, 9, 0.35);
+}
+
+/* Info variant - contract/stay ending */
+.payment-urgency-chip-info {
+  background: var(--color-info-bg);
+  border-color: rgba(29, 78, 216, 0.2);
+  color: var(--color-info);
+}
+
+.payment-urgency-chip-info:hover {
+  background: rgba(29, 78, 216, 0.16);
+  border-color: rgba(29, 78, 216, 0.3);
+}
