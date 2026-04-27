@@ -172,31 +172,31 @@ enum ExpenseCategory {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  fullName     String
-  email        String    @unique
-  passwordHash String
-  role         UserRole
-  tenantId     Int?      @unique
-  isActive     Boolean   @default(true)
+  id                Int       @id @default(autoincrement())
+  fullName          String
+  email             String    @unique
+  passwordHash      String
+  role              UserRole
+  tenantId          Int?      @unique
+  isActive          Boolean   @default(true)
   lastLoginAt       DateTime?
   passwordChangedAt DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  tenant                      Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  announcementsCreated        Announcement[]      @relation("AnnouncementCreatedBy")
-  staysCreated                Stay[]              @relation("StayCreatedBy")
-  invoicesCreated             Invoice[]           @relation("InvoiceCreatedBy")
-  paymentsCaptured            InvoicePayment[]    @relation("InvoicePaymentCapturedBy")
-  ticketsAssigned             Ticket[]            @relation("TicketAssignedTo")
-  meterReadingsRecorded       MeterReading[]      @relation("MeterReadingRecordedBy")
-  inventoryMovementsCreated   InventoryMovement[] @relation("InventoryMovementCreatedBy")
-  wifiSalesCreated            WifiSale[]          @relation("WifiSaleCreatedBy")
-  expensesCreated             Expense[]           @relation("ExpenseCreatedBy")
-  auditLogs                   AuditLog[]          @relation("AuditLogActor")
-  paymentSubmissionsSubmitted PaymentSubmission[] @relation("PaymentSubmissionSubmittedBy")
-  paymentSubmissionsReviewed  PaymentSubmission[] @relation("PaymentSubmissionReviewedBy")
+  tenant                      Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  announcementsCreated        Announcement[]       @relation("AnnouncementCreatedBy")
+  staysCreated                Stay[]               @relation("StayCreatedBy")
+  invoicesCreated             Invoice[]            @relation("InvoiceCreatedBy")
+  paymentsCaptured            InvoicePayment[]     @relation("InvoicePaymentCapturedBy")
+  ticketsAssigned             Ticket[]             @relation("TicketAssignedTo")
+  meterReadingsRecorded       MeterReading[]       @relation("MeterReadingRecordedBy")
+  inventoryMovementsCreated   InventoryMovement[]  @relation("InventoryMovementCreatedBy")
+  wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
+  expensesCreated             Expense[]            @relation("ExpenseCreatedBy")
+  auditLogs                   AuditLog[]           @relation("AuditLogActor")
+  paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
+  paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
   passwordResetTokens         PasswordResetToken[]
   notifications               AppNotification[]
 
@@ -286,14 +286,14 @@ model Stay {
   actualCheckOutDate  DateTime? @db.Date
   expiresAt           DateTime?
 
-  depositAmountRupiah    Int           @default(0)
-  depositPaidAmountRupiah Int          @default(0)
+  depositAmountRupiah     Int                         @default(0)
+  depositPaidAmountRupiah Int                         @default(0)
   depositPaymentStatus    BookingDepositPaymentStatus @default(UNPAID)
-  depositStatus          DepositStatus @default(HELD)
-  depositDeductionRupiah Int           @default(0)
-  depositRefundedRupiah  Int           @default(0)
-  depositRefundedAt      DateTime?
-  depositNote            String?
+  depositStatus           DepositStatus               @default(HELD)
+  depositDeductionRupiah  Int                         @default(0)
+  depositRefundedRupiah   Int                         @default(0)
+  depositRefundedAt       DateTime?
+  depositNote             String?
 
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
@@ -417,14 +417,13 @@ model InvoicePayment {
   @@index([paymentDate])
 }
 
-
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    Int
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -475,31 +474,31 @@ model PaymentSubmission {
 }
 
 model Ticket {
-  id             Int          @id @default(autoincrement())
-  ticketNumber   String       @unique
-  tenantId       Int
-  roomId         Int?
-  stayId         Int?
-  title          String
-  description    String
-  category       String?
-  issueImageUrl              String?
-  issueImageFileKey          String?
-  issueImageOriginalFilename String?
-  issueImageMimeType         String?
-  issueImageFileSizeBytes    Int?
+  id                              Int          @id @default(autoincrement())
+  ticketNumber                    String       @unique
+  tenantId                        Int
+  roomId                          Int?
+  stayId                          Int?
+  title                           String
+  description                     String
+  category                        String?
+  issueImageUrl                   String?
+  issueImageFileKey               String?
+  issueImageOriginalFilename      String?
+  issueImageMimeType              String?
+  issueImageFileSizeBytes         Int?
   resolutionImageUrl              String?
   resolutionImageFileKey          String?
   resolutionImageOriginalFilename String?
   resolutionImageMimeType         String?
   resolutionImageFileSizeBytes    Int?
-  status         TicketStatus @default(OPEN)
-  assignedToId   Int?
-  resolutionNote String?
-  resolvedAt     DateTime?
-  closedAt       DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  status                          TicketStatus @default(OPEN)
+  assignedToId                    Int?
+  resolutionNote                  String?
+  resolvedAt                      DateTime?
+  closedAt                        DateTime?
+  createdAt                       DateTime     @default(now())
+  updatedAt                       DateTime     @updatedAt
 
   tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   room       Room?  @relation(fields: [roomId], references: [id], onDelete: SetNull)
@@ -513,23 +512,23 @@ model Ticket {
 }
 
 model Announcement {
-  id          Int                  @id @default(autoincrement())
-  title       String
-  content     String
-  audience    AnnouncementAudience @default(TENANT)
-  isPublished Boolean              @default(false)
-  isPinned    Boolean              @default(false)
-  publishedAt DateTime?
-  startsAt    DateTime?
-  expiresAt   DateTime?
+  id                    Int                  @id @default(autoincrement())
+  title                 String
+  content               String
+  audience              AnnouncementAudience @default(TENANT)
+  isPublished           Boolean              @default(false)
+  isPinned              Boolean              @default(false)
+  publishedAt           DateTime?
+  startsAt              DateTime?
+  expiresAt             DateTime?
   imageUrl              String?
   imageFileKey          String?
   imageOriginalFilename String?
   imageMimeType         String?
   imageFileSizeBytes    Int?
-  createdById Int?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  createdById           Int?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   createdBy User? @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 

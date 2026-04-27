@@ -99,6 +99,11 @@ export type WifiSale = $Result.DefaultSelection<Prisma.$WifiSalePayload>
  */
 export type Expense = $Result.DefaultSelection<Prisma.$ExpensePayload>
 /**
+ * Model AppNotification
+ * 
+ */
+export type AppNotification = $Result.DefaultSelection<Prisma.$AppNotificationPayload>
+/**
  * Model AuditLog
  * 
  */
@@ -220,6 +225,23 @@ export const PaymentSubmissionStatus: {
 };
 
 export type PaymentSubmissionStatus = (typeof PaymentSubmissionStatus)[keyof typeof PaymentSubmissionStatus]
+
+
+export const PaymentSubmissionTargetType: {
+  INVOICE: 'INVOICE',
+  DEPOSIT: 'DEPOSIT'
+};
+
+export type PaymentSubmissionTargetType = (typeof PaymentSubmissionTargetType)[keyof typeof PaymentSubmissionTargetType]
+
+
+export const BookingDepositPaymentStatus: {
+  UNPAID: 'UNPAID',
+  PARTIAL: 'PARTIAL',
+  PAID: 'PAID'
+};
+
+export type BookingDepositPaymentStatus = (typeof BookingDepositPaymentStatus)[keyof typeof BookingDepositPaymentStatus]
 
 
 export const TicketStatus: {
@@ -360,6 +382,14 @@ export const PaymentMethod: typeof $Enums.PaymentMethod
 export type PaymentSubmissionStatus = $Enums.PaymentSubmissionStatus
 
 export const PaymentSubmissionStatus: typeof $Enums.PaymentSubmissionStatus
+
+export type PaymentSubmissionTargetType = $Enums.PaymentSubmissionTargetType
+
+export const PaymentSubmissionTargetType: typeof $Enums.PaymentSubmissionTargetType
+
+export type BookingDepositPaymentStatus = $Enums.BookingDepositPaymentStatus
+
+export const BookingDepositPaymentStatus: typeof $Enums.BookingDepositPaymentStatus
 
 export type TicketStatus = $Enums.TicketStatus
 
@@ -680,6 +710,16 @@ export class PrismaClient<
     * ```
     */
   get expense(): Prisma.ExpenseDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.appNotification`: Exposes CRUD operations for the **AppNotification** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AppNotifications
+    * const appNotifications = await prisma.appNotification.findMany()
+    * ```
+    */
+  get appNotification(): Prisma.AppNotificationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
@@ -1148,6 +1188,7 @@ export namespace Prisma {
     InventoryMovement: 'InventoryMovement',
     WifiSale: 'WifiSale',
     Expense: 'Expense',
+    AppNotification: 'AppNotification',
     AuditLog: 'AuditLog'
   };
 
@@ -1167,7 +1208,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "wifiSale" | "expense" | "auditLog"
+      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "wifiSale" | "expense" | "appNotification" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2429,6 +2470,80 @@ export namespace Prisma {
           }
         }
       }
+      AppNotification: {
+        payload: Prisma.$AppNotificationPayload<ExtArgs>
+        fields: Prisma.AppNotificationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AppNotificationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AppNotificationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          findFirst: {
+            args: Prisma.AppNotificationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AppNotificationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          findMany: {
+            args: Prisma.AppNotificationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>[]
+          }
+          create: {
+            args: Prisma.AppNotificationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          createMany: {
+            args: Prisma.AppNotificationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AppNotificationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>[]
+          }
+          delete: {
+            args: Prisma.AppNotificationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          update: {
+            args: Prisma.AppNotificationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          deleteMany: {
+            args: Prisma.AppNotificationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AppNotificationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AppNotificationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>[]
+          }
+          upsert: {
+            args: Prisma.AppNotificationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AppNotificationPayload>
+          }
+          aggregate: {
+            args: Prisma.AppNotificationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAppNotification>
+          }
+          groupBy: {
+            args: Prisma.AppNotificationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AppNotificationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AppNotificationCountArgs<ExtArgs>
+            result: $Utils.Optional<AppNotificationCountAggregateOutputType> | number
+          }
+        }
+      }
       AuditLog: {
         payload: Prisma.$AuditLogPayload<ExtArgs>
         fields: Prisma.AuditLogFieldRefs
@@ -2616,6 +2731,7 @@ export namespace Prisma {
     inventoryMovement?: InventoryMovementOmit
     wifiSale?: WifiSaleOmit
     expense?: ExpenseOmit
+    appNotification?: AppNotificationOmit
     auditLog?: AuditLogOmit
   }
 
@@ -2710,6 +2826,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted: number
     paymentSubmissionsReviewed: number
     passwordResetTokens: number
+    notifications: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2726,6 +2843,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: boolean | UserCountOutputTypeCountPaymentSubmissionsSubmittedArgs
     paymentSubmissionsReviewed?: boolean | UserCountOutputTypeCountPaymentSubmissionsReviewedArgs
     passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
+    notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   }
 
   // Custom InputTypes
@@ -2828,6 +2946,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PasswordResetTokenWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AppNotificationWhereInput
   }
 
 
@@ -3371,6 +3496,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3434,6 +3560,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3460,6 +3587,7 @@ export namespace Prisma {
       paymentSubmissionsSubmitted: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
       paymentSubmissionsReviewed: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
       passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
+      notifications: Prisma.$AppNotificationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3881,6 +4009,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted<T extends User$paymentSubmissionsSubmittedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsSubmittedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissionsReviewed<T extends User$paymentSubmissionsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     passwordResetTokens<T extends User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4645,6 +4774,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * User.notifications
+   */
+  export type User$notificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    where?: AppNotificationWhereInput
+    orderBy?: AppNotificationOrderByWithRelationInput | AppNotificationOrderByWithRelationInput[]
+    cursor?: AppNotificationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AppNotificationScalarFieldEnum | AppNotificationScalarFieldEnum[]
   }
 
   /**
@@ -6077,6 +6230,7 @@ export namespace Prisma {
     defaultDepositRupiah: number
     electricityTariffPerKwhRupiah: number
     waterTariffPerM3Rupiah: number
+    images: number
     notes: number
     isActive: number
     createdAt: number
@@ -6158,6 +6312,7 @@ export namespace Prisma {
     defaultDepositRupiah?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
+    images?: true
     notes?: true
     isActive?: true
     createdAt?: true
@@ -6264,6 +6419,7 @@ export namespace Prisma {
     defaultDepositRupiah: number
     electricityTariffPerKwhRupiah: number
     waterTariffPerM3Rupiah: number
+    images: string[]
     notes: string | null
     isActive: boolean
     createdAt: Date
@@ -6302,6 +6458,7 @@ export namespace Prisma {
     defaultDepositRupiah?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -6328,6 +6485,7 @@ export namespace Prisma {
     defaultDepositRupiah?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -6347,6 +6505,7 @@ export namespace Prisma {
     defaultDepositRupiah?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -6366,13 +6525,14 @@ export namespace Prisma {
     defaultDepositRupiah?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | Room$staysArgs<ExtArgs>
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
@@ -6408,6 +6568,7 @@ export namespace Prisma {
       defaultDepositRupiah: number
       electricityTariffPerKwhRupiah: number
       waterTariffPerM3Rupiah: number
+      images: string[]
       notes: string | null
       isActive: boolean
       createdAt: Date
@@ -6853,6 +7014,7 @@ export namespace Prisma {
     readonly defaultDepositRupiah: FieldRef<"Room", 'Int'>
     readonly electricityTariffPerKwhRupiah: FieldRef<"Room", 'Int'>
     readonly waterTariffPerM3Rupiah: FieldRef<"Room", 'Int'>
+    readonly images: FieldRef<"Room", 'String[]'>
     readonly notes: FieldRef<"Room", 'String'>
     readonly isActive: FieldRef<"Room", 'Boolean'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
@@ -7425,6 +7587,7 @@ export namespace Prisma {
     roomId: number | null
     agreedRentAmountRupiah: number | null
     depositAmountRupiah: number | null
+    depositPaidAmountRupiah: number | null
     depositDeductionRupiah: number | null
     depositRefundedRupiah: number | null
     electricityTariffPerKwhRupiah: number | null
@@ -7438,6 +7601,7 @@ export namespace Prisma {
     roomId: number | null
     agreedRentAmountRupiah: number | null
     depositAmountRupiah: number | null
+    depositPaidAmountRupiah: number | null
     depositDeductionRupiah: number | null
     depositRefundedRupiah: number | null
     electricityTariffPerKwhRupiah: number | null
@@ -7457,6 +7621,8 @@ export namespace Prisma {
     actualCheckOutDate: Date | null
     expiresAt: Date | null
     depositAmountRupiah: number | null
+    depositPaidAmountRupiah: number | null
+    depositPaymentStatus: $Enums.BookingDepositPaymentStatus | null
     depositStatus: $Enums.DepositStatus | null
     depositDeductionRupiah: number | null
     depositRefundedRupiah: number | null
@@ -7486,6 +7652,8 @@ export namespace Prisma {
     actualCheckOutDate: Date | null
     expiresAt: Date | null
     depositAmountRupiah: number | null
+    depositPaidAmountRupiah: number | null
+    depositPaymentStatus: $Enums.BookingDepositPaymentStatus | null
     depositStatus: $Enums.DepositStatus | null
     depositDeductionRupiah: number | null
     depositRefundedRupiah: number | null
@@ -7515,6 +7683,8 @@ export namespace Prisma {
     actualCheckOutDate: number
     expiresAt: number
     depositAmountRupiah: number
+    depositPaidAmountRupiah: number
+    depositPaymentStatus: number
     depositStatus: number
     depositDeductionRupiah: number
     depositRefundedRupiah: number
@@ -7540,6 +7710,7 @@ export namespace Prisma {
     roomId?: true
     agreedRentAmountRupiah?: true
     depositAmountRupiah?: true
+    depositPaidAmountRupiah?: true
     depositDeductionRupiah?: true
     depositRefundedRupiah?: true
     electricityTariffPerKwhRupiah?: true
@@ -7553,6 +7724,7 @@ export namespace Prisma {
     roomId?: true
     agreedRentAmountRupiah?: true
     depositAmountRupiah?: true
+    depositPaidAmountRupiah?: true
     depositDeductionRupiah?: true
     depositRefundedRupiah?: true
     electricityTariffPerKwhRupiah?: true
@@ -7572,6 +7744,8 @@ export namespace Prisma {
     actualCheckOutDate?: true
     expiresAt?: true
     depositAmountRupiah?: true
+    depositPaidAmountRupiah?: true
+    depositPaymentStatus?: true
     depositStatus?: true
     depositDeductionRupiah?: true
     depositRefundedRupiah?: true
@@ -7601,6 +7775,8 @@ export namespace Prisma {
     actualCheckOutDate?: true
     expiresAt?: true
     depositAmountRupiah?: true
+    depositPaidAmountRupiah?: true
+    depositPaymentStatus?: true
     depositStatus?: true
     depositDeductionRupiah?: true
     depositRefundedRupiah?: true
@@ -7630,6 +7806,8 @@ export namespace Prisma {
     actualCheckOutDate?: true
     expiresAt?: true
     depositAmountRupiah?: true
+    depositPaidAmountRupiah?: true
+    depositPaymentStatus?: true
     depositStatus?: true
     depositDeductionRupiah?: true
     depositRefundedRupiah?: true
@@ -7746,6 +7924,8 @@ export namespace Prisma {
     actualCheckOutDate: Date | null
     expiresAt: Date | null
     depositAmountRupiah: number
+    depositPaidAmountRupiah: number
+    depositPaymentStatus: $Enums.BookingDepositPaymentStatus
     depositStatus: $Enums.DepositStatus
     depositDeductionRupiah: number
     depositRefundedRupiah: number
@@ -7794,6 +7974,8 @@ export namespace Prisma {
     actualCheckOutDate?: boolean
     expiresAt?: boolean
     depositAmountRupiah?: boolean
+    depositPaidAmountRupiah?: boolean
+    depositPaymentStatus?: boolean
     depositStatus?: boolean
     depositDeductionRupiah?: boolean
     depositRefundedRupiah?: boolean
@@ -7831,6 +8013,8 @@ export namespace Prisma {
     actualCheckOutDate?: boolean
     expiresAt?: boolean
     depositAmountRupiah?: boolean
+    depositPaidAmountRupiah?: boolean
+    depositPaymentStatus?: boolean
     depositStatus?: boolean
     depositDeductionRupiah?: boolean
     depositRefundedRupiah?: boolean
@@ -7863,6 +8047,8 @@ export namespace Prisma {
     actualCheckOutDate?: boolean
     expiresAt?: boolean
     depositAmountRupiah?: boolean
+    depositPaidAmountRupiah?: boolean
+    depositPaymentStatus?: boolean
     depositStatus?: boolean
     depositDeductionRupiah?: boolean
     depositRefundedRupiah?: boolean
@@ -7895,6 +8081,8 @@ export namespace Prisma {
     actualCheckOutDate?: boolean
     expiresAt?: boolean
     depositAmountRupiah?: boolean
+    depositPaidAmountRupiah?: boolean
+    depositPaymentStatus?: boolean
     depositStatus?: boolean
     depositDeductionRupiah?: boolean
     depositRefundedRupiah?: boolean
@@ -7912,7 +8100,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["stay"]>
+  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["stay"]>
   export type StayInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
@@ -7957,6 +8145,8 @@ export namespace Prisma {
       actualCheckOutDate: Date | null
       expiresAt: Date | null
       depositAmountRupiah: number
+      depositPaidAmountRupiah: number
+      depositPaymentStatus: $Enums.BookingDepositPaymentStatus
       depositStatus: $Enums.DepositStatus
       depositDeductionRupiah: number
       depositRefundedRupiah: number
@@ -8413,6 +8603,8 @@ export namespace Prisma {
     readonly actualCheckOutDate: FieldRef<"Stay", 'DateTime'>
     readonly expiresAt: FieldRef<"Stay", 'DateTime'>
     readonly depositAmountRupiah: FieldRef<"Stay", 'Int'>
+    readonly depositPaidAmountRupiah: FieldRef<"Stay", 'Int'>
+    readonly depositPaymentStatus: FieldRef<"Stay", 'BookingDepositPaymentStatus'>
     readonly depositStatus: FieldRef<"Stay", 'DepositStatus'>
     readonly depositDeductionRupiah: FieldRef<"Stay", 'Int'>
     readonly depositRefundedRupiah: FieldRef<"Stay", 'Int'>
@@ -14997,6 +15189,7 @@ export namespace Prisma {
     tenantId: number | null
     submittedById: number | null
     amountRupiah: number | null
+    targetId: number | null
     fileSizeBytes: number | null
     reviewedById: number | null
   }
@@ -15008,6 +15201,7 @@ export namespace Prisma {
     tenantId: number | null
     submittedById: number | null
     amountRupiah: number | null
+    targetId: number | null
     fileSizeBytes: number | null
     reviewedById: number | null
   }
@@ -15021,6 +15215,8 @@ export namespace Prisma {
     amountRupiah: number | null
     paidAt: Date | null
     paymentMethod: $Enums.PaymentMethod | null
+    targetType: $Enums.PaymentSubmissionTargetType | null
+    targetId: number | null
     senderName: string | null
     senderBankName: string | null
     referenceNumber: string | null
@@ -15047,6 +15243,8 @@ export namespace Prisma {
     amountRupiah: number | null
     paidAt: Date | null
     paymentMethod: $Enums.PaymentMethod | null
+    targetType: $Enums.PaymentSubmissionTargetType | null
+    targetId: number | null
     senderName: string | null
     senderBankName: string | null
     referenceNumber: string | null
@@ -15073,6 +15271,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: number
     paymentMethod: number
+    targetType: number
+    targetId: number
     senderName: number
     senderBankName: number
     referenceNumber: number
@@ -15099,6 +15299,7 @@ export namespace Prisma {
     tenantId?: true
     submittedById?: true
     amountRupiah?: true
+    targetId?: true
     fileSizeBytes?: true
     reviewedById?: true
   }
@@ -15110,6 +15311,7 @@ export namespace Prisma {
     tenantId?: true
     submittedById?: true
     amountRupiah?: true
+    targetId?: true
     fileSizeBytes?: true
     reviewedById?: true
   }
@@ -15123,6 +15325,8 @@ export namespace Prisma {
     amountRupiah?: true
     paidAt?: true
     paymentMethod?: true
+    targetType?: true
+    targetId?: true
     senderName?: true
     senderBankName?: true
     referenceNumber?: true
@@ -15149,6 +15353,8 @@ export namespace Prisma {
     amountRupiah?: true
     paidAt?: true
     paymentMethod?: true
+    targetType?: true
+    targetId?: true
     senderName?: true
     senderBankName?: true
     referenceNumber?: true
@@ -15175,6 +15381,8 @@ export namespace Prisma {
     amountRupiah?: true
     paidAt?: true
     paymentMethod?: true
+    targetType?: true
+    targetId?: true
     senderName?: true
     senderBankName?: true
     referenceNumber?: true
@@ -15282,12 +15490,14 @@ export namespace Prisma {
   export type PaymentSubmissionGroupByOutputType = {
     id: number
     stayId: number
-    invoiceId: number
+    invoiceId: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date
     paymentMethod: $Enums.PaymentMethod
+    targetType: $Enums.PaymentSubmissionTargetType
+    targetId: number | null
     senderName: string | null
     senderBankName: string | null
     referenceNumber: string | null
@@ -15333,6 +15543,8 @@ export namespace Prisma {
     amountRupiah?: boolean
     paidAt?: boolean
     paymentMethod?: boolean
+    targetType?: boolean
+    targetId?: boolean
     senderName?: boolean
     senderBankName?: boolean
     referenceNumber?: boolean
@@ -15349,7 +15561,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
@@ -15364,6 +15576,8 @@ export namespace Prisma {
     amountRupiah?: boolean
     paidAt?: boolean
     paymentMethod?: boolean
+    targetType?: boolean
+    targetId?: boolean
     senderName?: boolean
     senderBankName?: boolean
     referenceNumber?: boolean
@@ -15380,7 +15594,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
@@ -15395,6 +15609,8 @@ export namespace Prisma {
     amountRupiah?: boolean
     paidAt?: boolean
     paymentMethod?: boolean
+    targetType?: boolean
+    targetId?: boolean
     senderName?: boolean
     senderBankName?: boolean
     referenceNumber?: boolean
@@ -15411,7 +15627,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
@@ -15426,6 +15642,8 @@ export namespace Prisma {
     amountRupiah?: boolean
     paidAt?: boolean
     paymentMethod?: boolean
+    targetType?: boolean
+    targetId?: boolean
     senderName?: boolean
     senderBankName?: boolean
     referenceNumber?: boolean
@@ -15443,24 +15661,24 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PaymentSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "invoiceId" | "tenantId" | "submittedById" | "amountRupiah" | "paidAt" | "paymentMethod" | "senderName" | "senderBankName" | "referenceNumber" | "notes" | "fileKey" | "fileUrl" | "originalFilename" | "mimeType" | "fileSizeBytes" | "status" | "reviewedById" | "reviewedAt" | "reviewNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["paymentSubmission"]>
+  export type PaymentSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "invoiceId" | "tenantId" | "submittedById" | "amountRupiah" | "paidAt" | "paymentMethod" | "targetType" | "targetId" | "senderName" | "senderBankName" | "referenceNumber" | "notes" | "fileKey" | "fileUrl" | "originalFilename" | "mimeType" | "fileSizeBytes" | "status" | "reviewedById" | "reviewedAt" | "reviewNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["paymentSubmission"]>
   export type PaymentSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
   }
   export type PaymentSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
   }
   export type PaymentSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
-    invoice?: boolean | InvoiceDefaultArgs<ExtArgs>
+    invoice?: boolean | PaymentSubmission$invoiceArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     submittedBy?: boolean | UserDefaultArgs<ExtArgs>
     reviewedBy?: boolean | PaymentSubmission$reviewedByArgs<ExtArgs>
@@ -15470,7 +15688,7 @@ export namespace Prisma {
     name: "PaymentSubmission"
     objects: {
       stay: Prisma.$StayPayload<ExtArgs>
-      invoice: Prisma.$InvoicePayload<ExtArgs>
+      invoice: Prisma.$InvoicePayload<ExtArgs> | null
       tenant: Prisma.$TenantPayload<ExtArgs>
       submittedBy: Prisma.$UserPayload<ExtArgs>
       reviewedBy: Prisma.$UserPayload<ExtArgs> | null
@@ -15478,12 +15696,14 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       stayId: number
-      invoiceId: number
+      invoiceId: number | null
       tenantId: number
       submittedById: number
       amountRupiah: number
       paidAt: Date
       paymentMethod: $Enums.PaymentMethod
+      targetType: $Enums.PaymentSubmissionTargetType
+      targetId: number | null
       senderName: string | null
       senderBankName: string | null
       referenceNumber: string | null
@@ -15894,7 +16114,7 @@ export namespace Prisma {
   export interface Prisma__PaymentSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     stay<T extends StayDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StayDefaultArgs<ExtArgs>>): Prisma__StayClient<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    invoice<T extends InvoiceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InvoiceDefaultArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    invoice<T extends PaymentSubmission$invoiceArgs<ExtArgs> = {}>(args?: Subset<T, PaymentSubmission$invoiceArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     submittedBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     reviewedBy<T extends PaymentSubmission$reviewedByArgs<ExtArgs> = {}>(args?: Subset<T, PaymentSubmission$reviewedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -15935,6 +16155,8 @@ export namespace Prisma {
     readonly amountRupiah: FieldRef<"PaymentSubmission", 'Int'>
     readonly paidAt: FieldRef<"PaymentSubmission", 'DateTime'>
     readonly paymentMethod: FieldRef<"PaymentSubmission", 'PaymentMethod'>
+    readonly targetType: FieldRef<"PaymentSubmission", 'PaymentSubmissionTargetType'>
+    readonly targetId: FieldRef<"PaymentSubmission", 'Int'>
     readonly senderName: FieldRef<"PaymentSubmission", 'String'>
     readonly senderBankName: FieldRef<"PaymentSubmission", 'String'>
     readonly referenceNumber: FieldRef<"PaymentSubmission", 'String'>
@@ -16346,6 +16568,25 @@ export namespace Prisma {
   }
 
   /**
+   * PaymentSubmission.invoice
+   */
+  export type PaymentSubmission$invoiceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+  }
+
+  /**
    * PaymentSubmission.reviewedBy
    */
   export type PaymentSubmission$reviewedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16400,6 +16641,8 @@ export namespace Prisma {
     tenantId: number | null
     roomId: number | null
     stayId: number | null
+    issueImageFileSizeBytes: number | null
+    resolutionImageFileSizeBytes: number | null
     assignedToId: number | null
   }
 
@@ -16408,6 +16651,8 @@ export namespace Prisma {
     tenantId: number | null
     roomId: number | null
     stayId: number | null
+    issueImageFileSizeBytes: number | null
+    resolutionImageFileSizeBytes: number | null
     assignedToId: number | null
   }
 
@@ -16420,6 +16665,16 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: string | null
+    issueImageUrl: string | null
+    issueImageFileKey: string | null
+    issueImageOriginalFilename: string | null
+    issueImageMimeType: string | null
+    issueImageFileSizeBytes: number | null
+    resolutionImageUrl: string | null
+    resolutionImageFileKey: string | null
+    resolutionImageOriginalFilename: string | null
+    resolutionImageMimeType: string | null
+    resolutionImageFileSizeBytes: number | null
     status: $Enums.TicketStatus | null
     assignedToId: number | null
     resolutionNote: string | null
@@ -16438,6 +16693,16 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: string | null
+    issueImageUrl: string | null
+    issueImageFileKey: string | null
+    issueImageOriginalFilename: string | null
+    issueImageMimeType: string | null
+    issueImageFileSizeBytes: number | null
+    resolutionImageUrl: string | null
+    resolutionImageFileKey: string | null
+    resolutionImageOriginalFilename: string | null
+    resolutionImageMimeType: string | null
+    resolutionImageFileSizeBytes: number | null
     status: $Enums.TicketStatus | null
     assignedToId: number | null
     resolutionNote: string | null
@@ -16456,6 +16721,16 @@ export namespace Prisma {
     title: number
     description: number
     category: number
+    issueImageUrl: number
+    issueImageFileKey: number
+    issueImageOriginalFilename: number
+    issueImageMimeType: number
+    issueImageFileSizeBytes: number
+    resolutionImageUrl: number
+    resolutionImageFileKey: number
+    resolutionImageOriginalFilename: number
+    resolutionImageMimeType: number
+    resolutionImageFileSizeBytes: number
     status: number
     assignedToId: number
     resolutionNote: number
@@ -16472,6 +16747,8 @@ export namespace Prisma {
     tenantId?: true
     roomId?: true
     stayId?: true
+    issueImageFileSizeBytes?: true
+    resolutionImageFileSizeBytes?: true
     assignedToId?: true
   }
 
@@ -16480,6 +16757,8 @@ export namespace Prisma {
     tenantId?: true
     roomId?: true
     stayId?: true
+    issueImageFileSizeBytes?: true
+    resolutionImageFileSizeBytes?: true
     assignedToId?: true
   }
 
@@ -16492,6 +16771,16 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    issueImageUrl?: true
+    issueImageFileKey?: true
+    issueImageOriginalFilename?: true
+    issueImageMimeType?: true
+    issueImageFileSizeBytes?: true
+    resolutionImageUrl?: true
+    resolutionImageFileKey?: true
+    resolutionImageOriginalFilename?: true
+    resolutionImageMimeType?: true
+    resolutionImageFileSizeBytes?: true
     status?: true
     assignedToId?: true
     resolutionNote?: true
@@ -16510,6 +16799,16 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    issueImageUrl?: true
+    issueImageFileKey?: true
+    issueImageOriginalFilename?: true
+    issueImageMimeType?: true
+    issueImageFileSizeBytes?: true
+    resolutionImageUrl?: true
+    resolutionImageFileKey?: true
+    resolutionImageOriginalFilename?: true
+    resolutionImageMimeType?: true
+    resolutionImageFileSizeBytes?: true
     status?: true
     assignedToId?: true
     resolutionNote?: true
@@ -16528,6 +16827,16 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    issueImageUrl?: true
+    issueImageFileKey?: true
+    issueImageOriginalFilename?: true
+    issueImageMimeType?: true
+    issueImageFileSizeBytes?: true
+    resolutionImageUrl?: true
+    resolutionImageFileKey?: true
+    resolutionImageOriginalFilename?: true
+    resolutionImageMimeType?: true
+    resolutionImageFileSizeBytes?: true
     status?: true
     assignedToId?: true
     resolutionNote?: true
@@ -16633,6 +16942,16 @@ export namespace Prisma {
     title: string
     description: string
     category: string | null
+    issueImageUrl: string | null
+    issueImageFileKey: string | null
+    issueImageOriginalFilename: string | null
+    issueImageMimeType: string | null
+    issueImageFileSizeBytes: number | null
+    resolutionImageUrl: string | null
+    resolutionImageFileKey: string | null
+    resolutionImageOriginalFilename: string | null
+    resolutionImageMimeType: string | null
+    resolutionImageFileSizeBytes: number | null
     status: $Enums.TicketStatus
     assignedToId: number | null
     resolutionNote: string | null
@@ -16670,6 +16989,16 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    issueImageUrl?: boolean
+    issueImageFileKey?: boolean
+    issueImageOriginalFilename?: boolean
+    issueImageMimeType?: boolean
+    issueImageFileSizeBytes?: boolean
+    resolutionImageUrl?: boolean
+    resolutionImageFileKey?: boolean
+    resolutionImageOriginalFilename?: boolean
+    resolutionImageMimeType?: boolean
+    resolutionImageFileSizeBytes?: boolean
     status?: boolean
     assignedToId?: boolean
     resolutionNote?: boolean
@@ -16692,6 +17021,16 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    issueImageUrl?: boolean
+    issueImageFileKey?: boolean
+    issueImageOriginalFilename?: boolean
+    issueImageMimeType?: boolean
+    issueImageFileSizeBytes?: boolean
+    resolutionImageUrl?: boolean
+    resolutionImageFileKey?: boolean
+    resolutionImageOriginalFilename?: boolean
+    resolutionImageMimeType?: boolean
+    resolutionImageFileSizeBytes?: boolean
     status?: boolean
     assignedToId?: boolean
     resolutionNote?: boolean
@@ -16714,6 +17053,16 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    issueImageUrl?: boolean
+    issueImageFileKey?: boolean
+    issueImageOriginalFilename?: boolean
+    issueImageMimeType?: boolean
+    issueImageFileSizeBytes?: boolean
+    resolutionImageUrl?: boolean
+    resolutionImageFileKey?: boolean
+    resolutionImageOriginalFilename?: boolean
+    resolutionImageMimeType?: boolean
+    resolutionImageFileSizeBytes?: boolean
     status?: boolean
     assignedToId?: boolean
     resolutionNote?: boolean
@@ -16736,6 +17085,16 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    issueImageUrl?: boolean
+    issueImageFileKey?: boolean
+    issueImageOriginalFilename?: boolean
+    issueImageMimeType?: boolean
+    issueImageFileSizeBytes?: boolean
+    resolutionImageUrl?: boolean
+    resolutionImageFileKey?: boolean
+    resolutionImageOriginalFilename?: boolean
+    resolutionImageMimeType?: boolean
+    resolutionImageFileSizeBytes?: boolean
     status?: boolean
     assignedToId?: boolean
     resolutionNote?: boolean
@@ -16745,7 +17104,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "status" | "assignedToId" | "resolutionNote" | "resolvedAt" | "closedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "issueImageUrl" | "issueImageFileKey" | "issueImageOriginalFilename" | "issueImageMimeType" | "issueImageFileSizeBytes" | "resolutionImageUrl" | "resolutionImageFileKey" | "resolutionImageOriginalFilename" | "resolutionImageMimeType" | "resolutionImageFileSizeBytes" | "status" | "assignedToId" | "resolutionNote" | "resolvedAt" | "closedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | Ticket$roomArgs<ExtArgs>
@@ -16782,6 +17141,16 @@ export namespace Prisma {
       title: string
       description: string
       category: string | null
+      issueImageUrl: string | null
+      issueImageFileKey: string | null
+      issueImageOriginalFilename: string | null
+      issueImageMimeType: string | null
+      issueImageFileSizeBytes: number | null
+      resolutionImageUrl: string | null
+      resolutionImageFileKey: string | null
+      resolutionImageOriginalFilename: string | null
+      resolutionImageMimeType: string | null
+      resolutionImageFileSizeBytes: number | null
       status: $Enums.TicketStatus
       assignedToId: number | null
       resolutionNote: string | null
@@ -17224,6 +17593,16 @@ export namespace Prisma {
     readonly title: FieldRef<"Ticket", 'String'>
     readonly description: FieldRef<"Ticket", 'String'>
     readonly category: FieldRef<"Ticket", 'String'>
+    readonly issueImageUrl: FieldRef<"Ticket", 'String'>
+    readonly issueImageFileKey: FieldRef<"Ticket", 'String'>
+    readonly issueImageOriginalFilename: FieldRef<"Ticket", 'String'>
+    readonly issueImageMimeType: FieldRef<"Ticket", 'String'>
+    readonly issueImageFileSizeBytes: FieldRef<"Ticket", 'Int'>
+    readonly resolutionImageUrl: FieldRef<"Ticket", 'String'>
+    readonly resolutionImageFileKey: FieldRef<"Ticket", 'String'>
+    readonly resolutionImageOriginalFilename: FieldRef<"Ticket", 'String'>
+    readonly resolutionImageMimeType: FieldRef<"Ticket", 'String'>
+    readonly resolutionImageFileSizeBytes: FieldRef<"Ticket", 'Int'>
     readonly status: FieldRef<"Ticket", 'TicketStatus'>
     readonly assignedToId: FieldRef<"Ticket", 'Int'>
     readonly resolutionNote: FieldRef<"Ticket", 'String'>
@@ -17716,11 +18095,13 @@ export namespace Prisma {
 
   export type AnnouncementAvgAggregateOutputType = {
     id: number | null
+    imageFileSizeBytes: number | null
     createdById: number | null
   }
 
   export type AnnouncementSumAggregateOutputType = {
     id: number | null
+    imageFileSizeBytes: number | null
     createdById: number | null
   }
 
@@ -17734,6 +18115,11 @@ export namespace Prisma {
     publishedAt: Date | null
     startsAt: Date | null
     expiresAt: Date | null
+    imageUrl: string | null
+    imageFileKey: string | null
+    imageOriginalFilename: string | null
+    imageMimeType: string | null
+    imageFileSizeBytes: number | null
     createdById: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -17749,6 +18135,11 @@ export namespace Prisma {
     publishedAt: Date | null
     startsAt: Date | null
     expiresAt: Date | null
+    imageUrl: string | null
+    imageFileKey: string | null
+    imageOriginalFilename: string | null
+    imageMimeType: string | null
+    imageFileSizeBytes: number | null
     createdById: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -17764,6 +18155,11 @@ export namespace Prisma {
     publishedAt: number
     startsAt: number
     expiresAt: number
+    imageUrl: number
+    imageFileKey: number
+    imageOriginalFilename: number
+    imageMimeType: number
+    imageFileSizeBytes: number
     createdById: number
     createdAt: number
     updatedAt: number
@@ -17773,11 +18169,13 @@ export namespace Prisma {
 
   export type AnnouncementAvgAggregateInputType = {
     id?: true
+    imageFileSizeBytes?: true
     createdById?: true
   }
 
   export type AnnouncementSumAggregateInputType = {
     id?: true
+    imageFileSizeBytes?: true
     createdById?: true
   }
 
@@ -17791,6 +18189,11 @@ export namespace Prisma {
     publishedAt?: true
     startsAt?: true
     expiresAt?: true
+    imageUrl?: true
+    imageFileKey?: true
+    imageOriginalFilename?: true
+    imageMimeType?: true
+    imageFileSizeBytes?: true
     createdById?: true
     createdAt?: true
     updatedAt?: true
@@ -17806,6 +18209,11 @@ export namespace Prisma {
     publishedAt?: true
     startsAt?: true
     expiresAt?: true
+    imageUrl?: true
+    imageFileKey?: true
+    imageOriginalFilename?: true
+    imageMimeType?: true
+    imageFileSizeBytes?: true
     createdById?: true
     createdAt?: true
     updatedAt?: true
@@ -17821,6 +18229,11 @@ export namespace Prisma {
     publishedAt?: true
     startsAt?: true
     expiresAt?: true
+    imageUrl?: true
+    imageFileKey?: true
+    imageOriginalFilename?: true
+    imageMimeType?: true
+    imageFileSizeBytes?: true
     createdById?: true
     createdAt?: true
     updatedAt?: true
@@ -17923,6 +18336,11 @@ export namespace Prisma {
     publishedAt: Date | null
     startsAt: Date | null
     expiresAt: Date | null
+    imageUrl: string | null
+    imageFileKey: string | null
+    imageOriginalFilename: string | null
+    imageMimeType: string | null
+    imageFileSizeBytes: number | null
     createdById: number | null
     createdAt: Date
     updatedAt: Date
@@ -17957,6 +18375,11 @@ export namespace Prisma {
     publishedAt?: boolean
     startsAt?: boolean
     expiresAt?: boolean
+    imageUrl?: boolean
+    imageFileKey?: boolean
+    imageOriginalFilename?: boolean
+    imageMimeType?: boolean
+    imageFileSizeBytes?: boolean
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -17973,6 +18396,11 @@ export namespace Prisma {
     publishedAt?: boolean
     startsAt?: boolean
     expiresAt?: boolean
+    imageUrl?: boolean
+    imageFileKey?: boolean
+    imageOriginalFilename?: boolean
+    imageMimeType?: boolean
+    imageFileSizeBytes?: boolean
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -17989,6 +18417,11 @@ export namespace Prisma {
     publishedAt?: boolean
     startsAt?: boolean
     expiresAt?: boolean
+    imageUrl?: boolean
+    imageFileKey?: boolean
+    imageOriginalFilename?: boolean
+    imageMimeType?: boolean
+    imageFileSizeBytes?: boolean
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -18005,12 +18438,17 @@ export namespace Prisma {
     publishedAt?: boolean
     startsAt?: boolean
     expiresAt?: boolean
+    imageUrl?: boolean
+    imageFileKey?: boolean
+    imageOriginalFilename?: boolean
+    imageMimeType?: boolean
+    imageFileSizeBytes?: boolean
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "audience" | "isPublished" | "isPinned" | "publishedAt" | "startsAt" | "expiresAt" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
+  export type AnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "audience" | "isPublished" | "isPinned" | "publishedAt" | "startsAt" | "expiresAt" | "imageUrl" | "imageFileKey" | "imageOriginalFilename" | "imageMimeType" | "imageFileSizeBytes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
   export type AnnouncementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     createdBy?: boolean | Announcement$createdByArgs<ExtArgs>
   }
@@ -18036,6 +18474,11 @@ export namespace Prisma {
       publishedAt: Date | null
       startsAt: Date | null
       expiresAt: Date | null
+      imageUrl: string | null
+      imageFileKey: string | null
+      imageOriginalFilename: string | null
+      imageMimeType: string | null
+      imageFileSizeBytes: number | null
       createdById: number | null
       createdAt: Date
       updatedAt: Date
@@ -18472,6 +18915,11 @@ export namespace Prisma {
     readonly publishedAt: FieldRef<"Announcement", 'DateTime'>
     readonly startsAt: FieldRef<"Announcement", 'DateTime'>
     readonly expiresAt: FieldRef<"Announcement", 'DateTime'>
+    readonly imageUrl: FieldRef<"Announcement", 'String'>
+    readonly imageFileKey: FieldRef<"Announcement", 'String'>
+    readonly imageOriginalFilename: FieldRef<"Announcement", 'String'>
+    readonly imageMimeType: FieldRef<"Announcement", 'String'>
+    readonly imageFileSizeBytes: FieldRef<"Announcement", 'Int'>
     readonly createdById: FieldRef<"Announcement", 'Int'>
     readonly createdAt: FieldRef<"Announcement", 'DateTime'>
     readonly updatedAt: FieldRef<"Announcement", 'DateTime'>
@@ -18968,6 +19416,7 @@ export namespace Prisma {
     unit: number
     qtyOnHand: number
     minQty: number
+    images: number
     notes: number
     isActive: number
     createdAt: number
@@ -19024,6 +19473,7 @@ export namespace Prisma {
     unit?: true
     qtyOnHand?: true
     minQty?: true
+    images?: true
     notes?: true
     isActive?: true
     createdAt?: true
@@ -19125,6 +19575,7 @@ export namespace Prisma {
     unit: string
     qtyOnHand: Decimal
     minQty: Decimal
+    images: string[]
     notes: string | null
     isActive: boolean
     createdAt: Date
@@ -19158,6 +19609,7 @@ export namespace Prisma {
     unit?: boolean
     qtyOnHand?: boolean
     minQty?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -19175,6 +19627,7 @@ export namespace Prisma {
     unit?: boolean
     qtyOnHand?: boolean
     minQty?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -19189,6 +19642,7 @@ export namespace Prisma {
     unit?: boolean
     qtyOnHand?: boolean
     minQty?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -19203,13 +19657,14 @@ export namespace Prisma {
     unit?: boolean
     qtyOnHand?: boolean
     minQty?: boolean
+    images?: boolean
     notes?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type InventoryItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sku" | "name" | "category" | "unit" | "qtyOnHand" | "minQty" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["inventoryItem"]>
+  export type InventoryItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sku" | "name" | "category" | "unit" | "qtyOnHand" | "minQty" | "images" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["inventoryItem"]>
   export type InventoryItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     roomItems?: boolean | InventoryItem$roomItemsArgs<ExtArgs>
     movements?: boolean | InventoryItem$movementsArgs<ExtArgs>
@@ -19232,6 +19687,7 @@ export namespace Prisma {
       unit: string
       qtyOnHand: Prisma.Decimal
       minQty: Prisma.Decimal
+      images: string[]
       notes: string | null
       isActive: boolean
       createdAt: Date
@@ -19668,6 +20124,7 @@ export namespace Prisma {
     readonly unit: FieldRef<"InventoryItem", 'String'>
     readonly qtyOnHand: FieldRef<"InventoryItem", 'Decimal'>
     readonly minQty: FieldRef<"InventoryItem", 'Decimal'>
+    readonly images: FieldRef<"InventoryItem", 'String[]'>
     readonly notes: FieldRef<"InventoryItem", 'String'>
     readonly isActive: FieldRef<"InventoryItem", 'Boolean'>
     readonly createdAt: FieldRef<"InventoryItem", 'DateTime'>
@@ -24948,6 +25405,1180 @@ export namespace Prisma {
 
 
   /**
+   * Model AppNotification
+   */
+
+  export type AggregateAppNotification = {
+    _count: AppNotificationCountAggregateOutputType | null
+    _avg: AppNotificationAvgAggregateOutputType | null
+    _sum: AppNotificationSumAggregateOutputType | null
+    _min: AppNotificationMinAggregateOutputType | null
+    _max: AppNotificationMaxAggregateOutputType | null
+  }
+
+  export type AppNotificationAvgAggregateOutputType = {
+    id: number | null
+    recipientUserId: number | null
+  }
+
+  export type AppNotificationSumAggregateOutputType = {
+    id: number | null
+    recipientUserId: number | null
+  }
+
+  export type AppNotificationMinAggregateOutputType = {
+    id: number | null
+    recipientUserId: number | null
+    title: string | null
+    body: string | null
+    linkTo: string | null
+    entityType: string | null
+    entityId: string | null
+    isRead: boolean | null
+    readAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AppNotificationMaxAggregateOutputType = {
+    id: number | null
+    recipientUserId: number | null
+    title: string | null
+    body: string | null
+    linkTo: string | null
+    entityType: string | null
+    entityId: string | null
+    isRead: boolean | null
+    readAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AppNotificationCountAggregateOutputType = {
+    id: number
+    recipientUserId: number
+    title: number
+    body: number
+    linkTo: number
+    entityType: number
+    entityId: number
+    isRead: number
+    readAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AppNotificationAvgAggregateInputType = {
+    id?: true
+    recipientUserId?: true
+  }
+
+  export type AppNotificationSumAggregateInputType = {
+    id?: true
+    recipientUserId?: true
+  }
+
+  export type AppNotificationMinAggregateInputType = {
+    id?: true
+    recipientUserId?: true
+    title?: true
+    body?: true
+    linkTo?: true
+    entityType?: true
+    entityId?: true
+    isRead?: true
+    readAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AppNotificationMaxAggregateInputType = {
+    id?: true
+    recipientUserId?: true
+    title?: true
+    body?: true
+    linkTo?: true
+    entityType?: true
+    entityId?: true
+    isRead?: true
+    readAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AppNotificationCountAggregateInputType = {
+    id?: true
+    recipientUserId?: true
+    title?: true
+    body?: true
+    linkTo?: true
+    entityType?: true
+    entityId?: true
+    isRead?: true
+    readAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AppNotificationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AppNotification to aggregate.
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AppNotifications to fetch.
+     */
+    orderBy?: AppNotificationOrderByWithRelationInput | AppNotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AppNotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AppNotifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AppNotifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AppNotifications
+    **/
+    _count?: true | AppNotificationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AppNotificationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AppNotificationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AppNotificationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AppNotificationMaxAggregateInputType
+  }
+
+  export type GetAppNotificationAggregateType<T extends AppNotificationAggregateArgs> = {
+        [P in keyof T & keyof AggregateAppNotification]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAppNotification[P]>
+      : GetScalarType<T[P], AggregateAppNotification[P]>
+  }
+
+
+
+
+  export type AppNotificationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AppNotificationWhereInput
+    orderBy?: AppNotificationOrderByWithAggregationInput | AppNotificationOrderByWithAggregationInput[]
+    by: AppNotificationScalarFieldEnum[] | AppNotificationScalarFieldEnum
+    having?: AppNotificationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AppNotificationCountAggregateInputType | true
+    _avg?: AppNotificationAvgAggregateInputType
+    _sum?: AppNotificationSumAggregateInputType
+    _min?: AppNotificationMinAggregateInputType
+    _max?: AppNotificationMaxAggregateInputType
+  }
+
+  export type AppNotificationGroupByOutputType = {
+    id: number
+    recipientUserId: number
+    title: string
+    body: string
+    linkTo: string | null
+    entityType: string | null
+    entityId: string | null
+    isRead: boolean
+    readAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AppNotificationCountAggregateOutputType | null
+    _avg: AppNotificationAvgAggregateOutputType | null
+    _sum: AppNotificationSumAggregateOutputType | null
+    _min: AppNotificationMinAggregateOutputType | null
+    _max: AppNotificationMaxAggregateOutputType | null
+  }
+
+  type GetAppNotificationGroupByPayload<T extends AppNotificationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AppNotificationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AppNotificationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AppNotificationGroupByOutputType[P]>
+            : GetScalarType<T[P], AppNotificationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AppNotificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    recipientUserId?: boolean
+    title?: boolean
+    body?: boolean
+    linkTo?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    isRead?: boolean
+    readAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["appNotification"]>
+
+  export type AppNotificationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    recipientUserId?: boolean
+    title?: boolean
+    body?: boolean
+    linkTo?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    isRead?: boolean
+    readAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["appNotification"]>
+
+  export type AppNotificationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    recipientUserId?: boolean
+    title?: boolean
+    body?: boolean
+    linkTo?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    isRead?: boolean
+    readAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["appNotification"]>
+
+  export type AppNotificationSelectScalar = {
+    id?: boolean
+    recipientUserId?: boolean
+    title?: boolean
+    body?: boolean
+    linkTo?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    isRead?: boolean
+    readAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AppNotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "recipientUserId" | "title" | "body" | "linkTo" | "entityType" | "entityId" | "isRead" | "readAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appNotification"]>
+  export type AppNotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AppNotificationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AppNotificationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    recipientUser?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AppNotificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AppNotification"
+    objects: {
+      recipientUser: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      recipientUserId: number
+      title: string
+      body: string
+      linkTo: string | null
+      entityType: string | null
+      entityId: string | null
+      isRead: boolean
+      readAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["appNotification"]>
+    composites: {}
+  }
+
+  type AppNotificationGetPayload<S extends boolean | null | undefined | AppNotificationDefaultArgs> = $Result.GetResult<Prisma.$AppNotificationPayload, S>
+
+  type AppNotificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AppNotificationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AppNotificationCountAggregateInputType | true
+    }
+
+  export interface AppNotificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AppNotification'], meta: { name: 'AppNotification' } }
+    /**
+     * Find zero or one AppNotification that matches the filter.
+     * @param {AppNotificationFindUniqueArgs} args - Arguments to find a AppNotification
+     * @example
+     * // Get one AppNotification
+     * const appNotification = await prisma.appNotification.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AppNotificationFindUniqueArgs>(args: SelectSubset<T, AppNotificationFindUniqueArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AppNotification that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AppNotificationFindUniqueOrThrowArgs} args - Arguments to find a AppNotification
+     * @example
+     * // Get one AppNotification
+     * const appNotification = await prisma.appNotification.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AppNotificationFindUniqueOrThrowArgs>(args: SelectSubset<T, AppNotificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AppNotification that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationFindFirstArgs} args - Arguments to find a AppNotification
+     * @example
+     * // Get one AppNotification
+     * const appNotification = await prisma.appNotification.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AppNotificationFindFirstArgs>(args?: SelectSubset<T, AppNotificationFindFirstArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AppNotification that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationFindFirstOrThrowArgs} args - Arguments to find a AppNotification
+     * @example
+     * // Get one AppNotification
+     * const appNotification = await prisma.appNotification.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AppNotificationFindFirstOrThrowArgs>(args?: SelectSubset<T, AppNotificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AppNotifications that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AppNotifications
+     * const appNotifications = await prisma.appNotification.findMany()
+     * 
+     * // Get first 10 AppNotifications
+     * const appNotifications = await prisma.appNotification.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const appNotificationWithIdOnly = await prisma.appNotification.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AppNotificationFindManyArgs>(args?: SelectSubset<T, AppNotificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AppNotification.
+     * @param {AppNotificationCreateArgs} args - Arguments to create a AppNotification.
+     * @example
+     * // Create one AppNotification
+     * const AppNotification = await prisma.appNotification.create({
+     *   data: {
+     *     // ... data to create a AppNotification
+     *   }
+     * })
+     * 
+     */
+    create<T extends AppNotificationCreateArgs>(args: SelectSubset<T, AppNotificationCreateArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AppNotifications.
+     * @param {AppNotificationCreateManyArgs} args - Arguments to create many AppNotifications.
+     * @example
+     * // Create many AppNotifications
+     * const appNotification = await prisma.appNotification.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AppNotificationCreateManyArgs>(args?: SelectSubset<T, AppNotificationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AppNotifications and returns the data saved in the database.
+     * @param {AppNotificationCreateManyAndReturnArgs} args - Arguments to create many AppNotifications.
+     * @example
+     * // Create many AppNotifications
+     * const appNotification = await prisma.appNotification.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AppNotifications and only return the `id`
+     * const appNotificationWithIdOnly = await prisma.appNotification.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AppNotificationCreateManyAndReturnArgs>(args?: SelectSubset<T, AppNotificationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AppNotification.
+     * @param {AppNotificationDeleteArgs} args - Arguments to delete one AppNotification.
+     * @example
+     * // Delete one AppNotification
+     * const AppNotification = await prisma.appNotification.delete({
+     *   where: {
+     *     // ... filter to delete one AppNotification
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AppNotificationDeleteArgs>(args: SelectSubset<T, AppNotificationDeleteArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AppNotification.
+     * @param {AppNotificationUpdateArgs} args - Arguments to update one AppNotification.
+     * @example
+     * // Update one AppNotification
+     * const appNotification = await prisma.appNotification.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AppNotificationUpdateArgs>(args: SelectSubset<T, AppNotificationUpdateArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AppNotifications.
+     * @param {AppNotificationDeleteManyArgs} args - Arguments to filter AppNotifications to delete.
+     * @example
+     * // Delete a few AppNotifications
+     * const { count } = await prisma.appNotification.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AppNotificationDeleteManyArgs>(args?: SelectSubset<T, AppNotificationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AppNotifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AppNotifications
+     * const appNotification = await prisma.appNotification.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AppNotificationUpdateManyArgs>(args: SelectSubset<T, AppNotificationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AppNotifications and returns the data updated in the database.
+     * @param {AppNotificationUpdateManyAndReturnArgs} args - Arguments to update many AppNotifications.
+     * @example
+     * // Update many AppNotifications
+     * const appNotification = await prisma.appNotification.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AppNotifications and only return the `id`
+     * const appNotificationWithIdOnly = await prisma.appNotification.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AppNotificationUpdateManyAndReturnArgs>(args: SelectSubset<T, AppNotificationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AppNotification.
+     * @param {AppNotificationUpsertArgs} args - Arguments to update or create a AppNotification.
+     * @example
+     * // Update or create a AppNotification
+     * const appNotification = await prisma.appNotification.upsert({
+     *   create: {
+     *     // ... data to create a AppNotification
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AppNotification we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AppNotificationUpsertArgs>(args: SelectSubset<T, AppNotificationUpsertArgs<ExtArgs>>): Prisma__AppNotificationClient<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AppNotifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationCountArgs} args - Arguments to filter AppNotifications to count.
+     * @example
+     * // Count the number of AppNotifications
+     * const count = await prisma.appNotification.count({
+     *   where: {
+     *     // ... the filter for the AppNotifications we want to count
+     *   }
+     * })
+    **/
+    count<T extends AppNotificationCountArgs>(
+      args?: Subset<T, AppNotificationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AppNotificationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AppNotification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AppNotificationAggregateArgs>(args: Subset<T, AppNotificationAggregateArgs>): Prisma.PrismaPromise<GetAppNotificationAggregateType<T>>
+
+    /**
+     * Group by AppNotification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AppNotificationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AppNotificationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AppNotificationGroupByArgs['orderBy'] }
+        : { orderBy?: AppNotificationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AppNotificationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAppNotificationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AppNotification model
+   */
+  readonly fields: AppNotificationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AppNotification.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AppNotificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    recipientUser<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AppNotification model
+   */
+  interface AppNotificationFieldRefs {
+    readonly id: FieldRef<"AppNotification", 'Int'>
+    readonly recipientUserId: FieldRef<"AppNotification", 'Int'>
+    readonly title: FieldRef<"AppNotification", 'String'>
+    readonly body: FieldRef<"AppNotification", 'String'>
+    readonly linkTo: FieldRef<"AppNotification", 'String'>
+    readonly entityType: FieldRef<"AppNotification", 'String'>
+    readonly entityId: FieldRef<"AppNotification", 'String'>
+    readonly isRead: FieldRef<"AppNotification", 'Boolean'>
+    readonly readAt: FieldRef<"AppNotification", 'DateTime'>
+    readonly createdAt: FieldRef<"AppNotification", 'DateTime'>
+    readonly updatedAt: FieldRef<"AppNotification", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AppNotification findUnique
+   */
+  export type AppNotificationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which AppNotification to fetch.
+     */
+    where: AppNotificationWhereUniqueInput
+  }
+
+  /**
+   * AppNotification findUniqueOrThrow
+   */
+  export type AppNotificationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which AppNotification to fetch.
+     */
+    where: AppNotificationWhereUniqueInput
+  }
+
+  /**
+   * AppNotification findFirst
+   */
+  export type AppNotificationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which AppNotification to fetch.
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AppNotifications to fetch.
+     */
+    orderBy?: AppNotificationOrderByWithRelationInput | AppNotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AppNotifications.
+     */
+    cursor?: AppNotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AppNotifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AppNotifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AppNotifications.
+     */
+    distinct?: AppNotificationScalarFieldEnum | AppNotificationScalarFieldEnum[]
+  }
+
+  /**
+   * AppNotification findFirstOrThrow
+   */
+  export type AppNotificationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which AppNotification to fetch.
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AppNotifications to fetch.
+     */
+    orderBy?: AppNotificationOrderByWithRelationInput | AppNotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AppNotifications.
+     */
+    cursor?: AppNotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AppNotifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AppNotifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AppNotifications.
+     */
+    distinct?: AppNotificationScalarFieldEnum | AppNotificationScalarFieldEnum[]
+  }
+
+  /**
+   * AppNotification findMany
+   */
+  export type AppNotificationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter, which AppNotifications to fetch.
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AppNotifications to fetch.
+     */
+    orderBy?: AppNotificationOrderByWithRelationInput | AppNotificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AppNotifications.
+     */
+    cursor?: AppNotificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AppNotifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AppNotifications.
+     */
+    skip?: number
+    distinct?: AppNotificationScalarFieldEnum | AppNotificationScalarFieldEnum[]
+  }
+
+  /**
+   * AppNotification create
+   */
+  export type AppNotificationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AppNotification.
+     */
+    data: XOR<AppNotificationCreateInput, AppNotificationUncheckedCreateInput>
+  }
+
+  /**
+   * AppNotification createMany
+   */
+  export type AppNotificationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AppNotifications.
+     */
+    data: AppNotificationCreateManyInput | AppNotificationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AppNotification createManyAndReturn
+   */
+  export type AppNotificationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * The data used to create many AppNotifications.
+     */
+    data: AppNotificationCreateManyInput | AppNotificationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AppNotification update
+   */
+  export type AppNotificationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AppNotification.
+     */
+    data: XOR<AppNotificationUpdateInput, AppNotificationUncheckedUpdateInput>
+    /**
+     * Choose, which AppNotification to update.
+     */
+    where: AppNotificationWhereUniqueInput
+  }
+
+  /**
+   * AppNotification updateMany
+   */
+  export type AppNotificationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AppNotifications.
+     */
+    data: XOR<AppNotificationUpdateManyMutationInput, AppNotificationUncheckedUpdateManyInput>
+    /**
+     * Filter which AppNotifications to update
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * Limit how many AppNotifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AppNotification updateManyAndReturn
+   */
+  export type AppNotificationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * The data used to update AppNotifications.
+     */
+    data: XOR<AppNotificationUpdateManyMutationInput, AppNotificationUncheckedUpdateManyInput>
+    /**
+     * Filter which AppNotifications to update
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * Limit how many AppNotifications to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AppNotification upsert
+   */
+  export type AppNotificationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AppNotification to update in case it exists.
+     */
+    where: AppNotificationWhereUniqueInput
+    /**
+     * In case the AppNotification found by the `where` argument doesn't exist, create a new AppNotification with this data.
+     */
+    create: XOR<AppNotificationCreateInput, AppNotificationUncheckedCreateInput>
+    /**
+     * In case the AppNotification was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AppNotificationUpdateInput, AppNotificationUncheckedUpdateInput>
+  }
+
+  /**
+   * AppNotification delete
+   */
+  export type AppNotificationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+    /**
+     * Filter which AppNotification to delete.
+     */
+    where: AppNotificationWhereUniqueInput
+  }
+
+  /**
+   * AppNotification deleteMany
+   */
+  export type AppNotificationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AppNotifications to delete
+     */
+    where?: AppNotificationWhereInput
+    /**
+     * Limit how many AppNotifications to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AppNotification without action
+   */
+  export type AppNotificationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AppNotification
+     */
+    select?: AppNotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AppNotification
+     */
+    omit?: AppNotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AppNotificationInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model AuditLog
    */
 
@@ -26168,6 +27799,7 @@ export namespace Prisma {
     defaultDepositRupiah: 'defaultDepositRupiah',
     electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
     waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
+    images: 'images',
     notes: 'notes',
     isActive: 'isActive',
     createdAt: 'createdAt',
@@ -26189,6 +27821,8 @@ export namespace Prisma {
     actualCheckOutDate: 'actualCheckOutDate',
     expiresAt: 'expiresAt',
     depositAmountRupiah: 'depositAmountRupiah',
+    depositPaidAmountRupiah: 'depositPaidAmountRupiah',
+    depositPaymentStatus: 'depositPaymentStatus',
     depositStatus: 'depositStatus',
     depositDeductionRupiah: 'depositDeductionRupiah',
     depositRefundedRupiah: 'depositRefundedRupiah',
@@ -26299,6 +27933,8 @@ export namespace Prisma {
     amountRupiah: 'amountRupiah',
     paidAt: 'paidAt',
     paymentMethod: 'paymentMethod',
+    targetType: 'targetType',
+    targetId: 'targetId',
     senderName: 'senderName',
     senderBankName: 'senderBankName',
     referenceNumber: 'referenceNumber',
@@ -26328,6 +27964,16 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     category: 'category',
+    issueImageUrl: 'issueImageUrl',
+    issueImageFileKey: 'issueImageFileKey',
+    issueImageOriginalFilename: 'issueImageOriginalFilename',
+    issueImageMimeType: 'issueImageMimeType',
+    issueImageFileSizeBytes: 'issueImageFileSizeBytes',
+    resolutionImageUrl: 'resolutionImageUrl',
+    resolutionImageFileKey: 'resolutionImageFileKey',
+    resolutionImageOriginalFilename: 'resolutionImageOriginalFilename',
+    resolutionImageMimeType: 'resolutionImageMimeType',
+    resolutionImageFileSizeBytes: 'resolutionImageFileSizeBytes',
     status: 'status',
     assignedToId: 'assignedToId',
     resolutionNote: 'resolutionNote',
@@ -26350,6 +27996,11 @@ export namespace Prisma {
     publishedAt: 'publishedAt',
     startsAt: 'startsAt',
     expiresAt: 'expiresAt',
+    imageUrl: 'imageUrl',
+    imageFileKey: 'imageFileKey',
+    imageOriginalFilename: 'imageOriginalFilename',
+    imageMimeType: 'imageMimeType',
+    imageFileSizeBytes: 'imageFileSizeBytes',
     createdById: 'createdById',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -26366,6 +28017,7 @@ export namespace Prisma {
     unit: 'unit',
     qtyOnHand: 'qtyOnHand',
     minQty: 'minQty',
+    images: 'images',
     notes: 'notes',
     isActive: 'isActive',
     createdAt: 'createdAt',
@@ -26436,6 +28088,23 @@ export namespace Prisma {
   };
 
   export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+  export const AppNotificationScalarFieldEnum: {
+    id: 'id',
+    recipientUserId: 'recipientUserId',
+    title: 'title',
+    body: 'body',
+    linkTo: 'linkTo',
+    entityType: 'entityType',
+    entityId: 'entityId',
+    isRead: 'isRead',
+    readAt: 'readAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AppNotificationScalarFieldEnum = (typeof AppNotificationScalarFieldEnum)[keyof typeof AppNotificationScalarFieldEnum]
 
 
   export const AuditLogScalarFieldEnum: {
@@ -26619,6 +28288,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'BookingDepositPaymentStatus'
+   */
+  export type EnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingDepositPaymentStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'BookingDepositPaymentStatus[]'
+   */
+  export type ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingDepositPaymentStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DepositStatus'
    */
   export type EnumDepositStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DepositStatus'>
@@ -26727,6 +28410,20 @@ export namespace Prisma {
    * Reference to a field of type 'PaymentMethod[]'
    */
   export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentSubmissionTargetType'
+   */
+  export type EnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentSubmissionTargetType'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentSubmissionTargetType[]'
+   */
+  export type ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentSubmissionTargetType[]'>
     
 
 
@@ -26888,6 +28585,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    notifications?: AppNotificationListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -26916,6 +28614,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionOrderByRelationAggregateInput
     paymentSubmissionsReviewed?: PaymentSubmissionOrderByRelationAggregateInput
     passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
+    notifications?: AppNotificationOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -26947,6 +28646,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    notifications?: AppNotificationListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -27122,6 +28822,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFilter<"Room"> | number
     electricityTariffPerKwhRupiah?: IntFilter<"Room"> | number
     waterTariffPerM3Rupiah?: IntFilter<"Room"> | number
+    images?: StringNullableListFilter<"Room">
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
     createdAt?: DateTimeFilter<"Room"> | Date | string
@@ -27147,6 +28848,7 @@ export namespace Prisma {
     defaultDepositRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -27175,6 +28877,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFilter<"Room"> | number
     electricityTariffPerKwhRupiah?: IntFilter<"Room"> | number
     waterTariffPerM3Rupiah?: IntFilter<"Room"> | number
+    images?: StringNullableListFilter<"Room">
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
     createdAt?: DateTimeFilter<"Room"> | Date | string
@@ -27200,6 +28903,7 @@ export namespace Prisma {
     defaultDepositRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -27227,6 +28931,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntWithAggregatesFilter<"Room"> | number
     electricityTariffPerKwhRupiah?: IntWithAggregatesFilter<"Room"> | number
     waterTariffPerM3Rupiah?: IntWithAggregatesFilter<"Room"> | number
+    images?: StringNullableListFilter<"Room">
     notes?: StringNullableWithAggregatesFilter<"Room"> | string | null
     isActive?: BoolWithAggregatesFilter<"Room"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
@@ -27248,6 +28953,8 @@ export namespace Prisma {
     actualCheckOutDate?: DateTimeNullableFilter<"Stay"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     depositAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaidAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFilter<"Stay"> | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFilter<"Stay"> | $Enums.DepositStatus
     depositDeductionRupiah?: IntFilter<"Stay"> | number
     depositRefundedRupiah?: IntFilter<"Stay"> | number
@@ -27284,6 +28991,8 @@ export namespace Prisma {
     actualCheckOutDate?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
+    depositPaymentStatus?: SortOrder
     depositStatus?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
@@ -27323,6 +29032,8 @@ export namespace Prisma {
     actualCheckOutDate?: DateTimeNullableFilter<"Stay"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     depositAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaidAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFilter<"Stay"> | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFilter<"Stay"> | $Enums.DepositStatus
     depositDeductionRupiah?: IntFilter<"Stay"> | number
     depositRefundedRupiah?: IntFilter<"Stay"> | number
@@ -27359,6 +29070,8 @@ export namespace Prisma {
     actualCheckOutDate?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
+    depositPaymentStatus?: SortOrder
     depositStatus?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
@@ -27396,6 +29109,8 @@ export namespace Prisma {
     actualCheckOutDate?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
     expiresAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
     depositAmountRupiah?: IntWithAggregatesFilter<"Stay"> | number
+    depositPaidAmountRupiah?: IntWithAggregatesFilter<"Stay"> | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusWithAggregatesFilter<"Stay"> | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusWithAggregatesFilter<"Stay"> | $Enums.DepositStatus
     depositDeductionRupiah?: IntWithAggregatesFilter<"Stay"> | number
     depositRefundedRupiah?: IntWithAggregatesFilter<"Stay"> | number
@@ -27853,12 +29568,14 @@ export namespace Prisma {
     NOT?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
     id?: IntFilter<"PaymentSubmission"> | number
     stayId?: IntFilter<"PaymentSubmission"> | number
-    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntNullableFilter<"PaymentSubmission"> | number | null
     tenantId?: IntFilter<"PaymentSubmission"> | number
     submittedById?: IntFilter<"PaymentSubmission"> | number
     amountRupiah?: IntFilter<"PaymentSubmission"> | number
     paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionTargetType
+    targetId?: IntNullableFilter<"PaymentSubmission"> | number | null
     senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
     senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
     referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
@@ -27875,7 +29592,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     updatedAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
-    invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
+    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     submittedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -27884,12 +29601,14 @@ export namespace Prisma {
   export type PaymentSubmissionOrderByWithRelationInput = {
     id?: SortOrder
     stayId?: SortOrder
-    invoiceId?: SortOrder
+    invoiceId?: SortOrderInput | SortOrder
     tenantId?: SortOrder
     submittedById?: SortOrder
     amountRupiah?: SortOrder
     paidAt?: SortOrder
     paymentMethod?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrderInput | SortOrder
     senderName?: SortOrderInput | SortOrder
     senderBankName?: SortOrderInput | SortOrder
     referenceNumber?: SortOrderInput | SortOrder
@@ -27918,12 +29637,14 @@ export namespace Prisma {
     OR?: PaymentSubmissionWhereInput[]
     NOT?: PaymentSubmissionWhereInput | PaymentSubmissionWhereInput[]
     stayId?: IntFilter<"PaymentSubmission"> | number
-    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntNullableFilter<"PaymentSubmission"> | number | null
     tenantId?: IntFilter<"PaymentSubmission"> | number
     submittedById?: IntFilter<"PaymentSubmission"> | number
     amountRupiah?: IntFilter<"PaymentSubmission"> | number
     paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionTargetType
+    targetId?: IntNullableFilter<"PaymentSubmission"> | number | null
     senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
     senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
     referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
@@ -27940,7 +29661,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     updatedAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
-    invoice?: XOR<InvoiceScalarRelationFilter, InvoiceWhereInput>
+    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     submittedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
     reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -27949,12 +29670,14 @@ export namespace Prisma {
   export type PaymentSubmissionOrderByWithAggregationInput = {
     id?: SortOrder
     stayId?: SortOrder
-    invoiceId?: SortOrder
+    invoiceId?: SortOrderInput | SortOrder
     tenantId?: SortOrder
     submittedById?: SortOrder
     amountRupiah?: SortOrder
     paidAt?: SortOrder
     paymentMethod?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrderInput | SortOrder
     senderName?: SortOrderInput | SortOrder
     senderBankName?: SortOrderInput | SortOrder
     referenceNumber?: SortOrderInput | SortOrder
@@ -27983,12 +29706,14 @@ export namespace Prisma {
     NOT?: PaymentSubmissionScalarWhereWithAggregatesInput | PaymentSubmissionScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"PaymentSubmission"> | number
     stayId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
-    invoiceId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
+    invoiceId?: IntNullableWithAggregatesFilter<"PaymentSubmission"> | number | null
     tenantId?: IntWithAggregatesFilter<"PaymentSubmission"> | number
     submittedById?: IntWithAggregatesFilter<"PaymentSubmission"> | number
     amountRupiah?: IntWithAggregatesFilter<"PaymentSubmission"> | number
     paidAt?: DateTimeWithAggregatesFilter<"PaymentSubmission"> | Date | string
     paymentMethod?: EnumPaymentMethodWithAggregatesFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeWithAggregatesFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionTargetType
+    targetId?: IntNullableWithAggregatesFilter<"PaymentSubmission"> | number | null
     senderName?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
     senderBankName?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
     referenceNumber?: StringNullableWithAggregatesFilter<"PaymentSubmission"> | string | null
@@ -28018,6 +29743,16 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: StringNullableFilter<"Ticket"> | string | null
+    issueImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    issueImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    issueImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
+    resolutionImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     assignedToId?: IntNullableFilter<"Ticket"> | number | null
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
@@ -28040,6 +29775,16 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrderInput | SortOrder
+    issueImageUrl?: SortOrderInput | SortOrder
+    issueImageFileKey?: SortOrderInput | SortOrder
+    issueImageOriginalFilename?: SortOrderInput | SortOrder
+    issueImageMimeType?: SortOrderInput | SortOrder
+    issueImageFileSizeBytes?: SortOrderInput | SortOrder
+    resolutionImageUrl?: SortOrderInput | SortOrder
+    resolutionImageFileKey?: SortOrderInput | SortOrder
+    resolutionImageOriginalFilename?: SortOrderInput | SortOrder
+    resolutionImageMimeType?: SortOrderInput | SortOrder
+    resolutionImageFileSizeBytes?: SortOrderInput | SortOrder
     status?: SortOrder
     assignedToId?: SortOrderInput | SortOrder
     resolutionNote?: SortOrderInput | SortOrder
@@ -28065,6 +29810,16 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: StringNullableFilter<"Ticket"> | string | null
+    issueImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    issueImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    issueImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
+    resolutionImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     assignedToId?: IntNullableFilter<"Ticket"> | number | null
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
@@ -28087,6 +29842,16 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrderInput | SortOrder
+    issueImageUrl?: SortOrderInput | SortOrder
+    issueImageFileKey?: SortOrderInput | SortOrder
+    issueImageOriginalFilename?: SortOrderInput | SortOrder
+    issueImageMimeType?: SortOrderInput | SortOrder
+    issueImageFileSizeBytes?: SortOrderInput | SortOrder
+    resolutionImageUrl?: SortOrderInput | SortOrder
+    resolutionImageFileKey?: SortOrderInput | SortOrder
+    resolutionImageOriginalFilename?: SortOrderInput | SortOrder
+    resolutionImageMimeType?: SortOrderInput | SortOrder
+    resolutionImageFileSizeBytes?: SortOrderInput | SortOrder
     status?: SortOrder
     assignedToId?: SortOrderInput | SortOrder
     resolutionNote?: SortOrderInput | SortOrder
@@ -28113,6 +29878,16 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"Ticket"> | string
     description?: StringWithAggregatesFilter<"Ticket"> | string
     category?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    issueImageUrl?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    issueImageFileKey?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    issueImageOriginalFilename?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    issueImageMimeType?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    issueImageFileSizeBytes?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
+    resolutionImageUrl?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    resolutionImageFileKey?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    resolutionImageOriginalFilename?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    resolutionImageMimeType?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
+    resolutionImageFileSizeBytes?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
     status?: EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
     assignedToId?: IntNullableWithAggregatesFilter<"Ticket"> | number | null
     resolutionNote?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
@@ -28135,6 +29910,11 @@ export namespace Prisma {
     publishedAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     startsAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
+    imageUrl?: StringNullableFilter<"Announcement"> | string | null
+    imageFileKey?: StringNullableFilter<"Announcement"> | string | null
+    imageOriginalFilename?: StringNullableFilter<"Announcement"> | string | null
+    imageMimeType?: StringNullableFilter<"Announcement"> | string | null
+    imageFileSizeBytes?: IntNullableFilter<"Announcement"> | number | null
     createdById?: IntNullableFilter<"Announcement"> | number | null
     createdAt?: DateTimeFilter<"Announcement"> | Date | string
     updatedAt?: DateTimeFilter<"Announcement"> | Date | string
@@ -28151,6 +29931,11 @@ export namespace Prisma {
     publishedAt?: SortOrderInput | SortOrder
     startsAt?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    imageFileKey?: SortOrderInput | SortOrder
+    imageOriginalFilename?: SortOrderInput | SortOrder
+    imageMimeType?: SortOrderInput | SortOrder
+    imageFileSizeBytes?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -28170,6 +29955,11 @@ export namespace Prisma {
     publishedAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     startsAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
+    imageUrl?: StringNullableFilter<"Announcement"> | string | null
+    imageFileKey?: StringNullableFilter<"Announcement"> | string | null
+    imageOriginalFilename?: StringNullableFilter<"Announcement"> | string | null
+    imageMimeType?: StringNullableFilter<"Announcement"> | string | null
+    imageFileSizeBytes?: IntNullableFilter<"Announcement"> | number | null
     createdById?: IntNullableFilter<"Announcement"> | number | null
     createdAt?: DateTimeFilter<"Announcement"> | Date | string
     updatedAt?: DateTimeFilter<"Announcement"> | Date | string
@@ -28186,6 +29976,11 @@ export namespace Prisma {
     publishedAt?: SortOrderInput | SortOrder
     startsAt?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
+    imageFileKey?: SortOrderInput | SortOrder
+    imageOriginalFilename?: SortOrderInput | SortOrder
+    imageMimeType?: SortOrderInput | SortOrder
+    imageFileSizeBytes?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -28209,6 +30004,11 @@ export namespace Prisma {
     publishedAt?: DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
     startsAt?: DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
     expiresAt?: DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"Announcement"> | string | null
+    imageFileKey?: StringNullableWithAggregatesFilter<"Announcement"> | string | null
+    imageOriginalFilename?: StringNullableWithAggregatesFilter<"Announcement"> | string | null
+    imageMimeType?: StringNullableWithAggregatesFilter<"Announcement"> | string | null
+    imageFileSizeBytes?: IntNullableWithAggregatesFilter<"Announcement"> | number | null
     createdById?: IntNullableWithAggregatesFilter<"Announcement"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Announcement"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Announcement"> | Date | string
@@ -28225,6 +30025,7 @@ export namespace Prisma {
     unit?: StringFilter<"InventoryItem"> | string
     qtyOnHand?: DecimalFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
+    images?: StringNullableListFilter<"InventoryItem">
     notes?: StringNullableFilter<"InventoryItem"> | string | null
     isActive?: BoolFilter<"InventoryItem"> | boolean
     createdAt?: DateTimeFilter<"InventoryItem"> | Date | string
@@ -28241,6 +30042,7 @@ export namespace Prisma {
     unit?: SortOrder
     qtyOnHand?: SortOrder
     minQty?: SortOrder
+    images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -28260,6 +30062,7 @@ export namespace Prisma {
     unit?: StringFilter<"InventoryItem"> | string
     qtyOnHand?: DecimalFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
+    images?: StringNullableListFilter<"InventoryItem">
     notes?: StringNullableFilter<"InventoryItem"> | string | null
     isActive?: BoolFilter<"InventoryItem"> | boolean
     createdAt?: DateTimeFilter<"InventoryItem"> | Date | string
@@ -28276,6 +30079,7 @@ export namespace Prisma {
     unit?: SortOrder
     qtyOnHand?: SortOrder
     minQty?: SortOrder
+    images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -28298,6 +30102,7 @@ export namespace Prisma {
     unit?: StringWithAggregatesFilter<"InventoryItem"> | string
     qtyOnHand?: DecimalWithAggregatesFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
     minQty?: DecimalWithAggregatesFilter<"InventoryItem"> | Decimal | DecimalJsLike | number | string
+    images?: StringNullableListFilter<"InventoryItem">
     notes?: StringNullableWithAggregatesFilter<"InventoryItem"> | string | null
     isActive?: BoolWithAggregatesFilter<"InventoryItem"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"InventoryItem"> | Date | string
@@ -28643,6 +30448,93 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Expense"> | Date | string
   }
 
+  export type AppNotificationWhereInput = {
+    AND?: AppNotificationWhereInput | AppNotificationWhereInput[]
+    OR?: AppNotificationWhereInput[]
+    NOT?: AppNotificationWhereInput | AppNotificationWhereInput[]
+    id?: IntFilter<"AppNotification"> | number
+    recipientUserId?: IntFilter<"AppNotification"> | number
+    title?: StringFilter<"AppNotification"> | string
+    body?: StringFilter<"AppNotification"> | string
+    linkTo?: StringNullableFilter<"AppNotification"> | string | null
+    entityType?: StringNullableFilter<"AppNotification"> | string | null
+    entityId?: StringNullableFilter<"AppNotification"> | string | null
+    isRead?: BoolFilter<"AppNotification"> | boolean
+    readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    createdAt?: DateTimeFilter<"AppNotification"> | Date | string
+    updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
+    recipientUser?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type AppNotificationOrderByWithRelationInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+    title?: SortOrder
+    body?: SortOrder
+    linkTo?: SortOrderInput | SortOrder
+    entityType?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    isRead?: SortOrder
+    readAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    recipientUser?: UserOrderByWithRelationInput
+  }
+
+  export type AppNotificationWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: AppNotificationWhereInput | AppNotificationWhereInput[]
+    OR?: AppNotificationWhereInput[]
+    NOT?: AppNotificationWhereInput | AppNotificationWhereInput[]
+    recipientUserId?: IntFilter<"AppNotification"> | number
+    title?: StringFilter<"AppNotification"> | string
+    body?: StringFilter<"AppNotification"> | string
+    linkTo?: StringNullableFilter<"AppNotification"> | string | null
+    entityType?: StringNullableFilter<"AppNotification"> | string | null
+    entityId?: StringNullableFilter<"AppNotification"> | string | null
+    isRead?: BoolFilter<"AppNotification"> | boolean
+    readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    createdAt?: DateTimeFilter<"AppNotification"> | Date | string
+    updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
+    recipientUser?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type AppNotificationOrderByWithAggregationInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+    title?: SortOrder
+    body?: SortOrder
+    linkTo?: SortOrderInput | SortOrder
+    entityType?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    isRead?: SortOrder
+    readAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AppNotificationCountOrderByAggregateInput
+    _avg?: AppNotificationAvgOrderByAggregateInput
+    _max?: AppNotificationMaxOrderByAggregateInput
+    _min?: AppNotificationMinOrderByAggregateInput
+    _sum?: AppNotificationSumOrderByAggregateInput
+  }
+
+  export type AppNotificationScalarWhereWithAggregatesInput = {
+    AND?: AppNotificationScalarWhereWithAggregatesInput | AppNotificationScalarWhereWithAggregatesInput[]
+    OR?: AppNotificationScalarWhereWithAggregatesInput[]
+    NOT?: AppNotificationScalarWhereWithAggregatesInput | AppNotificationScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"AppNotification"> | number
+    recipientUserId?: IntWithAggregatesFilter<"AppNotification"> | number
+    title?: StringWithAggregatesFilter<"AppNotification"> | string
+    body?: StringWithAggregatesFilter<"AppNotification"> | string
+    linkTo?: StringNullableWithAggregatesFilter<"AppNotification"> | string | null
+    entityType?: StringNullableWithAggregatesFilter<"AppNotification"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"AppNotification"> | string | null
+    isRead?: BoolWithAggregatesFilter<"AppNotification"> | boolean
+    readAt?: DateTimeNullableWithAggregatesFilter<"AppNotification"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AppNotification"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AppNotification"> | Date | string
+  }
+
   export type AuditLogWhereInput = {
     AND?: AuditLogWhereInput | AuditLogWhereInput[]
     OR?: AuditLogWhereInput[]
@@ -28744,6 +30636,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -28771,6 +30664,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUpdateInput = {
@@ -28797,6 +30691,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -28824,6 +30719,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -29024,6 +30920,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -29049,6 +30946,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -29073,6 +30971,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29098,6 +30997,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29123,6 +31023,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -29141,6 +31042,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29160,6 +31062,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29175,6 +31078,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -29210,6 +31115,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -29240,6 +31147,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -29275,6 +31184,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -29308,6 +31219,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -29334,6 +31247,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -29362,6 +31277,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -29837,6 +31754,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -29852,7 +31771,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
-    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice?: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
     tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
     submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
     reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
@@ -29861,12 +31780,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedCreateInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -29888,6 +31809,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29903,7 +31826,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
-    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
     submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
     reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
@@ -29912,12 +31835,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29938,12 +31863,14 @@ export namespace Prisma {
   export type PaymentSubmissionCreateManyInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -29965,6 +31892,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29984,12 +31913,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30012,6 +31943,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -30033,6 +31974,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -30047,6 +31998,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -30068,6 +32029,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30086,6 +32057,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -30100,6 +32081,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -30117,6 +32108,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30135,6 +32136,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: UserCreateNestedOneWithoutAnnouncementsCreatedInput
@@ -30150,6 +32156,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30164,6 +32175,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneWithoutAnnouncementsCreatedNestedInput
@@ -30179,6 +32195,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30194,6 +32215,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30208,6 +32234,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30222,6 +32253,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30234,6 +32270,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -30250,6 +32287,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -30265,6 +32303,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30281,6 +32320,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30297,6 +32337,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -30310,6 +32351,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30324,6 +32366,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30666,6 +32709,100 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AppNotificationCreateInput = {
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    recipientUser: UserCreateNestedOneWithoutNotificationsInput
+  }
+
+  export type AppNotificationUncheckedCreateInput = {
+    id?: number
+    recipientUserId: number
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AppNotificationUpdateInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipientUser?: UserUpdateOneRequiredWithoutNotificationsNestedInput
+  }
+
+  export type AppNotificationUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    recipientUserId?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AppNotificationCreateManyInput = {
+    id?: number
+    recipientUserId: number
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AppNotificationUpdateManyMutationInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AppNotificationUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    recipientUserId?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AuditLogCreateInput = {
     action: string
     entityType: string
@@ -30894,6 +33031,12 @@ export namespace Prisma {
     none?: PasswordResetTokenWhereInput
   }
 
+  export type AppNotificationListRelationFilter = {
+    every?: AppNotificationWhereInput
+    some?: AppNotificationWhereInput
+    none?: AppNotificationWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -30944,6 +33087,10 @@ export namespace Prisma {
   }
 
   export type PasswordResetTokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AppNotificationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -31222,6 +33369,14 @@ export namespace Prisma {
     not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type RoomItemListRelationFilter = {
     every?: RoomItemWhereInput
     some?: RoomItemWhereInput
@@ -31245,6 +33400,7 @@ export namespace Prisma {
     defaultDepositRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    images?: SortOrder
     notes?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -31335,6 +33491,13 @@ export namespace Prisma {
     not?: NestedEnumPricingTermFilter<$PrismaModel> | $Enums.PricingTerm
   }
 
+  export type EnumBookingDepositPaymentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BookingDepositPaymentStatus | EnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel> | $Enums.BookingDepositPaymentStatus
+  }
+
   export type EnumDepositStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.DepositStatus | EnumDepositStatusFieldRefInput<$PrismaModel>
     in?: $Enums.DepositStatus[] | ListEnumDepositStatusFieldRefInput<$PrismaModel>
@@ -31378,6 +33541,8 @@ export namespace Prisma {
     actualCheckOutDate?: SortOrder
     expiresAt?: SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
+    depositPaymentStatus?: SortOrder
     depositStatus?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
@@ -31401,6 +33566,7 @@ export namespace Prisma {
     roomId?: SortOrder
     agreedRentAmountRupiah?: SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
@@ -31420,6 +33586,8 @@ export namespace Prisma {
     actualCheckOutDate?: SortOrder
     expiresAt?: SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
+    depositPaymentStatus?: SortOrder
     depositStatus?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
@@ -31449,6 +33617,8 @@ export namespace Prisma {
     actualCheckOutDate?: SortOrder
     expiresAt?: SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
+    depositPaymentStatus?: SortOrder
     depositStatus?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
@@ -31472,6 +33642,7 @@ export namespace Prisma {
     roomId?: SortOrder
     agreedRentAmountRupiah?: SortOrder
     depositAmountRupiah?: SortOrder
+    depositPaidAmountRupiah?: SortOrder
     depositDeductionRupiah?: SortOrder
     depositRefundedRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
@@ -31497,6 +33668,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPricingTermFilter<$PrismaModel>
     _max?: NestedEnumPricingTermFilter<$PrismaModel>
+  }
+
+  export type EnumBookingDepositPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BookingDepositPaymentStatus | EnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBookingDepositPaymentStatusWithAggregatesFilter<$PrismaModel> | $Enums.BookingDepositPaymentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel>
+    _max?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel>
   }
 
   export type EnumDepositStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -31938,11 +34119,23 @@ export namespace Prisma {
     userId?: SortOrder
   }
 
+  export type EnumPaymentSubmissionTargetTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionTargetType | EnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel> | $Enums.PaymentSubmissionTargetType
+  }
+
   export type EnumPaymentSubmissionStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+  }
+
+  export type InvoiceNullableScalarRelationFilter = {
+    is?: InvoiceWhereInput | null
+    isNot?: InvoiceWhereInput | null
   }
 
   export type PaymentSubmissionCountOrderByAggregateInput = {
@@ -31954,6 +34147,8 @@ export namespace Prisma {
     amountRupiah?: SortOrder
     paidAt?: SortOrder
     paymentMethod?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
     senderName?: SortOrder
     senderBankName?: SortOrder
     referenceNumber?: SortOrder
@@ -31978,6 +34173,7 @@ export namespace Prisma {
     tenantId?: SortOrder
     submittedById?: SortOrder
     amountRupiah?: SortOrder
+    targetId?: SortOrder
     fileSizeBytes?: SortOrder
     reviewedById?: SortOrder
   }
@@ -31991,6 +34187,8 @@ export namespace Prisma {
     amountRupiah?: SortOrder
     paidAt?: SortOrder
     paymentMethod?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
     senderName?: SortOrder
     senderBankName?: SortOrder
     referenceNumber?: SortOrder
@@ -32017,6 +34215,8 @@ export namespace Prisma {
     amountRupiah?: SortOrder
     paidAt?: SortOrder
     paymentMethod?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
     senderName?: SortOrder
     senderBankName?: SortOrder
     referenceNumber?: SortOrder
@@ -32041,8 +34241,19 @@ export namespace Prisma {
     tenantId?: SortOrder
     submittedById?: SortOrder
     amountRupiah?: SortOrder
+    targetId?: SortOrder
     fileSizeBytes?: SortOrder
     reviewedById?: SortOrder
+  }
+
+  export type EnumPaymentSubmissionTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionTargetType | EnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentSubmissionTargetType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel>
   }
 
   export type EnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -32081,6 +34292,16 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    issueImageUrl?: SortOrder
+    issueImageFileKey?: SortOrder
+    issueImageOriginalFilename?: SortOrder
+    issueImageMimeType?: SortOrder
+    issueImageFileSizeBytes?: SortOrder
+    resolutionImageUrl?: SortOrder
+    resolutionImageFileKey?: SortOrder
+    resolutionImageOriginalFilename?: SortOrder
+    resolutionImageMimeType?: SortOrder
+    resolutionImageFileSizeBytes?: SortOrder
     status?: SortOrder
     assignedToId?: SortOrder
     resolutionNote?: SortOrder
@@ -32095,6 +34316,8 @@ export namespace Prisma {
     tenantId?: SortOrder
     roomId?: SortOrder
     stayId?: SortOrder
+    issueImageFileSizeBytes?: SortOrder
+    resolutionImageFileSizeBytes?: SortOrder
     assignedToId?: SortOrder
   }
 
@@ -32107,6 +34330,16 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    issueImageUrl?: SortOrder
+    issueImageFileKey?: SortOrder
+    issueImageOriginalFilename?: SortOrder
+    issueImageMimeType?: SortOrder
+    issueImageFileSizeBytes?: SortOrder
+    resolutionImageUrl?: SortOrder
+    resolutionImageFileKey?: SortOrder
+    resolutionImageOriginalFilename?: SortOrder
+    resolutionImageMimeType?: SortOrder
+    resolutionImageFileSizeBytes?: SortOrder
     status?: SortOrder
     assignedToId?: SortOrder
     resolutionNote?: SortOrder
@@ -32125,6 +34358,16 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    issueImageUrl?: SortOrder
+    issueImageFileKey?: SortOrder
+    issueImageOriginalFilename?: SortOrder
+    issueImageMimeType?: SortOrder
+    issueImageFileSizeBytes?: SortOrder
+    resolutionImageUrl?: SortOrder
+    resolutionImageFileKey?: SortOrder
+    resolutionImageOriginalFilename?: SortOrder
+    resolutionImageMimeType?: SortOrder
+    resolutionImageFileSizeBytes?: SortOrder
     status?: SortOrder
     assignedToId?: SortOrder
     resolutionNote?: SortOrder
@@ -32139,6 +34382,8 @@ export namespace Prisma {
     tenantId?: SortOrder
     roomId?: SortOrder
     stayId?: SortOrder
+    issueImageFileSizeBytes?: SortOrder
+    resolutionImageFileSizeBytes?: SortOrder
     assignedToId?: SortOrder
   }
 
@@ -32169,6 +34414,11 @@ export namespace Prisma {
     publishedAt?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
+    imageUrl?: SortOrder
+    imageFileKey?: SortOrder
+    imageOriginalFilename?: SortOrder
+    imageMimeType?: SortOrder
+    imageFileSizeBytes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -32176,6 +34426,7 @@ export namespace Prisma {
 
   export type AnnouncementAvgOrderByAggregateInput = {
     id?: SortOrder
+    imageFileSizeBytes?: SortOrder
     createdById?: SortOrder
   }
 
@@ -32189,6 +34440,11 @@ export namespace Prisma {
     publishedAt?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
+    imageUrl?: SortOrder
+    imageFileKey?: SortOrder
+    imageOriginalFilename?: SortOrder
+    imageMimeType?: SortOrder
+    imageFileSizeBytes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -32204,6 +34460,11 @@ export namespace Prisma {
     publishedAt?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
+    imageUrl?: SortOrder
+    imageFileKey?: SortOrder
+    imageOriginalFilename?: SortOrder
+    imageMimeType?: SortOrder
+    imageFileSizeBytes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -32211,6 +34472,7 @@ export namespace Prisma {
 
   export type AnnouncementSumOrderByAggregateInput = {
     id?: SortOrder
+    imageFileSizeBytes?: SortOrder
     createdById?: SortOrder
   }
 
@@ -32232,6 +34494,7 @@ export namespace Prisma {
     unit?: SortOrder
     qtyOnHand?: SortOrder
     minQty?: SortOrder
+    images?: SortOrder
     notes?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -32566,6 +34829,58 @@ export namespace Prisma {
     _min?: NestedEnumExpenseCategoryFilter<$PrismaModel>
     _max?: NestedEnumExpenseCategoryFilter<$PrismaModel>
   }
+
+  export type AppNotificationCountOrderByAggregateInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+    title?: SortOrder
+    body?: SortOrder
+    linkTo?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    isRead?: SortOrder
+    readAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AppNotificationAvgOrderByAggregateInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+  }
+
+  export type AppNotificationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+    title?: SortOrder
+    body?: SortOrder
+    linkTo?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    isRead?: SortOrder
+    readAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AppNotificationMinOrderByAggregateInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+    title?: SortOrder
+    body?: SortOrder
+    linkTo?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    isRead?: SortOrder
+    readAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AppNotificationSumOrderByAggregateInput = {
+    id?: SortOrder
+    recipientUserId?: SortOrder
+  }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -32753,6 +35068,13 @@ export namespace Prisma {
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
   }
 
+  export type AppNotificationCreateNestedManyWithoutRecipientUserInput = {
+    create?: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput> | AppNotificationCreateWithoutRecipientUserInput[] | AppNotificationUncheckedCreateWithoutRecipientUserInput[]
+    connectOrCreate?: AppNotificationCreateOrConnectWithoutRecipientUserInput | AppNotificationCreateOrConnectWithoutRecipientUserInput[]
+    createMany?: AppNotificationCreateManyRecipientUserInputEnvelope
+    connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -32842,6 +35164,13 @@ export namespace Prisma {
     connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
     createMany?: PasswordResetTokenCreateManyUserInputEnvelope
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+  }
+
+  export type AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput = {
+    create?: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput> | AppNotificationCreateWithoutRecipientUserInput[] | AppNotificationUncheckedCreateWithoutRecipientUserInput[]
+    connectOrCreate?: AppNotificationCreateOrConnectWithoutRecipientUserInput | AppNotificationCreateOrConnectWithoutRecipientUserInput[]
+    createMany?: AppNotificationCreateManyRecipientUserInputEnvelope
+    connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -33056,6 +35385,20 @@ export namespace Prisma {
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
   }
 
+  export type AppNotificationUpdateManyWithoutRecipientUserNestedInput = {
+    create?: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput> | AppNotificationCreateWithoutRecipientUserInput[] | AppNotificationUncheckedCreateWithoutRecipientUserInput[]
+    connectOrCreate?: AppNotificationCreateOrConnectWithoutRecipientUserInput | AppNotificationCreateOrConnectWithoutRecipientUserInput[]
+    upsert?: AppNotificationUpsertWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpsertWithWhereUniqueWithoutRecipientUserInput[]
+    createMany?: AppNotificationCreateManyRecipientUserInputEnvelope
+    set?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    disconnect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    delete?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    update?: AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput[]
+    updateMany?: AppNotificationUpdateManyWithWhereWithoutRecipientUserInput | AppNotificationUpdateManyWithWhereWithoutRecipientUserInput[]
+    deleteMany?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -33254,6 +35597,20 @@ export namespace Prisma {
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
   }
 
+  export type AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput = {
+    create?: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput> | AppNotificationCreateWithoutRecipientUserInput[] | AppNotificationUncheckedCreateWithoutRecipientUserInput[]
+    connectOrCreate?: AppNotificationCreateOrConnectWithoutRecipientUserInput | AppNotificationCreateOrConnectWithoutRecipientUserInput[]
+    upsert?: AppNotificationUpsertWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpsertWithWhereUniqueWithoutRecipientUserInput[]
+    createMany?: AppNotificationCreateManyRecipientUserInputEnvelope
+    set?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    disconnect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    delete?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+    update?: AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput[]
+    updateMany?: AppNotificationUpdateManyWithWhereWithoutRecipientUserInput | AppNotificationUpdateManyWithWhereWithoutRecipientUserInput[]
+    deleteMany?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -33420,6 +35777,10 @@ export namespace Prisma {
     deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
+  export type RoomCreateimagesInput = {
+    set: string[]
+  }
+
   export type StayCreateNestedManyWithoutRoomInput = {
     create?: XOR<StayCreateWithoutRoomInput, StayUncheckedCreateWithoutRoomInput> | StayCreateWithoutRoomInput[] | StayUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: StayCreateOrConnectWithoutRoomInput | StayCreateOrConnectWithoutRoomInput[]
@@ -33506,6 +35867,11 @@ export namespace Prisma {
 
   export type EnumRoomStatusFieldUpdateOperationsInput = {
     set?: $Enums.RoomStatus
+  }
+
+  export type RoomUpdateimagesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type StayUpdateManyWithoutRoomNestedInput = {
@@ -33756,6 +36122,10 @@ export namespace Prisma {
 
   export type EnumPricingTermFieldUpdateOperationsInput = {
     set?: $Enums.PricingTerm
+  }
+
+  export type EnumBookingDepositPaymentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.BookingDepositPaymentStatus
   }
 
   export type EnumDepositStatusFieldUpdateOperationsInput = {
@@ -34210,6 +36580,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentSubmissionTargetType
+  }
+
   export type EnumPaymentSubmissionStatusFieldUpdateOperationsInput = {
     set?: $Enums.PaymentSubmissionStatus
   }
@@ -34222,10 +36596,12 @@ export namespace Prisma {
     update?: XOR<XOR<StayUpdateToOneWithWhereWithoutPaymentSubmissionsInput, StayUpdateWithoutPaymentSubmissionsInput>, StayUncheckedUpdateWithoutPaymentSubmissionsInput>
   }
 
-  export type InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput = {
+  export type InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput = {
     create?: XOR<InvoiceCreateWithoutPaymentSubmissionsInput, InvoiceUncheckedCreateWithoutPaymentSubmissionsInput>
     connectOrCreate?: InvoiceCreateOrConnectWithoutPaymentSubmissionsInput
     upsert?: InvoiceUpsertWithoutPaymentSubmissionsInput
+    disconnect?: InvoiceWhereInput | boolean
+    delete?: InvoiceWhereInput | boolean
     connect?: InvoiceWhereUniqueInput
     update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutPaymentSubmissionsInput, InvoiceUpdateWithoutPaymentSubmissionsInput>, InvoiceUncheckedUpdateWithoutPaymentSubmissionsInput>
   }
@@ -34342,6 +36718,10 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAnnouncementsCreatedInput, UserUpdateWithoutAnnouncementsCreatedInput>, UserUncheckedUpdateWithoutAnnouncementsCreatedInput>
   }
 
+  export type InventoryItemCreateimagesInput = {
+    set: string[]
+  }
+
   export type RoomItemCreateNestedManyWithoutItemInput = {
     create?: XOR<RoomItemCreateWithoutItemInput, RoomItemUncheckedCreateWithoutItemInput> | RoomItemCreateWithoutItemInput[] | RoomItemUncheckedCreateWithoutItemInput[]
     connectOrCreate?: RoomItemCreateOrConnectWithoutItemInput | RoomItemCreateOrConnectWithoutItemInput[]
@@ -34368,6 +36748,11 @@ export namespace Prisma {
     connectOrCreate?: InventoryMovementCreateOrConnectWithoutItemInput | InventoryMovementCreateOrConnectWithoutItemInput[]
     createMany?: InventoryMovementCreateManyItemInputEnvelope
     connect?: InventoryMovementWhereUniqueInput | InventoryMovementWhereUniqueInput[]
+  }
+
+  export type InventoryItemUpdateimagesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type RoomItemUpdateManyWithoutItemNestedInput = {
@@ -34578,6 +36963,20 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutExpensesCreatedInput, UserUpdateWithoutExpensesCreatedInput>, UserUncheckedUpdateWithoutExpensesCreatedInput>
+  }
+
+  export type UserCreateNestedOneWithoutNotificationsInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
+    upsert?: UserUpsertWithoutNotificationsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationsInput, UserUpdateWithoutNotificationsInput>, UserUncheckedUpdateWithoutNotificationsInput>
   }
 
   export type UserCreateNestedOneWithoutAuditLogsInput = {
@@ -34862,6 +37261,13 @@ export namespace Prisma {
     not?: NestedEnumPricingTermFilter<$PrismaModel> | $Enums.PricingTerm
   }
 
+  export type NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BookingDepositPaymentStatus | EnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel> | $Enums.BookingDepositPaymentStatus
+  }
+
   export type NestedEnumDepositStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.DepositStatus | EnumDepositStatusFieldRefInput<$PrismaModel>
     in?: $Enums.DepositStatus[] | ListEnumDepositStatusFieldRefInput<$PrismaModel>
@@ -34901,6 +37307,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPricingTermFilter<$PrismaModel>
     _max?: NestedEnumPricingTermFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBookingDepositPaymentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BookingDepositPaymentStatus | EnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BookingDepositPaymentStatus[] | ListEnumBookingDepositPaymentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBookingDepositPaymentStatusWithAggregatesFilter<$PrismaModel> | $Enums.BookingDepositPaymentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel>
+    _max?: NestedEnumBookingDepositPaymentStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumDepositStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -35045,11 +37461,28 @@ export namespace Prisma {
     _max?: NestedEnumPaymentMethodFilter<$PrismaModel>
   }
 
+  export type NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionTargetType | EnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel> | $Enums.PaymentSubmissionTargetType
+  }
+
   export type NestedEnumPaymentSubmissionStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.PaymentSubmissionStatus | EnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     in?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.PaymentSubmissionStatus[] | ListEnumPaymentSubmissionStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumPaymentSubmissionStatusFilter<$PrismaModel> | $Enums.PaymentSubmissionStatus
+  }
+
+  export type NestedEnumPaymentSubmissionTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentSubmissionTargetType | EnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentSubmissionTargetType[] | ListEnumPaymentSubmissionTargetTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentSubmissionTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentSubmissionTargetType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentSubmissionTargetTypeFilter<$PrismaModel>
   }
 
   export type NestedEnumPaymentSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -35244,6 +37677,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -35258,6 +37696,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -35281,6 +37724,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -35315,6 +37760,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -35432,6 +37879,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -35452,6 +37909,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -35635,6 +38102,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -35650,7 +38119,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
-    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice?: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
     tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
     reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
   }
@@ -35658,11 +38127,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedCreateWithoutSubmittedByInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -35694,6 +38165,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -35709,7 +38182,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
-    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice?: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
     tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
     submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
   }
@@ -35717,12 +38190,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedCreateWithoutReviewedByInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -35772,6 +38247,41 @@ export namespace Prisma {
 
   export type PasswordResetTokenCreateManyUserInputEnvelope = {
     data: PasswordResetTokenCreateManyUserInput | PasswordResetTokenCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AppNotificationCreateWithoutRecipientUserInput = {
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AppNotificationUncheckedCreateWithoutRecipientUserInput = {
+    id?: number
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AppNotificationCreateOrConnectWithoutRecipientUserInput = {
+    where: AppNotificationWhereUniqueInput
+    create: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput>
+  }
+
+  export type AppNotificationCreateManyRecipientUserInputEnvelope = {
+    data: AppNotificationCreateManyRecipientUserInput | AppNotificationCreateManyRecipientUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -35858,6 +38368,11 @@ export namespace Prisma {
     publishedAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     startsAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Announcement"> | Date | string | null
+    imageUrl?: StringNullableFilter<"Announcement"> | string | null
+    imageFileKey?: StringNullableFilter<"Announcement"> | string | null
+    imageOriginalFilename?: StringNullableFilter<"Announcement"> | string | null
+    imageMimeType?: StringNullableFilter<"Announcement"> | string | null
+    imageFileSizeBytes?: IntNullableFilter<"Announcement"> | number | null
     createdById?: IntNullableFilter<"Announcement"> | number | null
     createdAt?: DateTimeFilter<"Announcement"> | Date | string
     updatedAt?: DateTimeFilter<"Announcement"> | Date | string
@@ -35894,6 +38409,8 @@ export namespace Prisma {
     actualCheckOutDate?: DateTimeNullableFilter<"Stay"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     depositAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaidAmountRupiah?: IntFilter<"Stay"> | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFilter<"Stay"> | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFilter<"Stay"> | $Enums.DepositStatus
     depositDeductionRupiah?: IntFilter<"Stay"> | number
     depositRefundedRupiah?: IntFilter<"Stay"> | number
@@ -36008,6 +38525,16 @@ export namespace Prisma {
     title?: StringFilter<"Ticket"> | string
     description?: StringFilter<"Ticket"> | string
     category?: StringNullableFilter<"Ticket"> | string | null
+    issueImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    issueImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    issueImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    issueImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
+    resolutionImageUrl?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileKey?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageOriginalFilename?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageMimeType?: StringNullableFilter<"Ticket"> | string | null
+    resolutionImageFileSizeBytes?: IntNullableFilter<"Ticket"> | number | null
     status?: EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
     assignedToId?: IntNullableFilter<"Ticket"> | number | null
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
@@ -36197,12 +38724,14 @@ export namespace Prisma {
     NOT?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
     id?: IntFilter<"PaymentSubmission"> | number
     stayId?: IntFilter<"PaymentSubmission"> | number
-    invoiceId?: IntFilter<"PaymentSubmission"> | number
+    invoiceId?: IntNullableFilter<"PaymentSubmission"> | number | null
     tenantId?: IntFilter<"PaymentSubmission"> | number
     submittedById?: IntFilter<"PaymentSubmission"> | number
     amountRupiah?: IntFilter<"PaymentSubmission"> | number
     paidAt?: DateTimeFilter<"PaymentSubmission"> | Date | string
     paymentMethod?: EnumPaymentMethodFilter<"PaymentSubmission"> | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFilter<"PaymentSubmission"> | $Enums.PaymentSubmissionTargetType
+    targetId?: IntNullableFilter<"PaymentSubmission"> | number | null
     senderName?: StringNullableFilter<"PaymentSubmission"> | string | null
     senderBankName?: StringNullableFilter<"PaymentSubmission"> | string | null
     referenceNumber?: StringNullableFilter<"PaymentSubmission"> | string | null
@@ -36264,6 +38793,39 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
   }
 
+  export type AppNotificationUpsertWithWhereUniqueWithoutRecipientUserInput = {
+    where: AppNotificationWhereUniqueInput
+    update: XOR<AppNotificationUpdateWithoutRecipientUserInput, AppNotificationUncheckedUpdateWithoutRecipientUserInput>
+    create: XOR<AppNotificationCreateWithoutRecipientUserInput, AppNotificationUncheckedCreateWithoutRecipientUserInput>
+  }
+
+  export type AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput = {
+    where: AppNotificationWhereUniqueInput
+    data: XOR<AppNotificationUpdateWithoutRecipientUserInput, AppNotificationUncheckedUpdateWithoutRecipientUserInput>
+  }
+
+  export type AppNotificationUpdateManyWithWhereWithoutRecipientUserInput = {
+    where: AppNotificationScalarWhereInput
+    data: XOR<AppNotificationUpdateManyMutationInput, AppNotificationUncheckedUpdateManyWithoutRecipientUserInput>
+  }
+
+  export type AppNotificationScalarWhereInput = {
+    AND?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+    OR?: AppNotificationScalarWhereInput[]
+    NOT?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+    id?: IntFilter<"AppNotification"> | number
+    recipientUserId?: IntFilter<"AppNotification"> | number
+    title?: StringFilter<"AppNotification"> | string
+    body?: StringFilter<"AppNotification"> | string
+    linkTo?: StringNullableFilter<"AppNotification"> | string | null
+    entityType?: StringNullableFilter<"AppNotification"> | string | null
+    entityId?: StringNullableFilter<"AppNotification"> | string | null
+    isRead?: BoolFilter<"AppNotification"> | boolean
+    readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    createdAt?: DateTimeFilter<"AppNotification"> | Date | string
+    updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
+  }
+
   export type UserCreateWithoutTenantInput = {
     fullName: string
     email: string
@@ -36287,6 +38849,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -36313,6 +38876,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
@@ -36329,6 +38893,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -36362,6 +38928,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -36398,6 +38966,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -36417,6 +38995,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -36440,6 +39028,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -36455,7 +39045,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutPaymentSubmissionsInput
-    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice?: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
     submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
     reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
   }
@@ -36463,11 +39053,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedCreateWithoutTenantInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -36529,6 +39121,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -36555,6 +39148,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -36614,6 +39208,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -36647,6 +39243,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -36712,6 +39310,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -36731,6 +39339,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -37019,6 +39637,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -37043,6 +39662,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -37082,6 +39702,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -37108,6 +39729,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -37169,6 +39791,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -37188,6 +39820,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -37250,6 +39892,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -37264,7 +39908,7 @@ export namespace Prisma {
     reviewNotes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    invoice: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
+    invoice?: InvoiceCreateNestedOneWithoutPaymentSubmissionsInput
     tenant: TenantCreateNestedOneWithoutPaymentSubmissionsInput
     submittedBy: UserCreateNestedOneWithoutPaymentSubmissionsSubmittedInput
     reviewedBy?: UserCreateNestedOneWithoutPaymentSubmissionsReviewedInput
@@ -37272,12 +39916,14 @@ export namespace Prisma {
 
   export type PaymentSubmissionUncheckedCreateWithoutStayInput = {
     id?: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -37382,6 +40028,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37406,6 +40053,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37451,6 +40099,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -37477,6 +40126,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -37555,6 +40205,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -37579,6 +40230,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -37618,6 +40270,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -37644,6 +40297,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -37674,6 +40328,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37698,6 +40353,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37743,6 +40399,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -37769,6 +40426,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -37780,6 +40438,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -37814,6 +40474,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -37862,6 +40524,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -37888,6 +40551,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -37969,6 +40633,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -37997,6 +40663,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -38044,6 +40712,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -38078,6 +40748,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -38132,6 +40804,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -38158,6 +40831,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -38387,6 +41061,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -38413,6 +41088,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -38504,6 +41180,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -38530,6 +41207,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -38555,6 +41233,7 @@ export namespace Prisma {
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -38581,6 +41260,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -38622,6 +41302,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -38648,6 +41329,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type StayCreateWithoutPaymentSubmissionsInput = {
@@ -38659,6 +41341,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -38693,6 +41377,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -38833,6 +41519,7 @@ export namespace Prisma {
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
@@ -38859,6 +41546,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
@@ -38889,6 +41577,7 @@ export namespace Prisma {
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
@@ -38915,6 +41604,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
@@ -38942,6 +41632,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -38976,6 +41668,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -39134,6 +41828,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
@@ -39160,6 +41855,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
@@ -39196,6 +41892,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
@@ -39222,6 +41919,7 @@ export namespace Prisma {
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -39284,6 +41982,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39308,6 +42007,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39333,6 +42033,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -39367,6 +42069,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -39415,6 +42119,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -39441,6 +42146,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -39525,6 +42231,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39549,6 +42256,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39580,6 +42288,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -39614,6 +42324,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -39668,6 +42380,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -39694,6 +42407,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -39719,6 +42433,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -39745,6 +42460,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -39786,6 +42502,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -39812,6 +42529,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -39918,6 +42636,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39942,6 +42661,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39965,6 +42685,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39980,6 +42701,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40015,6 +42737,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40039,6 +42762,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40068,6 +42792,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40083,6 +42808,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40097,6 +42823,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40112,6 +42839,7 @@ export namespace Prisma {
     unit?: string
     qtyOnHand?: Decimal | DecimalJsLike | number | string
     minQty?: Decimal | DecimalJsLike | number | string
+    images?: InventoryItemCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40136,6 +42864,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40160,6 +42889,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40199,6 +42929,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -40225,6 +42956,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -40250,6 +42982,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40265,6 +42998,7 @@ export namespace Prisma {
     unit?: StringFieldUpdateOperationsInput | string
     qtyOnHand?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    images?: InventoryItemUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40295,6 +43029,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40319,6 +43054,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40364,6 +43100,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -40390,6 +43127,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -40415,6 +43153,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -40441,6 +43180,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -40482,6 +43222,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -40508,6 +43249,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -40522,6 +43264,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40546,6 +43289,7 @@ export namespace Prisma {
     defaultDepositRupiah?: number
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -40571,6 +43315,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -40605,6 +43351,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -40653,6 +43401,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -40679,6 +43428,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -40709,6 +43459,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40733,6 +43484,7 @@ export namespace Prisma {
     defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40764,6 +43516,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -40798,6 +43552,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -40852,6 +43608,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -40874,6 +43631,129 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserCreateWithoutNotificationsInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutNotificationsInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutNotificationsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+  }
+
+  export type UserUpsertWithoutNotificationsInput = {
+    update: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
+  }
+
+  export type UserUpdateWithoutNotificationsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotificationsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -40903,6 +43783,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -40929,6 +43810,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -40970,6 +43852,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -40996,6 +43879,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
   }
 
   export type AnnouncementCreateManyCreatedByInput = {
@@ -41008,6 +43892,11 @@ export namespace Prisma {
     publishedAt?: Date | string | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
+    imageUrl?: string | null
+    imageFileKey?: string | null
+    imageOriginalFilename?: string | null
+    imageMimeType?: string | null
+    imageFileSizeBytes?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41024,6 +43913,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -41078,6 +43969,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
@@ -41147,11 +44048,13 @@ export namespace Prisma {
   export type PaymentSubmissionCreateManySubmittedByInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -41172,12 +44075,14 @@ export namespace Prisma {
   export type PaymentSubmissionCreateManyReviewedByInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -41202,6 +44107,19 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type AppNotificationCreateManyRecipientUserInput = {
+    id?: number
+    title: string
+    body: string
+    linkTo?: string | null
+    entityType?: string | null
+    entityId?: string | null
+    isRead?: boolean
+    readAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AnnouncementUpdateWithoutCreatedByInput = {
     title?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
@@ -41211,6 +44129,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41225,6 +44148,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41239,6 +44167,11 @@ export namespace Prisma {
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    imageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    imageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    imageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41252,6 +44185,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41286,6 +44221,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41318,6 +44255,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41430,6 +44369,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41450,6 +44399,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41467,6 +44426,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41648,6 +44617,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41663,7 +44634,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
-    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
     reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
   }
@@ -41671,11 +44642,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateWithoutSubmittedByInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41696,11 +44669,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41722,6 +44697,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41737,7 +44714,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
-    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
     submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
   }
@@ -41745,12 +44722,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateWithoutReviewedByInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41770,12 +44749,14 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateManyWithoutReviewedByInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41816,6 +44797,44 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AppNotificationUpdateWithoutRecipientUserInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AppNotificationUncheckedUpdateWithoutRecipientUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AppNotificationUncheckedUpdateManyWithoutRecipientUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    linkTo?: NullableStringFieldUpdateOperationsInput | string | null
+    entityType?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    isRead?: BoolFieldUpdateOperationsInput | boolean
+    readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StayCreateManyTenantInput = {
     id?: number
     roomId: number
@@ -41827,6 +44846,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -41852,6 +44873,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -41864,11 +44895,13 @@ export namespace Prisma {
   export type PaymentSubmissionCreateManyTenantInput = {
     id?: number
     stayId: number
-    invoiceId: number
+    invoiceId?: number | null
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -41895,6 +44928,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41928,6 +44963,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41960,6 +44997,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -41982,6 +45021,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42001,6 +45050,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42018,6 +45077,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42031,6 +45100,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42046,7 +45117,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
-    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput
     submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
     reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
   }
@@ -42054,11 +45125,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateWithoutTenantInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42079,11 +45152,13 @@ export namespace Prisma {
   export type PaymentSubmissionUncheckedUpdateManyWithoutTenantInput = {
     id?: IntFieldUpdateOperationsInput | number
     stayId?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42112,6 +45187,8 @@ export namespace Prisma {
     actualCheckOutDate?: Date | string | null
     expiresAt?: Date | string | null
     depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
     depositStatus?: $Enums.DepositStatus
     depositDeductionRupiah?: number
     depositRefundedRupiah?: number
@@ -42147,6 +45224,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -42201,6 +45288,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -42234,6 +45323,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -42266,6 +45357,8 @@ export namespace Prisma {
     actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
     depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
     depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
     depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
@@ -42317,6 +45410,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42336,6 +45439,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42353,6 +45466,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42492,6 +45615,16 @@ export namespace Prisma {
     title: string
     description: string
     category?: string | null
+    issueImageUrl?: string | null
+    issueImageFileKey?: string | null
+    issueImageOriginalFilename?: string | null
+    issueImageMimeType?: string | null
+    issueImageFileSizeBytes?: number | null
+    resolutionImageUrl?: string | null
+    resolutionImageFileKey?: string | null
+    resolutionImageOriginalFilename?: string | null
+    resolutionImageMimeType?: string | null
+    resolutionImageFileSizeBytes?: number | null
     status?: $Enums.TicketStatus
     assignedToId?: number | null
     resolutionNote?: string | null
@@ -42518,12 +45651,14 @@ export namespace Prisma {
 
   export type PaymentSubmissionCreateManyStayInput = {
     id?: number
-    invoiceId: number
+    invoiceId?: number | null
     tenantId: number
     submittedById: number
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -42602,6 +45737,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42621,6 +45766,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42638,6 +45793,16 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    issueImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    resolutionImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
     status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
     assignedToId?: NullableIntFieldUpdateOperationsInput | number | null
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42695,6 +45860,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42709,7 +45876,7 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    invoice?: InvoiceUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
+    invoice?: InvoiceUpdateOneWithoutPaymentSubmissionsNestedInput
     tenant?: TenantUpdateOneRequiredWithoutPaymentSubmissionsNestedInput
     submittedBy?: UserUpdateOneRequiredWithoutPaymentSubmissionsSubmittedNestedInput
     reviewedBy?: UserUpdateOneWithoutPaymentSubmissionsReviewedNestedInput
@@ -42717,12 +45884,14 @@ export namespace Prisma {
 
   export type PaymentSubmissionUncheckedUpdateWithoutStayInput = {
     id?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42742,12 +45911,14 @@ export namespace Prisma {
 
   export type PaymentSubmissionUncheckedUpdateManyWithoutStayInput = {
     id?: IntFieldUpdateOperationsInput | number
-    invoiceId?: IntFieldUpdateOperationsInput | number
+    invoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     tenantId?: IntFieldUpdateOperationsInput | number
     submittedById?: IntFieldUpdateOperationsInput | number
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42799,6 +45970,8 @@ export namespace Prisma {
     amountRupiah: number
     paidAt: Date | string
     paymentMethod: $Enums.PaymentMethod
+    targetType?: $Enums.PaymentSubmissionTargetType
+    targetId?: number | null
     senderName?: string | null
     senderBankName?: string | null
     referenceNumber?: string | null
@@ -42896,6 +46069,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42924,6 +46099,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -42949,6 +46126,8 @@ export namespace Prisma {
     amountRupiah?: IntFieldUpdateOperationsInput | number
     paidAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentMethod?: EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+    targetType?: EnumPaymentSubmissionTargetTypeFieldUpdateOperationsInput | $Enums.PaymentSubmissionTargetType
+    targetId?: NullableIntFieldUpdateOperationsInput | number | null
     senderName?: NullableStringFieldUpdateOperationsInput | string | null
     senderBankName?: NullableStringFieldUpdateOperationsInput | string | null
     referenceNumber?: NullableStringFieldUpdateOperationsInput | string | null

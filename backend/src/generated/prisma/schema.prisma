@@ -90,6 +90,17 @@ enum PaymentSubmissionStatus {
   EXPIRED
 }
 
+enum PaymentSubmissionTargetType {
+  INVOICE
+  DEPOSIT
+}
+
+enum BookingDepositPaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -187,6 +198,7 @@ model User {
   paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
   paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
   passwordResetTokens         PasswordResetToken[]
+  notifications               AppNotification[]
 
   @@index([role])
   @@index([isActive])
@@ -243,6 +255,7 @@ model Room {
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
 
+  images    String[] @default([])
   notes     String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -273,12 +286,14 @@ model Stay {
   actualCheckOutDate  DateTime? @db.Date
   expiresAt           DateTime?
 
-  depositAmountRupiah    Int           @default(0)
-  depositStatus          DepositStatus @default(HELD)
-  depositDeductionRupiah Int           @default(0)
-  depositRefundedRupiah  Int           @default(0)
-  depositRefundedAt      DateTime?
-  depositNote            String?
+  depositAmountRupiah     Int                         @default(0)
+  depositPaidAmountRupiah Int                         @default(0)
+  depositPaymentStatus    BookingDepositPaymentStatus @default(UNPAID)
+  depositStatus           DepositStatus               @default(HELD)
+  depositDeductionRupiah  Int                         @default(0)
+  depositRefundedRupiah   Int                         @default(0)
+  depositRefundedAt       DateTime?
+  depositNote             String?
 
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
@@ -417,14 +432,16 @@ model PasswordResetToken {
 }
 
 model PaymentSubmission {
-  id               Int                     @id @default(autoincrement())
+  id               Int                         @id @default(autoincrement())
   stayId           Int
-  invoiceId        Int
+  invoiceId        Int?
   tenantId         Int
   submittedById    Int
   amountRupiah     Int
-  paidAt           DateTime                @db.Date
+  paidAt           DateTime                    @db.Date
   paymentMethod    PaymentMethod
+  targetType       PaymentSubmissionTargetType @default(INVOICE)
+  targetId         Int?
   senderName       String?
   senderBankName   String?
   referenceNumber  String?
@@ -434,42 +451,54 @@ model PaymentSubmission {
   originalFilename String?
   mimeType         String?
   fileSizeBytes    Int?
-  status           PaymentSubmissionStatus @default(PENDING_REVIEW)
+  status           PaymentSubmissionStatus     @default(PENDING_REVIEW)
   reviewedById     Int?
   reviewedAt       DateTime?
   reviewNotes      String?
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
 
-  stay        Stay    @relation(fields: [stayId], references: [id], onDelete: Restrict)
-  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
-  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  submittedBy User    @relation("PaymentSubmissionSubmittedBy", fields: [submittedById], references: [id], onDelete: Restrict)
-  reviewedBy  User?   @relation("PaymentSubmissionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  stay        Stay     @relation(fields: [stayId], references: [id], onDelete: Restrict)
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  submittedBy User     @relation("PaymentSubmissionSubmittedBy", fields: [submittedById], references: [id], onDelete: Restrict)
+  reviewedBy  User?    @relation("PaymentSubmissionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([stayId])
   @@index([invoiceId])
   @@index([tenantId])
   @@index([status])
   @@index([invoiceId, status])
+  @@index([targetType, status])
+  @@index([targetType, targetId])
 }
 
 model Ticket {
-  id             Int          @id @default(autoincrement())
-  ticketNumber   String       @unique
-  tenantId       Int
-  roomId         Int?
-  stayId         Int?
-  title          String
-  description    String
-  category       String?
-  status         TicketStatus @default(OPEN)
-  assignedToId   Int?
-  resolutionNote String?
-  resolvedAt     DateTime?
-  closedAt       DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                              Int          @id @default(autoincrement())
+  ticketNumber                    String       @unique
+  tenantId                        Int
+  roomId                          Int?
+  stayId                          Int?
+  title                           String
+  description                     String
+  category                        String?
+  issueImageUrl                   String?
+  issueImageFileKey               String?
+  issueImageOriginalFilename      String?
+  issueImageMimeType              String?
+  issueImageFileSizeBytes         Int?
+  resolutionImageUrl              String?
+  resolutionImageFileKey          String?
+  resolutionImageOriginalFilename String?
+  resolutionImageMimeType         String?
+  resolutionImageFileSizeBytes    Int?
+  status                          TicketStatus @default(OPEN)
+  assignedToId                    Int?
+  resolutionNote                  String?
+  resolvedAt                      DateTime?
+  closedAt                        DateTime?
+  createdAt                       DateTime     @default(now())
+  updatedAt                       DateTime     @updatedAt
 
   tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   room       Room?  @relation(fields: [roomId], references: [id], onDelete: SetNull)
@@ -483,18 +512,23 @@ model Ticket {
 }
 
 model Announcement {
-  id          Int                  @id @default(autoincrement())
-  title       String
-  content     String
-  audience    AnnouncementAudience @default(TENANT)
-  isPublished Boolean              @default(false)
-  isPinned    Boolean              @default(false)
-  publishedAt DateTime?
-  startsAt    DateTime?
-  expiresAt   DateTime?
-  createdById Int?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  id                    Int                  @id @default(autoincrement())
+  title                 String
+  content               String
+  audience              AnnouncementAudience @default(TENANT)
+  isPublished           Boolean              @default(false)
+  isPinned              Boolean              @default(false)
+  publishedAt           DateTime?
+  startsAt              DateTime?
+  expiresAt             DateTime?
+  imageUrl              String?
+  imageFileKey          String?
+  imageOriginalFilename String?
+  imageMimeType         String?
+  imageFileSizeBytes    Int?
+  createdById           Int?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   createdBy User? @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
@@ -513,6 +547,7 @@ model InventoryItem {
   unit      String   @default("pcs")
   qtyOnHand Decimal  @default(0) @db.Decimal(12, 2)
   minQty    Decimal  @default(0) @db.Decimal(12, 2)
+  images    String[] @default([])
   notes     String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -607,6 +642,25 @@ model Expense {
   @@index([category])
   @@index([roomId])
   @@index([stayId])
+}
+
+model AppNotification {
+  id              Int       @id @default(autoincrement())
+  recipientUserId Int
+  title           String
+  body            String
+  linkTo          String?
+  entityType      String?
+  entityId        String?
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  recipientUser User @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
+
+  @@index([recipientUserId, isRead, createdAt])
+  @@index([recipientUserId, createdAt])
 }
 
 model AuditLog {

@@ -167,6 +167,7 @@ exports.Prisma.RoomScalarFieldEnum = {
   defaultDepositRupiah: 'defaultDepositRupiah',
   electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
   waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
+  images: 'images',
   notes: 'notes',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -185,6 +186,8 @@ exports.Prisma.StayScalarFieldEnum = {
   actualCheckOutDate: 'actualCheckOutDate',
   expiresAt: 'expiresAt',
   depositAmountRupiah: 'depositAmountRupiah',
+  depositPaidAmountRupiah: 'depositPaidAmountRupiah',
+  depositPaymentStatus: 'depositPaymentStatus',
   depositStatus: 'depositStatus',
   depositDeductionRupiah: 'depositDeductionRupiah',
   depositRefundedRupiah: 'depositRefundedRupiah',
@@ -277,6 +280,8 @@ exports.Prisma.PaymentSubmissionScalarFieldEnum = {
   amountRupiah: 'amountRupiah',
   paidAt: 'paidAt',
   paymentMethod: 'paymentMethod',
+  targetType: 'targetType',
+  targetId: 'targetId',
   senderName: 'senderName',
   senderBankName: 'senderBankName',
   referenceNumber: 'referenceNumber',
@@ -303,6 +308,16 @@ exports.Prisma.TicketScalarFieldEnum = {
   title: 'title',
   description: 'description',
   category: 'category',
+  issueImageUrl: 'issueImageUrl',
+  issueImageFileKey: 'issueImageFileKey',
+  issueImageOriginalFilename: 'issueImageOriginalFilename',
+  issueImageMimeType: 'issueImageMimeType',
+  issueImageFileSizeBytes: 'issueImageFileSizeBytes',
+  resolutionImageUrl: 'resolutionImageUrl',
+  resolutionImageFileKey: 'resolutionImageFileKey',
+  resolutionImageOriginalFilename: 'resolutionImageOriginalFilename',
+  resolutionImageMimeType: 'resolutionImageMimeType',
+  resolutionImageFileSizeBytes: 'resolutionImageFileSizeBytes',
   status: 'status',
   assignedToId: 'assignedToId',
   resolutionNote: 'resolutionNote',
@@ -322,6 +337,11 @@ exports.Prisma.AnnouncementScalarFieldEnum = {
   publishedAt: 'publishedAt',
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
+  imageUrl: 'imageUrl',
+  imageFileKey: 'imageFileKey',
+  imageOriginalFilename: 'imageOriginalFilename',
+  imageMimeType: 'imageMimeType',
+  imageFileSizeBytes: 'imageFileSizeBytes',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -335,6 +355,7 @@ exports.Prisma.InventoryItemScalarFieldEnum = {
   unit: 'unit',
   qtyOnHand: 'qtyOnHand',
   minQty: 'minQty',
+  images: 'images',
   notes: 'notes',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -388,6 +409,20 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   stayId: 'stayId',
   note: 'note',
   createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AppNotificationScalarFieldEnum = {
+  id: 'id',
+  recipientUserId: 'recipientUserId',
+  title: 'title',
+  body: 'body',
+  linkTo: 'linkTo',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  isRead: 'isRead',
+  readAt: 'readAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -465,6 +500,12 @@ exports.PricingTerm = exports.$Enums.PricingTerm = {
   YEARLY: 'YEARLY'
 };
 
+exports.BookingDepositPaymentStatus = exports.$Enums.BookingDepositPaymentStatus = {
+  UNPAID: 'UNPAID',
+  PARTIAL: 'PARTIAL',
+  PAID: 'PAID'
+};
+
 exports.DepositStatus = exports.$Enums.DepositStatus = {
   HELD: 'HELD',
   PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',
@@ -524,6 +565,11 @@ exports.PaymentMethod = exports.$Enums.PaymentMethod = {
   QRIS: 'QRIS',
   EWALLET: 'EWALLET',
   OTHER: 'OTHER'
+};
+
+exports.PaymentSubmissionTargetType = exports.$Enums.PaymentSubmissionTargetType = {
+  INVOICE: 'INVOICE',
+  DEPOSIT: 'DEPOSIT'
 };
 
 exports.PaymentSubmissionStatus = exports.$Enums.PaymentSubmissionStatus = {
@@ -598,6 +644,7 @@ exports.Prisma.ModelName = {
   InventoryMovement: 'InventoryMovement',
   WifiSale: 'WifiSale',
   Expense: 'Expense',
+  AppNotification: 'AppNotification',
   AuditLog: 'AuditLog'
 };
 
