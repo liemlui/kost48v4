@@ -49,7 +49,13 @@ export interface SubmissionLockRow extends SubmissionBaseRow {
   roomStatus: string;
   roomIsActive: boolean;
   stayStatus: string;
+  stayDepositAmountRupiah: number | null;
+  stayDepositPaidAmountRupiah: number | null;
   stayExpiresAt: Date | null;
+  stayInitialElectricityKwhPending: any | null;
+  stayInitialWaterM3Pending: any | null;
+  stayInitialMetersRecordedAt: Date | null;
+  stayInitialMetersRecordedById: number | null;
   invoiceNumber: string;
   invoiceStatus: string;
   invoiceIssuedAt: Date | null;

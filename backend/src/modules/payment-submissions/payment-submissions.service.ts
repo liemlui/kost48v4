@@ -587,6 +587,10 @@ export class PaymentSubmissionsService {
           data: {
             status: StayStatus.CANCELLED,
             checkoutReason: 'Booking ditutup manual oleh admin',
+            initialElectricityKwhPending: null,
+            initialWaterM3Pending: null,
+            initialMetersRecordedAt: null,
+            initialMetersRecordedById: null,
           },
         });
 
@@ -661,6 +665,10 @@ export class PaymentSubmissionsService {
             data: {
               status: StayStatus.CANCELLED,
               checkoutReason: 'Booking kadaluarsa otomatis',
+              initialElectricityKwhPending: null,
+              initialWaterM3Pending: null,
+              initialMetersRecordedAt: null,
+              initialMetersRecordedById: null,
             },
           });
 
