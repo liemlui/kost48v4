@@ -439,3 +439,25 @@ Hasil audit codebase (dari sesi terpisah):
 - Branch `checkpoint/uat-4-2-before-cancelstay-fix` sudah sinkron dengan remote sampai C1b.
 - Sisa dirty/untracked lama diamankan dalam `stash@{0}` dengan label `wip leftover files after phase 4.3-c notification center`.
 - Working tree bersih setelah stash.
+
+---
+
+## 2026-04-27 — Lifecycle Integrity Decision: Announcement Guard + Pending Meter Snapshot
+
+- Setelah Phase 4.3-F1 business event AppNotifications selesai, UAT visual menemukan dua gap lifecycle:
+  1. Tenant yang belum aktif/occupied masih bisa menerima notification pengumuman dan membuka `/portal/announcements`.
+  2. Approval booking dapat gagal karena duplicate meter baseline pada kamar/tanggal yang sama setelah booking lama batal/expired/checkout.
+- Dua jawaban arsitektur dibandingkan. Keputusan akhir: memakai diagnosa yang lebih code-grounded sebagai dasar implementasi.
+- Freeze baru:
+  - Untuk flow tenant booking, `MeterReading` final dibuat saat payment approved dan room menjadi `OCCUPIED`, bukan saat approve booking.
+  - Approve booking menyimpan meter awal sebagai pending snapshot di `Stay`.
+  - Cancel/expired sebelum occupied membersihkan snapshot, bukan menghapus histori meter operational.
+  - Checkout occupied stay mempertahankan meter, invoice, payment, dan deposit history.
+  - Announcement audience `TENANT` jangka pendek hanya untuk tenant occupied.
+  - Tenant reserved/non-occupied yang membuka `/portal/announcements` diarahkan ke `/portal/bookings`.
+- Next ACT diputuskan:
+  1. 4.3-G1 Announcement Access Guard.
+  2. 4.3-G2 Pending Meter Snapshot.
+  3. 4.3-G3 Legacy Meter Audit/Cleanup.
+  4. 4.3-G4 Long-term metadata dan stage-aware audience.
+- WhatsApp/API provider, scheduler/cron, PWA push, SSE/websocket tetap deferred.

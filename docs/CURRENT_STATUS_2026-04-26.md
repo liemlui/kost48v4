@@ -139,3 +139,28 @@ Untuk 4.3-D, tidak perlu mengulang Gate 1/2/4.2 core. Cukup uji:
 - tenant dengan invoice due soon melihat chip `Tagihan H-X`,
 - chip tetap muncul walau notification sudah read,
 - chip hilang setelah invoice paid / booking resolved / stay resolved.
+
+---
+
+## Update 2026-04-27 — Lifecycle Integrity Decision Added
+
+### Masalah yang ditemukan
+
+1. Tenant reserved/non-occupied masih bisa menerima notification pengumuman dan membuka `/portal/announcements`.
+2. Approval booking dapat gagal karena duplicate meter baseline untuk room + utility + tanggal check-in yang sama.
+
+### Keputusan baru
+
+| Area | Status keputusan |
+|---|---|
+| Announcement guard | ✅ Freeze: audience `TENANT` operational hanya untuk occupied tenant |
+| Portal announcements access | ✅ Freeze: non-occupied tenant redirect ke `/portal/bookings` |
+| Tenant booking meter | ✅ Freeze: approve booking simpan pending snapshot |
+| Meter final | ✅ Freeze: dibuat saat payment approved / room `OCCUPIED` |
+| Deposit booking vs checkout | ✅ Freeze: tetap dipisah |
+| Legacy meter cleanup | 🟡 Audit dulu, no bulk delete |
+| Next ACT | 🟡 4.3-G1 Announcement Guard, lalu 4.3-G2 Pending Meter Snapshot |
+
+### Catatan penting
+
+Backoffice direct check-in existing tetap boleh membuat meter awal sebagai `MeterReading` karena room langsung `OCCUPIED`. Perubahan freeze ini terutama untuk flow tenant booking yang melewati `RESERVED -> approval -> payment -> OCCUPIED`.

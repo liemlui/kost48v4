@@ -296,3 +296,62 @@ Jika ada konflik, urutan ini menentukan siapa yang menang:
 - belum kirim WhatsApp sungguhan,
 - belum scheduler,
 - belum provider credential.
+
+---
+
+## Update Aktif — 2026-04-27: Freeze Lifecycle Meter, Deposit, dan Announcement Audience
+
+### Latar belakang
+
+Setelah Notification Center, Announcement → AppNotification, Booking Approved AppNotification, dan Payment Reviewed AppNotification berjalan, ditemukan dua gap lifecycle yang harus dibekukan sebelum ACT berikutnya:
+
+1. Tenant yang masih berada di tahap booking/reserved dapat menerima notifikasi pengumuman dan membuka `/portal/announcements`, padahal beberapa pengumuman operasional seperti listrik/air hanya relevan untuk penghuni aktif.
+2. Approval booking dapat gagal dengan pesan `Meter awal listrik pada tanggal check-in sudah pernah tercatat untuk kamar ini` karena meter baseline dibuat pada approval booking, lalu booking dibatalkan/expired atau kamar dibooking ulang pada tanggal yang sama.
+
+### Keputusan freeze baru
+
+| Area | Keputusan |
+|---|---|
+| Meter tenant booking | `MeterReading` final untuk flow booking tenant **tidak dibuat saat approve booking**. |
+| Timing meter operasional | `MeterReading` final dibuat saat payment approved dan room berubah `RESERVED -> OCCUPIED`. |
+| Approval booking | Admin tetap mengisi meter awal, tetapi nilai disimpan sebagai **pending meter snapshot** di `Stay`. |
+| Cancel/expired sebelum occupied | Pending meter snapshot dibersihkan; jangan menghapus histori meter operasional. |
+| Checkout occupied stay | Meter history, invoice, payment, dan deposit history **tetap disimpan**. |
+| Deposit booking | Deposit awal booking adalah syarat aktivasi; deposit pasca-checkout tetap workflow refund/forfeit terpisah. |
+| Announcement TENANT | Jangka pendek: audience `TENANT` hanya dikirim ke tenant dengan hunian aktif operasional (`Room.status = OCCUPIED`). |
+| Tenant reserved membuka pengumuman | Jika tenant belum occupied membuka `/portal/announcements`, frontend harus redirect aman ke `/portal/bookings`. |
+| Audience stage-aware | `TENANT_OCCUPIED`, `TENANT_BOOKING`, `TENANT_ALL` ditunda sebagai long-term improvement setelah guard minimal stabil. |
+| WhatsApp/scheduler/PWA | Tetap deferred; lifecycle integrity lebih prioritas daripada channel eksternal. |
+
+### Keputusan desain meter
+
+Untuk flow **backoffice direct check-in existing**, meter awal tetap boleh langsung menjadi `MeterReading` karena room langsung `OCCUPIED`.
+
+Untuk flow **tenant booking V4**, meter awal bersifat provisional sampai pembayaran disetujui. Karena itu:
+
+```text
+Booking created         -> no meter snapshot
+Booking approved        -> pending meter snapshot on Stay
+Payment rejected        -> snapshot remains pending
+Payment approved full   -> promote snapshot to MeterReading final
+Booking cancel/expired  -> clear snapshot only
+Checkout occupied stay  -> preserve MeterReading history
+```
+
+### Next ACT resmi
+
+Next core bukan fitur baru, melainkan stabilisasi lifecycle:
+
+1. **4.3-G1 — Announcement Access Guard**
+   - Backend filter notification recipient untuk audience `TENANT` hanya occupied tenants.
+   - Frontend guard `/portal/announcements` untuk tenant non-occupied.
+2. **4.3-G2 — Pending Meter Snapshot for Tenant Booking**
+   - Tambah field pending meter di `Stay`.
+   - Ubah approve booking agar tidak membuat `MeterReading` final.
+   - Ubah payment approval agar mempromosikan snapshot menjadi `MeterReading`.
+   - Cancel/expired hanya clear snapshot.
+3. **4.3-G3 — Legacy Meter Audit/Cleanup**
+   - Audit data `MeterReading` lama yang berasal dari booking cancelled/expired.
+   - Jangan bulk delete tanpa review.
+4. **4.3-G4 — Long-term Metadata**
+   - Pertimbangkan `MeterReading.stayId`, `sourceType`, `isBaseline`, dan stage-aware announcement audience.

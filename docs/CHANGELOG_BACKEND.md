@@ -285,3 +285,28 @@ Service besar dipecah ke helper / mapper / query-support agar file source utama 
 - Eksplorasi/prototype `payment-submissions` yang sempat masuk source **tidak mengubah status gate resmi**
 - Gate 4.0 dan 4.1 tetap harus lulus sebelum 4.2 dianggap baseline resmi
 - Refactor ini tidak boleh dibaca sebagai “4.2 sudah final/live”
+
+---
+
+## KOST48 Backend Decision Update — 2026-04-27 (Meter Snapshot & Announcement Recipient Guard)
+
+### Tujuan
+
+Membekukan arah backend untuk menutup duplicate meter baseline dan membatasi recipient announcement operasional.
+
+### Keputusan backend
+
+- Tenant booking approval tidak lagi menjadi titik pembuatan `MeterReading` final.
+- Nilai meter awal approval booking akan disimpan sebagai pending snapshot di `Stay`.
+- Payment approval/activation `RESERVED -> OCCUPIED` menjadi titik promosi snapshot ke `MeterReading` final.
+- Cancel/expired sebelum occupied membersihkan pending snapshot.
+- Checkout occupied stay mempertahankan semua history meter dan deposit.
+- Announcement audience `TENANT` jangka pendek hanya mengirim notification ke user tenant yang memiliki stay aktif operasional dan room `OCCUPIED`.
+
+### Status
+
+Dokumentasi keputusan sudah diperbarui. Implementasi code dibagi ke:
+
+1. **4.3-G1 Announcement Access Guard**
+2. **4.3-G2 Pending Meter Snapshot**
+3. **4.3-G3 Legacy Meter Audit/Cleanup**

@@ -365,3 +365,27 @@ Zip final frontend berisi:
 - Jika ada file/source 4.2 yang sudah ada di repo, perlakukan sebagai:
   - prototype / exploratory patch
   - belum authoritative untuk status proyek
+
+---
+
+## Update Frontend Decision — 2026-04-27: Announcement Guard untuk Tenant Stage
+
+### Masalah
+
+Tenant yang masih tahap booking/reserved dapat membuka `/portal/announcements` melalui notification link, padahal pengumuman operasional tenant lebih tepat untuk penghuni aktif.
+
+### Keputusan UX
+
+- Tenant dengan room `OCCUPIED` / hunian aktif boleh membuka `/portal/announcements`.
+- Tenant booking/reserved/non-occupied diarahkan ke `/portal/bookings`.
+- Pesan yang disarankan: **"Pengumuman operasional hanya tersedia untuk penghuni aktif."**
+- Tenant booking tetap bisa mendapat informasi proses booking melalui `/portal/bookings`, notification event booking/payment, dan chip urgency.
+
+### Long-term
+
+Jika dibutuhkan, audience pengumuman dapat dibuat stage-aware:
+- `TENANT_OCCUPIED`
+- `TENANT_BOOKING`
+- `TENANT_ALL`
+
+Untuk saat ini, guard minimal lebih diprioritaskan daripada memperluas UI audience selector.

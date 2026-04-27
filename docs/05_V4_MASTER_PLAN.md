@@ -2079,3 +2079,48 @@ Phase 4.3 sudah dibuka secara aman melalui subfase **4.3-A Reminder Preview**.
 
 ### 4. Urutan berikutnya
 Lanjutkan **4.3-B Reminder Queue / Mock Send**. Real WhatsApp provider baru dibuka setelah mock flow aman dan idempotency jelas.
+
+---
+
+## ADDENDUM — 2026-04-27: Lifecycle Integrity Before Further Feature Expansion
+
+### 1. Kenapa addendum ini dibuat
+
+Setelah internal notification track berjalan, ditemukan bahwa beberapa lifecycle edge-case harus dibekukan sebelum membuka fitur baru:
+
+- Tenant booking/reserved dapat mengakses pengumuman operasional melalui notification.
+- Meter baseline dibuat terlalu dini pada booking approval sehingga dapat bentrok saat booking batal/expired dan kamar dipakai ulang.
+- Deposit awal booking dan deposit refund/forfeit setelah checkout harus semakin jelas dipisahkan.
+
+### 2. Keputusan master plan baru
+
+| Area | Master decision |
+|---|---|
+| Announcement | `TENANT` operational announcement hanya untuk occupied tenant. |
+| Portal access | Tenant non-occupied tidak masuk `/portal/announcements`; redirect ke `/portal/bookings`. |
+| Meter tenant booking | Meter awal approval booking menjadi pending snapshot. |
+| Meter final | `MeterReading` final dibuat saat activation/payment approved. |
+| Cancel/expiry | Clear snapshot dan release booking; jangan hapus histori operational. |
+| Checkout | Preserve all history; deposit refund/forfeit tetap workflow terpisah. |
+
+### 3. Roadmap pendek yang menggantikan next feature expansion
+
+```text
+4.3-G1 Announcement Access Guard
+    ↓
+4.3-G2 Pending Meter Snapshot + Promote on Activation
+    ↓
+4.3-G3 Legacy Meter Audit/Cleanup
+    ↓
+4.3-G4 Optional metadata/audience model
+```
+
+### 4. Dampak ke V4 roadmap
+
+- 4.4 marketing/public detail dan 4.5 self-service **ditunda sampai G1-G2 aman**.
+- Real WhatsApp tetap bukan blocker dan tidak perlu dibuka sekarang.
+- Lifecycle integrity menjadi prasyarat sebelum automation/channel eksternal.
+
+### 5. Design note
+
+Backoffice direct check-in tidak otomatis berubah: karena check-in langsung membuat room `OCCUPIED`, meter awalnya tetap boleh menjadi `MeterReading` final. Perubahan utama hanya untuk **tenant booking approval** yang belum menghasilkan occupancy operational.

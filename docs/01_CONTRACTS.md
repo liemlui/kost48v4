@@ -677,3 +677,95 @@ Prioritas tampilan:
 4. Stay/contract ending soon → `Kontrak H-X`
 
 Chip hilang hanya jika kondisi bisnis selesai, misalnya invoice `PAID`, booking expired/cancelled/activated, atau stay renewed/checkout resolved.
+
+---
+
+## 2026-04-27 — Contract Addendum: Tenant Booking Meter Snapshot, Deposit Separation, dan Announcement Guard
+
+### A. Prinsip baru untuk meter awal
+
+Kontrak lama tetap berlaku untuk **backoffice direct create stay**: jika admin melakukan check-in langsung dan room menjadi `OCCUPIED`, meter awal listrik dan air langsung dicatat sebagai `MeterReading`.
+
+Kontrak baru untuk **tenant booking flow**:
+
+| Tahap | Kontrak meter |
+|---|---|
+| Booking dibuat | Tidak ada meter snapshot dan tidak ada `MeterReading`. |
+| Booking approved | Admin mengisi meter awal, tetapi disimpan sebagai pending snapshot di `Stay`, bukan `MeterReading`. |
+| Payment rejected | Pending snapshot tetap ada karena booking masih bisa dilanjutkan. |
+| Payment approved full / activation | Pending snapshot dipromosikan menjadi `MeterReading` final. |
+| Booking cancelled/expired sebelum `OCCUPIED` | Pending snapshot dibersihkan; tidak boleh menghapus histori meter operasional. |
+| Checkout stay yang sudah `OCCUPIED` | Semua `MeterReading` historis dipertahankan. |
+
+### B. Pending meter snapshot fields yang direkomendasikan
+
+Schema detail akan diputuskan saat ACT, tetapi arah kontrak yang direkomendasikan:
+
+```prisma
+model Stay {
+  initialElectricityKwhPending Decimal? @db.Decimal(12, 3)
+  initialWaterM3Pending        Decimal? @db.Decimal(12, 3)
+  initialMetersRecordedAt      DateTime?
+  initialMetersRecordedById    Int?
+  initialMetersPromotedAt      DateTime?
+}
+```
+
+Catatan:
+- Jangan memakai `notes` JSON sebagai solusi utama kecuali emergency, karena meter adalah data operasional penting.
+- Saat long-term metadata dibuka, `MeterReading` dapat diperkaya dengan `stayId`, `sourceType`, dan `isBaseline`.
+
+### C. Deposit booking vs deposit pasca-checkout
+
+Deposit dipisah secara konseptual:
+
+| Jenis deposit | Makna | Reset? |
+|---|---|---|
+| Deposit awal booking | Bagian dari pembayaran awal sebelum aktivasi room | Boleh direset/diabaikan bila booking batal sebelum `OCCUPIED`. |
+| Deposit setelah stay aktif | Dana deposit yang sudah benar-benar dipegang setelah tenant masuk | Tidak direset saat checkout; masuk workflow refund/forfeit. |
+
+Jika booking expired/cancelled sebelum `OCCUPIED`:
+- pending payment/submission dibatalkan/expired sesuai flow,
+- invoice awal yang belum final dibatalkan sesuai aturan existing,
+- deposit payment tracking dikembalikan ke state tidak aktif/irrelevant,
+- pending meter snapshot dibersihkan.
+
+Jika stay sudah `OCCUPIED` lalu checkout:
+- invoice/payment/deposit/meter tetap histori,
+- deposit diproses melalui workflow refund/partial refund/forfeit,
+- tidak ada reset data historis otomatis.
+
+### D. Announcement audience guard
+
+Kontrak jangka pendek:
+
+```text
+audience = TENANT -> hanya tenant aktif operasional dengan stay ACTIVE dan room OCCUPIED
+```
+
+Tenant yang masih dalam tahap booking/reserved tidak menerima pengumuman operasional tenant dan tidak boleh membuka `/portal/announcements` secara langsung. Jika route dibuka dari link lama, frontend harus redirect ke `/portal/bookings`.
+
+Kontrak jangka panjang yang boleh direncanakan tetapi belum wajib diimplementasikan:
+
+```text
+TENANT_OCCUPIED
+TENANT_BOOKING
+TENANT_ALL
+ALL
+```
+
+### E. Transaction boundary baru
+
+Saat payment approval mengaktifkan room:
+
+```text
+PaymentSubmission APPROVED
+InvoicePayment created
+Invoice status synced
+Deposit payment tracking synced
+Room RESERVED -> OCCUPIED
+Pending meter snapshot -> MeterReading final
+Audit log
+```
+
+Semua update di atas harus berada dalam transaksi yang aman. Kegagalan AppNotification tetap tidak boleh rollback transaksi bisnis utama.

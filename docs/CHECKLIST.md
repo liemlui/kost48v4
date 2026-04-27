@@ -253,3 +253,48 @@
 
 Next:
 - [ ] 4.3-B Reminder Queue / Mock Send.
+
+---
+
+## 2026-04-27 — Checklist Tambahan Lifecycle Integrity 4.3-G
+
+### Freeze keputusan
+- [x] Pilih diagnosa code-grounded sebagai dasar keputusan meter duplicate.
+- [x] Meter tenant booking final dibuat saat payment approved / room `OCCUPIED`.
+- [x] Approve booking menyimpan pending meter snapshot, bukan `MeterReading` final.
+- [x] Cancel/expired sebelum occupied membersihkan snapshot.
+- [x] Checkout occupied stay mempertahankan meter/deposit/payment/invoice history.
+- [x] Announcement `TENANT` jangka pendek hanya untuk occupied tenant.
+- [x] Stage-aware audience ditunda sebagai long-term improvement.
+
+### 4.3-G1 — Announcement Access Guard
+- [ ] PLAN/ACT backend filter recipient audience `TENANT` hanya occupied tenants.
+- [ ] PLAN/ACT frontend guard `/portal/announcements` untuk tenant non-occupied.
+- [ ] UAT tenant occupied menerima announcement notification.
+- [ ] UAT tenant reserved tidak menerima announcement operational notification.
+- [ ] UAT tenant reserved direct URL `/portal/announcements` redirect ke `/portal/bookings`.
+
+### 4.3-G2 — Pending Meter Snapshot
+- [ ] PLAN schema pending meter fields pada `Stay`.
+- [ ] ACT schema/prisma sync pending meter fields.
+- [ ] ACT `approveBooking`: simpan pending snapshot, jangan create `MeterReading` final.
+- [ ] ACT `approveSubmission`: promote pending snapshot menjadi 2 `MeterReading` saat room `OCCUPIED`.
+- [ ] ACT cancel/expire: clear pending snapshot.
+- [ ] UAT approve booking tidak membuat duplicate meter.
+- [ ] UAT payment rejected tidak membuat meter final.
+- [ ] UAT payment approved membuat meter final tepat sekali.
+- [ ] UAT booking ulang kamar/tanggal sama tidak bentrok.
+- [ ] UAT checkout occupied stay tidak menghapus histori meter.
+
+### 4.3-G3 — Legacy Meter Audit/Cleanup
+- [ ] Buat query audit baseline meter lama yang berasal dari booking cancelled/expired.
+- [ ] Review manual sebelum delete.
+- [ ] Cleanup terbatas hanya jika aman dan tidak pernah occupied.
+
+### Deferred
+- [ ] `MeterReading.stayId`.
+- [ ] `MeterReading.sourceType`.
+- [ ] `MeterReading.isBaseline`.
+- [ ] Stage-aware `AnnouncementAudience` enum.
+- [ ] Real WhatsApp provider/API.
+- [ ] Scheduler/cron/PWA push/SSE.

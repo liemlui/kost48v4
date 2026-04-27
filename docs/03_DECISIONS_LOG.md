@@ -220,3 +220,23 @@
 | 133 | Finance-critical reminder tidak boleh hanya bergantung pada notification read/unread | Tenant tetap melihat urgency bisnis sampai invoice/booking/contract selesai |
 | 134 | Phase 4.3-D berikutnya adalah Tenant Payment Urgency Header Chip | Prioritas bisnis bergeser dari sekadar inbox ke reminder pembayaran yang terus terlihat |
 | 135 | Real WhatsApp, scheduler/cron, service worker, push, SSE/websocket tetap deferred | Foundation notification distabilkan dulu sebelum membuka automation/channel eksternal |
+
+---
+
+## 2026-04-27 — Freeze Lifecycle Integrity: Meter, Deposit, dan Announcement Guard
+
+| # | Keputusan | Alasan | Dampak |
+|---|-----------|--------|--------|
+| 126 | Jawaban arsitektur yang dipakai sebagai dasar adalah diagnosa code-grounded: root cause meter duplicate ada pada pembuatan baseline saat approval booking dan normalisasi `readingAt` ke start-of-day. | Lebih cocok dengan kondisi source aktif daripada desain lifecycle rewrite besar. | Patch berikutnya fokus pada lifecycle integrity, bukan fitur baru. |
+| 127 | Untuk tenant booking flow, `MeterReading` final hanya boleh dibuat saat payment approved dan room berubah `RESERVED -> OCCUPIED`. | Meter adalah data operasional, bukan data administrative approval. | Approval booking tidak lagi membuat baseline final yang bisa menjadi orphan. |
+| 128 | Admin tetap mengisi meter awal saat approve booking, tetapi disimpan sebagai pending snapshot pada `Stay`. | Data input admin tidak hilang, tetapi belum dianggap histori operasional. | Perlu schema pending meter fields atau struktur setara yang typed. |
+| 129 | Cancel/expired booking sebelum `OCCUPIED` hanya membersihkan pending snapshot; tidak menghapus histori meter operasional. | Menghindari data corruption pada stay yang sudah pernah aktif. | Cleanup meter lama harus diaudit, bukan bulk delete. |
+| 130 | Backoffice direct check-in existing tetap boleh langsung membuat `MeterReading` karena room langsung `OCCUPIED`. | Flow direct check-in berbeda dari tenant booking approval. | Baseline existing tidak dibongkar total. |
+| 131 | Checkout occupied stay tidak boleh mereset/menghapus invoice, payment, deposit, atau meter history. | Data tersebut adalah histori bisnis sah. | Deposit masuk refund/forfeit workflow terpisah. |
+| 132 | Deposit awal booking dan deposit pasca-checkout dipisah secara konseptual. | Deposit awal adalah syarat aktivasi; deposit pasca-checkout adalah kewajiban refund/forfeit. | Booking batal sebelum occupied boleh reset/ignore deposit booking; checkout tidak reset deposit history. |
+| 133 | Announcement audience `TENANT` jangka pendek hanya dikirim ke tenant dengan hunian aktif operasional (`Room.status = OCCUPIED`). | Pengumuman operasional seperti listrik/air hanya relevan untuk penghuni aktif. | Tenant booking/reserved tidak menerima announcement operational notification. |
+| 134 | Tenant non-occupied yang membuka `/portal/announcements` harus diarahkan aman ke `/portal/bookings`. | Link lama dari notification atau URL manual tidak boleh membuka surface yang belum relevan. | Perlu frontend guard. |
+| 135 | Stage-aware announcement audience (`TENANT_OCCUPIED`, `TENANT_BOOKING`, `TENANT_ALL`) ditunda setelah guard minimal stabil. | Menghindari schema/UI change terlalu cepat. | Long-term improvement dicatat, bukan ACT langsung. |
+| 136 | Urutan berikutnya adalah G1 Announcement Guard, lalu G2 Pending Meter Snapshot. | G1 kecil dan aman; G2 menyentuh lifecycle payment/meter lebih sensitif. | Fitur baru ditahan sampai data integrity lebih kuat. |
+| 137 | Legacy meter cleanup harus berupa audit dulu, bukan delete otomatis masal. | Risiko salah hapus meter operational tinggi. | G3 menjadi audit/cleanup terbatas. |
+| 138 | WhatsApp, scheduler, PWA push, SSE/websocket tetap deferred. | Channel eksternal tidak menyelesaikan root cause lifecycle. | Fokus tetap internal notification + data integrity. |

@@ -463,3 +463,22 @@ Merapikan source frontend tanpa mengubah arah bisnis aktif, agar file besar lebi
 
 ### Catatan
 - Surface review pembayaran / approval booking sempat mendapat patch UX tambahan selama debugging integrasi, tetapi gate resmi tetap mengacu pada hasil UAT, bukan pada keberadaan patch semata
+
+---
+
+## KOST48 Frontend Decision Update — 2026-04-27 (Announcement Access Guard)
+
+### Tujuan
+
+Membekukan UX rule bahwa pengumuman operasional tenant hanya relevan untuk penghuni aktif, bukan tenant yang masih dalam tahap booking/reserved.
+
+### Keputusan
+
+- `/portal/announcements` akan dijaga berdasarkan tenant stage.
+- Tenant non-occupied diarahkan ke `/portal/bookings`.
+- Admin/owner/staff behavior tidak berubah.
+- Stage-aware announcement audience ditunda sebagai improvement setelah guard minimal stabil.
+
+### Status
+
+Dokumentasi keputusan sudah diperbarui. Implementasi code masuk ke ACT berikutnya: **4.3-G1 Announcement Access Guard**.

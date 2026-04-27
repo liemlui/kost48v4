@@ -817,3 +817,82 @@ Scope yang disarankan:
 - Tidak ada duplikasi log untuk event yang sama jika log digunakan.
 - TENANT tetap tidak melihat menu.
 - Build backend/frontend PASS.
+
+---
+
+## 2026-04-27 — Phase 4.3-G Lifecycle Integrity Stabilization
+
+### Tujuan
+
+Menutup gap lifecycle yang muncul setelah notification dan payment flow berjalan:
+
+1. Announcement operasional tidak boleh bocor ke tenant yang belum benar-benar menghuni.
+2. Meter awal tenant booking tidak boleh membuat duplicate `MeterReading` saat booking batal/expired/booking ulang.
+3. Deposit awal booking harus tetap terpisah dari deposit refund/forfeit setelah checkout.
+
+### Urutan ACT yang dipilih
+
+| Subfase | Nama | Status | Scope |
+|---|---|---|---|
+| 4.3-G1 | Announcement Access Guard | 🟡 NEXT | Filter occupied tenant + frontend redirect non-occupied |
+| 4.3-G2 | Pending Meter Snapshot | ⬜ | Defer `MeterReading` creation sampai payment activation |
+| 4.3-G3 | Legacy Meter Audit/Cleanup | ⬜ | Audit data lama; cleanup manual/terbatas bila aman |
+| 4.3-G4 | Meter Metadata + Stage-aware Audience | ⬜ Deferred | `stayId`, `sourceType`, `isBaseline`, audience enum baru |
+
+### ACT 4.3-G1 — Announcement Access Guard
+
+**Backend target:**
+- Ubah `Announcement -> AppNotification` recipient filter.
+- Untuk audience `TENANT`, hanya user tenant aktif yang punya stay aktif operasional dan room `OCCUPIED`.
+- Jangan kirim announcement operational ke tenant booking/reserved.
+
+**Frontend target:**
+- Guard `/portal/announcements`.
+- Jika tenant belum punya occupied/current stay, redirect ke `/portal/bookings` dengan pesan operasional-friendly.
+
+**Acceptance criteria:**
+- Tenant occupied menerima notification pengumuman.
+- Tenant reserved tidak menerima notification pengumuman operational.
+- Tenant reserved yang membuka `/portal/announcements` diarahkan ke `/portal/bookings`.
+- Admin/owner/staff behavior tidak berubah.
+
+### ACT 4.3-G2 — Pending Meter Snapshot
+
+**Backend target:**
+- Tambah pending meter fields pada `Stay`.
+- `approveBooking` menyimpan pending meter snapshot, bukan membuat `MeterReading` final.
+- `approveSubmission` saat activation `RESERVED -> OCCUPIED` mempromosikan snapshot menjadi 2 `MeterReading` final.
+- `expireBooking` / manual cancel sebelum occupied membersihkan snapshot.
+- Backoffice direct check-in existing tetap membuat `MeterReading` langsung karena room langsung `OCCUPIED`.
+
+**Acceptance criteria:**
+- Booking approved tidak lagi membuat duplicate `MeterReading`.
+- Payment approved membuat meter final tepat sekali.
+- Payment rejected tidak membuat meter final.
+- Booking expired/cancelled sebelum occupied tidak meninggalkan meter final baru.
+- Checkout occupied stay tetap mempertahankan meter history.
+
+### ACT 4.3-G3 — Legacy Meter Audit/Cleanup
+
+**Tujuan:** data lama yang sudah terlanjur memiliki baseline meter dari booking cancelled/expired diaudit dulu sebelum dihapus.
+
+**Rule:**
+- Jangan bulk delete.
+- Hapus hanya jika yakin meter berasal dari booking yang tidak pernah `OCCUPIED`.
+- Jika ragu, biarkan dan catat untuk manual review.
+
+### ACT 4.3-G4 — Long-term Metadata
+
+Dibuka setelah G1-G2 stabil:
+- `MeterReading.stayId`
+- `MeterReading.sourceType = CHECKIN | REGULAR | CHECKOUT | ADJUSTMENT`
+- `MeterReading.isBaseline`
+- stage-aware announcement audience: `TENANT_OCCUPIED`, `TENANT_BOOKING`, `TENANT_ALL`, `ALL`
+
+### Do Not Open
+
+- Real WhatsApp provider/API.
+- Scheduler/cron reminder otomatis.
+- PWA push/service worker/SSE.
+- Deposit refund automation baru.
+- Full lifecycle state rewrite.
