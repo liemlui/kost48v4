@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from '../../generated/prisma';
-import { LeadSource, PricingTerm, RoomStatus, StayStatus } from '../../common/enums/app.enums';
+import { LeadSource, PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
@@ -11,6 +11,7 @@ import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
+import { AppNotificationService } from '../notifications/app-notification.service';
 
 interface RoomPricingSnapshot {
   id: number;
@@ -93,7 +94,10 @@ interface BookingSchemaStatus {
 export class TenantBookingsService {
   private bookingSchemaStatusCache: BookingSchemaStatus | null = null;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly appNotification: AppNotificationService,
+  ) {}
 
   async getPublicRooms(query: PublicRoomsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -660,6 +664,9 @@ export class TenantBookingsService {
         };
       });
 
+      const tenantUserId = await this.resolveTenantPortalUser(approved.stay.tenantId);
+      await this.notifyBookingApproved(tenantUserId, approved.stay.id);
+
       return serializePrismaResult(approved);
     } catch (error: any) {
       if (error instanceof BadRequestException || error instanceof ConflictException || error instanceof NotFoundException) {
@@ -1101,5 +1108,59 @@ export class TenantBookingsService {
       throw new BadRequestException(message);
     }
     return this.startOfDay(parsed);
+  }
+
+  /**
+   * Resolve portal user (role TENANT) linked to a given tenantId.
+   * Returns null if no active portal user exists.
+   */
+  private async resolveTenantPortalUser(tenantId: number): Promise<number | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        role: UserRole.TENANT,
+        tenantId,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    return user?.id ?? null;
+  }
+
+  /**
+   * Create an AppNotification for booking approval.
+   * Silently skips if recipient user not found or duplicate exists.
+   * Wrapped in try/catch to never rollback booking approval.
+   */
+  private async notifyBookingApproved(recipientUserId: number | null, stayId: number) {
+    if (!recipientUserId) return;
+
+    try {
+      const title = 'Booking disetujui';
+      const entityTypeVal = 'BOOKING';
+      const entityIdVal = String(stayId);
+
+      const existing = await this.prisma.appNotification.findFirst({
+        where: {
+          recipientUserId,
+          entityType: entityTypeVal,
+          entityId: entityIdVal,
+          title,
+        },
+        select: { id: true },
+      });
+
+      if (existing) return;
+
+      await this.appNotification.create({
+        recipientUserId,
+        title,
+        body: 'Booking Anda telah disetujui. Silakan lakukan pembayaran awal.',
+        linkTo: '/portal/bookings',
+        entityType: entityTypeVal,
+        entityId: entityIdVal,
+      });
+    } catch {
+      // Never throw — notification is non-critical side effect
+    }
   }
 }
