@@ -20,6 +20,8 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AppNotificationService } from '../notifications/app-notification.service';
+import { UserRole } from '../../common/enums/app.enums';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import {
@@ -33,7 +35,10 @@ import {
 
 @Injectable()
 export class PaymentSubmissionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly appNotificationService: AppNotificationService,
+  ) {}
 
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
     const tenantId = user.tenantId;
@@ -417,7 +422,9 @@ export class PaymentSubmissionsService {
         return this.findSubmissionByIdTx(tx, submissionId);
       });
 
-      return serializePrismaResult(approved);
+      const result = serializePrismaResult(approved);
+      this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
+      return result;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('Approval pembayaran bentrok dengan data yang sudah ada');
@@ -466,7 +473,9 @@ export class PaymentSubmissionsService {
         return this.findSubmissionByIdTx(tx, submissionId);
       });
 
-      return serializePrismaResult(rejected);
+      const result = serializePrismaResult(rejected);
+      this.notifyPaymentRejected(rejected.tenantId, submissionId, reviewNotes).catch(() => {});
+      return result;
     } catch (error) {
       this.handleSchemaError(error);
       throw error;
@@ -775,6 +784,84 @@ export class PaymentSubmissionsService {
       throw new ServiceUnavailableException(
         'Fitur payment submission belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
       );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Notification helpers
+  // ---------------------------------------------------------------------------
+
+  private async resolveTenantPortalUser(tenantId: number): Promise<number | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        tenantId,
+        role: UserRole.TENANT,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    return user ? user.id : null;
+  }
+
+  private async notifyPaymentApproved(tenantId: number, submissionId: number) {
+    try {
+      const recipientUserId = await this.resolveTenantPortalUser(tenantId);
+      if (!recipientUserId) return;
+
+      const title = 'Pembayaran diterima';
+      const entityType = 'PAYMENT_SUBMISSION';
+      const entityId = String(submissionId);
+
+      const duplicate = await this.prisma.appNotification.findFirst({
+        where: { recipientUserId, entityType, entityId, title },
+        select: { id: true },
+      });
+      if (duplicate) return;
+
+      await this.appNotificationService.create({
+        recipientUserId,
+        title,
+        body: 'Pembayaran Anda telah diverifikasi. Hunian Anda sudah aktif.',
+        entityType,
+        entityId,
+        linkTo: '/portal/stay',
+      });
+    } catch {
+      // Notification failure must not rollback approval
+    }
+  }
+
+  private async notifyPaymentRejected(tenantId: number, submissionId: number, reviewNotes: string) {
+    try {
+      const recipientUserId = await this.resolveTenantPortalUser(tenantId);
+      if (!recipientUserId) return;
+
+      const title = 'Bukti pembayaran ditolak';
+      const entityType = 'PAYMENT_SUBMISSION';
+      const entityId = String(submissionId);
+
+      const duplicate = await this.prisma.appNotification.findFirst({
+        where: { recipientUserId, entityType, entityId, title },
+        select: { id: true },
+      });
+      if (duplicate) return;
+
+      const safeNotes = reviewNotes?.trim() ?? '';
+      const maxLen = 500;
+      const body = safeNotes.length > 0
+        ? safeNotes.slice(0, maxLen)
+        : 'Bukti pembayaran Anda ditolak. Silakan unggah ulang bukti pembayaran.';
+
+      await this.appNotificationService.create({
+        recipientUserId,
+        title,
+        body,
+        entityType,
+        entityId,
+        linkTo: '/portal/bookings',
+      });
+    } catch {
+      // Notification failure must not rollback rejection
     }
   }
 }
