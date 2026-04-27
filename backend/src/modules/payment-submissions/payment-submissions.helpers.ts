@@ -77,6 +77,10 @@ export interface SubmissionLockRow {
   stayDepositAmountRupiah: number;
   stayDepositPaidAmountRupiah: number;
   stayExpiresAt: Date | null;
+  stayInitialElectricityKwhPending: number | null;
+  stayInitialWaterM3Pending: number | null;
+  stayInitialMetersRecordedAt: Date | null;
+  stayInitialMetersRecordedById: number | null;
   invoiceNumber: string;
   invoiceStatus: string;
   invoiceIssuedAt: Date | null;

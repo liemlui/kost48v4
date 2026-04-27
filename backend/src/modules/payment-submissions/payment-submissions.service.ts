@@ -15,6 +15,7 @@ import {
   PaymentSubmissionTargetType,
   RoomStatus,
   StayStatus,
+  UtilityType,
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -401,6 +402,61 @@ export class PaymentSubmissionsService {
             where: { id: submission.roomId },
             data: { status: RoomStatus.OCCUPIED },
           });
+
+          // Promote pending meter snapshot to operational MeterReading
+          const hasElectricity =
+            submission.stayInitialElectricityKwhPending != null;
+          const hasWater = submission.stayInitialWaterM3Pending != null;
+
+          const stay = await tx.stay.findUnique({
+            where: { id: submission.stayId },
+            select: { checkInDate: true, roomId: true },
+          });
+
+          if (stay && (hasElectricity || hasWater)) {
+            const readingAt = new Date(stay.checkInDate);
+            readingAt.setHours(0, 0, 0, 0);
+
+            const recordedById =
+              submission.stayInitialMetersRecordedById ?? user.id;
+
+            if (hasElectricity) {
+              const electricityValue = submission.stayInitialElectricityKwhPending!;
+              await tx.meterReading.create({
+                data: {
+                  roomId: stay.roomId,
+                  utilityType: UtilityType.ELECTRICITY,
+                  readingAt,
+                  readingValue: electricityValue,
+                  recordedById,
+                },
+              });
+            }
+
+            if (hasWater) {
+              const waterValue = submission.stayInitialWaterM3Pending!;
+              await tx.meterReading.create({
+                data: {
+                  roomId: stay.roomId,
+                  utilityType: UtilityType.WATER,
+                  readingAt,
+                  readingValue: waterValue,
+                  recordedById,
+                },
+              });
+            }
+
+            await tx.stay.update({
+              where: { id: submission.stayId },
+              data: {
+                initialElectricityKwhPending: null,
+                initialWaterM3Pending: null,
+                initialMetersRecordedAt: null,
+                initialMetersRecordedById: null,
+                initialMetersPromotedAt: new Date(),
+              },
+            });
+          }
         }
 
         await tx.auditLog.create({
@@ -730,6 +786,10 @@ export class PaymentSubmissionsService {
         s."depositAmountRupiah" AS "stayDepositAmountRupiah",
         s."depositPaidAmountRupiah" AS "stayDepositPaidAmountRupiah",
         s."expiresAt" AS "stayExpiresAt",
+        s."initialElectricityKwhPending" AS "stayInitialElectricityKwhPending",
+        s."initialWaterM3Pending" AS "stayInitialWaterM3Pending",
+        s."initialMetersRecordedAt" AS "stayInitialMetersRecordedAt",
+        s."initialMetersRecordedById" AS "stayInitialMetersRecordedById",
         i."invoiceNumber",
         i.status AS "invoiceStatus",
         i."issuedAt" AS "invoiceIssuedAt",

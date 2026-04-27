@@ -202,7 +202,12 @@ exports.Prisma.StayScalarFieldEnum = {
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  initialElectricityKwhPending: 'initialElectricityKwhPending',
+  initialWaterM3Pending: 'initialWaterM3Pending',
+  initialMetersRecordedAt: 'initialMetersRecordedAt',
+  initialMetersRecordedById: 'initialMetersRecordedById',
+  initialMetersPromotedAt: 'initialMetersPromotedAt'
 };
 
 exports.Prisma.MeterReadingScalarFieldEnum = {

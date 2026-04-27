@@ -2815,6 +2815,7 @@ export namespace Prisma {
   export type UserCountOutputType = {
     announcementsCreated: number
     staysCreated: number
+    staysInitialMetersRecorded: number
     invoicesCreated: number
     paymentsCaptured: number
     ticketsAssigned: number
@@ -2832,6 +2833,7 @@ export namespace Prisma {
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     announcementsCreated?: boolean | UserCountOutputTypeCountAnnouncementsCreatedArgs
     staysCreated?: boolean | UserCountOutputTypeCountStaysCreatedArgs
+    staysInitialMetersRecorded?: boolean | UserCountOutputTypeCountStaysInitialMetersRecordedArgs
     invoicesCreated?: boolean | UserCountOutputTypeCountInvoicesCreatedArgs
     paymentsCaptured?: boolean | UserCountOutputTypeCountPaymentsCapturedArgs
     ticketsAssigned?: boolean | UserCountOutputTypeCountTicketsAssignedArgs
@@ -2868,6 +2870,13 @@ export namespace Prisma {
    * UserCountOutputType without action
    */
   export type UserCountOutputTypeCountStaysCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StayWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaysInitialMetersRecordedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: StayWhereInput
   }
 
@@ -3485,6 +3494,7 @@ export namespace Prisma {
     tenant?: boolean | User$tenantArgs<ExtArgs>
     announcementsCreated?: boolean | User$announcementsCreatedArgs<ExtArgs>
     staysCreated?: boolean | User$staysCreatedArgs<ExtArgs>
+    staysInitialMetersRecorded?: boolean | User$staysInitialMetersRecordedArgs<ExtArgs>
     invoicesCreated?: boolean | User$invoicesCreatedArgs<ExtArgs>
     paymentsCaptured?: boolean | User$paymentsCapturedArgs<ExtArgs>
     ticketsAssigned?: boolean | User$ticketsAssignedArgs<ExtArgs>
@@ -3549,6 +3559,7 @@ export namespace Prisma {
     tenant?: boolean | User$tenantArgs<ExtArgs>
     announcementsCreated?: boolean | User$announcementsCreatedArgs<ExtArgs>
     staysCreated?: boolean | User$staysCreatedArgs<ExtArgs>
+    staysInitialMetersRecorded?: boolean | User$staysInitialMetersRecordedArgs<ExtArgs>
     invoicesCreated?: boolean | User$invoicesCreatedArgs<ExtArgs>
     paymentsCaptured?: boolean | User$paymentsCapturedArgs<ExtArgs>
     ticketsAssigned?: boolean | User$ticketsAssignedArgs<ExtArgs>
@@ -3576,6 +3587,7 @@ export namespace Prisma {
       tenant: Prisma.$TenantPayload<ExtArgs> | null
       announcementsCreated: Prisma.$AnnouncementPayload<ExtArgs>[]
       staysCreated: Prisma.$StayPayload<ExtArgs>[]
+      staysInitialMetersRecorded: Prisma.$StayPayload<ExtArgs>[]
       invoicesCreated: Prisma.$InvoicePayload<ExtArgs>[]
       paymentsCaptured: Prisma.$InvoicePaymentPayload<ExtArgs>[]
       ticketsAssigned: Prisma.$TicketPayload<ExtArgs>[]
@@ -3998,6 +4010,7 @@ export namespace Prisma {
     tenant<T extends User$tenantArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     announcementsCreated<T extends User$announcementsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$announcementsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnnouncementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staysCreated<T extends User$staysCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$staysCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staysInitialMetersRecorded<T extends User$staysInitialMetersRecordedArgs<ExtArgs> = {}>(args?: Subset<T, User$staysInitialMetersRecordedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoicesCreated<T extends User$invoicesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$invoicesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentsCaptured<T extends User$paymentsCapturedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsCapturedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ticketsAssigned<T extends User$ticketsAssignedArgs<ExtArgs> = {}>(args?: Subset<T, User$ticketsAssignedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4492,6 +4505,30 @@ export namespace Prisma {
    * User.staysCreated
    */
   export type User$staysCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Stay
+     */
+    select?: StaySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Stay
+     */
+    omit?: StayOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StayInclude<ExtArgs> | null
+    where?: StayWhereInput
+    orderBy?: StayOrderByWithRelationInput | StayOrderByWithRelationInput[]
+    cursor?: StayWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StayScalarFieldEnum | StayScalarFieldEnum[]
+  }
+
+  /**
+   * User.staysInitialMetersRecorded
+   */
+  export type User$staysInitialMetersRecordedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Stay
      */
@@ -7593,6 +7630,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     createdById: number | null
+    initialElectricityKwhPending: Decimal | null
+    initialWaterM3Pending: Decimal | null
+    initialMetersRecordedById: number | null
   }
 
   export type StaySumAggregateOutputType = {
@@ -7607,6 +7647,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     createdById: number | null
+    initialElectricityKwhPending: Decimal | null
+    initialWaterM3Pending: Decimal | null
+    initialMetersRecordedById: number | null
   }
 
   export type StayMinAggregateOutputType = {
@@ -7638,6 +7681,11 @@ export namespace Prisma {
     createdById: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    initialElectricityKwhPending: Decimal | null
+    initialWaterM3Pending: Decimal | null
+    initialMetersRecordedAt: Date | null
+    initialMetersRecordedById: number | null
+    initialMetersPromotedAt: Date | null
   }
 
   export type StayMaxAggregateOutputType = {
@@ -7669,6 +7717,11 @@ export namespace Prisma {
     createdById: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    initialElectricityKwhPending: Decimal | null
+    initialWaterM3Pending: Decimal | null
+    initialMetersRecordedAt: Date | null
+    initialMetersRecordedById: number | null
+    initialMetersPromotedAt: Date | null
   }
 
   export type StayCountAggregateOutputType = {
@@ -7700,6 +7753,11 @@ export namespace Prisma {
     createdById: number
     createdAt: number
     updatedAt: number
+    initialElectricityKwhPending: number
+    initialWaterM3Pending: number
+    initialMetersRecordedAt: number
+    initialMetersRecordedById: number
+    initialMetersPromotedAt: number
     _all: number
   }
 
@@ -7716,6 +7774,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     createdById?: true
+    initialElectricityKwhPending?: true
+    initialWaterM3Pending?: true
+    initialMetersRecordedById?: true
   }
 
   export type StaySumAggregateInputType = {
@@ -7730,6 +7791,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     createdById?: true
+    initialElectricityKwhPending?: true
+    initialWaterM3Pending?: true
+    initialMetersRecordedById?: true
   }
 
   export type StayMinAggregateInputType = {
@@ -7761,6 +7825,11 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    initialElectricityKwhPending?: true
+    initialWaterM3Pending?: true
+    initialMetersRecordedAt?: true
+    initialMetersRecordedById?: true
+    initialMetersPromotedAt?: true
   }
 
   export type StayMaxAggregateInputType = {
@@ -7792,6 +7861,11 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    initialElectricityKwhPending?: true
+    initialWaterM3Pending?: true
+    initialMetersRecordedAt?: true
+    initialMetersRecordedById?: true
+    initialMetersPromotedAt?: true
   }
 
   export type StayCountAggregateInputType = {
@@ -7823,6 +7897,11 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    initialElectricityKwhPending?: true
+    initialWaterM3Pending?: true
+    initialMetersRecordedAt?: true
+    initialMetersRecordedById?: true
+    initialMetersPromotedAt?: true
     _all?: true
   }
 
@@ -7941,6 +8020,11 @@ export namespace Prisma {
     createdById: number | null
     createdAt: Date
     updatedAt: Date
+    initialElectricityKwhPending: Decimal | null
+    initialWaterM3Pending: Decimal | null
+    initialMetersRecordedAt: Date | null
+    initialMetersRecordedById: number | null
+    initialMetersPromotedAt: Date | null
     _count: StayCountAggregateOutputType | null
     _avg: StayAvgAggregateOutputType | null
     _sum: StaySumAggregateOutputType | null
@@ -7991,9 +8075,15 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    initialElectricityKwhPending?: boolean
+    initialWaterM3Pending?: boolean
+    initialMetersRecordedAt?: boolean
+    initialMetersRecordedById?: boolean
+    initialMetersPromotedAt?: boolean
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
@@ -8030,9 +8120,15 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    initialElectricityKwhPending?: boolean
+    initialWaterM3Pending?: boolean
+    initialMetersRecordedAt?: boolean
+    initialMetersRecordedById?: boolean
+    initialMetersPromotedAt?: boolean
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
   export type StaySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -8064,9 +8160,15 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    initialElectricityKwhPending?: boolean
+    initialWaterM3Pending?: boolean
+    initialMetersRecordedAt?: boolean
+    initialMetersRecordedById?: boolean
+    initialMetersPromotedAt?: boolean
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
   export type StaySelectScalar = {
@@ -8098,13 +8200,19 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    initialElectricityKwhPending?: boolean
+    initialWaterM3Pending?: boolean
+    initialMetersRecordedAt?: boolean
+    initialMetersRecordedById?: boolean
+    initialMetersPromotedAt?: boolean
   }
 
-  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["stay"]>
+  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "notes" | "createdById" | "createdAt" | "updatedAt" | "initialElectricityKwhPending" | "initialWaterM3Pending" | "initialMetersRecordedAt" | "initialMetersRecordedById" | "initialMetersPromotedAt", ExtArgs["result"]["stay"]>
   export type StayInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
@@ -8115,11 +8223,13 @@ export namespace Prisma {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
   }
   export type StayIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
+    initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
   }
 
   export type $StayPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8128,6 +8238,7 @@ export namespace Prisma {
       tenant: Prisma.$TenantPayload<ExtArgs>
       room: Prisma.$RoomPayload<ExtArgs>
       createdBy: Prisma.$UserPayload<ExtArgs> | null
+      initialMetersRecordedBy: Prisma.$UserPayload<ExtArgs> | null
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
@@ -8162,6 +8273,11 @@ export namespace Prisma {
       createdById: number | null
       createdAt: Date
       updatedAt: Date
+      initialElectricityKwhPending: Prisma.Decimal | null
+      initialWaterM3Pending: Prisma.Decimal | null
+      initialMetersRecordedAt: Date | null
+      initialMetersRecordedById: number | null
+      initialMetersPromotedAt: Date | null
     }, ExtArgs["result"]["stay"]>
     composites: {}
   }
@@ -8559,6 +8675,7 @@ export namespace Prisma {
     tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     room<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends Stay$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Stay$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    initialMetersRecordedBy<T extends Stay$initialMetersRecordedByArgs<ExtArgs> = {}>(args?: Subset<T, Stay$initialMetersRecordedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     invoices<T extends Stay$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Stay$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Stay$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8620,6 +8737,11 @@ export namespace Prisma {
     readonly createdById: FieldRef<"Stay", 'Int'>
     readonly createdAt: FieldRef<"Stay", 'DateTime'>
     readonly updatedAt: FieldRef<"Stay", 'DateTime'>
+    readonly initialElectricityKwhPending: FieldRef<"Stay", 'Decimal'>
+    readonly initialWaterM3Pending: FieldRef<"Stay", 'Decimal'>
+    readonly initialMetersRecordedAt: FieldRef<"Stay", 'DateTime'>
+    readonly initialMetersRecordedById: FieldRef<"Stay", 'Int'>
+    readonly initialMetersPromotedAt: FieldRef<"Stay", 'DateTime'>
   }
     
 
@@ -9019,6 +9141,25 @@ export namespace Prisma {
    * Stay.createdBy
    */
   export type Stay$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Stay.initialMetersRecordedBy
+   */
+  export type Stay$initialMetersRecordedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -27837,7 +27978,12 @@ export namespace Prisma {
     notes: 'notes',
     createdById: 'createdById',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    initialElectricityKwhPending: 'initialElectricityKwhPending',
+    initialWaterM3Pending: 'initialWaterM3Pending',
+    initialMetersRecordedAt: 'initialMetersRecordedAt',
+    initialMetersRecordedById: 'initialMetersRecordedById',
+    initialMetersPromotedAt: 'initialMetersPromotedAt'
   };
 
   export type StayScalarFieldEnum = (typeof StayScalarFieldEnum)[keyof typeof StayScalarFieldEnum]
@@ -28344,20 +28490,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'UtilityType'
-   */
-  export type EnumUtilityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityType'>
-    
-
-
-  /**
-   * Reference to a field of type 'UtilityType[]'
-   */
-  export type ListEnumUtilityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityType[]'>
-    
-
-
-  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -28368,6 +28500,20 @@ export namespace Prisma {
    * Reference to a field of type 'Decimal[]'
    */
   export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'UtilityType'
+   */
+  export type EnumUtilityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityType'>
+    
+
+
+  /**
+   * Reference to a field of type 'UtilityType[]'
+   */
+  export type ListEnumUtilityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UtilityType[]'>
     
 
 
@@ -28574,6 +28720,7 @@ export namespace Prisma {
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
     announcementsCreated?: AnnouncementListRelationFilter
     staysCreated?: StayListRelationFilter
+    staysInitialMetersRecorded?: StayListRelationFilter
     invoicesCreated?: InvoiceListRelationFilter
     paymentsCaptured?: InvoicePaymentListRelationFilter
     ticketsAssigned?: TicketListRelationFilter
@@ -28603,6 +28750,7 @@ export namespace Prisma {
     tenant?: TenantOrderByWithRelationInput
     announcementsCreated?: AnnouncementOrderByRelationAggregateInput
     staysCreated?: StayOrderByRelationAggregateInput
+    staysInitialMetersRecorded?: StayOrderByRelationAggregateInput
     invoicesCreated?: InvoiceOrderByRelationAggregateInput
     paymentsCaptured?: InvoicePaymentOrderByRelationAggregateInput
     ticketsAssigned?: TicketOrderByRelationAggregateInput
@@ -28635,6 +28783,7 @@ export namespace Prisma {
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
     announcementsCreated?: AnnouncementListRelationFilter
     staysCreated?: StayListRelationFilter
+    staysInitialMetersRecorded?: StayListRelationFilter
     invoicesCreated?: InvoiceListRelationFilter
     paymentsCaptured?: InvoicePaymentListRelationFilter
     ticketsAssigned?: TicketListRelationFilter
@@ -28970,9 +29119,15 @@ export namespace Prisma {
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
     updatedAt?: DateTimeFilter<"Stay"> | Date | string
+    initialElectricityKwhPending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    initialMetersRecordedById?: IntNullableFilter<"Stay"> | number | null
+    initialMetersPromotedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    initialMetersRecordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -29008,9 +29163,15 @@ export namespace Prisma {
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    initialElectricityKwhPending?: SortOrderInput | SortOrder
+    initialWaterM3Pending?: SortOrderInput | SortOrder
+    initialMetersRecordedAt?: SortOrderInput | SortOrder
+    initialMetersRecordedById?: SortOrderInput | SortOrder
+    initialMetersPromotedAt?: SortOrderInput | SortOrder
     tenant?: TenantOrderByWithRelationInput
     room?: RoomOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
+    initialMetersRecordedBy?: UserOrderByWithRelationInput
     invoices?: InvoiceOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
@@ -29049,9 +29210,15 @@ export namespace Prisma {
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
     updatedAt?: DateTimeFilter<"Stay"> | Date | string
+    initialElectricityKwhPending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    initialMetersRecordedById?: IntNullableFilter<"Stay"> | number | null
+    initialMetersPromotedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    initialMetersRecordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -29087,6 +29254,11 @@ export namespace Prisma {
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    initialElectricityKwhPending?: SortOrderInput | SortOrder
+    initialWaterM3Pending?: SortOrderInput | SortOrder
+    initialMetersRecordedAt?: SortOrderInput | SortOrder
+    initialMetersRecordedById?: SortOrderInput | SortOrder
+    initialMetersPromotedAt?: SortOrderInput | SortOrder
     _count?: StayCountOrderByAggregateInput
     _avg?: StayAvgOrderByAggregateInput
     _max?: StayMaxOrderByAggregateInput
@@ -29126,6 +29298,11 @@ export namespace Prisma {
     createdById?: IntNullableWithAggregatesFilter<"Stay"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Stay"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Stay"> | Date | string
+    initialElectricityKwhPending?: DecimalNullableWithAggregatesFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: DecimalNullableWithAggregatesFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
+    initialMetersRecordedById?: IntNullableWithAggregatesFilter<"Stay"> | number | null
+    initialMetersPromotedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
   }
 
   export type MeterReadingWhereInput = {
@@ -30625,6 +30802,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -30653,6 +30831,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -30680,6 +30859,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -30708,6 +30888,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -31094,9 +31275,14 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -31132,6 +31318,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
@@ -31163,9 +31354,14 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -31201,6 +31397,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
@@ -31236,6 +31437,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
   }
 
   export type StayUpdateManyMutationInput = {
@@ -31263,6 +31469,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type StayUncheckedUpdateManyInput = {
@@ -31294,6 +31504,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MeterReadingCreateInput = {
@@ -33519,6 +33734,17 @@ export namespace Prisma {
     not?: NestedEnumStayPurposeNullableFilter<$PrismaModel> | $Enums.StayPurpose | null
   }
 
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
   export type TenantScalarRelationFilter = {
     is?: TenantWhereInput
     isNot?: TenantWhereInput
@@ -33558,6 +33784,11 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    initialElectricityKwhPending?: SortOrder
+    initialWaterM3Pending?: SortOrder
+    initialMetersRecordedAt?: SortOrder
+    initialMetersRecordedById?: SortOrder
+    initialMetersPromotedAt?: SortOrder
   }
 
   export type StayAvgOrderByAggregateInput = {
@@ -33572,6 +33803,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     createdById?: SortOrder
+    initialElectricityKwhPending?: SortOrder
+    initialWaterM3Pending?: SortOrder
+    initialMetersRecordedById?: SortOrder
   }
 
   export type StayMaxOrderByAggregateInput = {
@@ -33603,6 +33837,11 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    initialElectricityKwhPending?: SortOrder
+    initialWaterM3Pending?: SortOrder
+    initialMetersRecordedAt?: SortOrder
+    initialMetersRecordedById?: SortOrder
+    initialMetersPromotedAt?: SortOrder
   }
 
   export type StayMinOrderByAggregateInput = {
@@ -33634,6 +33873,11 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    initialElectricityKwhPending?: SortOrder
+    initialWaterM3Pending?: SortOrder
+    initialMetersRecordedAt?: SortOrder
+    initialMetersRecordedById?: SortOrder
+    initialMetersPromotedAt?: SortOrder
   }
 
   export type StaySumOrderByAggregateInput = {
@@ -33648,6 +33892,9 @@ export namespace Prisma {
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     createdById?: SortOrder
+    initialElectricityKwhPending?: SortOrder
+    initialWaterM3Pending?: SortOrder
+    initialMetersRecordedById?: SortOrder
   }
 
   export type EnumStayStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -33708,6 +33955,22 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
     _max?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type EnumUtilityTypeFilter<$PrismaModel = never> = {
@@ -34991,6 +35254,13 @@ export namespace Prisma {
     connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
   }
 
+  export type StayCreateNestedManyWithoutInitialMetersRecordedByInput = {
+    create?: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput> | StayCreateWithoutInitialMetersRecordedByInput[] | StayUncheckedCreateWithoutInitialMetersRecordedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutInitialMetersRecordedByInput | StayCreateOrConnectWithoutInitialMetersRecordedByInput[]
+    createMany?: StayCreateManyInitialMetersRecordedByInputEnvelope
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+  }
+
   export type InvoiceCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<InvoiceCreateWithoutCreatedByInput, InvoiceUncheckedCreateWithoutCreatedByInput> | InvoiceCreateWithoutCreatedByInput[] | InvoiceUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutCreatedByInput | InvoiceCreateOrConnectWithoutCreatedByInput[]
@@ -35086,6 +35356,13 @@ export namespace Prisma {
     create?: XOR<StayCreateWithoutCreatedByInput, StayUncheckedCreateWithoutCreatedByInput> | StayCreateWithoutCreatedByInput[] | StayUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: StayCreateOrConnectWithoutCreatedByInput | StayCreateOrConnectWithoutCreatedByInput[]
     createMany?: StayCreateManyCreatedByInputEnvelope
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+  }
+
+  export type StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput = {
+    create?: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput> | StayCreateWithoutInitialMetersRecordedByInput[] | StayUncheckedCreateWithoutInitialMetersRecordedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutInitialMetersRecordedByInput | StayCreateOrConnectWithoutInitialMetersRecordedByInput[]
+    createMany?: StayCreateManyInitialMetersRecordedByInputEnvelope
     connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
   }
 
@@ -35228,6 +35505,20 @@ export namespace Prisma {
     connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
     update?: StayUpdateWithWhereUniqueWithoutCreatedByInput | StayUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: StayUpdateManyWithWhereWithoutCreatedByInput | StayUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
+  }
+
+  export type StayUpdateManyWithoutInitialMetersRecordedByNestedInput = {
+    create?: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput> | StayCreateWithoutInitialMetersRecordedByInput[] | StayUncheckedCreateWithoutInitialMetersRecordedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutInitialMetersRecordedByInput | StayCreateOrConnectWithoutInitialMetersRecordedByInput[]
+    upsert?: StayUpsertWithWhereUniqueWithoutInitialMetersRecordedByInput | StayUpsertWithWhereUniqueWithoutInitialMetersRecordedByInput[]
+    createMany?: StayCreateManyInitialMetersRecordedByInputEnvelope
+    set?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    disconnect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    delete?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    update?: StayUpdateWithWhereUniqueWithoutInitialMetersRecordedByInput | StayUpdateWithWhereUniqueWithoutInitialMetersRecordedByInput[]
+    updateMany?: StayUpdateManyWithWhereWithoutInitialMetersRecordedByInput | StayUpdateManyWithWhereWithoutInitialMetersRecordedByInput[]
     deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
   }
 
@@ -35440,6 +35731,20 @@ export namespace Prisma {
     connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
     update?: StayUpdateWithWhereUniqueWithoutCreatedByInput | StayUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: StayUpdateManyWithWhereWithoutCreatedByInput | StayUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
+  }
+
+  export type StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput = {
+    create?: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput> | StayCreateWithoutInitialMetersRecordedByInput[] | StayUncheckedCreateWithoutInitialMetersRecordedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutInitialMetersRecordedByInput | StayCreateOrConnectWithoutInitialMetersRecordedByInput[]
+    upsert?: StayUpsertWithWhereUniqueWithoutInitialMetersRecordedByInput | StayUpsertWithWhereUniqueWithoutInitialMetersRecordedByInput[]
+    createMany?: StayCreateManyInitialMetersRecordedByInputEnvelope
+    set?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    disconnect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    delete?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    update?: StayUpdateWithWhereUniqueWithoutInitialMetersRecordedByInput | StayUpdateWithWhereUniqueWithoutInitialMetersRecordedByInput[]
+    updateMany?: StayUpdateManyWithWhereWithoutInitialMetersRecordedByInput | StayUpdateManyWithWhereWithoutInitialMetersRecordedByInput[]
     deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
   }
 
@@ -36060,6 +36365,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutStaysInitialMetersRecordedInput = {
+    create?: XOR<UserCreateWithoutStaysInitialMetersRecordedInput, UserUncheckedCreateWithoutStaysInitialMetersRecordedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaysInitialMetersRecordedInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type InvoiceCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -36140,6 +36451,14 @@ export namespace Prisma {
     set?: $Enums.StayPurpose | null
   }
 
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
   export type TenantUpdateOneRequiredWithoutStaysNestedInput = {
     create?: XOR<TenantCreateWithoutStaysInput, TenantUncheckedCreateWithoutStaysInput>
     connectOrCreate?: TenantCreateOrConnectWithoutStaysInput
@@ -36164,6 +36483,16 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaysCreatedInput, UserUpdateWithoutStaysCreatedInput>, UserUncheckedUpdateWithoutStaysCreatedInput>
+  }
+
+  export type UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput = {
+    create?: XOR<UserCreateWithoutStaysInitialMetersRecordedInput, UserUncheckedCreateWithoutStaysInitialMetersRecordedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaysInitialMetersRecordedInput
+    upsert?: UserUpsertWithoutStaysInitialMetersRecordedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaysInitialMetersRecordedInput, UserUpdateWithoutStaysInitialMetersRecordedInput>, UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput>
   }
 
   export type InvoiceUpdateManyWithoutStayNestedInput = {
@@ -37289,6 +37618,17 @@ export namespace Prisma {
     not?: NestedEnumStayPurposeNullableFilter<$PrismaModel> | $Enums.StayPurpose | null
   }
 
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
   export type NestedEnumStayStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.StayStatus | EnumStayStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StayStatus[] | ListEnumStayStatusFieldRefInput<$PrismaModel>
@@ -37347,6 +37687,22 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
     _max?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumUtilityTypeFilter<$PrismaModel = never> = {
@@ -37740,8 +38096,13 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -37776,6 +38137,11 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
@@ -37789,6 +38155,93 @@ export namespace Prisma {
 
   export type StayCreateManyCreatedByInputEnvelope = {
     data: StayCreateManyCreatedByInput | StayCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StayCreateWithoutInitialMetersRecordedByInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutInitialMetersRecordedByInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutInitialMetersRecordedByInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput>
+  }
+
+  export type StayCreateManyInitialMetersRecordedByInputEnvelope = {
+    data: StayCreateManyInitialMetersRecordedByInput | StayCreateManyInitialMetersRecordedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -38426,6 +38879,27 @@ export namespace Prisma {
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
     updatedAt?: DateTimeFilter<"Stay"> | Date | string
+    initialElectricityKwhPending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: DecimalNullableFilter<"Stay"> | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    initialMetersRecordedById?: IntNullableFilter<"Stay"> | number | null
+    initialMetersPromotedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+  }
+
+  export type StayUpsertWithWhereUniqueWithoutInitialMetersRecordedByInput = {
+    where: StayWhereUniqueInput
+    update: XOR<StayUpdateWithoutInitialMetersRecordedByInput, StayUncheckedUpdateWithoutInitialMetersRecordedByInput>
+    create: XOR<StayCreateWithoutInitialMetersRecordedByInput, StayUncheckedCreateWithoutInitialMetersRecordedByInput>
+  }
+
+  export type StayUpdateWithWhereUniqueWithoutInitialMetersRecordedByInput = {
+    where: StayWhereUniqueInput
+    data: XOR<StayUpdateWithoutInitialMetersRecordedByInput, StayUncheckedUpdateWithoutInitialMetersRecordedByInput>
+  }
+
+  export type StayUpdateManyWithWhereWithoutInitialMetersRecordedByInput = {
+    where: StayScalarWhereInput
+    data: XOR<StayUpdateManyMutationInput, StayUncheckedUpdateManyWithoutInitialMetersRecordedByInput>
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -38838,6 +39312,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -38865,6 +39340,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -38909,8 +39385,13 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -38945,6 +39426,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
@@ -39110,6 +39596,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -39137,6 +39624,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -39224,8 +39712,13 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -39260,6 +39753,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
@@ -39691,6 +40189,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -39718,6 +40217,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -39735,6 +40235,66 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutStaysCreatedInput, UserUncheckedCreateWithoutStaysCreatedInput>
+  }
+
+  export type UserCreateWithoutStaysInitialMetersRecordedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserUncheckedCreateWithoutStaysInitialMetersRecordedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserCreateOrConnectWithoutStaysInitialMetersRecordedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaysInitialMetersRecordedInput, UserUncheckedCreateWithoutStaysInitialMetersRecordedInput>
   }
 
   export type InvoiceCreateWithoutStayInput = {
@@ -40088,6 +40648,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -40115,6 +40676,73 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUpsertWithoutStaysInitialMetersRecordedInput = {
+    update: XOR<UserUpdateWithoutStaysInitialMetersRecordedInput, UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput>
+    create: XOR<UserCreateWithoutStaysInitialMetersRecordedInput, UserUncheckedCreateWithoutStaysInitialMetersRecordedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaysInitialMetersRecordedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaysInitialMetersRecordedInput, UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput>
+  }
+
+  export type UserUpdateWithoutStaysInitialMetersRecordedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -40260,6 +40888,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -40287,6 +40916,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -40389,6 +41019,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -40416,6 +41047,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -40454,9 +41086,14 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -40491,6 +41128,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
@@ -40514,6 +41156,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
@@ -40541,6 +41184,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
@@ -40728,9 +41372,14 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -40765,6 +41414,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
@@ -40794,6 +41448,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
@@ -40821,6 +41476,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
@@ -41051,6 +41707,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
@@ -41078,6 +41735,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
@@ -41170,6 +41828,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
@@ -41197,6 +41856,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
@@ -41223,6 +41883,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -41250,6 +41911,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -41292,6 +41954,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -41319,6 +41982,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -41357,9 +42021,14 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -41394,6 +42063,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
@@ -41509,6 +42183,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -41536,6 +42211,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -41567,6 +42243,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -41594,6 +42271,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -41648,9 +42326,14 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -41685,6 +42368,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
@@ -41818,6 +42506,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -41845,6 +42534,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -41882,6 +42572,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -41909,6 +42600,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -42049,9 +42741,14 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -42086,6 +42783,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
@@ -42109,6 +42811,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
@@ -42136,6 +42839,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
@@ -42304,9 +43008,14 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -42341,6 +43050,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
@@ -42370,6 +43084,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
@@ -42397,6 +43112,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
@@ -42422,6 +43138,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -42449,6 +43166,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -42491,6 +43209,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -42518,6 +43237,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -42919,6 +43639,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -42946,6 +43667,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -43090,6 +43812,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -43117,6 +43840,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -43143,6 +43867,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -43170,6 +43895,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -43212,6 +43938,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -43239,6 +43966,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -43331,9 +44059,14 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -43368,6 +44101,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
@@ -43391,6 +44129,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -43418,6 +44157,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -43532,9 +44272,14 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -43569,6 +44314,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
@@ -43598,6 +44348,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -43625,6 +44376,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -43651,6 +44403,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -43678,6 +44431,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -43720,6 +44474,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -43747,6 +44502,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -43773,6 +44529,7 @@ export namespace Prisma {
     tenant?: TenantCreateNestedOneWithoutUserInput
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
@@ -43800,6 +44557,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
@@ -43842,6 +44600,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneWithoutUserNestedInput
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
@@ -43869,6 +44628,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
@@ -43929,6 +44689,46 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+  }
+
+  export type StayCreateManyInitialMetersRecordedByInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
   }
 
   export type InvoiceCreateManyCreatedByInput = {
@@ -44201,8 +45001,13 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -44237,6 +45042,11 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
@@ -44271,6 +45081,123 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type StayUpdateWithoutInitialMetersRecordedByInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutInitialMetersRecordedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateManyWithoutInitialMetersRecordedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type InvoiceUpdateWithoutCreatedByInput = {
@@ -44863,6 +45790,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
   }
 
   export type TicketCreateManyTenantInput = {
@@ -44944,8 +45876,13 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -44980,6 +45917,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
@@ -45014,6 +45956,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TicketUpdateWithoutTenantInput = {
@@ -45204,6 +46151,11 @@ export namespace Prisma {
     createdById?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
   }
 
   export type MeterReadingCreateManyRoomInput = {
@@ -45304,8 +46256,13 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -45340,6 +46297,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
@@ -45374,6 +46336,11 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MeterReadingUpdateWithoutRoomInput = {

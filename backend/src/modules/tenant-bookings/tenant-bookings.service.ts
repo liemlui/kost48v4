@@ -496,30 +496,6 @@ export class TenantBookingsService {
 
         const baselineDate = this.startOfDay(new Date(booking.checkInDate));
 
-        const existingElectricityReading = await tx.meterReading.findFirst({
-          where: {
-            roomId: booking.roomId,
-            utilityType: 'ELECTRICITY' as any,
-            readingAt: baselineDate,
-          },
-          select: { id: true },
-        });
-        if (existingElectricityReading) {
-          throw new ConflictException('Meter awal listrik pada tanggal check-in sudah pernah tercatat untuk kamar ini');
-        }
-
-        const existingWaterReading = await tx.meterReading.findFirst({
-          where: {
-            roomId: booking.roomId,
-            utilityType: 'WATER' as any,
-            readingAt: baselineDate,
-          },
-          select: { id: true },
-        });
-        if (existingWaterReading) {
-          throw new ConflictException('Meter awal air pada tanggal check-in sudah pernah tercatat untuk kamar ini');
-        }
-
         const updatedStay = await tx.stay.update({
           where: { id: stayId },
           data: {
@@ -573,25 +549,13 @@ export class TenantBookingsService {
           },
         });
 
-        const electricityMeter = await tx.meterReading.create({
+        await tx.stay.update({
+          where: { id: updatedStay.id },
           data: {
-            roomId: booking.roomId,
-            utilityType: 'ELECTRICITY' as any,
-            readingAt: baselineDate,
-            readingValue: initialElectricity,
-            recordedById: actor.id,
-            note: 'Meter awal saat approval booking admin',
-          },
-        });
-
-        const waterMeter = await tx.meterReading.create({
-          data: {
-            roomId: booking.roomId,
-            utilityType: 'WATER' as any,
-            readingAt: baselineDate,
-            readingValue: initialWater,
-            recordedById: actor.id,
-            note: 'Meter awal saat approval booking admin',
+            initialElectricityKwhPending: initialElectricity,
+            initialWaterM3Pending: initialWater,
+            initialMetersRecordedAt: baselineDate,
+            initialMetersRecordedById: actor.id,
           },
         });
 
@@ -610,13 +574,15 @@ export class TenantBookingsService {
               agreedRentAmountRupiah: updatedStay.agreedRentAmountRupiah,
               depositAmountRupiah: updatedStay.depositAmountRupiah,
               roomStatus: booking.roomStatus,
+              initialElectricityKwhPending: new Prisma.Decimal(initialElectricity),
+              initialWaterM3Pending: new Prisma.Decimal(initialWater),
             } as any,
             meta: {
               stayId,
               roomId: booking.roomId,
               tenantId: booking.tenantId,
               invoiceId: invoice.id,
-              baselineReadingAt: baselineDate,
+              pendingBaselineReadingAt: baselineDate,
             } as any,
           },
         });
@@ -656,9 +622,9 @@ export class TenantBookingsService {
             periodEnd: invoice.periodEnd,
             dueDate: invoice.dueDate,
           },
-          baselineMeters: {
-            electricityId: electricityMeter.id,
-            waterId: waterMeter.id,
+          pendingBaselineMeters: {
+            electricityKwh: Number(initialElectricity),
+            waterM3: Number(initialWater),
             readingAt: baselineDate,
           },
         };
@@ -682,10 +648,6 @@ export class TenantBookingsService {
       const databaseCode = error?.code ?? error?.meta?.code;
       if (databaseCode === '23505') {
         throw new ConflictException('Approval booking bentrok dengan data aktif lain');
-      }
-
-      if (error?.message?.includes('tidak boleh lebih rendah')) {
-        throw new ConflictException('Pembacaan meter tidak boleh lebih rendah dari sebelumnya');
       }
 
       throw error;

@@ -187,6 +187,7 @@ model User {
   tenant                      Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   announcementsCreated        Announcement[]       @relation("AnnouncementCreatedBy")
   staysCreated                Stay[]               @relation("StayCreatedBy")
+  staysInitialMetersRecorded  Stay[]               @relation("StayInitialMetersRecordedBy")
   invoicesCreated             Invoice[]            @relation("InvoiceCreatedBy")
   paymentsCaptured            InvoicePayment[]     @relation("InvoicePaymentCapturedBy")
   ticketsAssigned             Ticket[]             @relation("TicketAssignedTo")
@@ -308,9 +309,16 @@ model Stay {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  room      Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
-  createdBy User?  @relation("StayCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  initialElectricityKwhPending Decimal?  @db.Decimal(12, 3)
+  initialWaterM3Pending        Decimal?  @db.Decimal(12, 3)
+  initialMetersRecordedAt      DateTime?
+  initialMetersRecordedById    Int?
+  initialMetersPromotedAt      DateTime?
+
+  tenant                  Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  room                    Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  createdBy               User?  @relation("StayCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  initialMetersRecordedBy User?  @relation("StayInitialMetersRecordedBy", fields: [initialMetersRecordedById], references: [id], onDelete: SetNull)
 
   invoices           Invoice[]
   tickets            Ticket[]
