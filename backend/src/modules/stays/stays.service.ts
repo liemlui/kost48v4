@@ -252,14 +252,29 @@ export class StaysService {
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
     if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
 
+    const room = await this.prisma.room.findUnique({
+      where: { id: existing.roomId },
+      select: { status: true },
+    });
+    const isReservedBooking = room?.status === RoomStatus.RESERVED;
+
     const updated = await this.prisma.$transaction(async (tx) => {
+      const updateData: Prisma.StayUpdateInput = {
+        status: StayStatus.CANCELLED,
+        checkoutReason: dto.cancelReason,
+        notes: dto.notes ?? existing.notes,
+      };
+
+      if (isReservedBooking) {
+        updateData.initialElectricityKwhPending = null;
+        updateData.initialWaterM3Pending = null;
+        updateData.initialMetersRecordedAt = null;
+        updateData.initialMetersRecordedBy = { disconnect: true };
+      }
+
       await tx.stay.update({
         where: { id },
-        data: {
-          status: StayStatus.CANCELLED,
-          checkoutReason: dto.cancelReason,
-          notes: dto.notes ?? existing.notes,
-        },
+        data: updateData,
       });
 
       await tx.invoice.updateMany({
