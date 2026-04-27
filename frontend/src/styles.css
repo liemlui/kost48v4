@@ -1230,3 +1230,35 @@ a {
 .public-room-detail-placeholder {
   min-height: 240px;
 }
+
+/* Notification dot */
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.notification-dot.unread {
+  background: var(--primary, #0d6efd);
+}
+.notification-dot.read {
+  background: var(--border-soft, #cbd5e1);
+}
+
+/* Notification dropdown item */
+.notification-dropdown-item.unread {
+  background: rgba(14, 165, 233, 0.04);
+}
+.notification-dropdown-menu {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.notification-title {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.notification-bell-toggle::after {
+  display: none !important;
+}

@@ -116,6 +116,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
       links: [
         { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Lihat kamar yang tersedia dan mulai booking.' },
         { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
+        { to: '/notifications', label: 'Notifikasi', icon: '🔔', hint: 'Notifikasi dan pengingat dari pengelola kos.' },
       ],
     }];
   }
@@ -128,6 +129,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
         { to: '/portal/bookings', label: 'Pemesanan Saya', icon: '🗓️', hint: 'Pantau booking reserved, approval, dan pembayaran awal.' },
         { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Lihat tagihan awal hasil approval booking.' },
         { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
+        { to: '/notifications', label: 'Notifikasi', icon: '🔔', hint: 'Notifikasi dan pengingat dari pengelola kos.' },
       ],
     }];
   }
@@ -141,6 +143,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
       { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola kos.' },
       { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
       { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
+      { to: '/notifications', label: 'Notifikasi', icon: '🔔', hint: 'Notifikasi dan pengingat dari pengelola kos.' },
     ],
   }];
 }

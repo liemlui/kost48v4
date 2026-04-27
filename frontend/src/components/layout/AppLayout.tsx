@@ -3,6 +3,7 @@ import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
+import NotificationBell from '../notifications/NotificationBell';
 import {
   getDefaultRoute,
   getNavigationLinks,
@@ -74,6 +75,24 @@ function titleCaseSegment(segment: string) {
     .join(' ');
 }
 
+const segmentLabelMap: Record<string, string> = {
+  'notifications': 'Notifikasi',
+  'reminders': 'Pengingat WhatsApp',
+  'payment-submissions': 'Review Pembayaran',
+  'invoice-payments': 'Pembayaran Manual',
+  'inventory-items': 'Inventory Items',
+  'inventory-movements': 'Inventory Movements',
+  'room-items': 'Room Items',
+  'wifi-sales': 'WiFi Sales',
+  'meter-readings': 'Meter Readings',
+  'announcements': 'Announcements',
+  'expenses': 'Expenses',
+};
+
+function toLabel(segment: string): string {
+  return segmentLabelMap[segment] ?? titleCaseSegment(segment);
+}
+
 function getBreadcrumbParts(pathname: string, links: NavigationLink[]) {
   const matched = links.find((link) => pathname === link.to || pathname.startsWith(`${link.to}/`));
   const parts: string[] = [];
@@ -91,7 +110,7 @@ function getBreadcrumbParts(pathname: string, links: NavigationLink[]) {
       parts.push('Detail');
       return;
     }
-    parts.push(titleCaseSegment(segment));
+    parts.push(toLabel(segment));
   });
 
   return parts.length ? parts : ['Dashboard'];
@@ -207,6 +226,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
 
               <div className="d-flex align-items-center gap-3 flex-grow-1 justify-content-end flex-wrap">
                 <GlobalSearch role={user?.role} />
+                <NotificationBell />
                 <div className="topbar-user">
                   <div className="text-end">
                     <div className="fw-semibold">{user?.fullName}</div>
