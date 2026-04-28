@@ -112,8 +112,6 @@ export function usePaymentUrgency(): {
     if (invoicesQuery.isLoading || bookingsQuery.isLoading || stayQuery.isLoading) return null;
     if (invoicesQuery.isError && bookingsQuery.isError && stayQuery.isError) return null;
 
-    const today = todayMidnight();
-
     // P1: Invoice overdue
     {
       const invoices = invoicesQuery.data?.items ?? [];
@@ -148,11 +146,14 @@ export function usePaymentUrgency(): {
     {
       const bookings = bookingsQuery.data?.items ?? [];
       for (const booking of bookings) {
+        // Only consider active (reserved/booked) bookings, not cancelled/completed
+        const bookingStatus = (booking.status ?? '').toUpperCase();
+        if (bookingStatus !== 'ACTIVE') continue;
+
         const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
         if (expiryMeta.isExpired) continue;
-        if (expiryMeta.daysRemaining !== null && expiryMeta.daysRemaining > 0) continue;
 
-        // Check if within 24 hours
+        // Check if within 24 hours (using actual timestamps, not midnight-normalized)
         const expiryDate = parseDateSafe(booking.expiresAt);
         if (!expiryDate) continue;
         const hrs = hoursRemaining(expiryDate);
