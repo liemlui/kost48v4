@@ -542,7 +542,13 @@ export class PaymentSubmissionsService {
     try {
       const booking = await this.prisma.stay.findUnique({
         where: { id: stayId },
-        select: { id: true, roomId: true, status: true },
+        select: {
+          id: true,
+          roomId: true,
+          status: true,
+          initialMetersPromotedAt: true,
+          room: { select: { status: true } },
+        },
       });
 
       if (!booking) {
@@ -550,16 +556,19 @@ export class PaymentSubmissionsService {
       }
 
       if (booking.status !== StayStatus.ACTIVE) {
-        throw new ConflictException('Hanya booking dengan status ACTIVE yang dapat ditutup manual');
+        throw new ConflictException('Booking tidak aktif atau sudah diproses.');
       }
 
-      const room = await this.prisma.room.findUnique({
-        where: { id: booking.roomId },
-        select: { status: true },
-      });
+      if (booking.room.status !== RoomStatus.RESERVED) {
+        throw new ConflictException(
+          'Booking sudah menjadi hunian aktif. Gunakan checkout untuk mengakhiri stay.',
+        );
+      }
 
-      if (room?.status !== RoomStatus.RESERVED) {
-        throw new ConflictException('Booking ini sudah tidak dalam status reserved');
+      if (booking.initialMetersPromotedAt !== null) {
+        throw new ConflictException(
+          'Booking sudah aktif operasional. Gunakan checkout untuk mengakhiri stay.',
+        );
       }
 
       await this.prisma.$transaction(async (tx) => {
@@ -626,6 +635,7 @@ export class PaymentSubmissionsService {
         where: {
           status: StayStatus.ACTIVE,
           room: { status: RoomStatus.RESERVED },
+          initialMetersPromotedAt: null,
           expiresAt: { not: null, lt: new Date() },
           paymentSubmissions: {
             none: {
