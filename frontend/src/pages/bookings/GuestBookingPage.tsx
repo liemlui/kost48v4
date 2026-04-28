@@ -173,7 +173,7 @@ export default function GuestBookingPage() {
                   </div>
                   <div className="col-6">
                     <div className="small text-muted">Status</div>
-                    <StatusBadge status={result.booking.status} />
+                    <StatusBadge status={result.booking.status} customLabel="Menunggu Approval" />
                   </div>
                   <div className="col-6">
                     <div className="small text-muted">Check-in</div>
