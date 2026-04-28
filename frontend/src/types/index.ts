@@ -367,8 +367,45 @@ export type CreateTenantBookingPayload = {
   checkInDate: string;
   pricingTerm: PricingTerm;
   plannedCheckOutDate?: string;
-  stayPurpose?: 'WORK' | 'STUDY' | 'TRANSIT' | 'FAMILY' | 'MEDICAL' | 'PROJECT' | 'OTHER';
+  stayPurpose?: StayPurposeOption;
   notes?: string;
+};
+
+export type StayPurposeOption = 'WORK' | 'STUDY' | 'TRANSIT' | 'FAMILY' | 'MEDICAL' | 'PROJECT' | 'OTHER';
+
+export type CreatePublicBookingPayload = {
+  roomId: number;
+  checkInDate: string;
+  pricingTerm: PricingTerm;
+  fullName: string;
+  phone: string;
+  email: string;
+  identityNumber?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  plannedCheckOutDate?: string;
+  stayPurpose?: StayPurposeOption;
+  notes?: string;
+  website?: string;
+};
+
+export type PublicBookingResult = {
+  booking: {
+    stayId: number;
+    roomId: number;
+    roomCode: string;
+    status: string;
+    expiresAt: string;
+    checkInDate: string;
+    pricingTerm: PricingTerm;
+  };
+  portalAccess: {
+    email: string;
+    temporaryPassword?: string | null;
+    isNewUser: boolean;
+    instructions: string;
+  };
+  message: string;
 };
 
 

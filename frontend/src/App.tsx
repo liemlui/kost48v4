@@ -24,6 +24,7 @@ import MyTicketsPage from './pages/portal/MyTicketsPage';
 import WifiOrderPage from './pages/portal/WifiOrderPage';
 import SimpleCrudPage from './pages/resources/SimpleCrudPage';
 import BookingPage from './pages/bookings/BookingPage';
+import GuestBookingPage from './pages/bookings/GuestBookingPage';
 import RoomDetailPage from './pages/rooms/RoomDetailPage';
 import RoomsRouteEntry from './pages/rooms/RoomsRouteEntry';
 import PublicRoomDetailPage from './pages/rooms/PublicRoomDetailPage';
@@ -55,6 +56,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/rooms" element={<RoomsRouteEntry />} />
       <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
+      <Route path="/booking/:roomId" element={<GuestBookingPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<RootRedirect />} />

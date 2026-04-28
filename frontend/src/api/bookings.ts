@@ -2,8 +2,10 @@ import { createResource, getResource, listResource, updateResource } from './res
 import type {
   ApproveBookingPayload,
   ApproveBookingResult,
+  CreatePublicBookingPayload,
   CreateTenantBookingPayload,
   PaginatedResponse,
+  PublicBookingResult,
   PublicRoom,
   TenantBooking,
 } from '../types';
@@ -67,4 +69,8 @@ export async function approveBooking(stayId: number | string, payload: ApproveBo
 
 export async function getPublicRoomDetail(roomId: number | string) {
   return getResource<PublicRoom>(`/public/rooms/${roomId}`);
+}
+
+export async function createPublicBooking(payload: CreatePublicBookingPayload) {
+  return createResource<PublicBookingResult>('/public/bookings', payload as unknown as Record<string, unknown>);
 }
