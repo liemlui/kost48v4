@@ -1,4 +1,11 @@
-import type { SelectOption } from '../../../components/common/SearchableSelect';
+export type TenantOption = { label: string; value: number };
+
+export type InlineTenantState = {
+  fullName: string;
+  phone: string;
+  email: string;
+  gender: string;
+};
 
 export type WizardFormValues = {
   tenantId: number | null;
@@ -13,12 +20,3 @@ export type WizardFormValues = {
   initialElectricityKwh: string;
   initialWaterM3: string;
 };
-
-export type InlineTenantState = {
-  fullName: string;
-  phone: string;
-  email: string;
-  gender: string;
-};
-
-export type TenantOption = SelectOption<number>;
