@@ -9,6 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
+import { getBookingStatusLabel } from '../../utils/statusLabels';
 import StatCard from '../../components/common/StatCard';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
 import type { PaginatedResponse, Stay } from '../../types';
@@ -334,9 +335,24 @@ export default function StaysPage() {
                               {expireMutation.isPending ? 'Memproses...' : 'Jalankan Expire'}
                             </Button>
                           ) : (
-                            <div className="small text-muted">
-                              Tidak ada approval
-                            </div>
+                            <StatusBadge
+                              status={getBookingStatusLabel({
+                                isReserved: isReservedBooking(item),
+                                isExpired: expiryMeta.isExpired,
+                                hasInvoice: !approvalMeta.isPendingApproval,
+                                isCancelled: item.status === 'CANCELLED',
+                                isCompleted: item.status === 'COMPLETED',
+                                isActiveOccupied: item.status === 'ACTIVE' && item.room?.status === 'OCCUPIED',
+                              }).variant}
+                              customLabel={getBookingStatusLabel({
+                                isReserved: isReservedBooking(item),
+                                isExpired: expiryMeta.isExpired,
+                                hasInvoice: !approvalMeta.isPendingApproval,
+                                isCancelled: item.status === 'CANCELLED',
+                                isCompleted: item.status === 'COMPLETED',
+                                isActiveOccupied: item.status === 'ACTIVE' && item.room?.status === 'OCCUPIED',
+                              }).label}
+                            />
                           )}
                         </td>
                       </tr>

@@ -89,3 +89,22 @@ export function getStatusVariant(status?: string): 'success' | 'warning' | 'dang
   if (['MISSING'].includes(normalized)) return 'dark';
   return 'secondary';
 }
+
+export interface BookingStatusInput {
+  isReserved: boolean;
+  isExpired: boolean;
+  hasInvoice: boolean;
+  isCancelled: boolean;
+  isCompleted: boolean;
+  isActiveOccupied: boolean;
+}
+
+export function getBookingStatusLabel(input: BookingStatusInput): { label: string; variant: string } {
+  if (input.isCancelled) return { label: 'Dibatalkan', variant: 'DANGER' };
+  if (input.isCompleted) return { label: 'Selesai', variant: 'COMPLETED' };
+  if (input.isActiveOccupied) return { label: 'Aktif', variant: 'ACTIVE' };
+  if (input.isReserved && input.isExpired) return { label: 'Kedaluwarsa', variant: 'EXPIRED' };
+  if (input.isReserved && !input.hasInvoice) return { label: 'Menunggu Approval', variant: 'WARNING' };
+  if (input.isReserved && input.hasInvoice) return { label: 'Menunggu Pembayaran', variant: 'INFO' };
+  return { label: 'Perlu Review', variant: 'WARNING' };
+}

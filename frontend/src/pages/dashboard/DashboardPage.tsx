@@ -224,13 +224,14 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
   const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
+  const reservedBookingsQuery = useQuery({ queryKey: ['dashboard-admin', 'reserved-bookings'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
   const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 1000 }) });
   const depositCompletedQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-completed'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'COMPLETED', limit: 50 }) });
   const depositCancelledQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-cancelled'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'CANCELLED', limit: 50 }) });
   const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<any>('/tickets', { limit: 100 }) });
 
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
@@ -245,6 +246,17 @@ function AdminDashboard() {
     const daysLeft = daysFromToday(stay.plannedCheckOutDate);
     return stay.status === 'ACTIVE' && daysLeft !== null && daysLeft >= 0 && daysLeft <= 10;
   });
+  const allStays = reservedBookingsQuery.data?.items ?? [];
+  const reservedWithoutInvoice = allStays.filter((stay) => {
+    return (
+      stay.status === 'ACTIVE' &&
+      stay.room?.status === 'RESERVED' &&
+      stay.bookingSource === 'WEBSITE' &&
+      Boolean(stay.expiresAt) &&
+      !(Number(stay.invoiceCount ?? 0) > 0 || Boolean(stay.latestInvoiceId))
+    );
+  });
+  const pendingApprovalCount = reservedWithoutInvoice.length;
 
   return (
     <div>
@@ -261,6 +273,7 @@ function AdminDashboard() {
         <Col md={6} xl={3}><StatCard title="Due soon" value={dueSoonInvoices.length} subtitle="≤ 3 hari ke jatuh tempo" icon="🧾" variant={dueSoonInvoices.length ? 'warning' : 'success'} /></Col>
         <Col md={6} xl={3}><StatCard title="Checkout soon" value={checkoutSoon.length} subtitle="≤ 10 hari ke planned checkout" icon="⏳" variant={checkoutSoon.length ? 'info' : 'success'} /></Col>
         <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} /></Col>
+        <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} /></Col>
       </Row>
 
       <Row className="g-4">
@@ -280,6 +293,7 @@ function AdminDashboard() {
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Stay checkout soon</td><td>{checkoutSoon.length}</td><td>Persiapan perpanjangan atau checkout</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/tickets')}><td>Ticket terbuka</td><td>{tickets.filter((item) => ['OPEN', 'IN_PROGRESS'].includes(item.status)).length}</td><td>Triage, assign, dan tindak lanjut teknis</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/stays?filter=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
                 </tbody>
               </Table>
             </Card.Body>
