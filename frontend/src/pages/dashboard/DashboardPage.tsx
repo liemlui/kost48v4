@@ -293,7 +293,7 @@ function AdminDashboard() {
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Stay checkout soon</td><td>{checkoutSoon.length}</td><td>Persiapan perpanjangan atau checkout</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/tickets')}><td>Ticket terbuka</td><td>{tickets.filter((item) => ['OPEN', 'IN_PROGRESS'].includes(item.status)).length}</td><td>Triage, assign, dan tindak lanjut teknis</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays?filter=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
                 </tbody>
               </Table>
             </Card.Body>

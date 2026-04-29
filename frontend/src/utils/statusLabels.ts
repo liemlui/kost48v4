@@ -70,7 +70,7 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     PENDING_REVIEW: 'Menunggu Review',
     APPROVED: 'Disetujui',
     REJECTED: 'Ditolak',
-    EXPIRED: 'Kadaluarsa',
+    EXPIRED: 'Kedaluwarsa',
   };
 
   if (normalized === 'INACTIVE') return labels.INACTIVE;
