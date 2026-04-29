@@ -3,6 +3,7 @@ import { AuditLogService } from '../../audit-log/audit-log.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from './app-notification.service';
 import { MockReminderType } from './dto/mock-send.dto';
+import { normalizePhone } from '../../common/utils/phone.util';
 
 export interface MockSendResult {
   mock: true;
@@ -29,7 +30,7 @@ export class ReminderMockService {
     message: string;
     actorUserId: number;
   }): Promise<MockSendResult> {
-    const normalizedPhone = this.normalizePhone(input.phone);
+    const normalizedPhone = normalizePhone(input.phone);
     const sentAt = new Date().toISOString();
 
     // Write audit log
@@ -112,18 +113,5 @@ export class ReminderMockService {
       default:
         return 'Pengingat KOST48';
     }
-  }
-
-  /**
-   * Normalize Indonesian phone number:
-   * - 08xx -> 628xx
-   * - +628xx -> 628xx
-   * - 628xx stays 628xx
-   */
-  private normalizePhone(value: string): string {
-    const digits = value.replace(/\D/g, '');
-    if (digits.startsWith('62')) return digits;
-    if (digits.startsWith('0')) return `62${digits.slice(1)}`;
-    return digits;
   }
 }

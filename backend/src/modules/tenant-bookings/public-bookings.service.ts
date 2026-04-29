@@ -13,6 +13,8 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { calculateRentByPricingTerm } from './pricing.helper';
+import { startOfDay, endOfDay, addDays, parseDateOnly } from '../../common/utils/date.util';
+import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
 import { CreatePublicBookingDto } from './dto/create-public-booking.dto';
 
 interface RoomPricingSnapshot {
@@ -69,11 +71,6 @@ interface BookingRow {
   invoiceRemainingAmountRupiah?: number | null;
 }
 
-interface BookingSchemaStatus {
-  hasReservedRoomStatus: boolean;
-  hasStayExpiresAt: boolean;
-}
-
 const BOOKING_SELECT = Prisma.sql`
   s.id,
   s."tenantId",
@@ -106,8 +103,6 @@ const BOOKING_SELECT = Prisma.sql`
 
 @Injectable()
 export class PublicBookingsService {
-  private bookingSchemaStatusCache: BookingSchemaStatus | null = null;
-
   constructor(private readonly prisma: PrismaService) {}
 
   // ---------------------------------------------------------------------------
@@ -115,7 +110,7 @@ export class PublicBookingsService {
   // ---------------------------------------------------------------------------
 
   async createPublicBooking(dto: CreatePublicBookingDto) {
-    if (!(await this.isBookingSchemaReady())) {
+    if (!(await isBookingSchemaReady(this.prisma, { current: null }))) {
       throw new ServiceUnavailableException(
         'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
       );
@@ -129,9 +124,9 @@ export class PublicBookingsService {
       throw new BadRequestException('Permintaan tidak valid. Silakan coba lagi.');
     }
 
-    const checkInDate = this.parseDateOnly(dto.checkInDate, 'Tanggal check-in tidak valid');
+    const checkInDate = parseDateOnly(dto.checkInDate, 'Tanggal check-in tidak valid');
     const plannedCheckOutDate = dto.plannedCheckOutDate
-      ? this.parseDateOnly(dto.plannedCheckOutDate, 'Tanggal rencana checkout tidak valid')
+      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal rencana checkout tidak valid')
       : null;
 
     if (plannedCheckOutDate && plannedCheckOutDate < checkInDate) {
@@ -139,14 +134,14 @@ export class PublicBookingsService {
     }
 
     const now = new Date();
-    const today = this.startOfDay(now);
+    const today = startOfDay(now);
     if (checkInDate < today) {
       throw new BadRequestException('Tanggal check-in tidak boleh di masa lalu');
     }
 
     const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
     const minimumBookingWindowMs = 3 * 60 * 60 * 1000;
-    if (isSameDayCheckIn && (this.endOfDay(checkInDate).getTime() - now.getTime()) < minimumBookingWindowMs) {
+    if (isSameDayCheckIn && (endOfDay(checkInDate).getTime() - now.getTime()) < minimumBookingWindowMs) {
       throw new BadRequestException(
         'Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir. Silakan pilih tanggal check-in mulai besok. Jam operasional booking hari ini: 08.00–21.00 WIB.',
       );
@@ -396,7 +391,7 @@ export class PublicBookingsService {
         throw new ConflictException('Booking bentrok dengan data aktif lain');
       }
 
-      if (this.isBookingSchemaDriftError(error)) {
+      if (isBookingSchemaDriftError(error)) {
         throw new ServiceUnavailableException(
           'Fitur booking belum aktif penuh karena database belum sinkron. Jalankan sinkronisasi schema terlebih dahulu.',
         );
@@ -409,46 +404,6 @@ export class PublicBookingsService {
   // ---------------------------------------------------------------------------
   // PRIVATE HELPERS
   // ---------------------------------------------------------------------------
-
-  private async isBookingSchemaReady(): Promise<boolean> {
-    if (this.bookingSchemaStatusCache) {
-      return this.bookingSchemaStatusCache.hasReservedRoomStatus && this.bookingSchemaStatusCache.hasStayExpiresAt;
-    }
-
-    try {
-      const hasReserved = await this.prisma.$queryRawUnsafe<Array<{ enumlabel: string }>>(
-        `SELECT enumlabel FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'RoomStatus') AND enumlabel = 'RESERVED'`,
-      );
-      const hasExpiresAt = await this.prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
-        `SELECT column_name FROM information_schema.columns WHERE table_name = 'Stay' AND column_name = 'expiresAt'`,
-      );
-
-      this.bookingSchemaStatusCache = {
-        hasReservedRoomStatus: hasReserved.length > 0,
-        hasStayExpiresAt: hasExpiresAt.length > 0,
-      };
-
-      return this.bookingSchemaStatusCache.hasReservedRoomStatus && this.bookingSchemaStatusCache.hasStayExpiresAt;
-    } catch {
-      this.bookingSchemaStatusCache = { hasReservedRoomStatus: false, hasStayExpiresAt: false };
-      return false;
-    }
-  }
-
-  private isBookingSchemaDriftError(error: any): boolean {
-    const message = error?.message ?? '';
-    return (
-      message.includes('relation') && message.includes('does not exist')
-      || message.includes('column') && message.includes('does not exist')
-      || message.includes('type') && message.includes('does not exist')
-      || message.includes('invalid input value for enum')
-      || message.includes('expiresat')
-      || message.includes('roomstatus')
-      || message.includes('depositpaidamountrupiah')
-      || message.includes('depositpaymentstatus')
-      || message.includes('enum roomstatus')
-    );
-  }
 
   private async findBookingByIdTx(
     tx: Prisma.TransactionClient,
@@ -519,25 +474,4 @@ export class PublicBookingsService {
     return calculateRentByPricingTerm(monthlyRate, pricingTerm);
   }
 
-  private startOfDay(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  }
-
-  private endOfDay(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-  }
-
-  private addDays(date: Date, days: number) {
-    const next = new Date(date);
-    next.setDate(next.getDate() + days);
-    return this.startOfDay(next);
-  }
-
-  private parseDateOnly(value: string, message: string) {
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      throw new BadRequestException(message);
-    }
-    return this.startOfDay(parsed);
-  }
 }
