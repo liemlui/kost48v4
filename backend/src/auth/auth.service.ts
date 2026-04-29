@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
+import { normalizePhone, denormalizePhone } from '../common/utils/phone.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -26,7 +27,7 @@ export class AuthService {
     const invalidCredentialsMessage = 'Email atau password salah';
 
     const identifier = dto.identifier.trim();
-    const normalizedPhone = this.normalizePhone(identifier);
+    const normalizedPhone = normalizePhone(identifier);
 
     const user = await this.findUserForLogin(identifier, normalizedPhone);
 
@@ -95,7 +96,7 @@ export class AuthService {
       return { success: true };
     }
 
-    const normalizedPhone = this.normalizePhone(identifier);
+    const normalizedPhone = normalizePhone(identifier);
     const user = await this.findUserForForgotPassword(identifier, normalizedPhone);
 
     if (!user || !user.isActive) {
@@ -265,7 +266,7 @@ export class AuthService {
       where: {
         OR: [
           { phone: normalizedPhone },
-          { phone: this.denormalizePhone(normalizedPhone) },
+          { phone: denormalizePhone(normalizedPhone) },
         ],
         isActive: true,
       },
@@ -315,7 +316,7 @@ export class AuthService {
       where: {
         OR: [
           { phone: normalizedPhone },
-          { phone: this.denormalizePhone(normalizedPhone) },
+          { phone: denormalizePhone(normalizedPhone) },
         ],
         isActive: true,
       },
@@ -335,21 +336,6 @@ export class AuthService {
         tenant: true,
       },
     });
-  }
-
-  private normalizePhone(value: string): string | null {
-    const digits = value.replace(/\D/g, '');
-    if (!digits) return null;
-    if (digits.startsWith('62')) return digits;
-    if (digits.startsWith('0')) return `62${digits.slice(1)}`;
-    return digits.length >= 8 ? digits : null;
-  }
-
-  private denormalizePhone(value: string): string {
-    if (value.startsWith('62')) {
-      return `0${value.slice(2)}`;
-    }
-    return value;
   }
 
   private buildSimpleId(prefix: string) {
