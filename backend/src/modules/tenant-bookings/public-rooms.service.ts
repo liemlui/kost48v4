@@ -51,6 +51,35 @@ export class PublicRoomsService {
       this.prisma.room.count({ where }),
     ]);
 
+    const roomIds = items.map((room) => room.id);
+    const allFacilities =
+      roomIds.length > 0
+        ? await this.prisma.roomFacility.findMany({
+            where: { roomId: { in: roomIds }, publicVisible: true },
+            select: {
+              id: true,
+              roomId: true,
+              name: true,
+              quantity: true,
+              category: true,
+              publicVisible: true,
+              condition: true,
+              note: true,
+            },
+            orderBy: { id: 'asc' },
+          })
+        : [];
+
+    const facilitiesByRoomId = new Map<number, typeof allFacilities>();
+    for (const f of allFacilities) {
+      const list = facilitiesByRoomId.get(f.roomId);
+      if (list) {
+        list.push(f);
+      } else {
+        facilitiesByRoomId.set(f.roomId, [f]);
+      }
+    }
+
     const transformedItems = items.map((room) => ({
       id: room.id,
       code: room.code,
@@ -71,6 +100,7 @@ export class PublicRoomsService {
       highlightedPricingTerm: query.pricingTerm ?? PricingTerm.MONTHLY,
       highlightedRateRupiah: this.resolveRent(room, query.pricingTerm ?? PricingTerm.MONTHLY),
       availablePricingTerms: this.getAvailablePricingTerms(room),
+      facilities: facilitiesByRoomId.get(room.id) ?? [],
     }));
 
     return {

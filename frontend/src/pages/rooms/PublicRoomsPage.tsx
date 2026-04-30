@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import FacilityList from '../../components/rooms/FacilityList';
 import type { PricingTerm, PublicRoom } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
@@ -147,7 +148,7 @@ export default function PublicRoomsPage() {
         <Card className="content-card border-0 mt-4">
           <Card.Body>
             <Row className="g-3 align-items-end">
-              <Col lg={5}>
+              <Col lg={10}>
                 <Form.Group>
                   <Form.Label>Pencarian</Form.Label>
                   <Form.Control
@@ -155,23 +156,6 @@ export default function PublicRoomsPage() {
                     onChange={(event) => updateParams({ search: event.target.value })}
                     placeholder="Cari kode atau nama kamar"
                   />
-                </Form.Group>
-              </Col>
-              <Col sm={6} lg={3}>
-                <Form.Group>
-                  <Form.Label>Term utama</Form.Label>
-                  <Form.Select value={pricingTerm} onChange={(event) => updateParams({ pricingTerm: event.target.value })}>
-                    {pricingOptions.map((option) => <option key={option.value || 'all'} value={option.value}>{option.label}</option>)}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col sm={6} lg={2}>
-                <Form.Group>
-                  <Form.Label>Lantai</Form.Label>
-                  <Form.Select value={floor} onChange={(event) => updateParams({ floor: event.target.value })}>
-                    <option value="">Semua lantai</option>
-                    {floorOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-                  </Form.Select>
                 </Form.Group>
               </Col>
               <Col lg={2}>
@@ -205,7 +189,9 @@ export default function PublicRoomsPage() {
                       <div className="fw-semibold fs-5">{room.code}</div>
                       <div className="text-muted small">{room.name || 'Nama kamar belum tersedia'}</div>
                     </div>
-                    <Badge bg="success" className="status-badge">Tersedia</Badge>
+                    <Badge bg={room.isAvailable !== false ? 'success' : 'secondary'} className="status-badge">
+                      {room.isAvailable !== false ? 'Tersedia' : 'Penuh'}
+                    </Badge>
                   </div>
 
                   <div className="d-flex flex-wrap gap-2">
@@ -226,16 +212,14 @@ export default function PublicRoomsPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <div className="small text-muted mb-2">Term yang tersedia</div>
-                    <div className="d-flex flex-wrap gap-2">
-                      {(room.availablePricingTerms ?? []).map((term) => (
-                        <Badge bg="light" text="dark" key={`${room.id}-${term}`} className="border">{getStatusLabel(term)}</Badge>
-                      ))}
-                    </div>
-                  </div>
+                  <FacilityList
+                    facilities={room.facilities ?? []}
+                    maxItems={5}
+                    compact
+                    emptyMessage=""
+                  />
 
-                  {room.notes ? <div className="app-caption">Catatan: {room.notes}</div> : <div className="app-caption">Placeholder netral dipakai sampai foto kamar tersedia di backend publik.</div>}
+                  {room.notes ? <div className="app-caption">Catatan: {room.notes}</div> : null}
 
                   <div className="mt-auto d-grid gap-2">
                     <Button variant="outline-secondary" onClick={() => navigate(`/rooms/${room.id}/detail`)}>Lihat Detail</Button>
