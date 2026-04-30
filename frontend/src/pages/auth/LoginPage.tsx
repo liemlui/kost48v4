@@ -92,9 +92,6 @@ export default function LoginPage() {
             </Button>
           </Form>
 
-          <div className="login-footer-note">
-            Tip: halaman ini sengaja dibuat lebih tenang dan premium agar kesan pertama sistem terasa lebih kuat.
-          </div>
         </section>
       </div>
     </div>

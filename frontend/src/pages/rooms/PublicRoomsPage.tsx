@@ -123,12 +123,12 @@ export default function PublicRoomsPage() {
         <PublicTopbar />
 
         {user?.role === 'TENANT' && stage === 'booking' ? (
-          <Alert variant="info" className="mt-4">Anda masih punya booking reserved yang aktif. Jika ingin memantau approval atau pembayaran awal, buka <Button variant="link" className="p-0 align-baseline" onClick={() => navigate('/portal/bookings')}>Pemesanan Saya</Button>.</Alert>
+          <Alert variant="info" className="mt-4">Anda masih punya pemesanan yang sedang diproses. Jika ingin memantau approval atau pembayaran awal, buka <Button variant="link" className="p-0 align-baseline" onClick={() => navigate('/portal/bookings')}>Pemesanan Saya</Button>.</Alert>
         ) : null}
 
         <Card className="content-card border-0 public-hero-card mt-4">
           <Card.Body>
-            <div className="page-eyebrow">✦ Tenant-first booking</div>
+            <div className="page-eyebrow">✦ Pemesanan Tenant</div>
             <div className="public-hero-grid">
               <div>
                 <h1 className="mb-3">Cari kamar yang masih tersedia</h1>
