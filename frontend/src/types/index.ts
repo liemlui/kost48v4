@@ -66,6 +66,19 @@ export type Tenant = {
   portalUserSummary?: PortalUserSummary | null;
 };
 
+export type RoomFacility = {
+  id: number;
+  roomId: number;
+  name: string;
+  quantity: number;
+  category?: string | null;
+  publicVisible: boolean;
+  condition?: string | null;
+  note?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type Room = {
   id: number;
   code: string;
@@ -84,6 +97,7 @@ export type Room = {
   isActive?: boolean;
   activeStayId?: number | null;
   currentStay?: Stay | null;
+  facilities?: RoomFacility[];
 };
 
 export type PricingTerm = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'SMESTERLY' | 'YEARLY' | string;
@@ -311,6 +325,7 @@ export type PublicRoom = {
   highlightedPricingTerm?: PricingTerm;
   highlightedRateRupiah?: number | null;
   availablePricingTerms?: PricingTerm[];
+  facilities?: RoomFacility[];
 };
 
 export type TenantBooking = {

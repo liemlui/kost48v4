@@ -276,9 +276,28 @@ model Room {
   roomItems          RoomItem[]
   expenses           Expense[]
   inventoryMovements InventoryMovement[]
+  facilities         RoomFacility[]
 
   @@index([status])
   @@index([isActive])
+}
+
+model RoomFacility {
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  name      String
+  quantity  Int      @default(1)
+  category  String?
+  isPublic  Boolean  @default(true)
+  condition String?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([roomId, isPublic])
 }
 
 model Stay {

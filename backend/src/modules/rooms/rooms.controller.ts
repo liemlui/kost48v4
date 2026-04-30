@@ -11,6 +11,7 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
+import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facility.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
 import { RoomsService } from './rooms.service';
 
@@ -89,4 +90,28 @@ export class RoomsController {
     return { message: 'Kamar berhasil diperbarui', data: await this.roomsService.update(id, dto, user) };
   }
 
+  @Get(':roomId/facilities')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  async findFacilities(@Param('roomId', ParseIntPipe) roomId: number) {
+    return { message: 'Daftar fasilitas kamar berhasil diambil', data: await this.roomsService.findFacilities(roomId) };
+  }
+
+  @Post(':roomId/facilities')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async createFacility(@Param('roomId', ParseIntPipe) roomId: number, @Body() dto: CreateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Fasilitas kamar berhasil dibuat', data: await this.roomsService.createFacility(roomId, dto, user) };
+  }
+
+  @Patch(':roomId/facilities/:facilityId')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async updateFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @Body() dto: UpdateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Fasilitas kamar berhasil diperbarui', data: await this.roomsService.updateFacility(roomId, facilityId, dto, user) };
+  }
+
+  @Delete(':roomId/facilities/:facilityId')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async deleteFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @CurrentUser() user: CurrentUserPayload) {
+    await this.roomsService.deleteFacility(roomId, facilityId, user);
+    return { message: 'Fasilitas kamar berhasil dihapus' };
+  }
 }

@@ -2,6 +2,7 @@ import { Alert, Card } from 'react-bootstrap';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import type { PublicRoom } from '../../types';
+import FacilityList from '../../components/rooms/FacilityList';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from '../../utils/pricing';
 import type { GuestBookingFormState } from './guestBookingUtils';
 
@@ -57,6 +58,8 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
               <strong>Catatan kamar:</strong> {room.notes}
             </Alert>
           ) : null}
+
+          <FacilityList facilities={room.facilities ?? []} emptyMessage="Informasi fasilitas belum tersedia." />
         </div>
       </Card.Body>
     </Card>

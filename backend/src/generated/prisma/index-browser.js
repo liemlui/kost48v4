@@ -174,6 +174,19 @@ exports.Prisma.RoomScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.RoomFacilityScalarFieldEnum = {
+  id: 'id',
+  roomId: 'roomId',
+  name: 'name',
+  quantity: 'quantity',
+  category: 'category',
+  isPublic: 'isPublic',
+  condition: 'condition',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.StayScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -656,6 +669,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Tenant: 'Tenant',
   Room: 'Room',
+  RoomFacility: 'RoomFacility',
   Stay: 'Stay',
   MeterReading: 'MeterReading',
   Invoice: 'Invoice',
