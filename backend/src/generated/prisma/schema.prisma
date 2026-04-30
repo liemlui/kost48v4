@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -283,21 +282,21 @@ model Room {
 }
 
 model RoomFacility {
-  id        Int      @id @default(autoincrement())
-  roomId    Int
-  name      String
-  quantity  Int      @default(1)
-  category  String?
-  isPublic  Boolean  @default(true)
-  condition String?
-  note      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  roomId        Int
+  name          String
+  quantity      Int      @default(1)
+  category      String?
+  publicVisible Boolean  @default(true)
+  condition     String?
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId])
-  @@index([roomId, isPublic])
+  @@index([roomId, publicVisible])
 }
 
 model Stay {

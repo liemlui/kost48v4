@@ -1,5 +1,4 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -355,7 +354,7 @@ export class TicketsService {
         },
       });
     } catch (error) {
-      if (!(error instanceof PrismaClientKnownRequestError) || error.code !== 'P2002') {
+if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
         throw error;
       }
 

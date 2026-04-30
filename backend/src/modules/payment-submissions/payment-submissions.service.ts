@@ -5,7 +5,6 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from 'src/generated/prisma';
 import {
   BookingDepositPaymentStatus,
@@ -505,7 +504,7 @@ export class PaymentSubmissionsService {
       this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
       return result;
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('Approval pembayaran bentrok dengan data yang sudah ada');
       }
       this.handleSchemaError(error);

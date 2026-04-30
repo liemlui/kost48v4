@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -288,7 +287,7 @@ model RoomFacility {
   name      String
   quantity  Int      @default(1)
   category  String?
-  isPublic  Boolean  @default(true)
+  publicVisible  Boolean  @default(true)
   condition String?
   note      String?
   createdAt DateTime @default(now())
@@ -297,7 +296,7 @@ model RoomFacility {
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId])
-  @@index([roomId, isPublic])
+  @@index([roomId, publicVisible])
 }
 
 model Stay {

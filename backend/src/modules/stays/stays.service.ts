@@ -1,5 +1,4 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, DepositStatus, UtilityType } from '../../common/enums/app.enums';
@@ -204,7 +203,7 @@ export class StaysService {
       await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Invoice', entityId: String(created.invoice.id), newData: created.invoice });
       return created;
     } catch (error: any) {
-      if (error instanceof PrismaClientKnownRequestError) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictException('Pembacaan meter untuk tanggal tersebut sudah ada');
         }
@@ -434,7 +433,7 @@ export class StaysService {
 
       return result;
     } catch (error: any) {
-      if (error instanceof PrismaClientKnownRequestError) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new ConflictException(`Constraint database gagal: ${error.message}`);
       }
       throw error;

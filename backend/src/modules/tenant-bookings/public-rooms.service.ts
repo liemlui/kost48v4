@@ -95,7 +95,7 @@ export class PublicRoomsService {
     const highlightedPricingTerm = availablePricingTerms[0] ?? PricingTerm.MONTHLY;
 
     const publicFacilities = await this.prisma.roomFacility.findMany({
-      where: { roomId: id, isPublic: true },
+      where: { roomId: id, publicVisible: true },
       select: {
         id: true,
         roomId: true,

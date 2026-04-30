@@ -7,7 +7,7 @@ export class CreateRoomFacilityDto {
 
   @IsOptional() @IsString() category?: string;
 
-  @IsOptional() @IsBoolean() isPublic?: boolean;
+  @IsOptional() @IsBoolean() publicVisible?: boolean;
 
   @IsOptional() @IsString() condition?: string;
 
@@ -21,7 +21,7 @@ export class UpdateRoomFacilityDto {
 
   @IsOptional() @IsString() category?: string;
 
-  @IsOptional() @IsBoolean() isPublic?: boolean;
+  @IsOptional() @IsBoolean() publicVisible?: boolean;
 
   @IsOptional() @IsString() condition?: string;
 

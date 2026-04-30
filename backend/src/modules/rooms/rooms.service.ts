@@ -166,7 +166,7 @@ export class RoomsService {
     const pricingTerms = this.getAvailablePricingTerms(room);
 
     const publicFacilities = await this.prisma.roomFacility.findMany({
-      where: { roomId: id, isPublic: true },
+      where: { roomId: id, publicVisible: true },
       select: {
         id: true,
         roomId: true,
@@ -301,7 +301,7 @@ export class RoomsService {
         name,
         quantity,
         category: dto.category?.trim() || null,
-        isPublic: dto.isPublic ?? true,
+        publicVisible: dto.publicVisible ?? true,
         condition: dto.condition?.trim() || null,
         note: dto.note?.trim() || null,
       },
@@ -338,7 +338,7 @@ export class RoomsService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.quantity !== undefined) updateData.quantity = dto.quantity;
     if (dto.category !== undefined) updateData.category = dto.category?.trim() || null;
-    if (dto.isPublic !== undefined) updateData.isPublic = dto.isPublic;
+    if (dto.publicVisible !== undefined) updateData.publicVisible = dto.publicVisible;
     if (dto.condition !== undefined) updateData.condition = dto.condition?.trim() || null;
     if (dto.note !== undefined) updateData.note = dto.note?.trim() || null;
 

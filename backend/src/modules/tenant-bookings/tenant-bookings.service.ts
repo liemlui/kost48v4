@@ -5,7 +5,6 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from '../../generated/prisma';
 import {
   LeadSource,
@@ -494,7 +493,7 @@ export class TenantBookingsService {
         throw error;
       }
 
-      if (error instanceof PrismaClientKnownRequestError) {
+if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictException('Invoice atau pembacaan meter bentrok dengan data yang sudah ada');
         }
