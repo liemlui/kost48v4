@@ -128,18 +128,17 @@ export default function PublicRoomsPage() {
 
         <Card className="content-card border-0 public-hero-card mt-4">
           <Card.Body>
-            <div className="page-eyebrow">✦ Pemesanan Tenant</div>
+            <div className="page-eyebrow">✦ Katalog Kamar — Kos48 Surabaya</div>
             <div className="public-hero-grid">
               <div>
-                <h1 className="mb-3">Cari kamar yang masih tersedia</h1>
+                <h1 className="mb-3">Booking kamar kos langsung dari sini</h1>
                 <p className="text-muted mb-0">
-                  Katalog ini hanya menampilkan kamar aktif yang masih tersedia untuk dipesan. Setelah memilih kamar,
-                  tenant bisa lanjut ke form booking tanpa perlu mengisi ID teknis apa pun.
+                  Pilih kamar yang masih tersedia, lihat fasilitas dan tarif, lalu ajukan booking. Setelah disetujui, Anda bisa masuk ke portal tenant untuk memantau hunian dan tagihan.
                 </p>
               </div>
               <div className="public-hero-note">
-                <div className="fw-semibold mb-1">Yang ditampilkan di sini</div>
-                <div className="small text-muted">Kode kamar, lantai, tarif utama yang relevan, dan CTA booking yang aman terhadap kontrak backend.</div>
+                <div className="fw-semibold mb-1">Katalog selalu diperbarui</div>
+                <div className="small text-muted">Hanya kamar aktif yang ditampilkan. Harga dan ketersediaan mengikuti data operasional terbaru.</div>
               </div>
             </div>
           </Card.Body>
@@ -148,14 +147,31 @@ export default function PublicRoomsPage() {
         <Card className="content-card border-0 mt-4">
           <Card.Body>
             <Row className="g-3 align-items-end">
-              <Col lg={10}>
+              <Col lg={4}>
                 <Form.Group>
-                  <Form.Label>Pencarian</Form.Label>
+                  <Form.Label>Cari kamar</Form.Label>
                   <Form.Control
                     value={search}
                     onChange={(event) => updateParams({ search: event.target.value })}
                     placeholder="Cari kode atau nama kamar"
                   />
+                </Form.Group>
+              </Col>
+              <Col lg={3}>
+                <Form.Group>
+                  <Form.Label>Lantai</Form.Label>
+                  <Form.Select value={floor} onChange={(event) => updateParams({ floor: event.target.value })}>
+                    <option value="">Semua lantai</option>
+                    {floorOptions.map((f) => <option key={f} value={f}>Lantai {f}</option>)}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col lg={3}>
+                <Form.Group>
+                  <Form.Label>Term sewa</Form.Label>
+                  <Form.Select value={pricingTerm} onChange={(event) => updateParams({ pricingTerm: event.target.value })}>
+                    {pricingOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  </Form.Select>
                 </Form.Group>
               </Col>
               <Col lg={2}>

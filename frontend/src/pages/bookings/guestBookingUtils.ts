@@ -58,6 +58,11 @@ export function validate(form: GuestBookingFormState): FormErrors {
   }
   if (!form.checkInDate) errors.checkInDate = 'Tanggal check-in wajib diisi.';
   if (!form.pricingTerm) errors.pricingTerm = 'Pilih term harga.';
+  if (!form.identityNumber.trim()) {
+    errors.identityNumber = 'Nomor KTP/NIK wajib diisi (16 digit).';
+  } else if (!/^\d{16}$/.test(form.identityNumber.trim())) {
+    errors.identityNumber = 'Nomor KTP/NIK harus tepat 16 digit angka.';
+  }
   if (form.plannedCheckOutDate && form.plannedCheckOutDate < form.checkInDate) {
     errors.plannedCheckOutDate = 'Rencana check-out tidak boleh sebelum check-in.';
   }
