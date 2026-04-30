@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { CurrentUserPayload } from '../common/interfaces/current-user.interface';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -30,12 +31,14 @@ export class AuthController {
 
 
   @Post('forgot-password')
+  @UseGuards(RateLimitGuard)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     const data = await this.authService.forgotPassword(dto);
     return { message: 'Jika akun ditemukan, instruksi reset password telah dikirim.', data };
   }
 
   @Post('reset-password')
+  @UseGuards(RateLimitGuard)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     const data = await this.authService.resetPassword(dto);
     return { message: 'Password berhasil diperbarui. Silakan login dengan password baru Anda.', data };
