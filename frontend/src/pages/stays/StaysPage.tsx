@@ -192,9 +192,9 @@ export default function StaysPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Stay management"
-        title="Stays"
-        description="Surface ini memisahkan stay operasional dari queue booking reserved, sehingga admin bisa melihat mana yang masih menunggu approval dan mana yang sudah menunggu pembayaran."
+        eyebrow="Manajemen Stay"
+        title="Stay"
+        description="Halaman ini memisahkan stay operasional dari antrean booking reserved, sehingga admin bisa melihat mana yang masih menunggu persetujuan dan mana yang sudah menunggu pembayaran."
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
@@ -328,11 +328,11 @@ export default function StaysPage() {
                         <td>
                           {canApprove ? (
                             <Button size="sm" onClick={() => setSelectedBooking(item)}>
-                              Approve
+                              Setujui
                             </Button>
                           ) : expiryMeta.isExpired ? (
                             <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
-                              {expireMutation.isPending ? 'Memproses...' : 'Jalankan Expire'}
+                              {expireMutation.isPending ? 'Memproses...' : 'Jalankan Kedaluwarsa'}
                             </Button>
                           ) : (
                             <StatusBadge

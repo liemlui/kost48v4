@@ -145,9 +145,9 @@ export default function InvoicesPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Billing workspace"
-        title="Invoices"
-        description="Kelola draft, penerbitan, status tagihan, dan tindak lanjut pembayaran dengan alur yang lebih sederhana untuk tim operasional."
+        eyebrow="Manajemen Invoice"
+        title="Invoice"
+        description="Kelola draft, penerbitan, status tagihan, dan tindak lanjut pembayaran."
         actionLabel="Buat Invoice Draft"
         onAction={() => {
           setError('');
@@ -186,7 +186,7 @@ export default function InvoicesPage() {
           </div>
 
           <Alert variant="info" className="mt-3 mb-0">
-            Flow yang paling sederhana: buat invoice draft → tambahkan line bila perlu → issue invoice → catat pembayaran dari detail invoice. Untuk perhitungan listrik/air otomatis per periode, backend berikutnya idealnya menyiapkan endpoint preview invoice berbasis meter reading.
+            Flow yang paling sederhana: buat invoice draft → tambahkan line bila perlu → terbitkan invoice → catat pembayaran dari detail invoice. Untuk perhitungan listrik/air otomatis per periode, backend berikutnya idealnya menyiapkan endpoint preview invoice berbasis meter reading.
           </Alert>
 
           <div className="toolbar-card mt-3">
@@ -237,7 +237,7 @@ export default function InvoicesPage() {
       <Card className="content-card border-0">
         <Card.Body>
           {invoicesQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-          {invoicesQuery.isError ? <Alert variant="danger">Gagal mengambil data invoice.</Alert> : null}
+          {invoicesQuery.isError ? <Alert variant="danger">Gagal mengambil data invoice. Silakan coba lagi.</Alert> : null}
           {!invoicesQuery.isLoading && !invoicesQuery.isError && filteredItems.length === 0 ? (
             <EmptyState
               icon="🧾"
@@ -291,7 +291,7 @@ export default function InvoicesPage() {
                           <Button as={Link as any} to={`/invoices/${item.id}`} size="sm" variant="outline-primary">Buka</Button>
                           {item.status === 'DRAFT' ? (
                             <Button size="sm" variant="outline-success" onClick={() => issueMutation.mutate(item.id)} disabled={issueMutation.isPending}>
-                              Issue
+                              Terbitkan
                             </Button>
                           ) : null}
                           {['DRAFT', 'ISSUED'].includes(item.status) ? (
