@@ -117,32 +117,55 @@ export default function PublicRoomDetailPage() {
                     <div className="small text-muted mt-1">Deposit default <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
                   </div>
 
-                  <Table size="sm" className="mb-0">
-                    <thead>
-                      <tr>
-                        <th className="text-muted">Term</th>
-                        <th className="text-end">Tarif</th>
-                        <th className="text-muted small">Utilitas</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ALL_PRICING_TERMS.map((term) => {
-                        const rent = room.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
-                        const incUtil = isUtilitiesIncludedForPricingTerm(term);
-                        return (
-                          <tr key={term}>
-                            <td className="text-muted">{getStatusLabel(term)}</td>
-                            <td className="text-end fw-semibold"><CurrencyDisplay amount={rent} showZero={false} /></td>
-                            <td className="small">{incUtil ? 'Termasuk (flat)' : 'Meteran terpisah'}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
+                   <h5 className="mt-2">📋 Spesifikasi Kamar</h5>
 
-                  {room.notes ? <Alert variant="light" className="mb-0">{room.notes}</Alert> : null}
+                   <Row className="g-2">
+                     <Col xs={6}>
+                       <div className="card-title-soft mb-1">Status</div>
+                       <StatusBadge status={room.status} />
+                     </Col>
+                     <Col xs={6}>
+                       <div className="card-title-soft mb-1">Lantai</div>
+                       <div className="fw-semibold">{room.floor || '-'}</div>
+                     </Col>
+                     <Col xs={6}>
+                       <div className="card-title-soft mb-1">Tarif Bulanan</div>
+                       <div className="fw-semibold"><CurrencyDisplay amount={room.pricing?.monthlyRateRupiah ?? 0} showZero={false} /></div>
+                     </Col>
+                     <Col xs={6}>
+                       <div className="card-title-soft mb-1">Deposit</div>
+                       <div className="fw-semibold"><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
+                     </Col>
+                   </Row>
 
-                  <FacilityList facilities={room.facilities ?? []} emptyMessage="Belum ada informasi fasilitas kamar." />
+                   <FacilityList facilities={room.facilities ?? []} emptyMessage="Belum ada informasi fasilitas kamar." />
+
+                   {room.notes ? <Alert variant="light" className="mb-0">{room.notes}</Alert> : null}
+
+                   <h5 className="mt-2">📊 Daftar Tarif Lengkap</h5>
+
+                   <Table size="sm" className="mb-0">
+                     <thead>
+                       <tr>
+                         <th className="text-muted">Term</th>
+                         <th className="text-end">Tarif</th>
+                         <th className="text-muted small">Utilitas</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {ALL_PRICING_TERMS.map((term) => {
+                         const rent = room.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
+                         const incUtil = isUtilitiesIncludedForPricingTerm(term);
+                         return (
+                           <tr key={term}>
+                             <td className="text-muted">{getStatusLabel(term)}</td>
+                             <td className="text-end fw-semibold"><CurrencyDisplay amount={rent} showZero={false} /></td>
+                             <td className="small">{incUtil ? 'Termasuk (flat)' : 'Meteran terpisah'}</td>
+                           </tr>
+                         );
+                       })}
+                     </tbody>
+                   </Table>
                 </Card.Body>
               </Card>
             </Col>
