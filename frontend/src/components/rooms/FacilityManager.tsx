@@ -7,6 +7,7 @@ import type { RoomFacility } from '../../types';
 
 interface FacilityManagerProps {
   roomId: number;
+  allowedToManage?: boolean;
 }
 
 interface FacilityFormState {
@@ -74,7 +75,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-export default function FacilityManager({ roomId }: FacilityManagerProps) {
+export default function FacilityManager({ roomId, allowedToManage = true }: FacilityManagerProps) {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -187,26 +188,32 @@ export default function FacilityManager({ roomId }: FacilityManagerProps) {
         </Alert>
       ) : null}
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div className="card-title-soft mb-0">Daftar Fasilitas Kamar</div>
-        <Button
-          size="sm"
-          variant="outline-primary"
-          onClick={() => {
-            if (showForm) {
-              resetForm();
-              return;
-            }
+      {allowedToManage ? (
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="card-title-soft mb-0">Daftar Fasilitas Kamar</div>
+          <Button
+            size="sm"
+            variant="outline-primary"
+            onClick={() => {
+              if (showForm) {
+                resetForm();
+                return;
+              }
 
-            setForm(EMPTY_FACILITY);
-            setEditingId(null);
-            setError(null);
-            setShowForm(true);
-          }}
-        >
-          {showForm ? 'Batal' : '+ Tambah Fasilitas'}
-        </Button>
-      </div>
+              setForm(EMPTY_FACILITY);
+              setEditingId(null);
+              setError(null);
+              setShowForm(true);
+            }}
+          >
+            {showForm ? 'Batal' : '+ Tambah Fasilitas'}
+          </Button>
+        </div>
+      ) : (
+        <div className="mb-3">
+          <div className="card-title-soft mb-0">Daftar Fasilitas Kamar</div>
+        </div>
+      )}
 
       <Collapse in={showForm}>
         <div>
@@ -345,28 +352,32 @@ export default function FacilityManager({ roomId }: FacilityManagerProps) {
                   )}
                 </td>
                 <td className="text-end">
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    className="me-1"
-                    onClick={() => startEdit(facility)}
-                    disabled={isMutating}
-                  >
-                    Edit
-                  </Button>
+                  {allowedToManage ? (
+                    <>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => startEdit(facility)}
+                        disabled={isMutating}
+                      >
+                        Edit
+                      </Button>
 
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => {
-                      if (window.confirm(`Hapus fasilitas "${facility.name}"?`)) {
-                        deleteMutation.mutate(facility.id);
-                      }
-                    }}
-                    disabled={isMutating}
-                  >
-                    Hapus
-                  </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => {
+                          if (window.confirm(`Hapus fasilitas "${facility.name}"?`)) {
+                            deleteMutation.mutate(facility.id);
+                          }
+                        }}
+                        disabled={isMutating}
+                      >
+                        Hapus
+                      </Button>
+                    </>
+                  ) : null}
                 </td>
               </tr>
             ))}
