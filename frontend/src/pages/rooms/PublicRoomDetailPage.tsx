@@ -6,7 +6,7 @@ import { getPublicRoomDetail } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import type { PublicRoom } from '../../types';
-import { getStatusLabel } from '../../components/common/StatusBadge';
+import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 
@@ -70,8 +70,10 @@ export default function PublicRoomDetailPage() {
           <div className="d-flex gap-2 flex-wrap">
             <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke Katalog</Link>
             {room?.isAvailable ? (
-              <Button onClick={() => navigate(`/booking/${id}`, { state: { room } })}>Pesan Sekarang</Button>
-            ) : null}
+              <Button onClick={() => navigate(`/booking/${id}`, { state: { room } })}>Booking Kamar Ini</Button>
+            ) : (
+              <Button disabled variant="secondary">Kamar Tidak Tersedia</Button>
+            )}
           </div>
         </div>
 
@@ -96,9 +98,7 @@ export default function PublicRoomDetailPage() {
                       <div className="fw-semibold fs-4">{room.code}</div>
                       <div className="text-muted">{room.name || 'Nama kamar belum tersedia'}</div>
                     </div>
-                    <Badge bg={room.isAvailable ? 'success' : 'secondary'} className="status-badge">
-                      {room.isAvailable ? 'Tersedia' : 'Tidak Tersedia'}
-                    </Badge>
+                    <StatusBadge status={room.status} />
                   </div>
 
                    <div className="d-flex flex-wrap gap-2">
