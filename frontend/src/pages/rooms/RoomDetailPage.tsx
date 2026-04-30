@@ -8,6 +8,7 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import MeterTab from '../../components/stays/MeterTab';
+import FacilityManager from '../../components/rooms/FacilityManager';
 import type { Room, RoomItem, Stay } from '../../types';
 
 function formatValue(value?: string | null) {
@@ -179,6 +180,12 @@ export default function RoomDetailPage() {
                 ) : null}
               </Card.Body>
             </Card>
+          </div>
+        </Tab>
+
+        <Tab eventKey="facilities" title={<><span className="me-2">🛋️</span>Fasilitas</>}>
+          <div className="pt-3">
+            <FacilityManager roomId={roomId} />
           </div>
         </Tab>
 

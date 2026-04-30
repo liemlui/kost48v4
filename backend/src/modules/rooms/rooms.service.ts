@@ -5,6 +5,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
+import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facility.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
 import { InvoiceStatus, PricingTerm, RoomStatus, UtilityType } from '../../common/enums/app.enums';
 
@@ -81,6 +82,9 @@ export class RoomsService {
           include: {
             item: true,
           },
+          orderBy: { id: 'asc' },
+        },
+        facilities: {
           orderBy: { id: 'asc' },
         },
         stays: {
@@ -161,6 +165,20 @@ export class RoomsService {
 
     const pricingTerms = this.getAvailablePricingTerms(room);
 
+    const publicFacilities = await this.prisma.roomFacility.findMany({
+      where: { roomId: id, isPublic: true },
+      select: {
+        id: true,
+        roomId: true,
+        name: true,
+        quantity: true,
+        category: true,
+        condition: true,
+        note: true,
+      },
+      orderBy: { id: 'asc' },
+    });
+
     return {
       id: room.id,
       code: room.code,
@@ -182,6 +200,7 @@ export class RoomsService {
       availablePricingTerms: pricingTerms,
       highlightedPricingTerm: pricingTerms[0] ?? 'MONTHLY',
       highlightedRateRupiah: this.resolveRent(room, (pricingTerms[0] ?? 'MONTHLY') as PricingTerm),
+      facilities: publicFacilities,
     };
   }
 
@@ -256,7 +275,107 @@ export class RoomsService {
     return updated;
   }
 
+  async findFacilities(roomId: number) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
+    return this.prisma.roomFacility.findMany({
+      where: { roomId },
+      orderBy: { id: 'asc' },
+    });
+  }
+
+  async createFacility(roomId: number, dto: CreateRoomFacilityDto, actor: CurrentUserPayload) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+
+    const name = dto.name?.trim();
+    if (!name) throw new ConflictException('Nama fasilitas wajib diisi.');
+
+    const quantity = dto.quantity ?? 1;
+    if (quantity < 1) throw new ConflictException('Jumlah fasilitas minimal 1.');
+
+    const facility = await this.prisma.roomFacility.create({
+      data: {
+        roomId,
+        name,
+        quantity,
+        category: dto.category?.trim() || null,
+        isPublic: dto.isPublic ?? true,
+        condition: dto.condition?.trim() || null,
+        note: dto.note?.trim() || null,
+      },
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'CREATE',
+      entityType: 'RoomFacility',
+      entityId: String(facility.id),
+      newData: facility,
+    });
+
+    return facility;
+  }
+
+  async updateFacility(roomId: number, facilityId: number, dto: UpdateRoomFacilityDto, actor: CurrentUserPayload) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+
+    const existing = await this.prisma.roomFacility.findUnique({ where: { id: facilityId } });
+    if (!existing || existing.roomId !== roomId) throw new NotFoundException('Fasilitas kamar tidak ditemukan.');
+
+    if (dto.name !== undefined) {
+      const name = dto.name?.trim();
+      if (!name) throw new ConflictException('Nama fasilitas wajib diisi.');
+      dto.name = name;
+    }
+    if (dto.quantity !== undefined && dto.quantity < 1) {
+      throw new ConflictException('Jumlah fasilitas minimal 1.');
+    }
+
+    const updateData: Prisma.RoomFacilityUpdateInput = {};
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.quantity !== undefined) updateData.quantity = dto.quantity;
+    if (dto.category !== undefined) updateData.category = dto.category?.trim() || null;
+    if (dto.isPublic !== undefined) updateData.isPublic = dto.isPublic;
+    if (dto.condition !== undefined) updateData.condition = dto.condition?.trim() || null;
+    if (dto.note !== undefined) updateData.note = dto.note?.trim() || null;
+
+    const updated = await this.prisma.roomFacility.update({
+      where: { id: facilityId },
+      data: updateData,
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'UPDATE',
+      entityType: 'RoomFacility',
+      entityId: String(updated.id),
+      oldData: existing,
+      newData: updated,
+    });
+
+    return updated;
+  }
+
+  async deleteFacility(roomId: number, facilityId: number, actor: CurrentUserPayload) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+
+    const existing = await this.prisma.roomFacility.findUnique({ where: { id: facilityId } });
+    if (!existing || existing.roomId !== roomId) throw new NotFoundException('Fasilitas kamar tidak ditemukan.');
+
+    await this.prisma.roomFacility.delete({ where: { id: facilityId } });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'DELETE',
+      entityType: 'RoomFacility',
+      entityId: String(facilityId),
+      oldData: existing,
+    });
+  }
 
   private getAvailablePricingTerms(room: {
     dailyRateRupiah: number | null;

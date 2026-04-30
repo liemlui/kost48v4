@@ -94,6 +94,20 @@ export class PublicRoomsService {
     const availablePricingTerms = this.getAvailablePricingTerms(room as any);
     const highlightedPricingTerm = availablePricingTerms[0] ?? PricingTerm.MONTHLY;
 
+    const publicFacilities = await this.prisma.roomFacility.findMany({
+      where: { roomId: id, isPublic: true },
+      select: {
+        id: true,
+        roomId: true,
+        name: true,
+        quantity: true,
+        category: true,
+        condition: true,
+        note: true,
+      },
+      orderBy: { id: 'asc' },
+    });
+
     return serializePrismaResult({
       id: room.id,
       code: room.code,
@@ -115,6 +129,7 @@ export class PublicRoomsService {
       highlightedRateRupiah: this.resolveRent(room as any, highlightedPricingTerm),
       availablePricingTerms,
       isAvailable: room.status === RoomStatus.AVAILABLE,
+      facilities: publicFacilities,
     });
   }
 

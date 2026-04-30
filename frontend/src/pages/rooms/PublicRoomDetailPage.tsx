@@ -5,8 +5,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getPublicRoomDetail } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
-import type { PublicRoom } from '../../types';
+import type { PublicRoom, RoomFacility } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
+import FacilityList from '../../components/rooms/FacilityList';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 
@@ -140,6 +141,8 @@ export default function PublicRoomDetailPage() {
                   </Table>
 
                   {room.notes ? <Alert variant="light" className="mb-0">{room.notes}</Alert> : null}
+
+                  <FacilityList facilities={room.facilities ?? []} emptyMessage="Belum ada informasi fasilitas kamar." />
                 </Card.Body>
               </Card>
             </Col>
