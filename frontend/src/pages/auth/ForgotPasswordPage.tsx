@@ -85,6 +85,21 @@ export default function ForgotPasswordPage() {
           <div className="login-footer-note mt-3">
             Sudah ingat password? <Link to="/login">Kembali ke login</Link>
           </div>
+
+          <hr className="my-4" />
+
+          <div className="login-footer-note">
+            <div className="fw-semibold mb-1">Tidak punya akses email atau belum menerima instruksi reset?</div>
+            <div className="small text-muted mb-2">Admin akan bantu reset password Anda melalui WhatsApp.</div>
+            <a
+              href="https://wa.me/6285648887628?text=Saya%20lupa%20password%20akun%20Kost48.%20Mohon%20bantu%20reset%20password%20saya."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-success btn-sm"
+            >
+              Hubungi Admin via WhatsApp
+            </a>
+          </div>
         </section>
       </div>
     </div>

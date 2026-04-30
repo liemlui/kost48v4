@@ -1,11 +1,13 @@
 import { FormEvent, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { resetPassword } from '../../api/auth';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
-  const [token, setToken] = useState('');
+  const [searchParams] = useSearchParams();
+  const tokenFromUrl = searchParams.get('token') ?? '';
+  const [token, setToken] = useState(tokenFromUrl);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
