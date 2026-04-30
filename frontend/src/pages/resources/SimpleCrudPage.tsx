@@ -7,6 +7,7 @@ import PageHeader from '../../components/common/PageHeader';
 import ResourceFormModal from '../../components/resources/ResourceFormModal';
 import ResourceTable from '../../components/resources/ResourceTable';
 import {
+  canCreateResourceItem,
   canDeleteResourceItem,
   canEditResourceItem,
   ResourceConfig,
@@ -231,6 +232,12 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   }, [items]);
 
   const openCreate = () => {
+    const createGuard = canCreateResourceItem(config, user?.role);
+    if (!createGuard.allowed) {
+      setError(createGuard.reason ?? 'Anda tidak memiliki izin untuk membuat data baru.');
+      return;
+    }
+
     setEditingItem(null);
     setFormState(buildInitialState(config));
     setError('');
@@ -326,6 +333,8 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
     saveMutation.mutate(payload);
   };
 
+  const createGuard = useMemo(() => canCreateResourceItem(config, user?.role), [config, user?.role]);
+
   const flowNote = getFlowNote(config.path);
   const meta = query.data?.meta;
   const isReferenceLoading = [tenantsRefQuery, roomsRefQuery, inventoryItemsRefQuery, invoicesRefQuery, staysRefQuery]
@@ -338,8 +347,8 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
         eyebrow="Master data"
         title={config.title}
         description={`Kelola data ${config.title.toLowerCase()} dengan tampilan yang lebih rapi, relasi yang lebih jelas, dan input yang lebih aman.`}
-        actionLabel={config.createLabel || 'Tambah Data'}
-        onAction={openCreate}
+        actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
+        onAction={createGuard.allowed ? openCreate : undefined}
       />
 
       {flowNote ? (

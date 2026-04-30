@@ -9,6 +9,7 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import MeterTab from '../../components/stays/MeterTab';
 import FacilityManager from '../../components/rooms/FacilityManager';
+import { useAuth } from '../../context/AuthContext';
 import type { Room, RoomItem, Stay } from '../../types';
 
 function formatValue(value?: string | null) {
@@ -19,6 +20,7 @@ export default function RoomDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const roomId = Number(id);
+  const { user } = useAuth();
 
   const roomQuery = useQuery({
     queryKey: ['room', roomId],
@@ -185,7 +187,7 @@ export default function RoomDetailPage() {
 
         <Tab eventKey="facilities" title={<><span className="me-2">🛋️</span>Fasilitas</>}>
           <div className="pt-3">
-            <FacilityManager roomId={roomId} />
+          <FacilityManager roomId={roomId} allowedToManage={user?.role !== 'STAFF'} />
           </div>
         </Tab>
 

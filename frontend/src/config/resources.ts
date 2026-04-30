@@ -882,6 +882,20 @@ export function getFieldOptionsForContext(
   return options;
 }
 
+export function canCreateResourceItem(
+  config: ResourceConfig,
+  currentUserRole: string | undefined,
+): ManageGuardResult {
+  if (config.path === '/rooms' && currentUserRole === 'STAFF') {
+    return {
+      allowed: false,
+      reason: 'Hanya Owner/Admin yang dapat menambah data kamar.',
+    };
+  }
+
+  return { allowed: true };
+}
+
 export function canEditResourceItem(
   config: ResourceConfig,
   currentUserRole: string | undefined,
@@ -891,6 +905,13 @@ export function canEditResourceItem(
     return {
       allowed: false,
       reason: 'Admin tidak dapat mengedit akun Owner.',
+    };
+  }
+
+  if (config.path === '/rooms' && currentUserRole === 'STAFF') {
+    return {
+      allowed: false,
+      reason: 'Hanya Owner/Admin yang dapat mengubah data kamar.',
     };
   }
 
