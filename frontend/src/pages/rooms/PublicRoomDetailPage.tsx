@@ -64,9 +64,9 @@ export default function PublicRoomDetailPage() {
       <Container fluid="xl" className="py-4 py-lg-5">
         <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
           <div>
-            <div className="page-eyebrow">✦ Detail kamar publik</div>
+            <div className="page-eyebrow">✦ Detail Kamar — Kos48 Surabaya</div>
             <h1 className="mb-1">{room?.code ?? 'Detail kamar'}</h1>
-            <div className="text-muted">Lihat galeri, tarif, dan pilih flow booking yang sesuai.</div>
+            <div className="text-muted">Lihat foto galeri, spesifikasi, dan rincian tarif sebelum mengajukan booking.</div>
           </div>
           <div className="d-flex gap-2 flex-wrap">
             <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke Katalog</Link>
@@ -147,9 +147,9 @@ export default function PublicRoomDetailPage() {
                    <Table size="sm" className="mb-0">
                      <thead>
                        <tr>
-                         <th className="text-muted">Term</th>
-                         <th className="text-end">Tarif</th>
-                         <th className="text-muted small">Utilitas</th>
+                          <th className="text-muted">Term</th>
+                          <th className="text-end">Tarif</th>
+                          <th className="text-muted small">Listrik & Air</th>
                        </tr>
                      </thead>
                      <tbody>
@@ -165,8 +165,12 @@ export default function PublicRoomDetailPage() {
                          );
                        })}
                      </tbody>
-                   </Table>
-                </Card.Body>
+                    </Table>
+
+                    <Alert variant="light" className="mt-3 mb-0 p-2 small">
+                      Tarif dan status kamar dapat berubah sewaktu-waktu. Booking yang sudah dikonfirmasi akan mengikuti tarif pada saat persetujuan.
+                    </Alert>
+                 </Card.Body>
               </Card>
             </Col>
           </Row>

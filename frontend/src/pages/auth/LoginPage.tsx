@@ -34,24 +34,24 @@ export default function LoginPage() {
     <div className="login-shell">
       <div className="login-wrap">
         <section className="login-aside">
-          <div className="login-chip">✦ Kost48 Surabaya V3</div>
-          <div className="login-title">Backoffice kos yang tampil lebih rapi, modern, dan meyakinkan.</div>
+          <div className="login-chip">✦ Kos48 Surabaya Barat</div>
+          <div className="login-title">Kos nyaman di Surabaya Barat — booking kamar langsung dari sini.</div>
           <div className="login-copy">
-            Satu tempat untuk memantau kamar, tenant, stay aktif, invoice, dan tindak lanjut operasional tanpa kesan dashboard lama yang kaku.
+            Kos48 menyediakan kamar siap huni dengan fasilitas yang jelas, tarif transparan, dan proses booking online yang mudah untuk calon tenant.
           </div>
 
           <div className="login-feature-list">
             <div className="login-feature-item">
-              <strong>Operasional lebih cepat</strong>
-              <div className="mt-1 small text-white-50">Navigasi inti dibuat fokus supaya admin tidak perlu berpindah halaman dengan bingung.</div>
+              <strong>Kamar siap huni</strong>
+              <div className="mt-1 small text-white-50">Pilih kamar dari katalog yang selalu diperbarui, lengkap dengan foto, tarif, dan fasilitas.</div>
             </div>
             <div className="login-feature-item">
-              <strong>Tampilan lebih premium</strong>
-              <div className="mt-1 small text-white-50">Hierarchy visual, kartu statistik, dan tabel dibuat lebih halus dan nyaman dibaca.</div>
+              <strong>Booking transparan</strong>
+              <div className="mt-1 small text-white-50">Lihat harga, deposit, dan status ketersediaan sebelum mengajukan booking.</div>
             </div>
             <div className="login-feature-item">
-              <strong>Siap untuk tenant portal</strong>
-              <div className="mt-1 small text-white-50">Role tenant tetap mendapatkan pengalaman yang terasa satu sistem, bukan halaman tempelan.</div>
+              <strong>Portal tenant pribadi</strong>
+              <div className="mt-1 small text-white-50">Setelah disetujui, tenant dapat memantau tagihan, pengumuman, dan data hunian dari portal.</div>
             </div>
           </div>
         </section>
@@ -65,8 +65,8 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h2>Selamat datang kembali</h2>
-          <p className="text-muted mb-4">Masuk ke backoffice atau tenant portal untuk melanjutkan pekerjaan Anda.</p>
+          <h2>Masuk ke Portal Kos48</h2>
+          <p className="text-muted mb-4">Lanjutkan ke portal tenant atau backoffice sesuai akun Anda.</p>
 
           {error ? <Alert variant="danger">{error}</Alert> : null}
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
               <Form.Control value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Masukkan password" />
             </Form.Group>
 
-            <div className="form-helper mb-3">Gunakan akun owner/admin/staff/tenant yang sudah tersedia di backend Anda.</div>
+            <div className="form-helper mb-3">Belum punya akun? Tenant baru bisa booking kamar dari katalog. Akun portal akan dibuat setelah booking disetujui.</div>
 
             <div className="d-flex justify-content-end mb-4">
               <Link to="/forgot-password" className="small text-decoration-none">Lupa password?</Link>
@@ -91,6 +91,10 @@ export default function LoginPage() {
               {submitting ? 'Memproses...' : 'Masuk ke Dashboard'}
             </Button>
           </Form>
+
+          <div className="mt-3 text-center">
+            <Link to="/rooms" className="small text-decoration-none">Belum punya akun? Lihat katalog kamar →</Link>
+          </div>
 
         </section>
       </div>
