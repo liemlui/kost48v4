@@ -16,24 +16,34 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
 const ownerSections: NavigationSection[] = [
   {
-    title: 'Owner Surface',
+    title: 'Ringkasan Owner',
     links: [
       { to: '/dashboard', label: 'Dashboard Owner', icon: '📈', hint: 'KPI properti, koleksi, dan arah keputusan bisnis.' },
-      { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau billed, collected, overdue, dan follow-up utama.' },
-      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
-      { to: '/expenses', label: 'Pengeluaran', icon: '💸', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
-      { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
-      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
-      { to: '/users', label: 'Users', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
     ],
   },
   {
-    title: 'Operasional Harian',
+    title: 'Keuangan Owner',
     links: [
-      { to: '/stays', label: 'Stays', icon: '🏠', hint: 'Lihat stay aktif, detail, dan follow-up operasional.' },
-      { to: '/rooms', label: 'Rooms', icon: '🚪', hint: 'Status kamar, tarif, dan akses ke detail inventaris.' },
-      { to: '/tenants', label: 'Tenants', icon: '👥', hint: 'Data tenant, status aktif, dan portal access.' },
-      { to: '/tickets', label: 'Tickets', icon: '🎫', hint: 'Pantau ticket tenant dan progres tindak lanjut.' },
+      { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau tagihan, pembayaran, tunggakan, dan follow-up utama.' },
+      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
+      { to: '/expenses', label: 'Pengeluaran', icon: '🧮', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
+    ],
+  },
+  {
+    title: 'Operasional',
+    links: [
+      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Lihat stay aktif, detail, dan follow-up operasional.' },
+      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Status kamar, tarif, dan akses ke detail inventaris.' },
+      { to: '/tenants', label: 'Tenant', icon: '👥', hint: 'Data tenant, status aktif, dan akses portal.' },
+      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Pantau tiket tenant dan progres tindak lanjut.' },
+    ],
+  },
+  {
+    title: 'Komunikasi & Kontrol',
+    links: [
+      { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
+      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
+      { to: '/users', label: 'Pengguna', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
     ],
   },
   {
@@ -46,34 +56,44 @@ const ownerSections: NavigationSection[] = [
 
 const adminSections: NavigationSection[] = [
   {
-    title: 'Operasional Harian',
+    title: 'Dashboard',
     links: [
-      { to: '/dashboard', label: 'Dashboard Admin', icon: '📊', hint: 'Queue penting, status kamar, stay, dan invoice.' },
-      { to: '/stays', label: 'Stays', icon: '🏠', hint: 'Check-in, checkout, perpanjangan, dan deposit.' },
-      { to: '/rooms', label: 'Rooms', icon: '🚪', hint: 'Status kamar dan akses ke detail room.' },
-      { to: '/tenants', label: 'Tenants', icon: '👥', hint: 'Data tenant dan pengelolaan portal access.' },
-      { to: '/tickets', label: 'Tickets', icon: '🎫', hint: 'Triage, assignment, progress, dan closure.' },
+      { to: '/dashboard', label: 'Dashboard Admin', icon: '📊', hint: 'Antrian penting, status kamar, stay, dan invoice.' },
     ],
   },
   {
-    title: 'Keuangan & Kontrol',
+    title: 'Operasional',
     links: [
-      { to: '/invoices', label: 'Tagihan', icon: '💳', hint: 'Tagihan, line item, dan status pembayaran.' },
+      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Check-in, checkout, perpanjangan, dan deposit.' },
+      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Status kamar dan akses ke detail kamar.' },
+      { to: '/tenants', label: 'Tenant', icon: '👥', hint: 'Data tenant dan pengelolaan akses portal.' },
+      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Triage, penugasan, progres, dan penyelesaian.' },
+    ],
+  },
+  {
+    title: 'Keuangan',
+    links: [
+      { to: '/invoices', label: 'Tagihan', icon: '🧾', hint: 'Tagihan, item baris, dan status pembayaran.' },
       { to: '/invoice-payments', label: 'Pembayaran Manual', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
-      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Queue review bukti bayar booking reserved tenant.' },
-      { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
-      { to: '/expenses', label: 'Expenses', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
-      { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
-      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
-      { to: '/users', label: 'Users', icon: '🧑‍💼', hint: 'Kelola akun admin, staff, dan tenant portal.' },
+      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Antrian review bukti bayar booking reserved tenant.' },
+      { to: '/expenses', label: 'Pengeluaran', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
     ],
   },
   {
-    title: 'Inventory & Maintenance',
+    title: 'Komunikasi & Kontrol',
     links: [
-      { to: '/inventory-items', label: 'Inventory Items', icon: '📦', hint: 'Master stok barang global.' },
-      { to: '/room-items', label: 'Room Items', icon: '🛏️', hint: 'Inventaris barang yang terpasang per kamar.' },
-      { to: '/inventory-movements', label: 'Inventory Movements', icon: '🔄', hint: 'Arus stok masuk, keluar, dan assignment kamar.' },
+      { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
+      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
+      { to: '/wifi-sales', label: 'Penjualan WiFi', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
+      { to: '/users', label: 'Pengguna', icon: '🧑‍💼', hint: 'Kelola akun admin, staff, dan tenant portal.' },
+    ],
+  },
+  {
+    title: 'Inventaris & Perawatan',
+    links: [
+      { to: '/inventory-items', label: 'Stok Barang', icon: '📦', hint: 'Master stok barang global.' },
+      { to: '/room-items', label: 'Inventaris Kamar', icon: '🛏️', hint: 'Inventaris barang yang terpasang per kamar.' },
+      { to: '/inventory-movements', label: 'Riwayat Stok', icon: '🔄', hint: 'Arus stok masuk, keluar, dan pemasangan kamar.' },
     ],
   },
   {
@@ -89,16 +109,16 @@ const staffSections: NavigationSection[] = [
     title: 'Pekerjaan Lapangan',
     links: [
       { to: '/dashboard', label: 'Dashboard Staff', icon: '🛠️', hint: 'Pekerjaan aktif, stok, dan konteks teknis harian.' },
-      { to: '/tickets', label: 'Tickets', icon: '🎫', hint: 'Assignment, progress, dan penyelesaian pekerjaan.' },
-      { to: '/rooms', label: 'Rooms', icon: '🚪', hint: 'Lihat konteks kamar untuk pekerjaan teknis.' },
+      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Penugasan, progres, dan penyelesaian pekerjaan.' },
+      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Lihat konteks kamar untuk pekerjaan teknis.' },
     ],
   },
   {
-    title: 'Inventory & Maintenance',
+    title: 'Inventaris & Perawatan',
     links: [
-      { to: '/inventory-items', label: 'Inventory Items', icon: '📦', hint: 'Cek stok dan low stock.' },
-      { to: '/room-items', label: 'Room Items', icon: '🛏️', hint: 'Inventaris kamar dan kondisinya.' },
-      { to: '/inventory-movements', label: 'Inventory Movements', icon: '🔄', hint: 'Riwayat pergerakan stok barang.' },
+      { to: '/inventory-items', label: 'Stok Barang', icon: '📦', hint: 'Cek stok dan stok menipis.' },
+      { to: '/room-items', label: 'Inventaris Kamar', icon: '🛏️', hint: 'Inventaris kamar dan kondisinya.' },
+      { to: '/inventory-movements', label: 'Riwayat Stok', icon: '🔄', hint: 'Riwayat pergerakan stok barang.' },
     ],
   },
   {
@@ -126,7 +146,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
       title: 'Portal Tenant',
       links: [
         { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Cari kamar lain atau lihat katalog yang tersedia.' },
-        { to: '/portal/bookings', label: 'Pemesanan Saya', icon: '🗓️', hint: 'Pantau booking reserved, approval, dan pembayaran awal.' },
+        { to: '/portal/bookings', label: 'Pemesanan Saya', icon: '🗓️', hint: 'Pantau booking, approval, dan pembayaran awal.' },
         { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Lihat tagihan awal hasil approval booking.' },
         { to: '/portal/profile', label: 'Profil Saya', icon: '🙍', hint: 'Data akun portal dan ganti password.' },
         { to: '/notifications', label: 'Notifikasi', icon: '🔔', hint: 'Notifikasi dan pengingat dari pengelola kos.' },

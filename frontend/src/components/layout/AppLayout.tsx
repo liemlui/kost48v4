@@ -81,13 +81,13 @@ const segmentLabelMap: Record<string, string> = {
   'reminders': 'Pengingat WhatsApp',
   'payment-submissions': 'Review Pembayaran',
   'invoice-payments': 'Pembayaran Manual',
-  'inventory-items': 'Inventory Items',
-  'inventory-movements': 'Inventory Movements',
-  'room-items': 'Room Items',
-  'wifi-sales': 'WiFi Sales',
+  'inventory-items': 'Stok Barang',
+  'inventory-movements': 'Riwayat Stok',
+  'room-items': 'Inventaris Kamar',
+  'wifi-sales': 'Penjualan WiFi',
   'meter-readings': 'Meter Readings',
-  'announcements': 'Announcements',
-  'expenses': 'Expenses',
+  'announcements': 'Pengumuman',
+  'expenses': 'Pengeluaran',
 };
 
 function toLabel(segment: string): string {
@@ -156,6 +156,7 @@ function SidebarContent({
                 <NavLink
                   key={link.to}
                   to={link.to}
+                  title={link.hint ?? link.label}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                   onClick={onNavigate}
                 >
