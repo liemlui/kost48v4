@@ -89,6 +89,11 @@ export type RoomItem = $Result.DefaultSelection<Prisma.$RoomItemPayload>
  */
 export type InventoryMovement = $Result.DefaultSelection<Prisma.$InventoryMovementPayload>
 /**
+ * Model RenewRequest
+ * 
+ */
+export type RenewRequest = $Result.DefaultSelection<Prisma.$RenewRequestPayload>
+/**
  * Model WifiSale
  * 
  */
@@ -244,6 +249,15 @@ export const BookingDepositPaymentStatus: {
 export type BookingDepositPaymentStatus = (typeof BookingDepositPaymentStatus)[keyof typeof BookingDepositPaymentStatus]
 
 
+export const RenewRequestStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
+export type RenewRequestStatus = (typeof RenewRequestStatus)[keyof typeof RenewRequestStatus]
+
+
 export const TicketStatus: {
   OPEN: 'OPEN',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -390,6 +404,10 @@ export const PaymentSubmissionTargetType: typeof $Enums.PaymentSubmissionTargetT
 export type BookingDepositPaymentStatus = $Enums.BookingDepositPaymentStatus
 
 export const BookingDepositPaymentStatus: typeof $Enums.BookingDepositPaymentStatus
+
+export type RenewRequestStatus = $Enums.RenewRequestStatus
+
+export const RenewRequestStatus: typeof $Enums.RenewRequestStatus
 
 export type TicketStatus = $Enums.TicketStatus
 
@@ -690,6 +708,16 @@ export class PrismaClient<
     * ```
     */
   get inventoryMovement(): Prisma.InventoryMovementDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.renewRequest`: Exposes CRUD operations for the **RenewRequest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RenewRequests
+    * const renewRequests = await prisma.renewRequest.findMany()
+    * ```
+    */
+  get renewRequest(): Prisma.RenewRequestDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.wifiSale`: Exposes CRUD operations for the **WifiSale** model.
@@ -1186,6 +1214,7 @@ export namespace Prisma {
     InventoryItem: 'InventoryItem',
     RoomItem: 'RoomItem',
     InventoryMovement: 'InventoryMovement',
+    RenewRequest: 'RenewRequest',
     WifiSale: 'WifiSale',
     Expense: 'Expense',
     AppNotification: 'AppNotification',
@@ -1208,7 +1237,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "wifiSale" | "expense" | "appNotification" | "auditLog"
+      modelProps: "user" | "tenant" | "room" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "renewRequest" | "wifiSale" | "expense" | "appNotification" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2322,6 +2351,80 @@ export namespace Prisma {
           }
         }
       }
+      RenewRequest: {
+        payload: Prisma.$RenewRequestPayload<ExtArgs>
+        fields: Prisma.RenewRequestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RenewRequestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RenewRequestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          findFirst: {
+            args: Prisma.RenewRequestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RenewRequestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          findMany: {
+            args: Prisma.RenewRequestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>[]
+          }
+          create: {
+            args: Prisma.RenewRequestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          createMany: {
+            args: Prisma.RenewRequestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RenewRequestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>[]
+          }
+          delete: {
+            args: Prisma.RenewRequestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          update: {
+            args: Prisma.RenewRequestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          deleteMany: {
+            args: Prisma.RenewRequestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RenewRequestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RenewRequestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>[]
+          }
+          upsert: {
+            args: Prisma.RenewRequestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RenewRequestPayload>
+          }
+          aggregate: {
+            args: Prisma.RenewRequestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRenewRequest>
+          }
+          groupBy: {
+            args: Prisma.RenewRequestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RenewRequestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RenewRequestCountArgs<ExtArgs>
+            result: $Utils.Optional<RenewRequestCountAggregateOutputType> | number
+          }
+        }
+      }
       WifiSale: {
         payload: Prisma.$WifiSalePayload<ExtArgs>
         fields: Prisma.WifiSaleFieldRefs
@@ -2729,6 +2832,7 @@ export namespace Prisma {
     inventoryItem?: InventoryItemOmit
     roomItem?: RoomItemOmit
     inventoryMovement?: InventoryMovementOmit
+    renewRequest?: RenewRequestOmit
     wifiSale?: WifiSaleOmit
     expense?: ExpenseOmit
     appNotification?: AppNotificationOmit
@@ -2823,6 +2927,7 @@ export namespace Prisma {
     inventoryMovementsCreated: number
     wifiSalesCreated: number
     expensesCreated: number
+    renewRequestsReviewed: number
     auditLogs: number
     paymentSubmissionsSubmitted: number
     paymentSubmissionsReviewed: number
@@ -2841,6 +2946,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: boolean | UserCountOutputTypeCountInventoryMovementsCreatedArgs
     wifiSalesCreated?: boolean | UserCountOutputTypeCountWifiSalesCreatedArgs
     expensesCreated?: boolean | UserCountOutputTypeCountExpensesCreatedArgs
+    renewRequestsReviewed?: boolean | UserCountOutputTypeCountRenewRequestsReviewedArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
     paymentSubmissionsSubmitted?: boolean | UserCountOutputTypeCountPaymentSubmissionsSubmittedArgs
     paymentSubmissionsReviewed?: boolean | UserCountOutputTypeCountPaymentSubmissionsReviewedArgs
@@ -2932,6 +3038,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountRenewRequestsReviewedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RenewRequestWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AuditLogWhereInput
   }
@@ -2973,12 +3086,14 @@ export namespace Prisma {
     stays: number
     tickets: number
     paymentSubmissions: number
+    renewRequests: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | TenantCountOutputTypeCountStaysArgs
     tickets?: boolean | TenantCountOutputTypeCountTicketsArgs
     paymentSubmissions?: boolean | TenantCountOutputTypeCountPaymentSubmissionsArgs
+    renewRequests?: boolean | TenantCountOutputTypeCountRenewRequestsArgs
   }
 
   // Custom InputTypes
@@ -3011,6 +3126,13 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentSubmissionWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountRenewRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RenewRequestWhereInput
   }
 
 
@@ -3099,6 +3221,7 @@ export namespace Prisma {
     tickets: number
     expenses: number
     paymentSubmissions: number
+    renewRequests: number
   }
 
   export type StayCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3106,6 +3229,7 @@ export namespace Prisma {
     tickets?: boolean | StayCountOutputTypeCountTicketsArgs
     expenses?: boolean | StayCountOutputTypeCountExpensesArgs
     paymentSubmissions?: boolean | StayCountOutputTypeCountPaymentSubmissionsArgs
+    renewRequests?: boolean | StayCountOutputTypeCountRenewRequestsArgs
   }
 
   // Custom InputTypes
@@ -3145,6 +3269,13 @@ export namespace Prisma {
    */
   export type StayCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentSubmissionWhereInput
+  }
+
+  /**
+   * StayCountOutputType without action
+   */
+  export type StayCountOutputTypeCountRenewRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RenewRequestWhereInput
   }
 
 
@@ -3502,6 +3633,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: boolean | User$inventoryMovementsCreatedArgs<ExtArgs>
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
     expensesCreated?: boolean | User$expensesCreatedArgs<ExtArgs>
+    renewRequestsReviewed?: boolean | User$renewRequestsReviewedArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
@@ -3567,6 +3699,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: boolean | User$inventoryMovementsCreatedArgs<ExtArgs>
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
     expensesCreated?: boolean | User$expensesCreatedArgs<ExtArgs>
+    renewRequestsReviewed?: boolean | User$renewRequestsReviewedArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     paymentSubmissionsSubmitted?: boolean | User$paymentSubmissionsSubmittedArgs<ExtArgs>
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
@@ -3595,6 +3728,7 @@ export namespace Prisma {
       inventoryMovementsCreated: Prisma.$InventoryMovementPayload<ExtArgs>[]
       wifiSalesCreated: Prisma.$WifiSalePayload<ExtArgs>[]
       expensesCreated: Prisma.$ExpensePayload<ExtArgs>[]
+      renewRequestsReviewed: Prisma.$RenewRequestPayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
       paymentSubmissionsSubmitted: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
       paymentSubmissionsReviewed: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
@@ -4018,6 +4152,7 @@ export namespace Prisma {
     inventoryMovementsCreated<T extends User$inventoryMovementsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryMovementsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     wifiSalesCreated<T extends User$wifiSalesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$wifiSalesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WifiSalePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expensesCreated<T extends User$expensesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$expensesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    renewRequestsReviewed<T extends User$renewRequestsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$renewRequestsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissionsSubmitted<T extends User$paymentSubmissionsSubmittedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsSubmittedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissionsReviewed<T extends User$paymentSubmissionsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4718,6 +4853,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.renewRequestsReviewed
+   */
+  export type User$renewRequestsReviewedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    where?: RenewRequestWhereInput
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    cursor?: RenewRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
+  }
+
+  /**
    * User.auditLogs
    */
   export type User$auditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5146,6 +5305,7 @@ export namespace Prisma {
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
     paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
+    renewRequests?: boolean | Tenant$renewRequestsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -5212,6 +5372,7 @@ export namespace Prisma {
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
     paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
+    renewRequests?: boolean | Tenant$renewRequestsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -5224,6 +5385,7 @@ export namespace Prisma {
       stays: Prisma.$StayPayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
+      renewRequests: Prisma.$RenewRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5640,6 +5802,7 @@ export namespace Prisma {
     stays<T extends Tenant$staysArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$staysArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Tenant$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissions<T extends Tenant$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    renewRequests<T extends Tenant$renewRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$renewRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6161,6 +6324,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.renewRequests
+   */
+  export type Tenant$renewRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    where?: RenewRequestWhereInput
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    cursor?: RenewRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
   }
 
   /**
@@ -8088,6 +8275,7 @@ export namespace Prisma {
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
     paymentSubmissions?: boolean | Stay$paymentSubmissionsArgs<ExtArgs>
+    renewRequests?: boolean | Stay$renewRequestsArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
@@ -8217,6 +8405,7 @@ export namespace Prisma {
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
     paymentSubmissions?: boolean | Stay$paymentSubmissionsArgs<ExtArgs>
+    renewRequests?: boolean | Stay$renewRequestsArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type StayIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8243,6 +8432,7 @@ export namespace Prisma {
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
       paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
+      renewRequests: Prisma.$RenewRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8680,6 +8870,7 @@ export namespace Prisma {
     tickets<T extends Stay$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Stay$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissions<T extends Stay$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    renewRequests<T extends Stay$renewRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$renewRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9269,6 +9460,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PaymentSubmissionScalarFieldEnum | PaymentSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * Stay.renewRequests
+   */
+  export type Stay$renewRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    where?: RenewRequestWhereInput
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    cursor?: RenewRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
   }
 
   /**
@@ -23090,6 +23305,1236 @@ export namespace Prisma {
 
 
   /**
+   * Model RenewRequest
+   */
+
+  export type AggregateRenewRequest = {
+    _count: RenewRequestCountAggregateOutputType | null
+    _avg: RenewRequestAvgAggregateOutputType | null
+    _sum: RenewRequestSumAggregateOutputType | null
+    _min: RenewRequestMinAggregateOutputType | null
+    _max: RenewRequestMaxAggregateOutputType | null
+  }
+
+  export type RenewRequestAvgAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    tenantId: number | null
+    reviewedById: number | null
+  }
+
+  export type RenewRequestSumAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    tenantId: number | null
+    reviewedById: number | null
+  }
+
+  export type RenewRequestMinAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    tenantId: number | null
+    requestedTerm: $Enums.PricingTerm | null
+    requestedCheckOutDate: Date | null
+    status: $Enums.RenewRequestStatus | null
+    requestNotes: string | null
+    reviewNotes: string | null
+    reviewedById: number | null
+    reviewedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RenewRequestMaxAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    tenantId: number | null
+    requestedTerm: $Enums.PricingTerm | null
+    requestedCheckOutDate: Date | null
+    status: $Enums.RenewRequestStatus | null
+    requestNotes: string | null
+    reviewNotes: string | null
+    reviewedById: number | null
+    reviewedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RenewRequestCountAggregateOutputType = {
+    id: number
+    stayId: number
+    tenantId: number
+    requestedTerm: number
+    requestedCheckOutDate: number
+    status: number
+    requestNotes: number
+    reviewNotes: number
+    reviewedById: number
+    reviewedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RenewRequestAvgAggregateInputType = {
+    id?: true
+    stayId?: true
+    tenantId?: true
+    reviewedById?: true
+  }
+
+  export type RenewRequestSumAggregateInputType = {
+    id?: true
+    stayId?: true
+    tenantId?: true
+    reviewedById?: true
+  }
+
+  export type RenewRequestMinAggregateInputType = {
+    id?: true
+    stayId?: true
+    tenantId?: true
+    requestedTerm?: true
+    requestedCheckOutDate?: true
+    status?: true
+    requestNotes?: true
+    reviewNotes?: true
+    reviewedById?: true
+    reviewedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RenewRequestMaxAggregateInputType = {
+    id?: true
+    stayId?: true
+    tenantId?: true
+    requestedTerm?: true
+    requestedCheckOutDate?: true
+    status?: true
+    requestNotes?: true
+    reviewNotes?: true
+    reviewedById?: true
+    reviewedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RenewRequestCountAggregateInputType = {
+    id?: true
+    stayId?: true
+    tenantId?: true
+    requestedTerm?: true
+    requestedCheckOutDate?: true
+    status?: true
+    requestNotes?: true
+    reviewNotes?: true
+    reviewedById?: true
+    reviewedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RenewRequestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RenewRequest to aggregate.
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RenewRequests to fetch.
+     */
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RenewRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RenewRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RenewRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RenewRequests
+    **/
+    _count?: true | RenewRequestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RenewRequestAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RenewRequestSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RenewRequestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RenewRequestMaxAggregateInputType
+  }
+
+  export type GetRenewRequestAggregateType<T extends RenewRequestAggregateArgs> = {
+        [P in keyof T & keyof AggregateRenewRequest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRenewRequest[P]>
+      : GetScalarType<T[P], AggregateRenewRequest[P]>
+  }
+
+
+
+
+  export type RenewRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RenewRequestWhereInput
+    orderBy?: RenewRequestOrderByWithAggregationInput | RenewRequestOrderByWithAggregationInput[]
+    by: RenewRequestScalarFieldEnum[] | RenewRequestScalarFieldEnum
+    having?: RenewRequestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RenewRequestCountAggregateInputType | true
+    _avg?: RenewRequestAvgAggregateInputType
+    _sum?: RenewRequestSumAggregateInputType
+    _min?: RenewRequestMinAggregateInputType
+    _max?: RenewRequestMaxAggregateInputType
+  }
+
+  export type RenewRequestGroupByOutputType = {
+    id: number
+    stayId: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate: Date | null
+    status: $Enums.RenewRequestStatus
+    requestNotes: string | null
+    reviewNotes: string | null
+    reviewedById: number | null
+    reviewedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: RenewRequestCountAggregateOutputType | null
+    _avg: RenewRequestAvgAggregateOutputType | null
+    _sum: RenewRequestSumAggregateOutputType | null
+    _min: RenewRequestMinAggregateOutputType | null
+    _max: RenewRequestMaxAggregateOutputType | null
+  }
+
+  type GetRenewRequestGroupByPayload<T extends RenewRequestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RenewRequestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RenewRequestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RenewRequestGroupByOutputType[P]>
+            : GetScalarType<T[P], RenewRequestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RenewRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    tenantId?: boolean
+    requestedTerm?: boolean
+    requestedCheckOutDate?: boolean
+    status?: boolean
+    requestNotes?: boolean
+    reviewNotes?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["renewRequest"]>
+
+  export type RenewRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    tenantId?: boolean
+    requestedTerm?: boolean
+    requestedCheckOutDate?: boolean
+    status?: boolean
+    requestNotes?: boolean
+    reviewNotes?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["renewRequest"]>
+
+  export type RenewRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    tenantId?: boolean
+    requestedTerm?: boolean
+    requestedCheckOutDate?: boolean
+    status?: boolean
+    requestNotes?: boolean
+    reviewNotes?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }, ExtArgs["result"]["renewRequest"]>
+
+  export type RenewRequestSelectScalar = {
+    id?: boolean
+    stayId?: boolean
+    tenantId?: boolean
+    requestedTerm?: boolean
+    requestedCheckOutDate?: boolean
+    status?: boolean
+    requestNotes?: boolean
+    reviewNotes?: boolean
+    reviewedById?: boolean
+    reviewedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
+  export type RenewRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }
+  export type RenewRequestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }
+  export type RenewRequestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reviewedBy?: boolean | RenewRequest$reviewedByArgs<ExtArgs>
+  }
+
+  export type $RenewRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RenewRequest"
+    objects: {
+      stay: Prisma.$StayPayload<ExtArgs>
+      tenant: Prisma.$TenantPayload<ExtArgs>
+      reviewedBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      stayId: number
+      tenantId: number
+      requestedTerm: $Enums.PricingTerm
+      requestedCheckOutDate: Date | null
+      status: $Enums.RenewRequestStatus
+      requestNotes: string | null
+      reviewNotes: string | null
+      reviewedById: number | null
+      reviewedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["renewRequest"]>
+    composites: {}
+  }
+
+  type RenewRequestGetPayload<S extends boolean | null | undefined | RenewRequestDefaultArgs> = $Result.GetResult<Prisma.$RenewRequestPayload, S>
+
+  type RenewRequestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RenewRequestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RenewRequestCountAggregateInputType | true
+    }
+
+  export interface RenewRequestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RenewRequest'], meta: { name: 'RenewRequest' } }
+    /**
+     * Find zero or one RenewRequest that matches the filter.
+     * @param {RenewRequestFindUniqueArgs} args - Arguments to find a RenewRequest
+     * @example
+     * // Get one RenewRequest
+     * const renewRequest = await prisma.renewRequest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RenewRequestFindUniqueArgs>(args: SelectSubset<T, RenewRequestFindUniqueArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RenewRequest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RenewRequestFindUniqueOrThrowArgs} args - Arguments to find a RenewRequest
+     * @example
+     * // Get one RenewRequest
+     * const renewRequest = await prisma.renewRequest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RenewRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, RenewRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RenewRequest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestFindFirstArgs} args - Arguments to find a RenewRequest
+     * @example
+     * // Get one RenewRequest
+     * const renewRequest = await prisma.renewRequest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RenewRequestFindFirstArgs>(args?: SelectSubset<T, RenewRequestFindFirstArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RenewRequest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestFindFirstOrThrowArgs} args - Arguments to find a RenewRequest
+     * @example
+     * // Get one RenewRequest
+     * const renewRequest = await prisma.renewRequest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RenewRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, RenewRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RenewRequests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RenewRequests
+     * const renewRequests = await prisma.renewRequest.findMany()
+     * 
+     * // Get first 10 RenewRequests
+     * const renewRequests = await prisma.renewRequest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const renewRequestWithIdOnly = await prisma.renewRequest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RenewRequestFindManyArgs>(args?: SelectSubset<T, RenewRequestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RenewRequest.
+     * @param {RenewRequestCreateArgs} args - Arguments to create a RenewRequest.
+     * @example
+     * // Create one RenewRequest
+     * const RenewRequest = await prisma.renewRequest.create({
+     *   data: {
+     *     // ... data to create a RenewRequest
+     *   }
+     * })
+     * 
+     */
+    create<T extends RenewRequestCreateArgs>(args: SelectSubset<T, RenewRequestCreateArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RenewRequests.
+     * @param {RenewRequestCreateManyArgs} args - Arguments to create many RenewRequests.
+     * @example
+     * // Create many RenewRequests
+     * const renewRequest = await prisma.renewRequest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RenewRequestCreateManyArgs>(args?: SelectSubset<T, RenewRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RenewRequests and returns the data saved in the database.
+     * @param {RenewRequestCreateManyAndReturnArgs} args - Arguments to create many RenewRequests.
+     * @example
+     * // Create many RenewRequests
+     * const renewRequest = await prisma.renewRequest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RenewRequests and only return the `id`
+     * const renewRequestWithIdOnly = await prisma.renewRequest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RenewRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, RenewRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RenewRequest.
+     * @param {RenewRequestDeleteArgs} args - Arguments to delete one RenewRequest.
+     * @example
+     * // Delete one RenewRequest
+     * const RenewRequest = await prisma.renewRequest.delete({
+     *   where: {
+     *     // ... filter to delete one RenewRequest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RenewRequestDeleteArgs>(args: SelectSubset<T, RenewRequestDeleteArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RenewRequest.
+     * @param {RenewRequestUpdateArgs} args - Arguments to update one RenewRequest.
+     * @example
+     * // Update one RenewRequest
+     * const renewRequest = await prisma.renewRequest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RenewRequestUpdateArgs>(args: SelectSubset<T, RenewRequestUpdateArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RenewRequests.
+     * @param {RenewRequestDeleteManyArgs} args - Arguments to filter RenewRequests to delete.
+     * @example
+     * // Delete a few RenewRequests
+     * const { count } = await prisma.renewRequest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RenewRequestDeleteManyArgs>(args?: SelectSubset<T, RenewRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RenewRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RenewRequests
+     * const renewRequest = await prisma.renewRequest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RenewRequestUpdateManyArgs>(args: SelectSubset<T, RenewRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RenewRequests and returns the data updated in the database.
+     * @param {RenewRequestUpdateManyAndReturnArgs} args - Arguments to update many RenewRequests.
+     * @example
+     * // Update many RenewRequests
+     * const renewRequest = await prisma.renewRequest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RenewRequests and only return the `id`
+     * const renewRequestWithIdOnly = await prisma.renewRequest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RenewRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, RenewRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RenewRequest.
+     * @param {RenewRequestUpsertArgs} args - Arguments to update or create a RenewRequest.
+     * @example
+     * // Update or create a RenewRequest
+     * const renewRequest = await prisma.renewRequest.upsert({
+     *   create: {
+     *     // ... data to create a RenewRequest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RenewRequest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RenewRequestUpsertArgs>(args: SelectSubset<T, RenewRequestUpsertArgs<ExtArgs>>): Prisma__RenewRequestClient<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RenewRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestCountArgs} args - Arguments to filter RenewRequests to count.
+     * @example
+     * // Count the number of RenewRequests
+     * const count = await prisma.renewRequest.count({
+     *   where: {
+     *     // ... the filter for the RenewRequests we want to count
+     *   }
+     * })
+    **/
+    count<T extends RenewRequestCountArgs>(
+      args?: Subset<T, RenewRequestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RenewRequestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RenewRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RenewRequestAggregateArgs>(args: Subset<T, RenewRequestAggregateArgs>): Prisma.PrismaPromise<GetRenewRequestAggregateType<T>>
+
+    /**
+     * Group by RenewRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RenewRequestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RenewRequestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RenewRequestGroupByArgs['orderBy'] }
+        : { orderBy?: RenewRequestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RenewRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRenewRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RenewRequest model
+   */
+  readonly fields: RenewRequestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RenewRequest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RenewRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    stay<T extends StayDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StayDefaultArgs<ExtArgs>>): Prisma__StayClient<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    reviewedBy<T extends RenewRequest$reviewedByArgs<ExtArgs> = {}>(args?: Subset<T, RenewRequest$reviewedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RenewRequest model
+   */
+  interface RenewRequestFieldRefs {
+    readonly id: FieldRef<"RenewRequest", 'Int'>
+    readonly stayId: FieldRef<"RenewRequest", 'Int'>
+    readonly tenantId: FieldRef<"RenewRequest", 'Int'>
+    readonly requestedTerm: FieldRef<"RenewRequest", 'PricingTerm'>
+    readonly requestedCheckOutDate: FieldRef<"RenewRequest", 'DateTime'>
+    readonly status: FieldRef<"RenewRequest", 'RenewRequestStatus'>
+    readonly requestNotes: FieldRef<"RenewRequest", 'String'>
+    readonly reviewNotes: FieldRef<"RenewRequest", 'String'>
+    readonly reviewedById: FieldRef<"RenewRequest", 'Int'>
+    readonly reviewedAt: FieldRef<"RenewRequest", 'DateTime'>
+    readonly createdAt: FieldRef<"RenewRequest", 'DateTime'>
+    readonly updatedAt: FieldRef<"RenewRequest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RenewRequest findUnique
+   */
+  export type RenewRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which RenewRequest to fetch.
+     */
+    where: RenewRequestWhereUniqueInput
+  }
+
+  /**
+   * RenewRequest findUniqueOrThrow
+   */
+  export type RenewRequestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which RenewRequest to fetch.
+     */
+    where: RenewRequestWhereUniqueInput
+  }
+
+  /**
+   * RenewRequest findFirst
+   */
+  export type RenewRequestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which RenewRequest to fetch.
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RenewRequests to fetch.
+     */
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RenewRequests.
+     */
+    cursor?: RenewRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RenewRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RenewRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RenewRequests.
+     */
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
+  }
+
+  /**
+   * RenewRequest findFirstOrThrow
+   */
+  export type RenewRequestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which RenewRequest to fetch.
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RenewRequests to fetch.
+     */
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RenewRequests.
+     */
+    cursor?: RenewRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RenewRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RenewRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RenewRequests.
+     */
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
+  }
+
+  /**
+   * RenewRequest findMany
+   */
+  export type RenewRequestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which RenewRequests to fetch.
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RenewRequests to fetch.
+     */
+    orderBy?: RenewRequestOrderByWithRelationInput | RenewRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RenewRequests.
+     */
+    cursor?: RenewRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RenewRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RenewRequests.
+     */
+    skip?: number
+    distinct?: RenewRequestScalarFieldEnum | RenewRequestScalarFieldEnum[]
+  }
+
+  /**
+   * RenewRequest create
+   */
+  export type RenewRequestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RenewRequest.
+     */
+    data: XOR<RenewRequestCreateInput, RenewRequestUncheckedCreateInput>
+  }
+
+  /**
+   * RenewRequest createMany
+   */
+  export type RenewRequestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RenewRequests.
+     */
+    data: RenewRequestCreateManyInput | RenewRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RenewRequest createManyAndReturn
+   */
+  export type RenewRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * The data used to create many RenewRequests.
+     */
+    data: RenewRequestCreateManyInput | RenewRequestCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RenewRequest update
+   */
+  export type RenewRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RenewRequest.
+     */
+    data: XOR<RenewRequestUpdateInput, RenewRequestUncheckedUpdateInput>
+    /**
+     * Choose, which RenewRequest to update.
+     */
+    where: RenewRequestWhereUniqueInput
+  }
+
+  /**
+   * RenewRequest updateMany
+   */
+  export type RenewRequestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RenewRequests.
+     */
+    data: XOR<RenewRequestUpdateManyMutationInput, RenewRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which RenewRequests to update
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * Limit how many RenewRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RenewRequest updateManyAndReturn
+   */
+  export type RenewRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * The data used to update RenewRequests.
+     */
+    data: XOR<RenewRequestUpdateManyMutationInput, RenewRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which RenewRequests to update
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * Limit how many RenewRequests to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RenewRequest upsert
+   */
+  export type RenewRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RenewRequest to update in case it exists.
+     */
+    where: RenewRequestWhereUniqueInput
+    /**
+     * In case the RenewRequest found by the `where` argument doesn't exist, create a new RenewRequest with this data.
+     */
+    create: XOR<RenewRequestCreateInput, RenewRequestUncheckedCreateInput>
+    /**
+     * In case the RenewRequest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RenewRequestUpdateInput, RenewRequestUncheckedUpdateInput>
+  }
+
+  /**
+   * RenewRequest delete
+   */
+  export type RenewRequestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+    /**
+     * Filter which RenewRequest to delete.
+     */
+    where: RenewRequestWhereUniqueInput
+  }
+
+  /**
+   * RenewRequest deleteMany
+   */
+  export type RenewRequestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RenewRequests to delete
+     */
+    where?: RenewRequestWhereInput
+    /**
+     * Limit how many RenewRequests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RenewRequest.reviewedBy
+   */
+  export type RenewRequest$reviewedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * RenewRequest without action
+   */
+  export type RenewRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RenewRequest
+     */
+    select?: RenewRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RenewRequest
+     */
+    omit?: RenewRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RenewRequestInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model WifiSale
    */
 
@@ -28202,6 +29647,24 @@ export namespace Prisma {
   export type InventoryMovementScalarFieldEnum = (typeof InventoryMovementScalarFieldEnum)[keyof typeof InventoryMovementScalarFieldEnum]
 
 
+  export const RenewRequestScalarFieldEnum: {
+    id: 'id',
+    stayId: 'stayId',
+    tenantId: 'tenantId',
+    requestedTerm: 'requestedTerm',
+    requestedCheckOutDate: 'requestedCheckOutDate',
+    status: 'status',
+    requestNotes: 'requestNotes',
+    reviewNotes: 'reviewNotes',
+    reviewedById: 'reviewedById',
+    reviewedAt: 'reviewedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RenewRequestScalarFieldEnum = (typeof RenewRequestScalarFieldEnum)[keyof typeof RenewRequestScalarFieldEnum]
+
+
   export const WifiSaleScalarFieldEnum: {
     id: 'id',
     saleDate: 'saleDate',
@@ -28644,6 +30107,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'RenewRequestStatus'
+   */
+  export type EnumRenewRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RenewRequestStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RenewRequestStatus[]'
+   */
+  export type ListEnumRenewRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RenewRequestStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ExpenseType'
    */
   export type EnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseType'>
@@ -28728,6 +30205,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementListRelationFilter
     wifiSalesCreated?: WifiSaleListRelationFilter
     expensesCreated?: ExpenseListRelationFilter
+    renewRequestsReviewed?: RenewRequestListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
@@ -28758,6 +30236,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementOrderByRelationAggregateInput
     wifiSalesCreated?: WifiSaleOrderByRelationAggregateInput
     expensesCreated?: ExpenseOrderByRelationAggregateInput
+    renewRequestsReviewed?: RenewRequestOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
     paymentSubmissionsSubmitted?: PaymentSubmissionOrderByRelationAggregateInput
     paymentSubmissionsReviewed?: PaymentSubmissionOrderByRelationAggregateInput
@@ -28791,6 +30270,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementListRelationFilter
     wifiSalesCreated?: WifiSaleListRelationFilter
     expensesCreated?: ExpenseListRelationFilter
+    renewRequestsReviewed?: RenewRequestListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     paymentSubmissionsSubmitted?: PaymentSubmissionListRelationFilter
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
@@ -28858,6 +30338,7 @@ export namespace Prisma {
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
+    renewRequests?: RenewRequestListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -28881,6 +30362,7 @@ export namespace Prisma {
     stays?: StayOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
+    renewRequests?: RenewRequestOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -28907,6 +30389,7 @@ export namespace Prisma {
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
+    renewRequests?: RenewRequestListRelationFilter
   }, "id">
 
   export type TenantOrderByWithAggregationInput = {
@@ -29132,6 +30615,7 @@ export namespace Prisma {
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
+    renewRequests?: RenewRequestListRelationFilter
   }
 
   export type StayOrderByWithRelationInput = {
@@ -29176,6 +30660,7 @@ export namespace Prisma {
     tickets?: TicketOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
     paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
+    renewRequests?: RenewRequestOrderByRelationAggregateInput
   }
 
   export type StayWhereUniqueInput = Prisma.AtLeast<{
@@ -29223,6 +30708,7 @@ export namespace Prisma {
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
+    renewRequests?: RenewRequestListRelationFilter
   }, "id">
 
   export type StayOrderByWithAggregationInput = {
@@ -30445,6 +31931,104 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"InventoryMovement"> | Date | string
   }
 
+  export type RenewRequestWhereInput = {
+    AND?: RenewRequestWhereInput | RenewRequestWhereInput[]
+    OR?: RenewRequestWhereInput[]
+    NOT?: RenewRequestWhereInput | RenewRequestWhereInput[]
+    id?: IntFilter<"RenewRequest"> | number
+    stayId?: IntFilter<"RenewRequest"> | number
+    tenantId?: IntFilter<"RenewRequest"> | number
+    requestedTerm?: EnumPricingTermFilter<"RenewRequest"> | $Enums.PricingTerm
+    requestedCheckOutDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    status?: EnumRenewRequestStatusFilter<"RenewRequest"> | $Enums.RenewRequestStatus
+    requestNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type RenewRequestOrderByWithRelationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    requestedTerm?: SortOrder
+    requestedCheckOutDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    requestNotes?: SortOrderInput | SortOrder
+    reviewNotes?: SortOrderInput | SortOrder
+    reviewedById?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    stay?: StayOrderByWithRelationInput
+    tenant?: TenantOrderByWithRelationInput
+    reviewedBy?: UserOrderByWithRelationInput
+  }
+
+  export type RenewRequestWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: RenewRequestWhereInput | RenewRequestWhereInput[]
+    OR?: RenewRequestWhereInput[]
+    NOT?: RenewRequestWhereInput | RenewRequestWhereInput[]
+    stayId?: IntFilter<"RenewRequest"> | number
+    tenantId?: IntFilter<"RenewRequest"> | number
+    requestedTerm?: EnumPricingTermFilter<"RenewRequest"> | $Enums.PricingTerm
+    requestedCheckOutDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    status?: EnumRenewRequestStatusFilter<"RenewRequest"> | $Enums.RenewRequestStatus
+    requestNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reviewedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type RenewRequestOrderByWithAggregationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    requestedTerm?: SortOrder
+    requestedCheckOutDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    requestNotes?: SortOrderInput | SortOrder
+    reviewNotes?: SortOrderInput | SortOrder
+    reviewedById?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RenewRequestCountOrderByAggregateInput
+    _avg?: RenewRequestAvgOrderByAggregateInput
+    _max?: RenewRequestMaxOrderByAggregateInput
+    _min?: RenewRequestMinOrderByAggregateInput
+    _sum?: RenewRequestSumOrderByAggregateInput
+  }
+
+  export type RenewRequestScalarWhereWithAggregatesInput = {
+    AND?: RenewRequestScalarWhereWithAggregatesInput | RenewRequestScalarWhereWithAggregatesInput[]
+    OR?: RenewRequestScalarWhereWithAggregatesInput[]
+    NOT?: RenewRequestScalarWhereWithAggregatesInput | RenewRequestScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"RenewRequest"> | number
+    stayId?: IntWithAggregatesFilter<"RenewRequest"> | number
+    tenantId?: IntWithAggregatesFilter<"RenewRequest"> | number
+    requestedTerm?: EnumPricingTermWithAggregatesFilter<"RenewRequest"> | $Enums.PricingTerm
+    requestedCheckOutDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    status?: EnumRenewRequestStatusWithAggregatesFilter<"RenewRequest"> | $Enums.RenewRequestStatus
+    requestNotes?: StringNullableWithAggregatesFilter<"RenewRequest"> | string | null
+    reviewNotes?: StringNullableWithAggregatesFilter<"RenewRequest"> | string | null
+    reviewedById?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
+    reviewedAt?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
+  }
+
   export type WifiSaleWhereInput = {
     AND?: WifiSaleWhereInput | WifiSaleWhereInput[]
     OR?: WifiSaleWhereInput[]
@@ -30810,6 +32394,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -30839,6 +32424,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -30867,6 +32453,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -30896,6 +32483,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -30963,6 +32551,7 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -30986,6 +32575,7 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -31008,6 +32598,7 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -31031,6 +32622,7 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -31287,6 +32879,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateInput = {
@@ -31327,6 +32920,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayUpdateInput = {
@@ -31366,6 +32960,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateInput = {
@@ -31406,6 +33001,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayCreateManyInput = {
@@ -32738,6 +34334,105 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RenewRequestCreateInput = {
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutRenewRequestsInput
+    tenant: TenantCreateNestedOneWithoutRenewRequestsInput
+    reviewedBy?: UserCreateNestedOneWithoutRenewRequestsReviewedInput
+  }
+
+  export type RenewRequestUncheckedCreateInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RenewRequestUpdateInput = {
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
+    reviewedBy?: UserUpdateOneWithoutRenewRequestsReviewedNestedInput
+  }
+
+  export type RenewRequestUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestCreateManyInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RenewRequestUpdateManyMutationInput = {
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type WifiSaleCreateInput = {
     saleDate: Date | string
     customerName: string
@@ -33228,6 +34923,12 @@ export namespace Prisma {
     none?: ExpenseWhereInput
   }
 
+  export type RenewRequestListRelationFilter = {
+    every?: RenewRequestWhereInput
+    some?: RenewRequestWhereInput
+    none?: RenewRequestWhereInput
+  }
+
   export type AuditLogListRelationFilter = {
     every?: AuditLogWhereInput
     some?: AuditLogWhereInput
@@ -33290,6 +34991,10 @@ export namespace Prisma {
   }
 
   export type ExpenseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RenewRequestOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -34947,6 +36652,82 @@ export namespace Prisma {
     _max?: NestedEnumInventoryMovementTypeFilter<$PrismaModel>
   }
 
+  export type EnumRenewRequestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RenewRequestStatus | EnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRenewRequestStatusFilter<$PrismaModel> | $Enums.RenewRequestStatus
+  }
+
+  export type RenewRequestCountOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    requestedTerm?: SortOrder
+    requestedCheckOutDate?: SortOrder
+    status?: SortOrder
+    requestNotes?: SortOrder
+    reviewNotes?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RenewRequestAvgOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    reviewedById?: SortOrder
+  }
+
+  export type RenewRequestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    requestedTerm?: SortOrder
+    requestedCheckOutDate?: SortOrder
+    status?: SortOrder
+    requestNotes?: SortOrder
+    reviewNotes?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RenewRequestMinOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    requestedTerm?: SortOrder
+    requestedCheckOutDate?: SortOrder
+    status?: SortOrder
+    requestNotes?: SortOrder
+    reviewNotes?: SortOrder
+    reviewedById?: SortOrder
+    reviewedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RenewRequestSumOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    tenantId?: SortOrder
+    reviewedById?: SortOrder
+  }
+
+  export type EnumRenewRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RenewRequestStatus | EnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRenewRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.RenewRequestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRenewRequestStatusFilter<$PrismaModel>
+    _max?: NestedEnumRenewRequestStatusFilter<$PrismaModel>
+  }
+
   export type WifiSaleCountOrderByAggregateInput = {
     id?: SortOrder
     saleDate?: SortOrder
@@ -35310,6 +37091,13 @@ export namespace Prisma {
     connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
   }
 
+  export type RenewRequestCreateNestedManyWithoutReviewedByInput = {
+    create?: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput> | RenewRequestCreateWithoutReviewedByInput[] | RenewRequestUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutReviewedByInput | RenewRequestCreateOrConnectWithoutReviewedByInput[]
+    createMany?: RenewRequestCreateManyReviewedByInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+  }
+
   export type AuditLogCreateNestedManyWithoutActorUserInput = {
     create?: XOR<AuditLogCreateWithoutActorUserInput, AuditLogUncheckedCreateWithoutActorUserInput> | AuditLogCreateWithoutActorUserInput[] | AuditLogUncheckedCreateWithoutActorUserInput[]
     connectOrCreate?: AuditLogCreateOrConnectWithoutActorUserInput | AuditLogCreateOrConnectWithoutActorUserInput[]
@@ -35413,6 +37201,13 @@ export namespace Prisma {
     connectOrCreate?: ExpenseCreateOrConnectWithoutCreatedByInput | ExpenseCreateOrConnectWithoutCreatedByInput[]
     createMany?: ExpenseCreateManyCreatedByInputEnvelope
     connect?: ExpenseWhereUniqueInput | ExpenseWhereUniqueInput[]
+  }
+
+  export type RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput = {
+    create?: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput> | RenewRequestCreateWithoutReviewedByInput[] | RenewRequestUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutReviewedByInput | RenewRequestCreateOrConnectWithoutReviewedByInput[]
+    createMany?: RenewRequestCreateManyReviewedByInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
   }
 
   export type AuditLogUncheckedCreateNestedManyWithoutActorUserInput = {
@@ -35618,6 +37413,20 @@ export namespace Prisma {
     update?: ExpenseUpdateWithWhereUniqueWithoutCreatedByInput | ExpenseUpdateWithWhereUniqueWithoutCreatedByInput[]
     updateMany?: ExpenseUpdateManyWithWhereWithoutCreatedByInput | ExpenseUpdateManyWithWhereWithoutCreatedByInput[]
     deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
+  }
+
+  export type RenewRequestUpdateManyWithoutReviewedByNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput> | RenewRequestCreateWithoutReviewedByInput[] | RenewRequestUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutReviewedByInput | RenewRequestCreateOrConnectWithoutReviewedByInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutReviewedByInput | RenewRequestUpsertWithWhereUniqueWithoutReviewedByInput[]
+    createMany?: RenewRequestCreateManyReviewedByInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutReviewedByInput | RenewRequestUpdateWithWhereUniqueWithoutReviewedByInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutReviewedByInput | RenewRequestUpdateManyWithWhereWithoutReviewedByInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
   }
 
   export type AuditLogUpdateManyWithoutActorUserNestedInput = {
@@ -35846,6 +37655,20 @@ export namespace Prisma {
     deleteMany?: ExpenseScalarWhereInput | ExpenseScalarWhereInput[]
   }
 
+  export type RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput> | RenewRequestCreateWithoutReviewedByInput[] | RenewRequestUncheckedCreateWithoutReviewedByInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutReviewedByInput | RenewRequestCreateOrConnectWithoutReviewedByInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutReviewedByInput | RenewRequestUpsertWithWhereUniqueWithoutReviewedByInput[]
+    createMany?: RenewRequestCreateManyReviewedByInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutReviewedByInput | RenewRequestUpdateWithWhereUniqueWithoutReviewedByInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutReviewedByInput | RenewRequestUpdateManyWithWhereWithoutReviewedByInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
+  }
+
   export type AuditLogUncheckedUpdateManyWithoutActorUserNestedInput = {
     create?: XOR<AuditLogCreateWithoutActorUserInput, AuditLogUncheckedCreateWithoutActorUserInput> | AuditLogCreateWithoutActorUserInput[] | AuditLogUncheckedCreateWithoutActorUserInput[]
     connectOrCreate?: AuditLogCreateOrConnectWithoutActorUserInput | AuditLogCreateOrConnectWithoutActorUserInput[]
@@ -35943,6 +37766,13 @@ export namespace Prisma {
     connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
   }
 
+  export type RenewRequestCreateNestedManyWithoutTenantInput = {
+    create?: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput> | RenewRequestCreateWithoutTenantInput[] | RenewRequestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutTenantInput | RenewRequestCreateOrConnectWithoutTenantInput[]
+    createMany?: RenewRequestCreateManyTenantInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -35968,6 +37798,13 @@ export namespace Prisma {
     connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutTenantInput | PaymentSubmissionCreateOrConnectWithoutTenantInput[]
     createMany?: PaymentSubmissionCreateManyTenantInputEnvelope
     connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type RenewRequestUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput> | RenewRequestCreateWithoutTenantInput[] | RenewRequestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutTenantInput | RenewRequestCreateOrConnectWithoutTenantInput[]
+    createMany?: RenewRequestCreateManyTenantInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -36030,6 +37867,20 @@ export namespace Prisma {
     deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
+  export type RenewRequestUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput> | RenewRequestCreateWithoutTenantInput[] | RenewRequestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutTenantInput | RenewRequestCreateOrConnectWithoutTenantInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutTenantInput | RenewRequestUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: RenewRequestCreateManyTenantInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutTenantInput | RenewRequestUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutTenantInput | RenewRequestUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateOneWithoutTenantNestedInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -36080,6 +37931,20 @@ export namespace Prisma {
     update?: PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput | PaymentSubmissionUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutTenantInput | PaymentSubmissionUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type RenewRequestUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput> | RenewRequestCreateWithoutTenantInput[] | RenewRequestUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutTenantInput | RenewRequestCreateOrConnectWithoutTenantInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutTenantInput | RenewRequestUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: RenewRequestCreateManyTenantInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutTenantInput | RenewRequestUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutTenantInput | RenewRequestUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
   }
 
   export type RoomCreateimagesInput = {
@@ -36399,6 +38264,13 @@ export namespace Prisma {
     connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
   }
 
+  export type RenewRequestCreateNestedManyWithoutStayInput = {
+    create?: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput> | RenewRequestCreateWithoutStayInput[] | RenewRequestUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutStayInput | RenewRequestCreateOrConnectWithoutStayInput[]
+    createMany?: RenewRequestCreateManyStayInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+  }
+
   export type InvoiceUncheckedCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -36425,6 +38297,13 @@ export namespace Prisma {
     connectOrCreate?: PaymentSubmissionCreateOrConnectWithoutStayInput | PaymentSubmissionCreateOrConnectWithoutStayInput[]
     createMany?: PaymentSubmissionCreateManyStayInputEnvelope
     connect?: PaymentSubmissionWhereUniqueInput | PaymentSubmissionWhereUniqueInput[]
+  }
+
+  export type RenewRequestUncheckedCreateNestedManyWithoutStayInput = {
+    create?: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput> | RenewRequestCreateWithoutStayInput[] | RenewRequestUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutStayInput | RenewRequestCreateOrConnectWithoutStayInput[]
+    createMany?: RenewRequestCreateManyStayInputEnvelope
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
   }
 
   export type EnumStayStatusFieldUpdateOperationsInput = {
@@ -36551,6 +38430,20 @@ export namespace Prisma {
     deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
   }
 
+  export type RenewRequestUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput> | RenewRequestCreateWithoutStayInput[] | RenewRequestUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutStayInput | RenewRequestCreateOrConnectWithoutStayInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutStayInput | RenewRequestUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RenewRequestCreateManyStayInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutStayInput | RenewRequestUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutStayInput | RenewRequestUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
+  }
+
   export type InvoiceUncheckedUpdateManyWithoutStayNestedInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -36605,6 +38498,20 @@ export namespace Prisma {
     update?: PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput | PaymentSubmissionUpdateWithWhereUniqueWithoutStayInput[]
     updateMany?: PaymentSubmissionUpdateManyWithWhereWithoutStayInput | PaymentSubmissionUpdateManyWithWhereWithoutStayInput[]
     deleteMany?: PaymentSubmissionScalarWhereInput | PaymentSubmissionScalarWhereInput[]
+  }
+
+  export type RenewRequestUncheckedUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput> | RenewRequestCreateWithoutStayInput[] | RenewRequestUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RenewRequestCreateOrConnectWithoutStayInput | RenewRequestCreateOrConnectWithoutStayInput[]
+    upsert?: RenewRequestUpsertWithWhereUniqueWithoutStayInput | RenewRequestUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RenewRequestCreateManyStayInputEnvelope
+    set?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    disconnect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    delete?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    connect?: RenewRequestWhereUniqueInput | RenewRequestWhereUniqueInput[]
+    update?: RenewRequestUpdateWithWhereUniqueWithoutStayInput | RenewRequestUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RenewRequestUpdateManyWithWhereWithoutStayInput | RenewRequestUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
   }
 
   export type RoomCreateNestedOneWithoutMeterReadingsInput = {
@@ -37220,6 +39127,54 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInventoryMovementsCreatedInput, UserUpdateWithoutInventoryMovementsCreatedInput>, UserUncheckedUpdateWithoutInventoryMovementsCreatedInput>
+  }
+
+  export type StayCreateNestedOneWithoutRenewRequestsInput = {
+    create?: XOR<StayCreateWithoutRenewRequestsInput, StayUncheckedCreateWithoutRenewRequestsInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRenewRequestsInput
+    connect?: StayWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutRenewRequestsInput = {
+    create?: XOR<TenantCreateWithoutRenewRequestsInput, TenantUncheckedCreateWithoutRenewRequestsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutRenewRequestsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutRenewRequestsReviewedInput = {
+    create?: XOR<UserCreateWithoutRenewRequestsReviewedInput, UserUncheckedCreateWithoutRenewRequestsReviewedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRenewRequestsReviewedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumRenewRequestStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RenewRequestStatus
+  }
+
+  export type StayUpdateOneRequiredWithoutRenewRequestsNestedInput = {
+    create?: XOR<StayCreateWithoutRenewRequestsInput, StayUncheckedCreateWithoutRenewRequestsInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRenewRequestsInput
+    upsert?: StayUpsertWithoutRenewRequestsInput
+    connect?: StayWhereUniqueInput
+    update?: XOR<XOR<StayUpdateToOneWithWhereWithoutRenewRequestsInput, StayUpdateWithoutRenewRequestsInput>, StayUncheckedUpdateWithoutRenewRequestsInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutRenewRequestsNestedInput = {
+    create?: XOR<TenantCreateWithoutRenewRequestsInput, TenantUncheckedCreateWithoutRenewRequestsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutRenewRequestsInput
+    upsert?: TenantUpsertWithoutRenewRequestsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutRenewRequestsInput, TenantUpdateWithoutRenewRequestsInput>, TenantUncheckedUpdateWithoutRenewRequestsInput>
+  }
+
+  export type UserUpdateOneWithoutRenewRequestsReviewedNestedInput = {
+    create?: XOR<UserCreateWithoutRenewRequestsReviewedInput, UserUncheckedCreateWithoutRenewRequestsReviewedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRenewRequestsReviewedInput
+    upsert?: UserUpsertWithoutRenewRequestsReviewedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRenewRequestsReviewedInput, UserUpdateWithoutRenewRequestsReviewedInput>, UserUncheckedUpdateWithoutRenewRequestsReviewedInput>
   }
 
   export type UserCreateNestedOneWithoutWifiSalesCreatedInput = {
@@ -37919,6 +39874,23 @@ export namespace Prisma {
     _max?: NestedEnumInventoryMovementTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumRenewRequestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RenewRequestStatus | EnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRenewRequestStatusFilter<$PrismaModel> | $Enums.RenewRequestStatus
+  }
+
+  export type NestedEnumRenewRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RenewRequestStatus | EnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RenewRequestStatus[] | ListEnumRenewRequestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRenewRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.RenewRequestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRenewRequestStatusFilter<$PrismaModel>
+    _max?: NestedEnumRenewRequestStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumExpenseTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseType | EnumExpenseTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseType[] | ListEnumExpenseTypeFieldRefInput<$PrismaModel>
@@ -37995,6 +39967,7 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUserInput = {
@@ -38017,6 +39990,7 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUserInput = {
@@ -38107,6 +40081,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCreatedByInput = {
@@ -38146,6 +40121,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCreatedByInput = {
@@ -38194,6 +40170,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInitialMetersRecordedByInput = {
@@ -38233,6 +40210,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInitialMetersRecordedByInput = {
@@ -38520,6 +40498,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RenewRequestCreateWithoutReviewedByInput = {
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutRenewRequestsInput
+    tenant: TenantCreateNestedOneWithoutRenewRequestsInput
+  }
+
+  export type RenewRequestUncheckedCreateWithoutReviewedByInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RenewRequestCreateOrConnectWithoutReviewedByInput = {
+    where: RenewRequestWhereUniqueInput
+    create: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput>
+  }
+
+  export type RenewRequestCreateManyReviewedByInputEnvelope = {
+    data: RenewRequestCreateManyReviewedByInput | RenewRequestCreateManyReviewedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AuditLogCreateWithoutActorUserInput = {
     action: string
     entityType: string
@@ -38768,6 +40783,7 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUserInput = {
@@ -38790,6 +40806,7 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AnnouncementUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -39145,6 +41162,40 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Expense"> | Date | string
   }
 
+  export type RenewRequestUpsertWithWhereUniqueWithoutReviewedByInput = {
+    where: RenewRequestWhereUniqueInput
+    update: XOR<RenewRequestUpdateWithoutReviewedByInput, RenewRequestUncheckedUpdateWithoutReviewedByInput>
+    create: XOR<RenewRequestCreateWithoutReviewedByInput, RenewRequestUncheckedCreateWithoutReviewedByInput>
+  }
+
+  export type RenewRequestUpdateWithWhereUniqueWithoutReviewedByInput = {
+    where: RenewRequestWhereUniqueInput
+    data: XOR<RenewRequestUpdateWithoutReviewedByInput, RenewRequestUncheckedUpdateWithoutReviewedByInput>
+  }
+
+  export type RenewRequestUpdateManyWithWhereWithoutReviewedByInput = {
+    where: RenewRequestScalarWhereInput
+    data: XOR<RenewRequestUpdateManyMutationInput, RenewRequestUncheckedUpdateManyWithoutReviewedByInput>
+  }
+
+  export type RenewRequestScalarWhereInput = {
+    AND?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
+    OR?: RenewRequestScalarWhereInput[]
+    NOT?: RenewRequestScalarWhereInput | RenewRequestScalarWhereInput[]
+    id?: IntFilter<"RenewRequest"> | number
+    stayId?: IntFilter<"RenewRequest"> | number
+    tenantId?: IntFilter<"RenewRequest"> | number
+    requestedTerm?: EnumPricingTermFilter<"RenewRequest"> | $Enums.PricingTerm
+    requestedCheckOutDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    status?: EnumRenewRequestStatusFilter<"RenewRequest"> | $Enums.RenewRequestStatus
+    requestNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
+    reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
+    reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
+  }
+
   export type AuditLogUpsertWithWhereUniqueWithoutActorUserInput = {
     where: AuditLogWhereUniqueInput
     update: XOR<AuditLogUpdateWithoutActorUserInput, AuditLogUncheckedUpdateWithoutActorUserInput>
@@ -39320,6 +41371,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -39348,6 +41400,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -39396,6 +41449,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTenantInput = {
@@ -39435,6 +41489,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTenantInput = {
@@ -39573,6 +41628,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RenewRequestCreateWithoutTenantInput = {
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stay: StayCreateNestedOneWithoutRenewRequestsInput
+    reviewedBy?: UserCreateNestedOneWithoutRenewRequestsReviewedInput
+  }
+
+  export type RenewRequestUncheckedCreateWithoutTenantInput = {
+    id?: number
+    stayId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RenewRequestCreateOrConnectWithoutTenantInput = {
+    where: RenewRequestWhereUniqueInput
+    create: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput>
+  }
+
+  export type RenewRequestCreateManyTenantInputEnvelope = {
+    data: RenewRequestCreateManyTenantInput | RenewRequestCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutTenantInput = {
     update: XOR<UserUpdateWithoutTenantInput, UserUncheckedUpdateWithoutTenantInput>
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
@@ -39604,6 +41696,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -39632,6 +41725,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -39687,6 +41781,22 @@ export namespace Prisma {
     data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutTenantInput>
   }
 
+  export type RenewRequestUpsertWithWhereUniqueWithoutTenantInput = {
+    where: RenewRequestWhereUniqueInput
+    update: XOR<RenewRequestUpdateWithoutTenantInput, RenewRequestUncheckedUpdateWithoutTenantInput>
+    create: XOR<RenewRequestCreateWithoutTenantInput, RenewRequestUncheckedCreateWithoutTenantInput>
+  }
+
+  export type RenewRequestUpdateWithWhereUniqueWithoutTenantInput = {
+    where: RenewRequestWhereUniqueInput
+    data: XOR<RenewRequestUpdateWithoutTenantInput, RenewRequestUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type RenewRequestUpdateManyWithWhereWithoutTenantInput = {
+    where: RenewRequestScalarWhereInput
+    data: XOR<RenewRequestUpdateManyMutationInput, RenewRequestUncheckedUpdateManyWithoutTenantInput>
+  }
+
   export type StayCreateWithoutRoomInput = {
     status?: $Enums.StayStatus
     pricingTerm: $Enums.PricingTerm
@@ -39723,6 +41833,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRoomInput = {
@@ -39762,6 +41873,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRoomInput = {
@@ -40094,6 +42206,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutStaysInput = {
@@ -40116,6 +42229,7 @@ export namespace Prisma {
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutStaysInput = {
@@ -40197,6 +42311,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -40225,6 +42340,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -40257,6 +42373,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -40285,6 +42402,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -40511,6 +42629,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RenewRequestCreateWithoutStayInput = {
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutRenewRequestsInput
+    reviewedBy?: UserCreateNestedOneWithoutRenewRequestsReviewedInput
+  }
+
+  export type RenewRequestUncheckedCreateWithoutStayInput = {
+    id?: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RenewRequestCreateOrConnectWithoutStayInput = {
+    where: RenewRequestWhereUniqueInput
+    create: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput>
+  }
+
+  export type RenewRequestCreateManyStayInputEnvelope = {
+    data: RenewRequestCreateManyStayInput | RenewRequestCreateManyStayInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutStaysInput = {
     update: XOR<TenantUpdateWithoutStaysInput, TenantUncheckedUpdateWithoutStaysInput>
     create: XOR<TenantCreateWithoutStaysInput, TenantUncheckedCreateWithoutStaysInput>
@@ -40541,6 +42696,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaysInput = {
@@ -40563,6 +42719,7 @@ export namespace Prisma {
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutStaysInput = {
@@ -40656,6 +42813,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -40684,6 +42842,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -40722,6 +42881,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -40750,6 +42910,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -40819,6 +42980,22 @@ export namespace Prisma {
   export type PaymentSubmissionUpdateManyWithWhereWithoutStayInput = {
     where: PaymentSubmissionScalarWhereInput
     data: XOR<PaymentSubmissionUpdateManyMutationInput, PaymentSubmissionUncheckedUpdateManyWithoutStayInput>
+  }
+
+  export type RenewRequestUpsertWithWhereUniqueWithoutStayInput = {
+    where: RenewRequestWhereUniqueInput
+    update: XOR<RenewRequestUpdateWithoutStayInput, RenewRequestUncheckedUpdateWithoutStayInput>
+    create: XOR<RenewRequestCreateWithoutStayInput, RenewRequestUncheckedCreateWithoutStayInput>
+  }
+
+  export type RenewRequestUpdateWithWhereUniqueWithoutStayInput = {
+    where: RenewRequestWhereUniqueInput
+    data: XOR<RenewRequestUpdateWithoutStayInput, RenewRequestUncheckedUpdateWithoutStayInput>
+  }
+
+  export type RenewRequestUpdateManyWithWhereWithoutStayInput = {
+    where: RenewRequestScalarWhereInput
+    data: XOR<RenewRequestUpdateManyMutationInput, RenewRequestUncheckedUpdateManyWithoutStayInput>
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -40895,6 +43072,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -40923,6 +43101,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -41026,6 +43205,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -41054,6 +43234,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -41097,6 +43278,7 @@ export namespace Prisma {
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInvoicesInput = {
@@ -41136,6 +43318,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInvoicesInput = {
@@ -41163,6 +43346,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -41191,6 +43375,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -41383,6 +43568,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInvoicesInput = {
@@ -41422,6 +43608,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutInvoicesCreatedInput = {
@@ -41455,6 +43642,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -41483,6 +43671,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -41714,6 +43903,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -41742,6 +43932,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -41835,6 +44026,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -41863,6 +44055,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -41891,6 +44084,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -41919,6 +44113,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -41962,6 +44157,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -41990,6 +44186,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -42032,6 +44229,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -42071,6 +44269,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -42141,6 +44340,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutTenantInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -42163,6 +44363,7 @@ export namespace Prisma {
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -42191,6 +44392,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -42219,6 +44421,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -42251,6 +44454,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -42279,6 +44483,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -42337,6 +44542,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -42376,6 +44582,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type InvoiceUpsertWithoutPaymentSubmissionsInput = {
@@ -42458,6 +44665,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutTenantNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -42480,6 +44688,7 @@ export namespace Prisma {
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsSubmittedInput = {
@@ -42514,6 +44723,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -42542,6 +44752,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -42580,6 +44791,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -42608,6 +44820,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -42633,6 +44846,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutTenantInput
     stays?: StayCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutTicketsInput = {
@@ -42655,6 +44869,7 @@ export namespace Prisma {
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutTicketsInput = {
@@ -42752,6 +44967,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTicketsInput = {
@@ -42791,6 +45007,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTicketsInput = {
@@ -42818,6 +45035,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -42846,6 +45064,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -42888,6 +45107,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutTenantNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutTicketsInput = {
@@ -42910,6 +45130,7 @@ export namespace Prisma {
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutTicketsInput = {
@@ -43019,6 +45240,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTicketsInput = {
@@ -43058,6 +45280,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutTicketsAssignedInput = {
@@ -43091,6 +45314,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -43119,6 +45343,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -43146,6 +45371,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -43174,6 +45400,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -43217,6 +45444,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -43245,6 +45473,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -43646,6 +45875,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -43674,6 +45904,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -43819,6 +46050,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -43845,6 +46077,417 @@ export namespace Prisma {
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type StayCreateWithoutRenewRequestsInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutRenewRequestsInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutRenewRequestsInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutRenewRequestsInput, StayUncheckedCreateWithoutRenewRequestsInput>
+  }
+
+  export type TenantCreateWithoutRenewRequestsInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutTenantInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutRenewRequestsInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutRenewRequestsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutRenewRequestsInput, TenantUncheckedCreateWithoutRenewRequestsInput>
+  }
+
+  export type UserCreateWithoutRenewRequestsReviewedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserUncheckedCreateWithoutRenewRequestsReviewedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserCreateOrConnectWithoutRenewRequestsReviewedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRenewRequestsReviewedInput, UserUncheckedCreateWithoutRenewRequestsReviewedInput>
+  }
+
+  export type StayUpsertWithoutRenewRequestsInput = {
+    update: XOR<StayUpdateWithoutRenewRequestsInput, StayUncheckedUpdateWithoutRenewRequestsInput>
+    create: XOR<StayCreateWithoutRenewRequestsInput, StayUncheckedCreateWithoutRenewRequestsInput>
+    where?: StayWhereInput
+  }
+
+  export type StayUpdateToOneWithWhereWithoutRenewRequestsInput = {
+    where?: StayWhereInput
+    data: XOR<StayUpdateWithoutRenewRequestsInput, StayUncheckedUpdateWithoutRenewRequestsInput>
+  }
+
+  export type StayUpdateWithoutRenewRequestsInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutRenewRequestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type TenantUpsertWithoutRenewRequestsInput = {
+    update: XOR<TenantUpdateWithoutRenewRequestsInput, TenantUncheckedUpdateWithoutRenewRequestsInput>
+    create: XOR<TenantCreateWithoutRenewRequestsInput, TenantUncheckedCreateWithoutRenewRequestsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutRenewRequestsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutRenewRequestsInput, TenantUncheckedUpdateWithoutRenewRequestsInput>
+  }
+
+  export type TenantUpdateWithoutRenewRequestsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutTenantNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutRenewRequestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type UserUpsertWithoutRenewRequestsReviewedInput = {
+    update: XOR<UserUpdateWithoutRenewRequestsReviewedInput, UserUncheckedUpdateWithoutRenewRequestsReviewedInput>
+    create: XOR<UserCreateWithoutRenewRequestsReviewedInput, UserUncheckedCreateWithoutRenewRequestsReviewedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRenewRequestsReviewedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRenewRequestsReviewedInput, UserUncheckedUpdateWithoutRenewRequestsReviewedInput>
+  }
+
+  export type UserUpdateWithoutRenewRequestsReviewedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRenewRequestsReviewedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
@@ -43874,6 +46517,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -43902,6 +46546,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -43945,6 +46590,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -43973,6 +46619,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -44070,6 +46717,7 @@ export namespace Prisma {
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutExpensesInput = {
@@ -44109,6 +46757,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
     tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutExpensesInput = {
@@ -44136,6 +46785,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -44164,6 +46814,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -44283,6 +46934,7 @@ export namespace Prisma {
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutExpensesInput = {
@@ -44322,6 +46974,7 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutExpensesCreatedInput = {
@@ -44355,6 +47008,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -44383,6 +47037,7 @@ export namespace Prisma {
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -44411,6 +47066,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
@@ -44439,6 +47095,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
@@ -44482,6 +47139,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
@@ -44510,6 +47168,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
@@ -44537,6 +47196,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -44565,6 +47225,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -44608,6 +47269,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -44636,6 +47298,7 @@ export namespace Prisma {
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -44834,6 +47497,20 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RenewRequestCreateManyReviewedByInput = {
+    id?: number
+    stayId: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AuditLogCreateManyActorUserInput = {
     id?: number
     action: string
@@ -45012,6 +47689,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCreatedByInput = {
@@ -45051,6 +47729,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutCreatedByInput = {
@@ -45124,6 +47803,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInitialMetersRecordedByInput = {
@@ -45163,6 +47843,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutInitialMetersRecordedByInput = {
@@ -45504,6 +48185,47 @@ export namespace Prisma {
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUpdateWithoutReviewedByInput = {
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
+  }
+
+  export type RenewRequestUncheckedUpdateWithoutReviewedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUncheckedUpdateManyWithoutReviewedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -45851,6 +48573,20 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RenewRequestCreateManyTenantInput = {
+    id?: number
+    stayId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type StayUpdateWithoutTenantInput = {
     status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
     pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
@@ -45887,6 +48623,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTenantInput = {
@@ -45926,6 +48663,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutTenantInput = {
@@ -46123,6 +48861,47 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RenewRequestUpdateWithoutTenantInput = {
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
+    reviewedBy?: UserUpdateOneWithoutRenewRequestsReviewedNestedInput
+  }
+
+  export type RenewRequestUncheckedUpdateWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUncheckedUpdateManyWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StayCreateManyRoomInput = {
     id?: number
     tenantId: number
@@ -46267,6 +49046,7 @@ export namespace Prisma {
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRoomInput = {
@@ -46306,6 +49086,7 @@ export namespace Prisma {
     tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutRoomInput = {
@@ -46643,6 +49424,20 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RenewRequestCreateManyStayInput = {
+    id?: number
+    tenantId: number
+    requestedTerm: $Enums.PricingTerm
+    requestedCheckOutDate?: Date | string | null
+    status?: $Enums.RenewRequestStatus
+    requestNotes?: string | null
+    reviewNotes?: string | null
+    reviewedById?: number | null
+    reviewedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type InvoiceUpdateWithoutStayInput = {
     invoiceNumber?: StringFieldUpdateOperationsInput | string
     status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -46899,6 +49694,47 @@ export namespace Prisma {
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUpdateWithoutStayInput = {
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
+    reviewedBy?: UserUpdateOneWithoutRenewRequestsReviewedNestedInput
+  }
+
+  export type RenewRequestUncheckedUpdateWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RenewRequestUncheckedUpdateManyWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    requestedTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    requestedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumRenewRequestStatusFieldUpdateOperationsInput | $Enums.RenewRequestStatus
+    requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

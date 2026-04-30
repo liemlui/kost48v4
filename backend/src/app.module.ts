@@ -21,6 +21,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.module';
 import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-submissions.module';
+import { RenewRequestsModule } from './modules/renew-requests/renew-requests.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-
     NotificationsModule,
     TenantBookingsModule,
     PaymentSubmissionsModule,
+    RenewRequestsModule,
   ],
 })
 export class AppModule {}

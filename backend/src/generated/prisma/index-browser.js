@@ -390,6 +390,21 @@ exports.Prisma.InventoryMovementScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RenewRequestScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  tenantId: 'tenantId',
+  requestedTerm: 'requestedTerm',
+  requestedCheckOutDate: 'requestedCheckOutDate',
+  status: 'status',
+  requestNotes: 'requestNotes',
+  reviewNotes: 'reviewNotes',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.WifiSaleScalarFieldEnum = {
   id: 'id',
   saleDate: 'saleDate',
@@ -612,6 +627,12 @@ exports.InventoryMovementType = exports.$Enums.InventoryMovementType = {
   ADJUSTMENT: 'ADJUSTMENT'
 };
 
+exports.RenewRequestStatus = exports.$Enums.RenewRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.ExpenseType = exports.$Enums.ExpenseType = {
   FIXED: 'FIXED',
   VARIABLE: 'VARIABLE'
@@ -647,6 +668,7 @@ exports.Prisma.ModelName = {
   InventoryItem: 'InventoryItem',
   RoomItem: 'RoomItem',
   InventoryMovement: 'InventoryMovement',
+  RenewRequest: 'RenewRequest',
   WifiSale: 'WifiSale',
   Expense: 'Expense',
   AppNotification: 'AppNotification',

@@ -403,6 +403,29 @@ export class PaymentSubmissionsService {
             data: { status: RoomStatus.OCCUPIED },
           });
 
+          const activationStay = await tx.stay.findUnique({
+            where: { id: submission.stayId },
+            select: { id: true, checkInDate: true, pricingTerm: true, plannedCheckOutDate: true },
+          });
+
+          if (activationStay && activationStay.checkInDate && !activationStay.plannedCheckOutDate) {
+            const autoPlannedCheckOut = new Date(activationStay.checkInDate);
+            switch (activationStay.pricingTerm) {
+              case 'DAILY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 1); break;
+              case 'WEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 7); break;
+              case 'BIWEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 14); break;
+              case 'MONTHLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1); break;
+              case 'SMESTERLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 6); break;
+              case 'YEARLY': autoPlannedCheckOut.setFullYear(autoPlannedCheckOut.getFullYear() + 1); break;
+              default: autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1);
+            }
+
+            await tx.stay.update({
+              where: { id: activationStay.id },
+              data: { plannedCheckOutDate: autoPlannedCheckOut },
+            });
+          }
+
           // Promote pending meter snapshot to operational MeterReading
           const hasElectricity =
             submission.stayInitialElectricityKwhPending != null;

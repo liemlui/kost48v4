@@ -101,6 +101,12 @@ enum BookingDepositPaymentStatus {
   PAID
 }
 
+enum RenewRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -195,6 +201,7 @@ model User {
   inventoryMovementsCreated   InventoryMovement[]  @relation("InventoryMovementCreatedBy")
   wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
   expensesCreated             Expense[]            @relation("ExpenseCreatedBy")
+  renewRequestsReviewed       RenewRequest[]       @relation("RenewRequestReviewedBy")
   auditLogs                   AuditLog[]           @relation("AuditLogActor")
   paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
   paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
@@ -229,6 +236,7 @@ model Tenant {
   stays              Stay[]
   tickets            Ticket[]
   paymentSubmissions PaymentSubmission[]
+  renewRequests      RenewRequest[]
 
   @@index([fullName])
   @@index([phone])
@@ -324,6 +332,7 @@ model Stay {
   tickets            Ticket[]
   expenses           Expense[]
   paymentSubmissions PaymentSubmission[]
+  renewRequests      RenewRequest[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -607,6 +616,29 @@ model InventoryMovement {
   @@index([roomId])
   @@index([movementDate])
   @@index([movementType])
+}
+
+model RenewRequest {
+  id                    Int                @id @default(autoincrement())
+  stayId                Int
+  tenantId              Int
+  requestedTerm         PricingTerm
+  requestedCheckOutDate DateTime?          @db.Date
+  status                RenewRequestStatus @default(PENDING)
+  requestNotes          String?
+  reviewNotes           String?
+  reviewedById          Int?
+  reviewedAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  stay       Stay   @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  reviewedBy User?  @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
+  @@index([tenantId])
+  @@index([status, createdAt])
 }
 
 model WifiSale {

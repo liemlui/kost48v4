@@ -97,7 +97,7 @@ export class StaysService {
             pricingTerm: dto.pricingTerm as PricingTerm,
             agreedRentAmountRupiah: agreed,
             checkInDate: new Date(dto.checkInDate),
-            plannedCheckOutDate: dto.plannedCheckOutDate ? new Date(dto.plannedCheckOutDate) : undefined,
+            plannedCheckOutDate: dto.plannedCheckOutDate ? new Date(dto.plannedCheckOutDate) : calculatePeriodEnd(new Date(dto.checkInDate), dto.pricingTerm),
             depositAmountRupiah: deposit,
             electricityTariffPerKwhRupiah: electricity,
             waterTariffPerM3Rupiah: water,
