@@ -24,7 +24,7 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const invalidCredentialsMessage = 'Email atau password salah';
+    const invalidCredentialsMessage = 'Email/nomor HP atau password salah';
 
     const identifier = dto.identifier.trim();
     const normalizedPhone = normalizePhone(identifier);
@@ -262,12 +262,24 @@ export class AuthService {
       return null;
     }
 
+    const denormalized = denormalizePhone(normalizedPhone);
+    const digitsOnly = identifier.replace(/\D/g, '');
+
+    const phoneConditions: Array<{ phone: string }> = [
+      { phone: normalizedPhone },
+      { phone: denormalized },
+    ];
+
+    if (!phoneConditions.some((c) => c.phone === identifier)) {
+      phoneConditions.push({ phone: identifier });
+    }
+    if (digitsOnly !== identifier && !phoneConditions.some((c) => c.phone === digitsOnly)) {
+      phoneConditions.push({ phone: digitsOnly });
+    }
+
     const tenant = await this.prisma.tenant.findFirst({
       where: {
-        OR: [
-          { phone: normalizedPhone },
-          { phone: denormalizePhone(normalizedPhone) },
-        ],
+        OR: phoneConditions,
         isActive: true,
       },
     });
