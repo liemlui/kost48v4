@@ -8,9 +8,10 @@ import StatCard from '../../components/common/StatCard';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listResource } from '../../api/resources';
+import { listAdminRenewRequests } from '../../api/renewRequests';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
-import type { Invoice, Room, Stay } from '../../types';
+import type { Invoice, RenewRequest, Room, Stay } from '../../types';
 
 type DashboardListSummary<T> = {
   items: T[];
@@ -120,9 +121,10 @@ function OwnerDashboard() {
   const staysQuery = useQuery({ queryKey: ['dashboard-owner', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
   const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices-summary'], queryFn: () => fetchAllPagesForDashboard<Invoice>('/invoices') });
   const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses-summary'], queryFn: () => fetchAllPagesForDashboard<any>('/expenses') });
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-owner', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
 
-  if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading) return <LoadingDashboard />;
-  if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
+  if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading || renewRequestsQuery.isLoading) return <LoadingDashboard />;
+  if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError || renewRequestsQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
@@ -139,6 +141,7 @@ function OwnerDashboard() {
   const collected = invoices.filter((invoice) => invoice.status === 'PAID').reduce((sum, invoice) => sum + Number(invoice.totalAmountRupiah ?? 0), 0);
   const overdue = invoices.filter(isOverdue);
   const totalExpense = expenses.reduce((sum, expense) => sum + Number(expense.amountRupiah ?? 0), 0);
+  const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
 
   return (
     <div>
@@ -166,6 +169,7 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
         <Col md={6} xl={3}><StatCard title="Kamar terisi" value={occupiedRooms} subtitle={`Tersedia ${availableRooms} kamar kosong`} icon="📈" /></Col>
         <Col md={6} xl={3}><StatCard title="Total billed" value={new Intl.NumberFormat('id-ID').format(billed)} subtitle="Estimasi tagihan yang sudah terbentuk" icon="🧾" /></Col>
         <Col md={6} xl={3}><StatCard title="Total collected" value={new Intl.NumberFormat('id-ID').format(collected)} subtitle={`Expense tercatat ${new Intl.NumberFormat('id-ID').format(totalExpense)}`} icon="💰" variant={collected >= totalExpense ? 'success' : 'warning'} /></Col>
+        <Col md={6} xl={3}><StatCard title="Permintaan Perpanjangan" value={pendingRenewCount} subtitle="Butuh approval owner" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} /></Col>
       </Row>
 
       <Row className="g-4">
@@ -183,6 +187,7 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
                 <div className="kpi-item"><div><div className="card-title-soft">Collected / billed</div><strong>{billed ? `${Math.round((collected / billed) * 100)}%` : '0%'}</strong></div><StatusBadge status={collected >= billed ? 'SUCCESS' : 'INFO'} customLabel="Collection ratio" /></div>
                 <div className="kpi-item"><div><div className="card-title-soft">Occ. rate kasar</div><strong>{rooms.length ? `${Math.round((occupiedRooms / rooms.length) * 100)}%` : '0%'}</strong></div><StatusBadge status="INFO" customLabel="Occupancy" /></div>
                 <div className="kpi-item"><div><div className="card-title-soft">Cashflow ringkas</div><strong>{collected - totalExpense >= 0 ? 'Positif' : 'Tertekan'}</strong></div><StatusBadge status={collected - totalExpense >= 0 ? 'SUCCESS' : 'WARNING'} customLabel="Management view" /></div>
+                <div className="kpi-item"><div><div className="card-title-soft">Permintaan perpanjangan</div><strong>{pendingRenewCount}</strong></div><StatusBadge status={pendingRenewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingRenewCount ? 'Butuh approval' : 'Aman'} /></div>
               </div>
             </Card.Body>
           </Card>
@@ -229,9 +234,10 @@ function AdminDashboard() {
   const depositCompletedQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-completed'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'COMPLETED', limit: 50 }) });
   const depositCancelledQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-cancelled'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'CANCELLED', limit: 50 }) });
   const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<any>('/tickets', { limit: 100 }) });
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
 
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
@@ -257,6 +263,7 @@ function AdminDashboard() {
     );
   });
   const pendingApprovalCount = reservedWithoutInvoice.length;
+  const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
 
   return (
     <div>
@@ -274,6 +281,7 @@ function AdminDashboard() {
         <Col md={6} xl={3}><StatCard title="Checkout soon" value={checkoutSoon.length} subtitle="≤ 10 hari ke planned checkout" icon="⏳" variant={checkoutSoon.length ? 'info' : 'success'} /></Col>
         <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} /></Col>
         <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} /></Col>
+        <Col md={6} xl={3}><StatCard title="Perpanjangan" value={pendingRenewCount} subtitle="Permintaan perpanjangan stay" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} /></Col>
       </Row>
 
       <Row className="g-4">
@@ -294,6 +302,7 @@ function AdminDashboard() {
                   <tr className="clickable-row" onClick={() => navigate('/tickets')}><td>Ticket terbuka</td><td>{tickets.filter((item) => ['OPEN', 'IN_PROGRESS'].includes(item.status)).length}</td><td>Triage, assign, dan tindak lanjut teknis</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Permintaan perpanjangan</td><td>{pendingRenewCount}</td><td>Permintaan tenant untuk memperpanjang masa tinggal</td></tr>
                 </tbody>
               </Table>
             </Card.Body>

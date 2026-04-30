@@ -512,3 +512,45 @@ export type Ticket = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type RenewRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | string;
+
+export type RenewRequest = {
+  id: number;
+  stayId: number;
+  tenantId: number;
+  requestedTerm: PricingTerm;
+  requestedCheckOutDate?: string | null;
+  status: RenewRequestStatus;
+  requestNotes?: string | null;
+  reviewNotes?: string | null;
+  reviewedById?: number | null;
+  reviewedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  stay?: {
+    id: number;
+    roomId: number;
+    room?: { id: number; code?: string; name?: string } | null;
+    checkInDate?: string;
+    plannedCheckOutDate?: string | null;
+    tenant?: { id: number; fullName?: string } | null;
+  } | null;
+  tenant?: { id: number; fullName?: string } | null;
+  reviewedBy?: { id: number; fullName?: string } | null;
+};
+
+export type CreateRenewRequestPayload = {
+  stayId: number;
+  requestedTerm: PricingTerm;
+  requestNotes?: string;
+};
+
+export type ApproveRenewRequestPayload = {
+  plannedCheckOutDate?: string;
+  agreedRentAmountRupiah?: number;
+};
+
+export type RejectRenewRequestPayload = {
+  reviewNotes: string;
+};

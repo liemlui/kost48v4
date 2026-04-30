@@ -1,15 +1,17 @@
 import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import { getResource } from '../../api/resources';
+import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
-import type { Stay } from '../../types';
+import type { ApiEnvelope, PaginatedResponse } from '../../types';
+import type { RenewRequest, Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
 function formatDate(value?: string | null) {
@@ -29,6 +31,171 @@ function DataField({ label, value }: { label: string; value: ReactNode }) {
       <div className="card-title-soft mb-1">{label}</div>
       <div className="fw-semibold">{value ?? '-'}</div>
     </div>
+  );
+}
+
+function ActiveStayContent({ stay }: { stay: Stay }) {
+  const queryClient = useQueryClient();
+
+  const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
+    queryKey: ['my-renew-requests', stay.id],
+    queryFn: () => listMyRenewRequests(),
+    refetchOnWindowFocus: true,
+  });
+
+  const pendingRenewRequest = (renewRequestsQuery.data?.items ?? []).find(
+    (rr: RenewRequest) => rr.stayId === stay.id && rr.status === 'PENDING',
+  );
+
+  const createRenewMutation = useMutation<RenewRequest>({
+    mutationFn: (): Promise<RenewRequest> => createRenewRequest({ stayId: stay.id, requestedTerm: 'MONTHLY' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] });
+    },
+  });
+
+  const rejectedRequest = (renewRequestsQuery.data?.items ?? []).find(
+    (rr: RenewRequest) => rr.stayId === stay.id && rr.status === 'REJECTED',
+  );
+
+  const renewData = createRenewMutation.data as RenewRequest | undefined;
+  const showRenewButton =
+    !pendingRenewRequest && !createRenewMutation.isSuccess && renewData?.status !== 'PENDING';
+  const showRejectedMessage = renewData?.status === 'REJECTED' || rejectedRequest;
+
+  return (
+    <>
+      <Card className="detail-hero border-0 mb-4">
+        <Card.Body>
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div className="d-flex flex-wrap gap-2">
+              <StatusBadge status={stay.status} />
+              {stay.depositStatus ? <StatusBadge status={stay.depositStatus} /> : null}
+            </div>
+            <div className="app-caption">Kamar {stay.room?.code ?? stay.roomId} · Check-in {formatDate(stay.checkInDate)}</div>
+          </div>
+
+          <div className="metric-grid">
+            <div className="metric-tile">
+              <div className="metric-tile-label">Sewa Bulanan</div>
+              <div className="metric-tile-value"><CurrencyDisplay amount={stay.agreedRentAmountRupiah} /></div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-tile-label">Deposit</div>
+              <div className="metric-tile-value"><CurrencyDisplay amount={stay.depositAmountRupiah} /></div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-tile-label">Rencana Checkout</div>
+              <div className="metric-tile-value">{formatDate(stay.plannedCheckOutDate)}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-tile-label">Status Deposit</div>
+              <div className="metric-tile-value">{getStatusLabel(stay.depositStatus)}</div>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {/* Perpanjangan */}
+      {showRenewButton ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <h5 className="mb-2">Ajukan Perpanjangan</h5>
+            <p className="text-muted small mb-3">
+              Ajukan permintaan perpanjangan masa tinggal Anda. Admin akan meninjau dan menyetujui permintaan Anda.
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => createRenewMutation.mutate()}
+              disabled={createRenewMutation.isPending}
+            >
+              {createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}
+            </Button>
+            {createRenewMutation.isError ? (
+              <Alert variant="danger" className="mt-2 small">
+                {(createRenewMutation.error as any)?.response?.data?.message ?? 'Gagal mengajukan perpanjangan.'}
+              </Alert>
+            ) : null}
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {pendingRenewRequest ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <h5 className="mb-2">Permintaan Perpanjangan</h5>
+            <Alert variant="info" className="small">
+              Permintaan perpanjangan Anda sedang <strong>Menunggu Persetujuan</strong> admin.
+              {pendingRenewRequest.requestedCheckOutDate
+                ? ` Tanggal checkout yang diajukan: ${formatDate(pendingRenewRequest.requestedCheckOutDate)}.`
+                : ''}
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {createRenewMutation.isSuccess && renewData?.status === 'APPROVED' ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <Alert variant="success" className="small">
+              Permintaan perpanjangan Anda telah <strong>Disetujui</strong>. Masa tinggal Anda telah diperpanjang.
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {showRejectedMessage ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <Alert variant="warning" className="small">
+              Permintaan perpanjangan Anda telah <strong>Ditolak</strong>.
+              {rejectedRequest?.reviewNotes ? ` Alasan: ${rejectedRequest.reviewNotes}` : ''}
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      <Row className="g-4 mb-4">
+        <Col lg={6}>
+          <Card className="content-card border-0 h-100">
+            <Card.Body>
+              <h5 className="mb-3">Informasi Kamar</h5>
+              <Row>
+                <Col md={6}>
+                  <DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} />
+                  <DataField label="Nama Kamar" value={stay.room?.name ?? '-'} />
+                  <DataField label="Lantai" value={stay.room?.floor ?? '-'} />
+                </Col>
+                <Col md={6}>
+                  <DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} />
+                  <DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
+                  <DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} />
+                  <DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} />
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col lg={6}>
+          <Card className="content-card border-0 h-100">
+            <Card.Body>
+              <h5 className="mb-3">Ketentuan Stay</h5>
+              <Row>
+                <Col md={6}>
+                  <DataField label="Pricing Term" value={getStatusLabel(stay.pricingTerm)} />
+                  <DataField label="Booking Source" value={stay.bookingSource ?? '-'} />
+                </Col>
+                <Col md={6}>
+                  <DataField label="Tujuan Tinggal" value={stay.stayPurpose ?? '-'} />
+                  <DataField label="Catatan" value={stay.notes ?? '-'} />
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </>
   );
 }
 
@@ -53,7 +220,6 @@ export default function MyStayPage() {
 
   const stay = query.data;
 
-  // Validate that returned stay belongs to current user
   const stayBelongsToUser = stay
     ? stay.tenantId === tenantId
     : false;
@@ -80,7 +246,6 @@ export default function MyStayPage() {
         const message = error?.response?.data?.message;
 
         if (status === 404) {
-          // Tidak ada stay aktif — tampilkan CTA sesuai stage tenant
           if (stage === 'booking') {
             return (
               <EmptyState
@@ -130,79 +295,7 @@ export default function MyStayPage() {
       ) : null}
 
       {stay && stayBelongsToUser && roomStatusOccupied ? (
-        <>
-          <Card className="detail-hero border-0 mb-4">
-            <Card.Body>
-              <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-                <div className="d-flex flex-wrap gap-2">
-                  <StatusBadge status={stay.status} />
-                  {stay.depositStatus ? <StatusBadge status={stay.depositStatus} /> : null}
-                </div>
-                <div className="app-caption">Kamar {stay.room?.code ?? stay.roomId} · Check-in {formatDate(stay.checkInDate)}</div>
-              </div>
-
-              <div className="metric-grid">
-                <div className="metric-tile">
-                  <div className="metric-tile-label">Sewa Bulanan</div>
-                  <div className="metric-tile-value"><CurrencyDisplay amount={stay.agreedRentAmountRupiah} /></div>
-                </div>
-                <div className="metric-tile">
-                  <div className="metric-tile-label">Deposit</div>
-                  <div className="metric-tile-value"><CurrencyDisplay amount={stay.depositAmountRupiah} /></div>
-                </div>
-                <div className="metric-tile">
-                  <div className="metric-tile-label">Rencana Checkout</div>
-                  <div className="metric-tile-value">{formatDate(stay.plannedCheckOutDate)}</div>
-                </div>
-                <div className="metric-tile">
-                  <div className="metric-tile-label">Status Deposit</div>
-                  <div className="metric-tile-value">{getStatusLabel(stay.depositStatus)}</div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Row className="g-4 mb-4">
-            <Col lg={6}>
-              <Card className="content-card border-0 h-100">
-                <Card.Body>
-                  <h5 className="mb-3">Informasi Kamar</h5>
-                  <Row>
-                    <Col md={6}>
-                      <DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} />
-                      <DataField label="Nama Kamar" value={stay.room?.name ?? '-'} />
-                      <DataField label="Lantai" value={stay.room?.floor ?? '-'} />
-                    </Col>
-                    <Col md={6}>
-                      <DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} />
-                      <DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
-                      <DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} />
-                      <DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} />
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col lg={6}>
-              <Card className="content-card border-0 h-100">
-                <Card.Body>
-                  <h5 className="mb-3">Ketentuan Stay</h5>
-                  <Row>
-                    <Col md={6}>
-                      <DataField label="Pricing Term" value={getStatusLabel(stay.pricingTerm)} />
-                      <DataField label="Booking Source" value={stay.bookingSource ?? '-'} />
-                    </Col>
-                    <Col md={6}>
-                      <DataField label="Tujuan Tinggal" value={stay.stayPurpose ?? '-'} />
-                      <DataField label="Catatan" value={stay.notes ?? '-'} />
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </>
+        <ActiveStayContent stay={stay} />
       ) : null}
     </div>
   );
