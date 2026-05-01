@@ -146,9 +146,14 @@ export function usePaymentUrgency(): {
     {
       const bookings = bookingsQuery.data?.items ?? [];
       for (const booking of bookings) {
-        // Only consider active (reserved/booked) bookings, not cancelled/completed
+        // Exclude cancelled/expired bookings; only consider approved bookings with invoice
         const bookingStatus = (booking.status ?? '').toUpperCase();
-        if (bookingStatus !== 'ACTIVE') continue;
+        if (bookingStatus === 'CANCELLED' || bookingStatus === 'EXPIRED') continue;
+        // Booking must be approved (has invoice) to have a payment deadline
+        const hasInitialInvoice = Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
+        if (!hasInitialInvoice) continue;
+        // Room already occupied means booking is already active (payment completed)
+        if (booking.room?.status === 'OCCUPIED') continue;
 
         const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
         if (expiryMeta.isExpired) continue;
@@ -161,7 +166,7 @@ export function usePaymentUrgency(): {
 
         // Check if payment is still needed
         const remaining = booking.invoiceRemainingAmountRupiah;
-        const isPaid = booking.latestInvoiceStatus === 'PAID' || (remaining != null && remaining <= 0);
+        const isPaid = booking.latestInvoiceStatus === 'PAID' || booking.latestInvoiceStatus === 'CANCELLED' || (remaining != null && remaining <= 0);
         if (isPaid) continue;
 
         const variant = hrs <= 6 ? ('danger' as const) : ('warning' as const);
