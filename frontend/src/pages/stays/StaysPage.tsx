@@ -293,10 +293,22 @@ export default function StaysPage() {
                     const expiryMeta = getBookingExpiryMeta(item.expiresAt);
                     const approvalMeta = getBookingApprovalMeta(item);
                     const canApprove = approvalMeta.isPendingApproval && !expiryMeta.isExpired;
+                    const bookingStatusResult = getBookingStatusLabel({
+                      isReserved: isReservedBooking(item),
+                      isExpired: expiryMeta.isExpired,
+                      hasInvoice: !approvalMeta.isPendingApproval,
+                      isCancelled: item.status === 'CANCELLED',
+                      isCompleted: item.status === 'COMPLETED',
+                      isActiveOccupied: item.status === 'ACTIVE' && item.room?.status === 'OCCUPIED',
+                    });
+                    const showExpirySubBadge = expiryMeta.variant === 'DANGER' || expiryMeta.variant === 'WARNING';
                     return (
                       <tr key={item.id}>
                         <td>
                           <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
+                          {item.tenant?.identityNumber ? (
+                            <div className="small text-muted font-monospace">NIK: {item.tenant.identityNumber}</div>
+                          ) : null}
                           <div className="small text-muted">{item.bookingSource ? `Source: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
                         </td>
                         <td>
@@ -316,44 +328,35 @@ export default function StaysPage() {
                           <div className="small text-muted">{expiryMeta.helperText}</div>
                         </td>
                         <td>
-                          <div className="d-flex flex-column gap-2">
-                            <StatusBadge status={approvalMeta.variant} customLabel={approvalMeta.label} />
+                          <div className="d-flex flex-wrap gap-2 align-items-center">
+                            <StatusBadge status={bookingStatusResult.variant} customLabel={bookingStatusResult.label} />
+                            {showExpirySubBadge ? (
+                              <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />
+                            ) : null}
                           </div>
                           <div className="small text-muted mt-2">
                             {approvalMeta.helper}
-                            {expiryMeta.badgeLabel ? ` ${expiryMeta.badgeLabel}.` : ''}
                             {item.latestInvoiceNumber ? ` Invoice: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
                           </div>
                         </td>
                         <td>
-                          {canApprove ? (
-                            <Button size="sm" onClick={() => setSelectedBooking(item)}>
-                              Setujui
-                            </Button>
-                          ) : expiryMeta.isExpired ? (
-                            <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
-                              {expireMutation.isPending ? 'Memproses...' : 'Jalankan Kedaluwarsa'}
-                            </Button>
-                          ) : (
-                            <StatusBadge
-                              status={getBookingStatusLabel({
-                                isReserved: isReservedBooking(item),
-                                isExpired: expiryMeta.isExpired,
-                                hasInvoice: !approvalMeta.isPendingApproval,
-                                isCancelled: item.status === 'CANCELLED',
-                                isCompleted: item.status === 'COMPLETED',
-                                isActiveOccupied: item.status === 'ACTIVE' && item.room?.status === 'OCCUPIED',
-                              }).variant}
-                              customLabel={getBookingStatusLabel({
-                                isReserved: isReservedBooking(item),
-                                isExpired: expiryMeta.isExpired,
-                                hasInvoice: !approvalMeta.isPendingApproval,
-                                isCancelled: item.status === 'CANCELLED',
-                                isCompleted: item.status === 'COMPLETED',
-                                isActiveOccupied: item.status === 'ACTIVE' && item.room?.status === 'OCCUPIED',
-                              }).label}
-                            />
-                          )}
+                          <div className="d-flex gap-2">
+                            {canApprove ? (
+                              <Button size="sm" onClick={() => setSelectedBooking(item)}>
+                                Setujui Booking
+                              </Button>
+                            ) : null}
+                            {expiryMeta.isExpired ? (
+                              <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
+                                {expireMutation.isPending ? 'Memproses...' : 'Jalankan Kedaluwarsa'}
+                              </Button>
+                            ) : null}
+                            {!canApprove && !expiryMeta.isExpired ? (
+                              <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/stays/${item.id}`)}>
+                                Detail
+                              </Button>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
