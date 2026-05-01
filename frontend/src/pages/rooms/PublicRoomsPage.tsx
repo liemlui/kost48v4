@@ -28,7 +28,7 @@ const sortOptions = [
   { value: 'default', label: 'Rekomendasi' },
   { value: 'price-asc', label: 'Harga terendah' },
   { value: 'price-desc', label: 'Harga tertinggi' },
-  { value: 'available-first', label: 'Kamar tersedia dulu' },
+  { value: 'floor-asc', label: 'Lantai terendah' },
 ];
 
 function RoomPlaceholder({ room }: { room: PublicRoom }) {
@@ -96,7 +96,6 @@ export default function PublicRoomsPage() {
   const search = searchParams.get('search') ?? '';
   const pricingTerm = (searchParams.get('pricingTerm') ?? '') as '' | PricingTerm;
   const sort = searchParams.get('sort') ?? 'default';
-  const showAll = searchParams.get('showAll') === '1';
 
   const [compareIds, setCompareIds] = useState<number[]>([]);
 
@@ -119,21 +118,18 @@ export default function PublicRoomsPage() {
       list = [...list].sort((a, b) => (a.highlightedRateRupiah ?? 0) - (b.highlightedRateRupiah ?? 0));
     } else if (sort === 'price-desc') {
       list = [...list].sort((a, b) => (b.highlightedRateRupiah ?? 0) - (a.highlightedRateRupiah ?? 0));
-    } else if (sort === 'available-first') {
+    } else if (sort === 'floor-asc') {
       list = [...list].sort((a, b) => {
-        const aAvail = a.isAvailable !== false ? 0 : 1;
-        const bAvail = b.isAvailable !== false ? 0 : 1;
-        return aAvail - bAvail;
+        const aFloor = parseInt(String(a.floor ?? ''), 10);
+        const bFloor = parseInt(String(b.floor ?? ''), 10);
+        const aNum = Number.isFinite(aFloor) ? aFloor : 999;
+        const bNum = Number.isFinite(bFloor) ? bFloor : 999;
+        return aNum - bNum;
       });
     }
 
-    // local filter: show all or only available
-    if (!showAll) {
-      list = list.filter((r) => r.isAvailable !== false);
-    }
-
     return list;
-  }, [roomsFromApi, sort, showAll]);
+  }, [roomsFromApi, sort]);
 
   const compareRooms = useMemo(() => {
     return rooms.filter((r) => compareIds.includes(r.id));
@@ -162,7 +158,7 @@ export default function PublicRoomsPage() {
 
   const compareMaxWarning = compareIds.length >= 3;
 
-  const hasFilters = search !== '' || pricingTerm !== '' || sort !== 'default' || showAll;
+  const hasFilters = search !== '' || pricingTerm !== '' || sort !== 'default';
 
   return (
     <div className="public-page-shell">
@@ -180,7 +176,7 @@ export default function PublicRoomsPage() {
               <div>
                 <h1 className="mb-3">Katalog Kamar</h1>
                 <p className="text-muted mb-0">
-                  Cari kamar yang sesuai dengan budget, fasilitas, dan kebutuhan tinggal Anda. Gunakan filter dan perbandingan untuk memilih kamar sebelum booking.
+                  Cari kamar yang sesuai dengan budget, fasilitas, dan kebutuhan tinggal Anda. Gunakan filter, urutan harga, dan perbandingan untuk memilih kamar sebelum booking.
                 </p>
               </div>
               <div className="public-hero-note">
@@ -218,18 +214,6 @@ export default function PublicRoomsPage() {
                   <Form.Select value={sort} onChange={(event) => updateParams({ sort: event.target.value })}>
                     {sortOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                   </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col lg={2} md={4}>
-                <Form.Group>
-                  <Form.Label className="d-block">&nbsp;</Form.Label>
-                  <Form.Check
-                    type="switch"
-                    id="show-all-switch"
-                    label={showAll ? 'Semua kamar' : 'Tersedia saja'}
-                    checked={showAll}
-                    onChange={(event) => updateParams({ showAll: event.target.checked ? '1' : '' })}
-                  />
                 </Form.Group>
               </Col>
               <Col lg={1} md={6}>
