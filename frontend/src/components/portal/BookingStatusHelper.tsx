@@ -8,25 +8,78 @@ export function ExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   return <StatusBadge status={expiryMeta.variant} customLabel={expiryMeta.badgeLabel} />;
 }
 
-export function getPortalBookingStatus(booking: TenantBooking) {
-  const hasInitialInvoice =
-    Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
+export interface PortalBookingStatus {
+  badgeStatus: string;
+  label: string;
+  helper: string;
+}
 
-  if (hasInitialInvoice) {
+export function getPortalBookingStatus(
+  booking: TenantBooking,
+  hasPendingPaymentSubmission?: boolean,
+): PortalBookingStatus {
+  const statusUpper = (booking.status ?? '').toUpperCase();
+  const roomStatusUpper = (booking.room?.status ?? '').toUpperCase();
+  const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
+
+  // 6. Booking dibatalkan
+  if (statusUpper === 'CANCELLED') {
     return {
-      badgeStatus: 'INFO',
-      label: 'Menunggu Pembayaran',
-      helper: booking.latestInvoiceNumber
-        ? `Admin sudah menyetujui booking ini. Invoice awal ${booking.latestInvoiceNumber} sudah terbentuk dan menunggu pembayaran.`
-        : 'Admin sudah menyetujui booking ini. Invoice awal booking sudah terbentuk dan menunggu pembayaran.',
+      badgeStatus: 'DANGER',
+      label: 'Booking dibatalkan',
+      helper: 'Booking ini telah dibatalkan dan tidak dapat diproses lebih lanjut.',
     };
   }
 
+  // 5. Booking kadaluarsa
+  if (statusUpper === 'EXPIRED' || expiryMeta.isExpired) {
+    return {
+      badgeStatus: 'WARNING',
+      label: 'Booking kadaluarsa',
+      helper: 'Masa berlaku booking sudah habis. Silakan lakukan pemesanan baru jika masih berminat.',
+    };
+  }
+
+  // 4. Booking aktif / kamar sudah ditempati
+  if (statusUpper === 'ACTIVE' || roomStatusUpper === 'OCCUPIED') {
+    return {
+      badgeStatus: 'SUCCESS',
+      label: 'Booking aktif / kamar sudah ditempati',
+      helper: 'Booking Anda sudah aktif. Silakan buka halaman Hunian Saya untuk detail hunian.',
+    };
+  }
+
+  const hasInitialInvoice =
+    Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
+
+  // 3. Pembayaran sedang direview
+  if (hasInitialInvoice && hasPendingPaymentSubmission) {
+    return {
+      badgeStatus: 'INFO',
+      label: 'Pembayaran sedang direview',
+      helper: booking.latestInvoiceNumber
+        ? `Bukti pembayaran untuk invoice ${booking.latestInvoiceNumber} telah dikirim dan sedang menunggu verifikasi admin. Mohon tunggu hasil review.`
+        : 'Bukti pembayaran telah dikirim dan sedang menunggu verifikasi admin. Mohon tunggu hasil review.',
+    };
+  }
+
+  // 2. Booking disetujui --- menunggu pembayaran
+  if (hasInitialInvoice) {
+    return {
+      badgeStatus: 'INFO',
+      label: 'Booking disetujui — menunggu pembayaran',
+      helper: booking.latestInvoiceNumber
+        ? `Admin sudah menyetujui booking ini. Invoice awal ${booking.latestInvoiceNumber} sudah terbentuk dan menunggu pembayaran sewa pertama dan deposit.`
+        : 'Admin sudah menyetujui booking ini. Invoice awal sudah terbentuk dan menunggu pembayaran sewa pertama dan deposit.',
+    };
+  }
+
+  // 1. Menunggu review admin
   return {
     badgeStatus: 'WARNING',
-    label: 'Menunggu Approval',
+    label: 'Menunggu review admin',
     helper:
-      'Booking Anda masih menunggu persetujuan admin sebelum invoice awal dibuat.',
+      'Booking Anda sedang menunggu persetujuan admin sebelum invoice awal dibuat. Mohon tunggu informasi selanjutnya.',
   };
 }
 

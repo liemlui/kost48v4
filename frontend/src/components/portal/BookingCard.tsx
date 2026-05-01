@@ -24,7 +24,10 @@ export default function BookingCard({
   onViewCatalog,
 }: BookingCardProps) {
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
-  const portalStatus = getPortalBookingStatus(booking);
+  const portalStatus = getPortalBookingStatus(
+    booking,
+    Boolean(pendingInvoiceSubmission || pendingDepositSubmission),
+  );
 
   const invoicePaidAmount = Number(booking.invoicePaidAmountRupiah ?? 0);
   const invoiceTotalAmount = Number(
