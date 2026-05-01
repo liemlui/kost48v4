@@ -6,6 +6,7 @@ import { listPublicRooms } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import FacilityList from '../../components/rooms/FacilityList';
+import RoomComparePanel from '../../components/rooms/RoomComparePanel';
 import type { PricingTerm, PublicRoom } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +22,13 @@ const pricingOptions: Array<{ value: '' | PricingTerm; label: string }> = [
   { value: 'MONTHLY', label: 'Bulanan (meteran terpisah)' },
   { value: 'SMESTERLY', label: 'Semesteran (meteran terpisah)' },
   { value: 'YEARLY', label: 'Tahunan (meteran terpisah)' },
+];
+
+const sortOptions = [
+  { value: 'default', label: 'Rekomendasi' },
+  { value: 'price-asc', label: 'Harga terendah' },
+  { value: 'price-desc', label: 'Harga tertinggi' },
+  { value: 'available-first', label: 'Kamar tersedia dulu' },
 ];
 
 function RoomPlaceholder({ room }: { room: PublicRoom }) {
@@ -86,27 +94,50 @@ export default function PublicRoomsPage() {
   const { user } = useAuth();
   const { stage } = useTenantPortalStage();
   const search = searchParams.get('search') ?? '';
-  const floor = searchParams.get('floor') ?? '';
   const pricingTerm = (searchParams.get('pricingTerm') ?? '') as '' | PricingTerm;
+  const sort = searchParams.get('sort') ?? 'default';
+  const showAll = searchParams.get('showAll') === '1';
+
+  const [compareIds, setCompareIds] = useState<number[]>([]);
 
   const query = useQuery({
-    queryKey: ['public-rooms', { search, floor, pricingTerm }],
+    queryKey: ['public-rooms', { search, pricingTerm }],
     queryFn: () => listPublicRooms({
       limit: 100,
       ...(search ? { search } : {}),
-      ...(floor ? { floor } : {}),
       ...(pricingTerm ? { pricingTerm } : {}),
     }),
   });
 
-  const rooms = useMemo(() => query.data?.items ?? [], [query.data]);
-  const floorOptions = useMemo(() => {
-    const values = new Set<string>();
-    rooms.forEach((room) => {
-      if (room.floor) values.add(room.floor);
-    });
-    return Array.from(values).sort((a, b) => a.localeCompare(b, 'id'));
-  }, [rooms]);
+  const roomsFromApi = useMemo(() => query.data?.items ?? [], [query.data]);
+
+  const rooms = useMemo(() => {
+    let list = roomsFromApi;
+
+    // local sort
+    if (sort === 'price-asc') {
+      list = [...list].sort((a, b) => (a.highlightedRateRupiah ?? 0) - (b.highlightedRateRupiah ?? 0));
+    } else if (sort === 'price-desc') {
+      list = [...list].sort((a, b) => (b.highlightedRateRupiah ?? 0) - (a.highlightedRateRupiah ?? 0));
+    } else if (sort === 'available-first') {
+      list = [...list].sort((a, b) => {
+        const aAvail = a.isAvailable !== false ? 0 : 1;
+        const bAvail = b.isAvailable !== false ? 0 : 1;
+        return aAvail - bAvail;
+      });
+    }
+
+    // local filter: show all or only available
+    if (!showAll) {
+      list = list.filter((r) => r.isAvailable !== false);
+    }
+
+    return list;
+  }, [roomsFromApi, sort, showAll]);
+
+  const compareRooms = useMemo(() => {
+    return rooms.filter((r) => compareIds.includes(r.id));
+  }, [rooms, compareIds]);
 
   const updateParams = (next: Record<string, string>) => {
     const params = new URLSearchParams(searchParams);
@@ -116,6 +147,22 @@ export default function PublicRoomsPage() {
     });
     setSearchParams(params, { replace: true });
   };
+
+  const toggleCompare = (roomId: number) => {
+    setCompareIds((prev) => {
+      if (prev.includes(roomId)) {
+        return prev.filter((id) => id !== roomId);
+      }
+      if (prev.length >= 3) {
+        return prev;
+      }
+      return [...prev, roomId];
+    });
+  };
+
+  const compareMaxWarning = compareIds.length >= 3;
+
+  const hasFilters = search !== '' || pricingTerm !== '' || sort !== 'default' || showAll;
 
   return (
     <div className="public-page-shell">
@@ -131,9 +178,9 @@ export default function PublicRoomsPage() {
             <div className="page-eyebrow">✦ Katalog Kamar — Kos48 Surabaya</div>
             <div className="public-hero-grid">
               <div>
-                <h1 className="mb-3">Booking kamar kos langsung dari sini</h1>
+                <h1 className="mb-3">Katalog Kamar</h1>
                 <p className="text-muted mb-0">
-                  Pilih kamar yang masih tersedia, lihat fasilitas dan tarif, lalu ajukan booking. Setelah disetujui, Anda bisa masuk ke portal tenant untuk memantau hunian dan tagihan.
+                  Cari kamar yang sesuai dengan budget, fasilitas, dan kebutuhan tinggal Anda. Gunakan filter dan perbandingan untuk memilih kamar sebelum booking.
                 </p>
               </div>
               <div className="public-hero-note">
@@ -147,7 +194,7 @@ export default function PublicRoomsPage() {
         <Card className="content-card border-0 mt-4">
           <Card.Body>
             <Row className="g-3 align-items-end">
-              <Col lg={4}>
+              <Col lg={4} md={6}>
                 <Form.Group>
                   <Form.Label>Cari kamar</Form.Label>
                   <Form.Control
@@ -157,16 +204,7 @@ export default function PublicRoomsPage() {
                   />
                 </Form.Group>
               </Col>
-              <Col lg={3}>
-                <Form.Group>
-                  <Form.Label>Lantai</Form.Label>
-                  <Form.Select value={floor} onChange={(event) => updateParams({ floor: event.target.value })}>
-                    <option value="">Semua lantai</option>
-                    {floorOptions.map((f) => <option key={f} value={f}>Lantai {f}</option>)}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col lg={3}>
+              <Col lg={3} md={6}>
                 <Form.Group>
                   <Form.Label>Term sewa</Form.Label>
                   <Form.Select value={pricingTerm} onChange={(event) => updateParams({ pricingTerm: event.target.value })}>
@@ -174,10 +212,47 @@ export default function PublicRoomsPage() {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col lg={2}>
-                <div className="table-meta-count text-lg-end">{rooms.length} kamar tersedia</div>
+              <Col lg={2} md={4}>
+                <Form.Group>
+                  <Form.Label>Urutkan</Form.Label>
+                  <Form.Select value={sort} onChange={(event) => updateParams({ sort: event.target.value })}>
+                    {sortOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col lg={2} md={4}>
+                <Form.Group>
+                  <Form.Label className="d-block">&nbsp;</Form.Label>
+                  <Form.Check
+                    type="switch"
+                    id="show-all-switch"
+                    label={showAll ? 'Semua kamar' : 'Tersedia saja'}
+                    checked={showAll}
+                    onChange={(event) => updateParams({ showAll: event.target.checked ? '1' : '' })}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={1} md={6}>
+                <div className="table-meta-count text-lg-end">{rooms.length} kamar</div>
               </Col>
             </Row>
+
+            {query.isSuccess && compareIds.length > 0 && (
+              <div className="mt-3 d-flex align-items-center gap-2 flex-wrap">
+                <span className="small text-muted">
+                  {compareIds.length} kamar dipilih untuk perbandingan
+                </span>
+                <Button variant="outline-secondary" size="sm" onClick={() => setCompareIds([])}>
+                  Bersihkan Pilihan
+                </Button>
+              </div>
+            )}
+
+            {compareMaxWarning && compareIds.length === 3 && (
+              <Alert variant="warning" className="mt-2 mb-0 py-2 small">
+                Maksimal 3 kamar untuk dibandingkan.
+              </Alert>
+            )}
           </Card.Body>
         </Card>
 
@@ -188,10 +263,21 @@ export default function PublicRoomsPage() {
             <EmptyState
               icon="🛏️"
               title="Belum ada kamar yang cocok"
-              description="Coba ubah pencarian atau filter term untuk melihat opsi kamar lain yang tersedia."
+              description={
+                hasFilters
+                  ? 'Coba ubah filter pencarian atau term sewa untuk melihat opsi kamar lain yang tersedia.'
+                  : 'Belum ada kamar tersedia saat ini. Silakan cek kembali nanti.'
+              }
             />
           </div>
         ) : null}
+
+        {compareRooms.length > 0 && (
+          <RoomComparePanel
+            rooms={compareRooms}
+            onClear={() => setCompareIds([])}
+          />
+        )}
 
         <Row className="g-4 mt-1">
           {rooms.map((room) => (
@@ -238,8 +324,23 @@ export default function PublicRoomsPage() {
                   {room.notes ? <div className="app-caption">Catatan: {room.notes}</div> : null}
 
                   <div className="mt-auto d-grid gap-2">
-                    <Button variant="outline-secondary" onClick={() => navigate(`/rooms/${room.id}/detail`)}>Lihat Detail</Button>
-                    <Button onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}>Pesan Sekarang</Button>
+                    <div className="d-flex gap-2">
+                      <Button variant="outline-secondary" className="flex-fill" onClick={() => navigate(`/rooms/${room.id}/detail`)}>Lihat Detail</Button>
+                      {room.isAvailable !== false ? (
+                        <Button className="flex-fill" onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}>Pesan Sekarang</Button>
+                      ) : (
+                        <Button className="flex-fill" variant="secondary" disabled>Tidak Tersedia</Button>
+                      )}
+                    </div>
+
+                    <Form.Check
+                      type="checkbox"
+                      id={`compare-${room.id}`}
+                      label="Bandingkan"
+                      checked={compareIds.includes(room.id)}
+                      onChange={() => toggleCompare(room.id)}
+                      disabled={!compareIds.includes(room.id) && compareIds.length >= 3}
+                    />
                   </div>
                 </Card.Body>
               </Card>
