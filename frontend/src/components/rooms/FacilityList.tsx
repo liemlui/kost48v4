@@ -8,6 +8,60 @@ interface FacilityListProps {
   compact?: boolean;
 }
 
+/** Map common Indonesian facility category text to a single emoji */
+function categoryEmoji(category?: string | null): string {
+  if (!category) return '✦';
+  const c = category.toLowerCase().trim();
+  if (
+    c.includes('kamar') ||
+    c.includes('tidur') ||
+    c.includes('bed') ||
+    c.includes('kasur') ||
+    c.includes('ranjang') ||
+    c.includes('bantal') ||
+    c.includes('sprei') ||
+    c.includes('lemari') ||
+    c.includes('nakas')
+  )
+    return '🛏️';
+  if (c.includes('lampu') || c.includes('listrik') || c.includes('light') || c.includes('led'))
+    return '💡';
+  if (c.includes('meja') || c.includes('kursi') || c.includes('furniture') || c.includes('sofa'))
+    return '🪑';
+  if (
+    c.includes('mandi') ||
+    c.includes('wc') ||
+    c.includes('toilet') ||
+    c.includes('kamar mandi') ||
+    c.includes('shower') ||
+    c.includes('bath') ||
+    c.includes('kloset')
+  )
+    return '🚿';
+  if (c.includes('internet') || c.includes('wifi') || c.includes('wi-fi'))
+    return '📶';
+  if (c.includes('cctv') || c.includes('keamanan') || c.includes('security') || c.includes('satpam'))
+    return '🛡️';
+  if (
+    c.includes('dapur') ||
+    c.includes('kitchen') ||
+    c.includes('kompor') ||
+    c.includes('kulkas') ||
+    c.includes('rice') ||
+    c.includes('dispenser')
+  )
+    return '🍳';
+  if (c.includes('ac') || c.includes('air condition') || c.includes('pendingin'))
+    return '❄️';
+  if (c.includes('tv') || c.includes('televisi'))
+    return '📺';
+  if (c.includes('jemuran') || c.includes('laundry') || c.includes('cuci'))
+    return '👕';
+  if (c.includes('parkir') || c.includes('motor') || c.includes('mobil'))
+    return '🅿️';
+  return '✦';
+}
+
 export default function FacilityList({
   facilities,
   emptyMessage = 'Belum ada fasilitas.',
@@ -43,6 +97,7 @@ export default function FacilityList({
                 .join(' \n')
             }
           >
+            <span className="me-1">{categoryEmoji(f.category)}</span>
             {f.name}
             {f.quantity > 1 ? ` (${f.quantity})` : ''}
           </span>
