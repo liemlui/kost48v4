@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Spinner } from 'react-bootstrap';
+import { Alert, Button, Modal, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { listMyTenantBookings } from '../../api/bookings';
+import { cancelTenantBooking, listMyTenantBookings } from '../../api/bookings';
 import { createPaymentSubmission, listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
@@ -35,6 +35,8 @@ export default function MyBookingsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(() =>
     sessionStorage.getItem(SESSION_KEY),
   );
+  const [cancelTarget, setCancelTarget] = useState<TenantBooking | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const bookingsQuery = useQuery({
     queryKey: ['tenant-bookings', { userId, tenantId }],
@@ -126,10 +128,38 @@ export default function MyBookingsPage() {
     [submissionsQuery.error, submissionsQuery.isError],
   );
 
+  const cancelMutation = useMutation({
+    mutationFn: async (booking: TenantBooking) =>
+      cancelTenantBooking(booking.id),
+    onSuccess: async () => {
+      const message = 'Booking berhasil dibatalkan. Kamar telah dilepas kembali.';
+      setCancelError(null);
+      setCancelTarget(null);
+      setSuccessMessage(message);
+      sessionStorage.setItem(SESSION_KEY, message);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+        queryClient.invalidateQueries({ queryKey: ['public-rooms'] }),
+        refetchStage(),
+      ]);
+    },
+    onError: (error) => {
+      setCancelError(
+        getErrorMessage(error, 'Gagal membatalkan booking. Silakan coba lagi.'),
+      );
+    },
+  });
+
   const handleUploadClick = (booking: TenantBooking, targetType: PaymentTargetType) => {
     setSelectedBooking(booking);
     setPaymentTargetType(targetType);
     setSubmissionError(null);
+  };
+
+  const handleCancelClick = (booking: TenantBooking) => {
+    setCancelTarget(booking);
+    setCancelError(null);
   };
 
   return (
@@ -211,6 +241,7 @@ export default function MyBookingsPage() {
               pendingDepositSubmission={pendingDepositSubmission}
               onUploadClick={handleUploadClick}
               onViewCatalog={() => navigate('/rooms')}
+              onCancelClick={handleCancelClick}
             />
           );
         })}
@@ -234,6 +265,64 @@ export default function MyBookingsPage() {
         onHide={() => setSelectedBooking(null)}
         onSubmit={(payload) => createSubmissionMutation.mutateAsync(payload)}
       />
+
+      <Modal
+        show={Boolean(cancelTarget)}
+        onHide={() => {
+          if (!cancelMutation.isPending) {
+            setCancelTarget(null);
+            setCancelError(null);
+          }
+        }}
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton={!cancelMutation.isPending}>
+          <Modal.Title>Batalkan booking?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {cancelTarget ? (
+            <>
+              <p>
+                Anda akan membatalkan booking kamar{' '}
+                <strong>{cancelTarget.room?.code ?? `#${cancelTarget.roomId}`}</strong>.
+              </p>
+              <p className="mb-0 text-muted small">
+                Kamar akan dilepas kembali ke katalog publik dan booking ini tidak dapat
+                dilanjutkan. Jika Anda masih berminat, silakan lakukan pemesanan baru.
+              </p>
+              {cancelError ? (
+                <Alert variant="danger" className="mt-3 mb-0">
+                  {cancelError}
+                </Alert>
+              ) : null}
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setCancelTarget(null);
+              setCancelError(null);
+            }}
+            disabled={cancelMutation.isPending}
+          >
+            Tutup
+          </Button>
+          <Button
+            variant="danger"
+            disabled={cancelMutation.isPending}
+            onClick={() => {
+              if (cancelTarget) {
+                cancelMutation.mutate(cancelTarget);
+              }
+            }}
+          >
+            {cancelMutation.isPending ? 'Membatalkan...' : 'Ya, Batalkan'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

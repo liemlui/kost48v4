@@ -4,7 +4,7 @@ import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
-import { ExpiryBadge, getPortalBookingStatus, getPaymentTargetLabel } from './BookingStatusHelper';
+import { ExpiryBadge, getPortalBookingStatus, getPaymentTargetLabel, canCancelBooking, buildWhatsAppFollowUpUrl } from './BookingStatusHelper';
 
 interface BookingCardProps {
   booking: TenantBooking;
@@ -13,6 +13,7 @@ interface BookingCardProps {
   pendingDepositSubmission: PaymentSubmission | null;
   onUploadClick: (booking: TenantBooking, targetType: PaymentTargetType) => void;
   onViewCatalog: () => void;
+  onCancelClick: (booking: TenantBooking) => void;
 }
 
 export default function BookingCard({
@@ -22,6 +23,7 @@ export default function BookingCard({
   pendingDepositSubmission,
   onUploadClick,
   onViewCatalog,
+  onCancelClick,
 }: BookingCardProps) {
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
   const portalStatus = getPortalBookingStatus(
@@ -208,6 +210,26 @@ export default function BookingCard({
           <Button variant="outline-secondary" onClick={onViewCatalog}>
             Lihat Katalog
           </Button>
+
+          {canCancelBooking(booking) ? (
+            <>
+              <Button
+                variant="outline-danger"
+                onClick={() => onCancelClick(booking)}
+              >
+                Batalkan Booking
+              </Button>
+              <Button
+                as="a"
+                href={buildWhatsAppFollowUpUrl(booking)}
+                target="_blank"
+                rel="noreferrer"
+                variant="outline-success"
+              >
+                Hubungi Admin
+              </Button>
+            </>
+          ) : null}
         </div>
 
         {submissions.length ? (

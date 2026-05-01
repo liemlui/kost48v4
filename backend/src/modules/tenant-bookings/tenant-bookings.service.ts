@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
@@ -20,6 +21,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { calculateRentByPricingTerm } from './pricing.helper';
 import { startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
+import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
@@ -511,6 +513,161 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
   // -------------------------------------------------------------------------
   // FIND MY BOOKINGS (tenant portal)
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // CANCEL PENDING BOOKING (tenant portal)
+  // -------------------------------------------------------------------------
+
+  async cancelPendingBooking(
+    stayId: number,
+    user: CurrentUserPayload,
+    dto: CancelTenantBookingDto,
+  ) {
+    const tenantId = user.tenantId;
+    if (!tenantId) {
+      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const rows = await tx.$queryRaw<Array<{
+          stayId: number;
+          tenantId: number;
+          roomId: number;
+          stayStatus: string;
+          expiresAt: Date | null;
+          roomStatus: string;
+        }>>(Prisma.sql`
+          SELECT
+            s.id AS "stayId",
+            s."tenantId",
+            s."roomId",
+            s.status AS "stayStatus",
+            s."expiresAt",
+            r.status AS "roomStatus"
+          FROM "Stay" s
+          INNER JOIN "Room" r ON r.id = s."roomId"
+          WHERE s.id = ${stayId}
+          FOR UPDATE OF s, r
+        `);
+
+        const row = rows[0];
+        if (!row) {
+          throw new NotFoundException('Booking tidak ditemukan.');
+        }
+
+        if (row.tenantId !== tenantId) {
+          throw new ForbiddenException(
+            'Anda tidak dapat membatalkan booking milik tenant lain.',
+          );
+        }
+
+        if (row.stayStatus !== StayStatus.ACTIVE) {
+          if (row.stayStatus === StayStatus.CANCELLED) {
+            throw new ConflictException('Booking sudah dibatalkan.');
+          }
+          if (row.stayStatus === StayStatus.COMPLETED) {
+            throw new ConflictException(
+              'Booking sudah selesai dan tidak dapat dibatalkan.',
+            );
+          }
+          throw new ConflictException(
+            'Booking sudah disetujui dan tidak dapat dibatalkan dari halaman ini.',
+          );
+        }
+
+        if (row.roomStatus !== RoomStatus.RESERVED) {
+          throw new ConflictException(
+            'Booking sudah menjadi hunian aktif. Gunakan proses checkout.',
+          );
+        }
+
+        if (row.expiresAt && new Date(row.expiresAt) < new Date()) {
+          throw new ConflictException(
+            'Booking sudah kedaluwarsa dan tidak dapat dibatalkan.',
+          );
+        }
+
+        const existingInvoice = await tx.invoice.findFirst({
+          where: { stayId },
+          select: { id: true },
+        });
+        if (existingInvoice) {
+          throw new ConflictException(
+            'Booking sudah memiliki pembayaran atau tagihan. Hubungi admin untuk pembatalan.',
+          );
+        }
+
+        const existingSubmission = await tx.paymentSubmission.findFirst({
+          where: { stayId },
+          select: { id: true },
+        });
+        if (existingSubmission) {
+          throw new ConflictException(
+            'Booking sudah memiliki pembayaran atau tagihan. Hubungi admin untuk pembatalan.',
+          );
+        }
+
+        const cancelReason =
+          dto.cancelReason?.trim() ||
+          'Dibatalkan oleh tenant sebelum review admin';
+
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE "Room"
+          SET "status" = CAST(${RoomStatus.AVAILABLE} AS "RoomStatus"), "updatedAt" = NOW()
+          WHERE id = ${row.roomId}
+        `);
+
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE "Stay"
+          SET
+            "status" = CAST(${StayStatus.CANCELLED} AS "StayStatus"),
+            "cancelReason" = ${cancelReason},
+            "updatedAt" = NOW()
+          WHERE id = ${stayId}
+        `);
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: user.id,
+            action: 'TENANT_CANCEL_BOOKING',
+            entityType: 'Stay',
+            entityId: String(stayId),
+            oldData: {
+              stayStatus: row.stayStatus,
+              roomStatus: row.roomStatus,
+            } as any,
+            newData: {
+              stayStatus: StayStatus.CANCELLED,
+              roomStatus: RoomStatus.AVAILABLE,
+              cancelReason,
+            } as any,
+            meta: {
+              tenantId,
+              roomId: row.roomId,
+              cancelledBy: 'TENANT',
+            } as any,
+          },
+        });
+
+        return serializePrismaResult({
+          id: stayId,
+          status: StayStatus.CANCELLED,
+          cancelReason,
+        });
+      });
+    } catch (error: any) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw error;
+    }
+  }
 
   async findMine(user: CurrentUserPayload, query: TenantBookingsQueryDto) {
     const tenantId = user.tenantId;

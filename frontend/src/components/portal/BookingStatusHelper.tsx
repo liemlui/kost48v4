@@ -79,7 +79,7 @@ export function getPortalBookingStatus(
     badgeStatus: 'WARNING',
     label: 'Menunggu review admin',
     helper:
-      'Booking Anda sedang menunggu persetujuan admin sebelum invoice awal dibuat. Mohon tunggu informasi selanjutnya.',
+      'Booking Anda masih menunggu review admin. Jika belum ada update, Anda dapat membatalkan booking atau menghubungi admin.',
   };
 }
 
@@ -101,4 +101,39 @@ export function getDepositStatusLabel(status?: string | null) {
   if (status === 'PAID') return 'Lunas';
   if (status === 'PARTIAL') return 'Sebagian';
   return 'Belum Dibayar';
+}
+
+export function canCancelBooking(booking: TenantBooking): boolean {
+  const statusUpper = (booking.status ?? '').toUpperCase();
+  const roomStatusUpper = (booking.room?.status ?? '').toUpperCase();
+  const hasInvoice = Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
+
+  // Only allow cancel when:
+  // - status is not already CANCELLED or EXPIRED
+  // - room is RESERVED (not OCCUPIED, not AVAILABLE, not MAINTENANCE)
+  // - no invoice has been created yet (admin hasn't approved)
+  // - booking is not expired
+  if (statusUpper === 'CANCELLED' || statusUpper === 'EXPIRED') return false;
+  if (roomStatusUpper === 'OCCUPIED' || roomStatusUpper === 'ACTIVE') return false;
+  if (hasInvoice) return false;
+  if (statusUpper === 'ACTIVE') return false;
+
+  const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
+  if (expiryMeta.isExpired) return false;
+
+  return true;
+}
+
+export function getAdminWhatsAppNumber(): string {
+  return import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '';
+}
+
+export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string {
+  const waNumber = getAdminWhatsAppNumber().replace(/\D/g, '');
+  if (!waNumber) return '#';
+
+  const roomCode = booking.room?.code ?? `Kamar #${booking.roomId}`;
+  const message = `Halo Admin KOST48, saya ingin follow up booking ${roomCode}. Mohon info statusnya. Terima kasih.`;
+
+  return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
 }

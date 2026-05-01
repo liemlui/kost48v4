@@ -1,4 +1,4 @@
-import { createResource, getResource, listResource, updateResource } from './resources';
+import { createResource, getResource, listResource, postAction, updateResource } from './resources';
 import type {
   ApproveBookingPayload,
   ApproveBookingResult,
@@ -73,4 +73,24 @@ export async function getPublicRoomDetail(roomId: number | string) {
 
 export async function createPublicBooking(payload: CreatePublicBookingPayload) {
   return createResource<PublicBookingResult>('/public/bookings', payload as unknown as Record<string, unknown>);
+}
+
+export interface CancelTenantBookingPayload {
+  cancelReason?: string;
+}
+
+export interface CancelTenantBookingResult {
+  id: number;
+  status: string;
+  cancelReason?: string;
+}
+
+export async function cancelTenantBooking(
+  stayId: number | string,
+  payload?: CancelTenantBookingPayload,
+) {
+  return postAction<CancelTenantBookingResult>(
+    `/tenant/bookings/${stayId}/cancel`,
+    payload as Record<string, unknown> | undefined,
+  );
 }
