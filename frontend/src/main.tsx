@@ -19,3 +19,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+// PWA: Register safe service worker (production-only, non-blocking)
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.debug('[PWA] ServiceWorker registered:', registration.scope);
+      })
+      .catch((error) => {
+        console.warn('[PWA] ServiceWorker registration failed:', error.message);
+      });
+  });
+}
