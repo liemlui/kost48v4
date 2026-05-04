@@ -1,7 +1,22 @@
+/// <reference types="node" />
+
 import { PrismaClient, UserRole, RoomStatus } from './src/generated/prisma';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required for seed-admin.ts');
+}
+
+const adapter = new PrismaPg({
+  connectionString: databaseUrl,
+});
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 const OWNER_EMAIL = 'admin@kost48.com';
 const OWNER_PASSWORD = 'admin123';
@@ -33,10 +48,7 @@ async function main() {
 
   const existingTenant = await prisma.tenant.findFirst({
     where: {
-      OR: [
-        { email: TENANT_EMAIL },
-        { phone: '081234567890' },
-      ],
+      OR: [{ email: TENANT_EMAIL }, { phone: '081234567890' }],
     },
   });
 
