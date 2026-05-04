@@ -13,9 +13,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     const adapter = new PrismaPg({
       connectionString,
+      max: 5,
     });
 
-    super({ adapter });
+    const isProduction = process.env.NODE_ENV === 'production';
+    super({ adapter, log: isProduction ? [] : ['query', 'info', 'warn', 'error'] });
   }
 
   async onModuleInit() {
