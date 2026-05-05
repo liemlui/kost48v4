@@ -229,7 +229,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               <div className="d-flex align-items-center gap-3 flex-grow-1 justify-content-end flex-wrap">
                 <GlobalSearch role={user?.role} />
                 <NotificationBell />
-                <PaymentUrgencyChip />
+                {user?.role === 'TENANT' && <PaymentUrgencyChip />}
                 <div className="topbar-user">
                   <div className="text-end">
                     <div className="fw-semibold">{user?.fullName}</div>
