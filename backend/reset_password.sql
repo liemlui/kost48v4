@@ -1,1 +1,0 @@
-UPDATE "User" SET "passwordHash" = '$2b$10$bNkg5bMW2mMgTNqV3CTacON47WPQk9DOi/1JAe2tUUFn1K5oWi8pO' WHERE email = 'owner@kost48.com';
