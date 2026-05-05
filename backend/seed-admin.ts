@@ -1,14 +1,22 @@
 /// <reference types="node" />
 
+import dotenv from 'dotenv';
+import path from 'path';
 import { PrismaClient, UserRole, RoomStatus } from './src/generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcryptjs';
 
-const databaseUrl = process.env.DATABASE_URL;
+// Load .env from the backend directory (where this script lives),
+// regardless of CWD when the script is invoked.
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is required for seed-admin.ts');
+const rawDatabaseUrl = process.env.DATABASE_URL;
+
+if (!rawDatabaseUrl) {
+  throw new Error('DATABASE_URL is required. Check backend/.env.');
 }
+
+const databaseUrl = rawDatabaseUrl.trim().replace(/^["']|["']$/g, '');
 
 const adapter = new PrismaPg({
   connectionString: databaseUrl,
