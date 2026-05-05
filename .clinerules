@@ -1,523 +1,348 @@
-# CLINE RULES — WEBKOST48 SURABAYA V3
+# KOST48 Surabaya V3/V4 — Cline Rules
 
-## 0. IDENTITAS PROYEK
-Proyek ini adalah **WebKost48 Surabaya V3** dengan struktur monorepo sederhana:
-- `backend/`
-- `frontend/`
-- `docs/`
+You are working as a coding agent for the KOST48 Surabaya V3/V4 project.
 
-Prioritas produk:
-- **Backoffice App** = prioritas utama
-- Tenant Portal = fase lanjutan
+Language:
+- Use Indonesian for reports to the user.
+- Code, variable names, and technical identifiers may stay in English.
 
-Strategi kerja utama:
-- **vertical slice**
-- patch kecil
-- verifikasi manual
-- jangan melebar scope
+Project stack:
+- Backend: NestJS + Prisma + PostgreSQL
+- Frontend: React + Vite + TypeScript + React-Bootstrap + TanStack Query
+- Auth: JWT Bearer
+- Environment: Windows + VS Code + PowerShell
+- Monorepo folders:
+  - backend/
+  - frontend/
+  - docs/
 
-Jangan asumsi:
-- microservices
-- Nx / turborepo
-- WSL
-- Bash/Linux shell
-- Prisma custom client path sebagai jalur import utama
-- arsitektur baru di luar source of truth aktif
+Default local URLs:
+- Backend API: http://localhost:3000/api
+- Frontend: http://localhost:5173
 
----
+============================================================
+ABSOLUTE PROJECT FOLDER BOUNDARY
+============================================================
 
-## 0.1 EXECUTION ENVIRONMENT (WAJIB)
-Environment kerja utama proyek ini adalah:
-- **Windows**
-- **VS Code**
-- **Integrated Terminal = PowerShell**
+You are ONLY allowed to work inside this project root:
 
-### Aturan shell
-- Semua command default harus ditulis untuk **PowerShell Windows**
-- Jangan mengasumsikan Bash, Zsh, Git Bash, WSL, Linux, atau macOS shell
-- Jangan memberi command Linux/Bash seperti:
-  - `rm -rf`
-  - `ls`
-  - `grep`
-  - `cat`
-  - `cp -r`
-  - `mv`
-  - `pwd`
-  - `find . -name`
-  - `export VAR=value`
-  - `touch`
-  - `chmod`
+C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
 
-### Gunakan padanan PowerShell
-- `Remove-Item -Recurse -Force`
-- `Get-ChildItem`
-- `Select-String`
-- `Get-Content`
-- `Set-Location`
-- `Copy-Item`
-- `Move-Item`
-- `Get-Location`
-- `New-Item`
-- `$env:NODE_ENV = "development"`
+This folder is the only allowed workspace.
 
-### Gaya command
-- Jangan tulis “kalau gagal coba PowerShell”
-- Dari awal anggap **PowerShell adalah shell utama**
-- Jika command sensitif shell, tulis eksplisit dalam gaya PowerShell
-- Jika perlu beberapa langkah, lebih aman tulis command per baris
+Strict rules:
+- Do NOT read, write, create, delete, or modify files outside the project root.
+- Do NOT create files on Desktop.
+- Do NOT create files in parent folders.
+- Do NOT create files in C:\Users\lieml directly.
+- Do NOT use ../ to work outside the project root.
+- Do NOT touch another repo, another worktree, another project, or another database folder.
+- Do NOT create temporary files outside this project.
+- Do NOT create $null files, debug logs, scratch files, or helper scripts outside this project.
+- If a helper file is truly needed, create it only inside the project root and delete it before finishing.
+- Prefer not to create helper files at all.
 
-Contoh:
-```powershell
-Set-Location backend
+Allowed folders:
+- backend/
+- frontend/
+- root config files only if directly required for the current task
+- docs/ only if the user explicitly asks for docs
+
+Forbidden by default:
+- Desktop outside this project
+- Downloads
+- Documents
+- AppData
+- other VS Code workspaces
+- global npm folders
+- production server folders
+- any folder above final_bundle
+
+If any task requires access outside the project root:
+STOP and report.
+Do not continue.
+Do not guess.
+
+============================================================
+SHELL AND COMMAND RULES
+============================================================
+
+Use Windows PowerShell only.
+
+Before running commands, confirm current directory:
+
+Get-Location
+
+If current directory is outside:
+
+C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
+
+STOP and report.
+
+If the terminal is cmd.exe, bash, Git Bash, WSL, or any non-PowerShell shell:
+STOP and report:
+"Shell is not PowerShell. Please switch terminal to PowerShell before continuing."
+
+Do NOT adapt by using cmd syntax.
+Do NOT use curl.
+Do NOT use bash commands.
+
+All API tests must use Invoke-RestMethod.
+
+Protected endpoint format:
+
+$token="PASTE_TOKEN_HERE"; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/..." -Headers @{Authorization="Bearer $token"}
+
+JSON POST/PATCH/PUT format:
+
+$token="PASTE_TOKEN_HERE"; Invoke-RestMethod -Method Patch -Uri "http://localhost:3000/api/..." -Headers @{Authorization="Bearer $token"} -ContentType "application/json" -Body '{"field":"value"}'
+
+Do not use placeholder URLs like ID_STAY.
+If an ID is unknown, say:
+"replace with a real numeric ID"
+and give an example such as:
+http://localhost:3000/api/stays/9/cancel
+
+============================================================
+WORK MODE RULES
+============================================================
+
+Use one mode only:
+- PLAN: audit, explain, sequence, decide scope
+- ACT: edit code, build, verify minimal result
+
+Do not mix PLAN and ACT.
+
+For ACT:
+- Work on one vertical slice only.
+- Do not open a broad scope.
+- Do not rewrite the whole backend/frontend.
+- Do not touch unrelated modules.
+- Do not run long UAT unless the user explicitly asks for final UAT.
+- Do not create test data unless the current task explicitly requires it.
+- Do not mutate database for exploratory testing.
+- Prefer code patch + build first.
+- Mark manual/API tests as PENDING for final verification when appropriate.
+
+Current preferred strategy:
+- M1 to M4: code batch first, build minimal only.
+- M5/final gate: bigger UAT/manual verification.
+- Avoid wasting tokens on long repeated UAT after every small patch.
+
+============================================================
+DOCUMENTATION RULES
+============================================================
+
+Do NOT modify docs unless the user explicitly asks for docs.
+
+Do NOT create new markdown files.
+
+Active docs only:
+- docs/00_GROUND_STATE.md
+- docs/01_CONTRACTS.md
+- docs/02_PLAN.md
+- docs/CHECKLIST.md
+- docs/03_DECISIONS_LOG.md
+- docs/04_JOURNAL.md
+- docs/CHANGELOG.md
+
+Do not recreate:
+- CURRENT_STATUS_*.md
+- PATCH_SUMMARY*.md
+- PACKAGE_README*.md
+- README_PROGRESS_UPDATE.md
+- separate frontend/backend changelog
+- pasted markdown files
+- temporary status files
+
+If docs were modified accidentally:
+STOP and report.
+
+============================================================
+GIT HYGIENE
+============================================================
+
+Before editing:
+
+git status --short
+
+If unrelated changes exist:
+- Do not overwrite them.
+- Do not reset them unless the user explicitly asks.
+- Report them and continue only if your edits can stay scoped.
+
+Before final report:
+
+git status --short
+git diff --stat
+
+Do not commit unless the user explicitly asks.
+Do not push unless the user explicitly asks.
+Do not deploy unless the user explicitly asks.
+
+Known accidental file:
+$null
+
+If $null appears inside repo, delete it using:
+
+Get-ChildItem -Force | Where-Object { $_.Name -eq '$null' } | Remove-Item -Force
+
+Never leave helper/debug files behind.
+
+============================================================
+DATABASE RULES
+============================================================
+
+Default dev/UAT database:
+- Host: localhost
+- Port: 5433
+- Database: kost48_v3_pro
+- User: postgres
+
+Do not reset database unless the user explicitly asks.
+
+Do not touch production database.
+
+Do not use pgAdmin to delete databases or server connections unless the user explicitly asks.
+
+Do not modify data for UAT unless the task explicitly requires it.
+
+If DB verification is needed, prefer read-only checks.
+
+Allowed read-only example:
+
+psql -h localhost -p 5433 -U postgres -d kost48_v3_pro -c "select current_database();"
+
+If Prisma helper script is needed locally, import PrismaClient with:
+
+const { PrismaClient } = require('./src/generated/prisma');
+
+Do NOT use:
+
+const { PrismaClient } = require('@prisma/client');
+
+============================================================
+BUILD RULES
+============================================================
+
+Backend build:
+
+cd backend
 npm run build
-npm run start:dev
-1. STRUKTUR REPO (WAJIB DIPAHAMI)
 
-Root proyek berisi folder utama berikut:
+Frontend build:
 
-A. Backend
-
-Lokasi utama:
-
-backend/prisma/
-backend/sql/
-backend/src/
-backend/package.json
-backend/prisma.config.ts
-backend/nest-cli.json
-backend/tsconfig.json
-backend/tsconfig.build.json
-
-Substruktur backend penting:
-
-backend/src/auth/
-backend/src/common/
-backend/src/prisma/
-backend/src/audit-log/
-backend/src/modules/analytics/
-backend/src/modules/announcements/
-backend/src/modules/expenses/
-backend/src/modules/inventory-items/
-backend/src/modules/inventory-movements/
-backend/src/modules/invoice-payments/
-backend/src/modules/invoices/
-backend/src/modules/meter-readings/
-backend/src/modules/room-items/
-backend/src/modules/rooms/
-backend/src/modules/stays/
-backend/src/modules/tenants/
-backend/src/modules/tickets/
-backend/src/modules/users/
-backend/src/modules/wifi-sales/
-B. Generated Prisma (JANGAN DIEDIT MANUAL)
-
-Folder generated:
-
-backend/src/generated/prisma/
-
-Aturan:
-
-Jangan edit file dalam backend/src/generated/prisma/
-Jangan ubah generated runtime/client manual
-Jangan jadikan folder generated ini sebagai target patch biasa
-Gunakan @prisma/client standar kecuali user meminta lain
-C. Frontend
-
-Lokasi utama:
-
-frontend/src/api/
-frontend/src/components/
-frontend/src/config/
-frontend/src/context/
-frontend/src/hooks/
-frontend/src/pages/
-frontend/src/types/
-frontend/src/utils/
-frontend/package.json
-frontend/tsconfig.json
-frontend/vite.config.ts
-
-Halaman penting:
-
-frontend/src/pages/stays/
-frontend/src/pages/resources/
-frontend/src/pages/invoices/
-frontend/src/pages/dashboard/
-frontend/src/pages/portal/
-frontend/src/pages/auth/
-
-Komponen penting:
-
-frontend/src/components/stays/
-frontend/src/components/resources/
-frontend/src/components/common/
-frontend/src/components/layout/
-D. Docs aktif
-
-Lokasi:
-
-docs/00_SOURCE_OF_TRUTH.md
-docs/01_CURRENT_TASK.md
-docs/02_DECISIONS_LOG.md
-docs/backend-implementation-contract.md
-docs/FRONTEND_PLAN.md
-docs/MASTER_PROJECT_NOTE.md
-docs/project-journal.md
-docs/03_API_CONTRACTS/*.md
-E. Docs arsip
-
-Lokasi arsip:
-
-docs/archive/
-
-Jangan pakai docs/archive/* sebagai sumber kendali harian kecuali user minta eksplisit.
-
-F. File root lain
-
-Ada file tambahan seperti:
-
-README.md
-START_HERE.md
-GENERATED_NOTES.md
-
-Gunakan hanya bila relevan. Jangan lebih memprioritaskan file root umum daripada docs aktif dan source of truth.
-
-2. PENENTUAN WORKDIR
-
-Saat memberi command atau melakukan patch, tentukan workdir yang benar:
-
-Backend task
-
-Gunakan workdir:
-
-Set-Location backend
-Frontend task
-
-Gunakan workdir:
-
-Set-Location frontend
-Root/docs task
-
-Gunakan root repo hanya bila:
-
-task lintas backend + frontend
-task docs
-task butuh melihat struktur repo total
-
-Jangan menjalankan command backend dari root jika sebenarnya harus di folder backend.
-Jangan menjalankan command frontend dari root jika sebenarnya harus di folder frontend.
-
-3. SOURCE OF TRUTH PRIORITY
-
-Sebelum mengubah kode, prioritaskan referensi berikut:
-
-Prioritas tertinggi
-backend/prisma/schema.prisma atau file schema aktif yang setara
-backend/sql/bootstrap.sql
-docs/backend-implementation-contract.md
-docs/MASTER_PROJECT_NOTE.md
-docs/01_CURRENT_TASK.md
-docs/FRONTEND_PLAN.md
-docs/02_DECISIONS_LOG.md
-Prioritas berikutnya
-API contract modul terkait di docs/03_API_CONTRACTS/
-file config aktif:
-backend/package.json
-backend/prisma.config.ts
-backend/nest-cli.json
-backend/tsconfig.json
-backend/tsconfig.build.json
-frontend/package.json
-frontend/tsconfig.json
-frontend/vite.config.ts
-Jika ada konflik
-bentuk data dan relasi ikut schema
-pagar integritas ikut bootstrap SQL
-flow bisnis ikut backend contract + API contract
-phase aktif ikut current task + frontend plan + master project note
-build/dev command ikut package/config aktif
-
-Jangan membuat fitur atau flow di luar source of truth.
-Jangan mengklaim sesuatu final tanpa verifikasi.
-
-4. MODE KERJA
-
-Dalam satu task pilih hanya satu mode:
-
-PLAN
-
-Dipakai untuk:
-
-audit
-gap analysis
-phase breakdown
-identifikasi file target
-risiko implementasi
-strategi test
-ACT
-
-Dipakai untuk:
-
-patch kecil
-file target jelas
-output jelas
-bisa diuji langsung
-Aturan mode
-Jangan campur PLAN dan ACT dalam satu eksekusi
-Jika user meminta plan, jangan coding
-Jika user meminta act/patch dan scope sudah jelas, jangan tarik balik ke diskusi panjang
-Jika ambigu besar, ajukan maksimal 1 klarifikasi singkat
-5. SCOPE LOCK
-Kerjakan hanya task yang diminta
-Jangan refactor di luar scope
-Jangan menambah fitur bonus
-Jangan mengubah arsitektur inti tanpa instruksi eksplisit
-Jangan ubah state model besar hanya karena terlihat kurang ideal
-Jangan membuka backlog high-risk tanpa izin
-Jangan “sekalian beresin” modul lain
-
-Jika task melebar:
-
-berhenti
-pecah jadi patch lebih kecil
-keluarkan plan sempit
-6. PRE-FLIGHT CHECK (WAJIB SAAT ACT)
-
-Sebelum menulis kode, selalu tulis singkat:
-
-mode: PLAN atau ACT
-workdir: backend / frontend / root
-file yang akan dibuat
-file yang akan diubah
-flow/endpoint/component yang disentuh
-business rule / constraint yang relevan
-
-Jika target file terlalu banyak:
-
-3 file = evaluasi dulu
-
-5 file = jangan lanjut, pecah task
-
-7. TASK SIZE LIMIT
-
-Default aman:
-
-maksimal 1 endpoint backend atau 1 flow service per task
-maksimal 1 halaman frontend atau 1 flow UI per task
-maksimal 3 file diubah per task biasa
-maksimal 5 file hanya jika benar-benar masih satu flow kecil yang saling terkait
-
-Lebih baik patch kecil yang lolos verifikasi daripada patch besar yang kabur.
-
-8. DOCUMENTS LOCK
-Jangan edit file .md proyek kecuali user meminta eksplisit
-Jangan update:
-docs/01_CURRENT_TASK.md
-docs/02_DECISIONS_LOG.md
-docs/backend-implementation-contract.md
-docs/FRONTEND_PLAN.md
-docs/MASTER_PROJECT_NOTE.md
-docs/project-journal.md
-tanpa instruksi langsung dari user
-User mengelola markdown/context file secara manual
-Jika ada temuan penting, laporkan di output, jangan auto-edit docs
-9. BACKEND RULES
-Stack tetap
-NestJS
-Prisma
-PostgreSQL
-Aturan implementasi
-controller tipis
-logika bisnis utama di service
-akses DB via PrismaService
-DTO publik ditulis manual
-semua pesan error dan validation message pakai Bahasa Indonesia
-actor field seperti createdById, recordedById, capturedById, assignedToId wajib dari auth context
-transaksi multi-entity penting harus pakai prisma.$transaction()
-jika menyentuh Decimal, gunakan Prisma.Decimal
-Jangan lakukan
-jangan edit backend/src/generated/prisma/*
-jangan ubah schema / bootstrap tanpa instruksi tertulis
-jangan tambah dependency besar tanpa diminta
-jangan reset/drop DB tanpa diminta
-10. FRONTEND RULES
-Stack tetap
-React
-Vite
-TypeScript
-React-Bootstrap
-TanStack Query
-Aturan implementasi
-hormati backend contract yang sudah verified
-label UI yang terlihat user diutamakan Bahasa Indonesia
-tampilkan loading/error/empty state bila relevan
-jika masalah bisa selesai di display layer, jangan naik ke schema/state model
-patch frontend harus tetap sesuai phase plan
-Jangan lakukan
-jangan pindah ke Tailwind/MUI/shadcn/state library baru tanpa diminta
-jangan refactor besar halaman jika task hanya polish kecil
-jangan ubah struktur app global untuk masalah lokal
-11. CONFIG-AWARE RULES
-Backend
-backend/nest-cli.json hanya menetapkan sourceRoot: src; jangan asumsi setup build lain
-backend/prisma.config.ts harus dihormati
-backend/tsconfig.json mungkin longgar; jangan diam-diam aktifkan strict mode
-backend/package.json adalah sumber script backend resmi
-Frontend
-frontend/vite.config.ts adalah config Vite aktif
-frontend/tsconfig.json adalah acuan TypeScript frontend
-frontend/package.json adalah sumber script frontend resmi
-
-Jangan ubah config inti kecuali user meminta eksplisit.
-
-12. BUSINESS RULES YANG HARUS DIHORMATI
-
-Selalu cek rule inti berikut saat patch:
-
-Stay / Room
-satu tenant hanya boleh satu stay aktif
-satu room hanya boleh satu stay aktif
-room status harus sinkron dengan active stay
-checkout berarti tenant keluar kos
-deposit diproses terpisah setelah checkout
-meter awal check-in wajib dicatat sebagai MeterReading, bukan field di Stay
-anomali PENDING adalah backlog high-risk, jangan dibuka tanpa izin
-Invoice / Payment
-pembayaran invoice tidak boleh melebihi total
-total invoice dikelola otomatis dari invoice line
-line invoice hanya boleh diubah saat status DRAFT
-OVERDUE adalah status turunan/display, bukan enum inti
-Meter
-meter reading harus monotonik naik
-[roomId, utilityType, readingAt] unik
-meter awal wajib dianggap baseline pembacaan pertama
-Inventory
-stok global tidak boleh negatif
-
-Jika patch menyentuh salah satu rule di atas:
-
-sebutkan rule itu di pre-flight
-sebutkan lagi di post-flight
-13. PHASE-AWARE RULES
-
-Phase aktif proyek:
-
-Fase 1: UI cleanup & Bahasa Indonesia
-Fase 2: checkout UX hardening
-Fase 3A-backend: atomic initial meter on create stay
-Fase 3A-frontend: meter awal wajib di form check-in
-Fase 3B: reminder lifecycle PLAN only
-
-Backlog yang tidak boleh dibuka tanpa izin:
-
-debt flow
-scheduler reminder
-anomali PENDING
-
-Jika task menyentuh backlog di atas:
-
-jangan ACT langsung
-kembalikan ke PLAN
-14. ANTI-ASSUMPTION RULES
-
-Jangan otomatis menambah atau menganggap ada:
-
-public register
-refresh token flow kompleks
-logout invalidation kompleks
-upload bukti bayar
-ticket chat thread
-ticket attachment engine
-wifi package master
-utility tariff master terpisah
-room type hierarchy besar
-inventory location engine
-microservices
-engine notifikasi otomatis
-debt approval engine
-redesign state model stay besar
-custom Prisma generated client path sebagai jalur utama import
-
-Jika source of truth tidak mewajibkan, jangan bangun.
-
-15. TESTING & VERIFICATION RULES
-
-Setelah patch selesai, selalu beri:
-
-file yang dibuat/diubah
-ringkasan patch
-command verifikasi
-cara test manual singkat
-skenario gagal penting bila terkait constraint
-Command backend (PowerShell)
-Set-Location backend
+cd frontend
 npm run build
-npm run start:dev
-npm run prisma:generate
-npm run prisma:push
-Command frontend (PowerShell)
-Set-Location frontend
-npm run build
-npm run dev
-Aturan verifikasi
-Jika menyentuh constraint DB, sarankan test Swagger/curl/manual
-Jangan tandai final tanpa verifikasi masuk akal
-Jika build belum dijalankan, bilang jujur belum dijalankan
-16. OUTPUT STYLE
 
-Saat selesai ACT, output harus operasional:
+Run only the build relevant to the touched area:
+- Backend-only patch: backend build only.
+- Frontend-only patch: frontend build only.
+- Full-stack patch: both builds.
 
-workdir
-file yang diubah
-apa yang berubah
-cara test
-risiko/follow-up kecil jika ada
+Build success does not mean UAT PASS.
+Do not claim final PASS without manual/API verification.
 
-Jangan:
+============================================================
+CURRENT WORK PRIORITY
+============================================================
 
-menulis narasi terlalu panjang
-mengulang semua konteks proyek
-mengklaim sesuatu final tanpa verifikasi
-17. HARD STOPS
+Current baseline:
+- HEAD/main: bdba664 feat: gate payment urgency chip to tenants
+- Phase 4.3-D: CODE COMPLETE / BUILD PASS / PUSHED
+- Phase 4.3-D is NOT manual UAT PASS yet.
 
-Berhenti dan jangan lanjut otomatis jika:
+Do not claim Phase 4.3-D PASS.
 
-perlu ubah schema.prisma
-perlu ubah bootstrap.sql
-perlu ubah env sensitif
-patch menyentuh lebih dari satu modul besar
-file target terlalu banyak
-perlu ubah package dependencies inti
-perlu ubah tsconfig, prisma.config.ts, vite.config.ts, nest-cli.json
-perlu membuka backlog high-risk seperti PENDING
+Next priority sequence:
+1. M1 — Owner Protection Backend
+2. M2 — Manual Check-in Reliability
+3. M3 — UI Polish
+4. M4 — Password Visibility Toggle
+5. M5 — Final Verification Gate
 
-Dalam kondisi itu:
+============================================================
+M1 OWNER PROTECTION RULES
+============================================================
 
-keluarkan PLAN sempit
-jangan implementasi liar
-18. ATURAN KHUSUS GENERATED / ARCHIVE / DOCS
-Jangan edit manual
-backend/src/generated/prisma/*
-Jangan jadikan pusat kendali harian
-docs/archive/*
-Gunakan docs aktif saja untuk konteks harian
-docs/00_SOURCE_OF_TRUTH.md
-docs/01_CURRENT_TASK.md
-docs/02_DECISIONS_LOG.md
-docs/backend-implementation-contract.md
-docs/FRONTEND_PLAN.md
-docs/MASTER_PROJECT_NOTE.md
-docs/project-journal.md
-19. RULE PENUTUP
+For M1 Owner Protection Backend:
 
-Prioritas keputusan:
+Scope:
+- Backend only.
+- Do not touch frontend.
+- Do not touch docs.
+- Do not reset DB.
+- Do not run long UAT.
+- Build only unless user asks for final verification.
 
-source of truth
-business rule
-scope kecil
-PowerShell Windows execution
-verifikasi manual
-baru lanjut task berikutnya
+Goal:
+Prevent any non-OWNER role from locking, weakening, deleting, deactivating, or taking over OWNER accounts.
 
-Prinsip akhir:
-lebih baik patch kecil, jelas, dan lolos verifikasi daripada solusi besar yang membuat konteks proyek rusak atau shell command salah terus.
+Rules:
+- Protect all users with role OWNER.
+- Do not hardcode email.
+- Do not protect only admin@kost48.com.
+- Do not protect only liem.lui@gmail.com.
+
+Non-OWNER actor means any actor whose role is not OWNER:
+- ADMIN
+- STAFF
+- TENANT
+- any other non-OWNER role
+
+A non-OWNER actor must not be able to:
+- change OWNER role
+- deactivate OWNER
+- reset/change OWNER password through admin/staff route
+- delete OWNER if endpoint exists
+- grant OWNER role to another user
+- make changes that prevent OWNER from login
+
+OWNER should still be able to:
+- login
+- manage non-owner users according to existing rules
+
+Admin/Staff should still be able to:
+- manage non-owner users according to existing existing rules
+
+Preferred implementation:
+- Service-layer validation.
+- Controller remains thin.
+- Actor comes from JWT context.
+- Error message in Bahasa Indonesia.
+- No schema change unless absolutely necessary.
+- If schema change seems needed, STOP and report.
+
+============================================================
+FINAL REPORT FORMAT
+============================================================
+
+At the end of every ACT, report:
+
+1. Summary
+- COMPLETE / PARTIAL / BLOCKED
+- Short explanation only
+
+2. Files changed
+- File path
+- One sentence explanation
+
+3. Build result
+- Command used
+- PASS / FAIL
+
+4. Verification
+- Minimal checks performed
+- Manual/API tests pending, if any
+
+5. Git status
+- Paste git status --short
+- Paste git diff --stat
+
+6. Risks / next step
+- Only real risks
+- Next recommended ACT
+
+Do not overclaim.
+Do not say PASS if only build was done.
+Do not say UAT PASS unless UAT was actually done.
