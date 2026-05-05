@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Contracts & API
-**Versi:** 2026-04-28 clean consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Fungsi:** Kontrak bisnis/API aktif. Untuk status fase lihat `00_GROUND_STATE.md`; untuk rencana eksekusi lihat `02_PLAN.md`.
 
 ---
@@ -239,3 +239,29 @@ Dalam transaction:
 - Submit payment proof sesuai booking sendiri.
 - Tidak input ID teknis manual.
 - Tidak melihat tenant lain.
+
+---
+
+
+## 9. Production Deployment Contract
+
+### 9.1 Production endpoints
+- Frontend production: `https://app.kost48surabaya.com`.
+- Backend API base: `https://api.kost48surabaya.com/api`.
+- Public rooms health check: `GET /api/public/rooms`.
+- Protected notification check: `GET /api/me/notifications`.
+- Reminder preview all: `GET /api/admin/reminders/preview/all`.
+
+### 9.2 Deployment rules
+- Normal patch flow: source lokal → build → commit → push → pull/deploy on cPanel.
+- Jangan edit `dist` production kecuali emergency hotfix.
+- Jangan reset DB production.
+- Schema/DB changes require backup and separate plan.
+- `.htaccess`/Apache proxy config adalah deployment config; jangan commit kecuali sudah diputuskan.
+
+### 9.3 Production UAT minimum after deploy
+- `GET /api/public/rooms` returns API envelope.
+- `POST /api/auth/login` works for owner admin.
+- `GET /api/me/notifications` works with Bearer token.
+- If reminder code touched, `GET /api/admin/reminders/preview/all` works with Bearer token.
+

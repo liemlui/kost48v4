@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Execution Plan
-**Versi:** 2026-04-28 clean consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Fungsi:** Satu master plan aktif. Isi lama `05_V4_MASTER_PLAN.md` sudah digabung ke file ini agar dokumen tidak terlalu banyak.
 
 ---
@@ -34,13 +34,50 @@
 | 4.3-C | Notification Center MVP | ✅ COMPLETE |
 | 4.3-G1 | Announcement access guard | ✅ PASS |
 | 4.3-G2 | Pending meter snapshot + promotion | ✅ Fresh UAT PASS |
-| 4.3-D | Tenant payment urgency header chip | 🟡 NEXT |
+| Production deploy handoff | Frontend/backend production connection + runtime hardening | ✅ PASS |
+| Cleanup maintenance | Remove unused files/config safely with Cline, then verify | 🟡 NEXT MAINTENANCE |
+| 4.3-D | Tenant payment urgency header chip | 🟡 NEXT FEATURE |
 | 4.4 | Marketing display + flexible registration | ⬜ Belum dibuka |
 | 4.5 | Tenant self-service lanjutan | ⬜ Belum dibuka |
 
 ---
 
-## 3. Current Next ACT — Phase 4.3-D
+
+## 3. Immediate Maintenance — Cline Cleanup Unused Files/Config
+
+### 3.1 Goal
+Membersihkan file/config yang tidak dipakai setelah production deploy tanpa menyentuh flow bisnis yang sudah PASS.
+
+### 3.2 Scope sempit
+- Audit only first, then delete only obvious unused files.
+- Jangan rewrite backend/frontend.
+- Jangan ubah schema/database.
+- Jangan menghapus source aktif untuk reminder, notification, booking, payment, stay, auth.
+- Jangan menghapus generated Prisma kecuali ada keputusan eksplisit.
+- Jangan buat file markdown baru.
+- Setelah cleanup wajib `npm run build` backend/frontend sesuai area dan `git status --short`.
+
+### 3.3 Kandidat yang boleh diaudit
+- File temporary/helper lokal.
+- Copy/backup file yang jelas bukan source aktif.
+- Artefak deploy server seperti `.htaccess` bila tidak diperlukan di repo.
+- Stale markdown di luar 7 active docs.
+- Asset build lama yang tidak dipakai, tetapi jangan hapus source `frontend/src`.
+
+### 3.4 Prompt singkat untuk Cline PLAN
+```text
+MODE: PLAN ONLY
+Task: Audit unused files/config after KOST48 production handoff.
+Do not modify files.
+Find only obvious unused/temp/legacy files.
+Do not touch schema, generated Prisma, auth, booking, payment, reminders, notifications, or production config unless clearly unused.
+Return deletion candidates with reason, risk level, and verification commands.
+Use Windows PowerShell commands.
+```
+
+---
+
+## 4. Current Next ACT — Phase 4.3-D
 
 ### 3.1 Goal
 Menampilkan urgency bisnis aktif untuk tenant di header, khususnya kewajiban bayar dan deadline. Ini berbeda dari notification read/unread.
@@ -87,7 +124,7 @@ Return file list, data sources, priority calculation, and UAT checklist.
 
 ---
 
-## 4. Completed UAT Gates — Do Not Repeat Unless Touched
+## 5. Completed UAT Gates — Do Not Repeat Unless Touched
 
 ### Gate 1 / UAT 4.0 PASS
 - Public `/rooms` works for guest.
@@ -122,7 +159,7 @@ Return file list, data sources, priority calculation, and UAT checklist.
 
 ---
 
-## 5. Backlog Roadmap
+## 6. Backlog Roadmap
 
 ### 5.1 Phase 4.4 — Marketing Display & Flexible Registration
 Scope:
@@ -153,7 +190,7 @@ Scope:
 
 ---
 
-## 6. Suggested ACT Template
+## 7. Suggested ACT Template
 
 ```text
 MODE: ACT
@@ -183,7 +220,7 @@ Final report:
 
 ---
 
-## 7. Documentation Hygiene Policy
+## 8. Documentation Hygiene Policy
 
 ### Active docs only
 Keep active docs limited to:

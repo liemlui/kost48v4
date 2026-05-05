@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Ground State
-**Versi:** 2026-04-28 clean docs consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Status:** Source of truth utama untuk membuka sesi baru. Baca ini dulu sebelum `01_CONTRACTS.md`, `02_PLAN.md`, dan `CHECKLIST.md`.
 
 ---
@@ -19,8 +19,27 @@
 | Phase 4.3-G2 Pending Meter Snapshot | ✅ Fresh UAT PASS / committed |
 | G2e/G2f Legacy Meter Cleanup | ✅ SKIPPED — DB dev reset clean before live |
 | Seed dev/UAT | ✅ committed: `256a6f4 seed dev data for G2 UAT` |
+| Production frontend/backend | ✅ CONNECTED — `app.kost48surabaya.com` → `api.kost48surabaya.com/api` |
+| Production admin login | ✅ PASS — `admin@kost48.com / admin123` |
+| Protected production API | ✅ PASS — `/api/me/notifications` |
+| Production reminder preview | ✅ PASS — `/api/admin/reminders/preview/all` |
+| GitHub main | ✅ pushed to `54e74e6 optimize response serialization` |
+| Immediate maintenance | 🟡 Cline cleanup unused files/config only, then verify |
 | Next ACT | 🟡 Phase 4.3-D — Tenant Payment Urgency Header Chip |
 | Real WhatsApp provider / scheduler / push | ⬜ Deferred |
+
+
+### Latest production evidence — 2026-05-04
+Production deploy verification membuktikan:
+- Frontend production `https://app.kost48surabaya.com` berhasil login ke backend production.
+- Backend production base API aktif di `https://api.kost48surabaya.com/api`.
+- Public endpoint `GET /api/public/rooms` reachable; data rooms production masih kosong bila `items: []`.
+- Admin login production PASS dan mengembalikan JWT.
+- Protected endpoint `GET /api/me/notifications` PASS.
+- Reminder preview endpoint aktif di `GET /api/admin/reminders/preview/all`.
+- DB permission + sequence grant production sudah diperbaiki untuk user DB aplikasi.
+- GitHub `origin/main` sudah sinkron sampai commit `54e74e6`.
+- Hotfix langsung ke production `dist` hanya boleh dianggap emergency; patch normal harus lewat source lokal → build → commit → push → deploy.
 
 ### Latest accepted G2 evidence
 Fresh UAT G2 membuktikan:

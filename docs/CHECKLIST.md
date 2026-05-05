@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Active Checklist
-**Versi:** 2026-04-28 clean consolidation
+**Versi:** 2026-05-04 production handoff
 
 ---
 
@@ -8,6 +8,11 @@
 - [x] Fresh UAT G2 PASS.
 - [x] `seed-admin.ts` committed for clean UAT baseline: `256a6f4 seed dev data for G2 UAT`.
 - [ ] Delete temporary helper files if present, especially `backend/verify-db.js`.
+- [x] Production frontend/backend connection PASS.
+- [x] Admin login production PASS.
+- [x] Protected notification endpoint PASS.
+- [x] Reminder preview production endpoint PASS.
+- [x] GitHub `origin/main` pushed to `54e74e6`.
 - [ ] Run `git status --short` before next ACT; expected clean.
 
 PowerShell cleanup:
@@ -73,7 +78,26 @@ git log --oneline -5
 
 ---
 
-## C. Next — Phase 4.3-D Tenant Payment Urgency Header Chip
+
+## C. Immediate Maintenance — Cline Cleanup Unused Files/Config
+
+### PLAN
+- [ ] Audit unused/temp/legacy files only.
+- [ ] Identify files to delete with risk level.
+- [ ] Confirm no business flow source is touched.
+- [ ] Confirm no schema/database change.
+
+### ACT
+- [ ] Delete only approved obvious unused files.
+- [ ] Do not delete 7 active docs.
+- [ ] Do not delete reminder/notification source.
+- [ ] Do not delete generated Prisma unless explicitly decided.
+- [ ] Build affected app(s) PASS.
+- [ ] `git status --short` reviewed.
+
+---
+
+## D. Next — Phase 4.3-D Tenant Payment Urgency Header Chip
 
 ### PLAN
 - [ ] Audit header/topbar placement near `NotificationBell`.
@@ -100,7 +124,7 @@ git log --oneline -5
 
 ---
 
-## D. Deferred / Not Open Yet
+## E. Deferred / Not Open Yet
 
 - [ ] Real WhatsApp provider.
 - [ ] Scheduler/cron reminder.
@@ -111,7 +135,7 @@ git log --oneline -5
 
 ---
 
-## E. Later Roadmap
+## F. Later Roadmap
 
 ### Phase 4.4 — Marketing + Registration
 - [ ] Public room detail endpoint.

@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Project Journal
-**Versi:** 2026-04-28 clean consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Fungsi:** Arsip kronologis milestone dan hasil UAT. Tidak menggantikan `00_GROUND_STATE.md`.
 
 ---
@@ -134,3 +134,35 @@ File lama yang boleh dihapus dari active docs:
 - `FINAL_FRONTEND_FEATURES.md`
 - `05_V4_MASTER_PLAN.md`
 - pasted/temp markdown files.
+
+
+---
+
+## 2026-05-04 — Production Connection, Reminder Fix, and Git Push PASS
+
+### Production verification
+- Frontend production: `https://app.kost48surabaya.com`.
+- Backend production: `https://api.kost48surabaya.com/api`.
+- `GET /api/public/rooms` reachable. Response `items: []` berarti data rooms production masih kosong, bukan koneksi gagal.
+- Admin login production PASS dengan `admin@kost48.com / admin123`.
+- Protected endpoint `GET /api/me/notifications` PASS.
+- Reminder preview endpoint `GET /api/admin/reminders/preview/all` PASS.
+- Halaman Pengingat WhatsApp production sudah jalan setelah frontend path dan backend runtime diselaraskan.
+
+### Production fixes performed
+- DB grants untuk app user production diperbaiki, termasuk sequence grant untuk insert user.
+- Prisma client production digenerate di server.
+- Admin production dibuat/seeded tanpa reset DB.
+- Frontend production bundle diarahkan ke admin reminder preview path yang benar.
+- Backend production runtime direstart sampai controller reminder aktif.
+
+### Git commits pushed to `origin/main`
+- `ff8f2b5 harden backend production runtime`
+- `652c0dd support production prisma seed and lean build`
+- `54e74e6 optimize response serialization`
+
+### Final assessment
+- Production frontend/backend connection = PASS.
+- Reminder WhatsApp preview = PASS.
+- Local Git and `origin/main` synced at `54e74e6`.
+- Next safe maintenance: ask Cline to audit unused files/config first, then delete only low-risk unused items.

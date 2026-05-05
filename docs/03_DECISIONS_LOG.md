@@ -1,5 +1,5 @@
 # KOST48 V3/V4 — Decisions Log
-**Versi:** 2026-04-28 clean consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Fungsi:** Arsip keputusan freeze. Tambahkan keputusan baru di bawah; jangan buat file decision baru.
 
 ---
@@ -85,6 +85,20 @@
 | 138 | `seed-admin.ts` disimpan sebagai dev/UAT seed | Reset UAT berikutnya lebih cepat |
 | 139 | File markdown status/readme/patch summary digabung ke active docs | Dokumen tidak terlalu banyak dan tidak dibuat ulang terus |
 | 140 | `05_V4_MASTER_PLAN.md` digabung ke `02_PLAN.md` | Satu master plan aktif |
+
+---
+
+
+## 2026-05-04 — Production Deployment & Cleanup Decision
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 141 | Production backend/frontend connection dinyatakan PASS | `app.kost48surabaya.com` memakai `api.kost48surabaya.com/api` |
+| 142 | Production admin login dinyatakan PASS | Admin seed dan DB permission production sudah benar |
+| 143 | Reminder preview production endpoint memakai `/api/admin/reminders/preview/all` | Frontend reminder harus memakai path admin reminder contract |
+| 144 | Hotfix langsung ke `dist` hanya untuk emergency | Patch normal wajib lewat source, build, commit, push, deploy |
+| 145 | Cleanup berikutnya harus audit-first | Jangan hapus file source/flow aktif tanpa bukti tidak dipakai |
+| 146 | `.htaccess` production dianggap deployment config, bukan source app default | Jangan commit kecuali diputuskan sebagai bagian deploy strategy |
 
 ---
 

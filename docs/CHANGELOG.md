@@ -1,6 +1,33 @@
 # KOST48 V3/V4 — Changelog
-**Versi:** 2026-04-28 clean consolidation  
+**Versi:** 2026-05-04 production handoff  
 **Fungsi:** Satu changelog gabungan untuk backend, frontend, dan docs. Jangan buat changelog frontend/backend terpisah lagi kecuali diminta.
+
+---
+
+
+## 2026-05-04 — Production Handoff PASS
+
+### Type
+Production deployment verification + runtime hardening.
+
+### Result
+- Frontend production `app.kost48surabaya.com` connected to backend `api.kost48surabaya.com/api`.
+- Admin login production PASS.
+- Protected notification endpoint PASS.
+- Reminder preview endpoint PASS at `/api/admin/reminders/preview/all`.
+- Pengingat WhatsApp page production confirmed working.
+- DB table/sequence grants for production app user fixed.
+- GitHub `origin/main` updated to `54e74e6`.
+
+### Commits pushed
+- `ff8f2b5 harden backend production runtime`
+- `652c0dd support production prisma seed and lean build`
+- `54e74e6 optimize response serialization`
+
+### Notes
+- Production data rooms may still be empty; this is not a connection issue.
+- Direct production `dist` hotfix should be emergency-only. Future patch should go through source → build → commit → push → deploy.
+- Next requested maintenance is cleanup of unused files/config via Cline audit-first workflow.
 
 ---
 
