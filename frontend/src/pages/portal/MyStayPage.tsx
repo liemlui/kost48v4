@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -6,12 +6,12 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
-import { getResource } from '../../api/resources';
+import { getResource, listResource } from '../../api/resources';
 import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { ApiEnvelope, PaginatedResponse } from '../../types';
-import type { RenewRequest, Stay } from '../../types';
+import type { Invoice, RenewRequest, Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
 function formatDate(value?: string | null) {
@@ -42,6 +42,47 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     queryFn: () => listMyRenewRequests(),
     refetchOnWindowFocus: true,
   });
+
+  // ── Payment urgency gate ──────────────────────
+  const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
+    queryKey: ['my-invoices', stay.id],
+    queryFn: () => listResource<Invoice>('/invoices/my'),
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
+  const overdueInvoice = useMemo(() => {
+    const items = invoicesQuery.data?.items ?? [];
+    if (!items.length || invoicesQuery.isError) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (const inv of items) {
+      if (inv.status !== 'ISSUED' && inv.status !== 'PARTIAL') continue;
+      if (!inv.dueDate) continue;
+      const due = new Date(inv.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < today) return inv;
+    }
+    return null;
+  }, [invoicesQuery.data, invoicesQuery.isError]);
+
+  const dueSoonInvoice = useMemo(() => {
+    const items = invoicesQuery.data?.items ?? [];
+    if (!items.length || invoicesQuery.isError || overdueInvoice) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const threeDaysFromNow = new Date(today);
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    for (const inv of items) {
+      if (inv.status !== 'ISSUED' && inv.status !== 'PARTIAL') continue;
+      if (!inv.dueDate) continue;
+      const due = new Date(inv.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due >= today && due <= threeDaysFromNow) return inv;
+    }
+    return null;
+  }, [invoicesQuery.data, invoicesQuery.isError, overdueInvoice]);
 
   const pendingRenewRequest = (renewRequestsQuery.data?.items ?? []).find(
     (rr: RenewRequest) => rr.stayId === stay.id && rr.status === 'PENDING',
@@ -104,10 +145,20 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <p className="text-muted small mb-3">
               Ajukan permintaan perpanjangan masa tinggal Anda. Admin akan meninjau dan menyetujui permintaan Anda.
             </p>
+            {overdueInvoice ? (
+              <Alert variant="danger" className="small">
+                Anda memiliki tagihan yang sudah lewat jatuh tempo. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan perpanjangan.
+              </Alert>
+            ) : null}
+            {!overdueInvoice && dueSoonInvoice ? (
+              <Alert variant="warning" className="small">
+                Anda memiliki tagihan yang akan jatuh tempo. Disarankan melunasi sebelum mengajukan perpanjangan.
+              </Alert>
+            ) : null}
             <Button
               variant="primary"
               onClick={() => createRenewMutation.mutate()}
-              disabled={createRenewMutation.isPending}
+              disabled={createRenewMutation.isPending || Boolean(overdueInvoice)}
             >
               {createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}
             </Button>
