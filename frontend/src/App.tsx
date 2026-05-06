@@ -57,9 +57,9 @@ export default function App() {
       <Route path="/rooms" element={<RoomsRouteEntry />} />
       <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
       <Route path="/booking/:roomId" element={<GuestBookingPage />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<RootRedirect />} />
           <Route
             path="/dashboard"
             element={(

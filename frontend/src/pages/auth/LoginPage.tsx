@@ -82,7 +82,7 @@ export default function LoginPage() {
               <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" />
             </Form.Group>
 
-            <div className="form-helper mb-3">Belum punya akun? Tenant baru bisa booking kamar dari katalog. Akun portal akan dibuat setelah booking disetujui.</div>
+            <div className="form-helper mb-3">Belum punya akun? Tenant baru bisa booking kamar dari katalog. Akun portal akan langsung dibuat begitu booking dikirim.</div>
 
             <div className="d-flex justify-content-end mb-4">
               <Link to="/forgot-password" className="small text-decoration-none">Lupa password?</Link>

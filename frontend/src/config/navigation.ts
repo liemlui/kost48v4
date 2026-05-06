@@ -193,5 +193,6 @@ export function getDefaultRoute(role?: Role, tenantStage: TenantPortalStage = 'o
     if (tenantStage === 'booking') return '/portal/bookings';
     return '/portal/stay';
   }
+  if (!role) return '/rooms';
   return '/dashboard';
 }
