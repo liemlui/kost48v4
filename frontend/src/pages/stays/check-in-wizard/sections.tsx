@@ -339,7 +339,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
                   required: 'Meter awal listrik wajib diisi',
                   validate: (value) => {
                     const num = parseFloat(value);
-                    if (Number.isNaN(num)) return 'Harus angka desimal valid';
+                    if (Number.isNaN(num)) return 'Harus berupa angka';
                     if (num < 0) return 'Tidak boleh negatif';
                     return true;
                   },
@@ -363,7 +363,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
                   required: 'Meter awal air wajib diisi',
                   validate: (value) => {
                     const num = parseFloat(value);
-                    if (Number.isNaN(num)) return 'Harus angka desimal valid';
+                    if (Number.isNaN(num)) return 'Harus berupa angka';
                     if (num < 0) return 'Tidak boleh negatif';
                     return true;
                   },
@@ -384,7 +384,7 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
         </Row>
         <Alert variant="info" className="mt-3 mb-0">
           <div className="small">
-            <strong>Catatan Meter Awal:</strong> Meter awal listrik dan air wajib diisi untuk mencatat baseline penggunaan. Nilai harus angka desimal valid dan tidak boleh negatif.
+            <strong>Catatan Meter Awal:</strong> Meter awal listrik dan air wajib diisi untuk mencatat baseline penggunaan. Nilai harus berupa angka dan tidak boleh negatif.
           </div>
         </Alert>
       </Card.Body>

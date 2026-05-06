@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
+import PasswordInput from '../../components/common/PasswordInput';
 import { changePassword } from '../../api/auth';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
@@ -90,8 +91,7 @@ export default function ProfilePage() {
 
               <Form.Group className="mb-3">
                 <Form.Label>Password Saat Ini</Form.Label>
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
                   placeholder="Isi jika endpoint membutuhkan verifikasi password lama"
@@ -100,8 +100,7 @@ export default function ProfilePage() {
 
               <Form.Group className="mb-3">
                 <Form.Label>Password Baru</Form.Label>
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   placeholder="Minimal 8 karakter"
@@ -110,8 +109,7 @@ export default function ProfilePage() {
 
               <Form.Group className="mb-4">
                 <Form.Label>Konfirmasi Password Baru</Form.Label>
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Ulangi password baru"

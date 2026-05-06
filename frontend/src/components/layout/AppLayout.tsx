@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -65,7 +65,7 @@ function getWorkspaceSummary(role?: string) {
     case 'TENANT':
       return 'Portal tenant dijaga sederhana untuk hunian, tagihan, tiket, pengumuman, dan profil.';
     default:
-      return 'Navigasi disusun ulang agar lebih ringkas, lebih fokus, dan lebih mudah dipakai.';
+      return 'Menu utama workspace.';
   }
 }
 
@@ -191,6 +191,17 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
 
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.classList.add('offcanvas-open');
+    } else {
+      document.body.classList.remove('offcanvas-open');
+    }
+    return () => {
+      document.body.classList.remove('offcanvas-open');
+    };
+  }, [sidebarOpen]);
+
   return (
     <div className="app-shell">
       <div className="app-shell-grid">
@@ -245,9 +256,6 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </div>
               </div>
             </div>
-            {location.pathname !== defaultRoute ? (
-              <div className="app-caption mt-2">Navigasi saat ini disederhanakan sesuai role aktif untuk mengurangi menu yang tidak relevan.</div>
-            ) : null}
           </section>
 
           {children ?? <Outlet />}

@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import PasswordInput from '../../components/common/PasswordInput';
 import { resetPassword } from '../../api/auth';
 
 export default function ResetPasswordPage() {
@@ -76,12 +77,12 @@ export default function ResetPasswordPage() {
 
             <Form.Group className="mb-3">
               <Form.Label>Password Baru</Form.Label>
-              <Form.Control type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
+              <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
             </Form.Group>
 
             <Form.Group className="mb-4">
               <Form.Label>Konfirmasi Password Baru</Form.Label>
-              <Form.Control type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
+              <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" />
             </Form.Group>
 
             <Button type="submit" disabled={submitting} className="w-100">

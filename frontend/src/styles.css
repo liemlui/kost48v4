@@ -998,9 +998,31 @@ a {
   background: transparent;
 }
 
+/* Toast spacing - prevent danger/warning toast hugging screen edge */
+.toast-container {
+  padding: 1rem;
+}
+
 .app-sidebar-offcanvas {
+  background: var(--surface-main, #ffffff);
   padding-top: env(safe-area-inset-top, 0);
   padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Sidebar offcanvas header & close button breathing room */
+.app-sidebar-offcanvas .offcanvas-header {
+  padding-top: calc(env(safe-area-inset-top, 0) + 0.75rem);
+  padding-right: 1rem;
+}
+
+.app-sidebar-offcanvas .offcanvas-header .btn-close {
+  margin-right: 0.25rem;
+}
+
+/* Prevent black gap / overscroll flash on iPhone when sidebar is open */
+body.offcanvas-open {
+  overscroll-behavior: none;
+  background: var(--surface-main, #ffffff);
 }
 
 .android-safe-top {

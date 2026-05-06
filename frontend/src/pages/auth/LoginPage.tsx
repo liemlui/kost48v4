@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import PasswordInput from '../../components/common/PasswordInput';
 import { getDefaultRoute } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
 
@@ -78,7 +79,7 @@ export default function LoginPage() {
 
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Masukkan password" />
+              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" />
             </Form.Group>
 
             <div className="form-helper mb-3">Belum punya akun? Tenant baru bisa booking kamar dari katalog. Akun portal akan dibuat setelah booking disetujui.</div>

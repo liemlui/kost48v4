@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getRelationSpec, getReferenceLabel, ReferenceOption } from '../../pages/resources/resourceRelations';
 import type { PortalUserSummary } from '../../types';
 import CurrencyInput from '../common/CurrencyInput';
+import PasswordInput from '../common/PasswordInput';
 import SearchableSelect from '../common/SearchableSelect';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
 
@@ -541,8 +542,7 @@ export default function ResourceFormModal({
                         <div>
                           <Form.Group className="mb-3">
                             <Form.Label>Password Baru</Form.Label>
-                            <Form.Control
-                              type="password"
+                            <PasswordInput
                               value={newPassword}
                               onChange={(event) => setNewPassword(event.target.value)}
                               placeholder="Minimal 8 karakter"
@@ -587,8 +587,7 @@ export default function ResourceFormModal({
                           </Form.Group>
                           <Form.Group className="mb-3">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control
-                              type="password"
+                            <PasswordInput
                               value={createFormData.password}
                               onChange={(event) => setCreateFormData((prev) => ({ ...prev, password: event.target.value }))}
                               placeholder="Minimal 8 karakter"
