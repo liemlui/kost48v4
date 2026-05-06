@@ -89,7 +89,7 @@ export default function App() {
           <Route path="/users" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.users} /></RequireRoles>} />
           <Route path="/tenants" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.tenants} /></RequireRoles>} />
           <Route path="/rooms/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><RoomDetailPage /></RequireRoles>} />
-          <Route path="/booking/:roomId" element={<RequireRoles allowed={['TENANT']}><BookingPage /></RequireRoles>} />
+          <Route path="/portal/booking/:roomId" element={<RequireRoles allowed={['TENANT']}><BookingPage /></RequireRoles>} />
           <Route path="/stays" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaysPage /></RequireRoles>} />
           <Route path="/stays/check-in" element={<RequireRoles allowed={['ADMIN', 'OWNER']}><CheckInWizard /></RequireRoles>} />
           <Route path="/stays/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StayDetailPage /></RequireRoles>} />
