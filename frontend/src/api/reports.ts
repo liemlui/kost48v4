@@ -97,3 +97,63 @@ export async function fetchCashFlow(year: number, month: number): Promise<CashFl
   const res = await apiClient.get(`/reports/cash-flow?${params}`);
   return res.data.data;
 }
+
+// --- M10-B: New report types ---
+
+export interface ProfitLoss {
+  year: number;
+  month: number;
+  invoiceRevenueRupiah: number;
+  wifiRevenueRupiah: number;
+  totalRevenueRupiah: number;
+  totalExpenseRupiah: number;
+  netProfitRupiah: number;
+  netProfitMarginPercent: number;
+  expenseCategories: {
+    category: string;
+    totalRupiah: number;
+    count: number;
+  }[];
+}
+
+export interface FinancialRatios {
+  year: number;
+  month: number;
+  netProfitMarginPercent: number;
+  collectionRatePercent: number;
+  expenseRatioPercent: number;
+  overdueRateSnapshotPercent: number;
+  overdueRateSnapshotNote: string;
+  occupancyRatePercent: number;
+  occupancyRateNote: string;
+}
+
+export interface Occupancy {
+  year: number;
+  month: number;
+  totalOperableRooms: number;
+  occupiedRooms: number;
+  occupancyRatePercent: number;
+  occupancyNote: string;
+  totalBilledRupiah: number;
+  revenuePerOccupiedRoomRupiah: number;
+  revenueNote: string;
+}
+
+export async function fetchProfitLoss(year: number, month: number): Promise<ProfitLoss> {
+  const params = new URLSearchParams({ year: String(year), month: String(month) });
+  const res = await apiClient.get(`/reports/profit-loss?${params}`);
+  return res.data.data;
+}
+
+export async function fetchFinancialRatios(year: number, month: number): Promise<FinancialRatios> {
+  const params = new URLSearchParams({ year: String(year), month: String(month) });
+  const res = await apiClient.get(`/reports/financial-ratios?${params}`);
+  return res.data.data;
+}
+
+export async function fetchOccupancy(year: number, month: number): Promise<Occupancy> {
+  const params = new URLSearchParams({ year: String(year), month: String(month) });
+  const res = await apiClient.get(`/reports/occupancy?${params}`);
+  return res.data.data;
+}

@@ -7,11 +7,17 @@ import {
   fetchDepositLiability,
   fetchExpenseSummary,
   fetchCashFlow,
+  fetchProfitLoss,
+  fetchFinancialRatios,
+  fetchOccupancy,
   MonthlyIncome,
   OverdueAging,
   DepositLiability,
   ExpenseSummary,
   CashFlow,
+  ProfitLoss,
+  FinancialRatios,
+  Occupancy,
 } from '../../api/reports';
 
 function formatRupiah(value: number): string {
@@ -63,6 +69,21 @@ export default function ReportsPage() {
   const cashFlow = useQuery({
     queryKey: ['reports', 'cash-flow', ym],
     queryFn: () => fetchCashFlow(ym.year, ym.month),
+  });
+
+  const profitLoss = useQuery({
+    queryKey: ['reports', 'profit-loss', ym],
+    queryFn: () => fetchProfitLoss(ym.year, ym.month),
+  });
+
+  const financialRatios = useQuery({
+    queryKey: ['reports', 'financial-ratios', ym],
+    queryFn: () => fetchFinancialRatios(ym.year, ym.month),
+  });
+
+  const occupancy = useQuery({
+    queryKey: ['reports', 'occupancy', ym],
+    queryFn: () => fetchOccupancy(ym.year, ym.month),
   });
 
   const handleChange = (field: 'year' | 'month', val: string) => {
@@ -173,6 +194,48 @@ export default function ReportsPage() {
           )}
         </Card.Body>
       </Card>
+
+      {/* Profit & Loss */}
+      <Card className="mb-3">
+        <Card.Header>📈 Profit & Loss (Laba Rugi) — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {profitLoss.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : profitLoss.isError ? (
+            <p className="text-danger">Gagal memuat data laba rugi.</p>
+          ) : (
+            <ProfitLossTable data={profitLoss.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Financial Ratios */}
+      <Card className="mb-3">
+        <Card.Header>📊 Rasio Keuangan — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {financialRatios.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : financialRatios.isError ? (
+            <p className="text-danger">Gagal memuat data rasio keuangan.</p>
+          ) : (
+            <FinancialRatiosTable data={financialRatios.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Occupancy */}
+      <Card className="mb-3">
+        <Card.Header>🏠 Okupansi & Revenue per Room — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {occupancy.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : occupancy.isError ? (
+            <p className="text-danger">Gagal memuat data okupansi.</p>
+          ) : (
+            <OccupancyTable data={occupancy.data!} />
+          )}
+        </Card.Body>
+      </Card>
     </Container>
   );
 }
@@ -267,5 +330,106 @@ function ExpenseSummaryTable({ data }: { data: ExpenseSummary }) {
         </tbody>
       </Table>
     </>
+  );
+}
+
+function ProfitLossTable({ data }: { data: ProfitLoss }) {
+  const netColor = data.netProfitRupiah >= 0 ? 'text-success' : 'text-danger';
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <thead>
+        <tr><th>Pos</th><th className="text-end">Rupiah</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🟢 Pendapatan Invoice</td><td className="text-end">Rp {formatRupiah(data.invoiceRevenueRupiah)}</td></tr>
+        <tr><td>🟢 Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.wifiRevenueRupiah)}</td></tr>
+        <tr className="fw-bold"><td>Total Pendapatan</td><td className="text-end">Rp {formatRupiah(data.totalRevenueRupiah)}</td></tr>
+        <tr><td>🔴 Total Pengeluaran</td><td className="text-end">Rp {formatRupiah(data.totalExpenseRupiah)}</td></tr>
+        {data.expenseCategories.length > 0 && data.expenseCategories.map((c) => (
+          <tr key={c.category} className="text-muted small">
+            <td className="ps-4">— {EXPENSE_CATEGORY_LABELS[c.category] ?? c.category}</td>
+            <td className="text-end">Rp {formatRupiah(c.totalRupiah)}</td>
+          </tr>
+        ))}
+        <tr className={netColor}><td><strong>🔷 Laba/Rugi Bersih</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.netProfitRupiah)}</strong></td></tr>
+        <tr><td><strong>📐 Marjin Laba Bersih</strong></td><td className="text-end"><strong>{data.netProfitMarginPercent}%</strong></td></tr>
+      </tbody>
+    </Table>
+  );
+}
+
+function FinancialRatiosTable({ data }: { data: FinancialRatios }) {
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <thead>
+        <tr><th>Rasio</th><th className="text-end">Nilai</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Marjin Laba Bersih</td>
+          <td className="text-end"><strong>{data.netProfitMarginPercent}%</strong></td>
+        </tr>
+        <tr>
+          <td>Tingkat Koleksi (Pembayaran / Tagihan)</td>
+          <td className="text-end"><strong>{data.collectionRatePercent}%</strong></td>
+        </tr>
+        <tr>
+          <td>Rasio Pengeluaran (Expense / Revenue)</td>
+          <td className="text-end"><strong>{data.expenseRatioPercent}%</strong></td>
+        </tr>
+        <tr>
+          <td>Tingkat Tunggakan (Snapshot) *</td>
+          <td className="text-end"><strong>{data.overdueRateSnapshotPercent}%</strong></td>
+        </tr>
+        <tr>
+          <td>Okupansi (Snapshot) **</td>
+          <td className="text-end"><strong>{data.occupancyRatePercent}%</strong></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr><td colSpan={2} className="text-muted small">
+          * {data.overdueRateSnapshotNote}<br />
+          ** {data.occupancyRateNote}
+        </td></tr>
+      </tfoot>
+    </Table>
+  );
+}
+
+function OccupancyTable({ data }: { data: Occupancy }) {
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <thead>
+        <tr><th>Metrik</th><th className="text-end">Nilai</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total Kamar Operasional</td>
+          <td className="text-end"><strong>{data.totalOperableRooms}</strong></td>
+        </tr>
+        <tr>
+          <td>Kamar Terisi (Stay Aktif)</td>
+          <td className="text-end"><strong>{data.occupiedRooms}</strong></td>
+        </tr>
+        <tr>
+          <td>Tingkat Okupansi</td>
+          <td className="text-end"><strong>{data.occupancyRatePercent}%</strong></td>
+        </tr>
+        <tr>
+          <td>Total Tagihan Bulan Ini</td>
+          <td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td>
+        </tr>
+        <tr>
+          <td>Revenue per Kamar Terisi (Estimasi)</td>
+          <td className="text-end"><strong>Rp {formatRupiah(data.revenuePerOccupiedRoomRupiah)}</strong></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr><td colSpan={2} className="text-muted small">
+          * {data.occupancyNote}<br />
+          ** {data.revenueNote}
+        </td></tr>
+      </tfoot>
+    </Table>
   );
 }

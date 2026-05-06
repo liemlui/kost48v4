@@ -277,4 +277,219 @@ export class ReportsService {
       netCashFlowRupiah: totalCashIn - totalCashOut,
     };
   }
+
+  /**
+   * Profit & Loss Summary (Akrual)
+   * Revenue = invoice billed (non-cancelled) + wifi sales
+   * Expense = all expenses in period
+   * Net Profit = Revenue - Expense
+   */
+  async profitLoss(year: number, month: number) {
+    const start = new Date(Date.UTC(year, month - 1, 1));
+    const end = new Date(Date.UTC(year, month, 1));
+
+    const [invoiceAgg, wifiAgg, expenseAgg, categoryGroups] = await Promise.all([
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        where: {
+          status: { not: InvoiceStatus.CANCELLED as any },
+          periodStart: { gte: start, lt: end },
+        },
+      }),
+      this.prisma.wifiSale.aggregate({
+        _sum: { soldPriceRupiah: true },
+        where: {
+          saleDate: { gte: start, lt: end },
+        },
+      }),
+      this.prisma.expense.aggregate({
+        _sum: { amountRupiah: true },
+        where: {
+          expenseDate: { gte: start, lt: end },
+        },
+      }),
+      this.prisma.expense.groupBy({
+        by: ['category'],
+        _sum: { amountRupiah: true },
+        _count: { id: true },
+        where: {
+          expenseDate: { gte: start, lt: end },
+        },
+      }),
+    ]);
+
+    const invoiceRevenue = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
+    const wifiRevenue = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
+    const totalRevenue = invoiceRevenue + wifiRevenue;
+    const totalExpense = Number(expenseAgg._sum.amountRupiah ?? 0);
+    const netProfit = totalRevenue - totalExpense;
+    const netProfitMargin = totalRevenue > 0
+      ? Math.round((netProfit / totalRevenue) * 10000) / 100
+      : 0;
+
+    const expenseCategories = categoryGroups.map((g) => ({
+      category: g.category as string,
+      totalRupiah: Number(g._sum.amountRupiah ?? 0),
+      count: g._count.id,
+    }));
+
+    return {
+      year,
+      month,
+      invoiceRevenueRupiah: invoiceRevenue,
+      wifiRevenueRupiah: wifiRevenue,
+      totalRevenueRupiah: totalRevenue,
+      totalExpenseRupiah: totalExpense,
+      netProfitRupiah: netProfit,
+      netProfitMarginPercent: netProfitMargin,
+      expenseCategories,
+    };
+  }
+
+  /**
+   * Financial Ratios
+   * Combines net profit margin, collection rate, expense ratio,
+   * overdue rate (snapshot), and occupancy rate (real-time snapshot).
+   */
+  async financialRatios(year: number, month: number) {
+    const start = new Date(Date.UTC(year, month - 1, 1));
+    const end = new Date(Date.UTC(year, month, 1));
+
+    const [invoiceAgg, wifiAgg, expenseAgg, paymentAgg] = await Promise.all([
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        where: {
+          status: { not: InvoiceStatus.CANCELLED as any },
+          periodStart: { gte: start, lt: end },
+        },
+      }),
+      this.prisma.wifiSale.aggregate({
+        _sum: { soldPriceRupiah: true },
+        where: { saleDate: { gte: start, lt: end } },
+      }),
+      this.prisma.expense.aggregate({
+        _sum: { amountRupiah: true },
+        where: { expenseDate: { gte: start, lt: end } },
+      }),
+      this.prisma.invoicePayment.aggregate({
+        _sum: { amountRupiah: true },
+        where: { paymentDate: { gte: start, lt: end } },
+      }),
+    ]);
+
+    const totalBilled = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
+    const wifiRevenue = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
+    const totalRevenue = totalBilled + wifiRevenue;
+    const totalExpense = Number(expenseAgg._sum.amountRupiah ?? 0);
+    const totalPaid = Number(paymentAgg._sum.amountRupiah ?? 0);
+
+    // Net Profit Margin
+    const netProfit = totalRevenue - totalExpense;
+    const netProfitMargin = totalRevenue > 0
+      ? Math.round((netProfit / totalRevenue) * 10000) / 100
+      : 0;
+
+    // Collection Rate (period: payments received / billed in the same month)
+    const collectionRate = totalBilled > 0
+      ? Math.round((totalPaid / totalBilled) * 10000) / 100
+      : 0;
+
+    // Expense Ratio
+    const expenseRatio = totalRevenue > 0
+      ? Math.round((totalExpense / totalRevenue) * 10000) / 100
+      : 0;
+
+    // Overdue Rate — snapshot (all-time overdue face value / this month billed)
+    const overdueAgg = await this.prisma.invoice.aggregate({
+      _sum: { totalAmountRupiah: true },
+      where: {
+        status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] as any },
+        dueDate: { lt: new Date() },
+      },
+    });
+    const totalOverdueRupiah = Number(overdueAgg._sum.totalAmountRupiah ?? 0);
+    const overdueRateSnapshot = totalBilled > 0
+      ? Math.round((totalOverdueRupiah / totalBilled) * 10000) / 100
+      : 0;
+
+    // Occupancy Rate — real-time snapshot
+    const [operableCount, occupiedCount] = await Promise.all([
+      this.prisma.room.count({
+        where: {
+          isActive: true,
+          status: { notIn: ['MAINTENANCE', 'INACTIVE'] as any },
+        },
+      }),
+      this.prisma.stay.count({
+        where: { status: 'ACTIVE' as any },
+      }),
+    ]);
+    const occupancyRate = operableCount > 0
+      ? Math.round((occupiedCount / operableCount) * 10000) / 100
+      : 0;
+
+    return {
+      year,
+      month,
+      netProfitMarginPercent: netProfitMargin,
+      collectionRatePercent: collectionRate,
+      expenseRatioPercent: expenseRatio,
+      overdueRateSnapshotPercent: overdueRateSnapshot,
+      overdueRateSnapshotNote:
+        'Persentase total nominal tunggakan seluruh waktu terhadap total tagihan bulan ini (snapshot, bukan rasio periodik)',
+      occupancyRatePercent: occupancyRate,
+      occupancyRateNote:
+        'Okupansi real-time berdasarkan stay aktif vs kamar operasional saat ini (bukan rata-rata bulanan)',
+    };
+  }
+
+  /**
+   * Occupancy & Revenue per Occupied Room
+   * Real-time room snapshot + monthly billed revenue / occupied rooms.
+   */
+  async occupancy(year: number, month: number) {
+    const start = new Date(Date.UTC(year, month - 1, 1));
+    const end = new Date(Date.UTC(year, month, 1));
+
+    const [operableCount, occupiedCount, invoiceAgg] = await Promise.all([
+      this.prisma.room.count({
+        where: {
+          isActive: true,
+          status: { notIn: ['MAINTENANCE', 'INACTIVE'] as any },
+        },
+      }),
+      this.prisma.stay.count({
+        where: { status: 'ACTIVE' as any },
+      }),
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        where: {
+          status: { not: InvoiceStatus.CANCELLED as any },
+          periodStart: { gte: start, lt: end },
+        },
+      }),
+    ]);
+
+    const totalBilled = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
+    const occupancyRate = operableCount > 0
+      ? Math.round((occupiedCount / operableCount) * 10000) / 100
+      : 0;
+    const revenuePerOccupied = occupiedCount > 0
+      ? Math.round(totalBilled / occupiedCount)
+      : 0;
+
+    return {
+      year,
+      month,
+      totalOperableRooms: operableCount,
+      occupiedRooms: occupiedCount,
+      occupancyRatePercent: occupancyRate,
+      occupancyNote:
+        'Okupansi real-time berdasarkan stay aktif vs kamar operasional saat ini (bukan rata-rata bulanan)',
+      totalBilledRupiah: totalBilled,
+      revenuePerOccupiedRoomRupiah: revenuePerOccupied,
+      revenueNote:
+        'Total tagihan bulan ini dibagi jumlah kamar terisi saat ini (estimasi kasar, bukan revenue per room-day)',
+    };
+  }
 }

@@ -10,6 +10,7 @@ import {
   OverdueAgingQueryDto,
   ExpenseSummaryQueryDto,
   CashFlowQueryDto,
+  OccupancyQueryDto,
 } from './dto/reports-query.dto';
 
 @ApiTags('reports')
@@ -57,6 +58,30 @@ export class ReportsController {
     return {
       message: 'Ringkasan arus kas berhasil diambil',
       data: await this.reportsService.cashFlow(query.year, query.month),
+    };
+  }
+
+  @Get('profit-loss')
+  async profitLoss(@Query() query: OccupancyQueryDto) {
+    return {
+      message: 'Laporan laba rugi berhasil diambil',
+      data: await this.reportsService.profitLoss(query.year, query.month),
+    };
+  }
+
+  @Get('financial-ratios')
+  async financialRatios(@Query() query: OccupancyQueryDto) {
+    return {
+      message: 'Rasio keuangan berhasil diambil',
+      data: await this.reportsService.financialRatios(query.year, query.month),
+    };
+  }
+
+  @Get('occupancy')
+  async occupancy(@Query() query: OccupancyQueryDto) {
+    return {
+      message: 'Laporan okupansi berhasil diambil',
+      data: await this.reportsService.occupancy(query.year, query.month),
     };
   }
 }
