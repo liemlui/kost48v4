@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Card, Table, Badge, Spinner, Container, Row, Col, Form } from 'react-bootstrap';
+import React, { useCallback, useState } from 'react';
+import { Card, Table, Badge, Spinner, Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { generateCsv, downloadCsv } from '../../utils/csv';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchMonthlyIncome,
@@ -134,7 +135,7 @@ export default function ReportsPage() {
     <Container fluid className="px-2 py-3">
       <h4 className="mb-3">📊 Laporan Keuangan Owner</h4>
 
-      <Row className="mb-3">
+      <Row className="mb-3 align-items-end">
         <Col xs="auto">
           <Form.Label className="mb-0">Tahun</Form.Label>
           <Form.Control
@@ -159,6 +160,19 @@ export default function ReportsPage() {
               </option>
             ))}
           </Form.Select>
+        </Col>
+        <Col xs="auto">
+          <ExportAllCsvButton
+            ym={ym}
+            monthlyIncome={monthlyIncome}
+            cashFlow={cashFlow}
+            overdueAging={overdueAging}
+            depositLiability={depositLiability}
+            expenseSummary={expenseSummary}
+            profitLoss={profitLoss}
+            financialRatios={financialRatios}
+            occupancy={occupancy}
+          />
         </Col>
       </Row>
 
@@ -486,6 +500,236 @@ function LockedFormalRatios() {
         </Table>
       </Card.Body>
     </Card>
+  );
+}
+
+// --- M10-D: CSV Export ---
+
+interface ReportQueryState {
+  isLoading: boolean;
+  isError: boolean;
+  data?: unknown;
+}
+
+function allReady(queries: ReportQueryState[]): boolean {
+  return queries.every((q) => !q.isLoading && !q.isError && q.data !== undefined);
+}
+
+function buildOwnerReportsCsv(params: {
+  ym: { year: number; month: number };
+  monthlyIncome: MonthlyIncome;
+  cashFlow: CashFlow;
+  overdueAging: OverdueAging;
+  depositLiability: DepositLiability;
+  expenseSummary: ExpenseSummary;
+  profitLoss: ProfitLoss;
+  financialRatios: FinancialRatios;
+  occupancy: Occupancy;
+}): string {
+  const { ym, monthlyIncome, cashFlow, overdueAging, depositLiability, expenseSummary, profitLoss, financialRatios, occupancy } = params;
+  const monthLabel = new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+  const sections: string[] = [];
+
+  // 1. Ringkasan Kesehatan Keuangan
+  const colRate = collectionRateLabel(financialRatios.collectionRatePercent);
+  const npmLabel = netProfitMarginLabel(profitLoss.netProfitMarginPercent);
+  const expLabel = expenseRatioLabel(financialRatios.expenseRatioPercent);
+  const occLabel = occupancyRateLabel(occupancy.occupancyRatePercent);
+  const ovdLabel = overdueRateLabel(financialRatios.overdueRateSnapshotPercent);
+  const cfLabel = cashFlowLabel(cashFlow.netCashFlowRupiah);
+  const isBuruk = [colRate, npmLabel, expLabel, occLabel, ovdLabel].some((m) => m.label === 'Buruk');
+  const isDipantau = [colRate, npmLabel, expLabel, occLabel, ovdLabel].some((m) => m.label === 'Perlu Dipantau');
+  let overallLabel: string;
+  if (isBuruk || cashFlow.netCashFlowRupiah < 0) overallLabel = 'Bermasalah';
+  else if (isDipantau) overallLabel = 'Perlu Dipantau';
+  else overallLabel = 'Sehat';
+  sections.push(
+    generateCsv([
+      ['Ringkasan Kesehatan Keuangan Owner', monthLabel],
+      ['Kondisi Bulan Ini', overallLabel],
+      ['Tingkat Koleksi', `${financialRatios.collectionRatePercent}%`, colRate.label],
+      ['Marjin Laba Bersih', `${profitLoss.netProfitMarginPercent}%`, npmLabel.label],
+      ['Rasio Pengeluaran', `${financialRatios.expenseRatioPercent}%`, expLabel.label],
+      ['Tingkat Okupansi', `${occupancy.occupancyRatePercent}%`, occLabel.label],
+      ['Tingkat Tunggakan', `${financialRatios.overdueRateSnapshotPercent}%`, ovdLabel.label],
+      ['Arus Kas Bersih', `Rp ${formatRupiah(cashFlow.netCashFlowRupiah)}`, cfLabel.label],
+      [''],
+    ]),
+  );
+
+  // 2. Pendapatan Bulanan
+  sections.push(
+    generateCsv([
+      [`Pendapatan Bulanan — ${monthLabel}`],
+      ['Total Tagihan', `Rp ${formatRupiah(monthlyIncome.totalBilledRupiah)}`],
+      ['Total Dibayar', `Rp ${formatRupiah(monthlyIncome.totalPaidRupiah)}`],
+      ['Pendapatan WiFi', `Rp ${formatRupiah(monthlyIncome.totalWifiRevenueRupiah)}`],
+      ['Outstanding', `Rp ${formatRupiah(monthlyIncome.outstandingRupiah)}`],
+      ['Jumlah Tagihan', String(monthlyIncome.invoiceCount)],
+      ['— Lunas', String(monthlyIncome.paidInvoiceCount)],
+      ['— Sebagian', String(monthlyIncome.partialInvoiceCount)],
+      ['— Belum Bayar', String(monthlyIncome.unpaidInvoiceCount)],
+      [''],
+    ]),
+  );
+
+  // 3. Arus Kas
+  sections.push(
+    generateCsv([
+      [`Arus Kas — ${monthLabel}`],
+      ['Kas Masuk (Invoice + WiFi)', `Rp ${formatRupiah(cashFlow.cashIn.totalRupiah)}`],
+      ['— Pembayaran Invoice', `Rp ${formatRupiah(cashFlow.cashIn.invoicePaymentsRupiah)}`],
+      ['— Penjualan WiFi', `Rp ${formatRupiah(cashFlow.cashIn.wifiSalesRupiah)}`],
+      ['Kas Keluar (Pengeluaran)', `Rp ${formatRupiah(cashFlow.cashOut.expensesRupiah)}`],
+      ['Arus Kas Bersih', `Rp ${formatRupiah(cashFlow.netCashFlowRupiah)}`],
+      [''],
+    ]),
+  );
+
+  // 4. Aging Tunggakan
+  const b = overdueAging.buckets;
+  sections.push(
+    generateCsv([
+      ['Aging Tunggakan', `Per ${overdueAging.asOf}`],
+      ['Umur', 'Jumlah Tagihan', 'Total Rupiah'],
+      ['Current / Belum Jatuh Tempo', String(b.current.count), `Rp ${formatRupiah(b.current.totalRupiah)}`],
+      ['1–30 hari', String(b.days1to30.count), `Rp ${formatRupiah(b.days1to30.totalRupiah)}`],
+      ['31–60 hari', String(b.days31to60.count), `Rp ${formatRupiah(b.days31to60.totalRupiah)}`],
+      ['61–90 hari', String(b.days61to90.count), `Rp ${formatRupiah(b.days61to90.totalRupiah)}`],
+      ['91+ hari', String(b.days91plus.count), `Rp ${formatRupiah(b.days91plus.totalRupiah)}`],
+      ['Total Tunggakan', String(overdueAging.totalOverdueCount), `Rp ${formatRupiah(overdueAging.totalOverdueRupiah)}`],
+      [''],
+    ]),
+  );
+
+  // 5. Liabilitas Deposit
+  sections.push(
+    generateCsv([
+      ['Liabilitas Deposit'],
+      ['Total Deposit Dinilai', `Rp ${formatRupiah(depositLiability.totalDepositAmountRupiah)}`],
+      ['Sudah Dibayar', `Rp ${formatRupiah(depositLiability.totalDepositPaidRupiah)}`],
+      ['Outstanding Deposit', `Rp ${formatRupiah(depositLiability.totalDepositOutstandingRupiah)}`],
+      ['Stay Aktif (dengan deposit)', String(depositLiability.activeStayCount)],
+      ['— Lunas', String(depositLiability.fullyPaidCount)],
+      ['— Sebagian', String(depositLiability.partiallyPaidCount)],
+      ['— Belum Bayar', String(depositLiability.unpaidCount)],
+      [''],
+    ]),
+  );
+
+  // 6. Pengeluaran per Kategori
+  const expLines: string[][] = [[`Pengeluaran per Kategori — ${monthLabel}`], ['Kategori', 'Jumlah', 'Rupiah']];
+  for (const c of expenseSummary.categories) {
+    expLines.push([EXPENSE_CATEGORY_LABELS[c.category] ?? c.category, String(c.count), `Rp ${formatRupiah(c.totalRupiah)}`]);
+  }
+  expLines.push(['Total Pengeluaran', '', `Rp ${formatRupiah(expenseSummary.totalExpenseRupiah)}`], ['']);
+  sections.push(generateCsv(expLines));
+
+  // 7. Profit & Loss
+  const plLines: string[][] = [
+    [`Profit & Loss (Laba Rugi) — ${monthLabel}`],
+    ['Pos', 'Rupiah'],
+    ['Pendapatan Invoice', `Rp ${formatRupiah(profitLoss.invoiceRevenueRupiah)}`],
+    ['Pendapatan WiFi', `Rp ${formatRupiah(profitLoss.wifiRevenueRupiah)}`],
+    ['Total Pendapatan', `Rp ${formatRupiah(profitLoss.totalRevenueRupiah)}`],
+    ['Total Pengeluaran', `Rp ${formatRupiah(profitLoss.totalExpenseRupiah)}`],
+  ];
+  for (const c of profitLoss.expenseCategories) {
+    plLines.push([`— ${EXPENSE_CATEGORY_LABELS[c.category] ?? c.category}`, `Rp ${formatRupiah(c.totalRupiah)}`]);
+  }
+  plLines.push(
+    ['Laba/Rugi Bersih', `Rp ${formatRupiah(profitLoss.netProfitRupiah)}`],
+    ['Marjin Laba Bersih', `${profitLoss.netProfitMarginPercent}%`],
+    [''],
+  );
+  sections.push(generateCsv(plLines));
+
+  // 8. Rasio Keuangan
+  sections.push(
+    generateCsv([
+      [`Rasio Keuangan — ${monthLabel}`],
+      ['Rasio', 'Nilai'],
+      ['Marjin Laba Bersih', `${financialRatios.netProfitMarginPercent}%`],
+      ['Tingkat Koleksi', `${financialRatios.collectionRatePercent}%`],
+      ['Rasio Pengeluaran', `${financialRatios.expenseRatioPercent}%`],
+      ['Tingkat Tunggakan (Snapshot)', `${financialRatios.overdueRateSnapshotPercent}%`],
+      ['Okupansi (Snapshot)', `${financialRatios.occupancyRatePercent}%`],
+      ['Catatan Tunggakan', financialRatios.overdueRateSnapshotNote],
+      ['Catatan Okupansi', financialRatios.occupancyRateNote],
+      [''],
+    ]),
+  );
+
+  // 9. Okupansi
+  sections.push(
+    generateCsv([
+      [`Okupansi & Revenue per Room — ${monthLabel}`],
+      ['Metrik', 'Nilai'],
+      ['Total Kamar Operasional', String(occupancy.totalOperableRooms)],
+      ['Kamar Terisi (Stay Aktif)', String(occupancy.occupiedRooms)],
+      ['Tingkat Okupansi', `${occupancy.occupancyRatePercent}%`],
+      ['Total Tagihan Bulan Ini', `Rp ${formatRupiah(occupancy.totalBilledRupiah)}`],
+      ['Revenue per Kamar Terisi', `Rp ${formatRupiah(occupancy.revenuePerOccupiedRoomRupiah)}`],
+      ['Catatan Okupansi', occupancy.occupancyNote],
+      ['Catatan Revenue', occupancy.revenueNote],
+      [''],
+    ]),
+  );
+
+  return sections.join('\r\n');
+}
+
+function ExportAllCsvButton({
+  ym,
+  monthlyIncome,
+  cashFlow,
+  overdueAging,
+  depositLiability,
+  expenseSummary,
+  profitLoss,
+  financialRatios,
+  occupancy,
+}: {
+  ym: { year: number; month: number };
+  monthlyIncome: ReportQueryState & { data?: MonthlyIncome };
+  cashFlow: ReportQueryState & { data?: CashFlow };
+  overdueAging: ReportQueryState & { data?: OverdueAging };
+  depositLiability: ReportQueryState & { data?: DepositLiability };
+  expenseSummary: ReportQueryState & { data?: ExpenseSummary };
+  profitLoss: ReportQueryState & { data?: ProfitLoss };
+  financialRatios: ReportQueryState & { data?: FinancialRatios };
+  occupancy: ReportQueryState & { data?: Occupancy };
+}) {
+  const queries = [monthlyIncome, cashFlow, overdueAging, depositLiability, expenseSummary, profitLoss, financialRatios, occupancy];
+  const ready = allReady(queries);
+
+  const handleExport = useCallback(() => {
+    if (!ready) return;
+    const csv = buildOwnerReportsCsv({
+      ym,
+      monthlyIncome: monthlyIncome.data!,
+      cashFlow: cashFlow.data!,
+      overdueAging: overdueAging.data!,
+      depositLiability: depositLiability.data!,
+      expenseSummary: expenseSummary.data!,
+      profitLoss: profitLoss.data!,
+      financialRatios: financialRatios.data!,
+      occupancy: occupancy.data!,
+    });
+    const mm = String(ym.month).padStart(2, '0');
+    downloadCsv(csv, `kost48-owner-reports-${ym.year}-${mm}.csv`);
+  }, [ready, ym, monthlyIncome.data, cashFlow.data, overdueAging.data, depositLiability.data, expenseSummary.data, profitLoss.data, financialRatios.data, occupancy.data]);
+
+  return (
+    <Button
+      variant="outline-primary"
+      size="sm"
+      disabled={!ready}
+      onClick={handleExport}
+      title={ready ? 'Unduh semua laporan sebagai CSV' : 'Menunggu data laporan selesai dimuat'}
+    >
+      ⬇ Ekspor Semua CSV
+    </Button>
   );
 }
 
