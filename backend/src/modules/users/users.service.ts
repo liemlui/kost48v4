@@ -71,7 +71,7 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto, actor: CurrentUserPayload) {
-    this.assertAdminRoleBoundaryOnCreate(actor, dto.role);
+    this.assertOwnerProtectionOnCreate(actor, dto.role);
 
     if (dto.role === UserRole.TENANT && !dto.tenantId) {
       throw new ConflictException('Role TENANT wajib memiliki tenantId');
@@ -117,7 +117,7 @@ export class UsersService {
     const existing = await this.prisma.user.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('User tidak ditemukan');
 
-    this.assertAdminRoleBoundaryOnUpdate(actor, existing.role, dto.role);
+    this.assertOwnerProtectionOnUpdate(actor, existing.role, dto.role);
 
     const nextRole = dto.role ?? existing.role;
     const nextTenantId = dto.tenantId !== undefined ? dto.tenantId : existing.tenantId;
@@ -139,6 +139,8 @@ export class UsersService {
       const tenant = await this.prisma.tenant.findUnique({ where: { id: nextTenantId } });
       if (!tenant) throw new NotFoundException('Tenant terkait tidak ditemukan');
     }
+
+    this.assertOwnerSensitiveFieldProtection(actor, existing.role, dto);
 
     const passwordHash = dto.password ? await bcrypt.hash(dto.password, 10) : undefined;
     const updated = await this.prisma.user.update({
@@ -171,27 +173,47 @@ export class UsersService {
     return updated;
   }
 
-  private assertAdminRoleBoundaryOnCreate(actor: CurrentUserPayload, role: UserRole) {
-    if (actor.role === UserRole.ADMIN && role === UserRole.OWNER) {
-      throw new ForbiddenException('Admin tidak dapat membuat akun OWNER');
+  private assertOwnerProtectionOnCreate(actor: CurrentUserPayload, role: UserRole) {
+    if (actor.role !== UserRole.OWNER && role === UserRole.OWNER) {
+      throw new ForbiddenException('Hanya OWNER yang dapat membuat akun OWNER');
     }
   }
 
-  private assertAdminRoleBoundaryOnUpdate(
+  private assertOwnerProtectionOnUpdate(
     actor: CurrentUserPayload,
     existingRole: UserRole | string,
     requestedRole?: UserRole | string,
   ) {
-    if (actor.role !== UserRole.ADMIN) {
+    if (actor.role === UserRole.OWNER) {
       return;
     }
 
     if (existingRole === UserRole.OWNER) {
-      throw new ForbiddenException('Admin tidak dapat mengubah akun OWNER');
+      throw new ForbiddenException('Hanya OWNER yang dapat mengubah akun OWNER');
     }
 
     if (requestedRole === UserRole.OWNER) {
-      throw new ForbiddenException('Admin tidak dapat mengubah role menjadi OWNER');
+      throw new ForbiddenException('Hanya OWNER yang dapat memberikan role OWNER');
+    }
+  }
+
+  private assertOwnerSensitiveFieldProtection(
+    actor: CurrentUserPayload,
+    existingRole: UserRole | string,
+    dto: UpdateUserDto,
+  ) {
+    if (actor.role === UserRole.OWNER) {
+      return;
+    }
+
+    if (existingRole !== UserRole.OWNER) {
+      return;
+    }
+
+    if (dto.isActive !== undefined || dto.password !== undefined) {
+      throw new ForbiddenException(
+        'Hanya OWNER yang dapat mengubah status aktif atau password akun OWNER',
+      );
     }
   }
 }
