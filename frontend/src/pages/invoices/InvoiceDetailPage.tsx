@@ -8,6 +8,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 import EmptyState from '../../components/common/EmptyState';
 import { createResource, getResource } from '../../api/resources';
 import { formatDateSafe } from '../resources/simpleCrudHelpers';
+import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 
 const paymentMethodLabels: Record<string, string> = {
   CASH: 'Tunai',
@@ -100,6 +101,11 @@ export default function InvoiceDetailPage() {
   const outstanding = Math.max(totalInvoice - totalPaid, 0);
   const isFullyPaid = outstanding <= 0 && totalInvoice > 0;
   const canTakePayment = invoice && !['CANCELLED', 'DRAFT'].includes(invoice.status) && outstanding > 0;
+  const isCancelled = invoice?.status === 'CANCELLED';
+
+  const handlePrint = () => {
+    window.print();
+  };
   const paymentAmount = Number(paymentForm.amountRupiah) || 0;
   const isOverpay = paymentAmount > outstanding;
   const paymentPreview = paymentAmount > 0
@@ -213,6 +219,22 @@ export default function InvoiceDetailPage() {
                           : 'Invoice ini sudah lunas.'}
                     </div>
                   ) : null}
+
+                  <hr className="my-3" />
+                  <div className="panel-title mb-2">Cetak Invoice</div>
+                  <div className="panel-subtitle mb-3">
+                    {isCancelled
+                      ? 'Invoice yang dibatalkan tidak dapat dicetak.'
+                      : 'Cetak invoice atau kwitansi untuk arsip.'}
+                  </div>
+                  <Button
+                    variant="outline-secondary"
+                    className="w-100"
+                    onClick={handlePrint}
+                    disabled={isCancelled}
+                  >
+                    🖨️ Cetak
+                  </Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -361,6 +383,13 @@ export default function InvoiceDetailPage() {
             </Col>
           </Row>
         </>
+      ) : null}
+
+      {/* ========== PRINT LAYOUT (hidden until print) ========== */}
+      {invoice ? (
+        <div className="print-only">
+          <InvoicePrintLayout data={invoice} />
+        </div>
       ) : null}
 
       <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)} centered>

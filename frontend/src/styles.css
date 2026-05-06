@@ -1371,3 +1371,232 @@ body.offcanvas-open {
   background: rgba(29, 78, 216, 0.16);
   border-color: rgba(29, 78, 216, 0.3);
 }
+
+/* ================================================================
+   PRINT STYLES — Global
+   ================================================================ */
+
+/* Hidden on screen, visible only when printing */
+.print-only {
+  display: none !important;
+}
+
+/* Elements to hide during print */
+@media print {
+  /* Show print-only containers */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Hide shell chrome */
+  .app-sidebar,
+  .app-topbar,
+  .app-topbar-row,
+  .app-topbar-breadcrumb,
+  .app-mobile-menu-button,
+  .app-sidebar-offcanvas,
+  .sidebar-footer,
+  .sidebar-nav-groups,
+  .sidebar-link,
+  .sidebar-section-label,
+  .brand-block,
+  .brand-mark,
+  .brand-title,
+  .brand-subtitle,
+  .topbar-user,
+  .user-avatar,
+  .role-pill,
+  .surface-pill,
+
+  /* Hide navigation / actions */
+  .page-header-actions,
+  .page-eyebrow,
+  .btn,
+  .nav-tabs,
+  .breadcrumb,
+  .toast-container,
+  .toast,
+  .modal,
+  .modal-backdrop,
+  .offcanvas,
+  .offcanvas-backdrop,
+  .hero-actions,
+  .hero-badge-row,
+  .hero-chip,
+  .payment-urgency-chip,
+  .dashboard-hero::after,
+  .notification-dot,
+  .notification-dropdown-menu,
+  .notification-bell-toggle,
+
+  /* Hide search / filter toolbars */
+  .toolbar-card,
+  .search-box,
+  .filter-bar,
+
+  /* Hide empty-state decorative elements during print */
+  .empty-state-icon,
+
+  /* Hide no-print tagged elements */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset backgrounds and shadows for clean print */
+  body {
+    background: white !important;
+    color: #000 !important;
+    font-size: 12pt !important;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  }
+
+  .app-shell {
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  .app-shell-grid {
+    display: block !important;
+  }
+
+  .app-main {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Card styling for print - clean borders, no backdrop blur */
+  .content-card,
+  .glass-card,
+  .metric-card,
+  .toolbar-card,
+  .table-card,
+  .detail-hero,
+  .login-panel,
+  .login-aside,
+  .stat-card {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+  }
+
+  .content-card .card-body,
+  .metric-card .card-body,
+  .table-card .card-body,
+  .stat-card .card-body {
+    padding: 12px !important;
+  }
+
+  /* Table readability */
+  .table-card .table thead th,
+  .content-card .table thead th {
+    background: #f1f5f9 !important;
+    color: #000 !important;
+    font-size: 9pt !important;
+    border-bottom: 2px solid #000 !important;
+    padding: 6px 8px !important;
+  }
+
+  .table-card .table tbody td,
+  .content-card .table tbody td,
+  .table-card .table tbody th,
+  .content-card .table tbody th {
+    font-size: 9pt !important;
+    padding: 6px 8px !important;
+    border-color: #ddd !important;
+  }
+
+  /* Metrics / stats for print */
+  .stat-card::before {
+    display: none !important;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .metric-tile {
+    border: 1px solid #ccc !important;
+    background: white !important;
+  }
+
+  /* Page header simplified */
+  .page-header h1,
+  .page-header h2 {
+    font-size: 16pt !important;
+    margin-bottom: 4px !important;
+  }
+
+  .page-header p,
+  .page-header .text-muted {
+    font-size: 9pt !important;
+  }
+
+  /* Hide alerts except for the print layout itself */
+  .alert:not(.print-only .alert) {
+    display: none !important;
+  }
+
+  /* Summary strip */
+  .summary-chip {
+    border: 1px solid #ccc !important;
+    background: white !important;
+  }
+
+  /* Status badges keep colors but simplified */
+  .status-badge::before {
+    display: none !important;
+  }
+
+  /* Page margins for A4 */
+  @page {
+    size: A4;
+    margin: 12mm 15mm;
+  }
+
+  /* Print layout spacing */
+  .print-only > * {
+    page-break-inside: avoid;
+  }
+
+  /* Lunas stamp styles (ensure it renders well in print) */
+  .print-lunas-stamp {
+    display: inline-block;
+    border: 3px solid #15803d;
+    color: #15803d;
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 28pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transform: rotate(-10deg);
+    opacity: 0.85;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* Payment urgency chip hidden in print */
+  .payment-urgency-chip-danger,
+  .payment-urgency-chip-warning,
+  .payment-urgency-chip-info {
+    display: none !important;
+  }
+
+  /* Overview grid becomes single column */
+  .overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Public page clean */
+  .public-page-shell {
+    background: white !important;
+  }
+
+  .public-topbar {
+    border-bottom: 2px solid #000 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+  }
+}
