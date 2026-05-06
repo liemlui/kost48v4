@@ -69,7 +69,31 @@ SHELL AND COMMAND RULES
 
 Use Windows PowerShell only.
 
-Before running commands, confirm current directory:
+Before running any command, confirm native PowerShell session with:
+
+Get-Location
+$PSVersionTable.PSEdition
+$Host.Name
+
+Expected:
+- Get-Location must work.
+- $PSVersionTable.PSEdition must return Desktop or Core.
+- $Host.Name should return ConsoleHost or Visual Studio Code Host.
+- If Get-Location is not recognized, the shell is cmd.exe or another non-PowerShell shell.
+
+If the terminal is cmd.exe, bash, Git Bash, WSL, or any non-PowerShell shell:
+STOP and report:
+"Shell is not PowerShell. Please switch terminal to PowerShell before continuing."
+
+Forbidden shell workaround:
+- Do NOT use powershell -Command from cmd.exe.
+- Do NOT use pwsh -Command from cmd.exe.
+- Do NOT wrap PowerShell commands inside any non-PowerShell shell.
+- Do NOT adapt by using cmd syntax.
+- Do NOT use curl.
+- Do NOT use bash commands.
+
+Before running project commands, confirm current directory:
 
 Get-Location
 
@@ -78,14 +102,6 @@ If current directory is outside:
 C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
 
 STOP and report.
-
-If the terminal is cmd.exe, bash, Git Bash, WSL, or any non-PowerShell shell:
-STOP and report:
-"Shell is not PowerShell. Please switch terminal to PowerShell before continuing."
-
-Do NOT adapt by using cmd syntax.
-Do NOT use curl.
-Do NOT use bash commands.
 
 All API tests must use Invoke-RestMethod.
 
