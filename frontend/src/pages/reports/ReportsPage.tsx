@@ -43,6 +43,43 @@ const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Lainnya',
 };
 
+// --- M10-C: Owner Financial Health Thresholds ---
+
+type HealthLevel = 'Baik' | 'Perlu Dipantau' | 'Buruk';
+type CashFlowStatus = 'Positif' | 'Netral' | 'Negatif';
+type OverallStatus = 'Sehat' | 'Perlu Dipantau' | 'Bermasalah';
+
+function collectionRateLabel(value: number): { label: HealthLevel; color: string } {
+  if (value >= 90) return { label: 'Baik', color: 'success' };
+  if (value >= 70) return { label: 'Perlu Dipantau', color: 'warning' };
+  return { label: 'Buruk', color: 'danger' };
+}
+function netProfitMarginLabel(value: number): { label: HealthLevel; color: string } {
+  if (value >= 40) return { label: 'Baik', color: 'success' };
+  if (value >= 20) return { label: 'Perlu Dipantau', color: 'warning' };
+  return { label: 'Buruk', color: 'danger' };
+}
+function expenseRatioLabel(value: number): { label: HealthLevel; color: string } {
+  if (value <= 40) return { label: 'Baik', color: 'success' };
+  if (value <= 60) return { label: 'Perlu Dipantau', color: 'warning' };
+  return { label: 'Buruk', color: 'danger' };
+}
+function occupancyRateLabel(value: number): { label: HealthLevel; color: string } {
+  if (value >= 85) return { label: 'Baik', color: 'success' };
+  if (value >= 60) return { label: 'Perlu Dipantau', color: 'warning' };
+  return { label: 'Buruk', color: 'danger' };
+}
+function overdueRateLabel(value: number): { label: HealthLevel; color: string } {
+  if (value <= 10) return { label: 'Baik', color: 'success' };
+  if (value <= 25) return { label: 'Perlu Dipantau', color: 'warning' };
+  return { label: 'Buruk', color: 'danger' };
+}
+function cashFlowLabel(value: number): { label: CashFlowStatus; color: string } {
+  if (value > 0) return { label: 'Positif', color: 'success' };
+  if (value === 0) return { label: 'Netral', color: 'secondary' };
+  return { label: 'Negatif', color: 'danger' };
+}
+
 export default function ReportsPage() {
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
 
@@ -124,6 +161,30 @@ export default function ReportsPage() {
           </Form.Select>
         </Col>
       </Row>
+
+      {/* --- M10-C: Owner Financial Health Summary --- */}
+      {(financialRatios.isLoading || profitLoss.isLoading || occupancy.isLoading || cashFlow.isLoading) ? (
+        <Card className="mb-3">
+          <Card.Body className="text-center py-4">
+            <Spinner animation="border" size="sm" /> <span className="ms-2">Memuat ringkasan kesehatan keuangan...</span>
+          </Card.Body>
+        </Card>
+      ) : (financialRatios.isError || profitLoss.isError || occupancy.isError || cashFlow.isError) ? (
+        <Card className="mb-3 border-warning">
+          <Card.Body className="text-warning">
+            ⚠️ Sebagian data laporan gagal dimuat. Ringkasan kesehatan keuangan tidak dapat ditampilkan.
+          </Card.Body>
+        </Card>
+      ) : (
+        <OwnerHealthSummary
+          financialRatios={financialRatios.data!}
+          profitLoss={profitLoss.data!}
+          occupancy={occupancy.data!}
+          cashFlow={cashFlow.data!}
+        />
+      )}
+
+      <LockedFormalRatios />
 
       {/* Monthly Income */}
       <Card className="mb-3">
@@ -237,6 +298,194 @@ export default function ReportsPage() {
         </Card.Body>
       </Card>
     </Container>
+   );
+}
+
+// --- M10-C: Owner Financial Health Summary Components ---
+
+function OwnerHealthSummary({
+  financialRatios,
+  profitLoss,
+  occupancy,
+  cashFlow,
+}: {
+  financialRatios: FinancialRatios;
+  profitLoss: ProfitLoss;
+  occupancy: Occupancy;
+  cashFlow: CashFlow;
+}) {
+  const colRate = collectionRateLabel(financialRatios.collectionRatePercent);
+  const npmLabel = netProfitMarginLabel(profitLoss.netProfitMarginPercent);
+  const expLabel = expenseRatioLabel(financialRatios.expenseRatioPercent);
+  const occLabel = occupancyRateLabel(occupancy.occupancyRatePercent);
+  const ovdLabel = overdueRateLabel(financialRatios.overdueRateSnapshotPercent);
+  const cfLabel = cashFlowLabel(cashFlow.netCashFlowRupiah);
+
+  const isBuruk = [colRate, npmLabel, expLabel, occLabel, ovdLabel].some((m) => m.label === 'Buruk');
+  const isCashFlowNeg = cashFlow.netCashFlowRupiah < 0;
+  const isDipantau = [colRate, npmLabel, expLabel, occLabel, ovdLabel].some((m) => m.label === 'Perlu Dipantau');
+
+  let overall: { label: OverallStatus; color: string; bg: string; emoji: string };
+  if (isBuruk || isCashFlowNeg) {
+    overall = { label: 'Bermasalah', color: 'danger', bg: 'danger-subtle', emoji: '🔴' };
+  } else if (isDipantau) {
+    overall = { label: 'Perlu Dipantau', color: 'warning', bg: 'warning-subtle', emoji: '🟡' };
+  } else {
+    overall = { label: 'Sehat', color: 'success', bg: 'success-subtle', emoji: '🟢' };
+  }
+
+  return (
+    <Card className="mb-3 border-2" style={{ borderColor: `var(--bs-${overall.color})` }}>
+      <Card.Header className={`bg-${overall.bg}`}>
+        <h5 className="mb-1">📌 Ringkasan Kesehatan Keuangan Owner</h5>
+        <span className={`text-${overall.color} fw-bold`}>
+          {overall.emoji} Kondisi Bulan Ini: {overall.label}
+        </span>
+      </Card.Header>
+      <Card.Body className="p-0">
+        <Table bordered size="sm" className="mb-0">
+          <tbody>
+            <MetricRow
+              emoji="💰"
+              label="Tingkat Koleksi"
+              value={`${financialRatios.collectionRatePercent}%`}
+              status={colRate.label}
+              color={colRate.color}
+              note="Pembayaran diterima / Total tagihan bulan ini"
+            />
+            <MetricRow
+              emoji="📈"
+              label="Marjin Laba Bersih"
+              value={`${profitLoss.netProfitMarginPercent}%`}
+              status={npmLabel.label}
+              color={npmLabel.color}
+              note="Laba bersih / Total pendapatan"
+            />
+            <MetricRow
+              emoji="🧾"
+              label="Rasio Pengeluaran"
+              value={`${financialRatios.expenseRatioPercent}%`}
+              status={expLabel.label}
+              color={expLabel.color}
+              note="Total pengeluaran / Total pendapatan"
+            />
+            <MetricRow
+              emoji="🏠"
+              label="Tingkat Okupansi"
+              value={`${occupancy.occupancyRatePercent}%`}
+              status={occLabel.label}
+              color={occLabel.color}
+              note="Stay aktif / Kamar operasional (snapshot)"
+            />
+            <MetricRow
+              emoji="⏳"
+              label="Tingkat Tunggakan"
+              value={`${financialRatios.overdueRateSnapshotPercent}%`}
+              status={ovdLabel.label}
+              color={ovdLabel.color}
+              note="Total overdue / Tagihan bulan ini (snapshot)"
+            />
+            <MetricRow
+              emoji="💸"
+              label="Arus Kas Bersih"
+              value={`Rp ${formatRupiah(cashFlow.netCashFlowRupiah)}`}
+              status={cfLabel.label}
+              color={cfLabel.color}
+              note="Kas masuk - Kas keluar bulan ini"
+            />
+          </tbody>
+        </Table>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function MetricRow({
+  emoji,
+  label,
+  value,
+  status,
+  color,
+  note,
+}: {
+  emoji: string;
+  label: string;
+  value: string;
+  status: string;
+  color: string;
+  note: string;
+}) {
+  return (
+    <tr>
+      <td style={{ width: 180 }}>
+        {emoji} <strong>{label}</strong>
+      </td>
+      <td className="text-end" style={{ width: 100 }}>
+        <strong>{value}</strong>
+      </td>
+      <td className="text-center" style={{ width: 130 }}>
+        <Badge bg={color}>{status}</Badge>
+      </td>
+      <td className="text-muted small">{note}</td>
+    </tr>
+  );
+}
+
+function LockedFormalRatios() {
+  const ratios = [
+    {
+      name: 'Current Ratio',
+      formula: 'Aset Lancar / Kewajiban Lancar',
+      reason:
+        'Belum dapat dihitung akurat karena data kas/bank aktual dan current liabilities belum dimodelkan.',
+    },
+    {
+      name: 'Acid-Test / Quick Ratio',
+      formula: '(Aset Lancar - Inventory) / Kewajiban Lancar',
+      reason:
+        'Belum dapat dihitung akurat karena data kas/bank aktual, inventory, dan current liabilities belum dimodelkan.',
+    },
+    {
+      name: 'ROCE (Return on Capital Employed)',
+      formula: 'EBIT / (Total Aset - Kewajiban Lancar)',
+      reason:
+        'Belum dapat dihitung akurat karena nilai aset, depresiasi, dan capital employed belum dimodelkan.',
+    },
+    {
+      name: 'Debt-to-Equity Ratio',
+      formula: 'Total Kewajiban / Total Ekuitas',
+      reason:
+        'Belum dapat dihitung akurat karena data utang jangka panjang, ekuitas pemilik, dan akumulasi laba belum dimodelkan.',
+    },
+  ];
+
+  return (
+    <Card className="mb-3 border-secondary">
+      <Card.Header className="bg-light">
+        <h5 className="mb-0 text-muted">🔒 Rasio Akuntansi Formal — Belum Cukup Data</h5>
+      </Card.Header>
+      <Card.Body className="p-0">
+        <Table bordered size="sm" className="mb-0">
+          <tbody>
+            {ratios.map((r) => (
+              <tr key={r.name}>
+                <td style={{ width: 200 }}>
+                  <strong>{r.name}</strong>
+                  <br />
+                  <span className="text-muted small">{r.formula}</span>
+                </td>
+                <td>
+                  <Badge bg="secondary" className="me-2">
+                    🔒 Tidak Tersedia
+                  </Badge>
+                  <span className="text-muted small">{r.reason}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Card.Body>
+    </Card>
   );
 }
 
