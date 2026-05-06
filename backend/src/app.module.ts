@@ -22,6 +22,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.module';
 import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-submissions.module';
 import { RenewRequestsModule } from './modules/renew-requests/renew-requests.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { RenewRequestsModule } from './modules/renew-requests/renew-requests.mod
     TenantBookingsModule,
     PaymentSubmissionsModule,
     RenewRequestsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

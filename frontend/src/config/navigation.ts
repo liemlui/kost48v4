@@ -26,6 +26,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau tagihan, pembayaran, tunggakan, dan follow-up utama.' },
       { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
+      { to: '/reports', label: 'Laporan', icon: '📊', hint: 'Laporan keuangan Owner: pendapatan, arus kas, tunggakan, deposit, pengeluaran.' },
       { to: '/expenses', label: 'Pengeluaran', icon: '🧮', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
     ],
   },

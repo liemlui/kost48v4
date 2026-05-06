@@ -1,0 +1,271 @@
+import React, { useState } from 'react';
+import { Card, Table, Badge, Spinner, Container, Row, Col, Form } from 'react-bootstrap';
+import { useQuery } from '@tanstack/react-query';
+import {
+  fetchMonthlyIncome,
+  fetchOverdueAging,
+  fetchDepositLiability,
+  fetchExpenseSummary,
+  fetchCashFlow,
+  MonthlyIncome,
+  OverdueAging,
+  DepositLiability,
+  ExpenseSummary,
+  CashFlow,
+} from '../../api/reports';
+
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat('id-ID').format(value);
+}
+
+function currentYearMonth(): { year: number; month: number } {
+  const d = new Date();
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
+const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
+  RENT_BUILDING: 'Sewa Gedung',
+  SALARY: 'Gaji',
+  ELECTRICITY: 'Listrik',
+  WATER: 'Air',
+  INTERNET: 'Internet',
+  MAINTENANCE: 'Perawatan',
+  CLEANING: 'Kebersihan',
+  SUPPLIES: 'Perlengkapan',
+  TAX: 'Pajak',
+  MARKETING: 'Marketing',
+  OTHER: 'Lainnya',
+};
+
+export default function ReportsPage() {
+  const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
+
+  const monthlyIncome = useQuery({
+    queryKey: ['reports', 'monthly-income', ym],
+    queryFn: () => fetchMonthlyIncome(ym.year, ym.month),
+  });
+
+  const overdueAging = useQuery({
+    queryKey: ['reports', 'overdue-aging'],
+    queryFn: () => fetchOverdueAging(),
+  });
+
+  const depositLiability = useQuery({
+    queryKey: ['reports', 'deposit-liability'],
+    queryFn: () => fetchDepositLiability(),
+  });
+
+  const expenseSummary = useQuery({
+    queryKey: ['reports', 'expense-summary', ym],
+    queryFn: () => fetchExpenseSummary(ym.year, ym.month),
+  });
+
+  const cashFlow = useQuery({
+    queryKey: ['reports', 'cash-flow', ym],
+    queryFn: () => fetchCashFlow(ym.year, ym.month),
+  });
+
+  const handleChange = (field: 'year' | 'month', val: string) => {
+    const num = parseInt(val, 10);
+    if (!isNaN(num)) {
+      setYm((prev) => ({ ...prev, [field]: num }));
+    }
+  };
+
+  return (
+    <Container fluid className="px-2 py-3">
+      <h4 className="mb-3">📊 Laporan Keuangan Owner</h4>
+
+      <Row className="mb-3">
+        <Col xs="auto">
+          <Form.Label className="mb-0">Tahun</Form.Label>
+          <Form.Control
+            type="number"
+            value={ym.year}
+            min={2020}
+            max={2100}
+            onChange={(e) => handleChange('year', e.target.value)}
+            style={{ width: 100 }}
+          />
+        </Col>
+        <Col xs="auto">
+          <Form.Label className="mb-0">Bulan</Form.Label>
+          <Form.Select
+            value={ym.month}
+            onChange={(e) => handleChange('month', e.target.value)}
+            style={{ width: 140 }}
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+              <option key={m} value={m}>
+                {new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+      </Row>
+
+      {/* Monthly Income */}
+      <Card className="mb-3">
+        <Card.Header>💵 Pendapatan Bulanan — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {monthlyIncome.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : monthlyIncome.isError ? (
+            <p className="text-danger">Gagal memuat data pendapatan.</p>
+          ) : (
+            <MonthlyIncomeTable data={monthlyIncome.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Cash Flow */}
+      <Card className="mb-3">
+        <Card.Header>💸 Arus Kas — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {cashFlow.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : cashFlow.isError ? (
+            <p className="text-danger">Gagal memuat data arus kas.</p>
+          ) : (
+            <CashFlowTable data={cashFlow.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Overdue Aging */}
+      <Card className="mb-3">
+        <Card.Header>⏳ Aging Tunggakan</Card.Header>
+        <Card.Body>
+          {overdueAging.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : overdueAging.isError ? (
+            <p className="text-danger">Gagal memuat data tunggakan.</p>
+          ) : (
+            <OverdueAgingTable data={overdueAging.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Deposit Liability */}
+      <Card className="mb-3">
+        <Card.Header>💰 Liabilitas Deposit</Card.Header>
+        <Card.Body>
+          {depositLiability.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : depositLiability.isError ? (
+            <p className="text-danger">Gagal memuat data deposit.</p>
+          ) : (
+            <DepositLiabilityTable data={depositLiability.data!} />
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Expense Summary */}
+      <Card className="mb-3">
+        <Card.Header>🧮 Pengeluaran per Kategori — {new Date(ym.year, ym.month - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</Card.Header>
+        <Card.Body>
+          {expenseSummary.isLoading ? (
+            <Spinner animation="border" size="sm" />
+          ) : expenseSummary.isError ? (
+            <p className="text-danger">Gagal memuat data pengeluaran.</p>
+          ) : (
+            <ExpenseSummaryTable data={expenseSummary.data!} />
+          )}
+        </Card.Body>
+      </Card>
+    </Container>
+  );
+}
+
+function MonthlyIncomeTable({ data }: { data: MonthlyIncome }) {
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <tbody>
+        <tr><td>Total Tagihan</td><td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td></tr>
+        <tr><td>Total Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalPaidRupiah)}</td></tr>
+        <tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.totalWifiRevenueRupiah)}</td></tr>
+        <tr className="table-warning"><td><strong>Outstanding</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.outstandingRupiah)}</strong></td></tr>
+        <tr><td>Jumlah Tagihan</td><td className="text-end">{data.invoiceCount}</td></tr>
+        <tr><td>— Lunas</td><td className="text-end"><Badge bg="success">{data.paidInvoiceCount}</Badge></td></tr>
+        <tr><td>— Sebagian</td><td className="text-end"><Badge bg="warning">{data.partialInvoiceCount}</Badge></td></tr>
+        <tr><td>— Belum Bayar</td><td className="text-end"><Badge bg="danger">{data.unpaidInvoiceCount}</Badge></td></tr>
+      </tbody>
+    </Table>
+  );
+}
+
+function CashFlowTable({ data }: { data: CashFlow }) {
+  const netColor = data.netCashFlowRupiah >= 0 ? 'text-success' : 'text-danger';
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <thead>
+        <tr><th>Jenis</th><th className="text-end">Rupiah</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🟢 Kas Masuk (Invoice + WiFi)</td><td className="text-end">Rp {formatRupiah(data.cashIn.totalRupiah)}</td></tr>
+        <tr><td>— Pembayaran Invoice</td><td className="text-end">Rp {formatRupiah(data.cashIn.invoicePaymentsRupiah)}</td></tr>
+        <tr><td>— Penjualan WiFi</td><td className="text-end">Rp {formatRupiah(data.cashIn.wifiSalesRupiah)}</td></tr>
+        <tr><td>🔴 Kas Keluar (Pengeluaran)</td><td className="text-end">Rp {formatRupiah(data.cashOut.expensesRupiah)}</td></tr>
+        <tr className={netColor}><td><strong>🔷 Arus Kas Bersih</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.netCashFlowRupiah)}</strong></td></tr>
+      </tbody>
+    </Table>
+  );
+}
+
+function OverdueAgingTable({ data }: { data: OverdueAging }) {
+  const b = data.buckets;
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <thead>
+        <tr><th>Umur</th><th className="text-end">Jumlah Tagihan</th><th className="text-end">Total Rupiah</th></tr>
+      </thead>
+      <tbody>
+        <tr className="table-success"><td>Current / Belum Jatuh Tempo</td><td className="text-end">{b.current.count}</td><td className="text-end">Rp {formatRupiah(b.current.totalRupiah)}</td></tr>
+        <tr className="table-warning"><td>1–30 hari</td><td className="text-end">{b.days1to30.count}</td><td className="text-end">Rp {formatRupiah(b.days1to30.totalRupiah)}</td></tr>
+        <tr className="table-warning"><td>31–60 hari</td><td className="text-end">{b.days31to60.count}</td><td className="text-end">Rp {formatRupiah(b.days31to60.totalRupiah)}</td></tr>
+        <tr className="table-danger"><td>61–90 hari</td><td className="text-end">{b.days61to90.count}</td><td className="text-end">Rp {formatRupiah(b.days61to90.totalRupiah)}</td></tr>
+        <tr className="table-danger"><td>91+ hari</td><td className="text-end">{b.days91plus.count}</td><td className="text-end">Rp {formatRupiah(b.days91plus.totalRupiah)}</td></tr>
+        <tr className="fw-bold"><td>Total Tunggakan</td><td className="text-end">{data.totalOverdueCount}</td><td className="text-end">Rp {formatRupiah(data.totalOverdueRupiah)}</td></tr>
+        <tr><td colSpan={3} className="text-muted small">Per {data.asOf}</td></tr>
+      </tbody>
+    </Table>
+  );
+}
+
+function DepositLiabilityTable({ data }: { data: DepositLiability }) {
+  return (
+    <Table bordered size="sm" className="mb-0">
+      <tbody>
+        <tr><td>Total Deposit Dinilai</td><td className="text-end">Rp {formatRupiah(data.totalDepositAmountRupiah)}</td></tr>
+        <tr><td>Sudah Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalDepositPaidRupiah)}</td></tr>
+        <tr className="table-warning"><td><strong>Outstanding Deposit</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalDepositOutstandingRupiah)}</strong></td></tr>
+        <tr><td>Stay Aktif (dengan deposit)</td><td className="text-end">{data.activeStayCount}</td></tr>
+        <tr><td>— Lunas</td><td className="text-end"><Badge bg="success">{data.fullyPaidCount}</Badge></td></tr>
+        <tr><td>— Sebagian</td><td className="text-end"><Badge bg="warning">{data.partiallyPaidCount}</Badge></td></tr>
+        <tr><td>— Belum Bayar</td><td className="text-end"><Badge bg="danger">{data.unpaidCount}</Badge></td></tr>
+      </tbody>
+    </Table>
+  );
+}
+
+function ExpenseSummaryTable({ data }: { data: ExpenseSummary }) {
+  return (
+    <>
+      <p className="mb-1"><strong>Total Pengeluaran:</strong> Rp {formatRupiah(data.totalExpenseRupiah)}</p>
+      <Table bordered size="sm" className="mb-0">
+        <thead>
+          <tr><th>Kategori</th><th className="text-end">Jumlah</th><th className="text-end">Rupiah</th></tr>
+        </thead>
+        <tbody>
+          {data.categories.map((c) => (
+            <tr key={c.category}>
+              <td>{EXPENSE_CATEGORY_LABELS[c.category] ?? c.category}</td>
+              <td className="text-end">{c.count}</td>
+              <td className="text-end">Rp {formatRupiah(c.totalRupiah)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
+  );
+}
