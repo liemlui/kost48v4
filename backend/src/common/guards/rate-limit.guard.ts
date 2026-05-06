@@ -26,6 +26,7 @@ export class RateLimitGuard implements CanActivate {
   private static readonly store = new Map<string, BucketEntry>();
 
   private readonly configs: Record<string, RateLimitConfig> = {
+    login: { maxRequests: 10, windowMs: 5 * 60 * 1000 },
     forgotPassword: { maxRequests: 3, windowMs: 10 * 60 * 1000 },
     resetPassword: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
   };

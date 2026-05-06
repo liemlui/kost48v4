@@ -16,6 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @UseGuards(RateLimitGuard)
   async login(@Body() dto: LoginDto) {
     const data = await this.authService.login(dto);
     return { message: 'Login berhasil', data };
