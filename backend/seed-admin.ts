@@ -33,6 +33,10 @@ const TENANT_EMAIL = 'tenant.g2@kost48.com';
 const TENANT_PASSWORD = 'tenant123';
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('seed-admin.ts tidak boleh dijalankan di production');
+  }
+
   const ownerHash = await bcrypt.hash(OWNER_PASSWORD, 10);
   const tenantHash = await bcrypt.hash(TENANT_PASSWORD, 10);
 
