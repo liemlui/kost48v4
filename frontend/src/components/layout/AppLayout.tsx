@@ -200,7 +200,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
 
         <Offcanvas show={sidebarOpen} onHide={() => setSidebarOpen(false)} placement="start" className="app-sidebar-offcanvas">
           <Offcanvas.Header closeButton closeLabel="Tutup navigasi">
-            <Offcanvas.Title>Navigasi</Offcanvas.Title>
+            <Offcanvas.Title>{getWorkspaceTitle(user?.role)}</Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
             <div className="app-sidebar app-sidebar-mobile">
