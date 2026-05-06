@@ -70,7 +70,7 @@ export default function MyInvoicesPage() {
             <tbody>
               {sortedItems.map((item) => {
                 const overdue = isOverdue(item);
-                return <tr key={item.id}><td className="fw-semibold">{item.invoiceNumber || `INV-${item.id}`}</td><td>{formatPeriod(item.periodStart, item.periodEnd)}</td><td className={overdue ? 'text-soft-danger fw-semibold' : ''}>{formatDate(item.dueDate)}</td><td><CurrencyDisplay amount={item.totalAmountRupiah} /></td><td><StatusBadge status={overdue ? 'OVERDUE' : item.status} /></td><td>{['ISSUED', 'PARTIAL', 'DRAFT'].includes(item.status) ? <Button size="sm" variant="outline-primary" onClick={() => navigate('/portal/bookings')}>Buka Pemesanan Saya</Button> : <span className="small text-muted">-</span>}</td></tr>;
+                return <tr key={item.id}><td className="fw-semibold"><Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `INV-${item.id}`}</Button></td><td>{formatPeriod(item.periodStart, item.periodEnd)}</td><td className={overdue ? 'text-soft-danger fw-semibold' : ''}>{formatDate(item.dueDate)}</td><td><CurrencyDisplay amount={item.totalAmountRupiah} /></td><td><StatusBadge status={overdue ? 'OVERDUE' : item.status} /></td><td><Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button></td></tr>;
               })}
             </tbody>
           </Table>
