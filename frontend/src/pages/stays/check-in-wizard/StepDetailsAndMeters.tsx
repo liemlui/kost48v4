@@ -132,7 +132,7 @@ export default function StepDetailsAndMeters({
                   required: 'Meter awal listrik wajib diisi',
                   validate: (value) => {
                     const num = parseFloat(value);
-                    if (isNaN(num)) return 'Harus angka desimal valid';
+                    if (isNaN(num)) return 'Harus berupa angka';
                     if (num < 0) return 'Tidak boleh negatif';
                     return true;
                   }
@@ -156,7 +156,7 @@ export default function StepDetailsAndMeters({
                   required: 'Meter awal air wajib diisi',
                   validate: (value) => {
                     const num = parseFloat(value);
-                    if (isNaN(num)) return 'Harus angka desimal valid';
+                    if (isNaN(num)) return 'Harus berupa angka';
                     if (num < 0) return 'Tidak boleh negatif';
                     return true;
                   }
@@ -177,7 +177,7 @@ export default function StepDetailsAndMeters({
         </Row>
         <Alert variant="info" className="mt-3">
           <div className="small">
-            <strong>Catatan Meter Awal:</strong> Meter awal listrik dan air wajib diisi untuk mencatat baseline penggunaan. Nilai harus angka desimal valid dan tidak boleh negatif.
+            <strong>Catatan Meter Awal:</strong> Meter awal listrik dan air wajib diisi untuk mencatat baseline penggunaan. Nilai harus berupa angka dan tidak boleh negatif.
           </div>
         </Alert>
       </Card.Body>

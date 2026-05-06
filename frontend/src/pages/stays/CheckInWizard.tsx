@@ -78,16 +78,16 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
     return _rooms.map((room: any) => ({
       id: room.id,
       name: room.name,
-      price: room.baseMonthlyRate ?? room.price ?? undefined,
-      deposit: room.requiredDeposit ?? room.deposit ?? undefined,
+      price: room.monthlyRateRupiah ?? undefined,
+      deposit: room.defaultDepositRupiah ?? undefined,
       status: room.status,
     }));
   }, [_rooms]);
 
+  const watchRoomId = form.watch('roomId');
   const selectedRoom = useMemo(() => {
-    const roomId = form.watch('roomId');
-    return displayRooms.find((r) => r.id === roomId);
-  }, [displayRooms, form]);
+    return displayRooms.find((r) => r.id === watchRoomId);
+  }, [displayRooms, watchRoomId]);
 
   // ---- Mutations ----
   const createStayMutation = useMutation({
@@ -135,10 +135,18 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
   // ---- Derived ----
   const tenants = useMemo(() => (tenantsResp?.items ?? []) as Tenant[], [tenantsResp]);
 
+  const watchTenantId = form.watch('tenantId');
   const selectedTenant = useMemo(() => {
-    const tid = form.watch('tenantId');
-    return tenants.find((t) => t.id === tid);
-  }, [tenants, form]);
+    return tenants.find((t) => t.id === watchTenantId);
+  }, [tenants, watchTenantId]);
+
+  const handleClose = () => {
+    if (onHide) {
+      onHide();
+      return;
+    }
+    navigate('/stays');
+  };
 
   // ---- Load tenant options for SearchableSelect ----
   const defaultTenantOptions = useMemo(() => {
@@ -227,7 +235,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
       const elecNum = parseFloat(values.initialElectricityKwh);
       const waterNum = parseFloat(values.initialWaterM3);
       if (isNaN(elecNum) || isNaN(waterNum)) {
-        setWizardError('Meter awal harus angka desimal valid');
+        setWizardError('Meter awal harus berupa angka');
         return;
       }
       if (elecNum < 0 || waterNum < 0) {
@@ -296,7 +304,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
   }, [selectedRoom?.id]);
 
   return (
-    <Offcanvas show={show} onHide={onHide} placement="end" backdrop="static" style={{ width: '700px' }}>
+    <Offcanvas show={show} onHide={handleClose} placement="end" backdrop="static" style={{ width: '700px' }}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Check-in Baru</Offcanvas.Title>
       </Offcanvas.Header>
