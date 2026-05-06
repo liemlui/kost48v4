@@ -35,19 +35,19 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
   // ---- Queries ----
   const { data: tenantsResp, isLoading: isLoadingTenants } = useQuery({
     queryKey: ['tenants', 'select'],
-    queryFn: () => listResource<Tenant>('tenants', { pageSize: '200', sort: 'fullName' }),
+    queryFn: () => listResource<Tenant>('tenants', { limit: 200 }),
     enabled: show,
   });
 
   // Estimate latest meter readings
   const electricityQuery = useQuery({
     queryKey: ['meter-readings', 'electricity', 'latest'],
-    queryFn: () => listResource('meter-readings', { utilityType: 'ELECTRICITY', sort: '-readingAt', pageSize: '500' }),
+    queryFn: () => listResource('meter-readings', { utilityType: 'ELECTRICITY', limit: 500 }),
     enabled: show,
   });
   const waterQuery = useQuery({
     queryKey: ['meter-readings', 'water', 'latest'],
-    queryFn: () => listResource('meter-readings', { utilityType: 'WATER', sort: '-readingAt', pageSize: '500' }),
+    queryFn: () => listResource('meter-readings', { utilityType: 'WATER', limit: 500 }),
     enabled: show,
   });
 
@@ -147,7 +147,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
 
   const loadTenantOptions = async (inputValue: string): Promise<SelectOption<number>[]> => {
     try {
-      const res = await listResource<Tenant>('tenants', { q: inputValue, pageSize: '20' });
+      const res = await listResource<Tenant>('tenants', { search: inputValue, limit: 20 });
       return (res.items ?? []).map((t) => ({ label: t.fullName, value: t.id }));
     } catch {
       return [];
