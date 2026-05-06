@@ -106,7 +106,8 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
       navigate(`/stays/${data.stay.id}`);
     },
     onError: (err: any) => {
-      const message = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat stay';
+      const raw = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat stay';
+      const message = Array.isArray(raw) ? raw.join(' • ') : raw;
       setWizardError(message);
     },
   });
@@ -127,7 +128,8 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
       setWizardError('');
     },
     onError: (err: any) => {
-      const message = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat tenant';
+      const raw = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat tenant';
+      const message = Array.isArray(raw) ? raw.join(' • ') : raw;
       setWizardError(message);
     },
   });
@@ -255,9 +257,9 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
         bookingSource: values.bookingSource || undefined,
         notes: values.notes || undefined,
       } as any;
-      // Meter readings passed via separate field
-      (payload as any).initialElectricityKwh = parseFloat(values.initialElectricityKwh);
-      (payload as any).initialWaterM3 = parseFloat(values.initialWaterM3);
+      // Meter readings passed as strings (DTO expects @IsNumberString)
+      (payload as any).initialElectricityKwh = values.initialElectricityKwh;
+      (payload as any).initialWaterM3 = values.initialWaterM3;
       createStayMutation.mutate(payload);
     })();
   }

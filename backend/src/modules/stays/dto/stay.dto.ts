@@ -54,11 +54,11 @@ export class CreateStayDto {
   notes?: string;
 
   @IsNotEmpty({ message: 'Meter awal listrik harus diisi' })
-  @IsNumberString({}, { message: 'Meter awal listrik harus angka desimal' })
+  @IsNumberString({}, { message: 'Meter awal listrik harus berupa angka' })
   initialElectricityKwh!: string;
 
   @IsNotEmpty({ message: 'Meter awal air harus diisi' })
-  @IsNumberString({}, { message: 'Meter awal air harus angka desimal' })
+  @IsNumberString({}, { message: 'Meter awal air harus berupa angka' })
   initialWaterM3!: string;
 }
 
