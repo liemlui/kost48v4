@@ -12,6 +12,13 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
   const [reviewNotes, setReviewNotes] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (show) {
+      setReviewNotes('');
+      setError('');
+    }
+  }, [show]);
+
   const handleClose = () => {
     setReviewNotes('');
     setError('');

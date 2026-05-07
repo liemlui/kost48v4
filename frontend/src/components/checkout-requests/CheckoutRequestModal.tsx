@@ -61,7 +61,13 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
       onSuccess();
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Gagal mengajukan permintaan checkout.');
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message ?? 'Gagal mengajukan permintaan checkout.';
+      setError(message);
+      // 409 Conflict: already has pending request; refetch to show status card
+      if (status === 409) {
+        onSuccess();
+      }
     } finally {
       setSubmitting(false);
     }

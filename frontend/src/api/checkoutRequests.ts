@@ -12,11 +12,17 @@ export async function createCheckoutRequest(payload: CreateCheckoutRequestPayloa
 }
 
 export async function listMyCheckoutRequests(): Promise<PaginatedResponse<CheckoutRequest>> {
-  return getResource<PaginatedResponse<CheckoutRequest>>('/tenant/checkout-requests/my');
+  const data = await getResource<CheckoutRequest[]>('/tenant/checkout-requests/my');
+  // Backend returns a plain array; normalize to PaginatedResponse shape
+  const items = Array.isArray(data) ? data : (data as unknown as PaginatedResponse<CheckoutRequest>)?.items ?? [];
+  return { items };
 }
 
 export async function listAdminCheckoutRequests(params?: { status?: string }): Promise<PaginatedResponse<CheckoutRequest>> {
-  return listResource<CheckoutRequest>('/admin/checkout-requests', params as Record<string, unknown>) as Promise<PaginatedResponse<CheckoutRequest>>;
+  const data = await listResource<CheckoutRequest>('/admin/checkout-requests', params as Record<string, unknown>) as unknown as CheckoutRequest[];
+  // Backend returns a plain array; normalize to PaginatedResponse shape
+  const items = Array.isArray(data) ? data : (data as unknown as PaginatedResponse<CheckoutRequest>)?.items ?? [];
+  return { items };
 }
 
 export async function approveCheckoutRequest(id: number, payload?: ApproveCheckoutRequestPayload): Promise<CheckoutRequest> {
