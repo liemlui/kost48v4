@@ -22,6 +22,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { TenantBookingsModule } from './modules/tenant-bookings/tenant-bookings.module';
 import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-submissions.module';
 import { RenewRequestsModule } from './modules/renew-requests/renew-requests.module';
+import { CheckoutRequestsModule } from './modules/checkout-requests/checkout-requests.module';
 import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
@@ -49,6 +50,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     TenantBookingsModule,
     PaymentSubmissionsModule,
     RenewRequestsModule,
+    CheckoutRequestsModule,
     ReportsModule,
   ],
 })

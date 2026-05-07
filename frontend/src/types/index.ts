@@ -569,3 +569,44 @@ export type ApproveRenewRequestPayload = {
 export type RejectRenewRequestPayload = {
   reviewNotes: string;
 };
+
+/* --- Checkout Requests --- */
+
+export type CheckoutRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+
+export type CheckoutRequest = {
+  id: number;
+  stayId: number;
+  requestedCheckOutDate: string;
+  checkoutReason: string;
+  status: CheckoutRequestStatus;
+  requestNotes?: string | null;
+  reviewNotes?: string | null;
+  reviewedById?: number | null;
+  reviewedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  stay?: {
+    id: number;
+    room?: { id: number; code?: string; name?: string } | null;
+    tenant?: { id: number; fullName?: string; phone?: string } | null;
+  } | null;
+  reviewedBy?: { id: number; fullName?: string } | null;
+};
+
+export type CreateCheckoutRequestPayload = {
+  stayId: number;
+  requestedCheckOutDate: string;
+  checkoutReason: string;
+  requestNotes?: string;
+};
+
+export type ApproveCheckoutRequestPayload = {
+  actualCheckOutDate?: string;
+  checkoutReason?: string;
+  reviewNotes?: string;
+};
+
+export type RejectCheckoutRequestPayload = {
+  reviewNotes: string;
+};

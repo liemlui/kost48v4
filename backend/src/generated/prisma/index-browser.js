@@ -417,6 +417,20 @@ exports.Prisma.RenewRequestScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CheckoutRequestScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  requestedCheckOutDate: 'requestedCheckOutDate',
+  checkoutReason: 'checkoutReason',
+  status: 'status',
+  requestNotes: 'requestNotes',
+  reviewNotes: 'reviewNotes',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.WifiSaleScalarFieldEnum = {
   id: 'id',
   saleDate: 'saleDate',
@@ -645,6 +659,12 @@ exports.RenewRequestStatus = exports.$Enums.RenewRequestStatus = {
   REJECTED: 'REJECTED'
 };
 
+exports.CheckoutRequestStatus = exports.$Enums.CheckoutRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.ExpenseType = exports.$Enums.ExpenseType = {
   FIXED: 'FIXED',
   VARIABLE: 'VARIABLE'
@@ -682,6 +702,7 @@ exports.Prisma.ModelName = {
   RoomItem: 'RoomItem',
   InventoryMovement: 'InventoryMovement',
   RenewRequest: 'RenewRequest',
+  CheckoutRequest: 'CheckoutRequest',
   WifiSale: 'WifiSale',
   Expense: 'Expense',
   AppNotification: 'AppNotification',

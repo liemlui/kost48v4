@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -8,10 +8,12 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import { getResource, listResource } from '../../api/resources';
 import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
+import { listMyCheckoutRequests } from '../../api/checkoutRequests';
+import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { ApiEnvelope, PaginatedResponse } from '../../types';
-import type { Invoice, RenewRequest, Stay } from '../../types';
+import type { CheckoutRequest, Invoice, RenewRequest, Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
 function formatDate(value?: string | null) {
@@ -103,6 +105,33 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const showRenewButton =
     !pendingRenewRequest && !createRenewMutation.isSuccess && renewData?.status !== 'PENDING';
   const showRejectedMessage = renewData?.status === 'REJECTED' || rejectedRequest;
+
+  // ── Checkout request ──────────────────────
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
+  const checkoutRequestsQuery = useQuery<PaginatedResponse<CheckoutRequest>>({
+    queryKey: ['my-checkout-requests', stay.id],
+    queryFn: () => listMyCheckoutRequests(),
+    refetchOnWindowFocus: true,
+  });
+
+  const pendingCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
+    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'PENDING',
+  );
+
+  const approvedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
+    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'APPROVED',
+  );
+
+  const rejectedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
+    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'REJECTED',
+  );
+
+  const showCheckoutButton = !pendingCheckoutRequest && !approvedCheckoutRequest;
+
+  const handleCheckoutSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['my-checkout-requests', stay.id] });
+  };
 
   return (
     <>
@@ -205,6 +234,73 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           </Card.Body>
         </Card>
       ) : null}
+
+      {/* Checkout Lebih Awal */}
+      {showCheckoutButton ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <h5 className="mb-2">Ajukan Checkout Lebih Awal</h5>
+            <p className="text-muted small mb-3">
+              Ingin checkout sebelum tanggal rencana? Ajukan permintaan checkout lebih awal. Admin akan meninjau dan memproses permintaan Anda.
+            </p>
+            {overdueInvoice ? (
+              <Alert variant="danger" className="small">
+                Anda memiliki tagihan yang sudah lewat jatuh tempo. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan checkout.
+              </Alert>
+            ) : null}
+            <Button
+              variant="outline-warning"
+              onClick={() => setShowCheckoutModal(true)}
+              disabled={Boolean(overdueInvoice)}
+            >
+              Ajukan Checkout Lebih Awal
+            </Button>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {pendingCheckoutRequest ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <h5 className="mb-2">Permintaan Checkout Lebih Awal</h5>
+            <Alert variant="info" className="small">
+              Permintaan checkout Anda sedang <strong>Menunggu Persetujuan</strong> admin.
+              {pendingCheckoutRequest.requestedCheckOutDate
+                ? ` Tanggal checkout yang diajukan: ${formatDate(pendingCheckoutRequest.requestedCheckOutDate)}.`
+                : ''}
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {approvedCheckoutRequest ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <Alert variant="success" className="small">
+              Permintaan checkout Anda telah <strong>Disetujui</strong>. Admin akan memproses checkout Anda.
+              {approvedCheckoutRequest.reviewNotes ? ` Catatan: ${approvedCheckoutRequest.reviewNotes}` : ''}
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      {rejectedCheckoutRequest ? (
+        <Card className="content-card border-0 mb-4">
+          <Card.Body>
+            <Alert variant="warning" className="small">
+              Permintaan checkout Anda telah <strong>Ditolak</strong>.
+              {rejectedCheckoutRequest.reviewNotes ? ` Alasan: ${rejectedCheckoutRequest.reviewNotes}` : ''}
+            </Alert>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      <CheckoutRequestModal
+        show={showCheckoutModal}
+        onHide={() => setShowCheckoutModal(false)}
+        onSuccess={handleCheckoutSuccess}
+        stay={stay}
+      />
 
       <Row className="g-4 mb-4">
         <Col lg={6}>

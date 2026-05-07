@@ -106,6 +106,12 @@ enum RenewRequestStatus {
   REJECTED
 }
 
+enum CheckoutRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -201,6 +207,7 @@ model User {
   wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
   expensesCreated             Expense[]            @relation("ExpenseCreatedBy")
   renewRequestsReviewed       RenewRequest[]       @relation("RenewRequestReviewedBy")
+  checkoutRequestsReviewed    CheckoutRequest[]    @relation("CheckoutRequestReviewedBy")
   auditLogs                   AuditLog[]           @relation("AuditLogActor")
   paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
   paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
@@ -351,6 +358,7 @@ model Stay {
   expenses           Expense[]
   paymentSubmissions PaymentSubmission[]
   renewRequests      RenewRequest[]
+  checkoutRequests   CheckoutRequest[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -656,6 +664,26 @@ model RenewRequest {
 
   @@index([stayId])
   @@index([tenantId])
+  @@index([status, createdAt])
+}
+
+model CheckoutRequest {
+  id                    Int                   @id @default(autoincrement())
+  stayId                Int
+  requestedCheckOutDate DateTime              @db.Date
+  checkoutReason        String
+  status                CheckoutRequestStatus @default(PENDING)
+  requestNotes          String?
+  reviewNotes           String?
+  reviewedById          Int?
+  reviewedAt            DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  stay       Stay  @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("CheckoutRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
   @@index([status, createdAt])
 }
 

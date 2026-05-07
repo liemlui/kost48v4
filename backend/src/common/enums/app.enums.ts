@@ -23,3 +23,5 @@ export enum PaymentSubmissionTargetType { INVOICE = 'INVOICE', DEPOSIT = 'DEPOSI
 export enum BookingDepositPaymentStatus { UNPAID = 'UNPAID', PARTIAL = 'PARTIAL', PAID = 'PAID' }
 
 export enum RenewRequestStatus { PENDING = 'PENDING', APPROVED = 'APPROVED', REJECTED = 'REJECTED' }
+
+export enum CheckoutRequestStatus { PENDING = 'PENDING', APPROVED = 'APPROVED', REJECTED = 'REJECTED' }
