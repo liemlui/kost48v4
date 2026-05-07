@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Badge, Breadcrumb, Button, Card, Form, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { HeroSkeleton } from '../../components/common/SkeletonLoader';
@@ -11,10 +12,13 @@ import CompleteStayModal from '../../components/stays/CompleteStayModal';
 import ProcessDepositModal from '../../components/stays/ProcessDepositModal';
 import CancelStayModal from '../../components/stays/CancelStayModal';
 import RenewStayModal from '../../components/stays/RenewStayModal';
+import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
+import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
 import { useStay } from '../../hooks/useStay';
 import { useInvoices } from '../../hooks/useInvoices';
 import { useMeterReadings } from '../../hooks/useMeterReadings';
 import { formatRupiah } from '../../utils/formatCurrency';
+import type { CheckoutRequest } from '../../types';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
   if (!dateValue) return '-';
@@ -53,6 +57,7 @@ function getDepositLabel(depositStatus: string | null | undefined) {
 export default function StayDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'info';
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -60,6 +65,7 @@ export default function StayDetailPage() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRenewModal, setShowRenewModal] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
   const [notes, setNotes] = useState('');
   const [notesError, setNotesError] = useState('');
 
@@ -70,6 +76,39 @@ export default function StayDetailPage() {
   const overdue = useMemo(() => hasOverdue(invoices), [invoices]);
   const hasUnpaid = useMemo(() => hasUnpaidInvoices(invoices), [invoices]);
   const depositLabel = getDepositLabel(stay?.depositStatus);
+
+  const checkoutRequestsQuery = useQuery({
+    queryKey: ['admin-checkout-requests', 'stay', Number(id)],
+    queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
+    enabled: Boolean(id),
+  });
+
+  const pendingCheckoutRequest = useMemo(() => {
+    if (!checkoutRequestsQuery.data?.items) return null;
+    return checkoutRequestsQuery.data.items.find((r) => r.stayId === Number(id)) ?? null;
+  }, [checkoutRequestsQuery.data, id]);
+
+  const approveCrMutation = useMutation({
+    mutationFn: async (crId: number) => approveCheckoutRequest(crId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      ]);
+    },
+  });
+
+  const rejectCrMutation = useMutation({
+    mutationFn: async ({ id: crId, reviewNotes }: { id: number; reviewNotes: string }) =>
+      rejectCheckoutRequest(crId, { reviewNotes }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      ]);
+      setRejectTarget(null);
+    },
+  });
 
   useEffect(() => {
     setNotes(stay?.notes ?? '');
@@ -174,6 +213,37 @@ export default function StayDetailPage() {
               Ada invoice overdue untuk stay ini. Cek tab Keuangan untuk tindak lanjut pembayaran atau negosiasi tenant.
             </Alert>
           ) : null}
+
+          {pendingCheckoutRequest ? (
+            <Alert variant="warning" className="mt-3 mb-0 d-flex justify-content-between align-items-center">
+              <div>
+                <strong>🔔 Permintaan Checkout Lebih Awal</strong>
+                <div className="small mt-1">
+                  Diajukan {formatDateSafe(pendingCheckoutRequest.createdAt)} ·{' '}
+                  Rencana checkout {formatDateSafe(pendingCheckoutRequest.requestedCheckOutDate)}{' '}
+                  · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
+                </div>
+              </div>
+              <div className="d-flex gap-2 flex-shrink-0 ms-3">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => approveCrMutation.mutate(pendingCheckoutRequest.id)}
+                  disabled={approveCrMutation.isPending}
+                >
+                  {approveCrMutation.isPending ? '...' : 'Setujui'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline-danger"
+                  onClick={() => setRejectTarget(pendingCheckoutRequest)}
+                  disabled={rejectCrMutation.isPending}
+                >
+                  Tolak
+                </Button>
+              </div>
+            </Alert>
+          ) : null}
         </Card.Body>
       </Card>
 
@@ -209,6 +279,14 @@ export default function StayDetailPage() {
       <ProcessDepositModal show={showDepositModal} onHide={() => setShowDepositModal(false)} stay={stay} />
       <CancelStayModal show={showCancelModal} onHide={() => setShowCancelModal(false)} stay={stay} invoices={invoices} />
       <RenewStayModal show={showRenewModal} onHide={() => setShowRenewModal(false)} stay={stay} onSuccess={() => {}} />
+      <RejectCheckoutModal
+        show={Boolean(rejectTarget)}
+        onHide={() => setRejectTarget(null)}
+        onSubmit={(reviewNotes) => {
+          rejectCrMutation.mutate({ id: rejectTarget!.id, reviewNotes });
+        }}
+        isSubmitting={rejectCrMutation.isPending}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-boots
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
 import { expireReservedBooking, runPaymentSubmissionExpiryCheck } from '../../api/paymentSubmissions';
+import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
@@ -12,7 +13,8 @@ import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge
 import { getBookingStatusLabel } from '../../utils/statusLabels';
 import StatCard from '../../components/common/StatCard';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
-import type { PaginatedResponse, Stay } from '../../types';
+import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
+import type { CheckoutRequest, PaginatedResponse, Stay } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { daysUntilDate, formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 
@@ -115,6 +117,7 @@ export default function StaysPage() {
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<Stay | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
   const PAGE_SIZE = 20;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
@@ -128,6 +131,39 @@ export default function StaysPage() {
         queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
         queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
       ]);
+    },
+  });
+
+  const checkoutRequestsQuery = useQuery({
+    queryKey: ['admin-checkout-requests', 'PENDING'],
+    queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
+    enabled: isBookingsMode,
+  });
+
+  const pendingCheckoutRequests = useMemo(() => {
+    if (!checkoutRequestsQuery.data?.items) return [];
+    return checkoutRequestsQuery.data.items.filter((r) => r.status === 'PENDING');
+  }, [checkoutRequestsQuery.data]);
+
+  const approveCrMutation = useMutation({
+    mutationFn: async (id: number) => approveCheckoutRequest(id),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      ]);
+    },
+  });
+
+  const rejectCrMutation = useMutation({
+    mutationFn: async ({ id, reviewNotes }: { id: number; reviewNotes: string }) =>
+      rejectCheckoutRequest(id, { reviewNotes }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      ]);
+      setRejectTarget(null);
     },
   });
 
@@ -182,6 +218,7 @@ export default function StaysPage() {
   }, [statusFilter, keyword]);
 
   const checkoutSoonCount = checkoutDue.length;
+  const pendingCheckoutRequestCount = pendingCheckoutRequests.length;
   const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
@@ -210,7 +247,7 @@ export default function StaysPage() {
         <Col md={3}><StatCard title="Stay aktif" value={operationalActive.length} subtitle="Tenant yang sedang menempati kamar" icon="✅" /></Col>
         <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle={expiredBookingsCount ? `${expiredBookingsCount} expired / perlu tindak lanjut` : 'Booking reserved tanpa invoice awal'} icon="📝" /></Col>
         <Col md={3}><StatCard title="Checkout due" value={checkoutSoonCount} subtitle="Checkout H-10 s/d overdue" icon="⏰" /></Col>
-        <Col md={3}><StatCard title="Total butuh tindakan" value={isBookingsMode ? bookingsTotalItems : checkoutDue.length + reservedBookings.length} subtitle="Booking + checkout due" icon="📋" /></Col>
+        <Col md={3}><StatCard title="Total butuh tindakan" value={isBookingsMode ? bookingsTotalItems + pendingCheckoutRequestCount : checkoutDue.length + reservedBookings.length + pendingCheckoutRequestCount} subtitle="Booking + checkout due + checkout req" icon="📋" /></Col>
       </Row>
 
       <Card className="content-card border-0 mb-4">
@@ -262,10 +299,11 @@ export default function StaysPage() {
       <Card className="content-card border-0">
         <Card.Body>
           {isBookingsMode ? (
-            <Alert variant={expiredBookingsCount || checkoutSoonCount ? 'warning' : 'info'} className="small mb-4">
-              Item yang perlu ditindaklanjuti: booking menunggu approval/pembayaran, dan stay aktif yang mendekati jatuh tempo checkout (H-10 hingga overdue).
+            <Alert variant={expiredBookingsCount || checkoutSoonCount || pendingCheckoutRequestCount ? 'warning' : 'info'} className="small mb-4">
+              Item yang perlu ditindaklanjuti: booking menunggu approval/pembayaran, stay aktif yang mendekati jatuh tempo checkout (H-10 hingga overdue), dan permintaan checkout lebih awal dari tenant.
               {expiredBookingsCount ? ` ${expiredBookingsCount} booking expired.` : ''}
               {checkoutSoonCount ? ` ${checkoutSoonCount} checkout due/overdue.` : ''}
+              {pendingCheckoutRequestCount ? ` ${pendingCheckoutRequestCount} permintaan checkout awal.` : ''}
             </Alert>
           ) : null}
 
@@ -280,6 +318,69 @@ export default function StaysPage() {
                 : 'Coba ubah filter atau mulai check-in tenant baru.'}
               action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />
+          ) : null}
+
+          {isBookingsMode && pendingCheckoutRequests.length > 0 ? (
+            <>
+              <h6 className="fw-semibold mt-3 mb-2">🔔 Permintaan Checkout Lebih Awal dari Tenant</h6>
+              <Table hover responsive className="mb-3">
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Kamar</th>
+                    <th>Tgl Diajukan</th>
+                    <th>Alasan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingCheckoutRequests.map((cr) => (
+                    <tr key={`cr-${cr.id}`}>
+                      <td>
+                        <div className="fw-semibold">{cr.stay?.tenant?.fullName ?? '-'}</div>
+                        <div className="small text-muted">{cr.stay?.tenant?.phone ?? ''}</div>
+                      </td>
+                      <td>
+                        <div className="fw-semibold">{cr.stay?.room?.code ?? '-'}</div>
+                        <div className="small text-muted">Stay #{cr.stayId}</div>
+                      </td>
+                      <td>
+                        <div>{formatDateSafe(cr.requestedCheckOutDate)}</div>
+                        {cr.createdAt ? <div className="small text-muted">Diajukan {formatDateSafe(cr.createdAt)}</div> : null}
+                      </td>
+                      <td>
+                        <div>{cr.checkoutReason || cr.requestNotes || '-'}</div>
+                        {cr.requestNotes && cr.checkoutReason !== cr.requestNotes ? (
+                          <div className="small text-muted">Catatan: {cr.requestNotes}</div>
+                        ) : null}
+                      </td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            onClick={() => approveCrMutation.mutate(cr.id)}
+                            disabled={approveCrMutation.isPending}
+                          >
+                            {approveCrMutation.isPending ? '...' : 'Setujui'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => setRejectTarget(cr)}
+                            disabled={rejectCrMutation.isPending}
+                          >
+                            Tolak
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <hr className="my-1" />
+              <h6 className="fw-semibold mt-3 mb-2">Booking & Checkout Due</h6>
+            </>
           ) : null}
 
           {!query.isLoading && !query.isError && visibleItems.length > 0 && isBookingsMode ? (
@@ -483,6 +584,15 @@ export default function StaysPage() {
       </Card>
 
       <ApproveBookingModal show={Boolean(selectedBooking)} onHide={() => setSelectedBooking(null)} booking={selectedBooking} />
+
+      <RejectCheckoutModal
+        show={Boolean(rejectTarget)}
+        onHide={() => setRejectTarget(null)}
+        onSubmit={(reviewNotes) => {
+          rejectCrMutation.mutate({ id: rejectTarget!.id, reviewNotes });
+        }}
+        isSubmitting={rejectCrMutation.isPending}
+      />
     </div>
   );
 }
