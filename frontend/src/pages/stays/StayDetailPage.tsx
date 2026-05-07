@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Badge, Breadcrumb, Button, Card, Form, Spinner, Tab, Tabs } from 'react-bootstrap';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { HeroSkeleton } from '../../components/common/SkeletonLoader';
@@ -52,6 +52,7 @@ function getDepositLabel(depositStatus: string | null | undefined) {
 
 export default function StayDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'info';
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -204,7 +205,7 @@ export default function StayDetailPage() {
         </Tab>
       </Tabs>
 
-      <CompleteStayModal show={showCompleteModal} onHide={() => setShowCompleteModal(false)} stay={stay} invoices={invoices} />
+      <CompleteStayModal show={showCompleteModal} onHide={() => setShowCompleteModal(false)} onSuccess={() => navigate('/stays?status=ALL')} stay={stay} invoices={invoices} />
       <ProcessDepositModal show={showDepositModal} onHide={() => setShowDepositModal(false)} stay={stay} />
       <CancelStayModal show={showCancelModal} onHide={() => setShowCancelModal(false)} stay={stay} invoices={invoices} />
       <RenewStayModal show={showRenewModal} onHide={() => setShowRenewModal(false)} stay={stay} onSuccess={() => {}} />

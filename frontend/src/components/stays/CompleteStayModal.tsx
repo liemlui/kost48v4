@@ -6,11 +6,13 @@ import { Invoice, Stay } from '../../types';
 export default function CompleteStayModal({
   show,
   onHide,
+  onSuccess,
   stay,
   invoices,
 }: {
   show: boolean;
   onHide: () => void;
+  onSuccess?: () => void;
   stay: Stay;
   invoices: Invoice[];
 }) {
@@ -42,6 +44,7 @@ export default function CompleteStayModal({
     
     try {
       await completeMutation.mutateAsync({ actualCheckOutDate, checkoutReason: checkoutReason.trim() });
+      onSuccess?.();
       handleClose();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Gagal checkout stay');

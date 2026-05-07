@@ -37,6 +37,12 @@ function isOperationalActiveStay(stay: Stay): boolean {
   return stay.status === 'ACTIVE' && stay.room?.status === 'OCCUPIED';
 }
 
+function isCheckoutDueOrOverdue(stay: Stay): boolean {
+  if (stay.status !== 'ACTIVE' || stay.room?.status !== 'OCCUPIED' || !stay.plannedCheckOutDate) return false;
+  const daysLeft = daysFromToday(stay.plannedCheckOutDate);
+  return daysLeft !== null && daysLeft <= 10;
+}
+
 function getCheckoutReminderBadge(stay: Stay): { label: string; status: string } | null {
   if (stay.status !== 'ACTIVE' || stay.room?.status !== 'OCCUPIED' || !stay.plannedCheckOutDate) return null;
   const daysLeft = daysFromToday(stay.plannedCheckOutDate);
@@ -137,10 +143,11 @@ export default function StaysPage() {
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
   const reservedBookings = useMemo(() => items.filter((item) => isReservedBooking(item)), [items]);
   const operationalActive = useMemo(() => items.filter((item) => isOperationalActiveStay(item)), [items]);
+  const checkoutDue = useMemo(() => operationalActive.filter((item) => isCheckoutDueOrOverdue(item)), [operationalActive]);
 
   const filteredItems = useMemo(() => {
     const baseItems = statusFilter === 'BOOKINGS'
-      ? reservedBookings
+      ? [...reservedBookings, ...checkoutDue]
       : statusFilter === 'ACTIVE'
         ? operationalActive
         : items;
@@ -174,7 +181,7 @@ export default function StaysPage() {
     setPage(1);
   }, [statusFilter, keyword]);
 
-  const checkoutSoonCount = operationalActive.filter((item) => getCheckoutReminderBadge(item)?.label).length;
+  const checkoutSoonCount = checkoutDue.length;
   const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
@@ -186,7 +193,7 @@ export default function StaysPage() {
   const bookingsTotalPages = isBookingsMode ? Math.max(1, Math.ceil(bookingsTotalItems / PAGE_SIZE)) : 1;
   const visibleItems = isBookingsMode ? paginatedFilteredItems : filteredItems;
   const tableCountText = isBookingsMode
-    ? `Menampilkan ${visibleItems.length} dari ${bookingsTotalItems} booking reserved`
+    ? `Menampilkan ${visibleItems.length} dari ${bookingsTotalItems} item butuh tindakan`
     : `Menampilkan ${filteredItems.length} dari ${meta?.totalItems ?? items.length} data`;
 
   return (
@@ -200,10 +207,10 @@ export default function StaysPage() {
       />
 
       <Row className="g-4 mb-4">
-        <Col md={3}><StatCard title="Total hasil filter" value={isBookingsMode ? bookingsTotalItems : filteredItems.length} subtitle="Baris yang sedang terfilter" icon="📋" /></Col>
         <Col md={3}><StatCard title="Stay aktif" value={operationalActive.length} subtitle="Tenant yang sedang menempati kamar" icon="✅" /></Col>
-        <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle={expiredBookingsCount ? `${expiredBookingsCount} expired / perlu tindak lanjut` : 'Booking reserved tanpa invoice awal'} icon="🗓️" /></Col>
-        <Col md={3}><StatCard title="Menunggu pembayaran" value={waitingPaymentCount} subtitle="Booking approved dengan invoice awal" icon="💳" /></Col>
+        <Col md={3}><StatCard title="Menunggu approval" value={pendingApprovalCount} subtitle={expiredBookingsCount ? `${expiredBookingsCount} expired / perlu tindak lanjut` : 'Booking reserved tanpa invoice awal'} icon="📝" /></Col>
+        <Col md={3}><StatCard title="Checkout due" value={checkoutSoonCount} subtitle="Checkout H-10 s/d overdue" icon="⏰" /></Col>
+        <Col md={3}><StatCard title="Total butuh tindakan" value={isBookingsMode ? bookingsTotalItems : checkoutDue.length + reservedBookings.length} subtitle="Booking + checkout due" icon="📋" /></Col>
       </Row>
 
       <Card className="content-card border-0 mb-4">
@@ -221,7 +228,7 @@ export default function StaysPage() {
                 <Form.Group>
                   <Form.Label>Fokus Data</Form.Label>
                   <Form.Select value={statusFilter} onChange={(e) => handleStatusFilterChange(e.target.value as StayViewFilter)}>
-                    <option value="BOOKINGS">Perlu Approval</option>
+                    <option value="BOOKINGS">Perlu Tindakan</option>
                     <option value="ACTIVE">Stay Aktif</option>
                     <option value="ALL">Semua Stay</option>
                   </Form.Select>
@@ -255,9 +262,10 @@ export default function StaysPage() {
       <Card className="content-card border-0">
         <Card.Body>
           {isBookingsMode ? (
-            <Alert variant={expiredBookingsCount ? 'warning' : 'info'} className="small mb-4">
-              Baris di bawah ini adalah booking yang perlu ditindaklanjuti. Jika invoice awal belum ada berarti <strong>Menunggu Approval</strong>, dan jika invoice awal sudah ada berarti <strong>Menunggu Pembayaran</strong>.
-              {expiredBookingsCount ? ` Saat ini ada ${expiredBookingsCount} booking yang sudah expired dan perlu ditinjau.` : ''}
+            <Alert variant={expiredBookingsCount || checkoutSoonCount ? 'warning' : 'info'} className="small mb-4">
+              Item yang perlu ditindaklanjuti: booking menunggu approval/pembayaran, dan stay aktif yang mendekati jatuh tempo checkout (H-10 hingga overdue).
+              {expiredBookingsCount ? ` ${expiredBookingsCount} booking expired.` : ''}
+              {checkoutSoonCount ? ` ${checkoutSoonCount} checkout due/overdue.` : ''}
             </Alert>
           ) : null}
 
@@ -266,9 +274,9 @@ export default function StaysPage() {
           {!query.isLoading && !query.isError && visibleItems.length === 0 ? (
             <EmptyState
               icon={statusFilter === 'BOOKINGS' ? '🗓️' : '🏠'}
-              title={statusFilter === 'BOOKINGS' ? 'Belum ada booking reserved' : 'Belum ada data stay'}
+              title={statusFilter === 'BOOKINGS' ? 'Tidak ada item yang perlu ditindaklanjuti' : 'Belum ada data stay'}
               description={statusFilter === 'BOOKINGS'
-                ? 'Booking tenant yang masih reserved akan muncul di mode ini.'
+                ? 'Semua booking sudah ditangani dan tidak ada checkout yang mendekati jatuh tempo.'
                 : 'Coba ubah filter atau mulai check-in tenant baru.'}
               action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />

@@ -223,6 +223,16 @@ export class StaysService {
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
     if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
 
+    const openInvoices = await this.prisma.invoice.count({
+      where: {
+        stayId: id,
+        status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
+      },
+    });
+    if (openInvoices > 0) {
+      throw new ConflictException('Checkout tidak bisa diproses karena masih ada tagihan terbuka. Selesaikan atau batalkan tagihan terlebih dahulu.');
+    }
+
     const updated = await this.prisma.$transaction(async (tx) => {
       const stay = await tx.stay.update({
         where: { id },
