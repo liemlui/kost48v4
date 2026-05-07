@@ -7,8 +7,6 @@ import {
 } from '@nestjs/common';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
-import { StaysService } from '../stays/stays.service';
-import { CompleteStayDto } from '../stays/dto/stay.dto';
 import { CreateCheckoutRequestDto } from './dto/create-checkout-request.dto';
 import { ApproveCheckoutRequestDto } from './dto/approve-checkout-request.dto';
 import { RejectCheckoutRequestDto } from './dto/reject-checkout-request.dto';
@@ -20,10 +18,7 @@ import {
 
 @Injectable()
 export class CheckoutRequestsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly staysService: StaysService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Tenant creates a checkout request for their active stay. */
   async createRequest(dto: CreateCheckoutRequestDto, actor: CurrentUserPayload) {
@@ -85,7 +80,7 @@ export class CheckoutRequestsService {
     return request;
   }
 
-  /** Admin/owner approves a pending checkout request and executes the checkout. */
+  /** Admin/owner approves a pending checkout request. Does NOT execute checkout. */
   async approveRequest(
     id: number,
     dto: ApproveCheckoutRequestDto,
@@ -102,24 +97,6 @@ export class CheckoutRequestsService {
       );
     }
 
-    // Execute the actual checkout via staysService.complete
-    const actualCheckOutDate =
-      dto.actualCheckOutDate ?? new Date().toISOString();
-    const completeDto: CompleteStayDto = {
-      actualCheckOutDate,
-      checkoutReason:
-        dto.checkoutReason ??
-        request.requestNotes ??
-        'Checkout via permintaan tenant',
-      notes: dto.reviewNotes ?? undefined,
-    };
-
-    const result = await this.staysService.complete(
-      request.stayId,
-      completeDto,
-      actor,
-    );
-
     const updated = await this.prisma.checkoutRequest.update({
       where: { id },
       data: {
@@ -130,7 +107,7 @@ export class CheckoutRequestsService {
       },
     });
 
-    return { request: updated, stay: result };
+    return updated;
   }
 
   /** Admin/owner rejects a pending checkout request. */

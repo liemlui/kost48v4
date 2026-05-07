@@ -49,7 +49,7 @@ export class CheckoutRequestsAdminController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return {
-      message: 'Permintaan checkout disetujui dan stay selesai',
+      message: 'Permintaan checkout disetujui',
       data: await this.checkoutRequestsService.approveRequest(id, dto, user),
     };
   }
