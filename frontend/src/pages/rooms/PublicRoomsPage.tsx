@@ -311,7 +311,7 @@ export default function PublicRoomsPage() {
                     <div className="d-flex gap-2">
                       <Button variant="outline-secondary" className="flex-fill" onClick={() => navigate(`/rooms/${room.id}/detail`)}>Lihat Detail</Button>
                       {room.isAvailable !== false ? (
-                        <Button className="flex-fill" onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}>Pesan Sekarang</Button>
+                        <Button className="flex-fill" onClick={() => navigate(user?.role === 'TENANT' ? `/portal/booking/${room.id}` : `/booking/${room.id}`, { state: { room } })}>Pesan Sekarang</Button>
                       ) : (
                         <Button className="flex-fill" variant="secondary" disabled>Tidak Tersedia</Button>
                       )}
