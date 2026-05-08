@@ -52,3 +52,8 @@ export async function postAction<T>(path: string, payload?: Record<string, unkno
   const response = await client.post<ApiEnvelope<T>>(path, payload ?? {});
   return response.data.data;
 }
+
+export async function patchAction<T>(path: string, payload?: Record<string, unknown>) {
+  const response = await client.patch<ApiEnvelope<T>>(path, payload ?? {});
+  return response.data.data;
+}

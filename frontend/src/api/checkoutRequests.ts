@@ -1,4 +1,4 @@
-import { createResource, getResource, listResource, postAction } from './resources';
+import { createResource, getResource, listResource, postAction, patchAction } from './resources';
 import type {
   CreateCheckoutRequestPayload,
   CheckoutRequest,
@@ -26,9 +26,9 @@ export async function listAdminCheckoutRequests(params?: { status?: string }): P
 }
 
 export async function approveCheckoutRequest(id: number, payload?: ApproveCheckoutRequestPayload): Promise<CheckoutRequest> {
-  return postAction<CheckoutRequest>(`/admin/checkout-requests/${id}/approve`, payload as Record<string, unknown> | undefined);
+  return patchAction<CheckoutRequest>(`/admin/checkout-requests/${id}/approve`, payload as Record<string, unknown> | undefined);
 }
 
 export async function rejectCheckoutRequest(id: number, payload: RejectCheckoutRequestPayload): Promise<CheckoutRequest> {
-  return postAction<CheckoutRequest>(`/admin/checkout-requests/${id}/reject`, payload as unknown as Record<string, unknown>);
+  return patchAction<CheckoutRequest>(`/admin/checkout-requests/${id}/reject`, payload as unknown as Record<string, unknown>);
 }
