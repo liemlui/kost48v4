@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, MouseEventHandler } from 'react';
 
 export type StatCardProps = {
   title: string;
@@ -10,6 +10,7 @@ export type StatCardProps = {
     value: number;
     label?: string;
   };
+  onClick?: MouseEventHandler<HTMLDivElement>;
 };
 
 export default function StatCard({
@@ -19,6 +20,7 @@ export default function StatCard({
   icon = '•',
   variant = 'default',
   trend,
+  onClick,
 }: StatCardProps) {
   const trendClassName = trend
     ? trend.value > 0
@@ -37,7 +39,7 @@ export default function StatCard({
     : null;
 
   return (
-    <div className={`card stat-card stat-card--${variant} border-0`}>
+    <div className={`card stat-card stat-card--${variant} border-0${onClick ? ' clickable-row' : ''}`} onClick={onClick} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined} onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); (onClick as any)(e); } } : undefined}>
       <div className="card-body">
         <div className="stat-card-header">
           <div>

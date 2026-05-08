@@ -168,12 +168,12 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
       ) : null}
 
       <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Permintaan inti properti" icon="🏠" /></Col>
-        <Col md={6} xl={3}><StatCard title="Kamar terisi" value={occupiedRooms} subtitle={`Tersedia ${availableRooms} kamar kosong`} icon="📈" /></Col>
-        <Col md={6} xl={3}><StatCard title="Total billed" value={new Intl.NumberFormat('id-ID').format(billed)} subtitle="Estimasi tagihan yang sudah terbentuk" icon="🧾" /></Col>
-        <Col md={6} xl={3}><StatCard title="Total collected" value={new Intl.NumberFormat('id-ID').format(collected)} subtitle={`Expense tercatat ${new Intl.NumberFormat('id-ID').format(totalExpense)}`} icon="💰" variant={collected >= totalExpense ? 'success' : 'warning'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Permintaan Perpanjangan" value={pendingRenewCount} subtitle="Butuh approval owner" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} /></Col>
+        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Permintaan inti properti" icon="🏠" onClick={() => navigate('/stays')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Kamar terisi" value={occupiedRooms} subtitle={`Tersedia ${availableRooms} kamar kosong`} icon="📈" onClick={() => navigate('/rooms')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Total billed" value={new Intl.NumberFormat('id-ID').format(billed)} subtitle="Estimasi tagihan yang sudah terbentuk" icon="🧾" onClick={() => navigate('/invoices')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Total collected" value={new Intl.NumberFormat('id-ID').format(collected)} subtitle={`Expense tercatat ${new Intl.NumberFormat('id-ID').format(totalExpense)}`} icon="💰" variant={collected >= totalExpense ? 'success' : 'warning'} onClick={() => navigate('/invoices')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Permintaan Perpanjangan" value={pendingRenewCount} subtitle="Butuh approval owner" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
       </Row>
 
       <Row className="g-4">
@@ -187,11 +187,11 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
                 </div>
               </div>
               <div className="kpi-list mt-3">
-                <div className="kpi-item"><div><div className="card-title-soft">Invoice overdue</div><strong>{overdue.length}</strong></div><StatusBadge status={overdue.length ? 'WARNING' : 'SUCCESS'} customLabel={overdue.length ? 'Butuh aksi' : 'Aman'} /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Collected / billed</div><strong>{billed ? `${Math.round((collected / billed) * 100)}%` : '0%'}</strong></div><StatusBadge status={collected >= billed ? 'SUCCESS' : 'INFO'} customLabel="Collection ratio" /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Occ. rate kasar</div><strong>{rooms.length ? `${Math.round((occupiedRooms / rooms.length) * 100)}%` : '0%'}</strong></div><StatusBadge status="INFO" customLabel="Occupancy" /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Cashflow ringkas</div><strong>{collected - totalExpense >= 0 ? 'Positif' : 'Tertekan'}</strong></div><StatusBadge status={collected - totalExpense >= 0 ? 'SUCCESS' : 'WARNING'} customLabel="Management view" /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Permintaan perpanjangan</div><strong>{pendingRenewCount}</strong></div><StatusBadge status={pendingRenewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingRenewCount ? 'Butuh approval' : 'Aman'} /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/invoices')}><div><div className="card-title-soft">Invoice overdue</div><strong>{overdue.length}</strong></div><StatusBadge status={overdue.length ? 'WARNING' : 'SUCCESS'} customLabel={overdue.length ? 'Butuh aksi' : 'Aman'} /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/invoices')}><div><div className="card-title-soft">Collected / billed</div><strong>{billed ? `${Math.round((collected / billed) * 100)}%` : '0%'}</strong></div><StatusBadge status={collected >= billed ? 'SUCCESS' : 'INFO'} customLabel="Collection ratio" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Occ. rate kasar</div><strong>{rooms.length ? `${Math.round((occupiedRooms / rooms.length) * 100)}%` : '0%'}</strong></div><StatusBadge status="INFO" customLabel="Occupancy" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/reports')}><div><div className="card-title-soft">Cashflow ringkas</div><strong>{collected - totalExpense >= 0 ? 'Positif' : 'Tertekan'}</strong></div><StatusBadge status={collected - totalExpense >= 0 ? 'SUCCESS' : 'WARNING'} customLabel="Management view" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/stays')}><div><div className="card-title-soft">Permintaan perpanjangan</div><strong>{pendingRenewCount}</strong></div><StatusBadge status={pendingRenewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingRenewCount ? 'Butuh approval' : 'Aman'} /></div>
                 <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Permintaan checkout tenant</div><strong>{pendingCheckoutCount}</strong></div><StatusBadge status={pendingCheckoutCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingCheckoutCount ? 'Butuh review' : 'Aman'} /></div>
               </div>
             </Card.Body>
@@ -283,13 +283,13 @@ function AdminDashboard() {
       />
 
       <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Pusat kerja backoffice" icon="🏠" /></Col>
-        <Col md={6} xl={3}><StatCard title="Due soon" value={dueSoonInvoices.length} subtitle="≤ 3 hari ke jatuh tempo" icon="🧾" variant={dueSoonInvoices.length ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout soon" value={checkoutSoon.length} subtitle="≤ 10 hari ke planned checkout" icon="⏳" variant={checkoutSoon.length ? 'info' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Perpanjangan" value={pendingRenewCount} subtitle="Permintaan perpanjangan stay" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} /></Col>
+        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Pusat kerja backoffice" icon="🏠" onClick={() => navigate('/stays')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Due soon" value={dueSoonInvoices.length} subtitle="≤ 3 hari ke jatuh tempo" icon="🧾" variant={dueSoonInvoices.length ? 'warning' : 'success'} onClick={() => navigate('/invoices')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Checkout soon" value={checkoutSoon.length} subtitle="≤ 10 hari ke planned checkout" icon="⏳" variant={checkoutSoon.length ? 'info' : 'success'} onClick={() => navigate('/stays')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Perpanjangan" value={pendingRenewCount} subtitle="Permintaan perpanjangan stay" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/renew-requests')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
       </Row>
 
       <Row className="g-4">
@@ -310,7 +310,7 @@ function AdminDashboard() {
                   <tr className="clickable-row" onClick={() => navigate('/tickets')}><td>Ticket terbuka</td><td>{tickets.filter((item) => ['OPEN', 'IN_PROGRESS'].includes(item.status)).length}</td><td>Triage, assign, dan tindak lanjut teknis</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Permintaan perpanjangan</td><td>{pendingRenewCount}</td><td>Permintaan tenant untuk memperpanjang masa tinggal</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/renew-requests')}><td>Permintaan perpanjangan</td><td>{pendingRenewCount}</td><td>Permintaan tenant untuk memperpanjang masa tinggal</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Permintaan checkout tenant</td><td>{pendingCheckoutCount}</td><td>Tenant mengajukan checkout lebih awal, perlu ditinjau</td></tr>
                 </tbody>
               </Table>
@@ -327,9 +327,9 @@ function AdminDashboard() {
                 </div>
               </div>
               <div className="kpi-list mt-3">
-                <div className="kpi-item"><div><div className="card-title-soft">Kamar terisi</div><strong>{rooms.filter((room) => room.status === 'OCCUPIED').length}</strong></div><StatusBadge status="INFO" customLabel="Occupied" /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Kamar kosong</div><strong>{rooms.filter((room) => room.status === 'AVAILABLE').length}</strong></div><StatusBadge status="SUCCESS" customLabel="Available" /></div>
-                <div className="kpi-item"><div><div className="card-title-soft">Maintenance / nonaktif</div><strong>{rooms.filter((room) => ['MAINTENANCE', 'INACTIVE'].includes(room.status)).length}</strong></div><StatusBadge status="WARNING" customLabel="Perlu cek" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Kamar terisi</div><strong>{rooms.filter((room) => room.status === 'OCCUPIED').length}</strong></div><StatusBadge status="INFO" customLabel="Occupied" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Kamar kosong</div><strong>{rooms.filter((room) => room.status === 'AVAILABLE').length}</strong></div><StatusBadge status="SUCCESS" customLabel="Available" /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Maintenance / nonaktif</div><strong>{rooms.filter((room) => ['MAINTENANCE', 'INACTIVE'].includes(room.status)).length}</strong></div><StatusBadge status="WARNING" customLabel="Perlu cek" /></div>
               </div>
             </Card.Body>
           </Card>
@@ -364,10 +364,10 @@ const lowStock = inventory.filter((item) => Number(item.qtyOnHand ?? 0) <= Numbe
       />
 
       <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Open ticket" value={openTickets.length} subtitle="Belum diproses" icon="🎫" variant={openTickets.length ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="In progress" value={inProgress.length} subtitle="Pekerjaan berjalan" icon="🛠️" /></Col>
-        <Col md={6} xl={3}><StatCard title="Low stock" value={lowStock.length} subtitle="Butuh cek inventory" icon="📦" variant={lowStock.length ? 'warning' : 'success'} /></Col>
-        <Col md={6} xl={3}><StatCard title="Kamar maintenance" value={rooms.filter((room) => room.status === 'MAINTENANCE').length} subtitle="Perlu tindak lanjut teknis" icon="🚪" /></Col>
+        <Col md={6} xl={3}><StatCard title="Open ticket" value={openTickets.length} subtitle="Belum diproses" icon="🎫" variant={openTickets.length ? 'warning' : 'success'} onClick={() => navigate('/tickets')} /></Col>
+        <Col md={6} xl={3}><StatCard title="In progress" value={inProgress.length} subtitle="Pekerjaan berjalan" icon="🛠️" onClick={() => navigate('/tickets')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Low stock" value={lowStock.length} subtitle="Butuh cek inventory" icon="📦" variant={lowStock.length ? 'warning' : 'success'} onClick={() => navigate('/inventory-items')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Kamar maintenance" value={rooms.filter((room) => room.status === 'MAINTENANCE').length} subtitle="Perlu tindak lanjut teknis" icon="🚪" onClick={() => navigate('/rooms')} /></Col>
       </Row>
 
       <Row className="g-4">
