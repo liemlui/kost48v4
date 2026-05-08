@@ -6,7 +6,7 @@ import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
 import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
-import { StayStatus, RenewRequestStatus, UserRole } from '../../common/enums/app.enums';
+import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole } from '../../common/enums/app.enums';
 
 @Injectable()
 export class RenewRequestsService {
@@ -27,6 +27,16 @@ export class RenewRequestsService {
 
     if (stay.tenantId !== actor.tenantId) {
       throw new ForbiddenException('Anda bukan pemilik stay ini');
+    }
+
+    // Cross-block: cannot create renew request if a checkout request is PENDING
+    const pendingCheckout = await this.prisma.checkoutRequest.findFirst({
+      where: { stayId: dto.stayId, status: CheckoutRequestStatus.PENDING },
+    });
+    if (pendingCheckout) {
+      throw new ConflictException(
+        'Tidak dapat mengajukan perpanjangan karena ada permintaan checkout yang menunggu persetujuan',
+      );
     }
 
     const existingPending = await this.prisma.renewRequest.findFirst({
