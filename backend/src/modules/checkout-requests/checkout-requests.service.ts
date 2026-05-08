@@ -3,10 +3,12 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AppNotificationService } from '../notifications/app-notification.service';
 import { CreateCheckoutRequestDto } from './dto/create-checkout-request.dto';
 import { ApproveCheckoutRequestDto } from './dto/approve-checkout-request.dto';
 import { RejectCheckoutRequestDto } from './dto/reject-checkout-request.dto';
@@ -18,7 +20,12 @@ import {
 
 @Injectable()
 export class CheckoutRequestsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(CheckoutRequestsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly appNotificationService: AppNotificationService,
+  ) {}
 
   /** Tenant creates a checkout request for their active stay. */
   async createRequest(dto: CreateCheckoutRequestDto, actor: CurrentUserPayload) {
@@ -77,6 +84,9 @@ export class CheckoutRequestsService {
       },
     });
 
+    // Notify OWNER/ADMIN — non-blocking
+    await this.notifyOwnerAdminOnCreate(request.id, stay);
+
     return request;
   }
 
@@ -107,6 +117,9 @@ export class CheckoutRequestsService {
       },
     });
 
+    // Notify tenant — non-blocking
+    await this.notifyTenantOnApprove(request.stayId, id);
+
     return updated;
   }
 
@@ -136,6 +149,9 @@ export class CheckoutRequestsService {
         reviewedAt: new Date(),
       },
     });
+
+    // Notify tenant — non-blocking
+    await this.notifyTenantOnReject(request.stayId, id, dto.reviewNotes);
 
     return updated;
   }
@@ -174,5 +190,127 @@ export class CheckoutRequestsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Notification helpers — non-blocking (failures logged, not thrown)
+  // ---------------------------------------------------------------------------
+
+  private async notifyOwnerAdminOnCreate(
+    requestId: number,
+    stay: { tenantId: number; roomId: number },
+  ) {
+    try {
+      const ownerAdminUsers = await this.prisma.user.findMany({
+        where: { role: { in: [UserRole.OWNER, UserRole.ADMIN] }, isActive: true },
+        select: { id: true, fullName: true },
+      });
+
+      if (ownerAdminUsers.length === 0) return;
+
+      const body = `Tenant mengajukan permintaan checkout untuk stay #${stay.tenantId} di kamar #${stay.roomId}.`;
+
+      const notifications = ownerAdminUsers.map((user) =>
+        this.appNotificationService.create({
+          recipientUserId: user.id,
+          title: 'Permintaan Checkout Baru',
+          body,
+          linkTo: '/stays?status=BOOKINGS',
+          entityType: 'CheckoutRequest',
+          entityId: String(requestId),
+        }),
+      );
+
+      await Promise.allSettled(notifications);
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi OWNER/ADMIN untuk checkout request #${requestId}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
+
+  private async notifyTenantOnApprove(stayId: number, requestId: number) {
+    try {
+      const stay = await this.prisma.stay.findUnique({
+        where: { id: stayId },
+        select: {
+          tenant: {
+            select: {
+              id: true,
+              user: { select: { id: true, fullName: true } },
+            },
+          },
+        },
+      });
+
+      const tenantUser = stay?.tenant?.user;
+      if (!tenantUser) {
+        this.logger.warn(
+          `Tidak dapat menemukan user portal untuk tenant stay #${stayId}, notifikasi approve dilewati`,
+        );
+        return;
+      }
+
+      await this.appNotificationService.create({
+        recipientUserId: tenantUser.id,
+        title: 'Permintaan Checkout Disetujui',
+        body: 'Permintaan checkout Anda telah disetujui. Proses checkout final akan ditangani oleh admin. Silakan hubungi admin untuk jadwal checkout.',
+        linkTo: '/portal/stay',
+        entityType: 'CheckoutRequest',
+        entityId: String(requestId),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi approve ke tenant untuk checkout request #${requestId}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
+
+  private async notifyTenantOnReject(
+    stayId: number,
+    requestId: number,
+    reviewNotes: string,
+  ) {
+    try {
+      const stay = await this.prisma.stay.findUnique({
+        where: { id: stayId },
+        select: {
+          tenant: {
+            select: {
+              id: true,
+              user: { select: { id: true, fullName: true } },
+            },
+          },
+        },
+      });
+
+      const tenantUser = stay?.tenant?.user;
+      if (!tenantUser) {
+        this.logger.warn(
+          `Tidak dapat menemukan user portal untuk tenant stay #${stayId}, notifikasi reject dilewati`,
+        );
+        return;
+      }
+
+      const body = reviewNotes
+        ? `Permintaan checkout Anda ditolak. Catatan: ${reviewNotes}`
+        : 'Permintaan checkout Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.';
+
+      await this.appNotificationService.create({
+        recipientUserId: tenantUser.id,
+        title: 'Permintaan Checkout Ditolak',
+        body,
+        linkTo: '/portal/stay',
+        entityType: 'CheckoutRequest',
+        entityId: String(requestId),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi reject ke tenant untuk checkout request #${requestId}`,
+        (error as Error)?.message ?? error,
+      );
+    }
   }
 }
