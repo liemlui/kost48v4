@@ -76,7 +76,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
   return (
     <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Ajukan Checkout Lebih Awal</Modal.Title>
+        <Modal.Title>Pengajuan Keluar Kamar</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error ? (
@@ -94,7 +94,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
             onChange={(e) => setRequestedCheckOutDate(e.target.value)}
           />
           <Form.Text className="text-muted">
-            Minimal H+1 dari hari ini. Admin akan meninjau dan menyetujui permintaan Anda.
+            Minimal H+1 dari hari ini. Admin akan meninjau pengajuan rencana keluar Anda. Persetujuan admin belum berarti Anda sudah keluar — checkout final tetap dilakukan oleh admin secara terpisah.
           </Form.Text>
         </Form.Group>
 
@@ -131,7 +131,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
               Mengirim...
             </>
           ) : (
-            'Ajukan Checkout'
+            'Ajukan Keluar Kamar'
           )}
         </Button>
       </Modal.Footer>

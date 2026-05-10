@@ -30,7 +30,7 @@ export class InventoryMovementsController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateInventoryMovementDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pergerakan inventory berhasil dicatat', data: await this.inventoryMovementsService.create(dto, user) };
   }

@@ -83,10 +83,21 @@ export default function StayDetailPage() {
     enabled: Boolean(id),
   });
 
+  const approvedCheckoutRequestsQuery = useQuery({
+    queryKey: ['admin-checkout-requests', 'stay', Number(id), 'APPROVED'],
+    queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }),
+    enabled: Boolean(id),
+  });
+
   const pendingCheckoutRequest = useMemo(() => {
     if (!checkoutRequestsQuery.data?.items) return null;
     return checkoutRequestsQuery.data.items.find((r) => r.stayId === Number(id)) ?? null;
   }, [checkoutRequestsQuery.data, id]);
+
+  const approvedCheckoutRequest = useMemo(() => {
+    if (!approvedCheckoutRequestsQuery.data?.items) return null;
+    return approvedCheckoutRequestsQuery.data.items.find((r) => r.stayId === Number(id)) ?? null;
+  }, [approvedCheckoutRequestsQuery.data, id]);
 
   const approveCrMutation = useMutation({
     mutationFn: async (crId: number) => approveCheckoutRequest(crId),
@@ -170,7 +181,7 @@ export default function StayDetailPage() {
               ) : null}
               {stay.status === 'ACTIVE' && stay.room?.status !== 'RESERVED' ? (
                 <>
-                  <Button onClick={() => setShowCompleteModal(true)}>Checkout</Button>
+                  <Button onClick={() => setShowCompleteModal(true)}>Checkout Final</Button>
                   <Button variant="outline-success" onClick={() => setShowRenewModal(true)}>Perpanjang Stay</Button>
                   <Button variant="outline-danger" onClick={() => setShowCancelModal(true)}>Batalkan</Button>
                 </>
@@ -192,7 +203,7 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{formatRupiah(stay.depositAmountRupiah ?? 0)}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-tile-label">Checkout plan</div>
+              <div className="metric-tile-label">Rencana Keluar</div>
               <div className="metric-tile-value">{formatDateSafe(stay.plannedCheckOutDate)}</div>
             </div>
             <div className="metric-tile">
@@ -217,11 +228,14 @@ export default function StayDetailPage() {
           {pendingCheckoutRequest ? (
             <Alert variant="warning" className="mt-3 mb-0 d-flex justify-content-between align-items-center">
               <div>
-                <strong>🔔 Permintaan Checkout Lebih Awal</strong>
+                <strong>🔔 Pengajuan Rencana Keluar Kamar</strong>
                 <div className="small mt-1">
                   Diajukan {formatDateSafe(pendingCheckoutRequest.createdAt)} ·{' '}
-                  Rencana checkout {formatDateSafe(pendingCheckoutRequest.requestedCheckOutDate)}{' '}
+                  Rencana keluar {formatDateSafe(pendingCheckoutRequest.requestedCheckOutDate)}{' '}
                   · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
+                </div>
+                <div className="small mt-1 text-muted">
+                  Setujui rencana hanya menyetujui jadwal keluar. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
@@ -231,7 +245,7 @@ export default function StayDetailPage() {
                   onClick={() => approveCrMutation.mutate(pendingCheckoutRequest.id)}
                   disabled={approveCrMutation.isPending}
                 >
-                  {approveCrMutation.isPending ? '...' : 'Setujui'}
+                  {approveCrMutation.isPending ? '...' : 'Setujui Rencana'}
                 </Button>
                 <Button
                   size="sm"
@@ -241,6 +255,47 @@ export default function StayDetailPage() {
                 >
                   Tolak
                 </Button>
+              </div>
+            </Alert>
+          ) : null}
+
+          {approvedCheckoutRequest ? (
+            <Alert variant="info" className="mt-3 mb-0 d-flex justify-content-between align-items-center">
+              <div>
+                <strong>✅ Rencana Keluar Kamar — Rencana Disetujui</strong>
+                <div className="small mt-1">
+                  Disetujui {formatDateSafe(approvedCheckoutRequest.reviewedAt)} ·{' '}
+                  Rencana keluar {formatDateSafe(approvedCheckoutRequest.requestedCheckOutDate)}{' '}
+                  · Alasan: {approvedCheckoutRequest.checkoutReason || approvedCheckoutRequest.requestNotes || '-'}
+                </div>
+                <div className="small mt-1 text-muted">
+                   Rencana keluar kamar telah disetujui. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
+                </div>
+              </div>
+              <div className="d-flex gap-2 flex-shrink-0 ms-3">
+                <StatusBadge status="APPROVED" customLabel="Rencana Disetujui" />
+                {hasUnpaid ? (
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => {
+                      const nextParams = new URLSearchParams(searchParams);
+                      nextParams.set('tab', 'finance');
+                      setSearchParams(nextParams);
+                      setActiveTab('finance');
+                    }}
+                  >
+                    Lihat & Kelola Tagihan
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => setShowCompleteModal(true)}
+                  >
+                    Checkout Final
+                  </Button>
+                )}
               </div>
             </Alert>
           ) : null}

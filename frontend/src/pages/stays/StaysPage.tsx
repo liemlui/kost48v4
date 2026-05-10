@@ -140,10 +140,21 @@ export default function StaysPage() {
     enabled: isBookingsMode,
   });
 
+  const approvedCheckoutRequestsQuery = useQuery({
+    queryKey: ['admin-checkout-requests', 'APPROVED'],
+    queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }),
+    enabled: isBookingsMode,
+  });
+
   const pendingCheckoutRequests = useMemo(() => {
     if (!checkoutRequestsQuery.data?.items) return [];
     return checkoutRequestsQuery.data.items.filter((r) => r.status === 'PENDING');
   }, [checkoutRequestsQuery.data]);
+
+  const approvedCheckoutRequests = useMemo(() => {
+    if (!approvedCheckoutRequestsQuery.data?.items) return [];
+    return approvedCheckoutRequestsQuery.data.items.filter((r) => r.status === 'APPROVED');
+  }, [approvedCheckoutRequestsQuery.data]);
 
   const approveCrMutation = useMutation({
     mutationFn: async (id: number) => approveCheckoutRequest(id),
@@ -219,6 +230,7 @@ export default function StaysPage() {
 
   const checkoutSoonCount = checkoutDue.length;
   const pendingCheckoutRequestCount = pendingCheckoutRequests.length;
+  const approvedCheckoutRequestCount = approvedCheckoutRequests.length;
   const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
@@ -300,10 +312,11 @@ export default function StaysPage() {
         <Card.Body>
           {isBookingsMode ? (
             <Alert variant={expiredBookingsCount || checkoutSoonCount || pendingCheckoutRequestCount ? 'warning' : 'info'} className="small mb-4">
-              Item yang perlu ditindaklanjuti: booking menunggu approval/pembayaran, stay aktif yang mendekati jatuh tempo checkout (H-10 hingga overdue), dan permintaan checkout lebih awal dari tenant.
+              Item yang perlu ditindaklanjuti: booking menunggu approval/pembayaran, stay aktif yang mendekati jatuh tempo checkout (H-10 hingga overdue), pengajuan rencana keluar menunggu review, dan rencana keluar yang siap checkout final.
               {expiredBookingsCount ? ` ${expiredBookingsCount} booking expired.` : ''}
               {checkoutSoonCount ? ` ${checkoutSoonCount} checkout due/overdue.` : ''}
-              {pendingCheckoutRequestCount ? ` ${pendingCheckoutRequestCount} permintaan checkout awal.` : ''}
+              {pendingCheckoutRequestCount ? ` ${pendingCheckoutRequestCount} pengajuan rencana keluar.` : ''}
+              {approvedCheckoutRequestCount ? ` ${approvedCheckoutRequestCount} siap checkout final.` : ''}
             </Alert>
           ) : null}
 
@@ -322,7 +335,7 @@ export default function StaysPage() {
 
           {isBookingsMode && pendingCheckoutRequests.length > 0 ? (
             <>
-              <h6 className="fw-semibold mt-3 mb-2">🔔 Permintaan Checkout Lebih Awal dari Tenant</h6>
+              <h6 className="fw-semibold mt-3 mb-2">🔔 Pengajuan Rencana Keluar Kamar — Menunggu Review</h6>
               <Table hover responsive className="mb-3">
                 <thead>
                   <tr>
@@ -362,7 +375,7 @@ export default function StaysPage() {
                             onClick={() => approveCrMutation.mutate(cr.id)}
                             disabled={approveCrMutation.isPending}
                           >
-                            {approveCrMutation.isPending ? '...' : 'Setujui'}
+                            {approveCrMutation.isPending ? '...' : 'Setujui Rencana'}
                           </Button>
                           <Button
                             size="sm"
@@ -379,6 +392,66 @@ export default function StaysPage() {
                 </tbody>
               </Table>
               <hr className="my-1" />
+            </>
+          ) : null}
+
+          {isBookingsMode && approvedCheckoutRequests.length > 0 ? (
+            <>
+              <h6 className="fw-semibold mt-4 mb-2">✅ Rencana Keluar — Rencana Disetujui</h6>
+              <p className="small text-muted mb-2">
+                Jadwal checkout telah disetujui. Tenant masih tercatat menghuni sampai admin menjalankan Checkout Final dari halaman detail stay.
+              </p>
+              <Table hover responsive className="mb-3">
+                <thead>
+                  <tr>
+                    <th>Tenant</th>
+                    <th>Kamar</th>
+                    <th>Tgl Rencana Keluar</th>
+                    <th>Alasan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {approvedCheckoutRequests.map((cr) => (
+                    <tr key={`approved-cr-${cr.id}`}>
+                      <td>
+                        <div className="fw-semibold">{cr.stay?.tenant?.fullName ?? '-'}</div>
+                        <div className="small text-muted">{cr.stay?.tenant?.phone ?? ''}</div>
+                      </td>
+                      <td>
+                        <div className="fw-semibold">{cr.stay?.room?.code ?? '-'}</div>
+                        <div className="small text-muted">Stay #{cr.stayId}</div>
+                      </td>
+                      <td>
+                        <div>{formatDateSafe(cr.requestedCheckOutDate)}</div>
+                        {cr.reviewedAt ? <div className="small text-muted">Disetujui {formatDateSafe(cr.reviewedAt)}</div> : null}
+                      </td>
+                      <td>
+                        <div>{cr.checkoutReason || cr.requestNotes || '-'}</div>
+                      </td>
+                      <td>
+                        <StatusBadge status="APPROVED" customLabel="Rencana Disetujui" />
+                      </td>
+                      <td>
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          onClick={() => navigate(`/stays/${cr.stayId}`)}
+                        >
+                          Lihat Detail Stay
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              <hr className="my-1" />
+            </>
+          ) : null}
+
+          {isBookingsMode ? (
+            <>
               <h6 className="fw-semibold mt-3 mb-2">Booking & Checkout Due</h6>
             </>
           ) : null}

@@ -124,11 +124,12 @@ function OwnerDashboard() {
   const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices-summary'], queryFn: () => fetchAllPagesForDashboard<Invoice>('/invoices') });
   const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses-summary'], queryFn: () => fetchAllPagesForDashboard<any>('/expenses') });
   const renewRequestsQuery = useQuery({ queryKey: ['dashboard-owner', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
-  const checkoutRequestsQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
+  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
+  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }) });
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-owner', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 1 }) });
 
-  if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
-  if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError || renewRequestsQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
+  if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
+  if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
@@ -146,7 +147,8 @@ function OwnerDashboard() {
   const overdue = invoices.filter(isOverdue);
   const totalExpense = expenses.reduce((sum, expense) => sum + Number(expense.amountRupiah ?? 0), 0);
   const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
-  const pendingCheckoutCount = checkoutRequestsQuery.data?.items?.length ?? 0;
+  const pendingCheckoutCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
+  const approvedCheckoutCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
   const pendingPaymentReviewCount = (paymentReviewQuery.data?.items ?? []).filter((ps: PaymentSubmission) => ps.status === 'PENDING_REVIEW').length;
 
   return (
@@ -176,7 +178,8 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
         <Col md={6} xl={3}><StatCard title="Total billed" value={new Intl.NumberFormat('id-ID').format(billed)} subtitle="Estimasi tagihan yang sudah terbentuk" icon="🧾" onClick={() => navigate('/invoices')} /></Col>
         <Col md={6} xl={3}><StatCard title="Total collected" value={new Intl.NumberFormat('id-ID').format(collected)} subtitle={`Expense tercatat ${new Intl.NumberFormat('id-ID').format(totalExpense)}`} icon="💰" variant={collected >= totalExpense ? 'success' : 'warning'} onClick={() => navigate('/invoices')} /></Col>
         <Col md={6} xl={3}><StatCard title="Permintaan Perpanjangan" value={pendingRenewCount} subtitle="Butuh approval owner" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Pengajuan Keluar — Review" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Rencana Keluar — Disetujui" value={approvedCheckoutCount} subtitle="Menunggu checkout final" icon="✅" variant={approvedCheckoutCount ? 'info' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
         <Col md={6} xl={3}><StatCard title="Pembayaran Review" value={pendingPaymentReviewCount} subtitle="Menunggu verifikasi" icon="💳" variant={pendingPaymentReviewCount ? 'warning' : 'success'} onClick={() => navigate('/payment-submissions/review')} /></Col>
       </Row>
 
@@ -196,7 +199,8 @@ Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{i
                 <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Occ. rate kasar</div><strong>{rooms.length ? `${Math.round((occupiedRooms / rooms.length) * 100)}%` : '0%'}</strong></div><StatusBadge status="INFO" customLabel="Occupancy" /></div>
                 <div className="kpi-item clickable-row" onClick={() => navigate('/reports')}><div><div className="card-title-soft">Cashflow ringkas</div><strong>{collected - totalExpense >= 0 ? 'Positif' : 'Tertekan'}</strong></div><StatusBadge status={collected - totalExpense >= 0 ? 'SUCCESS' : 'WARNING'} customLabel="Management view" /></div>
                 <div className="kpi-item clickable-row" onClick={() => navigate('/stays')}><div><div className="card-title-soft">Permintaan perpanjangan</div><strong>{pendingRenewCount}</strong></div><StatusBadge status={pendingRenewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingRenewCount ? 'Butuh approval' : 'Aman'} /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Permintaan checkout tenant</div><strong>{pendingCheckoutCount}</strong></div><StatusBadge status={pendingCheckoutCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingCheckoutCount ? 'Butuh review' : 'Aman'} /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Pengajuan rencana keluar</div><strong>{pendingCheckoutCount}</strong></div><StatusBadge status={pendingCheckoutCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingCheckoutCount ? 'Butuh review' : 'Aman'} /></div>
+                <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Siap checkout final</div><strong>{approvedCheckoutCount}</strong></div><StatusBadge status={approvedCheckoutCount ? 'INFO' : 'SUCCESS'} customLabel={approvedCheckoutCount ? 'Menunggu admin' : 'Aman'} /></div>
                 <div className="kpi-item clickable-row" onClick={() => navigate('/payment-submissions/review')}><div><div className="card-title-soft">Pembayaran perlu review</div><strong>{pendingPaymentReviewCount}</strong></div><StatusBadge status={pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingPaymentReviewCount ? 'Butuh verifikasi' : 'Aman'} /></div>
               </div>
             </Card.Body>
@@ -245,11 +249,12 @@ function AdminDashboard() {
   const depositCancelledQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-cancelled'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'CANCELLED', limit: 50 }) });
   const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<any>('/tickets', { limit: 100 }) });
   const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
-  const checkoutRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
+  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
+  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }) });
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 1 }) });
 
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, checkoutRequestsQuery, paymentReviewQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, paymentReviewQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, checkoutRequestsPendingQuery, checkoutRequestsApprovedQuery, paymentReviewQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
+  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, checkoutRequestsPendingQuery, checkoutRequestsApprovedQuery, paymentReviewQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = staysQuery.data?.items ?? [];
@@ -276,7 +281,8 @@ function AdminDashboard() {
   });
   const pendingApprovalCount = reservedWithoutInvoice.length;
   const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
-  const pendingCheckoutCount = checkoutRequestsQuery.data?.items?.length ?? 0;
+  const pendingCheckoutCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
+  const approvedCheckoutCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
   const pendingPaymentReviewCount = (paymentReviewQuery.data?.items ?? []).filter((ps: PaymentSubmission) => ps.status === 'PENDING_REVIEW').length;
 
   return (
@@ -296,7 +302,8 @@ function AdminDashboard() {
         <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
         <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
         <Col md={6} xl={3}><StatCard title="Perpanjangan" value={pendingRenewCount} subtitle="Permintaan perpanjangan stay" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/renew-requests')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout Request" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Pengajuan Rencana Keluar" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
+        <Col md={6} xl={3}><StatCard title="Siap Checkout Final" value={approvedCheckoutCount} subtitle="Jadwal disetujui" icon="✅" variant={approvedCheckoutCount ? 'info' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
         <Col md={6} xl={3}><StatCard title="Pembayaran Review" value={pendingPaymentReviewCount} subtitle="Menunggu verifikasi" icon="💳" variant={pendingPaymentReviewCount ? 'warning' : 'success'} onClick={() => navigate('/payment-submissions/review')} /></Col>
       </Row>
 
@@ -319,7 +326,8 @@ function AdminDashboard() {
                   <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/renew-requests')}><td>Permintaan perpanjangan</td><td>{pendingRenewCount}</td><td>Permintaan tenant untuk memperpanjang masa tinggal</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Permintaan checkout tenant</td><td>{pendingCheckoutCount}</td><td>Tenant mengajukan checkout lebih awal, perlu ditinjau</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Pengajuan rencana keluar</td><td>{pendingCheckoutCount}</td><td>Tenant mengajukan rencana keluar, perlu ditinjau</td></tr>
+                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Siap checkout final</td><td>{approvedCheckoutCount}</td><td>Jadwal disetujui, tinggal checkout final oleh admin</td></tr>
                   <tr className="clickable-row" onClick={() => navigate('/payment-submissions/review')}><td>Pembayaran perlu review</td><td>{pendingPaymentReviewCount}</td><td>Bukti pembayaran tenant menunggu verifikasi</td></tr>
                 </tbody>
               </Table>

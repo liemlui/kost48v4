@@ -54,9 +54,12 @@ export default function CompleteStayModal({
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Checkout</Modal.Title>
+        <Modal.Title>Checkout Final — Tenant Keluar Kamar</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        <Alert variant="warning" className="small mb-3">
+          Checkout Final menandakan tenant benar-benar keluar dari kamar. Status stay akan berubah menjadi selesai dan deposit diproses terpisah.
+        </Alert>
         {unpaidCount ? (
           <Alert variant="warning">
             Ada {unpaidCount} invoice belum lunas. Stay tetap bisa diselesaikan, tetapi pastikan penagihan sudah diurus.
@@ -100,7 +103,7 @@ export default function CompleteStayModal({
           onClick={handleSubmit} 
           disabled={completeMutation.isPending || !actualCheckOutDate || !checkoutReason.trim()}
         >
-          {completeMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Konfirmasi Checkout'}
+          {completeMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Konfirmasi Checkout Final'}
         </Button>
       </Modal.Footer>
     </Modal>

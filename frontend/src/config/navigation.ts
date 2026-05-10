@@ -16,36 +16,35 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
 const ownerSections: NavigationSection[] = [
   {
-    title: 'Ringkasan Owner',
+    title: 'Command Center',
     links: [
-      { to: '/dashboard', label: 'Dashboard Owner', icon: '📈', hint: 'KPI properti, koleksi, dan arah keputusan bisnis.' },
+      { to: '/dashboard', label: 'Dashboard', icon: '📈', hint: 'Ringkasan KPI properti, antrean tindakan, koleksi, dan arah keputusan bisnis.' },
+      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Lihat stay aktif, booking, checkout due, dan tindakan operasional.' },
+      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Status kamar, tarif, dan akses ke detail inventaris.' },
+      { to: '/tenants', label: 'Tenant', icon: '👥', hint: 'Data tenant, status aktif, dan akses portal.' },
     ],
   },
   {
-    title: 'Keuangan Owner',
+    title: 'Keuangan',
     links: [
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau tagihan, pembayaran, tunggakan, dan follow-up utama.' },
       { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
       { to: '/reports', label: 'Laporan', icon: '📊', hint: 'Laporan keuangan Owner: pendapatan, arus kas, tunggakan, deposit, pengeluaran.' },
-      { to: '/expenses', label: 'Pengeluaran', icon: '🧮', hint: 'Ringkasan biaya operasional dan kategori biaya.' },
-    ],
-  },
-  {
-    title: 'Operasional',
-    links: [
-      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Lihat stay aktif, detail, dan follow-up operasional.' },
-      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Status kamar, tarif, dan akses ke detail inventaris.' },
-      { to: '/tenants', label: 'Tenant', icon: '👥', hint: 'Data tenant, status aktif, dan akses portal.' },
-      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Pantau tiket tenant dan progres tindak lanjut.' },
-      { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
     ],
   },
   {
     title: 'Komunikasi & Kontrol',
     links: [
+      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Pantau tiket tenant dan progres tindak lanjut.' },
+      { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
       { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
-      { to: '/users', label: 'Pengguna', icon: '🧑‍💼', hint: 'Kelola akun, role, dan akses.' },
+    ],
+  },
+  {
+    title: 'Administrasi',
+    links: [
+      { to: '/users', label: 'Pengguna', icon: '👤', hint: 'Kelola akun pengguna: admin, staff, tenant, dan owner.' },
     ],
   },
   {
@@ -58,45 +57,34 @@ const ownerSections: NavigationSection[] = [
 
 const adminSections: NavigationSection[] = [
   {
-    title: 'Dashboard',
+    title: 'Command Center',
     links: [
-      { to: '/dashboard', label: 'Dashboard Admin', icon: '📊', hint: 'Antrian penting, status kamar, stay, dan invoice.' },
-    ],
-  },
-  {
-    title: 'Operasional',
-    links: [
-      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Check-in, checkout, perpanjangan, dan deposit.' },
+      { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Antrean tindakan harian, status kamar, stay, dan invoice.' },
+      { to: '/stays', label: 'Stay', icon: '🏠', hint: 'Booking, checkout, perpanjangan, dan deposit.' },
       { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Status kamar dan akses ke detail kamar.' },
       { to: '/tenants', label: 'Tenant', icon: '👥', hint: 'Data tenant dan pengelolaan akses portal.' },
-      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Triage, penugasan, progres, dan penyelesaian.' },
-      { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
     ],
   },
   {
     title: 'Keuangan',
     links: [
       { to: '/invoices', label: 'Tagihan', icon: '🧾', hint: 'Tagihan, item baris, dan status pembayaran.' },
-      { to: '/invoice-payments', label: 'Pembayaran Manual', icon: '💰', hint: 'Pencatatan pembayaran invoice.' },
-      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Antrian review bukti bayar booking reserved tenant.' },
-      { to: '/expenses', label: 'Pengeluaran', icon: '🧮', hint: 'Pengeluaran operasional harian.' },
+      { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Antrean review bukti bayar booking reserved tenant.' },
     ],
   },
   {
     title: 'Komunikasi & Kontrol',
     links: [
+      { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Triage, penugasan, progres, dan penyelesaian.' },
+      { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
-      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
-      { to: '/wifi-sales', label: 'Penjualan WiFi', icon: '📶', hint: 'Penjualan paket WiFi tenant.' },
-      { to: '/users', label: 'Pengguna', icon: '🧑‍💼', hint: 'Kelola akun admin, staff, dan tenant portal.' },
+      { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp.' },
     ],
   },
   {
-    title: 'Inventaris & Perawatan',
+    title: 'Administrasi',
     links: [
-      { to: '/inventory-items', label: 'Stok Barang', icon: '📦', hint: 'Master stok barang global.' },
-      { to: '/room-items', label: 'Inventaris Kamar', icon: '🛏️', hint: 'Inventaris barang yang terpasang per kamar.' },
-      { to: '/inventory-movements', label: 'Riwayat Stok', icon: '🔄', hint: 'Arus stok masuk, keluar, dan pemasangan kamar.' },
+      { to: '/users', label: 'Pengguna', icon: '👤', hint: 'Kelola akun pengguna: admin, staff, dan tenant.' },
     ],
   },
   {

@@ -235,13 +235,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         </Card>
       ) : null}
 
-      {/* Checkout Lebih Awal */}
+      {/* Rencana Keluar Kamar */}
       {showCheckoutButton ? (
         <Card className="content-card border-0 mb-4">
           <Card.Body>
-            <h5 className="mb-2">Ajukan Checkout Lebih Awal</h5>
+            <h5 className="mb-2">Ajukan Rencana Keluar Kamar</h5>
             <p className="text-muted small mb-3">
-              Ingin checkout sebelum tanggal rencana? Ajukan permintaan checkout lebih awal. Admin akan meninjau dan memproses permintaan Anda.
+              Rencanakan keluar lebih awal dengan mengajukan rencana keluar kamar. Admin akan meninjau pengajuan Anda. Persetujuan admin hanya menyetujui jadwal — kamu masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
             </p>
             {overdueInvoice ? (
               <Alert variant="danger" className="small">
@@ -253,7 +253,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               onClick={() => setShowCheckoutModal(true)}
               disabled={Boolean(overdueInvoice)}
             >
-              Ajukan Checkout Lebih Awal
+              Ajukan Rencana Keluar
             </Button>
           </Card.Body>
         </Card>
@@ -262,11 +262,11 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       {pendingCheckoutRequest ? (
         <Card className="content-card border-0 mb-4">
           <Card.Body>
-            <h5 className="mb-2">Permintaan Checkout Lebih Awal</h5>
+            <h5 className="mb-2">Pengajuan Keluar Kamar</h5>
             <Alert variant="info" className="small">
-              Permintaan checkout Anda sedang <strong>Menunggu Persetujuan</strong> admin.
+              Pengajuan keluar kamu sedang <strong>Menunggu Review</strong> admin.
               {pendingCheckoutRequest.requestedCheckOutDate
-                ? ` Tanggal checkout yang diajukan: ${formatDate(pendingCheckoutRequest.requestedCheckOutDate)}.`
+                ? ` Tanggal keluar yang diajukan: ${formatDate(pendingCheckoutRequest.requestedCheckOutDate)}.`
                 : ''}
             </Alert>
           </Card.Body>
@@ -276,8 +276,12 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       {approvedCheckoutRequest ? (
         <Card className="content-card border-0 mb-4">
           <Card.Body>
-            <Alert variant="success" className="small">
-              Permintaan checkout Anda telah <strong>Disetujui</strong>. Admin akan memproses checkout Anda.
+            <h5 className="mb-2">Rencana Keluar Kamar — Rencana Disetujui</h5>
+            <Alert variant="info" className="small">
+              Jadwal checkout telah disetujui. Kamu masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
+              {approvedCheckoutRequest.requestedCheckOutDate
+                ? ` Tanggal checkout yang diajukan: ${formatDate(approvedCheckoutRequest.requestedCheckOutDate)}.`
+                : ''}
               {approvedCheckoutRequest.reviewNotes ? ` Catatan: ${approvedCheckoutRequest.reviewNotes}` : ''}
             </Alert>
           </Card.Body>
@@ -288,7 +292,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         <Card className="content-card border-0 mb-4">
           <Card.Body>
             <Alert variant="warning" className="small">
-              Permintaan checkout Anda telah <strong>Ditolak</strong>.
+              Pengajuan keluar kamu telah <strong>Ditolak</strong>.
               {rejectedCheckoutRequest.reviewNotes ? ` Alasan: ${rejectedCheckoutRequest.reviewNotes}` : ''}
             </Alert>
           </Card.Body>

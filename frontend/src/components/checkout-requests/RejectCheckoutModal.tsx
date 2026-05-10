@@ -38,7 +38,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
   return (
     <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Tolak Permintaan Checkout</Modal.Title>
+        <Modal.Title>Tolak Pengajuan</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error ? (
@@ -74,7 +74,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
               Menolak...
             </>
           ) : (
-            'Tolak Permintaan'
+            'Tolak'
           )}
         </Button>
       </Modal.Footer>
