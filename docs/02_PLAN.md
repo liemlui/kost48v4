@@ -4,6 +4,60 @@
 
 ---
 
+## 0A. Latest Execution Override — 2026-05-09
+
+Bagian ini mengalahkan `Next ACT` lama jika ada konflik.
+
+### Status kerja aktif
+
+1. **Pertama selalu cek working tree.** Ada kemungkinan BIG UX patch masih modified dan belum commit.
+2. Jika BIG UX patch masih modified, lakukan urutan:
+   - build frontend,
+   - visual UAT login/public/dashboard/sidebar/rencana keluar,
+   - commit jika aman,
+   - atau patch/rollback bagian yang rusak.
+3. Jangan buka fitur baru saat working tree modified.
+
+### Urutan next paling aman
+
+| Urutan | Task | Mode | Catatan |
+|---:|---|---|---|
+| 1 | Stabilkan working tree BIG UX patch | ACT | Commit hanya setelah build + visual UAT aman. |
+| 2 | Patch `backend/seed-admin.ts` untuk OWNER/ADMIN/TENANT baru | ACT | OWNER `liem.lui@gmail.com`, ADMIN `admin@kost48.com`. |
+| 3 | Reset DB dev/UAT fresh | ACT/manual PowerShell | Pakai `npx prisma db push --force-reset`, bukan `migrate reset`. |
+| 4 | Full checkout UAT dari data fresh | ACT/manual UAT | Guest booking → approval → payment → occupied → rencana keluar → checkout final. |
+| 5 | PLAN audit Staff Inventory read-only | PLAN | Frontend + backend guard. |
+| 6 | ACT Staff Inventory read-only | ACT | STAFF view-only; OWNER/ADMIN mutate. |
+| 7 | Final Verification Gate | ACT/manual | Backend build, frontend build, role checks, core flows. |
+
+### DB reset command dev/UAT
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; $env:NODE_ENV="development"; npx prisma db push --force-reset; npx prisma generate; npx ts-node seed-admin.ts
+```
+
+### Do not do now
+
+- Jangan CSS modularization ulang.
+- Jangan Phase 4.4/4.5.
+- Jangan production DB reset.
+- Jangan auto-checkout setelah approve rencana keluar.
+
+### Full checkout UAT target
+
+PASS hanya jika:
+- tenant baru bisa booking dari public catalog,
+- admin approve booking,
+- tenant submit payment,
+- admin approve payment,
+- stay menjadi active dan room occupied,
+- tenant ajukan Pengajuan Keluar Kamar,
+- admin Setujui Rencana,
+- tenant tetap menghuni/room occupied,
+- admin Checkout Final dari StayDetail,
+- stay completed dan room available.
+
+
 ## 1. Prinsip Eksekusi
 
 1. Satu flow utama per batch.

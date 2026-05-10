@@ -4,6 +4,60 @@
 
 ---
 
+## 0A. Latest Contract Override — 2026-05-09
+
+Bagian ini mengalahkan wording lama jika ada konflik.
+
+### Rencana Keluar / Checkout Final Contract
+
+1. Tenant-facing fitur disebut **Pengajuan Keluar Kamar**.
+2. Admin/internal boleh memakai label pendek **Rencana Keluar**.
+3. Status tampilan:
+   - `PENDING` → **Menunggu Review**
+   - `APPROVED` → **Rencana Disetujui / Siap Checkout Final**
+   - `REJECTED` → **Ditolak**
+4. Tombol admin:
+   - Approve → **Setujui Rencana**
+   - Reject → **Tolak**
+   - Final completion → **Checkout Final**
+5. `APPROVED` **tidak** mengakhiri stay.
+6. Tenant tetap `ACTIVE/OCCUPIED` sampai admin menjalankan **Checkout Final** via flow complete stay existing.
+7. Checkout Final adalah aksi yang menandai tenant benar-benar keluar kamar.
+8. Open invoice `ISSUED/PARTIAL` tetap memblokir Checkout Final sesuai logic existing.
+9. Deposit tetap diproses terpisah/manual setelah checkout.
+10. Backend lifecycle tidak boleh diubah untuk auto-checkout saat approve request.
+
+### Checkout vs Renew Conflict Contract
+
+- Jika ada rencana keluar/checkout request `PENDING`, tenant tidak boleh mengajukan renew/perpanjangan untuk stay yang sama.
+- Jika ada renew request `PENDING`, tenant tidak boleh mengajukan rencana keluar untuk stay yang sama.
+- Pesan harus Bahasa Indonesia dan operasional-friendly.
+
+### Staff Inventory Read-only Contract
+
+- STAFF boleh melihat inventory items.
+- STAFF tidak boleh create, edit, delete, import, atau adjust stok.
+- OWNER dan ADMIN boleh mutasi inventory sesuai guard.
+- Rule ini harus ditegakkan di **frontend dan backend**, bukan hanya hide button.
+
+### Dev/UAT Seed Contract Baru
+
+Seed dev/UAT terbaru harus menghasilkan:
+
+| Role | Email | Password |
+|---|---|---|
+| OWNER | `liem.lui@gmail.com` | `admin123` |
+| ADMIN | `admin@kost48.com` | `admin123` |
+| TENANT | `tenant.g2@kost48.com` | `tenant123` |
+
+Rooms fresh:
+- G2-001
+- G2-002
+- G2-003
+
+Semua room seed harus `AVAILABLE` dan `isActive=true`.
+
+
 ## 1. Prinsip Kontrak
 
 1. `schema.prisma` = bentuk data.

@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-05-09 — Local Stabilization & Flow Clarity Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 157 | Approve rencana keluar tidak mengakhiri stay | `APPROVED` hanya berarti rencana disetujui; tenant tetap menghuni sampai Checkout Final. |
+| 158 | Istilah tenant-facing adalah `Pengajuan Keluar Kamar` | Lebih jelas untuk tenant daripada istilah teknis checkout request. |
+| 159 | Istilah admin/internal pendek adalah `Rencana Keluar` | Dashboard/StaysPage lebih ringkas. |
+| 160 | `APPROVED` ditampilkan sebagai `Rencana Disetujui / Siap Checkout Final` | Menghindari salah paham bahwa tenant sudah keluar. |
+| 161 | CSS modularization ditunda setelah visual regression | `styles.css` tetap monolithic untuk stabilitas UI. |
+| 162 | Dev/UAT reset memakai `prisma db push --force-reset` | `migrate reset` tidak cocok saat migration tertinggal dari `schema.prisma`. |
+| 163 | Seed dev/UAT baru memisahkan OWNER dan ADMIN | OWNER `liem.lui@gmail.com`; ADMIN `admin@kost48.com`. |
+| 164 | STAFF inventory items adalah read-only | STAFF boleh lihat, tidak boleh mutate; OWNER/ADMIN yang mutate. |
+| 165 | Jika Cline tidak bisa PowerShell, Cline hanya boleh edit-only | Build/git/API test dijalankan user manual di PowerShell. |
+| 166 | Working tree modified harus distabilkan sebelum fitur baru | Hindari menumpuk patch dan visual regression. |
+
+
 ## Keputusan Utama yang Masih Aktif
 
 | # | Keputusan | Dampak |

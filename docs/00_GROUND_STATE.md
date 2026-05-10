@@ -4,6 +4,41 @@
 
 ---
 
+## 0A. Latest Override — 2026-05-09 Working State
+
+> Bagian ini mengalahkan status lama di bawahnya jika ada konflik. Baca ini dulu sebelum mengambil keputusan kerja.
+
+### Status paling baru yang harus diingat
+
+| Area | Status terbaru |
+|---|---|
+| Git/working tree | **Belum diasumsikan clean.** Selalu mulai sesi dengan `git status --short; git log --oneline -8`. |
+| BIG UX checkout/sidebar patch | **Belum boleh dianggap committed** sampai user menunjukkan commit/push. Kemungkinan masih modified di 8 file frontend. |
+| CSS modularization | **DIBATALKAN/DITUNDA.** Sempat menyebabkan visual regression. Jangan split `styles.css` lagi sekarang. |
+| `styles.css` | Kembali ke monolithic CSS. M3 polish sudah pushed di `960f922 polish mobile layout and toast spacing`. |
+| Dashboard command center | Browser UAT user: **OK/PASS** untuk dashboard command center. |
+| M2 Manual check-in reliability | User manual UAT: **PASS** — modal close dan tenant select refresh sudah oke. |
+| M4 Password visibility toggle | User menyatakan **PASS**. |
+| Early checkout / rencana keluar | Flow harus jelas: approve rencana ≠ checkout final. Jika patch belum commit, selesaikan visual UAT + commit dulu. |
+| DB dev/UAT | User sudah eksplisit mengizinkan reset. `migrate reset` gagal karena migration tertinggal. Pakai `prisma db push --force-reset`. |
+| Seed dev/UAT baru | OWNER `liem.lui@gmail.com / admin123`; ADMIN `admin@kost48.com / admin123`; TENANT `tenant.g2@kost48.com / tenant123`; rooms G2-001..003. |
+| Staff inventory | Rule baru: STAFF **read-only** untuk inventory items; hanya OWNER/ADMIN boleh create/edit/delete/adjust. Perlu audit+patch backend+frontend. |
+
+### Current boot command for new session
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -8
+```
+
+### Jangan salah arah
+
+- Jangan mulai Phase 4.4/4.5 sebelum working tree aman, DB dev fresh, dan full checkout UAT selesai.
+- Jangan klaim Early Checkout/Rencana Keluar PASS sebelum browser UAT: tenant request → admin approve rencana → tenant tetap menghuni → admin Checkout Final → stay completed.
+- Jangan lakukan CSS modularization ulang sekarang.
+- Jangan reset DB production.
+- Jangan commit docs/status file baru; hanya 7 active docs ini.
+
+
 ## 0. Ringkasan Status Terbaru
 
 | Area | Status |

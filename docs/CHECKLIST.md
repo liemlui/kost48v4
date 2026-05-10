@@ -3,6 +3,59 @@
 
 ---
 
+## A0. Latest Active Checklist — 2026-05-09
+
+### Start-of-session hygiene
+- [ ] Run `git status --short; git log --oneline -8` before any new work.
+- [ ] If 8 frontend UX files are modified, do not start new feature.
+- [ ] If BIG UX patch is modified, run frontend build and visual UAT first.
+- [ ] Do not attempt CSS modularization again now.
+
+### BIG UX / rencana keluar state
+- [ ] Verify login page styling normal.
+- [ ] Verify public rooms styling normal.
+- [ ] Verify OWNER sidebar has `Pengguna`.
+- [ ] Verify ADMIN sidebar has `Pengguna`.
+- [ ] Verify dashboard cards normal and clickable.
+- [ ] Verify `Pengajuan Keluar Kamar` wording clear in tenant portal.
+- [ ] Verify `Rencana Disetujui / Siap Checkout Final` does not imply tenant already left.
+- [ ] Commit BIG UX patch only after build + visual UAT.
+
+### Dev/UAT DB reset
+- [ ] Patch `seed-admin.ts` if not yet changed.
+- [ ] OWNER seed = `liem.lui@gmail.com / admin123`.
+- [ ] ADMIN seed = `admin@kost48.com / admin123`.
+- [ ] TENANT seed = `tenant.g2@kost48.com / tenant123`.
+- [ ] Reset DB with `npx prisma db push --force-reset`.
+- [ ] Run `npx prisma generate`.
+- [ ] Run `npx ts-node seed-admin.ts`.
+- [ ] Build backend PASS.
+- [ ] Public rooms API shows G2-001/G2-002/G2-003 available.
+- [ ] OWNER login returns role OWNER.
+- [ ] ADMIN login returns role ADMIN.
+
+### Full checkout UAT fresh data
+- [ ] Guest booking from `/rooms` creates reserved booking.
+- [ ] Admin approves booking.
+- [ ] Tenant submits payment.
+- [ ] Admin approves payment.
+- [ ] Room becomes OCCUPIED and stay active.
+- [ ] Tenant submits Pengajuan Keluar Kamar.
+- [ ] Admin Setujui Rencana.
+- [ ] Tenant remains occupying after approval.
+- [ ] Dashboard/Stays show Siap Checkout Final.
+- [ ] Admin runs Checkout Final from StayDetail.
+- [ ] Stay becomes completed and room available.
+
+### Staff inventory read-only
+- [ ] PLAN audit frontend inventory page.
+- [ ] PLAN audit backend inventory endpoints/guards.
+- [ ] STAFF can view inventory items.
+- [ ] STAFF cannot create/edit/delete/adjust/import.
+- [ ] OWNER/ADMIN can mutate inventory.
+- [ ] Backend enforces mutation guard, not just frontend hiding.
+
+
 ## A. Current Working Tree Hygiene
 
 - [x] Fresh UAT G2 PASS.

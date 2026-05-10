@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-05-09 — Local Stabilization Status Update
+
+### Type
+Docs/status sync for latest local development context.
+
+### Updated context
+- Added latest rule for Rencana Keluar / Checkout Final UX:
+  - approve plan/request is not final checkout,
+  - tenant remains occupying until admin runs Checkout Final.
+- Added current seed target:
+  - OWNER `liem.lui@gmail.com / admin123`,
+  - ADMIN `admin@kost48.com / admin123`,
+  - TENANT `tenant.g2@kost48.com / tenant123`.
+- Added DB reset correction:
+  - use `npx prisma db push --force-reset` for dev/UAT,
+  - do not use `migrate reset` when migrations lag behind current schema.
+- Added CSS modularization decision:
+  - deferred after visual regression,
+  - keep `styles.css` monolithic for now.
+- Added STAFF inventory read-only rule.
+- Added current next sequence:
+  - stabilize working tree,
+  - patch seed,
+  - reset DB dev/UAT,
+  - full checkout UAT,
+  - staff inventory permission audit/patch.
+
+### No assumption
+This update does not claim the current BIG UX working tree is committed. New sessions must check `git status --short` first.
+
+
 
 ## 2026-05-04 — Production Handoff PASS
 

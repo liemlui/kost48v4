@@ -4,6 +4,51 @@
 
 ---
 
+## 2026-05-09 — Local Stabilization, UX Flow, and DB Reset Context
+
+### Ringkasan kerja terbaru
+- Dashboard command center telah melewati browser UAT user dan dinyatakan OK/PASS.
+- M2 Manual Check-in Reliability dinyatakan PASS oleh user: modal close dan tenant select refresh sudah oke.
+- M4 Password Visibility Toggle dinyatakan PASS oleh user.
+- M3 UI polish sudah pushed: toast spacing, mobile safe-area, close button/sidebar polish.
+- BIG UX patch untuk rencana keluar/checkout final sempat digabung dengan sidebar/dashboard/CSS modularization.
+- CSS modularization menyebabkan visual regression: login/public page style hilang, header tidak proporsional, dashboard card aneh, menu Pengguna hilang.
+- Hotfix mengembalikan `styles.css` monolithic dan mengembalikan menu Pengguna untuk OWNER/ADMIN.
+
+### Rencana Keluar / Checkout Final
+Flow yang harus dipertahankan:
+1. Tenant mengajukan Pengajuan Keluar Kamar.
+2. Admin Setujui Rencana.
+3. Status menjadi Rencana Disetujui / Siap Checkout Final.
+4. Tenant masih menghuni.
+5. Admin menjalankan Checkout Final saat tenant benar-benar keluar.
+6. Baru setelah itu stay selesai dan room available.
+
+### DB reset dev/UAT
+User sudah mengizinkan reset DB dev/UAT. Percobaan `prisma migrate reset --force` berhasil reset migration lama, tetapi seed gagal karena kolom `User.passwordChangedAt` tidak ada di DB hasil migration. Kesimpulan: migration tertinggal dari `schema.prisma`.
+
+Solusi dev/UAT:
+```powershell
+npx prisma db push --force-reset
+npx prisma generate
+npx ts-node seed-admin.ts
+```
+
+Seed terbaru yang diinginkan:
+- OWNER: `liem.lui@gmail.com / admin123`
+- ADMIN: `admin@kost48.com / admin123`
+- TENANT: `tenant.g2@kost48.com / tenant123`
+- Rooms: G2-001, G2-002, G2-003, semua AVAILABLE.
+
+### Next practical sequence
+1. Cek `git status --short`.
+2. Stabilkan/commit atau patch ulang BIG UX working tree.
+3. Patch `seed-admin.ts` jika belum.
+4. Reset DB dev/UAT pakai `db push --force-reset`.
+5. Jalankan full checkout UAT dari data fresh.
+6. Audit+patch STAFF inventory read-only.
+
+
 ## Ringkasan Kronologi Utama
 
 ### 2026-04-13 sampai 2026-04-18 — Fondasi dan Stabilization
