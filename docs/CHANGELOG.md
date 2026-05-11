@@ -1,6 +1,61 @@
 # KOST48 V3/V4 — Changelog
-**Versi:** 2026-05-04 production handoff  
+**Versi:** 2026-05-11 business lifecycle blueprint  
 **Fungsi:** Satu changelog gabungan untuk backend, frontend, dan docs. Jangan buat changelog frontend/backend terpisah lagi kecuali diminta.
+
+---
+
+## 2026-05-11 — Business Lifecycle Blueprint Update
+
+### Type
+Docs/status sync for business lifecycle completeness after full UAT and manual browser findings.
+
+### Changed context
+- Clarified that **M2 Manual Check-in UX Reliability PASS** only covers:
+  - Offcanvas/modal close,
+  - Back/Kembali navigation to `/stays`,
+  - tenant select refresh after inline tenant creation.
+- Clarified that M2 does **not** include:
+  - invoice auto-ISSUED,
+  - portal user auto-create,
+  - temporary portal password delivery.
+- Added **Batch B1 — Manual Check-in Business Automation** as next P0 business batch.
+- Added business invariant: `OCCUPIED` means business is active, so invoice/portal consequences must be ready.
+- Added policy: manual check-in invoice should become `ISSUED`, not remain quietly `DRAFT`.
+- Added policy: portal user should auto-create during manual check-in if tenant email exists.
+- Added idempotent portal creation contract:
+  - `MISSING_EMAIL`,
+  - `CREATED`,
+  - `ALREADY_ACTIVE`,
+  - `CONFLICT`.
+- Added once-only temporary password delivery policy with copy button and warning.
+- Added future audit items:
+  - final meter → utility charge,
+  - renewal invoice lifecycle,
+  - checkout + DRAFT invoice policy,
+  - deposit settlement model,
+  - damage/penalty,
+  - inventory room condition.
+
+### Tenant Identity Required + Duplicate Protection
+- Status: CODE COMPLETE / BUILD PASS / API UAT PASS.
+- API UAT summary: 157 PASS / 2 WARN / 0 SKIP / 0 FAIL.
+- Added No KTP required for new tenants.
+- Added 16-digit validation for No KTP.
+- Added duplicate prevention for:
+  - No KTP,
+  - No HP,
+  - tenant email,
+  - User.email conflict.
+- Added No KTP to inline manual check-in tenant form.
+- Commit/push status should be confirmed with `git log --oneline -5` before starting Batch B1.
+
+### Not implemented yet
+- Manual check-in invoice auto-ISSUED.
+- Manual check-in portal auto-create.
+- Deposit settlement model.
+- Damage/penalty model.
+- KTP upload.
+- DB unique constraints.
 
 ---
 
@@ -24,17 +79,12 @@ Docs/status sync for latest local development context.
   - deferred after visual regression,
   - keep `styles.css` monolithic for now.
 - Added STAFF inventory read-only rule.
-- Added current next sequence:
-  - stabilize working tree,
-  - patch seed,
-  - reset DB dev/UAT,
-  - full checkout UAT,
-  - staff inventory permission audit/patch.
+- Later UAT confirmed Staff Inventory read-only PASS and M2 UX Reliability PASS.
 
 ### No assumption
-This update does not claim the current BIG UX working tree is committed. New sessions must check `git status --short` first.
+New sessions must check `git status --short` first. Do not assume working tree is clean.
 
-
+---
 
 ## 2026-05-04 — Production Handoff PASS
 
@@ -58,7 +108,6 @@ Production deployment verification + runtime hardening.
 ### Notes
 - Production data rooms may still be empty; this is not a connection issue.
 - Direct production `dist` hotfix should be emergency-only. Future patch should go through source → build → commit → push → deploy.
-- Next requested maintenance is cleanup of unused files/config via Cline audit-first workflow.
 
 ---
 
@@ -109,14 +158,7 @@ Backend lifecycle verification + dev seed committed.
 - Payment approval promotes snapshot into 2 `MeterReading` rows.
 - Occupied stay expiry is rejected with `409`.
 - `runExpiryCheck` is scoped to reserved/unpromoted bookings only.
-- G2e/G2f legacy cleanup skipped because dev DB reset clean before live.
-
-### Dev seed
-`backend/seed-admin.ts` now creates a clean UAT baseline:
-- OWNER `admin@kost48.com / admin123`
-- TENANT `tenant.g2@kost48.com / tenant123`
-- Rooms `G2-001`, `G2-002`, `G2-003`
-- No initial stays, meters, invoices, or payment submissions.
+- G2e/G2f legacy cleanup skipped because DB dev reset clean before live.
 
 ---
 

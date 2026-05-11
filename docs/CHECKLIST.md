@@ -1,85 +1,88 @@
 # KOST48 V3/V4 — Active Checklist
-**Versi:** 2026-05-04 production handoff
+**Versi:** 2026-05-11 business lifecycle blueprint
 
 ---
 
-## A0. Latest Active Checklist — 2026-05-09
+## A0. Latest Active Checklist — 2026-05-11
 
 ### Start-of-session hygiene
+
 - [ ] Run `git status --short; git log --oneline -8` before any new work.
-- [ ] If 8 frontend UX files are modified, do not start new feature.
-- [ ] If BIG UX patch is modified, run frontend build and visual UAT first.
-- [ ] Do not attempt CSS modularization again now.
+- [ ] Verify identity patch committed and pushed (atau konfirmasi status dari user).
+- [ ] Do not attempt CSS modularization.
+- [ ] Do not start Batch B1 ACT before running Cline PLAN audit first.
+- [ ] If Cline terminal is not PowerShell, STOP. Do not adapt to cmd/Git Bash/WSL.
 
-### BIG UX / rencana keluar state
-- [ ] Verify login page styling normal.
-- [ ] Verify public rooms styling normal.
-- [ ] Verify OWNER sidebar has `Pengguna`.
-- [ ] Verify ADMIN sidebar has `Pengguna`.
-- [ ] Verify dashboard cards normal and clickable.
-- [ ] Verify `Pengajuan Keluar Kamar` wording clear in tenant portal.
-- [ ] Verify `Rencana Disetujui / Siap Checkout Final` does not imply tenant already left.
-- [ ] Commit BIG UX patch only after build + visual UAT.
+### Batch B0 — Identity patch commit/push
 
-### Dev/UAT DB reset
-- [ ] Patch `seed-admin.ts` if not yet changed.
-- [ ] OWNER seed = `liem.lui@gmail.com / admin123`.
-- [ ] ADMIN seed = `admin@kost48.com / admin123`.
-- [ ] TENANT seed = `tenant.g2@kost48.com / tenant123`.
-- [ ] Reset DB with `npx prisma db push --force-reset`.
-- [ ] Run `npx prisma generate`.
-- [ ] Run `npx ts-node seed-admin.ts`.
-- [ ] Build backend PASS.
-- [ ] Public rooms API shows G2-001/G2-002/G2-003 available.
-- [ ] OWNER login returns role OWNER.
-- [ ] ADMIN login returns role ADMIN.
-
-### Full checkout UAT fresh data
-- [ ] Guest booking from `/rooms` creates reserved booking.
-- [ ] Admin approves booking.
-- [ ] Tenant submits payment.
-- [ ] Admin approves payment.
-- [ ] Room becomes OCCUPIED and stay active.
-- [ ] Tenant submits Pengajuan Keluar Kamar.
-- [ ] Admin Setujui Rencana.
-- [ ] Tenant remains occupying after approval.
-- [ ] Dashboard/Stays show Siap Checkout Final.
-- [ ] Admin runs Checkout Final from StayDetail.
-- [ ] Stay becomes completed and room available.
-
-### Staff inventory read-only
-- [ ] PLAN audit frontend inventory page.
-- [ ] PLAN audit backend inventory endpoints/guards.
-- [ ] STAFF can view inventory items.
-- [ ] STAFF cannot create/edit/delete/adjust/import.
-- [ ] OWNER/ADMIN can mutate inventory.
-- [ ] Backend enforces mutation guard, not just frontend hiding.
-
-
-## A. Current Working Tree Hygiene
-
-- [x] Fresh UAT G2 PASS.
-- [x] `seed-admin.ts` committed for clean UAT baseline: `256a6f4 seed dev data for G2 UAT`.
-- [ ] Delete temporary helper files if present, especially `backend/verify-db.js`.
-- [x] Production frontend/backend connection PASS.
-- [x] Admin login production PASS.
-- [x] Protected notification endpoint PASS.
-- [x] Reminder preview production endpoint PASS.
-- [x] GitHub `origin/main` pushed to `54e74e6`.
-- [ ] Run `git status --short` before next ACT; expected clean.
-
-PowerShell cleanup:
-```powershell
-Remove-Item backend/verify-db.js -Force -ErrorAction SilentlyContinue
-git status --short
-git log --oneline -5
-```
+- [ ] Confirm identity patch files sudah committed.
+- [ ] Confirm pushed to origin/main.
+- [ ] `git log --oneline -5` menunjukkan commit identity.
+- [ ] Working tree clean sebelum Batch B1.
 
 ---
 
-## B. Completed / Do Not Repeat Unless Touched
+## B. Batch B1 — Manual Check-in Business Automation
+
+### Owner decisions — harus dikunci sebelum ACT
+
+- [ ] Invoice manual check-in langsung ISSUED — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Auto-create portal user jika email ada — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Tenant tanpa email tetap bisa check-in, portal = belum aktif — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Portal auto-create idempotent (MISSING_EMAIL / CREATED / ALREADY_ACTIVE / CONFLICT) — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Jika portal user sudah ada untuk tenant sama, jangan error — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Jika email dipakai tenant/user lain, block conflict — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Temp password ditampilkan sekali di modal hasil check-in — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Modal punya tombol Salin Password + warning jelas — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Jika admin lupa copy, reset manual dari Tenant Detail — **dikonfirmasi owner: Ya/Tidak**
+
+### Pre-ACT — Cline PLAN audit dulu
+
+- [ ] Audit `StaysService.create()` — periksa invoice creation saat ini DRAFT atau ISSUED.
+- [ ] Audit `TenantsService` — periksa portal creation method existing.
+- [ ] Audit users/auth dependency untuk create portal user dan temporary password.
+- [ ] Audit `CheckInWizard.tsx` — periksa response handling saat ini.
+- [ ] Audit stays API/types — periksa response DTO existing.
+- [ ] PLAN output: file list, function, contract idempotent, response DTO plan, UAT checklist.
+- [ ] PLAN output tidak membuka deposit/damage/renewal/final utility/schema.
+
+### ACT scope
+
+- [ ] `StaysService.create()` — invoice awal langsung ISSUED.
+- [ ] `StaysService.create()` — auto-create portal user (idempotent).
+- [ ] Response check-in mengembalikan portal result + temp password jika baru.
+- [ ] `CheckInWizard.tsx` — success modal menampilkan portal result.
+- [ ] Temp password hanya ditampilkan sekali dan tidak disimpan plaintext.
+- [ ] Build backend PASS.
+- [ ] Build frontend PASS.
+- [ ] `git status --short` reviewed.
+
+### UAT B1 — Happy path
+
+- [ ] Manual check-in tenant baru dengan email.
+- [ ] Stay ACTIVE, room OCCUPIED, invoice ISSUED.
+- [ ] Modal menampilkan portalEmail + temp password.
+- [ ] Tombol Salin Password berfungsi (copy ke clipboard).
+- [ ] Tenant login portal dengan temp password berhasil.
+- [ ] Tenant melihat current stay di portal.
+- [ ] Tenant melihat invoice ISSUED di portal.
+
+### UAT B1 — Edge cases
+
+- [ ] Check-in tenant tanpa email: berhasil, modal tampilkan “portal belum aktif”.
+- [ ] Check-in tenant existing yang sudah punya portal: berhasil, modal tampilkan “portal sudah aktif”.
+- [ ] Check-in dengan email yang dipakai tenant/user lain: gagal dengan pesan konflik yang jelas.
+- [ ] Jika check-in gagal karena conflict, room tidak berubah status dan stay tidak tercipta.
+- [ ] Build backend PASS.
+- [ ] Build frontend PASS.
+- [ ] `git status --short` clean setelah selesai.
+
+---
+
+## C. Completed / Do Not Repeat Unless Touched
 
 ### Gate 1 — UAT 4.0 Booking Mandiri
+
 - [x] Public `/rooms` for guest.
 - [x] Admin `/rooms` remains backoffice.
 - [x] Tenant creates booking.
@@ -89,6 +92,7 @@ git log --oneline -5
 - [x] CheckInWizard regression safe.
 
 ### Gate 2 — UAT 4.1 Admin Approval
+
 - [x] Admin approve booking.
 - [x] Approval modal closes after success.
 - [x] Initial invoice created/synced.
@@ -96,6 +100,7 @@ git log --oneline -5
 - [x] Room remains `RESERVED` before payment.
 
 ### UAT 4.2 Core
+
 - [x] Happy path payment submission.
 - [x] Reject path.
 - [x] Wrong amount path.
@@ -104,6 +109,7 @@ git log --oneline -5
 - [x] Combined booking payment: rent + deposit exact amount.
 
 ### Pricing Policy V1
+
 - [x] Daily 13% monthly.
 - [x] Weekly 45% monthly.
 - [x] Biweekly 75% monthly.
@@ -114,6 +120,7 @@ git log --oneline -5
 - [x] Deposit not multiplied by term.
 
 ### Phase 4.3-A/B/C
+
 - [x] 4.3-A Reminder Preview.
 - [x] 4.3-B Reminder Mock Send.
 - [x] 4.3-C1a AppNotification Backend.
@@ -123,74 +130,128 @@ git log --oneline -5
 - [x] Admin/Owner/Staff access via bell/header only.
 
 ### Phase 4.3-G Lifecycle Fixes
+
 - [x] 4.3-G1 Announcement Access Guard.
 - [x] 4.3-G2 Pending Meter Snapshot + Promotion.
 - [x] Fresh UAT G2 PASS.
 - [x] Expire occupied rejected 409.
-- [x] G2e/G2f legacy cleanup skipped because DB dev reset clean before live.
+
+### M-series patches
+
+- [x] M2 Manual Check-in UX Reliability PASS — commit `71ab386`.
+  - Catatan: M2 adalah UX fix. Invoice auto-ISSUED dan portal auto-create belum dikerjakan → Batch B1.
+- [x] M3 UI Polish PASS — commit `960f922`.
+- [x] M4 Password Visibility Toggle PASS.
+
+### Staff Inventory Read-only
+
+- [x] STAFF dapat view inventory items.
+- [x] STAFF tidak dapat create/edit/delete/adjust/import.
+- [x] OWNER/ADMIN dapat mutate inventory.
+- [x] Backend guard enforced — commit `70fcf4e`.
+
+### Tenant Identity + Duplicate Protection
+
+- [x] `identityNumber` No KTP wajib untuk tenant baru.
+- [x] No KTP wajib 16 digit angka.
+- [x] Inline tenant creation di CheckInWizard punya field No KTP.
+- [x] Backend mencegah duplicate: No KTP, No HP, email.
+- [x] Update tenant juga mencegah duplicate.
+- [x] API UAT PASS — 157 PASS / 0 FAIL.
+- [ ] Commit/push dikonfirmasi dari `git log`.
+
+### Full Checkout UAT
+
+- [x] Guest booking dari `/rooms`.
+- [x] Admin approve booking.
+- [x] Tenant submit payment.
+- [x] Admin approve payment → room OCCUPIED.
+- [x] Tenant submit Pengajuan Keluar Kamar.
+- [x] Admin Setujui Rencana.
+- [x] Tenant tetap menghuni setelah approval rencana.
+- [x] Admin Checkout Final dari StayDetail.
+- [x] Stay completed, room available.
+
+### Production
+
+- [x] Frontend production `app.kost48surabaya.com` PASS.
+- [x] Backend production `api.kost48surabaya.com/api` PASS.
+- [x] Admin login production PASS.
+- [x] Protected notification endpoint PASS.
+- [x] Reminder preview endpoint PASS.
 
 ---
 
+## D. Next Up — Urgency Chip Status Audit
 
-## C. Immediate Maintenance — Cline Cleanup Unused Files/Config
+Sebelum klaim PASS 4.3-D, konfirmasi status kode urgency chip:
 
-### PLAN
-- [ ] Audit unused/temp/legacy files only.
-- [ ] Identify files to delete with risk level.
-- [ ] Confirm no business flow source is touched.
-- [ ] Confirm no schema/database change.
+- [ ] Cek apakah ada file urgency chip di frontend (`UrgencyChip`, `PaymentUrgency`, dll).
+- [ ] Jika ada kode: lakukan browser UAT.
+- [ ] Jika tidak ada kode: downgrade ke implementation PLAN, bukan verify.
 
-### ACT
-- [ ] Delete only approved obvious unused files.
-- [ ] Do not delete 7 active docs.
-- [ ] Do not delete reminder/notification source.
-- [ ] Do not delete generated Prisma unless explicitly decided.
-- [ ] Build affected app(s) PASS.
-- [ ] `git status --short` reviewed.
+### UAT 4.3-D jika kode sudah ada
 
----
-
-## D. Next — Phase 4.3-D Tenant Payment Urgency Header Chip
-
-### PLAN
-- [ ] Audit header/topbar placement near `NotificationBell`.
-- [ ] Audit tenant invoice data source.
-- [ ] Audit tenant booking data source.
-- [ ] Audit tenant current stay data source.
-- [ ] Decide whether data is sufficient frontend-only.
-
-### ACT
-- [ ] Add urgency calculation helper/hook.
-- [ ] Add tenant-only urgency chip beside bell.
-- [ ] Add navigation target per urgency type.
-- [ ] Ensure chip is independent from notification read/unread.
-- [ ] Build frontend PASS.
-
-### UAT 4.3-D
-- [ ] Tenant with overdue invoice sees `Terlambat X hari`.
-- [ ] Tenant with due soon invoice sees `Tagihan H-X` / `Jatuh tempo hari ini`.
-- [ ] Tenant with booking deadline sees `Bayar sebelum X jam`.
-- [ ] Tenant with ending stay sees `Kontrak H-X`.
-- [ ] Chip stays visible after notification is read.
-- [ ] Chip disappears after invoice paid / booking resolved / stay resolved.
-- [ ] Admin/Owner/Staff do not see tenant payment urgency chip.
+- [ ] Tenant dengan invoice overdue melihat chip `Terlambat X hari`.
+- [ ] Tenant dengan booking payment deadline melihat chip `Bayar sebelum X jam`.
+- [ ] Tenant dengan invoice due soon melihat chip `Tagihan H-X`.
+- [ ] Tenant dengan contract ending melihat chip `Kontrak H-X`.
+- [ ] Chip tetap muncul setelah notification dibaca.
+- [ ] Chip hilang setelah invoice paid / booking resolved / stay resolved.
+- [ ] Admin/OWNER/STAFF tidak melihat chip ini.
 
 ---
 
-## E. Deferred / Not Open Yet
+## E. Future Gates
+
+### Batch B2 — Invoice Lifecycle + Final Utility
+
+Pre-audit:
+
+- [ ] Audit `StaysService.complete()` — apakah meter akhir menghasilkan invoice line?
+- [ ] Audit `RenewalsService.approve()` — apakah invoice renewal DRAFT atau ISSUED?
+- [ ] Audit form approval renewal — apakah sudah punya field nominal?
+- [ ] Audit invoice period coverage setelah renewal.
+
+Owner decisions sebelum ACT B2:
+
+- [ ] Checkout + DRAFT invoice: hard block atau warning + void/issue option?
+- [ ] Renewal invoice: auto-ISSUED atau DRAFT dengan window koreksi?
+- [ ] Form approval renewal perlu nominal field?
+
+### Batch B4 — Deposit Settlement
+
+- [ ] DepositTransaction model schema plan.
+- [ ] Owner approve schema change.
+- [ ] Backend service + migration.
+- [ ] Frontend checkout final form dengan deposit settlement fields.
+
+### Batch B5 — Damage / Penalty
+
+- [ ] Damage model design setelah deposit clear.
+- [ ] RoomFacility.condition update flow.
+- [ ] Room MAINTENANCE trigger decision.
+
+---
+
+## F. Deferred / Not Open Yet
 
 - [ ] Real WhatsApp provider.
 - [ ] Scheduler/cron reminder.
 - [ ] Browser push/service worker/PWA push.
 - [ ] SSE/websocket notification stream.
 - [ ] Advanced stage-aware announcement audience.
-- [ ] Meter metadata enrichment unless needed.
+- [ ] KTP upload.
+- [ ] Damage photo upload.
+- [ ] Payment gateway.
+- [ ] DB unique constraint pending data audit/cleanup.
 
 ---
 
-## F. Later Roadmap
+## G. Later Roadmap
 
 ### Phase 4.4 — Marketing + Registration
+
 - [ ] Public room detail endpoint.
 - [ ] Room gallery/images.
 - [ ] Public room detail page.
@@ -199,9 +260,11 @@ git log --oneline -5
 - [ ] Tenant soft delete/deactivate.
 
 ### Phase 4.5 — Tenant Self-Service
+
 - [ ] Tenant renew request.
 - [ ] Admin approve/reject renew request.
 - [ ] Forgot password.
 - [ ] Reset password.
 - [ ] Token/OTP expiration and one-time use.
 - [ ] Account enumeration-safe response.
+
