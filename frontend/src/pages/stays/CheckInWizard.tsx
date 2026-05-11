@@ -28,7 +28,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   const [wizardError, setWizardError] = useState('');
   const [selectedTenantOption, setSelectedTenantOption] = useState<SelectOption<number> | null>(null);
   const [showInlineTenant, setShowInlineTenant] = useState(false);
-  const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+  const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   const [depositWasManuallyCleared, setDepositWasManuallyCleared] = useState(false);
   const [tenantSelectRefreshKey, setTenantSelectRefreshKey] = useState(0);
 
@@ -123,7 +123,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       setSelectedTenantOption(newOption);
       form.setValue('tenantId', tenant.id);
       setShowInlineTenant(false);
-      setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+      setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
       setWizardError('');
     },
     onError: (err: any) => {
@@ -160,7 +160,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   };
 
   // ---- Handlers ----
-  function handleCreateInlineTenant(tenant: { fullName: string; phone: string; email: string; gender: string }) {
+  function handleCreateInlineTenant(tenant: { fullName: string; phone: string; email: string; gender: string; identityNumber: string }) {
     const phoneRegex = /^(08\d{8,}|\+628\d{8,})$/;
     if (!tenant.fullName.trim()) {
       setWizardError('Nama tenant wajib diisi');
@@ -174,11 +174,21 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       setWizardError('Format No. HP tidak valid (08xxxxxxxxxx atau +628xxxxxxxxxx)');
       return;
     }
+    const nikRegex = /^\d{16}$/;
+    if (!tenant.identityNumber.trim()) {
+      setWizardError('No KTP wajib diisi');
+      return;
+    }
+    if (!nikRegex.test(tenant.identityNumber.trim())) {
+      setWizardError('No KTP wajib 16 digit angka');
+      return;
+    }
     createInlineTenantMutation.mutate({
       fullName: tenant.fullName.trim(),
       phone: tenant.phone.trim(),
       email: tenant.email.trim() || undefined,
       gender: tenant.gender,
+      identityNumber: tenant.identityNumber.trim(),
     });
   }
 

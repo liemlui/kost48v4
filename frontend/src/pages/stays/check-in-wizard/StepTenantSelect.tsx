@@ -12,7 +12,7 @@ interface StepTenantSelectProps {
   loadTenantOptions: (inputValue: string) => Promise<SelectOption<number>[]>;
   defaultTenantOptions: SelectOption<number>[];
   isLoading: boolean;
-  onCreateInlineTenant: (tenant: { fullName: string; phone: string; email: string; gender: string }) => void;
+  onCreateInlineTenant: (tenant: { fullName: string; phone: string; email: string; gender: string; identityNumber: string }) => void;
   isCreatingTenant: boolean;
   wizardError: string;
   onClearError: () => void;
@@ -32,7 +32,7 @@ export default function StepTenantSelect({
   onClearError,
 }: StepTenantSelectProps) {
   const [showInlineTenant, setShowInlineTenant] = useState(false);
-  const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+  const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
 
   const handleSaveTenant = () => {
     if (!inlineTenant.fullName.trim()) {
@@ -47,7 +47,7 @@ export default function StepTenantSelect({
       return;
     }
     onCreateInlineTenant(inlineTenant);
-    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   };
 
   const handleSaveWithValidation = () => {
@@ -63,7 +63,7 @@ export default function StepTenantSelect({
       return;
     }
     onCreateInlineTenant(inlineTenant);
-    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   };
 
   return (
@@ -135,6 +135,21 @@ export default function StepTenantSelect({
               </Col>
               <Col md={6}>
                 <Form.Group>
+                  <Form.Label>
+                    No. KTP<span className="text-danger ms-1">*</span>
+                  </Form.Label>
+                  <Form.Control 
+                    value={inlineTenant.identityNumber} 
+                    onChange={(e) => setInlineTenant((prev) => ({ ...prev, identityNumber: e.target.value }))} 
+                    placeholder="16 digit nomor KTP"
+                    maxLength={16}
+                    inputMode="numeric"
+                  />
+                  <div className="text-muted small mt-1">16 digit angka</div>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
                   <Form.Label>Email</Form.Label>
                   <Form.Control 
                     value={inlineTenant.email} 
@@ -172,7 +187,7 @@ export default function StepTenantSelect({
                     return;
                   }
                   onCreateInlineTenant(inlineTenant);
-                  setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER' });
+                  setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
                 }} 
                 disabled={isCreatingTenant}
               >

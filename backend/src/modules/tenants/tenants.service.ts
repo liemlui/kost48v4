@@ -131,6 +131,7 @@ export class TenantsService {
 
   async create(dto: CreateTenantDto, actor: CurrentUserPayload) {
     const data = this.normalizeTenantData(dto);
+    await this.validateTenantUniqueness(data);
     const created = await this.prisma.tenant.create({ data: data as Prisma.TenantCreateInput });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Tenant', entityId: String(created.id), newData: created });
     return created;
@@ -140,9 +141,42 @@ export class TenantsService {
     const existing = await this.prisma.tenant.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Tenant tidak ditemukan');
     const data = this.normalizeTenantData(dto);
+    await this.validateTenantUniqueness(data, id);
     const updated = await this.prisma.tenant.update({ where: { id }, data: data as Prisma.TenantUpdateInput });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Tenant', entityId: String(updated.id), oldData: existing, newData: updated });
     return updated;
+  }
+
+  private async validateTenantUniqueness(data: Record<string, unknown>, excludeId?: number) {
+    const idFilter = excludeId ? { not: excludeId } : undefined;
+
+    if (data.identityNumber) {
+      const dupNik = await this.prisma.tenant.findFirst({
+        where: { identityNumber: data.identityNumber as string, id: idFilter } as Prisma.TenantWhereInput,
+      });
+      if (dupNik) throw new ConflictException('No KTP sudah digunakan oleh tenant lain');
+    }
+
+    if (data.phone) {
+      const dupPhone = await this.prisma.tenant.findFirst({
+        where: { phone: data.phone as string, id: idFilter } as Prisma.TenantWhereInput,
+      });
+      if (dupPhone) throw new ConflictException('No HP sudah digunakan oleh tenant lain');
+    }
+
+    if (data.email) {
+      const dupTenantEmail = await this.prisma.tenant.findFirst({
+        where: { email: data.email as string, id: idFilter } as Prisma.TenantWhereInput,
+      });
+      if (dupTenantEmail) throw new ConflictException('Email sudah digunakan oleh tenant lain');
+
+      const dupUser = await this.prisma.user.findUnique({ where: { email: data.email as string } });
+      if (dupUser) {
+        if (!excludeId || dupUser.tenantId !== excludeId) {
+          throw new ConflictException('Email sudah digunakan oleh user lain');
+        }
+      }
+    }
   }
 
   private normalizeTenantData(dto: CreateTenantDto | UpdateTenantDto): Record<string, unknown> {
