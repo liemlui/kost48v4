@@ -16,6 +16,7 @@ interface StepTenantSelectProps {
   isCreatingTenant: boolean;
   wizardError: string;
   onClearError: () => void;
+  refreshKey?: number;
 }
 
 export default function StepTenantSelect({

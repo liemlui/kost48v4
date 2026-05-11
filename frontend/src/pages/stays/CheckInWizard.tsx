@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SearchableSelect, { SelectOption } from '../../components/common/SearchableSelect';
 import { createResource, listResource } from '../../api/resources';
 import { createStay, CreateStayResponse } from '../../api/stays';
-import { Room, Stay, StayCreatePayload, Tenant } from '../../types';
+import { Room, StayCreatePayload, Tenant } from '../../types';
 import { WizardSteps, defaultValues } from './check-in-wizard/checkInWizardUtils';
 import type { WizardFormValues } from './check-in-wizard/types';
 import StepTenantSelect from './check-in-wizard/StepTenantSelect';
@@ -19,16 +19,18 @@ interface CheckInWizardProps {
   onHide?: () => void;
 }
 
-export default function CheckInWizard({ show = true, onHide }: CheckInWizardProps) {
+export default function CheckInWizard({ show: _show = true, onHide }: CheckInWizardProps) {
   const isModal = !!onHide;
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [show, setShow] = useState(true);
   const [step, setStep] = useState(1);
   const [wizardError, setWizardError] = useState('');
   const [selectedTenantOption, setSelectedTenantOption] = useState<SelectOption<number> | null>(null);
   const [showInlineTenant, setShowInlineTenant] = useState(false);
   const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER' });
   const [depositWasManuallyCleared, setDepositWasManuallyCleared] = useState(false);
+  const [tenantSelectRefreshKey, setTenantSelectRefreshKey] = useState(0);
 
   const form = useForm<WizardFormValues>({ defaultValues });
 
@@ -98,11 +100,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
       queryClient.invalidateQueries({ queryKey: ['stays'] });
       queryClient.invalidateQueries({ queryKey: ['resources', 'tenants'] });
       queryClient.invalidateQueries({ queryKey: ['resources', 'rooms'] });
-      onHide?.();
-      form.reset();
-      setStep(1);
-      setWizardError('');
-      setDepositWasManuallyCleared(false);
+      setShow(false);
       navigate(`/stays/${data.stay.id}`);
     },
     onError: (err: any) => {
@@ -117,6 +115,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
     onSuccess: (data: any) => {
       const tenant = data;
       queryClient.invalidateQueries({ queryKey: ['tenants', 'select'] });
+      setTenantSelectRefreshKey((prev) => prev + 1);
       const newOption: SelectOption<number> = {
         label: tenant.fullName,
         value: tenant.id,
@@ -143,11 +142,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
   }, [tenants, watchTenantId]);
 
   const handleClose = () => {
-    if (onHide) {
-      onHide();
-      return;
-    }
-    navigate('/stays');
+    setShow(false);
   };
 
   // ---- Load tenant options for SearchableSelect ----
@@ -306,7 +301,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
   }, [selectedRoom?.id]);
 
   return (
-    <Offcanvas show={show} onHide={handleClose} placement="end" backdrop="static" style={{ width: '700px' }}>
+    <Offcanvas show={show} onHide={handleClose} onExited={() => navigate('/stays')} placement="end" backdrop="static" style={{ width: '700px' }}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Check-in Baru</Offcanvas.Title>
       </Offcanvas.Header>
@@ -335,6 +330,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
               isCreatingTenant={createInlineTenantMutation.isPending}
               wizardError={wizardError}
               onClearError={() => setWizardError('')}
+              refreshKey={tenantSelectRefreshKey}
             />
           ) : null}
 
@@ -368,7 +364,7 @@ export default function CheckInWizard({ show = true, onHide }: CheckInWizardProp
           ) : null}
 
           <div className="d-flex justify-content-between gap-2">
-            <Button variant="outline-secondary" onClick={() => step === 1 ? navigate('/dashboard') : setStep((prev) => Math.max(1, prev - 1))}>Kembali</Button>
+            <Button variant="outline-secondary" onClick={() => step === 1 ? handleClose() : setStep((prev) => Math.max(1, prev - 1))}>Kembali</Button>
             <div className="d-flex gap-2">
               {step < 3 ? <Button type="submit">Lanjut</Button> : null}
               {step === 3 ? (
