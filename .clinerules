@@ -20,6 +20,12 @@ Default local URLs:
 - Backend API: http://localhost:3000/api
 - Frontend: http://localhost:5173
 
+Default dev/UAT database:
+- Host: localhost
+- Port: 5433
+- Database: kost48_v3_pro
+- User: postgres
+
 ============================================================
 ABSOLUTE PROJECT FOLDER BOUNDARY
 ============================================================
@@ -69,6 +75,14 @@ SHELL AND COMMAND RULES
 
 Use Windows PowerShell only.
 
+Cline terminal behavior:
+- Prefer VS Code Integrated Terminal mode.
+- Do NOT use Background Exec mode for this project.
+- The user needs to see the terminal inside VS Code.
+- If Cline does not open or reuse a visible VS Code terminal, STOP and report:
+  "Cline terminal is not visible. Please switch Cline Terminal Execution Mode to VS Code Integrated Terminal and Default Terminal Profile to Windows PowerShell."
+- Do not continue by silently running commands in the background.
+
 Before running any command, confirm native PowerShell session with:
 
 Get-Location
@@ -79,11 +93,13 @@ Expected:
 - Get-Location must work.
 - $PSVersionTable.PSEdition must return Desktop or Core.
 - $Host.Name should return ConsoleHost or Visual Studio Code Host.
-- If Get-Location is not recognized, the shell is cmd.exe or another non-PowerShell shell.
+- Prompt should start with PS.
+
+If Get-Location is not recognized, the shell is cmd.exe or another non-PowerShell shell.
 
 If the terminal is cmd.exe, bash, Git Bash, WSL, or any non-PowerShell shell:
 STOP and report:
-"Shell is not PowerShell. Please switch terminal to PowerShell before continuing."
+"Shell is not PowerShell. Please switch terminal to Windows PowerShell before continuing."
 
 Forbidden shell workaround:
 - Do NOT use powershell -Command from cmd.exe.
@@ -92,6 +108,7 @@ Forbidden shell workaround:
 - Do NOT adapt by using cmd syntax.
 - Do NOT use curl.
 - Do NOT use bash commands.
+- Do NOT run hidden/background commands for build, git, API tests, or DB checks.
 
 Before running project commands, confirm current directory:
 
@@ -129,6 +146,13 @@ Use one mode only:
 
 Do not mix PLAN and ACT.
 
+For PLAN:
+- Do not edit files.
+- Do not run build unless explicitly requested.
+- Do not mutate database.
+- Read only the allowed files.
+- Stop after producing audit/plan report.
+
 For ACT:
 - Work on one vertical slice only.
 - Do not open a broad scope.
@@ -140,10 +164,12 @@ For ACT:
 - Prefer code patch + build first.
 - Mark manual/API tests as PENDING for final verification when appropriate.
 
-Current preferred strategy:
-- M1 to M4: code batch first, build minimal only.
-- M5/final gate: bigger UAT/manual verification.
-- Avoid wasting tokens on long repeated UAT after every small patch.
+Token and time economy:
+- Do not repeat UAT that already passed unless the touched code affects that flow.
+- Do not login repeatedly unless needed.
+- Do not run broad endpoint sweeps after every small patch.
+- For code batches: audit files → patch → build → short report.
+- Large API/manual UAT should be reserved for final verification gates.
 
 ============================================================
 DOCUMENTATION RULES
@@ -170,6 +196,7 @@ Do not recreate:
 - separate frontend/backend changelog
 - pasted markdown files
 - temporary status files
+- 05_V4_MASTER_PLAN.md
 
 If docs were modified accidentally:
 STOP and report.
@@ -181,6 +208,7 @@ GIT HYGIENE
 Before editing:
 
 git status --short
+git log --oneline -8
 
 If unrelated changes exist:
 - Do not overwrite them.
@@ -243,13 +271,11 @@ BUILD RULES
 
 Backend build:
 
-cd backend
-npm run build
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build
 
 Frontend build:
 
-cd frontend
-npm run build
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
 
 Run only the build relevant to the touched area:
 - Backend-only patch: backend build only.
@@ -264,70 +290,297 @@ CURRENT WORK PRIORITY
 ============================================================
 
 Current baseline:
-- HEAD/main: bdba664 feat: gate payment urgency chip to tenants
-- Phase 4.3-D: CODE COMPLETE / BUILD PASS / PUSHED
-- Phase 4.3-D is NOT manual UAT PASS yet.
+- Project status follows 2026-05-11 business lifecycle blueprint.
+- Always start by checking:
+  git status --short
+  git log --oneline -8
 
-Do not claim Phase 4.3-D PASS.
+Latest known completed work:
+- M2 Manual Check-in UX Reliability: PASS.
+  Scope was UX only:
+  - modal/offcanvas close,
+  - Back/Kembali button to /stays,
+  - tenant select refresh after inline tenant creation.
+- M2 did NOT include invoice auto-ISSUED or portal auto-create.
+- M3 UI Polish: PASS.
+- M4 Password Visibility Toggle: PASS.
+- Staff Inventory Read-only: PASS.
+- Tenant Identity + Duplicate Protection: CODE COMPLETE / BUILD PASS / API UAT PASS.
+- Full Checkout UAT: PASS.
+- Production handoff: PASS.
 
-Next priority sequence:
-1. M1 — Owner Protection Backend
-2. M2 — Manual Check-in Reliability
-3. M3 — UI Polish
-4. M4 — Password Visibility Toggle
-5. M5 — Final Verification Gate
+Do not claim:
+- Phase 4.3-D Urgency Chip PASS unless browser UAT was actually performed.
+- Batch B1 PASS unless build and UAT/manual verification are actually performed.
+- Any flow PASS if only code/build was done.
+
+Next priority:
+1. Batch B1 — Manual Check-in Business Automation
+2. Batch B2 — Invoice Lifecycle + Final Utility Audit
+3. Batch B3 — Urgency Chip Final Verification
+4. Batch B4 — Deposit Settlement Model
+5. Batch B5 — Damage / Penalty / Inventory Condition
+6. Batch B6 — Public / Marketing Polish
 
 ============================================================
-M1 OWNER PROTECTION RULES
+BATCH B1 MANUAL CHECK-IN BUSINESS AUTOMATION
 ============================================================
 
-For M1 Owner Protection Backend:
+Status:
+- NEXT P0.
+- Not started yet.
+- Must start with PLAN audit.
+- Do NOT start with ACT.
 
-Scope:
-- Backend only.
-- Do not touch frontend.
-- Do not touch docs.
-- Do not reset DB.
-- Do not run long UAT.
-- Build only unless user asks for final verification.
+Business problem:
+Manual check-in currently can produce:
+- tenant created,
+- room OCCUPIED,
+- stay ACTIVE,
+- initial meter recorded,
+but:
+- initial invoice may remain DRAFT,
+- portal user may not be auto-created,
+- tenant may not be able to login portal,
+- tenant may not see invoice,
+- admin must remember extra manual steps.
 
-Goal:
-Prevent any non-OWNER role from locking, weakening, deleting, deactivating, or taking over OWNER accounts.
+B1 target:
+Manual check-in completed should produce:
+- Stay ACTIVE.
+- Room OCCUPIED.
+- Initial meter recorded.
+- Initial invoice ISSUED.
+- Portal user auto-created if tenant has email.
+- If portal user is newly created, response returns temporary password once.
+- Frontend CheckInWizard displays portal result and copy password button.
+- If tenant email is missing, check-in still succeeds and portal status is clearly shown as unavailable.
+- If portal already exists for the same tenant, check-in still succeeds with ALREADY_ACTIVE.
+- If email belongs to another user/tenant, block with clear conflict before final side effects.
 
-Rules:
-- Protect all users with role OWNER.
-- Do not hardcode email.
-- Do not protect only admin@kost48.com.
-- Do not protect only liem.lui@gmail.com.
+Portal auto-create statuses:
+- MISSING_EMAIL: tenant.email is empty, skip portal creation, check-in succeeds.
+- CREATED: tenant.email exists and no portal user exists, create TENANT user and return temporary password once.
+- ALREADY_ACTIVE: portal user already exists for same tenant, no duplicate user, no error.
+- CONFLICT: email is used by another user/tenant, block before final room/stay side effects.
 
-Non-OWNER actor means any actor whose role is not OWNER:
-- ADMIN
-- STAFF
-- TENANT
-- any other non-OWNER role
+B1 forbidden scope:
+- Do not modify docs unless user explicitly asks.
+- Do not change schema.
+- Do not reset database.
+- Do not touch production.
+- Do not touch deposit settlement.
+- Do not touch damage/penalty.
+- Do not touch renewal.
+- Do not touch final utility charge.
+- Do not rewrite public booking.
+- Do not touch urgency chip.
+- Do not add KTP upload.
+- Do not open large frontend/backend rewrite.
 
-A non-OWNER actor must not be able to:
-- change OWNER role
-- deactivate OWNER
-- reset/change OWNER password through admin/staff route
-- delete OWNER if endpoint exists
-- grant OWNER role to another user
-- make changes that prevent OWNER from login
+B1 PLAN audit allowed files to read:
+- backend/src/modules/stays/stays.service.ts
+- backend/src/modules/stays/stays.controller.ts
+- backend/src/modules/stays/dto/**
+- backend/src/modules/tenants/tenants.service.ts
+- backend/src/modules/tenants/tenants.controller.ts
+- backend/src/modules/tenants/dto/**
+- backend/src/modules/users/users.service.ts
+- backend/src/auth/auth.service.ts
+- backend/prisma/schema.prisma
+- frontend/src/pages/stays/CheckInWizard.tsx
+- frontend/src/pages/stays/check-in-wizard/**
+- frontend/src/api/stays.ts
+- frontend/src/api/tenants.ts
+- frontend/src/types/index.ts
 
-OWNER should still be able to:
-- login
-- manage non-owner users according to existing rules
+B1 PLAN audit requirements:
+1. Trace current POST /stays manual check-in flow.
+2. Confirm invoice status created by StaysService.create(): DRAFT or ISSUED.
+3. Confirm where invoice line RENT is created.
+4. Confirm whether response currently returns enough data for frontend.
+5. Trace existing tenant portal creation method.
+6. Confirm how temporary password is generated and hashed.
+7. Confirm whether portal creation can be reused safely from StaysService.create().
+8. Identify logic needed for MISSING_EMAIL, CREATED, ALREADY_ACTIVE, CONFLICT.
+9. Confirm how to avoid side effects if email conflict happens.
+10. Propose minimal response DTO shape for CheckInWizard.
+11. Propose minimal frontend success modal change.
+12. List exact files for ACT.
+13. Give backend/frontend build commands.
+14. Give UAT checklist.
 
-Admin/Staff should still be able to:
-- manage non-owner users according to existing existing rules
+B1 PLAN stop condition:
+- No code changes.
+- No docs changes.
+- No DB mutation.
+- Stop after audit report.
 
-Preferred implementation:
-- Service-layer validation.
-- Controller remains thin.
-- Actor comes from JWT context.
-- Error message in Bahasa Indonesia.
-- No schema change unless absolutely necessary.
-- If schema change seems needed, STOP and report.
+B1 ACT can only start after user approves PLAN.
+
+Likely B1 ACT files after PLAN approval:
+- backend/src/modules/stays/stays.service.ts
+- backend/src/modules/stays/stays.controller.ts only if response shape/controller typing needs adjustment
+- backend/src/modules/tenants/tenants.service.ts only if portal helper must be reused or extracted
+- frontend/src/pages/stays/CheckInWizard.tsx
+- frontend/src/pages/stays/check-in-wizard/** only if success display is there
+- frontend/src/api/stays.ts
+- frontend/src/types/index.ts
+
+B1 Definition of Done:
+- Manual check-in creates Stay ACTIVE.
+- Room becomes OCCUPIED.
+- Initial meter is recorded.
+- Initial invoice is ISSUED.
+- Portal user is created if tenant has email and no existing portal user.
+- Temporary password is returned once only when portal user is newly created.
+- Frontend displays portal status and temporary password with copy button when CREATED.
+- Missing email does not block check-in but displays portal unavailable.
+- Existing portal for same tenant does not error.
+- Email conflict blocks before final side effects.
+- Backend build PASS.
+- Frontend build PASS.
+- Manual/API UAT performed before claiming PASS.
+
+B1 UAT checklist:
+1. Manual check-in tenant baru dengan email:
+   - stay ACTIVE
+   - room OCCUPIED
+   - invoice ISSUED
+   - portalEmail + temporaryPassword shown
+   - copy password works
+   - tenant can login portal
+   - tenant sees current stay
+   - tenant sees invoice ISSUED
+2. Manual check-in tenant tanpa email:
+   - check-in succeeds
+   - portal status says unavailable/missing email
+   - no portal user created
+3. Manual check-in tenant existing with existing portal:
+   - check-in succeeds
+   - portal status ALREADY_ACTIVE
+   - no duplicate user
+4. Manual check-in with email used by another user/tenant:
+   - check-in fails with clear conflict message
+   - room status does not change
+   - stay is not created
+
+============================================================
+BATCH B2 INVOICE LIFECYCLE + FINAL UTILITY AUDIT
+============================================================
+
+Status:
+- Not open yet.
+- Do not start before B1 is complete.
+
+B2 must start with PLAN audit.
+
+B2 audit questions:
+- Does StaysService.complete() only record final meter, or also create final utility invoice line?
+- Does renewal approval create DRAFT or ISSUED invoice?
+- Does renewal approval form have nominal confirmation field?
+- What should happen if checkout final has DRAFT invoice?
+- Does invoice period coverage remain correct after renewal?
+
+Forbidden before B2:
+- Do not patch final utility charge without audit.
+- Do not change renewal invoice behavior without owner decision.
+- Do not change checkout invoice policy without owner decision.
+
+============================================================
+BATCH B3 URGENCY CHIP FINAL VERIFICATION
+============================================================
+
+Status:
+- Phase 4.3-D code status must be confirmed.
+- Do not claim PASS without browser UAT.
+
+B3 audit target:
+- Check whether urgency chip code exists.
+- If code exists, perform browser UAT.
+- If code does not exist, downgrade to implementation PLAN.
+
+UAT target if code exists:
+- Tenant with overdue invoice sees chip.
+- Tenant with booking payment deadline sees chip.
+- Tenant with due soon invoice sees chip.
+- Tenant with contract ending sees chip.
+- Chip remains after notification is read.
+- Chip disappears only after invoice paid / booking resolved / stay resolved.
+- OWNER/ADMIN/STAFF do not see tenant urgency chip.
+
+============================================================
+BATCH B4 DEPOSIT SETTLEMENT MODEL
+============================================================
+
+Status:
+- Future batch.
+- Do not mix with B1.
+
+Deposit principle:
+- Deposit is a liability, not just a number.
+- Checkout final should eventually support refund/full, refund/partial, forfeit, deducted, or pending transfer.
+
+Likely future design:
+- DepositTransaction or DepositLog.
+- Schema change likely required.
+- Must be PLAN first.
+
+Forbidden now:
+- Do not add deposit schema in B1.
+- Do not patch deposit settlement during B1.
+
+============================================================
+BATCH B5 DAMAGE / PENALTY / INVENTORY CONDITION
+============================================================
+
+Status:
+- Future batch.
+- Do not mix with B1 or B4.
+
+Principle:
+- Damage/penalty and inventory movement are different.
+- RoomFacility.condition may change when room item is damaged.
+- InventoryMovement only happens when physical stock changes.
+
+Forbidden now:
+- Do not add damage model in B1.
+- Do not modify inventory movement logic in B1.
+
+============================================================
+BATCH B6 PUBLIC / MARKETING POLISH
+============================================================
+
+Status:
+- Later P2.
+- Baseline public booking already passed UAT.
+- Do not claim guest booking is missing.
+
+Future scope:
+- Public room detail page.
+- Gallery/images.
+- SEO-friendly detail.
+- Flexible registration.
+- Better guest onboarding.
+
+Forbidden now:
+- Do not rewrite public booking in B1.
+
+============================================================
+SEED DEV/UAT CONTEXT
+============================================================
+
+Known dev/UAT accounts:
+- OWNER: liem.lui@gmail.com / admin123
+- ADMIN: admin@kost48.com / admin123
+- STAFF: staff@kost48.com / staff123
+- TENANT: tenant.g2@kost48.com / tenant123
+
+Known seeded rooms:
+- G2-001 to G2-005
+- G3-001 to G3-003
+
+Do not reset DB unless user explicitly asks.
 
 ============================================================
 FINAL REPORT FORMAT
@@ -357,8 +610,19 @@ At the end of every ACT, report:
 
 6. Risks / next step
 - Only real risks
-- Next recommended ACT
+- Next recommended ACT or PLAN
 
 Do not overclaim.
 Do not say PASS if only build was done.
 Do not say UAT PASS unless UAT was actually done.
+
+At the end of every PLAN, report only:
+- Current behavior
+- Root gaps
+- Exact patch plan
+- Allowed files for ACT
+- Forbidden scope
+- Risk level
+- Build commands
+- UAT checklist
+- Stop condition confirmation
