@@ -5,6 +5,7 @@ import {
   Invoice,
   InvoiceSuggestionItem,
   PaginatedResponse,
+  PortalResult,
   ProcessDepositPayload,
   Stay,
   StayCreatePayload,
@@ -13,6 +14,7 @@ import {
 export type CreateStayResponse = {
   stay: Stay;
   invoice: Invoice;
+  portal?: PortalResult;
 };
 
 function readAlias<T>(source: unknown, ...keys: string[]): T | undefined {

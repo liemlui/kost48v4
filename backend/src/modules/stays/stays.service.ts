@@ -1,7 +1,9 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { createHash, randomBytes } from 'crypto';
+import * as bcrypt from 'bcryptjs';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, DepositStatus, UtilityType } from '../../common/enums/app.enums';
+import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, DepositStatus, UtilityType, UserRole } from '../../common/enums/app.enums';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
@@ -86,6 +88,39 @@ export class StaysService {
       throw new BadRequestException('Nilai meter tidak boleh negatif');
     }
 
+    // --- Portal pre-check: lakukan SEBELUM transaction untuk menghindari side effects ---
+    let portalStatus: 'MISSING_EMAIL' | 'CREATED' | 'ALREADY_ACTIVE' = 'MISSING_EMAIL';
+    let portalEmail: string | undefined;
+    let temporaryPassword: string | undefined;
+    let portalUserId: number | undefined;
+    let passwordHash: string | undefined;
+
+    if (!tenant.email) {
+      portalStatus = 'MISSING_EMAIL';
+    } else {
+      portalEmail = tenant.email;
+      const existingPortalUser = await this.prisma.user.findUnique({
+        where: { email: tenant.email },
+        select: { id: true, tenantId: true },
+      });
+
+      if (existingPortalUser) {
+        if (existingPortalUser.tenantId === tenant.id) {
+          portalStatus = 'ALREADY_ACTIVE';
+          portalUserId = existingPortalUser.id;
+        } else {
+          throw new ConflictException(
+            `Email ${tenant.email} sudah digunakan oleh tenant lain. Tidak dapat melanjutkan check-in. Hubungi administrator untuk menyelesaikan konflik data.`,
+          );
+        }
+      } else {
+        portalStatus = 'CREATED';
+        const rawPassword = `kost48-${String(Math.floor(1000 + Math.random() * 9000))}`;
+        temporaryPassword = rawPassword;
+        passwordHash = await bcrypt.hash(rawPassword, 10);
+      }
+    }
+
     try {
       const created = await this.prisma.$transaction(async (tx) => {
         const stay = await tx.stay.create({
@@ -119,6 +154,7 @@ export class StaysService {
         const periodEnd = calculatePeriodEnd(checkInDate, dto.pricingTerm, plannedCheckOutDate);
         const dueDate = calculateDueDate(periodEnd);
 
+        // Invoice dibuat DRAFT dulu agar InvoiceLine bisa dibuat (DB guard: invoice_line_draft_only_trg)
         const invoice = await tx.invoice.create({
           data: {
             invoiceNumber,
@@ -143,6 +179,13 @@ export class StaysService {
             lineAmountRupiah: agreed,
             sortOrder: 0,
           },
+        });
+
+        // Setelah InvoiceLine dibuat, update invoice jadi ISSUED
+        const issuedAt = new Date();
+        const issuedInvoice = await tx.invoice.update({
+          where: { id: invoice.id },
+          data: { status: InvoiceStatus.ISSUED, issuedAt },
         });
 
         const baselineDate = new Date(dto.checkInDate);
@@ -196,12 +239,46 @@ export class StaysService {
           },
         });
 
-        return { stay, invoice };
+        // --- Portal user creation ---
+        if (portalStatus === 'CREATED' && passwordHash) {
+          const newPortalUser = await tx.user.create({
+            data: {
+              fullName: tenant.fullName,
+              email: tenant.email!,
+              passwordHash,
+              role: UserRole.TENANT,
+              tenantId: tenant.id,
+              isActive: true,
+            },
+            select: { id: true },
+          });
+          portalUserId = newPortalUser.id;
+        }
+
+        return { stay, invoice: issuedInvoice };
       });
 
       await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Stay', entityId: String(created.stay.id), newData: created.stay });
       await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Invoice', entityId: String(created.invoice.id), newData: created.invoice });
-      return created;
+      if (portalStatus === 'CREATED' && portalUserId) {
+        await this.audit.log({
+          actorUserId: actor.id,
+          action: 'CREATE',
+          entityType: 'User',
+          entityId: String(portalUserId),
+          meta: { tenantId: tenant.id, action: 'AUTO_CREATE_PORTAL_BY_CHECKIN' },
+        });
+      }
+
+      return {
+        ...created,
+        portal: {
+          status: portalStatus,
+          email: portalEmail,
+          temporaryPassword,
+          portalUserId,
+        },
+      };
     } catch (error: any) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

@@ -367,6 +367,15 @@ export type ApproveBookingPayload = {
   initialWaterM3: string;
 };
 
+export type PortalStatus = 'MISSING_EMAIL' | 'CREATED' | 'ALREADY_ACTIVE';
+
+export type PortalResult = {
+  status: PortalStatus;
+  email?: string;
+  temporaryPassword?: string;
+  portalUserId?: number;
+};
+
 export type ApproveBookingResult = {
   stay: Stay;
   invoice: Pick<Invoice, 'id' | 'invoiceNumber' | 'status' | 'periodStart' | 'periodEnd' | 'dueDate'>;

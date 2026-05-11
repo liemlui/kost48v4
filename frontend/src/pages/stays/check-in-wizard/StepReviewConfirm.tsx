@@ -59,14 +59,14 @@ export default function StepReviewConfirm({
             <div className="mb-2">
               <span className="text-muted">Harga Sewa:</span>
               <br />
-              <strong>{values.agreedRentAmountRupiah ? `Rp ${Number(values.agreedRentAmountRupiah).toLocaleString('id-ID')}` : '—'}</strong>
+              <strong>{values.agreedRentAmountRupiah ? `Rp ${Number(values.agreedRentAmountRupiah).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</strong>
             </div>
           </Col>
           <Col md={6}>
             <div className="mb-2">
               <span className="text-muted">Deposit:</span>
               <br />
-              <strong>{values.depositAmountRupiah ? `Rp ${Number(values.depositAmountRupiah).toLocaleString('id-ID')}` : 'Rp 0'}</strong>
+              <strong>{values.depositAmountRupiah ? `Rp ${Number(values.depositAmountRupiah).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Rp 0,00'}</strong>
             </div>
           </Col>
           <Col md={6}>

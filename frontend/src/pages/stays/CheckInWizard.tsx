@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Form, Offcanvas, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, Form, InputGroup, Offcanvas, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import SearchableSelect, { SelectOption } from '../../components/common/SearchableSelect';
@@ -31,6 +31,8 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   const [depositWasManuallyCleared, setDepositWasManuallyCleared] = useState(false);
   const [tenantSelectRefreshKey, setTenantSelectRefreshKey] = useState(0);
+  const [createResult, setCreateResult] = useState<CreateStayResponse | null>(null);
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   const form = useForm<WizardFormValues>({ defaultValues });
 
@@ -100,8 +102,8 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       queryClient.invalidateQueries({ queryKey: ['stays'] });
       queryClient.invalidateQueries({ queryKey: ['resources', 'tenants'] });
       queryClient.invalidateQueries({ queryKey: ['resources', 'rooms'] });
-      setShow(false);
-      navigate(`/stays/${data.stay.id}`);
+      setCreateResult(data);
+      setPasswordCopied(false);
     },
     onError: (err: any) => {
       const raw = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat stay';
@@ -309,6 +311,91 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       }
     }
   }, [selectedRoom?.id]);
+
+  function handleCopyPassword() {
+    if (createResult?.portal?.temporaryPassword) {
+      navigator.clipboard.writeText(createResult.portal.temporaryPassword);
+      setPasswordCopied(true);
+      setTimeout(() => setPasswordCopied(false), 3000);
+    }
+  }
+
+  function handleCloseSuccess() {
+    setCreateResult(null);
+    setShow(false);
+  }
+
+  // --- Success result view ---
+  if (createResult) {
+    const { stay, invoice, portal } = createResult;
+    return (
+      <Offcanvas show={show} onHide={handleCloseSuccess} onExited={() => navigate('/stays')} placement="end" backdrop="static" style={{ width: '700px' }}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>✅ Check-in Berhasil</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Card className="mb-3 border-success">
+            <Card.Body>
+              <h6 className="text-success">Stay #{stay.id} — {stay.room?.code ?? 'Kamar'}</h6>
+              <p className="mb-1"><strong>Tenant:</strong> {stay.tenant?.fullName ?? selectedTenant?.fullName ?? '-'}</p>
+              <p className="mb-1"><strong>Invoice:</strong> {invoice.invoiceNumber} — <span className="badge bg-success">ISSUED</span></p>
+              <p className="mb-1"><strong>Status Kamar:</strong> <span className="badge bg-primary">OCCUPIED</span></p>
+            </Card.Body>
+          </Card>
+
+          {/* Portal result card */}
+          <Card className={`mb-3 border-${portal?.status === 'CREATED' ? 'primary' : portal?.status === 'ALREADY_ACTIVE' ? 'info' : 'secondary'}`}>
+            <Card.Body>
+              <h6>🔑 Akses Portal Tenant</h6>
+              {portal?.status === 'CREATED' ? (
+                <>
+                  <Alert variant="primary" className="mb-2">
+                    <strong>Akun portal baru dibuat!</strong><br />
+                    Email: <code>{portal.email}</code>
+                  </Alert>
+                  <InputGroup className="mb-2">
+                    <Form.Control
+                      type="text"
+                      value={portal.temporaryPassword ?? ''}
+                      readOnly
+                      style={{ fontFamily: 'monospace' }}
+                    />
+                    <Button
+                      variant={passwordCopied ? 'success' : 'outline-primary'}
+                      onClick={handleCopyPassword}
+                    >
+                      {passwordCopied ? '✅ Disalin' : '📋 Salin'}
+                    </Button>
+                  </InputGroup>
+                  <small className="text-muted">
+                    ⚠️ Password sementara hanya muncul sekali. Mohon segera dibagikan ke tenant.
+                    Tenant wajib mengganti password setelah login pertama.
+                  </small>
+                </>
+              ) : portal?.status === 'ALREADY_ACTIVE' ? (
+                <Alert variant="info" className="mb-0">
+                  Akun portal sudah aktif untuk email <code>{portal.email}</code>. Tidak ada perubahan.
+                </Alert>
+              ) : (
+                <Alert variant="secondary" className="mb-0">
+                  Tenant tidak memiliki email. Akun portal tidak tersedia.
+                </Alert>
+              )}
+            </Card.Body>
+          </Card>
+
+          <div className="d-flex gap-2">
+            <Button variant="outline-secondary" onClick={handleCloseSuccess}>
+              Kembali ke Daftar Stay
+            </Button>
+            <Button variant="primary" onClick={() => { handleCloseSuccess(); navigate(`/stays/${stay.id}`); }}>
+              Lihat Detail Stay #{stay.id}
+            </Button>
+          </div>
+        </Offcanvas.Body>
+      </Offcanvas>
+    );
+  }
 
   return (
     <Offcanvas show={show} onHide={handleClose} onExited={() => navigate('/stays')} placement="end" backdrop="static" style={{ width: '700px' }}>

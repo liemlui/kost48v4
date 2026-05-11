@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
+import { useState, useRef, useEffect } from 'react';
+import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import SearchableSelect, { SelectOption } from '../../../components/common/SearchableSelect';
@@ -33,10 +33,23 @@ export default function StepTenantSelect({
 }: StepTenantSelectProps) {
   const [showInlineTenant, setShowInlineTenant] = useState(false);
   const [inlineTenant, setInlineTenant] = useState({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
+  const [tenantSuccess, setTenantSuccess] = useState('');
+  const wasCreatingRef = useRef(false);
+
+  // Tutup form + feedback saat mutation selesai sukses
+  useEffect(() => {
+    if (wasCreatingRef.current && !isCreatingTenant && !wizardError) {
+      setShowInlineTenant(false);
+      setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
+      setTenantSuccess('Tenant berhasil dibuat dan dipilih.');
+      const timer = setTimeout(() => setTenantSuccess(''), 5000);
+      return () => clearTimeout(timer);
+    }
+    wasCreatingRef.current = isCreatingTenant;
+  }, [isCreatingTenant, wizardError]);
 
   const handleSaveTenant = () => {
     if (!inlineTenant.fullName.trim()) {
-      // Error handled via wizardError setter from parent
       return;
     }
     if (!inlineTenant.phone.trim()) {
@@ -47,12 +60,10 @@ export default function StepTenantSelect({
       return;
     }
     onCreateInlineTenant(inlineTenant);
-    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   };
 
   const handleSaveWithValidation = () => {
     if (!inlineTenant.fullName.trim()) {
-      // Parent handles error via onClearError
       return;
     }
     if (!inlineTenant.phone.trim()) {
@@ -63,7 +74,6 @@ export default function StepTenantSelect({
       return;
     }
     onCreateInlineTenant(inlineTenant);
-    setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
   };
 
   return (
@@ -71,8 +81,13 @@ export default function StepTenantSelect({
       <Card.Body>
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="mb-0">Pilih Tenant</h5>
-          <Button size="sm" variant="outline-primary" onClick={() => setShowInlineTenant((prev) => !prev)}>Tambah Tenant Baru</Button>
+          <Button size="sm" variant="outline-primary" onClick={() => { setTenantSuccess(''); setShowInlineTenant((prev) => !prev); }}>Tambah Tenant Baru</Button>
         </div>
+        {tenantSuccess ? (
+          <Alert variant="success" dismissible onClose={() => setTenantSuccess('')} className="py-2 mb-3">
+            ✅ {tenantSuccess}
+          </Alert>
+        ) : null}
         <Form.Group className="mb-3">
           <Form.Label>Tenant</Form.Label>
           {isLoading ? (

@@ -1,8 +1,19 @@
-import { Card, Col, Form, Row, Alert } from 'react-bootstrap';
+import { Card, Col, Form, Row, Alert, InputGroup } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import type { WizardFormValues } from './types';
 import { stayPurposeOptions, bookingSourceOptions } from './checkInWizardUtils';
+
+function formatRupiah(value: number | string | undefined | null): string {
+  const num = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
+  if (isNaN(num)) return '';
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+}
 
 interface StepDetailsAndMetersProps {
   form: UseFormReturn<WizardFormValues>;
@@ -53,16 +64,24 @@ export default function StepDetailsAndMeters({
                 name="agreedRentAmountRupiah"
                 rules={{ required: 'Agreed rent amount wajib diisi', min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
                 render={({ field }) => (
-                  <Form.Control
-                    type="number"
-                    min={0}
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? '' : Number(e.target.value);
-                      field.onChange(val);
-                    }}
-                    placeholder="0"
-                  />
+                  <>
+                    <InputGroup>
+                      <InputGroup.Text className="bg-white border-end-0 text-muted" style={{ fontSize: '0.85rem' }}>Rp</InputGroup.Text>
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value === '' ? '' : Number(e.target.value);
+                          field.onChange(val);
+                        }}
+                        placeholder="0"
+                      />
+                    </InputGroup>
+                    {field.value !== undefined && field.value !== null && field.value !== '' && !isNaN(Number(field.value)) ? (
+                      <div className="text-muted small mt-1">Preview: {formatRupiah(field.value)}</div>
+                    ) : null}
+                  </>
                 )}
               />
               {form.formState.errors.agreedRentAmountRupiah ? (
@@ -78,19 +97,27 @@ export default function StepDetailsAndMeters({
                 name="depositAmountRupiah"
                 rules={{ min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
                 render={({ field }) => (
-                  <Form.Control
-                    type="number"
-                    min={0}
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? '' : Number(e.target.value);
-                      field.onChange(val);
-                      if (val === '' || val === 0) {
-                        setDepositWasManuallyCleared(true);
-                      }
-                    }}
-                    placeholder="0"
-                  />
+                  <>
+                    <InputGroup>
+                      <InputGroup.Text className="bg-white border-end-0 text-muted" style={{ fontSize: '0.85rem' }}>Rp</InputGroup.Text>
+                      <Form.Control
+                        type="number"
+                        min={0}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value === '' ? '' : Number(e.target.value);
+                          field.onChange(val);
+                          if (val === '' || val === 0) {
+                            setDepositWasManuallyCleared(true);
+                          }
+                        }}
+                        placeholder="0"
+                      />
+                    </InputGroup>
+                    {field.value !== undefined && field.value !== null && field.value !== '' && !isNaN(Number(field.value)) ? (
+                      <div className="text-muted small mt-1">Preview: {formatRupiah(field.value)}</div>
+                    ) : null}
+                  </>
                 )}
               />
               {form.formState.errors.depositAmountRupiah ? (
