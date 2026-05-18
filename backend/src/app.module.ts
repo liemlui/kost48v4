@@ -24,6 +24,7 @@ import { PaymentSubmissionsModule } from './modules/payment-submissions/payment-
 import { RenewRequestsModule } from './modules/renew-requests/renew-requests.module';
 import { CheckoutRequestsModule } from './modules/checkout-requests/checkout-requests.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { MarketingModule } from './modules/marketing/marketing.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     RenewRequestsModule,
     CheckoutRequestsModule,
     ReportsModule,
+    MarketingModule,
   ],
 })
 export class AppModule {}

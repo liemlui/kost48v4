@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, InputGroup, Offcanvas, Spinner } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
@@ -33,6 +33,9 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   const [tenantSelectRefreshKey, setTenantSelectRefreshKey] = useState(0);
   const [createResult, setCreateResult] = useState<CreateStayResponse | null>(null);
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [passwordCopyError, setPasswordCopyError] = useState('');
+  const [successExitTarget, setSuccessExitTarget] = useState('/stays');
+  const successExitTargetRef = useRef('/stays');
 
   const form = useForm<WizardFormValues>({ defaultValues });
 
@@ -104,6 +107,8 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       queryClient.invalidateQueries({ queryKey: ['resources', 'rooms'] });
       setCreateResult(data);
       setPasswordCopied(false);
+      setPasswordCopyError('');
+      setSuccessExitTarget('/stays');
     },
     onError: (err: any) => {
       const raw = err?.response?.data?.message ?? err?.message ?? 'Gagal membuat stay';
@@ -312,16 +317,24 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
     }
   }, [selectedRoom?.id]);
 
-  function handleCopyPassword() {
-    if (createResult?.portal?.temporaryPassword) {
-      navigator.clipboard.writeText(createResult.portal.temporaryPassword);
+  async function handleCopyPassword() {
+    const password = createResult?.portal?.temporaryPassword;
+    if (!password) return;
+
+    try {
+      await navigator.clipboard.writeText(password);
+      setPasswordCopyError('');
       setPasswordCopied(true);
       setTimeout(() => setPasswordCopied(false), 3000);
+    } catch {
+      setPasswordCopied(false);
+      setPasswordCopyError('Browser tidak mengizinkan salin otomatis. Silakan salin password secara manual dari kolom di atas.');
     }
   }
 
-  function handleCloseSuccess() {
-    setCreateResult(null);
+  function handleCloseSuccess(target = '/stays') {
+    successExitTargetRef.current = target;
+    setSuccessExitTarget(target);
     setShow(false);
   }
 
@@ -329,7 +342,20 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
   if (createResult) {
     const { stay, invoice, portal } = createResult;
     return (
-      <Offcanvas show={show} onHide={handleCloseSuccess} onExited={() => navigate('/stays')} placement="end" backdrop="static" style={{ width: '700px' }}>
+      <Offcanvas
+        show={show}
+        onHide={() => handleCloseSuccess('/stays')}
+        onExited={() => {
+          const target = successExitTargetRef.current || successExitTarget || '/stays';
+          setCreateResult(null);
+          successExitTargetRef.current = '/stays';
+          setSuccessExitTarget('/stays');
+          navigate(target);
+        }}
+        placement="end"
+        backdrop="static"
+        style={{ width: '700px' }}
+      >
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>✅ Check-in Berhasil</Offcanvas.Title>
         </Offcanvas.Header>
@@ -371,6 +397,11 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
                     ⚠️ Password sementara hanya muncul sekali. Mohon segera dibagikan ke tenant.
                     Tenant wajib mengganti password setelah login pertama.
                   </small>
+                  {passwordCopyError ? (
+                    <Alert variant="warning" className="mt-2 mb-0 py-2">
+                      {passwordCopyError}
+                    </Alert>
+                  ) : null}
                 </>
               ) : portal?.status === 'ALREADY_ACTIVE' ? (
                 <Alert variant="info" className="mb-0">
@@ -385,10 +416,10 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
           </Card>
 
           <div className="d-flex gap-2">
-            <Button variant="outline-secondary" onClick={handleCloseSuccess}>
+            <Button variant="outline-secondary" onClick={() => handleCloseSuccess('/stays')}>
               Kembali ke Daftar Stay
             </Button>
-            <Button variant="primary" onClick={() => { handleCloseSuccess(); navigate(`/stays/${stay.id}`); }}>
+            <Button variant="primary" onClick={() => handleCloseSuccess(`/stays/${stay.id}`)}>
               Lihat Detail Stay #{stay.id}
             </Button>
           </div>

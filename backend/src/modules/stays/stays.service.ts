@@ -95,12 +95,33 @@ export class StaysService {
     let portalUserId: number | undefined;
     let passwordHash: string | undefined;
 
-    if (!tenant.email) {
+    const tenantEmail = tenant.email?.trim().toLowerCase();
+
+    if (!tenantEmail) {
       portalStatus = 'MISSING_EMAIL';
     } else {
-      portalEmail = tenant.email;
-      const existingPortalUser = await this.prisma.user.findUnique({
-        where: { email: tenant.email },
+      portalEmail = tenantEmail;
+
+      // Guard tambahan V5.1: kontrak B1 menolak email yang dipakai tenant lain,
+      // bahkan jika belum ada User portal. Ini mencegah auto-create portal ke data tenant yang ambigu.
+      const tenantWithSameEmail = await this.prisma.tenant.findFirst({
+        where: {
+          email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive },
+          id: { not: tenant.id },
+        },
+        select: { id: true, fullName: true },
+      });
+
+      if (tenantWithSameEmail) {
+        throw new ConflictException(
+          `Email ${tenantEmail} sudah digunakan oleh tenant lain (${tenantWithSameEmail.fullName}). Tidak dapat melanjutkan check-in.`,
+        );
+      }
+
+      const existingPortalUser = await this.prisma.user.findFirst({
+        where: {
+          email: { equals: tenantEmail, mode: Prisma.QueryMode.insensitive },
+        },
         select: { id: true, tenantId: true },
       });
 
@@ -110,7 +131,7 @@ export class StaysService {
           portalUserId = existingPortalUser.id;
         } else {
           throw new ConflictException(
-            `Email ${tenant.email} sudah digunakan oleh tenant lain. Tidak dapat melanjutkan check-in. Hubungi administrator untuk menyelesaikan konflik data.`,
+            `Email ${tenantEmail} sudah digunakan oleh user/tenant lain. Tidak dapat melanjutkan check-in. Hubungi administrator untuk menyelesaikan konflik data.`,
           );
         }
       } else {
@@ -240,11 +261,11 @@ export class StaysService {
         });
 
         // --- Portal user creation ---
-        if (portalStatus === 'CREATED' && passwordHash) {
+        if (portalStatus === 'CREATED' && passwordHash && portalEmail) {
           const newPortalUser = await tx.user.create({
             data: {
               fullName: tenant.fullName,
-              email: tenant.email!,
+              email: portalEmail,
               passwordHash,
               role: UserRole.TENANT,
               tenantId: tenant.id,
@@ -282,7 +303,23 @@ export class StaysService {
     } catch (error: any) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new ConflictException('Pembacaan meter untuk tanggal tersebut sudah ada');
+          const target = Array.isArray(error.meta?.target)
+            ? error.meta.target.join(',')
+            : String(error.meta?.target ?? '');
+
+          if (target.includes('email')) {
+            throw new ConflictException('Email sudah digunakan oleh user lain. Tidak dapat membuat akses portal tenant.');
+          }
+
+          if (target.includes('tenantId')) {
+            throw new ConflictException('Tenant ini sudah memiliki akun portal. Silakan refresh data dan coba lagi.');
+          }
+
+          if (target.includes('roomId') || target.includes('utilityType') || target.includes('readingAt')) {
+            throw new ConflictException('Pembacaan meter untuk tanggal tersebut sudah ada');
+          }
+
+          throw new ConflictException('Data duplikat terdeteksi. Periksa data tenant, user portal, atau meter check-in.');
         }
         throw new ConflictException(`Constraint database gagal: ${error.message}`);
       }

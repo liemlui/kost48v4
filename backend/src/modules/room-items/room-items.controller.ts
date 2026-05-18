@@ -23,13 +23,13 @@ export class RoomItemsController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateRoomItemDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Room item berhasil dibuat', data: await this.roomItemsService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoomItemDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Room item berhasil diperbarui', data: await this.roomItemsService.update(id, dto, user) };
   }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RoomStatus, StayStatus, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
@@ -77,8 +77,12 @@ export class StaysQueryService {
   }
 
   async findCurrentForTenant(user: CurrentUserPayload) {
+    if (!user.tenantId) {
+      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+    }
+
     const stay = await this.prisma.stay.findFirst({
-      where: { tenantId: user.tenantId ?? -1, status: StayStatus.ACTIVE },
+      where: { tenantId: user.tenantId, status: StayStatus.ACTIVE },
       include: { room: true },
     });
 

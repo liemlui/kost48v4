@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -6,7 +6,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInvoicePaymentDto, UpdateInvoicePaymentDto } from './dto/invoice-payment.dto';
 import { InvoicePaymentsQueryDto } from './dto/invoice-payments-query.dto';
-import { InvoiceStatus, PaymentMethod } from '../../common/enums/app.enums';
+import { InvoiceStatus, PaymentMethod, UserRole } from '../../common/enums/app.enums';
 
 @Injectable()
 export class InvoicePaymentsService {
@@ -14,6 +14,13 @@ export class InvoicePaymentsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
   ) {}
+
+  private assertFinanceMutationAllowed(actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
+      throw new ForbiddenException('Hanya OWNER/ADMIN yang boleh mencatat atau mengubah pembayaran invoice');
+    }
+  }
+
 
   async findAll(query: InvoicePaymentsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -59,6 +66,7 @@ export class InvoicePaymentsService {
   }
 
   async create(dto: CreateInvoicePaymentDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({
       where: { id: dto.invoiceId },
       include: { payments: true, stay: true },
@@ -97,6 +105,7 @@ export class InvoicePaymentsService {
   }
 
   async update(id: number, dto: UpdateInvoicePaymentDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
 
@@ -134,6 +143,7 @@ export class InvoicePaymentsService {
   }
 
   async remove(id: number, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
 

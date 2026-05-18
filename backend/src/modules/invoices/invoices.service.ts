@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -7,11 +7,18 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
 import { InvoicesQueryDto } from './dto/invoices-query.dto';
-import { InvoiceLineType, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
+import { InvoiceLineType, InvoiceStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 
 @Injectable()
 export class InvoicesService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+
+  private assertFinanceMutationAllowed(actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
+      throw new ForbiddenException('Hanya OWNER/ADMIN yang boleh mengubah data invoice finance');
+    }
+  }
+
 
   async findAll(query: InvoicesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -91,6 +98,7 @@ export class InvoicesService {
   }
 
   async create(dto: CreateInvoiceDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const stay = await this.prisma.stay.findUnique({ where: { id: dto.stayId } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (new Date(dto.periodEnd) < new Date(dto.periodStart)) throw new ConflictException('Periode invoice salah');
@@ -102,6 +110,7 @@ export class InvoicesService {
   }
 
   async update(id: number, dto: UpdateInvoiceDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const existing = await this.prisma.invoice.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Invoice tidak ditemukan');
     if (existing.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
@@ -111,6 +120,7 @@ export class InvoicesService {
   }
 
   async addLine(id: number, dto: CreateInvoiceLineDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({ where: { id } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
@@ -122,6 +132,7 @@ export class InvoicesService {
   }
 
   async updateLine(invoiceId: number, lineId: number, dto: UpdateInvoiceLineDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
@@ -159,6 +170,7 @@ export class InvoicesService {
   }
 
   async removeLine(invoiceId: number, lineId: number, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
@@ -171,6 +183,7 @@ export class InvoicesService {
   }
 
   async issue(id: number, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({ where: { id }, include: { lines: true } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status !== 'DRAFT') throw new ConflictException('Transisi status tidak valid');
@@ -182,6 +195,7 @@ export class InvoicesService {
   }
 
   async cancel(id: number, dto: CancelInvoiceDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({ where: { id }, include: { payments: true } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (!dto.cancelReason) throw new ConflictException('Alasan pembatalan wajib diisi');

@@ -1,12 +1,12 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PublicRoomsQueryDto } from './dto/public-rooms-query.dto';
-import { PublicRoomsService } from './public-rooms.service';
+import { MarketingPublicRoomsService } from './marketing-public-rooms.service';
 
-@ApiTags('public-rooms')
+@ApiTags('marketing-public-rooms')
 @Controller('public/rooms')
-export class PublicRoomsController {
-  constructor(private readonly publicRoomsService: PublicRoomsService) {}
+export class MarketingPublicRoomsController {
+  constructor(private readonly publicRoomsService: MarketingPublicRoomsService) {}
 
   @Get()
   async findAll(@Query() query: PublicRoomsQueryDto) {

@@ -36,37 +36,37 @@ export class InvoicesController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateInvoiceDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Invoice draft berhasil dibuat', data: await this.invoicesService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateInvoiceDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Invoice berhasil diperbarui', data: await this.invoicesService.update(id, dto, user) };
   }
 
   @Post(':id/lines')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async addLine(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateInvoiceLineDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail invoice berhasil ditambahkan', data: await this.invoicesService.addLine(id, dto, user) };
   }
 
   @Patch(':id/lines/:lineId')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async updateLine(@Param('id', ParseIntPipe) id: number, @Param('lineId', ParseIntPipe) lineId: number, @Body() dto: UpdateInvoiceLineDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail invoice berhasil diperbarui', data: await this.invoicesService.updateLine(id, lineId, dto, user) };
   }
 
   @Delete(':id/lines/:lineId')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async removeLine(@Param('id', ParseIntPipe) id: number, @Param('lineId', ParseIntPipe) lineId: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Detail invoice berhasil dihapus', data: await this.invoicesService.removeLine(id, lineId, user) };
   }
 
   @Post(':id/issue')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async issue(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Invoice berhasil diterbitkan', data: await this.invoicesService.issue(id, user) };
   }

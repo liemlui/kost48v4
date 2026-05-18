@@ -30,7 +30,7 @@ export class InvoicePaymentsController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateInvoicePaymentDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Pembayaran berhasil dicatat', data: await this.invoicePaymentsService.create(dto, user) };
   }

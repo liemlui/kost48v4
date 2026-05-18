@@ -334,6 +334,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   };
 
   const createGuard = useMemo(() => canCreateResourceItem(config, user?.role), [config, user?.role]);
+  const staffReadOnlyNotice = user?.role === 'STAFF' && !createGuard.allowed ? createGuard.reason : '';
 
   const flowNote = getFlowNote(config.path);
   const meta = query.data?.meta;
@@ -350,6 +351,13 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
         actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
         onAction={createGuard.allowed ? openCreate : undefined}
       />
+
+      {staffReadOnlyNotice ? (
+        <Alert variant="info" className="content-card border-0 mb-4">
+          <div className="fw-semibold mb-1">Mode baca staff</div>
+          <div>{staffReadOnlyNotice}</div>
+        </Alert>
+      ) : null}
 
       {flowNote ? (
         <Alert variant="info" className="content-card border-0 mb-4">

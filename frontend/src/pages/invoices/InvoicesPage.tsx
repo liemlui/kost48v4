@@ -13,6 +13,7 @@ import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
 import { cancelInvoice, issueInvoice } from '../../api/invoices';
+import { useAuth } from '../../context/AuthContext';
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -45,6 +46,8 @@ const initialForm = { stayId: '', invoiceNumber: '', periodStart: '', periodEnd:
 
 export default function InvoicesPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const canManageFinance = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const [showCreate, setShowCreate] = useState(false);
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
@@ -148,11 +151,11 @@ export default function InvoicesPage() {
         eyebrow="Manajemen Invoice"
         title="Invoice"
         description="Kelola draft, penerbitan, status tagihan, dan tindak lanjut pembayaran."
-        actionLabel="Buat Invoice Draft"
-        onAction={() => {
+        actionLabel={canManageFinance ? 'Buat Invoice Draft' : undefined}
+        onAction={canManageFinance ? () => {
           setError('');
           setShowCreate(true);
-        }}
+        } : undefined}
       />
 
       <Row className="g-4 mb-4">
@@ -185,9 +188,15 @@ export default function InvoicesPage() {
             </div>
           </div>
 
-          <Alert variant="info" className="mt-3 mb-0">
-            Flow yang paling sederhana: buat invoice draft → tambahkan line bila perlu → terbitkan invoice → catat pembayaran dari detail invoice. Untuk perhitungan listrik/air otomatis per periode, backend berikutnya idealnya menyiapkan endpoint preview invoice berbasis meter reading.
-          </Alert>
+          {canManageFinance ? (
+            <Alert variant="info" className="mt-3 mb-0">
+              Flow yang paling sederhana: buat invoice draft → tambahkan line bila perlu → terbitkan invoice → catat pembayaran dari detail invoice. Untuk perhitungan listrik/air otomatis per periode, backend berikutnya idealnya menyiapkan endpoint preview invoice berbasis meter reading.
+            </Alert>
+          ) : (
+            <Alert variant="secondary" className="mt-3 mb-0">
+              Mode baca staff: Anda bisa melihat invoice dan status tagihan, tetapi perubahan finance hanya untuk OWNER/ADMIN.
+            </Alert>
+          )}
 
           <div className="toolbar-card mt-3">
             <Row className="g-3 align-items-end">
@@ -289,12 +298,12 @@ export default function InvoicesPage() {
                       <td>
                         <div className="d-flex flex-wrap gap-2">
                           <Button as={Link as any} to={`/invoices/${item.id}`} size="sm" variant="outline-primary">Buka</Button>
-                          {item.status === 'DRAFT' ? (
+                          {canManageFinance && item.status === 'DRAFT' ? (
                             <Button size="sm" variant="outline-success" onClick={() => issueMutation.mutate(item.id)} disabled={issueMutation.isPending}>
                               Terbitkan
                             </Button>
                           ) : null}
-                          {['DRAFT', 'ISSUED'].includes(item.status) ? (
+                          {canManageFinance && ['DRAFT', 'ISSUED'].includes(item.status) ? (
                             <Button size="sm" variant="outline-danger" onClick={() => cancelMutation.mutate(item.id)} disabled={cancelMutation.isPending}>
                               Batalkan
                             </Button>
@@ -321,7 +330,7 @@ export default function InvoicesPage() {
         </Card.Body>
       </Card>
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)}>
+      <Modal show={showCreate && canManageFinance} onHide={() => setShowCreate(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Buat Invoice Draft</Modal.Title>
         </Modal.Header>

@@ -5,7 +5,7 @@ import { CreateAnnouncementDto, UpdateAnnouncementDto } from './dto/announcement
 import { AnnouncementsQueryDto } from './dto/announcements-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { AnnouncementAudience, UserRole } from '../../common/enums/app.enums';
+import { AnnouncementAudience, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { Announcement } from '../../generated/prisma';
 
@@ -38,7 +38,16 @@ export class AnnouncementsService {
 
   async findActive(user: CurrentUserPayload) {
     const now = new Date();
-    const audience = user.role === UserRole.TENANT ? [AnnouncementAudience.TENANT, AnnouncementAudience.ALL] : undefined;
+    const tenantHasOccupiedStay = user.role === UserRole.TENANT
+      ? await this.hasTenantOccupiedStay(user)
+      : false;
+
+    const audience = user.role === UserRole.TENANT
+      ? tenantHasOccupiedStay
+        ? [AnnouncementAudience.TENANT, AnnouncementAudience.ALL]
+        : [AnnouncementAudience.ALL]
+      : undefined;
+
     return {
       items: await this.prisma.announcement.findMany({
         where: {
@@ -62,6 +71,13 @@ export class AnnouncementsService {
       if (!item.isPublished) throw new ForbiddenException('Tidak berhak melihat announcement ini');
       if (![AnnouncementAudience.TENANT, AnnouncementAudience.ALL].includes(item.audience as any)) throw new ForbiddenException('Tidak berhak melihat announcement ini');
       if ((item.startsAt && item.startsAt > now) || (item.expiresAt && item.expiresAt < now)) throw new ForbiddenException('Tidak berhak melihat announcement ini');
+
+      if (item.audience === AnnouncementAudience.TENANT) {
+        const tenantHasOccupiedStay = await this.hasTenantOccupiedStay(user);
+        if (!tenantHasOccupiedStay) {
+          throw new ForbiddenException('Pengumuman operasional hanya tersedia untuk tenant yang sedang menghuni kamar');
+        }
+      }
     }
     return item;
   }
@@ -126,6 +142,22 @@ export class AnnouncementsService {
     await this.audit.log({ actorUserId: actor.id, action: 'PUBLISH', entityType: 'Announcement', entityId: String(updated.id), oldData: existing, newData: updated });
     this.notifyPublished(updated).catch((err) => this.logger.error('Gagal membuat notifikasi pengumuman', err));
     return updated;
+  }
+
+
+  private async hasTenantOccupiedStay(user: CurrentUserPayload): Promise<boolean> {
+    if (!user.tenantId) return false;
+
+    const occupiedStay = await this.prisma.stay.findFirst({
+      where: {
+        tenantId: user.tenantId,
+        status: StayStatus.ACTIVE as any,
+        room: { status: RoomStatus.OCCUPIED as any },
+      },
+      select: { id: true },
+    });
+
+    return Boolean(occupiedStay);
   }
 
   private async notifyPublished(announcement: Announcement) {

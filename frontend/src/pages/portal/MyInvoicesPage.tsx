@@ -8,7 +8,10 @@ import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { useAuth } from '../../context/AuthContext';
+import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import type { Invoice } from '../../types';
+
+const needsPayment = (invoice: Invoice) => ['ISSUED', 'PARTIAL'].includes(invoice.status);
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
@@ -47,6 +50,24 @@ export default function MyInvoicesPage() {
     refetchOnReconnect: false,
     staleTime: 30_000,
   });
+
+  const submissionsQuery = useQuery({
+    queryKey: ['my-payment-submissions'],
+    queryFn: () => listMyPaymentSubmissions(),
+    enabled: Boolean(userId),
+    staleTime: 30_000,
+  });
+  const pendingReviewByInvoiceId = useMemo(() => {
+    const map = new Map<number, boolean>();
+    const items = submissionsQuery.data?.items ?? [];
+    for (const s of items) {
+      if (s.invoiceId != null && s.status === 'PENDING_REVIEW') {
+        map.set(s.invoiceId, true);
+      }
+    }
+    return map;
+  }, [submissionsQuery.data]);
+
   const allItems = query.data?.items ?? [];
   const sortedItems = useMemo(() => [...allItems].sort((a, b) => {
     const aRank = isOverdue(a) ? 0 : ['PAID', 'CANCELLED'].includes(a.status) ? 2 : 1;
@@ -70,7 +91,8 @@ export default function MyInvoicesPage() {
             <tbody>
               {sortedItems.map((item) => {
                 const overdue = isOverdue(item);
-                return <tr key={item.id}><td className="fw-semibold"><Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `INV-${item.id}`}</Button></td><td>{formatPeriod(item.periodStart, item.periodEnd)}</td><td className={overdue ? 'text-soft-danger fw-semibold' : ''}>{formatDate(item.dueDate)}</td><td><CurrencyDisplay amount={item.totalAmountRupiah} /></td><td><StatusBadge status={overdue ? 'OVERDUE' : item.status} /></td><td><Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button></td></tr>;
+                const unpaid = needsPayment(item);
+                return <tr key={item.id}><td className="fw-semibold"><Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `INV-${item.id}`}</Button></td><td>{formatPeriod(item.periodStart, item.periodEnd)}</td><td className={overdue ? 'text-soft-danger fw-semibold' : ''}>{formatDate(item.dueDate)}</td><td><CurrencyDisplay amount={item.totalAmountRupiah} /></td><td><StatusBadge status={overdue ? 'OVERDUE' : item.status} /></td><td>{pendingReviewByInvoiceId.has(item.id) ? <Button size="sm" variant="outline-secondary" disabled>⏳ Menunggu Review</Button> : unpaid ? <Button size="sm" variant={overdue ? 'danger' : 'primary'} onClick={() => navigate(`/portal/invoices/${item.id}`)}>Bayar</Button> : <Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button>}</td></tr>;
               })}
             </tbody>
           </Table>

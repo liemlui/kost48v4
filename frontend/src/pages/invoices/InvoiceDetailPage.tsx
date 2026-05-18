@@ -9,6 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { createResource, getResource } from '../../api/resources';
 import { formatDateSafe } from '../resources/simpleCrudHelpers';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
+import { useAuth } from '../../context/AuthContext';
 
 const paymentMethodLabels: Record<string, string> = {
   CASH: 'Tunai',
@@ -30,6 +31,8 @@ const lineTypeLabels: Record<string, string> = {
 
 export default function InvoiceDetailPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const canManageFinance = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -100,7 +103,7 @@ export default function InvoiceDetailPage() {
   const totalInvoice = Number(invoice?.totalAmountRupiah ?? 0);
   const outstanding = Math.max(totalInvoice - totalPaid, 0);
   const isFullyPaid = outstanding <= 0 && totalInvoice > 0;
-  const canTakePayment = invoice && !['CANCELLED', 'DRAFT'].includes(invoice.status) && outstanding > 0;
+  const canTakePayment = canManageFinance && invoice && !['CANCELLED', 'DRAFT'].includes(invoice.status) && outstanding > 0;
   const isCancelled = invoice?.status === 'CANCELLED';
 
   const handlePrint = () => {
@@ -185,9 +188,15 @@ export default function InvoiceDetailPage() {
                     </Col>
                   </Row>
 
-                  <Alert variant="info" className="mt-3 mb-0">
-                    Flow sederhana yang disarankan: pastikan line tagihan sudah benar → issue invoice → catat pembayaran dari panel kanan. Untuk perhitungan otomatis listrik/air dari meter reading, backend idealnya nanti menyiapkan endpoint preview line utilitas per periode.
-                  </Alert>
+                  {canManageFinance ? (
+                    <Alert variant="info" className="mt-3 mb-0">
+                      Flow sederhana yang disarankan: pastikan line tagihan sudah benar → issue invoice → catat pembayaran dari panel kanan. Untuk perhitungan otomatis listrik/air dari meter reading, backend idealnya nanti menyiapkan endpoint preview line utilitas per periode.
+                    </Alert>
+                  ) : (
+                    <Alert variant="secondary" className="mt-3 mb-0">
+                      Mode baca staff: detail invoice dan riwayat pembayaran bisa dilihat, tetapi perubahan finance hanya untuk OWNER/ADMIN.
+                    </Alert>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
@@ -212,11 +221,13 @@ export default function InvoiceDetailPage() {
 
                   {!canTakePayment ? (
                     <div className="small text-muted mt-3">
-                      {invoice.status === 'DRAFT'
-                        ? 'Invoice masih draft. Issue invoice terlebih dahulu sebelum menerima pembayaran.'
-                        : invoice.status === 'CANCELLED'
-                          ? 'Invoice dibatalkan sehingga tidak bisa menerima pembayaran.'
-                          : 'Invoice ini sudah lunas.'}
+                      {!canManageFinance
+                        ? 'Mode baca staff: pencatatan pembayaran hanya untuk OWNER/ADMIN.'
+                        : invoice.status === 'DRAFT'
+                          ? 'Invoice masih draft. Issue invoice terlebih dahulu sebelum menerima pembayaran.'
+                          : invoice.status === 'CANCELLED'
+                            ? 'Invoice dibatalkan sehingga tidak bisa menerima pembayaran.'
+                            : 'Invoice ini sudah lunas.'}
                     </div>
                   ) : null}
 
@@ -249,7 +260,7 @@ export default function InvoiceDetailPage() {
                       <div className="panel-title">Rincian Tagihan</div>
                       <div className="panel-subtitle">Pastikan komponen tagihan benar sebelum invoice di-issue atau dibayar.</div>
                     </div>
-                    {!showAddLine && invoice.status === 'DRAFT' ? (
+                    {canManageFinance && !showAddLine && invoice.status === 'DRAFT' ? (
                       <Button size="sm" variant="outline-primary" onClick={() => setShowAddLine(true)}>
                         Tambah Rincian
                       </Button>
@@ -392,7 +403,7 @@ export default function InvoiceDetailPage() {
         </div>
       ) : null}
 
-      <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)} centered>
+      <Modal show={showPaymentModal && canManageFinance} onHide={() => setShowPaymentModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Catat Pembayaran</Modal.Title>
         </Modal.Header>

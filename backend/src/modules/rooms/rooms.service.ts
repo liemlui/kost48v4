@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -7,7 +7,7 @@ import { CurrentUserPayload } from '../../common/interfaces/current-user.interfa
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
 import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facility.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
-import { InvoiceStatus, PricingTerm, RoomStatus, UtilityType } from '../../common/enums/app.enums';
+import { InvoiceStatus, PricingTerm, RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 
 @Injectable()
 export class RoomsService {
@@ -205,6 +205,7 @@ export class RoomsService {
   }
 
   async create(dto: CreateRoomDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const exists = await this.prisma.room.findUnique({ where: { code: dto.code } });
     if (exists) throw new ConflictException('Kode kamar sudah digunakan');
 
@@ -225,6 +226,7 @@ export class RoomsService {
   }
 
   async update(id: number, dto: UpdateRoomDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const existing = await this.prisma.room.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Kamar tidak ditemukan');
 
@@ -286,6 +288,7 @@ export class RoomsService {
   }
 
   async createFacility(roomId: number, dto: CreateRoomFacilityDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
@@ -319,6 +322,7 @@ export class RoomsService {
   }
 
   async updateFacility(roomId: number, facilityId: number, dto: UpdateRoomFacilityDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
@@ -360,6 +364,7 @@ export class RoomsService {
   }
 
   async deleteFacility(roomId: number, facilityId: number, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
@@ -375,6 +380,12 @@ export class RoomsService {
       entityId: String(facilityId),
       oldData: existing,
     });
+  }
+
+  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException('Staff hanya boleh melihat data kamar. Perubahan kamar/fasilitas hanya boleh dilakukan Owner/Admin.');
+    }
   }
 
   private getAvailablePricingTerms(room: {

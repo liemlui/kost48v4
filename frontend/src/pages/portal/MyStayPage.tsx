@@ -9,6 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { getResource, listResource } from '../../api/resources';
 import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
+import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
@@ -38,6 +39,7 @@ function DataField({ label, value }: { label: string; value: ReactNode }) {
 
 function ActiveStayContent({ stay }: { stay: Stay }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['my-renew-requests', stay.id],
@@ -68,6 +70,25 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     }
     return null;
   }, [invoicesQuery.data, invoicesQuery.isError]);
+
+  const anyUnpaidInvoice = useMemo(() => {
+    const items = invoicesQuery.data?.items ?? [];
+    if (!items.length || invoicesQuery.isError) return null;
+    return items.find((inv) => inv.status === 'ISSUED' || inv.status === 'PARTIAL') ?? null;
+  }, [invoicesQuery.data, invoicesQuery.isError]);
+
+  // ── Pending review gate ──────────────────────
+  const submissionsQuery = useQuery({
+    queryKey: ['my-payment-submissions'],
+    queryFn: () => listMyPaymentSubmissions(),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const hasPendingReviewForUnpaid = useMemo(() => {
+    if (!anyUnpaidInvoice) return false;
+    const items = submissionsQuery.data?.items ?? [];
+    return items.some((s: any) => s.invoiceId === anyUnpaidInvoice.id && s.status === 'PENDING_REVIEW');
+  }, [submissionsQuery.data, anyUnpaidInvoice]);
 
   const dueSoonInvoice = useMemo(() => {
     const items = invoicesQuery.data?.items ?? [];
@@ -166,6 +187,36 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         </Card.Body>
       </Card>
 
+      {/* ── Unpaid Invoice Alert ── */}
+      {anyUnpaidInvoice && hasPendingReviewForUnpaid ? (
+        <Alert variant="info" className="mb-4">
+          <strong>⏳ Bukti Pembayaran Sedang Direview</strong>
+          <br />
+          <span className="small">
+            Bukti pembayaran untuk invoice {anyUnpaidInvoice.invoiceNumber || `INV-${anyUnpaidInvoice.id}`} telah dikirim dan sedang menunggu verifikasi admin.
+          </span>
+        </Alert>
+      ) : anyUnpaidInvoice ? (
+        <Alert variant={overdueInvoice ? 'danger' : 'warning'} className="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <strong>{overdueInvoice ? '⚠️ Tagihan Sudah Jatuh Tempo' : '📋 Ada Tagihan Belum Lunas'}</strong>
+            <br />
+            <span className="small">
+              {overdueInvoice
+                ? `Invoice ${anyUnpaidInvoice.invoiceNumber || `INV-${anyUnpaidInvoice.id}`} sudah lewat jatuh tempo. Harap segera melakukan pembayaran.`
+                : `Anda memiliki tagihan yang belum lunas. Silakan lakukan pembayaran untuk menghindari keterlambatan.`}
+            </span>
+          </div>
+          <Button
+            variant={overdueInvoice ? 'danger' : 'primary'}
+            size="sm"
+            onClick={() => navigate(`/portal/invoices/${anyUnpaidInvoice.id}`)}
+          >
+            💳 Bayar Sekarang
+          </Button>
+        </Alert>
+      ) : null}
+
       {/* Perpanjangan */}
       {showRenewButton ? (
         <Card className="content-card border-0 mb-4">
@@ -174,20 +225,15 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <p className="text-muted small mb-3">
               Ajukan permintaan perpanjangan masa tinggal Anda. Admin akan meninjau dan menyetujui permintaan Anda.
             </p>
-            {overdueInvoice ? (
+            {anyUnpaidInvoice ? (
               <Alert variant="danger" className="small">
-                Anda memiliki tagihan yang sudah lewat jatuh tempo. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan perpanjangan.
-              </Alert>
-            ) : null}
-            {!overdueInvoice && dueSoonInvoice ? (
-              <Alert variant="warning" className="small">
-                Anda memiliki tagihan yang akan jatuh tempo. Disarankan melunasi sebelum mengajukan perpanjangan.
+                Anda memiliki tagihan yang belum lunas. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan perpanjangan.
               </Alert>
             ) : null}
             <Button
               variant="primary"
               onClick={() => createRenewMutation.mutate()}
-              disabled={createRenewMutation.isPending || Boolean(overdueInvoice)}
+              disabled={createRenewMutation.isPending || Boolean(anyUnpaidInvoice)}
             >
               {createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}
             </Button>
@@ -243,15 +289,15 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <p className="text-muted small mb-3">
               Rencanakan keluar lebih awal dengan mengajukan rencana keluar kamar. Admin akan meninjau pengajuan Anda. Persetujuan admin hanya menyetujui jadwal — kamu masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
             </p>
-            {overdueInvoice ? (
+            {anyUnpaidInvoice ? (
               <Alert variant="danger" className="small">
-                Anda memiliki tagihan yang sudah lewat jatuh tempo. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan checkout.
+                Anda memiliki tagihan yang belum lunas. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan checkout.
               </Alert>
             ) : null}
             <Button
               variant="outline-warning"
               onClick={() => setShowCheckoutModal(true)}
-              disabled={Boolean(overdueInvoice)}
+              disabled={Boolean(anyUnpaidInvoice)}
             >
               Ajukan Rencana Keluar
             </Button>

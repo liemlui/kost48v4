@@ -61,38 +61,63 @@ export class PaymentSubmissionsService {
         throw new ConflictException('Booking tidak lagi aktif');
       }
 
-      if (eligibility.roomStatus !== RoomStatus.RESERVED) {
-        throw new ConflictException('Booking ini tidak lagi menunggu pembayaran reserved');
-      }
+      const isBookingPath = eligibility.roomStatus === RoomStatus.RESERVED;
 
-      if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
-        throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
-      }
+      if (isBookingPath) {
+        // ── Booking combined payment (RESERVED) ──────────────────────────
+        if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
+          throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
+        }
 
-      if (eligibility.stayExpiresAt && new Date(eligibility.stayExpiresAt) < new Date()) {
-        throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
-      }
+        if (eligibility.stayExpiresAt && new Date(eligibility.stayExpiresAt) < new Date()) {
+          throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
+        }
 
-      const invoiceRemaining = Math.max(
-        eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
-        0,
-      );
-
-      const depositRemaining = Math.max(
-        (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0),
-        0,
-      );
-
-      const combinedRemaining = invoiceRemaining + depositRemaining;
-
-      if (combinedRemaining <= 0) {
-        throw new ConflictException('Pembayaran awal (sewa + deposit) sudah lunas');
-      }
-
-      if (dto.amountRupiah !== combinedRemaining) {
-        throw new ConflictException(
-          `Pembayaran harus tepat sebesar total yang tersisa: Rp ${combinedRemaining.toLocaleString('id-ID')}`,
+        const invoiceRemaining = Math.max(
+          eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
+          0,
         );
+
+        const depositRemaining = Math.max(
+          (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0),
+          0,
+        );
+
+        const combinedRemaining = invoiceRemaining + depositRemaining;
+
+        if (combinedRemaining <= 0) {
+          throw new ConflictException('Pembayaran awal (sewa + deposit) sudah lunas');
+        }
+
+        if (dto.amountRupiah !== combinedRemaining) {
+          throw new ConflictException(
+            `Pembayaran harus tepat sebesar total yang tersisa: Rp ${combinedRemaining.toLocaleString('id-ID')}`,
+          );
+        }
+      } else {
+        // ── Invoice-only payment (OCCUPIED / manual check-in / renewal) ──
+        if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
+          throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
+        }
+
+        if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
+          throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
+        }
+
+        const invoiceRemaining = Math.max(
+          eligibility.invoiceTotalAmountRupiah - eligibility.invoicePaidAmountRupiah,
+          0,
+        );
+
+        if (invoiceRemaining <= 0) {
+          throw new ConflictException('Tagihan ini sudah lunas');
+        }
+
+        if (dto.amountRupiah > invoiceRemaining) {
+          throw new ConflictException(
+            `Jumlah pembayaran melebihi sisa tagihan sebesar Rp ${invoiceRemaining.toLocaleString('id-ID')}`,
+          );
+        }
       }
 
       const existingPending = await this.prisma.paymentSubmission.findFirst({
@@ -294,23 +319,26 @@ export class PaymentSubmissionsService {
         }
 
         if (submission.stayStatus !== StayStatus.ACTIVE) {
-          throw new ConflictException('Booking tidak lagi aktif');
+          throw new ConflictException('Hunian tidak lagi aktif');
         }
 
-        if (submission.roomStatus !== RoomStatus.RESERVED) {
-          throw new ConflictException('Booking ini tidak lagi berada pada status reserved');
+        const isBookingPath = submission.roomStatus === RoomStatus.RESERVED;
+
+        if (isBookingPath) {
+          if (!submission.roomIsActive) {
+            throw new ConflictException('Kamar tidak aktif untuk aktivasi booking');
+          }
+          if (submission.stayExpiresAt && new Date(submission.stayExpiresAt) < new Date()) {
+            throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat disetujui');
+          }
         }
 
-        if (!submission.roomIsActive) {
-          throw new ConflictException('Kamar tidak aktif untuk aktivasi booking');
+        if (submission.invoiceStatus === InvoiceStatus.DRAFT) {
+          throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
         }
 
         if ([InvoiceStatus.CANCELLED, InvoiceStatus.PAID].includes(submission.invoiceStatus as InvoiceStatus)) {
           throw new ConflictException('Invoice ini tidak dapat menerima approval pembayaran baru');
-        }
-
-        if (submission.stayExpiresAt && new Date(submission.stayExpiresAt) < new Date()) {
-          throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat disetujui');
         }
 
         const freshPayments = await tx.invoicePayment.aggregate({
@@ -319,13 +347,28 @@ export class PaymentSubmissionsService {
         });
         const freshPaidAmount = freshPayments._sum.amountRupiah ?? 0;
 
-        const remainingAmount = Math.max(
+        const invoiceRemaining = Math.max(
           submission.invoiceTotalAmountRupiah - freshPaidAmount,
           0,
         );
 
-        const rentPortion = Math.min(submission.amountRupiah, remainingAmount);
-        const depositPortion = Math.max(0, submission.amountRupiah - rentPortion);
+        let rentPortion = 0;
+        let depositPortion = 0;
+
+        if (isBookingPath) {
+          // Booking combined: rent + deposit; excess over invoice goes to deposit
+          rentPortion = Math.min(submission.amountRupiah, invoiceRemaining);
+          depositPortion = Math.max(0, submission.amountRupiah - rentPortion);
+        } else {
+          // Invoice-only: must not exceed remaining
+          if (submission.amountRupiah > invoiceRemaining) {
+            throw new ConflictException(
+              `Jumlah pembayaran melebihi sisa tagihan sebesar Rp ${invoiceRemaining.toLocaleString('id-ID')}`,
+            );
+          }
+          rentPortion = submission.amountRupiah;
+          depositPortion = 0;
+        }
 
         if (rentPortion > 0) {
           await tx.invoicePayment.create({
@@ -377,107 +420,110 @@ export class PaymentSubmissionsService {
           },
         });
 
-        const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
-        const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
-        const stayDepositPaidAfter = stayDepositPaidBefore + depositPortion;
+        // ── Booking path only: deposit settlement, room activation, meter promotion ──
+        if (isBookingPath) {
+          const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
+          const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
+          const stayDepositPaidAfter = stayDepositPaidBefore + depositPortion;
 
-        const stayDepositPaymentStatus: BookingDepositPaymentStatus =
-          stayDepositPaidAfter >= stayDepositAmount && stayDepositAmount > 0
-            ? BookingDepositPaymentStatus.PAID
-            : stayDepositPaidAfter > 0
-              ? BookingDepositPaymentStatus.PARTIAL
-              : BookingDepositPaymentStatus.UNPAID;
+          const stayDepositPaymentStatus: BookingDepositPaymentStatus =
+            stayDepositPaidAfter >= stayDepositAmount && stayDepositAmount > 0
+              ? BookingDepositPaymentStatus.PAID
+              : stayDepositPaidAfter > 0
+                ? BookingDepositPaymentStatus.PARTIAL
+                : BookingDepositPaymentStatus.UNPAID;
 
-        await tx.stay.update({
-          where: { id: submission.stayId },
-          data: {
-            depositPaidAmountRupiah: stayDepositPaidAfter,
-            depositPaymentStatus: stayDepositPaymentStatus,
-          },
-        });
-
-        if (nextInvoiceStatus === InvoiceStatus.PAID) {
-          await tx.room.update({
-            where: { id: submission.roomId },
-            data: { status: RoomStatus.OCCUPIED },
-          });
-
-          const activationStay = await tx.stay.findUnique({
+          await tx.stay.update({
             where: { id: submission.stayId },
-            select: { id: true, checkInDate: true, pricingTerm: true, plannedCheckOutDate: true },
+            data: {
+              depositPaidAmountRupiah: stayDepositPaidAfter,
+              depositPaymentStatus: stayDepositPaymentStatus,
+            },
           });
 
-          if (activationStay && activationStay.checkInDate && !activationStay.plannedCheckOutDate) {
-            const autoPlannedCheckOut = new Date(activationStay.checkInDate);
-            switch (activationStay.pricingTerm) {
-              case 'DAILY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 1); break;
-              case 'WEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 7); break;
-              case 'BIWEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 14); break;
-              case 'MONTHLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1); break;
-              case 'SMESTERLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 6); break;
-              case 'YEARLY': autoPlannedCheckOut.setFullYear(autoPlannedCheckOut.getFullYear() + 1); break;
-              default: autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1);
-            }
-
-            await tx.stay.update({
-              where: { id: activationStay.id },
-              data: { plannedCheckOutDate: autoPlannedCheckOut },
+          if (nextInvoiceStatus === InvoiceStatus.PAID) {
+            await tx.room.update({
+              where: { id: submission.roomId },
+              data: { status: RoomStatus.OCCUPIED },
             });
-          }
 
-          // Promote pending meter snapshot to operational MeterReading
-          const hasElectricity =
-            submission.stayInitialElectricityKwhPending != null;
-          const hasWater = submission.stayInitialWaterM3Pending != null;
-
-          const stay = await tx.stay.findUnique({
-            where: { id: submission.stayId },
-            select: { checkInDate: true, roomId: true },
-          });
-
-          if (stay && (hasElectricity || hasWater)) {
-            const readingAt = new Date(stay.checkInDate);
-            readingAt.setHours(0, 0, 0, 0);
-
-            const recordedById =
-              submission.stayInitialMetersRecordedById ?? user.id;
-
-            if (hasElectricity) {
-              const electricityValue = submission.stayInitialElectricityKwhPending!;
-              await tx.meterReading.create({
-                data: {
-                  roomId: stay.roomId,
-                  utilityType: UtilityType.ELECTRICITY,
-                  readingAt,
-                  readingValue: electricityValue,
-                  recordedById,
-                },
-              });
-            }
-
-            if (hasWater) {
-              const waterValue = submission.stayInitialWaterM3Pending!;
-              await tx.meterReading.create({
-                data: {
-                  roomId: stay.roomId,
-                  utilityType: UtilityType.WATER,
-                  readingAt,
-                  readingValue: waterValue,
-                  recordedById,
-                },
-              });
-            }
-
-            await tx.stay.update({
+            const activationStay = await tx.stay.findUnique({
               where: { id: submission.stayId },
-              data: {
-                initialElectricityKwhPending: null,
-                initialWaterM3Pending: null,
-                initialMetersRecordedAt: null,
-                initialMetersRecordedById: null,
-                initialMetersPromotedAt: new Date(),
-              },
+              select: { id: true, checkInDate: true, pricingTerm: true, plannedCheckOutDate: true },
             });
+
+            if (activationStay && activationStay.checkInDate && !activationStay.plannedCheckOutDate) {
+              const autoPlannedCheckOut = new Date(activationStay.checkInDate);
+              switch (activationStay.pricingTerm) {
+                case 'DAILY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 1); break;
+                case 'WEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 7); break;
+                case 'BIWEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 14); break;
+                case 'MONTHLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1); break;
+                case 'SMESTERLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 6); break;
+                case 'YEARLY': autoPlannedCheckOut.setFullYear(autoPlannedCheckOut.getFullYear() + 1); break;
+                default: autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1);
+              }
+
+              await tx.stay.update({
+                where: { id: activationStay.id },
+                data: { plannedCheckOutDate: autoPlannedCheckOut },
+              });
+            }
+
+            // Promote pending meter snapshot to operational MeterReading
+            const hasElectricity =
+              submission.stayInitialElectricityKwhPending != null;
+            const hasWater = submission.stayInitialWaterM3Pending != null;
+
+            const stay = await tx.stay.findUnique({
+              where: { id: submission.stayId },
+              select: { checkInDate: true, roomId: true },
+            });
+
+            if (stay && (hasElectricity || hasWater)) {
+              const readingAt = new Date(stay.checkInDate);
+              readingAt.setHours(0, 0, 0, 0);
+
+              const recordedById =
+                submission.stayInitialMetersRecordedById ?? user.id;
+
+              if (hasElectricity) {
+                const electricityValue = submission.stayInitialElectricityKwhPending!;
+                await tx.meterReading.create({
+                  data: {
+                    roomId: stay.roomId,
+                    utilityType: UtilityType.ELECTRICITY,
+                    readingAt,
+                    readingValue: electricityValue,
+                    recordedById,
+                  },
+                });
+              }
+
+              if (hasWater) {
+                const waterValue = submission.stayInitialWaterM3Pending!;
+                await tx.meterReading.create({
+                  data: {
+                    roomId: stay.roomId,
+                    utilityType: UtilityType.WATER,
+                    readingAt,
+                    readingValue: waterValue,
+                    recordedById,
+                  },
+                });
+              }
+
+              await tx.stay.update({
+                where: { id: submission.stayId },
+                data: {
+                  initialElectricityKwhPending: null,
+                  initialWaterM3Pending: null,
+                  initialMetersRecordedAt: null,
+                  initialMetersRecordedById: null,
+                  initialMetersPromotedAt: new Date(),
+                },
+              });
+            }
           }
         }
 

@@ -1,7 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+import { UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreateInventoryMovementDto, UpdateInventoryMovementDto } from './dto/inventory-movement.dto';
 import { InventoryMovementsQueryDto } from './dto/inventory-movements-query.dto';
@@ -40,6 +41,7 @@ export class InventoryMovementsService {
   }
 
   async create(dto: CreateInventoryMovementDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     await this.validateMovement(dto.itemId, dto.movementType, dto.roomId, dto.qty);
     const created = await this.prisma.$transaction(async (tx) => {
       const movement = await tx.inventoryMovement.create({ data: { itemId: dto.itemId, movementType: dto.movementType as any, qty: dto.qty as any, roomId: dto.roomId, movementDate: new Date(dto.movementDate), note: dto.note, createdById: actor.id } });
@@ -52,6 +54,7 @@ export class InventoryMovementsService {
   }
 
   async update(id: number, dto: UpdateInventoryMovementDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const existing = await this.prisma.inventoryMovement.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Movement tidak ditemukan');
     await this.validateMovement(existing.itemId, dto.movementType ?? existing.movementType, dto.roomId ?? existing.roomId ?? undefined, dto.qty ?? String(existing.qty));
@@ -64,6 +67,12 @@ export class InventoryMovementsService {
     const item = await this.prisma.inventoryItem.findUnique({ where: { id: existing.itemId } });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'InventoryMovement', entityId: String(updated.id), oldData: existing, newData: updated });
     return { ...updated, qtyOnHandAfterSync: item?.qtyOnHand };
+  }
+
+  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException('Staff hanya boleh melihat riwayat stok. Mutasi stok hanya boleh dilakukan Owner/Admin.');
+    }
   }
 
   private async validateMovement(itemId: number, movementType: string, roomId: number | undefined, qty: string) {

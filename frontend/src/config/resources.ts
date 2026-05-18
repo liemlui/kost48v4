@@ -867,6 +867,25 @@ export type ManageGuardResult = {
   reason?: string;
 };
 
+
+const staffReadOnlyResourcePaths = new Set(['/rooms', '/inventory-items', '/inventory-movements', '/room-items']);
+
+function getStaffReadOnlyReason(path: string) {
+  if (!staffReadOnlyResourcePaths.has(path)) return null;
+  switch (path) {
+    case '/rooms':
+      return 'Staff hanya boleh melihat data kamar. Perubahan kamar hanya boleh dilakukan Owner/Admin.';
+    case '/inventory-items':
+      return 'Staff hanya boleh melihat data stok. Perubahan stok hanya boleh dilakukan Owner/Admin.';
+    case '/inventory-movements':
+      return 'Staff hanya boleh melihat riwayat stok. Mutasi stok hanya boleh dilakukan Owner/Admin.';
+    case '/room-items':
+      return 'Staff hanya boleh melihat inventaris kamar. Perubahan inventaris kamar hanya boleh dilakukan Owner/Admin.';
+    default:
+      return 'Staff hanya memiliki akses baca untuk data ini.';
+  }
+}
+
 export function getFieldOptionsForContext(
   config: ResourceConfig,
   fieldName: string,
@@ -886,11 +905,11 @@ export function canCreateResourceItem(
   config: ResourceConfig,
   currentUserRole: string | undefined,
 ): ManageGuardResult {
-  if (config.path === '/rooms' && currentUserRole === 'STAFF') {
-    return {
-      allowed: false,
-      reason: 'Hanya Owner/Admin yang dapat menambah data kamar.',
-    };
+  if (currentUserRole === 'STAFF') {
+    const reason = getStaffReadOnlyReason(config.path);
+    if (reason) {
+      return { allowed: false, reason };
+    }
   }
 
   return { allowed: true };
@@ -908,11 +927,11 @@ export function canEditResourceItem(
     };
   }
 
-  if (config.path === '/rooms' && currentUserRole === 'STAFF') {
-    return {
-      allowed: false,
-      reason: 'Hanya Owner/Admin yang dapat mengubah data kamar.',
-    };
+  if (currentUserRole === 'STAFF') {
+    const reason = getStaffReadOnlyReason(config.path);
+    if (reason) {
+      return { allowed: false, reason };
+    }
   }
 
   return { allowed: true };
@@ -928,6 +947,13 @@ export function canDeleteResourceItem(
       allowed: false,
       reason: 'Admin tidak dapat menghapus akun Owner.',
     };
+  }
+
+  if (currentUserRole === 'STAFF') {
+    const reason = getStaffReadOnlyReason(config.path);
+    if (reason) {
+      return { allowed: false, reason };
+    }
   }
 
   return { allowed: true };

@@ -1,14 +1,21 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateInventoryItemDto, UpdateInventoryItemDto } from './dto/inventory-item.dto';
 import { InventoryItemsQueryDto } from './dto/inventory-items-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+import { UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 
 @Injectable()
 export class InventoryItemsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+
+  private assertOwnerOrAdmin(actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException('Staff hanya boleh melihat data stok. Perubahan stok hanya boleh dilakukan Owner/Admin.');
+    }
+  }
 
   async findAll(query: InventoryItemsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -36,6 +43,7 @@ export class InventoryItemsService {
   }
 
   async create(dto: CreateInventoryItemDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     if (dto.sku) {
       const exists = await this.prisma.inventoryItem.findUnique({ where: { sku: dto.sku } });
       if (exists) throw new ConflictException('SKU sudah digunakan');
@@ -46,6 +54,7 @@ export class InventoryItemsService {
   }
 
   async update(id: number, dto: UpdateInventoryItemDto, actor: CurrentUserPayload) {
+    this.assertOwnerOrAdmin(actor);
     const existing = await this.prisma.inventoryItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Item inventory tidak ditemukan');
     if (dto.sku && dto.sku !== existing.sku) {
