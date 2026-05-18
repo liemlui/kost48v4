@@ -43,7 +43,7 @@ export class StaysQueryService {
           _count: {
             select: {
               invoices: {
-                where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
+                where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
               },
             },
           },
@@ -99,7 +99,7 @@ export class StaysQueryService {
         _count: {
           select: {
             invoices: {
-              where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
+              where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
             },
           },
         },

@@ -1,538 +1,381 @@
-# KOST48 V3/V4 — Contracts & API
-**Versi:** 2026-05-18 multi-app shared-db architecture planning  
-**Fungsi:** Kontrak bisnis/API aktif. Untuk status fase lihat `00_GROUND_STATE.md`; untuk rencana eksekusi lihat `02_PLAN.md`.
+# KOST48 V5 — Contracts & API
+**Versi:** 2026-05-18 V5.7/V5.8 audit sync  
+**Fungsi:** Kontrak bisnis/API/ownership aktif. Untuk status fase lihat `00_GROUND_STATE.md`; untuk rencana eksekusi lihat `02_PLAN.md`.
 
 ---
 
-## 0AA. Latest Contract Override — 2026-05-18 Architecture Boundary
+---
 
-Kontrak ini mengunci arah **Multi-App Shared-DB Architecture**. Ini bukan pure microservices dan belum separate database. Semua boundary di bawah harus tunduk pada kontrak bisnis existing.
+## 0A. V5.8-A Implementation Contract Overlay
 
-### 0AA.1 Architecture contract
+V5.8-A source overlay mengikuti kontrak ini:
+
+| Area | Contract setelah patch |
+|---|---|
+| Renewal invoice | Invoice renewal boleh dibuat `DRAFT` hanya sebagai staging internal saat line dibuat; sebelum transaction selesai harus menjadi `ISSUED` dan memiliki `issuedAt`. |
+| Checkout final | `StaysService.complete()` wajib menolak invoice status selain `PAID`/`CANCELLED` sebelum `Stay` menjadi `COMPLETED` dan room menjadi `AVAILABLE`. |
+| Open invoice count | Count/surface backend harus memakai definisi open invoice yang sama: `status NOT IN [PAID, CANCELLED]`. |
+| Deposit processing | Deposit tidak boleh diproses jika masih ada open invoice menurut definisi yang sama. |
+| CheckoutRequestsModule | Tidak boleh import `StaysModule` jika service tidak inject `StaysService`. |
+
+Catatan penting: package ini belum membuktikan PASS karena build/UAT harus dilakukan di environment Windows user.
+
+## 0. Latest Contract Override — V5 Multi-App Shared-DB
+
+Kontrak ini mengalahkan wording lama jika ada konflik.
 
 ```text
-Migration style: greenfield shell + brownfield logic extraction.
-Shared PostgreSQL tetap dipakai.
-PrismaService tetap shared.
-Tidak rewrite total.
-Tidak distributed transaction.
-Tidak service-to-service HTTP pada Phase 0/1 kecuali diputuskan eksplisit.
+Architecture: Multi-App Shared-DB Architecture
+Database: shared PostgreSQL tetap dipakai
+PrismaService: shared
+Migration style: greenfield shell + brownfield logic extraction
+No total rewrite
+No pure microservices
+No separate DB at initial phase
+No distributed transaction
+No service-to-service HTTP in Phase 0/1 unless explicitly decided
 ```
 
-### 0AA.2 Service ownership contract
+### 0.1 Service ownership contract
 
 | Domain/action | Owner awal | Catatan |
 |---|---|---|
-| Stay lifecycle writes | `core-api` | create/complete/cancel/renew execution |
+| Stay lifecycle writes | `core-api` | create, complete, cancel, renew execution |
 | Room occupancy/status writes | `core-api` | AVAILABLE/RESERVED/OCCUPIED mutation |
-| Booking approval | `core-api` | karena pending meter + invoice + room status |
-| Checkout request create/view tenant | `tenant-api` | request only |
-| Checkout request approve/reject/final checkout | `core-api` | tidak boleh auto-complete dari tenant-api |
-| Renew request create/view tenant | `tenant-api` | request only |
-| Renew approve/reject + extend stay/invoice | `core-api` | tetap core sampai boundary baru |
-| Payment proof create/my | `tenant-api` | submission only |
-| Payment review queue | `finance-api` boleh nanti | read/review surface |
-| Payment approval yang mutate Stay/Room/Meter/Deposit | `core-api` dulu | jangan dipindah sebelum audit command boundary |
-| Public room/catalog/profile | `marketing-api` | read-only early win |
-| Staff tickets/room/inventory read-only | `staff-api` | early win |
-| Owner dashboard/reporting aggregator | later | jangan dibuat terlalu awal |
+| Direct/manual check-in | `core-api` | Operational lifecycle starts immediately |
+| Booking approval | `core-api` | agreed rent, deposit, invoice, pending meter snapshot |
+| Booking create/my | `tenant-api` later | request/read only; no activation |
+| Checkout request create/view/cancel tenant | `tenant-api` later | safe read/request methods only |
+| Checkout request approve/reject/admin processing | `core-api` | admin lifecycle decision |
+| Checkout final / complete stay | `core-api` | room release + invoice guard |
+| Renew request create/view tenant | `tenant-api` later | request/read only |
+| Renew approve/execution | `core-api` | confirmed injects `StaysService`; calls `renewStay()` |
+| Payment proof create/my | `tenant-api` later | submission only |
+| Payment review queue | `finance-api` later | read/review surface only |
+| Payment approval | `core-api` | confirmed `$transaction` + SQL lock + lifecycle mutation |
+| Public rooms/detail | `marketing-api` later | read-only candidate |
+| Staff tickets | `staff-api` later | low-risk candidate |
+| Staff room/inventory read-only | `staff-api` later | writes remain core |
+| Owner dashboard/reporting | later | defer to avoid mini-monolith |
 
-### 0AA.3 Cross-app data rule
+### 0.2 Cross-app shared DB rule
 
-Selama shared DB dipakai, service boleh membaca tabel domain lain untuk validasi bila perlu, tetapi write ownership harus jelas. Contoh: `tenant-api` boleh membaca `Stay` untuk validasi request tenant, tetapi tidak boleh mengubah `Stay.status`, `Room.status`, meter promotion, atau invoice lifecycle final.
+Selama shared DB dipakai:
 
-### 0AA.4 Phase 0 audit wajib
-
-Sebelum extraction, wajib audit file asli untuk:
-
-```text
-- module imports
-- service injections
-- Prisma model read/write
-- CheckoutRequestsService -> StaysService dependency
-- RenewRequestsService -> StaysService dependency
-- PaymentSubmissionsService.approve() mutation set
-- frontend route split by role
-```
+- App boleh membaca tabel domain lain untuk validasi.
+- Write ownership harus jelas.
+- `tenant-api` tidak boleh mutate `Stay.status`, `Room.status`, meter promotion, invoice lifecycle final.
+- `finance-api` tidak boleh approve payment yang mengubah Stay/Room/Meter/Deposit sampai command boundary didesain.
+- Tidak ada distributed transaction; multi-entity write tetap harus dilakukan dalam satu `prisma.$transaction()` di owner app.
 
 ---
 
-## 0A. Latest Contract Override — 2026-05-11 Business Lifecycle
+## 1. Confirmed High-Risk Flow Contract
 
-Bagian ini mengalahkan wording lama jika ada konflik.
+Hasil audit V5.7-B mengunci flow berikut sebagai **core-api only**:
 
-### 0A.1 Manual Check-in Business Automation — Target Batch B1
-
-**Current behavior sebelum B1:**
-
-- `POST /stays` direct/manual check-in membuat `Stay ACTIVE` dan `Room OCCUPIED`.
-- Meter awal langsung dibuat sebagai `MeterReading`.
-- Invoice awal dibuat sebagai `DRAFT` + line `RENT`.
-- Portal user tenant tidak auto-created.
-- Admin harus manual issue invoice dan manual create portal access.
-
-**Target behavior setelah B1:**
-
-- `POST /stays` manual check-in tetap membuat `Stay ACTIVE` dan `Room OCCUPIED`.
-- Meter awal tetap langsung dibuat sebagai 2 `MeterReading`.
-- Invoice awal manual check-in harus langsung `ISSUED` saat check-in selesai.
-- Jika tenant punya email, sistem mencoba auto-create portal user.
-- Jika portal user baru dibuat, response boleh mengembalikan temporary password sekali.
-- Jika tenant tidak punya email, check-in tetap sukses tetapi portal status harus `MISSING_EMAIL` / `PORTAL_UNAVAILABLE`.
-- Jika portal user sudah ada untuk tenant yang sama, check-in tetap sukses dengan status `ALREADY_ACTIVE`.
-- Jika email dipakai user/tenant lain, check-in harus gagal dengan conflict sebelum side effect room/stay final.
-
-### 0A.2 Portal Auto-create Idempotency Contract
-
-Saat manual check-in, portal auto-create harus mengikuti 4 kondisi:
-
-| Kondisi | Target behavior |
+| Flow/method | Reason |
 |---|---|
-| Tenant email kosong | Jangan create portal user. Return portal status `MISSING_EMAIL`. Check-in tetap sukses. |
-| Tenant email ada dan belum ada User | Create portal user role TENANT. Return status `CREATED`, `portalEmail`, dan `temporaryPassword` sekali. |
-| User sudah ada untuk tenant yang sama | Jangan error. Return status `ALREADY_ACTIVE`. Tidak membuat duplicate User. |
-| Email dipakai user/tenant lain | Block dengan conflict. Pesan operasional: `Email sudah digunakan oleh user/tenant lain`. |
+| `PaymentSubmissionsService.approveSubmission()` | `$transaction` + SQL lock; mutasi PaymentSubmission, InvoicePayment, Invoice, Stay, Room, MeterReading, deposit fields, AuditLog |
+| `TenantBookingsService.approveBooking()` | `$transaction`; set agreed rent/deposit, invoice DRAFT→ISSUED, pending meter snapshot, audit |
+| `StaysService.create()` | `$transaction`; creates Stay, Room OCCUPIED, invoice ISSUED, meter readings, portal user |
+| `StaysService.complete()` | `$transaction`; checkout final, room AVAILABLE; akan ditambah open invoice guard |
+| `StaysService.renewStay()` | `$transaction`; extends stay, creates renewal invoice; target KB-1 = ISSUED |
+| `RenewRequestsService.approveRequest()` | confirmed injects `StaysService` and calls `renewStay()` |
+| Room status writes | occupancy source of truth |
+| Meter promotion | tied to payment activation |
+| Deposit settlement | future model/audit trail needed |
+| Damage/penalty schema | deferred |
 
-### 0A.3 Temporary Password Contract
+---
 
-- Temporary password hanya boleh dikembalikan sekali saat portal user baru dibuat.
-- Plaintext temporary password tidak boleh disimpan di database.
-- Password yang disimpan di DB harus hashed.
-- Frontend harus menampilkan temporary password dalam modal hasil check-in dengan tombol Salin Password dan warning jelas.
-- Jika admin lupa copy, solusi adalah reset password manual dari Tenant Detail.
+## 2. Locked Business Decisions — V5.8
 
-### 0A.4 Tenant Identity Required Contract
+### KB-1 — Renewal invoice policy
 
-Untuk tenant baru:
+```text
+Renewal invoice must become ISSUED when admin approves a renew request.
+```
 
-- `identityNumber` / No KTP wajib.
-- No KTP wajib 16 digit angka.
-- Backend mencegah duplicate:
-  - `identityNumber`,
-  - `phone`,
-  - tenant `email`,
-  - konflik dengan `User.email`.
-- Update tenant tidak boleh mengubah No KTP/No HP/email menjadi data yang sudah dipakai tenant lain.
-- DB unique constraint belum ditambahkan sampai data existing diaudit/cleanup.
+Rationale:
 
-### 0A.5 Invoice Semantics Contract
+- Booking approval flow already produces an `ISSUED` invoice.
+- Renewal approval is a business commitment and should become tenant-facing.
+- Leaving renewal invoice as `DRAFT` can hide payment obligations from tenant.
 
-| Status | Makna bisnis |
+Implementation target:
+
+- Patch `RenewRequestsService.approveRequest()` and/or `StaysService.renewStay()` after V5.8 PLAN.
+- Preferred approach must be chosen in V5.8 PLAN based on lowest risk.
+- Do not change schema.
+
+Expected behavior after ACT:
+
+```text
+Admin approve renew request
+→ stay planned checkout extended
+→ renewal invoice created
+→ renewal invoice status ISSUED
+→ tenant can see/pay renewal invoice
+```
+
+### KB-2 — Checkout final open invoice guard
+
+```text
+StaysService.complete() must block checkout final if there is any open invoice for the stay.
+No auto-create final utility invoice inside complete().
+```
+
+Open invoice definition:
+
+```text
+Open invoice = invoice status NOT IN [PAID, CANCELLED]
+DRAFT is open and must block checkout until admin resolves it.
+```
+
+Rationale:
+
+- Checkout means tenant truly leaves.
+- Admin must settle invoices manually before final checkout.
+- No hidden unpaid or draft invoices should remain when room is released.
+- Final utility billing remains manual/admin-managed for now.
+
+Expected error style:
+
+```text
+Tidak bisa checkout final karena masih ada invoice yang belum diselesaikan: [invoiceId/number]. Selesaikan atau batalkan invoice terlebih dahulu.
+```
+
+---
+
+## 3. Manual Check-in Business Automation Contract — Status Updated
+
+Previous B1 target is now implemented in code according to V5.7-B audit.
+
+Current behavior confirmed by audit:
+
+- `StaysService.create()` uses `prisma.$transaction()`.
+- Direct/manual check-in creates `Stay ACTIVE` and `Room OCCUPIED`.
+- Invoice is created as `DRAFT`, invoice line is created, then invoice becomes `ISSUED`.
+- Initial meter readings are created.
+- Portal user auto-create is implemented for tenant email.
+- Portal statuses include `MISSING_EMAIL`, `CREATED`, `ALREADY_ACTIVE`.
+- Temporary password follows `kost48-XXXX` pattern and is returned only on `CREATED`.
+
+Contract remains:
+
+| Condition | Behavior |
 |---|---|
-| `DRAFT` | Belum resmi, internal, belum tenant-facing. |
-| `ISSUED` | Resmi, tenant-facing, bisa dibayar. |
-| `PARTIAL` | Sebagian dibayar. |
-| `PAID` | Lunas. |
-| `CANCELLED` | Dibatalkan. |
-
-Business invariant:
-
-```text
-Jika tenant sudah OCCUPIED, invoice utama yang menjadi tagihan tenant tidak boleh diam-diam tertinggal sebagai DRAFT tanpa warning/automation.
-```
-
-Target B1:
-
-```text
-Manual check-in selesai → invoice awal langsung ISSUED.
-```
-
-### 0A.6 Deposit / Damage / Inventory Contract — Future Batches
-
-Deposit adalah liability, bukan sekadar angka.
-
-Future Batch B4 harus mendesain audit trail deposit:
-
-- `COLLECTED`,
-- `DEDUCTED`,
-- `REFUNDED`,
-- `FORFEITED`,
-- `PENDING_TRANSFER` bila dipakai.
-
-Damage dan inventory movement tidak sama:
-
-- Kerusakan barang kamar mengubah `RoomFacility.condition`.
-- `InventoryMovement` hanya terjadi bila stok fisik berubah.
-- Penalty/damage charge dan deposit deduction adalah batch future, bukan B1.
-
-### 0A.7 Final Meter Utility Contract — Pending Audit
-
-Belum boleh diasumsikan bahwa checkout final membuat final utility charge.
-
-Sebelum Batch B2 ACT, wajib audit:
-
-```text
-Apakah StaysService.complete() hanya mencatat meter akhir,
-atau juga membuat InvoiceLine final dari delta meter akhir?
-```
-
-Jika hanya mencatat meter akhir tanpa charge, ini menjadi gap finance P0/P1 untuk Batch B2.
+| Tenant email empty | skip portal create; return `MISSING_EMAIL`; check-in succeeds |
+| Tenant email exists and no User | create TENANT portal user; return `CREATED`, portalEmail, temporaryPassword once |
+| User already exists for same tenant | return `ALREADY_ACTIVE`; no duplicate user |
+| Email belongs to another user/tenant | block with conflict before final side effects |
 
 ---
 
-## 0B. Latest Contract Override — 2026-05-09
+## 4. Invoice Semantics Contract
 
-### Rencana Keluar / Checkout Final Contract
+| Status | Meaning |
+|---|---|
+| `DRAFT` | Internal preparation only; not tenant-facing and not payable unless explicitly exposed |
+| `ISSUED` | Official tenant-facing invoice; payable |
+| `PARTIAL` | Partially paid |
+| `PAID` | Fully paid |
+| `CANCELLED` | Cancelled/voided from business flow |
 
-1. Tenant-facing fitur disebut **Pengajuan Keluar Kamar**.
-2. Admin/internal boleh memakai label pendek **Rencana Keluar**.
-3. Status tampilan:
-   - `PENDING` → **Menunggu Review**
-   - `APPROVED` → **Rencana Disetujui / Siap Checkout Final**
-   - `REJECTED` → **Ditolak**
-4. Tombol admin:
-   - Approve → **Setujui Rencana**
-   - Reject → **Tolak**
-   - Final completion → **Checkout Final**
-5. `APPROVED` **tidak** mengakhiri stay.
-6. Tenant tetap `ACTIVE/OCCUPIED` sampai admin menjalankan **Checkout Final** via flow complete stay existing.
-7. Checkout Final adalah aksi yang menandai tenant benar-benar keluar kamar.
-8. Open invoice `ISSUED/PARTIAL` tetap memblokir Checkout Final sesuai logic existing.
-9. Deposit tetap diproses terpisah/manual setelah checkout.
-10. Backend lifecycle tidak boleh diubah untuk auto-checkout saat approve request.
+Business invariants:
 
-### Checkout vs Renew Conflict Contract
-
-- Jika ada rencana keluar/checkout request `PENDING`, tenant tidak boleh mengajukan renew/perpanjangan untuk stay yang sama.
-- Jika ada renew request `PENDING`, tenant tidak boleh mengajukan rencana keluar untuk stay yang sama.
-- Pesan harus Bahasa Indonesia dan operasional-friendly.
-
-### Staff Inventory Read-only Contract
-
-- STAFF boleh melihat inventory items.
-- STAFF tidak boleh create, edit, delete, import, atau adjust stok.
-- OWNER dan ADMIN boleh mutasi inventory sesuai guard.
-- Rule ini harus ditegakkan di **frontend dan backend**, bukan hanya hide button.
-
-### Dev/UAT Seed Contract Baru
-
-Seed dev/UAT terbaru harus menghasilkan:
-
-| Role | Email | Password |
-|---|---|---|
-| OWNER | `liem.lui@gmail.com` | `admin123` |
-| ADMIN | `admin@kost48.com` | `admin123` |
-| STAFF | `staff@kost48.com` | `staff123` |
-| TENANT | `tenant.g2@kost48.com` | `tenant123` |
-
-Rooms fresh UAT yang umum dipakai:
-
-- G2-001 sampai G2-005,
-- G3-001 sampai G3-003.
-
-Semua room seed harus `AVAILABLE` dan `isActive=true`.
+1. Tenant who is `OCCUPIED` should not silently have active obligation hidden as `DRAFT`.
+2. Manual check-in initial invoice must be `ISSUED`.
+3. Booking approval initial invoice must be `ISSUED`.
+4. Renewal approval invoice must be `ISSUED` after KB-1.
+5. Checkout final must be blocked by any open invoice after KB-2.
 
 ---
 
-## 1. Prinsip Kontrak
+## 5. Checkout / Rencana Keluar Contract
 
-1. `schema.prisma` = bentuk data.
-2. `bootstrap.sql` = pagar integritas DB.
-3. Service = alur bisnis, validasi, kalkulasi.
-4. Controller tipis: routing + auth guard.
-5. Actor selalu diambil dari JWT auth context (`req.user.id`).
-6. Semua transaksi penting multi-entity wajib `prisma.$transaction()`.
-7. Raw SQL hanya jika perlu locking/compatibility; default tetap Prisma-first.
-8. Error message harus Bahasa Indonesia, operasional-friendly, dan tidak expose internal stack di production.
+Tenant-facing name: **Pengajuan Keluar Kamar**  
+Admin/internal short name: **Rencana Keluar**
 
----
+Status labels:
 
-## 2. Core Stay Contract
-
-### 2.1 Direct backoffice check-in
-
-Endpoint existing: `POST /stays`.
-
-**Current pre-B1 behavior:**
-
-- Room langsung `OCCUPIED`.
-- Stay langsung `ACTIVE` operasional.
-- Meter awal listrik dan air wajib.
-- Meter awal langsung dibuat sebagai 2 `MeterReading` dalam transaction yang sama.
-- Invoice awal `DRAFT` + line `RENT` dibuat otomatis.
-- Portal user tidak otomatis dibuat.
-
-**Target Batch B1 behavior:**
-
-- Room tetap langsung `OCCUPIED`.
-- Stay tetap langsung `ACTIVE`.
-- Meter awal tetap langsung dibuat.
-- Invoice awal langsung `ISSUED`.
-- Portal user auto-created jika tenant punya email.
-- Response check-in mengembalikan portal result.
-
-### 2.2 Checkout
-
-- Endpoint existing: `POST /stays/:id/complete`.
-- `checkoutReason` wajib.
-- Room kembali `AVAILABLE` jika tidak ada stay aktif lain.
-- Deposit belum diproses otomatis.
-- Meter/payment/invoice/deposit history tidak boleh dihapus.
-- Saat ini open invoice `ISSUED/PARTIAL` memblokir checkout.
-- Future Batch B2 wajib audit behavior untuk invoice `DRAFT` dan final meter utility charge.
-
-### 2.3 Cancel operational stay
-
-- Endpoint existing: `POST /stays/:id/cancel`.
-- `cancelReason` wajib/tersimpan eksplisit.
-- Tidak boleh menghapus histori operasional.
-
-### 2.4 Renew
-
-- Endpoint existing: `POST /stays/:id/renew`.
-- Renewal = extend existing active stay, bukan create parallel stay baru.
-- Invoice renewal saat ini `DRAFT` dibuat otomatis.
-- Future Batch B2 wajib audit apakah renewal approval harus auto-ISSUED dan apakah approval form sudah punya nominal confirmation.
-- Renewal tenant self-service harus berupa request + admin approval, bukan auto-renew.
-
----
-
-## 3. Tenant Booking Contract
-
-### 3.1 Public room catalog
-
-- `GET /public/rooms`
-- Public/guest/tenant melihat room aktif yang masih `AVAILABLE`.
-- Mendukung search, floor, pricingTerm bila tersedia.
-- Baseline public booking sudah pernah UAT PASS; marketing polish tetap Phase 4.4.
-
-### 3.2 Create tenant booking
-
-- `POST /tenant/bookings`
-- Role: TENANT.
-- Tenant hanya bisa booking untuk diri sendiri.
-- Tenant tidak boleh punya stay/booking aktif lain.
-- Room harus `AVAILABLE`.
-- Setelah booking:
-  - `Stay.status = ACTIVE` sebagai konteks booking.
-  - `Room.status = RESERVED`.
-  - `expiresAt` terisi.
-  - Belum membuat `MeterReading` final.
-  - Belum menjadi hunian operasional.
-
-### 3.3 My bookings
-
-- `GET /tenant/bookings/my`
-- Tenant hanya melihat booking miliknya.
-- Response harus manusiawi: room, pricing term, check-in, expiresAt, status, invoice/payment state bila ada.
-- Tidak expose ID teknis yang tidak perlu ke UI tenant.
-
-### 3.4 Admin approve booking
-
-- `PATCH /admin/bookings/:stayId/approve`
-- Role: OWNER/ADMIN.
-- Admin mengisi:
-  - `agreedRentAmountRupiah`
-  - `depositAmountRupiah`
-  - `initialElectricityKwh`
-  - `initialWaterM3`
-- Setelah approve booking:
-  - Stay tetap `ACTIVE`.
-  - Room tetap `RESERVED`.
-  - Invoice awal dibuat/di-issue sesuai policy existing.
-  - Meter awal disimpan sebagai pending snapshot di `Stay`.
-  - `MeterReading` tetap `0` sampai payment approved.
-
----
-
-## 4. Pending Meter Snapshot Contract — Phase 4.3-G2 PASS
-
-### 4.1 Field konseptual di Stay
-
-Pending snapshot menyimpan meter awal tenant booking sebelum room benar-benar occupied:
-
-- `initialElectricityKwhPending`
-- `initialWaterM3Pending`
-- `initialMetersRecordedAt`
-- `initialMetersRecordedById`
-- `initialMetersPromotedAt`
-
-### 4.2 Promotion rule
-
-`MeterReading` final dibuat hanya saat:
-
-1. Payment submission approved.
-2. Room berubah `RESERVED -> OCCUPIED`.
-3. Pending snapshot ada dan belum promoted.
-
-Promotion harus:
-
-- membuat 2 `MeterReading`: `ELECTRICITY` + `WATER`,
-- memakai value pending snapshot,
-- idempotent/no duplicate,
-- set `initialMetersPromotedAt`,
-- clear pending snapshot fields setelah sukses sesuai implementasi yang sudah PASS.
-
-### 4.3 Expiry/cancel before occupied
-
-Jika booking cancelled/expired sebelum occupied:
-
-- Stay menjadi `CANCELLED`.
-- Room kembali `AVAILABLE`.
-- Pending snapshot fields menjadi `null`.
-- Tidak ada `MeterReading` yang dihapus.
-- Global meter history tetap aman.
-
-### 4.4 Expire after occupied
-
-`expire-booking` pada stay yang sudah room `OCCUPIED` atau meter promoted harus ditolak `409` dengan pesan operasional:
-
-> Booking sudah menjadi hunian aktif. Gunakan checkout untuk mengakhiri stay.
-
----
-
-## 5. Payment Submission Contract — 4.2 Core Accepted
-
-### 5.1 Endpoint aktif/target
-
-- `POST /payment-submissions`
-- `GET /payment-submissions/my`
-- `GET /payment-submissions/review-queue`
-- `GET /payment-submissions/:id`
-- `POST /payment-submissions/:id/approve`
-- `POST /payment-submissions/:id/reject`
-- Internal/manual expiry path sesuai implementasi saat ini.
-
-### 5.2 Tenant create submission
-
-Tenant submit bukti bayar booking awal. Tenant tidak menulis langsung ke `InvoicePayment`.
-
-Payload minimal:
-
-- `stayId` atau context booking yang valid sesuai implementasi.
-- `invoiceId` bila target invoice dibutuhkan.
-- `amountRupiah`.
-- `paidAt`.
-- `paymentMethod`.
-- optional proof metadata: `fileUrl`, `originalFilename`, `mimeType`, `fileSizeBytes`, `notes`, `referenceNumber`, dll.
+| Status | Display |
+|---|---|
+| `PENDING` | Menunggu Review |
+| `APPROVED` | Rencana Disetujui / Siap Checkout Final |
+| `REJECTED` | Ditolak |
 
 Rules:
 
-- Tenant hanya submit untuk booking miliknya.
-- Booking harus masih `ACTIVE + RESERVED`.
-- Nominal workflow booking awal wajib tepat sebesar sisa sewa + sisa deposit.
-- No underpay, no overpay, no partial pada booking initial payment.
-- Jika nominal salah, backend menolak dan tidak membuat side effect final.
+1. Approving checkout request does not complete the stay.
+2. Tenant remains active/occupied until admin runs **Checkout Final**.
+3. Checkout final is done through `StaysService.complete()` / `POST /stays/:id/complete`.
+4. Checkout final must preserve history: meter, payment, invoice, deposit.
+5. After KB-2, checkout final must be blocked if any invoice for the stay is not `PAID` or `CANCELLED`.
+6. No auto-create utility invoice in `complete()` for now.
 
-### 5.3 Admin approve submission
+Audit finding:
 
-Dalam transaction:
-
-1. Lock/read submission.
-2. Guard status harus `PENDING_REVIEW`.
-3. Guard invoice/stay/room valid.
-4. Buat `InvoicePayment` untuk rent portion.
-5. Update deposit payment tracking untuk deposit portion.
-6. Sync invoice status.
-7. Set `PaymentSubmission.status = APPROVED`.
-8. Jika rent + deposit paid, update room `RESERVED -> OCCUPIED`.
-9. Promote pending meter snapshot menjadi `MeterReading`.
-10. Audit/log/app notification bila tersedia.
-
-### 5.4 Admin reject submission
-
-- Status menjadi `REJECTED`.
-- `reviewNotes` wajib.
-- Booking tetap `RESERVED` selama belum expired/cancelled.
-- Tenant dapat submit ulang jika booking masih valid.
-
-### 5.5 Double approve prevention
-
-- Submission yang sudah `APPROVED/REJECTED/EXPIRED` tidak boleh diproses ulang.
-- Tidak boleh ada duplicate `InvoicePayment` final dari satu submission.
+- `CheckoutRequestsModule` imports `StaysModule`, but `CheckoutRequestsService` does not inject `StaysService`.
+- This is a dead import cleanup candidate, not a business behavior change.
 
 ---
 
-## 6. Announcement, AppNotification, Reminder Contract
+## 6. Renew Request Contract
 
-### 6.1 Announcement
+Rules:
 
-- Announcement adalah konten broadcast/pengumuman.
-- Audience existing tetap ada, tetapi audience `TENANT` operasional hanya boleh untuk tenant occupied.
-- Tenant non-occupied redirect dari `/portal/announcements` ke `/portal/bookings`.
+1. Tenant can create/view own renew request later in `tenant-api`.
+2. Admin approval/execution stays in `core-api`.
+3. `RenewRequestsService` injects `StaysService` and approval calls `renewStay()`.
+4. Renewal extends existing active stay, not create parallel stay.
+5. After KB-1, renewal invoice must become `ISSUED` when admin approves the request.
+6. Renewal invoice should be tenant-facing immediately after approval.
 
-### 6.2 AppNotification
+Before ACT:
 
-- AppNotification adalah inbox personal/read-unread per user.
-- Endpoint aktif:
-  - `GET /me/notifications`
-  - `PATCH /me/notifications/:id/read`
-  - `PATCH /me/notifications/read-all`
-- Query dan mark-read wajib scoped ke user login.
-- Mock reminder boleh membuat AppNotification untuk tenant target jika tenant punya portal user.
-- Gagal membuat AppNotification tidak boleh menggagalkan mock send.
-
-### 6.3 Payment urgency chip
-
-- Bukan AppNotification.
-- Bukan Announcement.
-- Ini indikator kondisi bisnis aktif.
-- Read/unread notification tidak boleh menghilangkan chip.
-- Chip hilang hanya jika kondisi bisnis selesai: invoice paid, booking resolved, stay/contract resolved.
-- Status 4.3-D perlu browser UAT sebelum klaim PASS.
+- V5.8 PLAN must decide whether invoice issue logic is patched in `StaysService.renewStay()` or in `RenewRequestsService.approveRequest()` after `renewStay()`.
+- Prefer lower-risk approach with smallest file count.
 
 ---
 
-## 7. Pricing Policy Contract
+## 7. Payment Submission Contract
 
-- Harga dasar kamar = `monthlyRateRupiah`.
-- DAILY = 13% × monthly, rounded up to Rp5.000.
-- WEEKLY = 45% × monthly, rounded up to Rp5.000.
-- BIWEEKLY = 75% × monthly, rounded up to Rp5.000.
-- MONTHLY = 100% × monthly.
-- SMESTERLY/SEMESTERLY = 5,5 × monthly.
-- YEARLY = 10 × monthly.
-- Deposit tidak dikalikan term; deposit mengikuti default deposit room.
-- Admin dapat override saat approval booking.
-- Short-term includes utilities normal; long-term utilities by meter.
+Tenant writes to `PaymentSubmission`, not `InvoicePayment`.
 
----
+Tenant create rules:
 
-## 8. Role Contract
+- Tenant may create payment submission for own booking/invoice only.
+- Initial booking payment must equal required rent + deposit amount.
+- No underpay/overpay/partial for initial booking payment.
+- Duplicate pending review submissions must be prevented.
 
-### OWNER/ADMIN
+Admin approve contract:
 
-- Mengelola tenant, room, stay, invoice, payment review, announcement, user sesuai guard.
-- Admin tidak boleh edit/delete OWNER atau mengubah role menjadi OWNER.
+- Approval is `core-api` only.
+- Approval must be atomic.
+- Audit confirmed `$transaction` + raw SQL lock `FOR UPDATE` is used.
+- Approval writes/may write:
+  - `PaymentSubmission`
+  - `InvoicePayment`
+  - `Invoice`
+  - `Stay` deposit fields
+  - `Room` status RESERVED→OCCUPIED
+  - `MeterReading` promotion
+  - `AuditLog`
+- Notification after approval may be non-blocking.
 
-### STAFF
+Finance-api future:
 
-- Fokus operasional terbatas: tickets, rooms/inventory sesuai izin.
-- STAFF inventory read-only: boleh lihat, tidak boleh mutate.
-- Tidak boleh approve payment atau manage tenant portal access jika bukan scope.
-
-### TENANT
-
-- Melihat data miliknya sendiri.
-- Booking kamar.
-- Melihat booking, invoice, stay, ticket, announcement occupied, notification.
-- Submit payment proof sesuai booking sendiri.
-- Tidak input ID teknis manual.
-- Tidak melihat tenant lain.
+- `findReviewQueue()` / review list can move as read-only.
+- `approveSubmission()` and lifecycle mutation must not move yet.
 
 ---
 
-## 9. Production Deployment Contract
+## 8. Booking Contract
 
-### 9.1 Production endpoints
+Tenant booking:
 
-- Frontend production: `https://app.kost48surabaya.com`.
-- Backend API base: `https://api.kost48surabaya.com/api`.
-- Public rooms health check: `GET /api/public/rooms`.
-- Protected notification check: `GET /api/me/notifications`.
-- Reminder preview all: `GET /api/admin/reminders/preview/all`.
+- Tenant can create own booking request/Stay context.
+- Room must be available.
+- Booking creates reserved lifecycle context but not operational occupancy until payment approval.
 
-### 9.2 Deployment rules
+Admin approval:
 
-- Normal patch flow: source lokal → build → commit → push → pull/deploy on cPanel.
-- Jangan edit `dist` production kecuali emergency hotfix.
-- Jangan reset DB production.
-- Schema/DB changes require backup and separate plan.
-- `.htaccess`/Apache proxy config adalah deployment config; jangan commit kecuali sudah diputuskan.
+- `TenantBookingsService.approveBooking()` remains core-api.
+- Audit confirmed `$transaction`.
+- Approval creates invoice `ISSUED` and stores pending meter snapshot.
+- Room remains `RESERVED` until payment approval.
+- MeterReading is not created at booking approval; it is promoted at payment approval.
 
-### 9.3 Production UAT minimum after deploy
+---
 
-- `GET /api/public/rooms` returns API envelope.
-- `POST /api/auth/login` works for owner admin.
-- `GET /api/me/notifications` works with Bearer token.
-- If reminder code touched, `GET /api/admin/reminders/preview/all` works with Bearer token.
+## 9. Public / Marketing Contract
+
+Marketing/public module is read-only.
+
+Allowed future `marketing-api` scope:
+
+- public rooms list
+- public room detail
+- public profile/landing
+- gallery read later
+- announcement/public content read if applicable
+
+Forbidden:
+
+- no Room status writes
+- no booking approval
+- no tenant private data
+- no auth dependency unless explicitly needed later
+- no lifecycle mutation
+
+---
+
+## 10. Staff Contract
+
+Staff can be extracted later as a read/operational app.
+
+Allowed future `staff-api` scope:
+
+- tickets
+- room view
+- inventory read-only
+- room-items read-only
+- maintenance/task future
+
+Forbidden for staff-api early phase:
+
+- inventory write
+- room status write
+- payment approval
+- tenant portal access management
+- stay lifecycle mutation
+
+---
+
+## 11. Announcement, AppNotification, Reminder Contract
+
+Announcement:
+
+- Broadcast content/pengumuman.
+- Operational TENANT audience only for occupied tenants.
+- Non-occupied tenants should be routed to `/portal/bookings` instead of operational announcements.
+
+AppNotification:
+
+- Personal inbox/read-unread per user.
+- Query and mark-read must be scoped to current user.
+- Notification failure should not break main business transaction unless explicitly part of transaction.
+
+Urgency chip:
+
+- Not Announcement.
+- Not AppNotification.
+- Persistent business indicator until obligation resolved.
+- Still requires browser UAT before PASS claim.
+
+---
+
+## 12. Production Deployment Contract
+
+Production endpoints:
+
+- Frontend: `https://app.kost48surabaya.com`
+- Backend: `https://api.kost48surabaya.com/api`
+
+Rules:
+
+1. Normal flow: source local → build → commit → push → pull/deploy.
+2. Do not edit `dist` production except emergency hotfix.
+3. Do not reset production DB.
+4. Schema/DB changes require backup + separate plan.
+5. `.htaccess`/Apache config is deployment config, not default app source unless explicitly decided.
+
+Minimum production UAT after deploy:
+
+- `GET /api/public/rooms`
+- `POST /api/auth/login`
+- `GET /api/me/notifications` with Bearer token
+- If reminder touched: `GET /api/admin/reminders/preview/all`

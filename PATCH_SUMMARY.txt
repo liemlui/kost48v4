@@ -1,0 +1,105 @@
+KOST48 V5.8-A BACKEND GUARD OVERLAY PATCH
+Status: PREPARED ONLY — NOT PASS UNTIL LOCAL BUILD/UAT
+
+SUMMARY
+This overlay patches the safest high-priority V5.8-A business correctness scope from the uploaded Backend.zip, frontend.zip, and active docs.
+It does not perform workspace migration, schema migration, frontend split, or lifecycle ownership extraction.
+
+FILES CHANGED
+Backend:
+- backend/src/modules/checkout-requests/checkout-requests.module.ts
+- backend/src/modules/stays/stays.service.ts
+- backend/src/modules/stays/stays-query.service.ts
+
+Docs:
+- docs/00_GROUND_STATE.md
+- docs/01_CONTRACTS.md
+- docs/02_PLAN.md
+- docs/CHECKLIST.md
+- docs/03_DECISIONS_LOG.md
+- docs/04_JOURNAL.md
+- docs/CHANGELOG.md
+
+Scripts:
+- scripts/VERIFY_V5_8_A.ps1
+- scripts/UAT_V5_8_A_SMOKE.ps1
+
+WHAT CHANGED
+1. CheckoutRequestsModule cleanup
+- Removed dead StaysModule import.
+- Removed StaysModule from module imports.
+- Behavior should not change because CheckoutRequestsService does not inject StaysService.
+
+2. KB-1 renewal invoice auto-ISSUED
+- StaysService.renewStay() still creates the renewal invoice as DRAFT temporarily.
+- This is intentional because invoice lines must be inserted while invoice is still DRAFT.
+- After the renewal rent line is created, the same transaction updates invoice status to ISSUED and sets issuedAt.
+- Result returned by renewStay() now contains invoice.status = ISSUED.
+
+3. KB-2 checkout final open invoice guard
+- StaysService.complete() now checks blocking invoices inside prisma.$transaction() before updating Stay/Room.
+- Blocking invoice definition: status NOT IN [PAID, CANCELLED].
+- DRAFT/ISSUED/PARTIAL and any future non-closed status block checkout final.
+- Error message is Indonesian and lists invoice number/id + status.
+
+4. Deposit guard alignment
+- StaysService.processDeposit() now uses the same open invoice definition before processing deposit.
+- Deposit processing is blocked if any invoice is not PAID/CANCELLED.
+
+5. Query open invoice count alignment
+- StaysQueryService openInvoiceCount now uses status NOT IN [PAID, CANCELLED].
+- This aligns backend list/detail surfaces with KB-2 semantics.
+
+WHAT DID NOT CHANGE
+- No schema.prisma change.
+- No SQL migration.
+- No DB reset.
+- No nest-cli.json change.
+- No app.module.ts split.
+- No tsconfig/apps/libs generation.
+- No payment approval change.
+- No booking approval change.
+- No frontend route/API split.
+- No marketing-api/staff-api/tenant-api/finance-api shell generated.
+- No production DB touched.
+
+DOCS/CODE OUT OF SYNC FINDING
+Before this overlay, docs already locked KB-1/KB-2 but code still had:
+- renewal invoice created as DRAFT and returned as DRAFT;
+- checkout final only blocked ISSUED/PARTIAL invoices, not all open invoices;
+- CheckoutRequestsModule still imported dead StaysModule.
+This overlay brings code closer to docs. Local build/UAT is still required.
+
+BUILD COMMAND
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build
+
+VERIFY SCRIPT
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\VERIFY_V5_8_A.ps1
+
+SMOKE UAT SCRIPT
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_8_A_SMOKE.ps1
+
+EXACT UAT EXAMPLES WITH REAL IDS
+Renew approval, replace 9 with a real pending renew request ID:
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_8_A_SMOKE.ps1 -RenewRequestId 9
+
+Checkout blocked by open invoice, replace 9 with a real active stay ID with DRAFT/ISSUED/PARTIAL invoice:
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_8_A_SMOKE.ps1 -StayIdWithOpenInvoice 9
+
+Checkout allowed after settlement, replace 10 with a real active stay ID whose invoices are all PAID/CANCELLED:
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_8_A_SMOKE.ps1 -StayIdReadyToComplete 10
+
+Deposit guard, replace 11 with a real completed/cancelled stay ID with open invoice:
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_8_A_SMOKE.ps1 -DepositStayIdWithOpenInvoice 11
+
+RISKS
+- Build was not run in the user Windows environment.
+- UAT needs real IDs; this patch does not invent or reset DB data.
+- Checkout final will now be stricter: DRAFT invoices block checkout, as required by KB-2.
+- Deposit processing will now also block DRAFT invoices, aligned with open invoice semantics.
+
+NEXT STEP
+1. Merge overlay.
+2. Run backend build.
+3. Run smoke/UAT scripts.
+4. If OK, continue V5.8-B marketing-api shell/extraction plan/patch.

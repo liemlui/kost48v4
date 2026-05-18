@@ -1,6 +1,183 @@
-# KOST48 V3/V4 — Project Journal
-**Versi:** 2026-05-18 multi-app shared-db architecture planning  
+# KOST48 V5 — Project Journal
+**Versi:** 2026-05-18 V5.7/V5.8 audit sync  
 **Fungsi:** Arsip kronologis milestone dan hasil UAT. Tidak menggantikan `00_GROUND_STATE.md`.
+
+---
+
+---
+
+## 2026-05-18 — V5.8-A Backend Guard Overlay Prepared
+
+### Scope
+
+Patch overlay disiapkan langsung dari ZIP backend/frontend/docs terbaru. Fokus tetap business correctness sebelum extraction.
+
+### Source changes
+
+1. `backend/src/modules/checkout-requests/checkout-requests.module.ts`
+   - remove dead `StaysModule` import dari module imports.
+
+2. `backend/src/modules/stays/stays.service.ts`
+   - renewal invoice sekarang dibuat `DRAFT` sementara, line dibuat, lalu invoice langsung `ISSUED` + `issuedAt` dalam transaction yang sama.
+   - checkout final sekarang memblokir semua invoice dengan status selain `PAID`/`CANCELLED`; error menampilkan invoice reference dan status.
+   - deposit processing memakai definisi open invoice yang sama.
+
+3. `backend/src/modules/stays/stays-query.service.ts`
+   - open invoice count memakai definisi KB-2 (`notIn [PAID, CANCELLED]`).
+
+### Not verified
+
+Backend build dan UAT belum dijalankan di environment Windows project root. Tidak boleh klaim PASS sebelum user menjalankan verification commands.
+
+### Deferred
+
+Marketing-api shell, workspace migration, staff-api, tenant-api, finance-api, dan frontend split tetap deferred sampai V5.8-A lokal OK.
+
+## 2026-05-18 — V5.7-B Targeted Verification Audit Accepted
+
+### Konteks
+
+Setelah V5.1–V5.6 shared boundary hardening, dilakukan audit besar untuk menilai kesiapan migrasi ke **Multi-App Shared-DB Architecture**. Audit awal berguna sebagai peta besar, tetapi masih menyisakan `UNKNOWN` pada high-risk flows. Targeted audit V5.7-B dilakukan untuk menutup UNKNOWN sebelum V5.8.
+
+### Hasil utama
+
+```text
+Workspace verdict: NEEDS MANUAL MIGRATION
+V5.7 ACT scope: no workspace restructure
+Next: V5.8 PLAN only
+```
+
+Temuan penting:
+
+1. `nest-cli.json` masih single-project monolith.
+2. `app.module.ts` masih module aggregator.
+3. Public/marketing module read-only dan cocok sebagai early extraction candidate.
+4. `CheckoutRequestsModule` masih import `StaysModule`, tetapi service tidak inject `StaysService` — dead import cleanup candidate.
+5. `RenewRequestsService` confirmed inject `StaysService`, dan `approveRequest()` menjalankan renewal melalui `staysService.renewStay()`.
+6. `PaymentSubmissionsService.approveSubmission()` confirmed memakai `prisma.$transaction` dan SQL lock `FOR UPDATE`.
+7. `TenantBookingsService.approveBooking()` confirmed memakai `$transaction`, membuat invoice `ISSUED`, dan menyimpan pending meter snapshot.
+8. `StaysService.create()` confirmed sudah menjalankan manual check-in automation: invoice `ISSUED`, portal user auto-create, meter reading.
+9. `StaysService.complete()` confirmed memakai `$transaction`, tetapi tidak membuat final utility invoice.
+10. `StaysService.renewStay()` confirmed membuat renewal invoice `DRAFT`.
+11. `MyInvoicesPage.tsx` adalah valid tenant portal candidate jika build frontend PASS dan file dicommit terpisah.
+
+### Koreksi terhadap audit awal
+
+Audit awal sempat menyebut kemungkinan `complete()`/`cancel()` tidak transactional. V5.7-B mengoreksi itu:
+
+```text
+StaysService.complete() dan cancel() sudah memakai prisma.$transaction().
+Tidak ada P0 transaction hotfix untuk complete/cancel saat ini.
+```
+
+Yang tersisa sebagai P0 correctness:
+
+```text
+KB-1: Renewal invoice DRAFT → ISSUED saat approve request.
+KB-2: Checkout final block jika ada open invoice.
+```
+
+---
+
+## 2026-05-18 — V5.8 Business Decisions Locked
+
+### KB-1 — Renewal invoice auto-ISSUED
+
+Keputusan:
+
+```text
+Renewal invoice harus menjadi ISSUED saat admin approve renew request.
+```
+
+Alasan:
+
+- Booking approval sudah membuat invoice `ISSUED`.
+- Renewal approval adalah komitmen bisnis yang harus tenant-facing.
+- Jika invoice renewal tetap `DRAFT`, tenant bisa tidak melihat tagihan renew.
+
+### KB-2 — Checkout final open invoice guard
+
+Keputusan:
+
+```text
+StaysService.complete() harus block checkout final jika ada invoice open.
+Tidak ada auto-create final utility invoice di complete().
+```
+
+Open invoice:
+
+```text
+status NOT IN [PAID, CANCELLED]
+DRAFT ikut block checkout.
+```
+
+Alasan:
+
+- Checkout final berarti tenant benar-benar keluar dan room dilepas.
+- Tidak boleh ada invoice belum diselesaikan saat room kembali AVAILABLE.
+- Admin wajib settle manual dulu.
+
+---
+
+## 2026-05-18 — Cline Rules V5 Update
+
+`.clinerules` dan `.clineignore` diperbarui untuk V5 workflow:
+
+- Project label menjadi KOST48 V5.
+- ChatGPT menjadi command center.
+- Cline dibatasi sebagai local repo auditor / bounded coding agent.
+- PowerShell-only diperketat.
+- V5 architecture direction ditambahkan.
+- High-risk flows dikunci.
+- Current priority diubah dari B1 ke V5.7/V5.8.
+- Overlay patch format ditetapkan.
+- `.clineignore` source-of-truth comments diarahkan ke 7 active docs dan backend/frontend config.
+
+Catatan:
+
+```text
+Branch aktif dari bukti terminal terbaru adalah main/origin/main.
+Jangan ubah wording ke master kecuali git lokal membuktikan sebaliknya.
+```
+
+---
+
+## 2026-05-18 — V5.8 Next Plan
+
+V5.8 tidak langsung ACT. V5.8 harus dimulai dengan PLAN Cline yang membaca file berikut:
+
+```text
+backend/src/modules/public/public.controller.ts
+backend/src/modules/public/public.service.ts
+backend/src/modules/public/public.module.ts
+backend/src/modules/checkout-requests/checkout-requests.module.ts
+backend/src/modules/renew-requests/renew-requests.service.ts
+backend/src/modules/stays/stays.service.ts
+backend/src/app.module.ts
+backend/nest-cli.json
+backend/tsconfig.json
+frontend/src/App.tsx
+frontend/src/pages/rooms/RoomsRouteEntry.tsx
+frontend/src/pages/rooms/PublicRoomDetailPage.tsx
+frontend/src/api/public.ts
+```
+
+V5.8 PLAN must produce:
+
+1. Public module verification.
+2. Checkout dead import cleanup plan.
+3. KB-1 patch plan.
+4. KB-2 patch plan.
+5. Marketing-api extraction plan.
+6. Recommended ACT order.
+
+Likely split after PLAN:
+
+```text
+V5.8-A: dead import cleanup + KB-1 + KB-2
+V5.8-B: marketing-api extraction plan/shell
+V5.8-C: workspace/shared skeleton plan
+```
 
 ---
 
@@ -8,7 +185,7 @@
 
 ### Konteks
 
-Setelah audit awal, ditemukan bahwa coupling backend lebih rendah dari yang terlihat. Banyak modul terutama bergantung pada `PrismaService` dan `AuditLogService`, sementara cross-module import yang perlu perhatian khusus berada pada checkout request, renew request, tenant booking, notification, dan payment approval.
+Setelah audit awal, ditemukan bahwa coupling backend lebih rendah dari yang terlihat. Banyak modul terutama bergantung pada `PrismaService` dan `AuditLogService`, tetapi high-risk lifecycle flows tetap terpusat pada `StaysService`, `TenantBookingsService`, `PaymentSubmissionsService`, dan `RenewRequestsService`.
 
 ### Keputusan arah
 
@@ -19,296 +196,53 @@ Arah baru adalah **Multi-App Shared-DB Architecture**:
 - bukan pure microservices
 - bukan separate DB dulu
 - shared PostgreSQL tetap dipakai
-- PrismaService menjadi shared lib
+- PrismaService menjadi shared lib nanti
 - migration style: greenfield shell + brownfield logic extraction
 ```
 
 ### Koreksi boundary penting
 
-1. `CheckoutRequest` punya risiko sama seperti `RenewRequest`: tenant create/view bisa dipisah, tetapi admin approve/reject/final checkout tetap core karena menyentuh lifecycle.
-2. `PaymentSubmission.approve()` wajib diaudit sebelum finance-api extraction karena kemungkinan mutate Stay, Room, Invoice, Deposit, MeterReading, dan Notification.
-3. `owner-api` ditunda karena berpotensi menjadi mini-monolith kedua.
-
-### Next step
-
-Jalankan Phase 0 Architecture Audit terhadap backend/frontend ZIP terbaru sebelum generate app, pindah file, atau refactor.
+1. `PaymentSubmission.approveSubmission()` mutasi banyak model dan harus tetap core.
+2. `RenewRequestsService.approveRequest()` inject `StaysService`, sehingga admin approve/execution tidak boleh keluar dari core.
+3. `CheckoutRequestsService` tenant create/view safe untuk tenant-api later, tetapi admin processing tetap core.
+4. `owner-api` ditunda karena berpotensi menjadi mini-monolith kedua.
 
 ---
 
-## 2026-05-11 — Business Lifecycle Audit & Blueprint
+## Historical Journal Notes
 
-### Konteks
+### 2026-05-11 — Business Lifecycle Audit & Blueprint
 
-Setelah full API UAT lulus dan M-series patches selesai, penggunaan browser manual mengungkap **business automation gap**: manual check-in bisa menghasilkan tenant yang menghuni kamar sementara invoice pertama masih `DRAFT` dan portal belum otomatis dibuat.
+Dulu ditemukan gap manual check-in: invoice awal masih `DRAFT` dan portal belum auto-created. Gap ini sekarang sudah diimplementasikan menurut audit V5.7-B melalui commit `d1a7181` dan hardening V5.1–V5.2.
 
-Ini bukan regresi dari M2 UX patch. M2 yang PASS adalah UX reliability fix:
+### 2026-05-09 — Local Stabilization, UX Flow, and DB Reset Context
 
-- Modal close berfungsi benar.
-- Tombol X tidak meninggalkan backdrop.
-- Tombol Kembali ke `/stays`, bukan `/dashboard`.
-- Tenant select refresh setelah inline creation.
-
-M2 **tidak mencakup** invoice auto-ISSUED atau portal auto-create. Business automation gap ini adalah item baru yang ditemukan setelah UAT teknis selesai.
-
-### Audit business logic yang dilakukan
-
-Audit Cline memetakan full business lifecycle dari public booking sampai checkout final. Temuan utama yang valid:
-
-```text
-1. Manual check-in membuat invoice DRAFT, bukan ISSUED.
-2. Portal tidak auto-created saat check-in.
-3. Checkout final perlu audit terhadap DRAFT invoice dan final utility charge.
-4. Deposit settlement belum punya audit trail.
-5. Damage/penalty belum ada model.
-6. Final meter akhir checkout belum dikonfirmasi menghasilkan utility charge.
-```
-
-### Koreksi terhadap audit Cline
-
-Beberapa framing audit Cline perlu dikoreksi:
-
-```text
-"Guest/public booking tidak ada" → TIDAK AKURAT
-  Yang benar: baseline booking sudah UAT PASS (4.0/4.1/4.2).
-  Yang belum: marketing polish (gallery, detail, SEO, flexible registration) → Phase 4.4.
-
-"Payment flow pakai /invoice-payments" → KURANG AKURAT
-  Yang benar: flow utama booking memakai PaymentSubmission, bukan direct InvoicePayment.
-
-"M2 lanjut untuk invoice/portal" → SALAH NAMING
-  Yang benar: M2 UX sudah PASS. Invoice/portal automation adalah Batch B1.
-```
-
-### Business invariants yang dikunci
-
-Lima prinsip bisnis baru dikunci dan masuk ke CONTRACTS + GROUND_STATE:
-
-```text
-1. OCCUPIED berarti bisnis sudah aktif → invoice harus ISSUED, portal harus siap bila email ada.
-2. DRAFT invoice hanya untuk persiapan internal.
-3. Portal account otomatis jika email ada, status jelas jika tidak.
-4. Portal auto-create harus idempotent: MISSING_EMAIL, CREATED, ALREADY_ACTIVE, CONFLICT.
-5. Deposit adalah liability, bukan sekadar angka.
-```
-
-### Roadmap yang dihasilkan
-
-```text
-Batch B0: Commit identity patch jika belum.
-Batch B1: Manual Check-in Business Automation (P0 — next).
-Batch B2: Invoice Lifecycle + Final Utility Audit (P0/P1).
-Batch B3: Urgency Chip Verification (status perlu dikonfirmasi).
-Batch B4: Deposit Settlement Model (P1).
-Batch B5: Damage / Penalty / Inventory Condition (P1).
-Batch B6: Public / Marketing Polish (P2 — Phase 4.4).
-```
-
-### Status kerja setelah audit
-
-```text
-Tenant Identity + Duplicate Protection: API UAT PASS 157/0 — pending commit/push confirmation.
-Staff Inventory Read-only: PASS — commit 70fcf4e.
-M2 UX Reliability: PASS — commit 71ab386.
-Full Checkout UAT: PASS.
-Business automation gap: IDENTIFIED — Batch B1 belum dikerjakan.
-```
-
----
-
-## 2026-05-09 — Local Stabilization, UX Flow, and DB Reset Context
-
-### Ringkasan kerja terbaru
-
-- Dashboard command center telah melewati browser UAT user dan dinyatakan OK/PASS.
-- M2 Manual Check-in Reliability (UX) dinyatakan PASS: modal close dan tenant select refresh sudah oke. Commit `71ab386`.
-- M4 Password Visibility Toggle dinyatakan PASS oleh user.
-- M3 UI polish sudah pushed: toast spacing, mobile safe-area, close button/sidebar polish. Commit `960f922`.
-- Staff Inventory read-only PASS. Commit `70fcf4e`.
-- Tenant Identity Required + Duplicate Protection: backend build PASS, frontend build PASS, API UAT PASS 157/0.
-- BIG UX patch untuk rencana keluar/checkout final sempat digabung dengan CSS modularization.
-- CSS modularization menyebabkan visual regression dan di-rollback.
-
-### Full Checkout UAT selesai
-
-Flow yang harus dipertahankan — verified PASS:
+Full checkout UAT baseline pernah PASS:
 
 1. Tenant mengajukan Pengajuan Keluar Kamar.
 2. Admin Setujui Rencana.
-3. Status menjadi Rencana Disetujui / Siap Checkout Final.
-4. Tenant masih menghuni.
-5. Admin menjalankan Checkout Final saat tenant benar-benar keluar.
-6. Stay selesai dan room available.
+3. Tenant tetap menghuni.
+4. Admin Checkout Final.
+5. Stay completed, room available.
 
-### DB reset dev/UAT
+Setelah KB-2 nanti, checkout final perlu UAT ulang karena guard open invoice akan berubah.
 
-Solusi yang benar untuk dev/UAT:
+### 2026-04-28 — Phase 4.3-G2 Fresh UAT PASS
 
-```powershell
-npx prisma db push --force-reset
-npx prisma generate
-npx ts-node seed-admin.ts
-```
+Pending meter snapshot flow PASS:
 
-Seed target:
+- Approve booking creates pending snapshot only.
+- Payment approval promotes snapshot to 2 `MeterReading` rows.
+- Expire reserved clears snapshot.
+- Expire occupied rejected 409.
 
-- OWNER: `liem.lui@gmail.com / admin123`
-- ADMIN: `admin@kost48.com / admin123`
-- STAFF: `staff@kost48.com / staff123`
-- TENANT: `tenant.g2@kost48.com / tenant123`
-- Rooms: G2-001 sampai G2-005, G3-001 sampai G3-003, semua AVAILABLE.
+### 2026-05-04 — Production Connection PASS
 
----
+Production handoff pernah PASS:
 
-## Ringkasan Kronologi Utama
+- `app.kost48surabaya.com` connected to `api.kost48surabaya.com/api`.
+- Admin login production PASS.
+- Protected notification endpoint PASS.
+- Reminder preview endpoint PASS.
 
-### 2026-04-13 sampai 2026-04-18 — Fondasi dan Stabilization
-
-- Core commercial flow diverifikasi sampai checkout dan process deposit.
-- Backend/frontend cleanup batch awal dilakukan.
-- Direct check-in dibuat atomik dengan meter awal listrik+air.
-- Checkout UX memakai `checkoutReason`.
-- Invoice automation awal dan renew flow diperkenalkan.
-- Audit backend/frontend menutup gap P0/P1.
-
-### 2026-04-19 sampai 2026-04-20 — Role Split dan Portal Access
-
-- Dashboard route dikunci per role.
-- Tenant portal dibuat lebih jujur terhadap empty/error state.
-- Portal access tenant dibuat tenant-context:
-  - create portal user,
-  - toggle active/inactive,
-  - reset password portal.
-
-### 2026-04-21 — V4 Booking Mandiri Dimulai
-
-- Backend V4 4.0: `GET /public/rooms`, `POST /tenant/bookings`, `GET /tenant/bookings/my`.
-- Frontend V4 4.0: public rooms, booking page, portal bookings, backoffice reserved read-only.
-- Admin approval frontend surface disiapkan.
-
-### 2026-04-22 sampai 2026-04-24 — Payment Deep Patch dan UAT Stabilization
-
-- Payment submission flow masuk sebagai candidate baseline.
-- Combined booking payment decision dibuat: rent + deposit satu submission.
-- Approval payment harus idempotent dan race-safe.
-- Expiry booking diperketat.
-- Pricing Policy V1 diputuskan.
-
-### 2026-04-26 — Phase 4.3-A Reminder Preview PASS
-
-- Backend preview endpoint reminder tersedia.
-- Frontend `/reminders` untuk OWNER/ADMIN.
-- Preview read-only, tanpa WhatsApp send dan tanpa scheduler.
-
-### 2026-04-27 — Phase 4.3-B/C Notification Foundation
-
-- Reminder Mock Send PASS.
-- AppNotification backend foundation PASS.
-- Frontend Notification Center PASS:
-  - bell,
-  - unread badge,
-  - dropdown,
-  - `/notifications`,
-  - tenant sidebar menu Notifikasi.
-- Keputusan Payment Urgency Chip dibuat sebagai next UX finance.
-
----
-
-## 2026-04-27 — Lifecycle Integrity Issue Found
-
-### Masalah
-
-1. Tenant non-occupied masih dapat menerima/lihat announcement operasional.
-2. Meter baseline tenant booking dibuat terlalu dini saat approve booking sehingga rawan duplicate/zombie ketika booking cancel/rebook.
-
-### Keputusan
-
-- Announcement operational untuk tenant hanya untuk occupied tenant.
-- Tenant non-occupied diarahkan ke `/portal/bookings`.
-- Meter final tenant booking dibuat saat payment approved/room occupied.
-- Approve booking menyimpan pending snapshot di Stay.
-- Cancel/expired sebelum occupied membersihkan pending snapshot.
-- Checkout occupied tidak menghapus histori.
-
----
-
-## 2026-04-28 — Phase 4.3-G2 Fresh UAT PASS
-
-### Commit context
-
-- Branch: `checkpoint/uat-4-2-before-cancelstay-fix`
-- Relevant commits:
-  - `d2d80f2 defer booking meter baseline until payment activation`
-  - `b555f25 clear pending meter snapshot on reserved stay cancel`
-  - `7bfe282 clear pending meter snapshot on booking expiry`
-  - `3530004 guard booking expiry against occupied stays`
-  - `256a6f4 seed dev data for G2 UAT`
-
-### UAT evidence
-
-1. Admin approve booking created pending snapshot only.
-2. MeterReading count remained 0 after approve booking.
-3. Reserved expiry cleared pending snapshot and released room.
-4. Payment submission combined amount Rp2.700.000 succeeded.
-5. Admin approve payment promoted pending snapshot into 2 MeterReadings.
-6. Room became `OCCUPIED`.
-7. Expire occupied returned 409 and DB stayed unchanged.
-8. `runExpiryCheck` code verified to target only `ACTIVE + RESERVED + initialMetersPromotedAt null + expiresAt < now`.
-
-### Final assessment
-
-- Phase 4.3-G2 Pending Meter Snapshot Core = PASS.
-- G2e/G2f legacy cleanup = skipped because DB dev reset clean before live.
-- Payment Urgency Chip status tetap perlu dikonfirmasi sebelum klaim PASS.
-
----
-
-## 2026-04-28 — Docs Cleanup Consolidation
-
-Dokumen aktif dibatasi menjadi:
-
-- `00_GROUND_STATE.md`
-- `01_CONTRACTS.md`
-- `02_PLAN.md`
-- `CHECKLIST.md`
-- `03_DECISIONS_LOG.md`
-- `04_JOURNAL.md`
-- `CHANGELOG.md`
-
-File lama yang boleh dihapus dari active docs:
-
-- `CURRENT_STATUS_2026-04-26.md`
-- `README_PROGRESS_UPDATE.md`
-- `PACKAGE_README_2026-04-27.md`
-- `PATCH_SUMMARY*.md`
-- `CHANGELOG_BACKEND.md`
-- `FINAL_FRONTEND_FEATURES.md`
-- `05_V4_MASTER_PLAN.md`
-- pasted/temp markdown files.
-
----
-
-## 2026-05-04 — Production Connection, Reminder Fix, and Git Push PASS
-
-### Production verification
-
-- Frontend production: `https://app.kost48surabaya.com`.
-- Backend production: `https://api.kost48surabaya.com/api`.
-- `GET /api/public/rooms` reachable. Response `items: []` berarti data rooms production masih kosong, bukan koneksi gagal.
-- Admin login production PASS dengan `admin@kost48.com / admin123`.
-- Protected endpoint `GET /api/me/notifications` PASS.
-- Reminder preview endpoint `GET /api/admin/reminders/preview/all` PASS.
-- Halaman Pengingat WhatsApp production sudah jalan setelah frontend path dan backend runtime diselaraskan.
-
-### Git commits pushed to `origin/main`
-
-- `ff8f2b5 harden backend production runtime`
-- `652c0dd support production prisma seed and lean build`
-- `54e74e6 optimize response serialization`
-
-### Final assessment
-
-- Production frontend/backend connection = PASS.
-- Reminder WhatsApp preview = PASS.
-- Local Git and `origin/main` synced at `54e74e6`.
-- Hotfix langsung ke production `dist` hanya emergency-only; patch normal lewat source → build → commit → push → deploy.
-
+Hotfix langsung ke production `dist` tetap emergency-only.

@@ -337,17 +337,29 @@ export class StaysService {
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
     if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
 
-    const openInvoices = await this.prisma.invoice.count({
-      where: {
-        stayId: id,
-        status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
-      },
-    });
-    if (openInvoices > 0) {
-      throw new ConflictException('Checkout tidak bisa diproses karena masih ada tagihan terbuka. Selesaikan atau batalkan tagihan terlebih dahulu.');
-    }
-
     const updated = await this.prisma.$transaction(async (tx) => {
+      const blockingInvoices = await tx.invoice.findMany({
+        where: {
+          stayId: id,
+          status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
+        },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          status: true,
+        },
+        orderBy: { id: 'asc' },
+      });
+
+      if (blockingInvoices.length > 0) {
+        const invoiceRefs = blockingInvoices
+          .map((invoice) => `${invoice.invoiceNumber || `Invoice #${invoice.id}`} (${invoice.status})`)
+          .join(', ');
+        throw new ConflictException(
+          `Tidak bisa checkout final karena masih ada invoice yang belum diselesaikan: ${invoiceRefs}. Selesaikan atau batalkan invoice terlebih dahulu.`,
+        );
+      }
+
       const stay = await tx.stay.update({
         where: { id },
         data: {
@@ -437,8 +449,19 @@ export class StaysService {
     if (stay.status !== 'COMPLETED' && stay.status !== 'CANCELLED') throw new ConflictException('Deposit belum boleh diproses');
     if (stay.depositStatus !== 'HELD') throw new ConflictException('Deposit sudah diproses sebelumnya');
 
-    const openInvoices = await this.prisma.invoice.count({ where: { stayId: id, status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } } });
-    if (openInvoices > 0) throw new ConflictException('Deposit tidak dapat diproses karena masih ada tagihan terbuka');
+    const openInvoices = await this.prisma.invoice.findMany({
+      where: { stayId: id, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
+      select: { id: true, invoiceNumber: true, status: true },
+      orderBy: { id: 'asc' },
+    });
+    if (openInvoices.length > 0) {
+      const invoiceRefs = openInvoices
+        .map((invoice) => `${invoice.invoiceNumber || `Invoice #${invoice.id}`} (${invoice.status})`)
+        .join(', ');
+      throw new ConflictException(
+        `Deposit tidak dapat diproses karena masih ada invoice yang belum diselesaikan: ${invoiceRefs}`,
+      );
+    }
 
     let deduction = dto.depositDeductionRupiah ?? 0;
     let refunded = dto.depositRefundedRupiah ?? 0;
@@ -510,7 +533,9 @@ export class StaysService {
         const periodEnd = newPlannedCheckOut;
         const dueDate = calculateDueDate(periodEnd);
 
-        const invoice = await tx.invoice.create({
+        // Keep invoice in DRAFT while inserting lines because DB guards prevent line mutation after ISSUE.
+        // Immediately issue it after the renewal rent line exists, so approved renewals are tenant-facing.
+        let invoice = await tx.invoice.create({
           data: {
             invoiceNumber,
             stayId: stay.id,
@@ -533,6 +558,14 @@ export class StaysService {
             unitPriceRupiah: rentAmount,
             lineAmountRupiah: rentAmount,
             sortOrder: 0,
+          },
+        });
+
+        invoice = await tx.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            status: InvoiceStatus.ISSUED,
+            issuedAt: new Date(),
           },
         });
 

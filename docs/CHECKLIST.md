@@ -1,279 +1,256 @@
-# KOST48 V3/V4 — Active Checklist
-**Versi:** 2026-05-18 multi-app shared-db architecture planning
+# KOST48 V5 — Active Checklist
+**Versi:** 2026-05-18 V5.7/V5.8 audit sync
 
 ---
 
-## A00. Latest Active Checklist — 2026-05-18 Architecture Phase 0
+---
 
-### Architecture hygiene
+## AA. V5.8-A Overlay Merge Checklist
 
-- [ ] Treat Multi-App Shared-DB Architecture as PLAN/AUDIT only until ACT is explicitly requested.
-- [ ] Do not rewrite backend/frontend from scratch.
-- [ ] Do not generate Nest apps before workspace readiness audit.
-- [ ] Do not move files before dependency map is reviewed.
-- [ ] Do not introduce separate DB or distributed transaction.
-- [ ] Do not add service-to-service HTTP in Phase 0/1.
-- [ ] Keep shared PostgreSQL and shared PrismaService strategy.
-- [ ] Keep `core-api` owner of Stay lifecycle writes.
+- [ ] Copy/merge overlay into project root.
+- [ ] Confirm changed source only includes intended files:
+  - `backend/src/modules/checkout-requests/checkout-requests.module.ts`
+  - `backend/src/modules/stays/stays.service.ts`
+  - `backend/src/modules/stays/stays-query.service.ts`
+  - active docs updates
+  - optional scripts under `scripts/`
+- [ ] Run backend build.
+- [ ] Run public/protected smoke commands.
+- [ ] UAT renew approval: invoice returned/created as `ISSUED`.
+- [ ] UAT checkout final: open invoice blocks with Indonesian error listing invoice references.
+- [ ] UAT checkout final: all invoices `PAID`/`CANCELLED` allows completion.
+- [ ] UAT deposit process: open invoice blocks deposit processing.
+- [ ] Review `git status --short`.
+- [ ] Commit only after build/UAT evidence.
 
-### Phase 0 Architecture Audit
+Do not mark V5.8-A PASS until these are complete locally.
 
-- [ ] Upload/use latest backend.zip and frontend.zip.
-- [ ] Check backend workspace readiness: `package.json`, `nest-cli.json`, `tsconfig*`, `main.ts`, `app.module.ts`.
-- [ ] Map backend modules, controllers, services, imports, service injections.
-- [ ] Map Prisma model read/write per module.
-- [ ] Confirm `CheckoutRequestsService` dependency and which methods mutate lifecycle.
-- [ ] Confirm `RenewRequestsService` dependency and which methods mutate lifecycle.
-- [ ] Confirm `PaymentSubmissionsService.approve()` mutation set.
-- [ ] Map frontend routes/pages by marketing, tenant, staff, backoffice/finance, owner.
-- [ ] Propose shared libs: prisma, common, auth, audit-log, notifications helper, contracts/types.
-- [ ] Produce safe extraction order.
-- [ ] Produce exact Phase 0 ACT plan only after audit.
+## A. Start-of-Session Hygiene
 
-### Extraction order gate
-
-- [ ] Phase 1 candidate: `marketing-api` read-only/public.
-- [ ] Phase 2 candidate: `staff-api` low-risk staff surfaces.
-- [ ] Phase 3 candidate: `tenant-api` read/request flows only.
-- [ ] Phase 4 candidate: `finance-api` partial/read-review only.
-- [ ] Defer `owner-api`.
-- [ ] Defer payment approval extraction until command boundary is designed.
-- [ ] Defer checkout/renew execution extraction; keep in `core-api`.
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
+  ```
+- [ ] Confirm branch from local git. Latest evidence: `main/origin/main`.
+- [ ] Do not assume working tree clean.
+- [ ] Do not start ACT if untracked/modified files are unresolved.
+- [ ] PowerShell only.
+- [ ] API test uses `Invoke-RestMethod`, not curl.
+- [ ] Do not reset DB unless explicitly asked.
+- [ ] Do not create new `.md` docs.
 
 ---
 
-## A0. Latest Active Checklist — 2026-05-11
+## B. V5.7 Closeout Checklist
 
-### Start-of-session hygiene
+### B1. Cline rules / ignore
 
-- [ ] Run `git status --short; git log --oneline -8` before any new work.
-- [ ] Verify identity patch committed and pushed (atau konfirmasi status dari user).
-- [ ] Do not attempt CSS modularization.
-- [ ] Do not start Batch B1 ACT before running Cline PLAN audit first.
-- [ ] If Cline terminal is not PowerShell, STOP. Do not adapt to cmd/Git Bash/WSL.
+- [ ] `.clinerules` updated to KOST48 V5.
+- [ ] `.clineignore` updated with active source-of-truth comments.
+- [ ] No corrupt duplicate `staff-api`/`finance-api` section.
+- [ ] Branch wording matches actual local branch.
+- [ ] Rules committed separately from frontend code.
 
-### Batch B0 — Identity patch commit/push
+### B2. MyInvoicesPage resolution
 
-- [ ] Confirm identity patch files sudah committed.
-- [ ] Confirm pushed to origin/main.
-- [ ] `git log --oneline -5` menunjukkan commit identity.
-- [ ] Working tree clean sebelum Batch B1.
+- [ ] Check if `frontend/src/pages/portal/MyInvoicesPage.tsx` exists.
+- [ ] Confirm it is imported/used by `frontend/src/App.tsx` route `/portal/invoices`.
+- [ ] Run frontend build before commit:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+  ```
+- [ ] If build PASS, commit MyInvoicesPage separately.
+- [ ] If build FAIL, do not commit; paste error to command center.
+
+### B3. V5.7-B audit accepted
+
+- [x] CheckoutRequests dependency verified.
+- [x] RenewRequests dependency verified.
+- [x] PaymentSubmissions approval transaction verified.
+- [x] TenantBookings approval transaction verified.
+- [x] StaysService create/complete/renew behavior verified.
+- [x] Public module read-only candidate verified.
+- [x] Workspace verdict: `NEEDS MANUAL MIGRATION`.
 
 ---
 
-## B. Batch B1 — Manual Check-in Business Automation
+## C. V5.8 PLAN Gate
 
-### Owner decisions — harus dikunci sebelum ACT
+V5.8 PLAN may start only if:
 
-- [ ] Invoice manual check-in langsung ISSUED — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Auto-create portal user jika email ada — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Tenant tanpa email tetap bisa check-in, portal = belum aktif — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Portal auto-create idempotent (MISSING_EMAIL / CREATED / ALREADY_ACTIVE / CONFLICT) — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Jika portal user sudah ada untuk tenant sama, jangan error — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Jika email dipakai tenant/user lain, block conflict — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Temp password ditampilkan sekali di modal hasil check-in — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Modal punya tombol Salin Password + warning jelas — **dikonfirmasi owner: Ya/Tidak**
-- [ ] Jika admin lupa copy, reset manual dari Tenant Detail — **dikonfirmasi owner: Ya/Tidak**
+- [ ] Working tree clean or remaining changes explicitly known.
+- [ ] `.clinerules/.clineignore` resolved.
+- [ ] MyInvoicesPage resolved.
+- [x] Public/marketing module read-only confirmed.
+- [x] Payment approval stays core confirmed.
+- [x] Renew approval/execution stays core confirmed.
+- [x] Booking approval stays core confirmed.
+- [x] Checkout admin processing stays core confirmed.
+- [x] Room writes stay core confirmed.
+- [x] Meter promotion stays core confirmed.
 
-### Pre-ACT — Cline PLAN audit dulu
+V5.8 mode:
 
-- [ ] Audit `StaysService.create()` — periksa invoice creation saat ini DRAFT atau ISSUED.
-- [ ] Audit `TenantsService` — periksa portal creation method existing.
-- [ ] Audit users/auth dependency untuk create portal user dan temporary password.
-- [ ] Audit `CheckInWizard.tsx` — periksa response handling saat ini.
-- [ ] Audit stays API/types — periksa response DTO existing.
-- [ ] PLAN output: file list, function, contract idempotent, response DTO plan, UAT checklist.
-- [ ] PLAN output tidak membuka deposit/damage/renewal/final utility/schema.
+- [ ] PLAN ONLY first.
+- [ ] No code changes.
+- [ ] No file creation.
+- [ ] No nest-cli.json modification.
+- [ ] No app.module.ts modification.
+- [ ] No module moves.
+- [ ] No schema changes.
+- [ ] No DB mutation.
 
-### ACT scope
+---
 
-- [ ] `StaysService.create()` — invoice awal langsung ISSUED.
-- [ ] `StaysService.create()` — auto-create portal user (idempotent).
-- [ ] Response check-in mengembalikan portal result + temp password jika baru.
-- [ ] `CheckInWizard.tsx` — success modal menampilkan portal result.
-- [ ] Temp password hanya ditampilkan sekali dan tidak disimpan plaintext.
-- [ ] Build backend PASS.
-- [ ] Build frontend PASS.
+## D. V5.8 PLAN Tasks
+
+Cline PLAN must produce:
+
+- [ ] Public module verification:
+  - endpoints,
+  - Prisma models read,
+  - no writes,
+  - imports,
+  - extraction verdict.
+- [ ] Checkout dead import cleanup plan:
+  - exact import line,
+  - risk,
+  - file for ACT.
+- [ ] KB-1 renewal invoice ISSUED plan:
+  - choose patch location,
+  - exact expected behavior,
+  - files,
+  - UAT.
+- [ ] KB-2 checkout open invoice guard plan:
+  - guard query,
+  - open invoice definition,
+  - error message,
+  - UAT.
+- [ ] Marketing-api extraction plan:
+  - future files,
+  - shared deps,
+  - port,
+  - auth need/no need,
+  - smoke test.
+- [ ] Recommended ACT order.
+
+---
+
+## E. V5.8-A Expected ACT Checklist — After PLAN Approval Only
+
+Likely scope:
+
+- [ ] Remove dead `StaysModule` import from `CheckoutRequestsModule`.
+- [ ] KB-1: renewal invoice becomes `ISSUED` after admin renew approval.
+- [ ] KB-2: `StaysService.complete()` blocks open invoices.
+
+Allowed likely files:
+
+```text
+backend/src/modules/checkout-requests/checkout-requests.module.ts
+backend/src/modules/renew-requests/renew-requests.service.ts
+backend/src/modules/stays/stays.service.ts
+```
+
+Forbidden in V5.8-A:
+
+- [ ] No `nest-cli.json` migration.
+- [ ] No app generation.
+- [ ] No `app.module.ts` split.
+- [ ] No schema change.
+- [ ] No payment approval change.
+- [ ] No frontend split.
+- [ ] No marketing app shell.
+
+Build/UAT:
+
+- [ ] Backend build PASS.
+- [ ] Renew request approve creates/sets invoice `ISSUED`.
+- [ ] Checkout final with open invoice fails.
+- [ ] Checkout final with all invoices `PAID`/`CANCELLED` succeeds.
 - [ ] `git status --short` reviewed.
 
-### UAT B1 — Happy path
+---
 
-- [ ] Manual check-in tenant baru dengan email.
-- [ ] Stay ACTIVE, room OCCUPIED, invoice ISSUED.
-- [ ] Modal menampilkan portalEmail + temp password.
-- [ ] Tombol Salin Password berfungsi (copy ke clipboard).
-- [ ] Tenant login portal dengan temp password berhasil.
-- [ ] Tenant melihat current stay di portal.
-- [ ] Tenant melihat invoice ISSUED di portal.
+## F. V5.8-B Marketing-api Plan/Shell Gate
 
-### UAT B1 — Edge cases
+Do not start until V5.8-A is reviewed/pass.
 
-- [ ] Check-in tenant tanpa email: berhasil, modal tampilkan “portal belum aktif”.
-- [ ] Check-in tenant existing yang sudah punya portal: berhasil, modal tampilkan “portal sudah aktif”.
-- [ ] Check-in dengan email yang dipakai tenant/user lain: gagal dengan pesan konflik yang jelas.
-- [ ] Jika check-in gagal karena conflict, room tidak berubah status dan stay tidak tercipta.
-- [ ] Build backend PASS.
-- [ ] Build frontend PASS.
-- [ ] `git status --short` clean setelah selesai.
+Requirements:
+
+- [ ] Public module remains read-only.
+- [ ] No lifecycle imports.
+- [ ] No auth/JWT required for public endpoints.
+- [ ] Workspace migration plan accepted.
+- [ ] `marketing-api` port decided.
+- [ ] Existing `/api/public/rooms` behavior preserved.
+
+Forbidden:
+
+- [ ] No Room status writes.
+- [ ] No booking approval.
+- [ ] No tenant private data.
+- [ ] No payment/renew/checkout logic.
 
 ---
 
-## C. Completed / Do Not Repeat Unless Touched
+## G. V5.9+ Future Gates
 
-### Gate 1 — UAT 4.0 Booking Mandiri
+### V5.9 — staff-api
 
-- [x] Public `/rooms` for guest.
-- [x] Admin `/rooms` remains backoffice.
-- [x] Tenant creates booking.
-- [x] `/portal/bookings` shows correct dates/status.
-- [x] Placeholder/fallback image safe.
-- [x] Reserved booking separated from operational stay.
-- [x] CheckInWizard regression safe.
+- [ ] Tickets scope audited.
+- [ ] Inventory read-only endpoints verified.
+- [ ] Staff mutation block UAT preserved.
+- [ ] Room status writes remain core.
 
-### Gate 2 — UAT 4.1 Admin Approval
+### V5.10 — tenant-api read/request
 
-- [x] Admin approve booking.
-- [x] Approval modal closes after success.
-- [x] Initial invoice created/synced.
-- [x] Tenant sees `Menunggu Pembayaran`.
-- [x] Room remains `RESERVED` before payment.
+Prerequisites:
 
-### UAT 4.2 Core
+- [ ] KB-1 deployed and UAT PASS.
+- [ ] KB-2 deployed and UAT PASS.
+- [ ] Checkout/Renew create/view methods isolated.
+- [ ] Tenant isolation verified.
+- [ ] No lifecycle execution in tenant-api.
 
-- [x] Happy path payment submission.
-- [x] Reject path.
-- [x] Wrong amount path.
-- [x] Double approve prevention.
-- [x] Expiry core.
-- [x] Combined booking payment: rent + deposit exact amount.
+### V5.11 — finance-api read/review
 
-### Pricing Policy V1
+- [ ] `findReviewQueue()` read-only verified.
+- [ ] Invoices read/list verified.
+- [ ] Payment approval remains core.
+- [ ] Reports read-only verified.
 
-- [x] Daily 13% monthly.
-- [x] Weekly 45% monthly.
-- [x] Biweekly 75% monthly.
-- [x] Monthly 100%.
-- [x] Semester 5.5× monthly.
-- [x] Yearly 10× monthly.
-- [x] Round up to Rp5.000.
-- [x] Deposit not multiplied by term.
+### V5.12 — frontend split
 
-### Phase 4.3-A/B/C
-
-- [x] 4.3-A Reminder Preview.
-- [x] 4.3-B Reminder Mock Send.
-- [x] 4.3-C1a AppNotification Backend.
-- [x] 4.3-C1b Frontend Notification Center.
-- [x] Bell/dropdown/page `/notifications`.
-- [x] Tenant sidebar menu `Notifikasi`.
-- [x] Admin/Owner/Staff access via bell/header only.
-
-### Phase 4.3-G Lifecycle Fixes
-
-- [x] 4.3-G1 Announcement Access Guard.
-- [x] 4.3-G2 Pending Meter Snapshot + Promotion.
-- [x] Fresh UAT G2 PASS.
-- [x] Expire occupied rejected 409.
-
-### M-series patches
-
-- [x] M2 Manual Check-in UX Reliability PASS — commit `71ab386`.
-  - Catatan: M2 adalah UX fix. Invoice auto-ISSUED dan portal auto-create belum dikerjakan → Batch B1.
-- [x] M3 UI Polish PASS — commit `960f922`.
-- [x] M4 Password Visibility Toggle PASS.
-
-### Staff Inventory Read-only
-
-- [x] STAFF dapat view inventory items.
-- [x] STAFF tidak dapat create/edit/delete/adjust/import.
-- [x] OWNER/ADMIN dapat mutate inventory.
-- [x] Backend guard enforced — commit `70fcf4e`.
-
-### Tenant Identity + Duplicate Protection
-
-- [x] `identityNumber` No KTP wajib untuk tenant baru.
-- [x] No KTP wajib 16 digit angka.
-- [x] Inline tenant creation di CheckInWizard punya field No KTP.
-- [x] Backend mencegah duplicate: No KTP, No HP, email.
-- [x] Update tenant juga mencegah duplicate.
-- [x] API UAT PASS — 157 PASS / 0 FAIL.
-- [ ] Commit/push dikonfirmasi dari `git log`.
-
-### Full Checkout UAT
-
-- [x] Guest booking dari `/rooms`.
-- [x] Admin approve booking.
-- [x] Tenant submit payment.
-- [x] Admin approve payment → room OCCUPIED.
-- [x] Tenant submit Pengajuan Keluar Kamar.
-- [x] Admin Setujui Rencana.
-- [x] Tenant tetap menghuni setelah approval rencana.
-- [x] Admin Checkout Final dari StayDetail.
-- [x] Stay completed, room available.
-
-### Production
-
-- [x] Frontend production `app.kost48surabaya.com` PASS.
-- [x] Backend production `api.kost48surabaya.com/api` PASS.
-- [x] Admin login production PASS.
-- [x] Protected notification endpoint PASS.
-- [x] Reminder preview endpoint PASS.
+- [ ] API clients split plan.
+- [ ] App.tsx route split plan.
+- [ ] Shared UI/components plan.
+- [ ] No premature separate repo.
 
 ---
 
-## D. Next Up — Urgency Chip Status Audit
+## H. Completed / Do Not Repeat Unless Touched
 
-Sebelum klaim PASS 4.3-D, konfirmasi status kode urgency chip:
+- [x] Booking Mandiri PASS.
+- [x] Admin Approval PASS.
+- [x] Payment Submission Core PASS.
+- [x] Pricing Policy V1 PASS.
+- [x] Reminder Preview PASS.
+- [x] Reminder Mock Send PASS.
+- [x] Notification Center MVP COMPLETE.
+- [x] Announcement Access Guard PASS.
+- [x] Pending Meter Snapshot Fresh UAT PASS.
+- [x] Staff inventory read-only PASS.
+- [x] Manual Check-in UX Reliability PASS.
+- [x] Manual Check-in Business Automation implemented according to audit.
+- [x] Full checkout UAT baseline PASS.
+- [x] Production frontend/backend connection PASS.
 
-- [ ] Cek apakah ada file urgency chip di frontend (`UrgencyChip`, `PaymentUrgency`, dll).
-- [ ] Jika ada kode: lakukan browser UAT.
-- [ ] Jika tidak ada kode: downgrade ke implementation PLAN, bukan verify.
-
-### UAT 4.3-D jika kode sudah ada
-
-- [ ] Tenant dengan invoice overdue melihat chip `Terlambat X hari`.
-- [ ] Tenant dengan booking payment deadline melihat chip `Bayar sebelum X jam`.
-- [ ] Tenant dengan invoice due soon melihat chip `Tagihan H-X`.
-- [ ] Tenant dengan contract ending melihat chip `Kontrak H-X`.
-- [ ] Chip tetap muncul setelah notification dibaca.
-- [ ] Chip hilang setelah invoice paid / booking resolved / stay resolved.
-- [ ] Admin/OWNER/STAFF tidak melihat chip ini.
-
----
-
-## E. Future Gates
-
-### Batch B2 — Invoice Lifecycle + Final Utility
-
-Pre-audit:
-
-- [ ] Audit `StaysService.complete()` — apakah meter akhir menghasilkan invoice line?
-- [ ] Audit `RenewalsService.approve()` — apakah invoice renewal DRAFT atau ISSUED?
-- [ ] Audit form approval renewal — apakah sudah punya field nominal?
-- [ ] Audit invoice period coverage setelah renewal.
-
-Owner decisions sebelum ACT B2:
-
-- [ ] Checkout + DRAFT invoice: hard block atau warning + void/issue option?
-- [ ] Renewal invoice: auto-ISSUED atau DRAFT dengan window koreksi?
-- [ ] Form approval renewal perlu nominal field?
-
-### Batch B4 — Deposit Settlement
-
-- [ ] DepositTransaction model schema plan.
-- [ ] Owner approve schema change.
-- [ ] Backend service + migration.
-- [ ] Frontend checkout final form dengan deposit settlement fields.
-
-### Batch B5 — Damage / Penalty
-
-- [ ] Damage model design setelah deposit clear.
-- [ ] RoomFacility.condition update flow.
-- [ ] Room MAINTENANCE trigger decision.
+Retest only if touched.
 
 ---
 
-## F. Deferred / Not Open Yet
+## I. Deferred
 
 - [ ] Real WhatsApp provider.
 - [ ] Scheduler/cron reminder.
@@ -284,26 +261,6 @@ Owner decisions sebelum ACT B2:
 - [ ] Damage photo upload.
 - [ ] Payment gateway.
 - [ ] DB unique constraint pending data audit/cleanup.
-
----
-
-## G. Later Roadmap
-
-### Phase 4.4 — Marketing + Registration
-
-- [ ] Public room detail endpoint.
-- [ ] Room gallery/images.
-- [ ] Public room detail page.
-- [ ] Register with email or phone.
-- [ ] Phone normalization/uniqueness.
-- [ ] Tenant soft delete/deactivate.
-
-### Phase 4.5 — Tenant Self-Service
-
-- [ ] Tenant renew request.
-- [ ] Admin approve/reject renew request.
-- [ ] Forgot password.
-- [ ] Reset password.
-- [ ] Token/OTP expiration and one-time use.
-- [ ] Account enumeration-safe response.
-
+- [ ] DepositTransaction / DepositLog schema.
+- [ ] Damage/penalty model.
+- [ ] Owner-api.

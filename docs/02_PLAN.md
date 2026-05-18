@@ -1,738 +1,426 @@
-# KOST48 V3/V4 — Execution Plan
-**Versi:** 2026-05-18 multi-app shared-db architecture planning  
-**Fungsi:** Satu master plan aktif. Bagian terbaru ini mengalahkan rencana lama bila ada konflik.
+# KOST48 V5 — Execution Plan
+**Versi:** 2026-05-18 V5.7/V5.8 audit sync  
+**Fungsi:** Master plan eksekusi aktif. Bagian terbaru ini mengalahkan rencana lama jika ada konflik.
 
 ---
 
-## 0AA. Latest Execution Override — 2026-05-18 Architecture Migration Planning
+---
 
-### Status kerja arsitektur
+## 0A. V5.8-A Backend Guard Overlay — Prepared
+
+Scope executed in this overlay:
+
+- Removed dead `StaysModule` import from `CheckoutRequestsModule`.
+- Patched `StaysService.renewStay()` so renewal invoice is issued after line creation.
+- Patched `StaysService.complete()` so checkout final blocks all invoices where status is not `PAID` or `CANCELLED`.
+- Patched `StaysService.processDeposit()` with the same open invoice guard.
+- Patched `StaysQueryService` open invoice counts to match KB-2 semantics.
+
+Verification still required locally:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build
+```
+
+After build/UAT OK, next phase remains:
 
 ```text
-Architecture direction: Multi-App Shared-DB Architecture
-Migration style: greenfield shell + brownfield logic extraction
-Status: PLAN/AUDIT only
-No rewrite total
+V5.8-B = marketing-api shell/extraction PLAN/ACT, still no lifecycle writes moved.
+```
+
+## 0. Current Execution Override
+
+```text
+Current phase: V5.8-A overlay prepared, awaiting local build/UAT
+Mode for this package: bounded YOLO ACT completed in sandbox
+Do not generate apps yet
+Do not move modules yet
+Do not edit nest-cli.json yet
+Do not split app.module.ts yet
+Do not change schema
+```
+
+Architecture direction:
+
+```text
+Multi-App Shared-DB Architecture
+Shared PostgreSQL tetap dipakai
+PrismaService tetap shared
+Greenfield shell + brownfield logic extraction
+No total rewrite
 No separate DB
 No distributed transaction
-No service-to-service HTTP in Phase 0/1
+No service-to-service HTTP Phase 0/1
 ```
-
-### Keputusan eksekusi
-
-1. Jangan tulis ulang backend/frontend dari nol.
-2. Buat app shell baru nanti, tetapi logic lama dipertahankan dan diekstrak bertahap.
-3. Jangan mulai dari finance/payment approval, checkout final, atau renew execution.
-4. Mulai dari audit workspace + dependency map.
-5. Early win extraction: `marketing-api` lalu `staff-api`.
-6. `owner-api` ditunda.
-
-### Phase 0 — Architecture Audit wajib sebelum ACT
-
-| Urutan | Task | Mode | Catatan |
-|---:|---|---|---|
-| 0 | Upload/check ZIP backend + frontend terbaru | PLAN | Jangan percaya docs saja; bandingkan code vs docs |
-| 1 | Audit Nest workspace readiness | PLAN | Cek `package.json`, `nest-cli.json`, `tsconfig*`, `main.ts`, `app.module.ts` |
-| 2 | Audit module dependencies | PLAN | Imports + service injections + Prisma read/write |
-| 3 | Audit high-risk services | PLAN | CheckoutRequests, RenewRequests, PaymentSubmissions.approve |
-| 4 | Audit frontend route split | PLAN | marketing/tenant/staff/backoffice/owner surfaces |
-| 5 | Produce Phase 0 ACT plan | PLAN | Baru setelah ini boleh generate/move files |
-
-### Safe extraction order
-
-```text
-Phase 0: workspace/libs audit
-Phase 1: marketing-api
-Phase 2: staff-api
-Phase 3: tenant-api read/request flows
-Phase 4: finance-api partial/read-review only
-Phase 5: frontend split/shared packages
-Phase 6: owner/reporting later
-```
-
-### Jangan lakukan sekarang
-
-- Jangan `nest generate app` sebelum audit workspace.
-- Jangan move file sebelum dependency map jelas.
-- Jangan rewrite service dari nol.
-- Jangan pindahkan payment approval ke finance-api sebelum audit mutasi Stay/Room/Meter/Deposit.
-- Jangan pindahkan checkout/renew execution keluar dari core-api.
-- Jangan buat separate DB.
 
 ---
 
-## 0A. Latest Execution Override — 2026-05-11
+## 1. Latest Audit Summary — V5.7-B Accepted
 
-### Status kerja aktif
+V5.7-B targeted audit closed the critical UNKNOWNs:
 
-```text
-Tenant identity patch: CODE COMPLETE / BUILD PASS / API UAT PASS 157 PASS / 0 FAIL
-Commit/push: harus dikonfirmasi dari git log sebelum batch baru
-Batch B1 — Manual Check-in Business Automation: NEXT P0, belum dikerjakan
-M2 Manual Check-in UX Reliability: PASS, tapi hanya UX fix
-Urgency chip 4.3-D: status kode perlu dikonfirmasi, jangan klaim PASS tanpa browser UAT
-```
-
-### Urutan eksekusi paling aman
-
-| Urutan | Task | Mode | Catatan |
-|---:|---|---|---|
-| 0 | Cek working tree | PowerShell | `git status --short; git log --oneline -8` |
-| 1 | Commit + push identity patch | ACT/manual | Jika belum committed. Jangan mulai B1 saat working tree masih memuat patch identity. |
-| 2 | Verify working tree clean | PowerShell | Pastikan tidak ada code modified selain docs yang memang sedang dikerjakan. |
-| 3 | Cline PLAN audit Batch B1 | PLAN | Audit `StaysService.create()`, invoice creation, portal method, response ke `CheckInWizard`. |
-| 4 | Review PLAN B1 | PLAN review | Pastikan scope sempit dan tidak membuka deposit/damage/renewal. |
-| 5 | Owner decisions B1 dikunci | Owner confirmation | 9 keputusan B1 di section 6. |
-| 6 | Cline ACT Batch B1 | ACT | Patch bounded: invoice ISSUED + portal auto-create idempotent + frontend result modal. |
-| 7 | Build + UAT B1 | ACT/manual | Backend build, frontend build, UAT happy path + edge cases. |
-| 8 | Batch B2 PLAN | PLAN | Invoice lifecycle + final utility audit. Jangan ACT sebelum audit. |
-| 9 | Urgency chip 4.3-D status audit | PLAN/UAT | Jika kode ada, browser UAT; jika tidak ada, downgrade ke implementation PLAN. |
-
-### Jangan lakukan sekarang
-
-- Jangan langsung ACT Batch B1 tanpa PLAN audit.
-- Jangan CSS modularization ulang.
-- Jangan Phase 4.4/4.5.
-- Jangan production DB reset.
-- Jangan auto-checkout setelah approve rencana keluar.
-- Jangan buka deposit/damage/schema change di Batch B1.
-- Jangan klaim urgency chip PASS tanpa browser UAT.
-- Jangan buat file `.md` baru.
-
----
-
-## 1. Prinsip Eksekusi
-
-1. Satu flow utama per batch.
-2. PLAN dan ACT dipisah.
-3. ACT harus punya Definition of Done dan targeted UAT.
-4. Build backend/frontend harus PASS sesuai area yang disentuh.
-5. Jangan ulang UAT yang sudah PASS kecuali patch menyentuh flow terkait.
-6. Jangan buat file `.md` baru untuk setiap patch kecil; update salah satu file aktif saja.
-7. File helper UAT/debug harus dihapus sebelum selesai.
-8. Semua command/test default memakai PowerShell.
-9. Kalau terminal Cline bukan PowerShell, Cline harus STOP. Jangan adapt ke cmd/Git Bash/WSL.
-10. API test wajib `Invoke-RestMethod`, bukan curl.
-
----
-
-## 2. Status Fase Saat Ini
-
-| Fase | Nama | Status |
+| Area | Finding | Execution impact |
 |---|---|---|
-| 0 | Fondasi & stabilitas awal | ✅ Selesai |
-| 1 | Stabilization + cleanup | ✅ Selesai |
-| 2 | UX & module integration | ✅ Selesai |
-| 3 | Ticket tenant-only redesign | ✅ Selesai |
-| 3.5 | Backend stabilization/API gap closure | ✅ Selesai |
-| 4.0 | Booking mandiri + RESERVED | ✅ PASS |
-| 4.1 | Admin approval booking | ✅ PASS |
-| 4.2 | Payment submission + activation | ✅ CORE PASS |
-| 4.3-A | Reminder preview | ✅ PASS |
-| 4.3-B | Reminder mock send | ✅ PASS |
-| 4.3-C | Notification Center MVP | ✅ COMPLETE |
-| 4.3-G1 | Announcement access guard | ✅ PASS |
-| 4.3-G2 | Pending meter snapshot + promotion | ✅ Fresh UAT PASS |
-| M2 | Manual check-in UX reliability | ✅ PASS — `71ab386` |
-| M3 | UI polish | ✅ PASS — `960f922` |
-| M4 | Password visibility toggle | ✅ PASS |
-| Staff inventory read-only | Frontend + backend guard | ✅ PASS — `70fcf4e` |
-| Tenant identity + duplicate protection | Build + API UAT | ✅ PASS — commit/push perlu konfirmasi |
-| Full checkout UAT | Rencana keluar → checkout final | ✅ PASS |
-| Production handoff | Connection + runtime hardening | ✅ PASS |
-| **Batch B1** | **Manual Check-in Business Automation** | 🔴 **NEXT P0 — belum dikerjakan** |
-| Urgency chip 4.3-D | Kode status belum dikonfirmasi | 🟡 Perlu audit/UAT |
-| Batch B2 | Invoice lifecycle + final utility audit | ⬜ Belum dibuka |
-| Batch B4 | Deposit settlement model | ⬜ Belum dibuka |
-| Batch B5 | Damage / penalty / room condition | ⬜ Belum dibuka |
-| Phase 4.4 | Marketing display + flexible registration | ⬜ Belum dibuka |
-| Phase 4.5 | Tenant self-service lanjutan | ⬜ Belum dibuka |
+| Workspace | `nest-cli.json` single-project; `AppModule` monolith | `NEEDS MANUAL MIGRATION`; no app generation in V5.7 |
+| Public/Marketing | Read-only; safe candidate | Use for V5.8 marketing PLAN |
+| CheckoutRequests | `StaysModule` dead import; no `StaysService` injection | cleanup candidate |
+| RenewRequests | injects `StaysService`; approval calls `renewStay()` | approval/execution core-only |
+| PaymentSubmissions | approval uses `$transaction` + SQL lock | no hotfix needed; approval core-only |
+| TenantBookings | approval uses `$transaction`; invoice ISSUED; pending meter snapshot | approval core-only |
+| Stays.create | transaction; invoice ISSUED; meter + portal user | B1 behavior implemented |
+| Stays.complete | transaction; no final utility invoice | KB-2 guard needed |
+| Stays.renewStay | transaction; renewal invoice DRAFT | KB-1 patch needed |
 
 ---
 
-## 3. P0 Critical Gaps
+## 2. Locked Business Decisions
 
-### P0-1 — Manual check-in invoice masih DRAFT
-
-**Current behavior:** `StaysService.create()` membuat invoice dengan status `DRAFT` pada direct/manual check-in.
-
-**Business impact:**
+### KB-1 — Renewal invoice
 
 ```text
-Tenant sudah menghuni tapi invoice belum resmi.
-Tenant bisa tidak melihat tagihan dari portal.
-Admin bisa lupa issue invoice.
-Payment flow tertunda.
+Renewal invoice must auto-ISSUE when admin approves renew request.
 ```
 
-**Target Batch B1:** invoice awal langsung `ISSUED` saat manual check-in selesai.
-
----
-
-### P0-2 — Portal user tidak auto-created saat manual check-in
-
-**Current behavior:** `StaysService.create()` tidak otomatis membuat portal user. Admin harus manual dari menu tenant.
-
-**Business impact:**
+Target after patch:
 
 ```text
-Tenant baru via CheckInWizard tidak bisa login portal.
-Tenant tidak bisa lihat current stay/invoice.
-Tenant tidak bisa submit payment.
-Tenant tidak bisa ajukan Pengajuan Keluar Kamar.
-Admin harus kerja dua kali.
+Renew request approved
+→ stay extended
+→ renewal invoice created
+→ invoice status ISSUED
+→ tenant can see/pay renewal invoice
 ```
 
-**Target Batch B1:** auto-create portal user jika tenant punya email, dengan kontrak idempotent.
-
----
-
-### P0-3 — Temporary portal credential delivery belum ada
-
-**Current behavior:** karena portal belum auto-created, belum ada mekanisme menampilkan temporary password hasil check-in.
-
-**Target Batch B1:** response check-in mengembalikan temporary password sekali jika user baru dibuat. Frontend menampilkan modal hasil check-in dengan copy button dan warning.
-
----
-
-### P0-4 — Portal auto-create perlu idempotency
-
-**Target Batch B1:** 4 kondisi idempotent:
+### KB-2 — Checkout complete invoice guard
 
 ```text
-MISSING_EMAIL: email kosong, check-in tetap sukses, portal belum aktif.
-CREATED: email ada dan belum ada user, create portal user, return temp password sekali.
-ALREADY_ACTIVE: user sudah ada untuk tenant yang sama, jangan error.
-CONFLICT: email dipakai user/tenant lain, block dengan pesan jelas.
+StaysService.complete() must block if any invoice for the stay is not PAID/CANCELLED.
+No auto-create final utility invoice inside complete().
+```
+
+Target after patch:
+
+```text
+Checkout Final requested
+→ system checks all invoices for stay
+→ if any DRAFT/ISSUED/PARTIAL/etc exists: reject with invoice list
+→ if all PAID/CANCELLED: checkout proceeds
 ```
 
 ---
 
-### P0-5 — Final meter → utility charge perlu audit
+## 3. Current Gate Before V5.8 PLAN
 
-**Current uncertainty:** belum dipastikan apakah `StaysService.complete()` hanya mencatat meter akhir atau juga membuat final utility invoice line.
+Before running V5.8 PLAN with Cline:
 
-**Business risk:** jika hanya dicatat tanpa charge, tenant bisa checkout tanpa membayar utilitas terakhir.
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
+```
 
-**Target:** audit khusus sebelum Batch B2. Jangan assume sudah benar.
+Gate must be:
+
+- `.clinerules` and `.clineignore` resolved/committed.
+- `MyInvoicesPage.tsx` resolved:
+  - if valid: frontend build PASS then commit separately;
+  - if invalid/duplicate: do not add.
+- Working tree clean before extraction planning/ACT.
+
+If not clean, do not start V5.8 ACT.
 
 ---
 
-### P0-6 — Renewal invoice lifecycle perlu audit
+## 4. V5.8 Plan
 
-**Current state:** invoice renewal saat ini diperlakukan sebagai `DRAFT` menurut kontrak lama.
+### V5.8 objective
 
-**Target Batch B2:** audit apakah renewal approval harus langsung `ISSUED`, dan apakah form approval renewal sudah punya nominal confirmation.
+Produce a detailed PLAN for:
 
----
+1. Public/marketing module extraction path.
+2. Checkout dead import cleanup.
+3. KB-1 renewal invoice ISSUED patch.
+4. KB-2 complete open invoice guard patch.
+5. Future workspace migration approach.
 
-## 4. P1 Important Gaps
+### V5.8 mode
 
 ```text
-P1-1: Deposit settlement belum eksplisit di checkout final
-P1-2: Deposit audit trail belum ada (DepositTransaction / DepositLog)
-P1-3: Damage/penalty model belum ada
-P1-4: RoomFacility.condition belum terhubung ke checkout/damage flow
-P1-5: Room MAINTENANCE belum terhubung ke damage berat
-P1-6: Tenant tanpa email perlu portal unavailable state yang jelas di UI
-P1-7: Notification/urgency perlu diperluas setelah invoice/payment/deposit events
+V5.8 PLAN only first.
+No code changes.
+No file creation.
+No nest-cli modification.
+No app.module modification.
+No module moves.
+No schema changes.
+No DB mutation.
+No build unless explicitly requested later.
 ```
 
----
-
-## 5. P2 Later Improvements
+### V5.8 recommended Cline prompt
 
 ```text
-P2: KTP upload
-P2: damage photo upload
-P2: email/cron reminder
-P2: public marketing room detail polish (Phase 4.4)
-P2: analytics/reporting
-P2: DB unique constraint setelah data cleanup
-P2: payment gateway
-```
+MODE: PLAN ONLY — NO CODE CHANGES
 
----
+Project:
+KOST48 Surabaya V5
 
-## 6. Owner Decisions Batch B1
-
-Semua keputusan ini harus dikonfirmasi sebelum Cline ACT dimulai.
-
-| # | Keputusan | Rekomendasi |
-|---:|---|---|
-| 1 | Invoice manual check-in langsung ISSUED | Ya |
-| 2 | Auto-create portal user jika tenant punya email | Ya |
-| 3 | Tenant tanpa email tetap bisa check-in, portal = belum aktif | Ya |
-| 4 | Portal auto-create harus idempotent | Ya |
-| 5 | Jika portal user sudah ada untuk tenant yang sama, jangan error | Ya |
-| 6 | Jika email dipakai tenant/user lain, block conflict | Ya |
-| 7 | Temp password ditampilkan sekali di modal hasil check-in | Ya |
-| 8 | Modal memiliki tombol Salin Password + warning teks merah | Ya |
-| 9 | Jika admin lupa copy, reset password manual dari Tenant Detail | Ya |
-
-**Keputusan yang belum perlu dikunci sekarang (untuk B2+):**
-
-```text
-- Renewal invoice: auto-ISSUED atau DRAFT dengan window koreksi?
-- Checkout + DRAFT invoice: hard block atau warning + opsi void/issue?
-- Deposit model: DepositTransaction tabel atau simpler fields?
-- Damage/penalty: sekarang atau later?
-- Final meter utility charge: auto invoice line atau manual?
-```
-
----
-
-## 7. Batch Roadmap Detail
-
-### Batch B0 — Identity patch commit/push
-
-**Goal:** pastikan patch identity yang sudah API PASS masuk git sebelum batch bisnis baru.
-
-**Checklist:**
-
-```text
-- git status --short
-- git log --oneline -5
-- jika identity files masih modified: commit + push
-```
-
----
-
-### Batch B1 — Manual Check-in Business Automation
-
-**Priority:** P0
-
-**Scope:**
-
-```text
-Backend:
-- audit StaysService.create() — invoice issue logic
-- patch StaysService.create() — invoice langsung ISSUED
-- patch StaysService.create() — auto-create portal user (idempotent)
-- response mengembalikan portal result + temp password jika baru dibuat
-
-Frontend:
-- CheckInWizard success modal menampilkan:
-  - stay created
-  - invoice issued
-  - portal status (CREATED / ALREADY_ACTIVE / MISSING_EMAIL)
-  - temp password sekali + copy button jika CREATED
-```
-
-**Likely files:**
-
-```text
-backend/src/modules/stays/stays.service.ts
-backend/src/modules/stays/stays.controller.ts (jika response DTO berubah)
-backend/src/modules/tenants/tenants.service.ts
-backend/src/modules/tenants/dto/create-portal-access.dto.ts (jika perlu)
-frontend/src/pages/stays/CheckInWizard.tsx
-frontend/src/types/index.ts
-frontend/src/api/stays.ts
-```
-
-**Forbidden:**
-
-```text
-deposit, damage, renewal, final utility charge, schema change,
-public booking rewrite, KTP upload, urgency chip, docs update kecuali diminta
-```
-
-**Pre-ACT:** Cline PLAN audit dulu. Audit `StaysService.create()` dan portal method existing sebelum patch.
-
-**UAT B1 — Happy path:**
-
-```text
-1. Admin manual check-in tenant baru dengan email
-   → stay ACTIVE, room OCCUPIED, invoice ISSUED
-   → modal tampilkan portalEmail + temp password
-   → tombol Salin Password berfungsi
-   → tenant login portal dengan temp password berhasil
-   → tenant melihat current stay
-   → tenant melihat invoice ISSUED
-```
-
-**UAT B1 — Edge cases:**
-
-```text
-2. Manual check-in tenant tanpa email
-   → check-in berhasil
-   → modal tampilkan "Portal belum aktif — email tidak tersedia"
-   → tidak ada error
-
-3. Manual check-in tenant existing yang sudah punya portal user
-   → check-in berhasil
-   → modal tampilkan "Portal sudah aktif"
-   → tidak ada error, tidak ada duplikat user
-
-4. Manual check-in dengan email yang sudah dipakai tenant/user lain
-   → check-in gagal dengan pesan konflik yang jelas
-   → room tidak berubah status
-```
-
----
-
-### Batch B2 — Invoice Lifecycle + Final Utility Audit
-
-**Priority:** P0/P1
-
-**Pre-ACT audit wajib:**
-
-```text
-- Audit StaysService.complete(): apakah meter akhir menghasilkan invoice line?
-- Audit RenewalsService.approve(): apakah invoice renewal DRAFT atau ISSUED?
-- Audit form approval renewal: apakah sudah punya field nominal?
-- Audit invoice period coverage setelah renewal
-```
-
-**Scope setelah audit:**
-
-```text
-- patch final utility charge jika belum ada invoice line dari meter akhir
-- keputusan renewal invoice DRAFT vs ISSUED
-- patch form approval renewal jika perlu nominal input
-- checkout final handling untuk DRAFT invoice (policy perlu dikunci dulu)
-- invoice period coverage audit
-```
-
-Tidak bisa ACT sebelum audit dan owner decisions dikunci.
-
----
-
-### Batch B3 — Urgency Chip Final Verification
-
-**Scope:**
-
-```text
-Konfirmasi status kode urgency chip 4.3-D:
-- jika kode sudah ada: browser UAT final
-- jika kode belum ada: downgrade ke implementation PLAN
-```
-
-**UAT target jika kode sudah ada:**
-
-```text
-- Tenant dengan invoice overdue melihat chip
-- Tenant dengan booking deadline melihat chip
-- Chip hilang setelah invoice paid/booking resolved
-- Admin/OWNER/STAFF tidak melihat chip ini
-```
-
----
-
-### Batch B4 — Deposit Settlement Model
-
-**Priority:** P1
-
-**Scope:**
-
-```text
-DepositTransaction / DepositLog model (schema change)
-Deposit settlement di Checkout Final form:
-  - refund penuh
-  - refund sebagian
-  - forfeit
-  - pending transfer
-  - reason/admin notes
-```
-
-Butuh schema plan dulu. Jangan mix dengan B1.
-
----
-
-### Batch B5 — Damage / Penalty / Inventory Condition
-
-**Priority:** P1
-
-**Scope:**
-
-```text
-Damage note + penalty amount
-Optional linked RoomFacility
-RoomFacility.condition update
-Room MAINTENANCE option
-```
-
-Hanya setelah deposit design jelas (Batch B4).
-
----
-
-### Batch B6 — Public / Marketing Polish (Phase 4.4)
-
-**Priority:** P2
-
-**Scope:**
-
-```text
-Public room detail endpoint dan page
-Room gallery/images
-Flexible registration (email atau phone)
-Guest onboarding yang lebih halus
-SEO-friendly URL
-```
-
-Jangan treat sebagai P0. Baseline booking sudah PASS.
-
----
-
-## 8. Cline PLAN Prompt — Batch B1
-
-```text
-MODE: PLAN ONLY
+Phase:
+V5.8 — Marketing-api extraction + KB-1/KB-2 patch planning
 
 Project root:
 C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
 
-PowerShell only. If terminal is not PowerShell, STOP.
+PowerShell only.
+If terminal is not PowerShell, STOP.
 
-Task: Batch B1 — Manual Check-in Business Automation
+ABSOLUTE RULES:
+- No code changes.
+- No file creation.
+- Return the plan in chat only.
+- No nest-cli.json modification.
+- No app.module.ts changes.
+- No module moves.
+- No tsconfig changes.
+- No schema changes.
+- No DB mutation.
+- No npm install.
+- No build unless explicitly requested later.
+- Read-only analysis only.
 
-Context:
-- M2 Manual Check-in UX Reliability sudah PASS (commit 71ab386).
-- M2 yang PASS adalah UX fix: modal close, tombol Kembali, tenant select refresh.
-- M2 TIDAK mencakup invoice auto-ISSUED atau portal auto-create.
-- StaysService.create() saat ini belum auto-ISSUE invoice dan belum auto-create portal. Audit dulu.
+START:
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"
+git status --short
+git log --oneline -5
 
-Allowed files to read:
+If working tree is not clean:
+STOP and report what remains.
+
+CONTEXT FROM V5.7:
+- V5.1–V5.6 applied and committed.
+- Branch is main/origin/main unless local git says otherwise.
+- Backend workspace is still monolith.
+- nest-cli.json is single-project.
+- app.module.ts is monolith aggregator.
+- No app generation yet.
+- No libs/shared yet.
+- Public/marketing module confirmed read-only.
+- CheckoutRequestsModule imports StaysModule but CheckoutRequestsService does not inject StaysService. This is dead import cleanup candidate.
+- RenewRequestsService injects StaysService and approveRequest() calls staysService.renewStay(), so renewal execution must stay core-api.
+- PaymentSubmissions.approveSubmission() uses prisma.$transaction + SQL lock and must stay core-api.
+- StaysService.create() already creates portal user + invoice ISSUED + meter readings in transaction.
+- StaysService.complete() uses transaction but does not create final utility invoice.
+- StaysService.renewStay() creates renewal invoice as DRAFT.
+
+BUSINESS DECISIONS LOCKED:
+KB-1:
+Renewal invoice must be auto-ISSUED when admin approves renew request.
+Do not leave renewal invoice DRAFT after approval.
+
+KB-2:
+StaysService.complete() must block checkout final if there are open invoices.
+Admin must settle invoices manually first.
+Do not auto-create utility invoice inside complete().
+
+READ ONLY FILES:
+- backend/src/modules/public/public.controller.ts
+- backend/src/modules/public/public.service.ts
+- backend/src/modules/public/public.module.ts
+- backend/src/modules/checkout-requests/checkout-requests.module.ts
+- backend/src/modules/renew-requests/renew-requests.service.ts
 - backend/src/modules/stays/stays.service.ts
-- backend/src/modules/stays/stays.controller.ts
-- backend/src/modules/stays/dto/**
-- backend/src/modules/tenants/tenants.service.ts
-- backend/src/modules/tenants/dto/create-portal-access.dto.ts
-- backend/src/modules/users/**
-- frontend/src/pages/stays/CheckInWizard.tsx
-- frontend/src/api/stays.ts
-- frontend/src/types/index.ts
-
-Forbidden:
-- code changes
-- docs changes
-- DB reset
-- DB mutation
-- schema change
-- deposit/damage/renewal/final utility/urgency chip
-- production access
-
-Audit tasks:
-1. Read StaysService.create() — periksa invoice creation saat ini DRAFT atau ISSUED.
-2. Read TenantsService — apakah ada method untuk create portal user, reset password, dan duplicate email handling.
-3. Read CheckInWizard.tsx — bagaimana response check-in ditampilkan saat ini.
-4. Read stays API/types — apakah response DTO sudah punya portal result field.
-5. Propose exact minimal ACT files, response shape, and UAT checklist.
-
-Stop condition:
-No code changes. Stop after PLAN report.
-
-Return:
-- exact current behavior
-- file list and functions to patch
-- idempotent portal auto-create contract
-- response DTO plan
-- UAT checklist
-- forbidden scope
-```
-
----
-
-## 8A. Cline PLAN Prompt — Phase 0 Architecture Audit
-
-```text
-MODE: PLAN ONLY
-
-Project: KOST48 Surabaya V3/V4 — Multi-App Shared-DB Architecture Phase 0 Audit
-Project root:
-C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
-
-PowerShell only. If terminal is not PowerShell, STOP.
-
-Goal:
-Audit whether the existing NestJS backend and React frontend can be migrated safely into Multi-App Shared-DB Architecture using greenfield shell apps + brownfield module extraction.
-
-Architecture decision:
-- Do not rewrite from scratch.
-- Shared PostgreSQL remains.
-- Shared PrismaService remains.
-- Target apps: core-api, tenant-api, staff-api, finance-api, marketing-api; owner-api later.
-- Phase 0 is audit only. No code changes.
-
-Allowed files/folders to read:
-- backend/package.json
-- backend/nest-cli.json
-- backend/tsconfig*.json
-- backend/src/main.ts
 - backend/src/app.module.ts
-- backend/src/prisma/**
-- backend/src/common/**
-- backend/src/auth/**
-- backend/src/audit-log/**
-- backend/src/modules/**/*
-- backend/prisma/schema.prisma
-- frontend/src/**/*
-- frontend/package.json
+- backend/nest-cli.json
+- backend/tsconfig.json
+- frontend/src/App.tsx
+- frontend/src/pages/rooms/RoomsRouteEntry.tsx
+- frontend/src/pages/rooms/PublicRoomDetailPage.tsx
+- frontend/src/api/public.ts
 
-Forbidden:
-- No code changes
-- No file moves
-- No file creation
-- No docs changes
-- No DB reset/mutation/migration
-- No npm install
-- No service rewrite
-- No HTTP service-to-service implementation
+TASK 1 — PUBLIC MODULE VERIFICATION
+- List every endpoint in PublicController.
+- List every Prisma model read by PublicService.
+- Confirm PublicService write operations: yes/no.
+- Confirm PublicModule imports.
+- Confirm whether PublicModule imports lifecycle modules.
+- Verdict: safe to extract to marketing-api later? YES / NO / PARTIAL.
 
-Audit tasks:
-1. Check Nest workspace readiness.
-2. Map shared libs: prisma, common, auth, audit-log, notification helper, contracts/types.
-3. Map all direct module imports and service injections.
-4. Specifically confirm CheckoutRequests, RenewRequests, PaymentSubmissions approval dependencies/mutations.
-5. Map every backend module to core-api, tenant-api, staff-api, finance-api, marketing-api, shared lib, or keep-in-core.
-6. Map frontend routes/pages into marketing, tenant, staff, backoffice/finance, owner surfaces.
-7. Propose safest extraction order and high-risk flows.
-8. Produce exact Phase 0 ACT plan and build commands.
+TASK 2 — CHECKOUT DEAD IMPORT CLEANUP PLAN
+- Confirm exact import line for StaysModule in checkout-requests.module.ts.
+- Confirm no StaysService injection in CheckoutRequestsService.
+- Recommend whether removing StaysModule import is safe.
+- Risk level.
+- Exact file for future ACT.
+- Build needed after cleanup.
 
-Stop condition:
-Stop after PLAN report. Do not edit files.
+TASK 3 — KB-1 RENEWAL INVOICE ISSUED PLAN
+- Locate approveRequest() in RenewRequestsService.
+- Locate staysService.renewStay() call.
+- Locate renewStay() in StaysService.
+- Confirm renewal invoice status is currently DRAFT.
+- Recommend lowest-risk patch:
+  Option A: update invoice to ISSUED inside StaysService.renewStay()
+  Option B: update invoice to ISSUED from RenewRequestsService after renewStay()
+- Choose one and justify.
+- Exact files for ACT.
+- Exact expected behavior after patch.
+- UAT commands/checklist.
 
-Final report:
-1. Workspace readiness: READY / NOT READY / NEEDS MANUAL MIGRATION
-2. Current cross-module dependency map
-3. CheckoutRequest ownership finding
-4. RenewRequest ownership finding
-5. PaymentSubmission approval mutation finding
-6. Proposed service/module ownership table
-7. Frontend split map
-8. Safe extraction order
-9. High-risk flows
-10. Exact Phase 0 ACT plan
-11. Commands, PowerShell only
+TASK 4 — KB-2 COMPLETE OPEN INVOICE GUARD PLAN
+- Locate complete() in StaysService.
+- Confirm where checkout validation currently happens.
+- Define open invoice as status not in PAID/CANCELLED.
+- Decide whether DRAFT should block checkout.
+- Recommend exact guard placement.
+- Recommend error message in Indonesian.
+- Error should include invoice IDs or invoice numbers if available.
+- Exact file for ACT.
+- UAT checklist:
+  - complete() with open invoice should fail
+  - complete() with all invoices PAID/CANCELLED should succeed
+
+TASK 5 — MARKETING-API EXTRACTION PLAN
+- Since nest-cli.json is still monolith, do not generate app yet.
+- Plan future extraction only.
+- Propose exact future files for marketing-api.
+- Propose required shared dependencies.
+- Propose port for marketing-api.
+- Propose whether auth/JWT is needed. Expected: no.
+- Propose future smoke test:
+  GET /api/public/rooms
+
+TASK 6 — EXECUTION ORDER RECOMMENDATION
+Recommend the safest ACT order after this PLAN:
+- V5.8-A: small backend cleanup + KB-1 + KB-2?
+- V5.8-B: marketing-api shell?
+- V5.8-C: workspace migration?
+Or another safer order.
+
+Return format:
+A. Executive summary
+B. Public module verification
+C. Checkout dead import cleanup plan
+D. KB-1 renewal invoice ISSUED patch plan
+E. KB-2 checkout complete open invoice guard plan
+F. Marketing-api extraction plan
+G. Recommended V5.8 ACT order
+H. Exact allowed files for first ACT
+I. Forbidden scope
+J. Build commands
+K. UAT checklist
+L. Risks / unknowns
+
+Stop after PLAN.
+No edits.
 ```
 
 ---
 
-## 9. Suggested ACT Template
+## 5. Expected V5.8 ACT Split After PLAN
+
+Do not assume final until V5.8 PLAN result is reviewed.
+
+Expected safer split:
+
+### V5.8-A — Backend low-risk cleanup + finance lifecycle guard
+
+Candidate scope:
+
+- Remove dead `StaysModule` import from `CheckoutRequestsModule`.
+- KB-1: renewal invoice becomes `ISSUED` after renew approval.
+- KB-2: `complete()` blocks open invoices.
+
+Expected files:
 
 ```text
-MODE: ACT
-Project: KOST48 Surabaya V3/V4
-Task: [one exact task]
-
-Constraints:
-- One vertical slice only.
-- Do not modify docs unless explicitly requested.
-- Do not create unnecessary markdown files.
-- Use Windows PowerShell commands in final verification.
-- Remove temporary helper files before finishing.
-- Build must pass.
-
-Allowed files:
-- [list exact files after PLAN]
-
-Definition of Done:
-- [clear pass criteria]
-
-Final report:
-- Files changed
-- Build result
-- UAT/verification result
-- Git status note
+backend/src/modules/checkout-requests/checkout-requests.module.ts
+backend/src/modules/renew-requests/renew-requests.service.ts
+backend/src/modules/stays/stays.service.ts
 ```
 
----
+Verification:
 
-## 10. Completed UAT Gates — Do Not Repeat Unless Touched
+- Backend build PASS.
+- Targeted API UAT for renew approval invoice status.
+- Targeted API UAT for checkout blocked by open invoice and succeeds after invoice resolved.
+- `git status --short` reviewed.
 
-### Gate 1 / UAT 4.0 PASS
-- Public `/rooms` works for guest.
-- Admin `/rooms` remains backoffice.
-- Tenant booking succeeds.
-- `/portal/bookings` displays `checkInDate` and `expiresAt` correctly.
-- Reserved booking separated from operational stay.
+Forbidden:
 
-### Gate 2 / UAT 4.1 PASS
-- Admin approve booking succeeds.
-- Approval modal closes after success.
-- Initial invoice created/synced.
-- Room remains `RESERVED` before payment.
-- Tenant sees `Menunggu Pembayaran`.
+- no workspace migration;
+- no app generation;
+- no schema change;
+- no frontend split;
+- no payment approval change;
+- no marketing extraction yet.
 
-### UAT 4.2 Core PASS
-- Happy path payment submission.
-- Reject path.
-- Wrong amount path.
-- Double approve prevention.
-- Expiry core.
-- Combined rent + deposit exact amount.
+### V5.8-B — Marketing-api plan/shell
 
-### Phase 4.3-G2 Fresh UAT PASS
-- Approve booking creates pending snapshot only.
-- Payment approval promotes snapshot to 2 MeterReadings.
-- Expire reserved clears snapshot.
-- Expire occupied rejected 409.
+Only after V5.8-A passes and V5.8-B PLAN is accepted.
 
-### M2 UX Reliability PASS
-- Modal close correct.
-- Tombol X tidak meninggalkan backdrop.
-- Tombol Kembali ke `/stays`.
-- Tenant select refresh setelah inline creation.
+Candidate scope:
 
-### Staff Inventory Read-only PASS
-- STAFF view-only.
-- OWNER/ADMIN mutate.
-- Backend guard enforced, bukan hanya hide button.
+- workspace migration plan;
+- app shell plan;
+- public module extraction path;
+- no lifecycle dependency.
 
-### Full Checkout UAT PASS
-- Tenant request → admin approve rencana → tenant tetap menghuni → admin Checkout Final → stay completed, room available.
+### V5.8-C — Workspace/shared foundation
+
+Only after exact migration plan is accepted.
+
+Candidate scope:
+
+- `nest-cli.json` project format;
+- `apps/core-api`, `apps/marketing-api` shell;
+- `libs/shared` skeleton;
+- path aliases.
+
+This is high-risk and must not be mixed with KB-1/KB-2.
 
 ---
 
-## 11. Later Roadmap
+## 6. Roadmap Beyond V5.8
 
-### Phase 4.4 — Marketing Display & Flexible Registration
-
-- Public room detail endpoint dan page.
-- Room gallery/images.
-- Register via email atau phone.
-- Phone normalization dan uniqueness.
-- Tenant account soft delete/deactivate.
-
-Jangan mulai sebelum Batch B1-B2 stabil.
-
-### Phase 4.5 — Tenant Self-Service
-
-- Tenant renew request.
-- Admin approve/reject renew request.
-- Forgot password.
-- Reset password token/OTP.
-- Account enumeration-safe response.
-
-### Deferred External Automation
-
-- Real WhatsApp provider.
-- Scheduler/cron reminder.
-- PWA/browser push.
-- SSE/websocket live notification stream.
-- Stage-aware announcement audience advanced model.
-- Meter metadata enrichment.
+| Phase | Goal | Risk | Notes |
+|---|---|---|---|
+| V5.8-A | cleanup + KB-1/KB-2 | Low/Medium | business correctness before extraction |
+| V5.8-B | marketing-api PLAN/shell | Low | public read-only |
+| V5.8-C | workspace/shared skeleton | High | manual migration; small steps only |
+| V5.9 | staff-api read-only | Low | tickets + inventory read-only |
+| V5.10 | tenant-api read/request | Medium | only after renew/checkout/invoice guard stable |
+| V5.11 | finance-api read/review | Medium | approval remains core |
+| V5.12 | frontend API/router split | Medium | split API clients by surface |
+| Later | owner-api | Deferred | avoid mini-monolith |
 
 ---
 
-## 12. Documentation Hygiene Policy
+## 7. Definition of Done Rules
 
-Active docs hanya:
+No phase is PASS unless:
 
-- `00_GROUND_STATE.md`
-- `01_CONTRACTS.md`
-- `02_PLAN.md`
-- `CHECKLIST.md`
-- `03_DECISIONS_LOG.md`
-- `04_JOURNAL.md`
-- `CHANGELOG.md`
+1. Build relevant area passes.
+2. Targeted UAT/manual verification performed for touched flow.
+3. `git status --short` reviewed.
+4. No unrelated file changes.
+5. No hidden helper/debug files left.
 
-Jangan recreate:
+Build success is not UAT PASS.
 
-- dated current status docs,
-- package readme docs,
-- patch summary docs,
-- separate frontend/backend changelog,
-- pasted markdown files.
+---
 
+## 8. Completed / Historical Context
+
+These are completed or baseline and should not be re-opened unless touched:
+
+- Booking Mandiri PASS.
+- Admin Approval PASS.
+- Payment Submission Core PASS.
+- Pricing Policy V1 PASS.
+- Reminder Preview PASS.
+- Reminder Mock Send PASS.
+- Notification Center MVP COMPLETE.
+- Announcement Access Guard PASS.
+- Pending Meter Snapshot Fresh UAT PASS.
+- Staff inventory read-only PASS.
+- Manual Check-in UX Reliability PASS.
+- Manual Check-in Business Automation implemented in code by `d1a7181` and hardened in V5.1–V5.2.
+- Full checkout UAT PASS before KB-2 guard decision; future guard requires new targeted UAT when patched.
