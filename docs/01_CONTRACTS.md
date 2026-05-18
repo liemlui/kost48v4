@@ -1,6 +1,59 @@
 # KOST48 V3/V4 — Contracts & API
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Fungsi:** Kontrak bisnis/API aktif. Untuk status fase lihat `00_GROUND_STATE.md`; untuk rencana eksekusi lihat `02_PLAN.md`.
+
+---
+
+## 0AA. Latest Contract Override — 2026-05-18 Architecture Boundary
+
+Kontrak ini mengunci arah **Multi-App Shared-DB Architecture**. Ini bukan pure microservices dan belum separate database. Semua boundary di bawah harus tunduk pada kontrak bisnis existing.
+
+### 0AA.1 Architecture contract
+
+```text
+Migration style: greenfield shell + brownfield logic extraction.
+Shared PostgreSQL tetap dipakai.
+PrismaService tetap shared.
+Tidak rewrite total.
+Tidak distributed transaction.
+Tidak service-to-service HTTP pada Phase 0/1 kecuali diputuskan eksplisit.
+```
+
+### 0AA.2 Service ownership contract
+
+| Domain/action | Owner awal | Catatan |
+|---|---|---|
+| Stay lifecycle writes | `core-api` | create/complete/cancel/renew execution |
+| Room occupancy/status writes | `core-api` | AVAILABLE/RESERVED/OCCUPIED mutation |
+| Booking approval | `core-api` | karena pending meter + invoice + room status |
+| Checkout request create/view tenant | `tenant-api` | request only |
+| Checkout request approve/reject/final checkout | `core-api` | tidak boleh auto-complete dari tenant-api |
+| Renew request create/view tenant | `tenant-api` | request only |
+| Renew approve/reject + extend stay/invoice | `core-api` | tetap core sampai boundary baru |
+| Payment proof create/my | `tenant-api` | submission only |
+| Payment review queue | `finance-api` boleh nanti | read/review surface |
+| Payment approval yang mutate Stay/Room/Meter/Deposit | `core-api` dulu | jangan dipindah sebelum audit command boundary |
+| Public room/catalog/profile | `marketing-api` | read-only early win |
+| Staff tickets/room/inventory read-only | `staff-api` | early win |
+| Owner dashboard/reporting aggregator | later | jangan dibuat terlalu awal |
+
+### 0AA.3 Cross-app data rule
+
+Selama shared DB dipakai, service boleh membaca tabel domain lain untuk validasi bila perlu, tetapi write ownership harus jelas. Contoh: `tenant-api` boleh membaca `Stay` untuk validasi request tenant, tetapi tidak boleh mengubah `Stay.status`, `Room.status`, meter promotion, atau invoice lifecycle final.
+
+### 0AA.4 Phase 0 audit wajib
+
+Sebelum extraction, wajib audit file asli untuk:
+
+```text
+- module imports
+- service injections
+- Prisma model read/write
+- CheckoutRequestsService -> StaysService dependency
+- RenewRequestsService -> StaysService dependency
+- PaymentSubmissionsService.approve() mutation set
+- frontend route split by role
+```
 
 ---
 

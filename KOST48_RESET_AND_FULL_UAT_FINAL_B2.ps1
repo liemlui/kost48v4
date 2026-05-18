@@ -88,21 +88,12 @@ function DataOf($res) {
   return $res
 }
 
-function ItemsOf($res) {
-  if ($null -eq $res) { return @() }
-  if ($res -is [System.Array]) { return @($res) }
-
-  $rootItems = PropValue $res "items"
-  if ($null -ne $rootItems) { return @($rootItems) }
-
-  $data = DataOf $res
-  if ($null -eq $data) { return @() }
-  if ($data -is [System.Array]) { return @($data) }
-
-  $dataItems = PropValue $data "items"
-  if ($null -ne $dataItems) { return @($dataItems) }
-
-  return @($data)
+function ItemsOf($resp) {
+  if ($null -eq $resp) { return ,@() }
+  if ($resp -is [System.Array]) { return ,@($resp) }
+  if ($resp.PSObject.Properties.Name -contains "items") { return ,@($resp.items) }
+  if ($resp.PSObject.Properties.Name -contains "data") { $data = $resp.data; if ($null -eq $data) { return ,@() }; if ($data -is [System.Array]) { return ,@($data) }; if ($data.PSObject.Properties.Name -contains "items") { return ,@($data.items) }; return ,@($data) }
+  return ,@($resp)
 }
 
 function TokenOf($loginRes) {
@@ -282,7 +273,7 @@ Expect-Success "Get" "/me/notifications" $tenantToken $null "TENANT can access n
 Section "2. PUBLIC CATALOG + ROOM SOURCE"
 $publicRooms = Expect-Success "Get" "/public/rooms" $null $null "Public rooms list works"
 $rooms = ItemsOf $publicRooms
-Assert ($rooms.Count -gt 0) "Public rooms has at least 1 room"
+Assert (@($rooms).Count -gt 0) "Public rooms has at least 1 room"
 $room = $rooms | Where-Object { $_.code -eq "G2-001" } | Select-Object -First 1
 if (-not $room) { $room = $rooms | Select-Object -First 1 }
 Assert ($null -ne $room.id) "Selected room has id"
@@ -492,7 +483,7 @@ $b1CreatedTenantToken = $b1CreatedLogin.token
 Expect-Success "Get" "/stays/me/current" $b1CreatedTenantToken $null "B1 CREATED | new tenant can see current stay" | Out-Null
 $b1CreatedInvoices = Expect-Success "Get" "/invoices/my" $b1CreatedTenantToken $null "B1 CREATED | new tenant can see own invoices"
 $b1CreatedInvoiceItems = ItemsOf $b1CreatedInvoices
-if ($b1CreatedInvoiceItems.Count -gt 0) {
+if (@($b1CreatedInvoiceItems).Count -gt 0) {
   $b1CreatedInvoice = $b1CreatedInvoiceItems | Where-Object { $_.status -eq "ISSUED" -or $_.stayId -eq $b1CreatedStayId } | Select-Object -First 1
   Assert ($null -ne $b1CreatedInvoice) "B1 CREATED | own invoice list includes issued/manual check-in invoice"
 } else {
@@ -597,6 +588,158 @@ if ($b1ConflictUserSetup.ok) {
 } else {
   Skip "B1 CONFLICT | conflict setup blocked by identity/user guards HTTP $($b1ConflictUserSetup.status); no raw DB mutation used"
 }
+
+
+# ============================================================
+# 4D. B2-1 GLOBAL TENANT INVOICE PAYMENT READINESS API UAT
+# ============================================================
+
+Section "4D. B2-1 GLOBAL TENANT INVOICE PAYMENT READINESS API UAT"
+
+# B2-1 target:
+# - Any own ISSUED/PARTIAL tenant invoice can be paid via PaymentSubmission.
+# - Invoice-only payment must work even when room is already OCCUPIED.
+# - Manual check-in invoice from B1 is the cleanest invoice-only test source.
+# - Booking combined rent+deposit regression remains covered later in sections 5-7.
+# - UI CTA buttons are checked manually in browser after API UAT.
+
+function Get-UatFieldValue {
+  param($Obj, [string[]]$Names)
+  if ($null -eq $Obj) { return $null }
+  foreach ($n in $Names) {
+    if ($Obj.PSObject.Properties.Name -contains $n -and $null -ne $Obj.$n) {
+      return $Obj.$n
+    }
+  }
+  return $null
+}
+
+function Get-UatInvoiceDueAmount {
+  param($InvoiceData)
+  $d = DataOf $InvoiceData
+
+  $remaining = Get-UatFieldValue $d @(
+    "remainingAmountRupiah",
+    "outstandingAmountRupiah",
+    "balanceDueRupiah",
+    "amountDueRupiah",
+    "unpaidAmountRupiah"
+  )
+  if ($null -ne $remaining) { return [int]([decimal]$remaining) }
+
+  $total = Get-UatFieldValue $d @("totalAmountRupiah", "totalRupiah", "amountRupiah", "total")
+  $paid = Get-UatFieldValue $d @("paidAmountRupiah", "amountPaidRupiah", "paidRupiah")
+  if ($null -eq $paid) { $paid = 0 }
+  if ($null -ne $total) { return [int](([decimal]$total) - ([decimal]$paid)) }
+
+  Fail "B2-1 | cannot determine invoice due amount from invoice data: $(ToJson $d)"
+}
+
+function Assert-UatInvoiceInList {
+  param($InvoiceListResponse, [int]$InvoiceId, [string]$Label)
+  $items = ItemsOf $InvoiceListResponse
+  Assert (@($items).Count -gt 0) "$Label | /invoices/my returns at least one item"
+  $found = $items | Where-Object { [int]$_.id -eq [int]$InvoiceId } | Select-Object -First 1
+  Assert ($null -ne $found) "$Label | /invoices/my includes invoice $InvoiceId"
+  return $found
+}
+
+$b2ManualInvoiceId = $null
+if ($b1CreatedStayData -and $b1CreatedStayData.invoice -and $b1CreatedStayData.invoice.id) {
+  $b2ManualInvoiceId = [int]$b1CreatedStayData.invoice.id
+}
+Assert ($null -ne $b2ManualInvoiceId -and $b2ManualInvoiceId -gt 0) "B2-1 | manual check-in invoice id available from B1 CREATED flow"
+Assert ($b1CreatedStayId -gt 0) "B2-1 | manual check-in stay id available from B1 CREATED flow"
+Assert ($null -ne $b1CreatedTenantToken) "B2-1 | B1 created tenant token available"
+
+$b2ManualInvoiceAdmin = Expect-Success "Get" "/invoices/$b2ManualInvoiceId" $adminToken $null "B2-1 | ADMIN can read manual check-in invoice"
+$b2ManualInvoiceAdminData = DataOf $b2ManualInvoiceAdmin
+Assert ($b2ManualInvoiceAdminData.status -eq "ISSUED" -or $b2ManualInvoiceAdminData.status -eq "PARTIAL") "B2-1 | manual check-in invoice is tenant-facing unpaid"
+$b2ManualDue = Get-UatInvoiceDueAmount $b2ManualInvoiceAdmin
+Assert ($b2ManualDue -gt 0) "B2-1 | manual check-in invoice has positive due amount: $b2ManualDue"
+
+$b2ManualInvoiceTenant = Expect-Success "Get" "/invoices/$b2ManualInvoiceId" $b1CreatedTenantToken $null "B2-1 | tenant can read own manual check-in invoice detail"
+$b2ManualInvoiceTenantData = DataOf $b2ManualInvoiceTenant
+Assert ([int]$b2ManualInvoiceTenantData.id -eq [int]$b2ManualInvoiceId) "B2-1 | tenant invoice detail matches own invoice"
+
+$b2MyInvoices = Expect-Success "Get" "/invoices/my" $b1CreatedTenantToken $null "B2-1 | tenant can list own invoices after manual check-in"
+$b2ListedManualInvoice = Assert-UatInvoiceInList $b2MyInvoices $b2ManualInvoiceId "B2-1"
+Assert ($b2ListedManualInvoice.status -eq "ISSUED" -or $b2ListedManualInvoice.status -eq "PARTIAL") "B2-1 | listed invoice is unpaid tenant-facing"
+
+$b2OverpayInvoicePaymentBody = @{
+  stayId = [int]$b1CreatedStayId
+  invoiceId = [int]$b2ManualInvoiceId
+  targetType = "INVOICE"
+  amountRupiah = [int]($b2ManualDue + 1000)
+  paidAt = (Get-Date).ToString("o")
+  paymentMethod = "TRANSFER"
+  senderName = "B1 Created Portal Tenant"
+  senderBankName = "BCA"
+  fileUrl = "https://example.local/b2-overpay-invoice-only-proof.jpg"
+  originalFilename = "b2-overpay-invoice-only-proof.jpg"
+  mimeType = "image/jpeg"
+  fileSizeBytes = 12345
+  notes = "B2 overpay invoice-only amount should fail"
+  referenceNumber = "B2-OVERPAY-$b2ManualInvoiceId"
+}
+Expect-Fail "Post" "/payment-submissions" $b1CreatedTenantToken $b2OverpayInvoicePaymentBody @(400,409) "B2-1 | overpay invoice-only amount rejected"
+
+$b2OtherTenantPaymentBody = @{
+  stayId = [int]$b1CreatedStayId
+  invoiceId = [int]$b2ManualInvoiceId
+  targetType = "INVOICE"
+  amountRupiah = [int]$b2ManualDue
+  paidAt = (Get-Date).ToString("o")
+  paymentMethod = "TRANSFER"
+  senderName = "Wrong Tenant"
+  senderBankName = "BCA"
+  fileUrl = "https://example.local/b2-other-tenant-proof.jpg"
+  originalFilename = "b2-other-tenant-proof.jpg"
+  mimeType = "image/jpeg"
+  fileSizeBytes = 12345
+  notes = "B2 other tenant should not pay another tenant invoice"
+  referenceNumber = "B2-OTHER-$b2ManualInvoiceId"
+}
+Expect-Fail "Post" "/payment-submissions" $tenantToken $b2OtherTenantPaymentBody @(400,403,404,409) "B2-1 | other tenant cannot submit payment for manual check-in invoice"
+
+$b2CorrectInvoicePaymentBody = @{
+  stayId = [int]$b1CreatedStayId
+  invoiceId = [int]$b2ManualInvoiceId
+  targetType = "INVOICE"
+  amountRupiah = [int]$b2ManualDue
+  paidAt = (Get-Date).ToString("o")
+  paymentMethod = "TRANSFER"
+  senderName = "B1 Created Portal Tenant"
+  senderBankName = "BCA"
+  fileUrl = "https://example.local/b2-invoice-only-proof.jpg"
+  originalFilename = "b2-invoice-only-proof.jpg"
+  mimeType = "image/jpeg"
+  fileSizeBytes = 12345
+  notes = "B2 correct invoice-only payment for manual check-in invoice"
+  referenceNumber = "B2-INVOICE-$b2ManualInvoiceId"
+}
+
+$b2ManualSubmission = Expect-Success "Post" "/payment-submissions" $b1CreatedTenantToken $b2CorrectInvoicePaymentBody "B2-1 | tenant submits invoice-only payment for OCCUPIED manual check-in invoice"
+$b2ManualSubmissionId = ExtractId $b2ManualSubmission
+Assert ($b2ManualSubmissionId -gt 0) "B2-1 | invoice-only payment submission id extracted: $b2ManualSubmissionId"
+
+Expect-Fail "Post" "/payment-submissions" $b1CreatedTenantToken $b2CorrectInvoicePaymentBody @(400,409) "B2-1 | duplicate pending invoice-only submission rejected"
+Expect-Success "Get" "/payment-submissions/my" $b1CreatedTenantToken $null "B2-1 | tenant sees own invoice-only payment submission" | Out-Null
+Expect-Success "Get" "/payment-submissions/review-queue" $adminToken $null "B2-1 | admin sees invoice-only payment in review queue" | Out-Null
+Expect-Fail "Post" "/payment-submissions/$b2ManualSubmissionId/approve" $b1CreatedTenantToken @{ reviewNotes="Tenant should not approve own invoice-only payment" } @(403) "B2-1 | tenant cannot approve invoice-only payment"
+
+Expect-Success "Post" "/payment-submissions/$b2ManualSubmissionId/approve" $adminToken @{ reviewNotes="B2 invoice-only payment approved" } "B2-1 | admin approves invoice-only payment" | Out-Null
+Expect-Fail "Post" "/payment-submissions/$b2ManualSubmissionId/approve" $adminToken @{ reviewNotes="Double approve should fail" } @(400,409) "B2-1 | double approve invoice-only payment rejected"
+
+$b2PaidInvoice = Expect-Success "Get" "/invoices/$b2ManualInvoiceId" $adminToken $null "B2-1 | admin can read invoice after invoice-only payment approval"
+$b2PaidInvoiceData = DataOf $b2PaidInvoice
+Assert ($b2PaidInvoiceData.status -eq "PAID") "B2-1 | invoice-only payment approval marks invoice PAID"
+
+$b2PaidAgainBody = $b2CorrectInvoicePaymentBody.Clone()
+$b2PaidAgainBody.referenceNumber = "B2-PAID-AGAIN-$b2ManualInvoiceId"
+Expect-Fail "Post" "/payment-submissions" $b1CreatedTenantToken $b2PaidAgainBody @(400,409) "B2-1 | paid invoice cannot receive new payment submission"
+
+Warn "B2-1 browser checklist still required: /portal/stay CTA, /portal/invoices Bayar Sekarang, and invoice detail Upload Bukti Bayar."
 
 # ============================================================
 # 5. TENANT BOOKING FLOW
@@ -788,3 +931,4 @@ Write-Host "SKIP : $Global:SkipCount" -ForegroundColor DarkYellow
 Write-Host "FAIL : $Global:FailCount" -ForegroundColor Red
 if ($Global:FailCount -eq 0) { Write-Host ""; Write-Host "API UAT PACK FINISHED WITHOUT HARD FAIL." -ForegroundColor Green; Write-Host "Next: run manual visual UAT checklist." -ForegroundColor Cyan }
 else { Write-Host ""; Write-Host "API UAT HAS HARD FAILURES. Fix before claiming PASS." -ForegroundColor Red }
+

@@ -1,6 +1,37 @@
 # KOST48 V3/V4 — Project Journal
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Fungsi:** Arsip kronologis milestone dan hasil UAT. Tidak menggantikan `00_GROUND_STATE.md`.
+
+---
+
+## 2026-05-18 — Multi-App Shared-DB Architecture Planning
+
+### Konteks
+
+Setelah audit awal, ditemukan bahwa coupling backend lebih rendah dari yang terlihat. Banyak modul terutama bergantung pada `PrismaService` dan `AuditLogService`, sementara cross-module import yang perlu perhatian khusus berada pada checkout request, renew request, tenant booking, notification, dan payment approval.
+
+### Keputusan arah
+
+Arah baru adalah **Multi-App Shared-DB Architecture**:
+
+```text
+- bukan rewrite total
+- bukan pure microservices
+- bukan separate DB dulu
+- shared PostgreSQL tetap dipakai
+- PrismaService menjadi shared lib
+- migration style: greenfield shell + brownfield logic extraction
+```
+
+### Koreksi boundary penting
+
+1. `CheckoutRequest` punya risiko sama seperti `RenewRequest`: tenant create/view bisa dipisah, tetapi admin approve/reject/final checkout tetap core karena menyentuh lifecycle.
+2. `PaymentSubmission.approve()` wajib diaudit sebelum finance-api extraction karena kemungkinan mutate Stay, Room, Invoice, Deposit, MeterReading, dan Notification.
+3. `owner-api` ditunda karena berpotensi menjadi mini-monolith kedua.
+
+### Next step
+
+Jalankan Phase 0 Architecture Audit terhadap backend/frontend ZIP terbaru sebelum generate app, pindah file, atau refactor.
 
 ---
 

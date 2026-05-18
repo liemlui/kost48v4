@@ -1,6 +1,29 @@
 # KOST48 V3/V4 — Changelog
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Fungsi:** Satu changelog gabungan untuk backend, frontend, dan docs. Jangan buat changelog frontend/backend terpisah lagi kecuali diminta.
+
+---
+
+## 2026-05-18 — Multi-App Shared-DB Architecture Planning Docs Update
+
+### Type
+Architecture planning docs update only. No code implementation.
+
+### Added
+- Added new architecture direction: **Multi-App Shared-DB Architecture**.
+- Clarified this is not a total rewrite, not pure microservices, and not separate DB yet.
+- Added migration style: greenfield shell + brownfield logic extraction.
+- Added target backend apps: `core-api`, `tenant-api`, `staff-api`, `finance-api`, `marketing-api`, with `owner-api` deferred.
+- Added ownership boundaries for Stay lifecycle, Room occupancy, checkout request, renew request, and payment submission approval.
+- Added Phase 0 Architecture Audit plan and Cline prompt.
+- Updated decision log to replace old “no microservices” wording with “no pure microservices/separate DB at initial phase.”
+
+### Not implemented
+- No Nest app generated.
+- No files moved.
+- No Prisma schema split.
+- No frontend app split.
+- No service-to-service communication.
 
 ---
 

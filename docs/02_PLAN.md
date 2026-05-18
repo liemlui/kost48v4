@@ -1,6 +1,63 @@
 # KOST48 V3/V4 — Execution Plan
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Fungsi:** Satu master plan aktif. Bagian terbaru ini mengalahkan rencana lama bila ada konflik.
+
+---
+
+## 0AA. Latest Execution Override — 2026-05-18 Architecture Migration Planning
+
+### Status kerja arsitektur
+
+```text
+Architecture direction: Multi-App Shared-DB Architecture
+Migration style: greenfield shell + brownfield logic extraction
+Status: PLAN/AUDIT only
+No rewrite total
+No separate DB
+No distributed transaction
+No service-to-service HTTP in Phase 0/1
+```
+
+### Keputusan eksekusi
+
+1. Jangan tulis ulang backend/frontend dari nol.
+2. Buat app shell baru nanti, tetapi logic lama dipertahankan dan diekstrak bertahap.
+3. Jangan mulai dari finance/payment approval, checkout final, atau renew execution.
+4. Mulai dari audit workspace + dependency map.
+5. Early win extraction: `marketing-api` lalu `staff-api`.
+6. `owner-api` ditunda.
+
+### Phase 0 — Architecture Audit wajib sebelum ACT
+
+| Urutan | Task | Mode | Catatan |
+|---:|---|---|---|
+| 0 | Upload/check ZIP backend + frontend terbaru | PLAN | Jangan percaya docs saja; bandingkan code vs docs |
+| 1 | Audit Nest workspace readiness | PLAN | Cek `package.json`, `nest-cli.json`, `tsconfig*`, `main.ts`, `app.module.ts` |
+| 2 | Audit module dependencies | PLAN | Imports + service injections + Prisma read/write |
+| 3 | Audit high-risk services | PLAN | CheckoutRequests, RenewRequests, PaymentSubmissions.approve |
+| 4 | Audit frontend route split | PLAN | marketing/tenant/staff/backoffice/owner surfaces |
+| 5 | Produce Phase 0 ACT plan | PLAN | Baru setelah ini boleh generate/move files |
+
+### Safe extraction order
+
+```text
+Phase 0: workspace/libs audit
+Phase 1: marketing-api
+Phase 2: staff-api
+Phase 3: tenant-api read/request flows
+Phase 4: finance-api partial/read-review only
+Phase 5: frontend split/shared packages
+Phase 6: owner/reporting later
+```
+
+### Jangan lakukan sekarang
+
+- Jangan `nest generate app` sebelum audit workspace.
+- Jangan move file sebelum dependency map jelas.
+- Jangan rewrite service dari nol.
+- Jangan pindahkan payment approval ke finance-api sebelum audit mutasi Stay/Room/Meter/Deposit.
+- Jangan pindahkan checkout/renew execution keluar dari core-api.
+- Jangan buat separate DB.
 
 ---
 
@@ -473,6 +530,81 @@ Return:
 - response DTO plan
 - UAT checklist
 - forbidden scope
+```
+
+---
+
+## 8A. Cline PLAN Prompt — Phase 0 Architecture Audit
+
+```text
+MODE: PLAN ONLY
+
+Project: KOST48 Surabaya V3/V4 — Multi-App Shared-DB Architecture Phase 0 Audit
+Project root:
+C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
+
+PowerShell only. If terminal is not PowerShell, STOP.
+
+Goal:
+Audit whether the existing NestJS backend and React frontend can be migrated safely into Multi-App Shared-DB Architecture using greenfield shell apps + brownfield module extraction.
+
+Architecture decision:
+- Do not rewrite from scratch.
+- Shared PostgreSQL remains.
+- Shared PrismaService remains.
+- Target apps: core-api, tenant-api, staff-api, finance-api, marketing-api; owner-api later.
+- Phase 0 is audit only. No code changes.
+
+Allowed files/folders to read:
+- backend/package.json
+- backend/nest-cli.json
+- backend/tsconfig*.json
+- backend/src/main.ts
+- backend/src/app.module.ts
+- backend/src/prisma/**
+- backend/src/common/**
+- backend/src/auth/**
+- backend/src/audit-log/**
+- backend/src/modules/**/*
+- backend/prisma/schema.prisma
+- frontend/src/**/*
+- frontend/package.json
+
+Forbidden:
+- No code changes
+- No file moves
+- No file creation
+- No docs changes
+- No DB reset/mutation/migration
+- No npm install
+- No service rewrite
+- No HTTP service-to-service implementation
+
+Audit tasks:
+1. Check Nest workspace readiness.
+2. Map shared libs: prisma, common, auth, audit-log, notification helper, contracts/types.
+3. Map all direct module imports and service injections.
+4. Specifically confirm CheckoutRequests, RenewRequests, PaymentSubmissions approval dependencies/mutations.
+5. Map every backend module to core-api, tenant-api, staff-api, finance-api, marketing-api, shared lib, or keep-in-core.
+6. Map frontend routes/pages into marketing, tenant, staff, backoffice/finance, owner surfaces.
+7. Propose safest extraction order and high-risk flows.
+8. Produce exact Phase 0 ACT plan and build commands.
+
+Stop condition:
+Stop after PLAN report. Do not edit files.
+
+Final report:
+1. Workspace readiness: READY / NOT READY / NEEDS MANUAL MIGRATION
+2. Current cross-module dependency map
+3. CheckoutRequest ownership finding
+4. RenewRequest ownership finding
+5. PaymentSubmission approval mutation finding
+6. Proposed service/module ownership table
+7. Frontend split map
+8. Safe extraction order
+9. High-risk flows
+10. Exact Phase 0 ACT plan
+11. Commands, PowerShell only
 ```
 
 ---

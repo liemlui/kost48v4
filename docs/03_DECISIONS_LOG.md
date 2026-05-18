@@ -1,6 +1,25 @@
 # KOST48 V3/V4 — Decisions Log
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Fungsi:** Arsip keputusan freeze. Tambahkan keputusan baru di bawah; jangan buat file decision baru.
+
+---
+
+## 2026-05-18 — Multi-App Shared-DB Architecture Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 181 | Arah arsitektur baru adalah Multi-App Shared-DB Architecture | Mengganti keputusan lama “tidak memakai microservices” menjadi “tidak memakai pure microservices/separate DB dulu”. |
+| 182 | Strategi migrasi adalah greenfield shell + brownfield logic extraction | App shell baru boleh dibuat nanti, tetapi business logic existing tidak ditulis ulang dari nol. |
+| 183 | Shared PostgreSQL tetap dipakai pada fase awal | Menghindari distributed transaction dan menjaga trigger/constraint DB existing tetap berguna. |
+| 184 | PrismaService menjadi shared library | Semua app memakai akses DB yang konsisten selama shared DB. |
+| 185 | `core-api` owns Stay lifecycle writes | Checkout final, renew execution, room occupancy, booking approval, dan meter promotion tetap core dulu. |
+| 186 | `tenant-api` hanya boleh create/view request/submission tenant | Tidak boleh complete checkout, renew stay, atau mutate room/stay lifecycle. |
+| 187 | CheckoutRequest admin approval/finalization tetap `core-api` | Karena dapat menyentuh Stay, Room, invoice guard, deposit/final meter future. |
+| 188 | RenewRequest admin approval/execution tetap `core-api` | Karena extend stay dan invoice renewal adalah lifecycle write. |
+| 189 | Payment approval yang mutate Stay/Room/Meter/Deposit tetap `core-api` sampai audit boundary | Finance-api boleh mulai dari review/read surface, bukan lifecycle mutation. |
+| 190 | `marketing-api` dan `staff-api` menjadi kandidat early extraction | Risiko lebih rendah dan cocok untuk validasi setup multi-app. |
+| 191 | `owner-api` ditunda | Menghindari terbentuknya mini-monolith kedua yang menarik semua domain. |
+| 192 | Phase 0 Architecture Audit wajib sebelum `nest generate app` atau file move | Cek workspace readiness, dependency map, mutation boundary, dan frontend route split dulu. |
 
 ---
 
@@ -60,7 +79,7 @@
 | # | Keputusan | Dampak |
 |---:|---|---|
 | 1 | Arsitektur monorepo sederhana `/backend`, `/frontend`, `/docs` | Struktur tetap sederhana. |
-| 2 | Tidak memakai microservices | Satu NestJS backend + satu PostgreSQL. |
+| 2 | Tidak memakai pure microservices/separate DB pada fase awal | Arah baru adalah multi-app shared DB; proses backend boleh dipisah bertahap tetapi database tetap shared dulu. |
 | 3 | `schema.prisma` adalah bentuk data utama | Semua docs kalah dari schema. |
 | 4 | `bootstrap.sql` adalah pagar integritas DB | Setelah reset DB wajib run bootstrap. |
 | 5 | Vertical slice sebagai strategi utama | Hindari rewrite total. |

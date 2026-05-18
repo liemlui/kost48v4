@@ -1,6 +1,63 @@
 # KOST48 V3/V4 — Ground State
-**Versi:** 2026-05-11 business lifecycle blueprint  
+**Versi:** 2026-05-18 multi-app shared-db architecture planning  
 **Status:** Source of truth utama untuk membuka sesi baru. Baca ini dulu sebelum `01_CONTRACTS.md`, `02_PLAN.md`, dan `CHECKLIST.md`.
+
+---
+
+## 0AA. Latest Override — 2026-05-18 Multi-App Shared-DB Architecture Planning
+
+Bagian ini mengalahkan keputusan lama tentang “tidak memakai microservices” bila ada konflik. Statusnya **architecture planning**, belum implementasi.
+
+### Keputusan arsitektur baru
+
+KOST48 diarahkan ke **Multi-App Shared-DB Architecture**:
+
+```text
+Bukan rewrite dari nol.
+Bukan pure microservices dengan separate database.
+Bukan distributed transaction.
+Strategi: greenfield shell + brownfield logic extraction.
+Shared PostgreSQL tetap dipakai.
+PrismaService tetap shared.
+Business logic lama dipertahankan dan dipindahkan bertahap.
+```
+
+### Target app/process backend
+
+| App | Ownership utama | Status |
+|---|---|---|
+| `core-api` | Stay lifecycle, Room occupancy writes, manual check-in, booking approval, checkout final, renew execution, meter promotion | Target utama |
+| `tenant-api` | Tenant booking create/my, payment submission create/my, checkout/renew request create-view, tenant read-only surfaces | Setelah audit |
+| `staff-api` | Tickets, room view, inventory read-only, maintenance/task future | Early win |
+| `finance-api` | Invoices, payments, review queue, reports, expenses/deposit/damage later | Partial only; approval mutasi Stay tetap core dulu |
+| `marketing-api` | Public rooms, public detail, gallery, SEO/landing | Early win paling aman |
+| `owner-api` | Owner dashboard/reporting aggregator | Later only |
+
+### Boundary rules yang wajib dikunci
+
+1. `core-api` owns all writes to `Stay` lifecycle.
+2. `core-api` owns `Room.status` / occupancy writes.
+3. `tenant-api` boleh create request/submission, tapi tidak boleh execute lifecycle finalization.
+4. Checkout request: tenant create/view = `tenant-api`; admin approve/reject/final checkout = `core-api`.
+5. Renew request: tenant create/view = `tenant-api`; admin approve/reject + extend stay/invoice = `core-api`.
+6. Payment submission: tenant create/my = `tenant-api`; approval yang mutate invoice/stay/room/meter/deposit tetap `core-api` sampai command boundary didesain.
+7. `marketing-api` read-only/public dulu.
+8. `owner-api` ditunda supaya tidak menjadi mini-monolith kedua.
+
+### Next work terbaru
+
+Sebelum `nest generate app` atau pindah file, wajib lakukan **Phase 0 Architecture Audit** terhadap ZIP backend/frontend terbaru:
+
+```text
+- cek workspace readiness NestJS
+- petakan module imports/service injections
+- konfirmasi CheckoutRequests/RenewRequests/PaymentSubmissions mutation boundary
+- petakan frontend split routes
+- tentukan shared libs
+- hasilkan Phase 0 ACT plan
+```
+
+Jangan ACT arsitektur sebelum audit ini selesai.
 
 ---
 
@@ -207,12 +264,21 @@ Kerusakan barang kamar bukan otomatis inventory movement.
 
 ## 2. Arsitektur yang Tidak Ditawar
 
-1. Satu backend modular NestJS.
-2. Satu database PostgreSQL.
-3. Satu Prisma schema.
-4. Tidak memakai microservices.
-5. Constraint bisnis penting dibantu trigger/constraint DB (`bootstrap.sql` + addendum bila ada).
-6. Operasi multi-entity penting wajib atomik dengan `prisma.$transaction()`.
+### Current baseline sebelum migration
+
+1. Backend existing masih modular NestJS dalam `/backend`.
+2. Frontend existing masih React/Vite dalam `/frontend`.
+3. Database existing tetap PostgreSQL shared.
+4. Prisma schema existing tetap source of truth bentuk data.
+
+### Arah baru yang dikunci untuk audit
+
+1. Boleh migrasi ke beberapa NestJS app/process dengan shared PostgreSQL.
+2. Tidak memakai separate database per service pada fase awal.
+3. Tidak memakai distributed transaction pada fase awal.
+4. Tidak rewrite business logic dari nol.
+5. Constraint bisnis penting tetap dibantu trigger/constraint DB (`bootstrap.sql` + addendum bila ada).
+6. Operasi multi-entity penting tetap harus atomik dengan `prisma.$transaction()` selama masih shared DB.
 7. Build success saja belum cukup; flow penting wajib UAT.
 8. Default command/testing memakai Windows PowerShell.
 

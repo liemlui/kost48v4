@@ -1,5 +1,44 @@
 # KOST48 V3/V4 — Active Checklist
-**Versi:** 2026-05-11 business lifecycle blueprint
+**Versi:** 2026-05-18 multi-app shared-db architecture planning
+
+---
+
+## A00. Latest Active Checklist — 2026-05-18 Architecture Phase 0
+
+### Architecture hygiene
+
+- [ ] Treat Multi-App Shared-DB Architecture as PLAN/AUDIT only until ACT is explicitly requested.
+- [ ] Do not rewrite backend/frontend from scratch.
+- [ ] Do not generate Nest apps before workspace readiness audit.
+- [ ] Do not move files before dependency map is reviewed.
+- [ ] Do not introduce separate DB or distributed transaction.
+- [ ] Do not add service-to-service HTTP in Phase 0/1.
+- [ ] Keep shared PostgreSQL and shared PrismaService strategy.
+- [ ] Keep `core-api` owner of Stay lifecycle writes.
+
+### Phase 0 Architecture Audit
+
+- [ ] Upload/use latest backend.zip and frontend.zip.
+- [ ] Check backend workspace readiness: `package.json`, `nest-cli.json`, `tsconfig*`, `main.ts`, `app.module.ts`.
+- [ ] Map backend modules, controllers, services, imports, service injections.
+- [ ] Map Prisma model read/write per module.
+- [ ] Confirm `CheckoutRequestsService` dependency and which methods mutate lifecycle.
+- [ ] Confirm `RenewRequestsService` dependency and which methods mutate lifecycle.
+- [ ] Confirm `PaymentSubmissionsService.approve()` mutation set.
+- [ ] Map frontend routes/pages by marketing, tenant, staff, backoffice/finance, owner.
+- [ ] Propose shared libs: prisma, common, auth, audit-log, notifications helper, contracts/types.
+- [ ] Produce safe extraction order.
+- [ ] Produce exact Phase 0 ACT plan only after audit.
+
+### Extraction order gate
+
+- [ ] Phase 1 candidate: `marketing-api` read-only/public.
+- [ ] Phase 2 candidate: `staff-api` low-risk staff surfaces.
+- [ ] Phase 3 candidate: `tenant-api` read/request flows only.
+- [ ] Phase 4 candidate: `finance-api` partial/read-review only.
+- [ ] Defer `owner-api`.
+- [ ] Defer payment approval extraction until command boundary is designed.
+- [ ] Defer checkout/renew execution extraction; keep in `core-api`.
 
 ---
 
