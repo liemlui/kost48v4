@@ -35,7 +35,8 @@ lerna-debug.log*
 !.env.sample
 
 # Generated / temporary artifacts
-src/generated/
+backend/src/generated/
+frontend/src/generated/
 tmp/
 temp/
 uploads/
@@ -72,15 +73,19 @@ Thumbs.db
 *.sqlite3
 
 # Keep these visible for Cline because they are active source of truth:
-# - prisma/schema.prisma
-# - bootstrap.sql
-# - backend-implementation-contract.md
-# - auth.md, users.md, tenants.md, rooms.md, stays.md, invoices.md, invoice-payments.md,
-#   meter-readings.md, tickets.md, inventory-items.md, inventory-movements.md,
-#   wifi-sales.md, expenses.md, announcements.md
-# - package.json
-# - prisma.config.ts
-# - nest-cli.json
-# - tsconfig.json
-# - tsconfig.build.json
+# - backend/prisma/schema.prisma
+# - backend/sql/bootstrap.sql
+# - backend/package.json
+# - backend/nest-cli.json
+# - backend/tsconfig.json
+# - backend/tsconfig.build.json
+# - backend/prisma.config.ts
+# - frontend/package.json
+# - docs/00_GROUND_STATE.md
+# - docs/01_CONTRACTS.md
+# - docs/02_PLAN.md
+# - docs/CHECKLIST.md
+# - docs/03_DECISIONS_LOG.md
+# - docs/04_JOURNAL.md
+# - docs/CHANGELOG.md
 # - .env.example

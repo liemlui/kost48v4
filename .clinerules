@@ -1,10 +1,10 @@
-# KOST48 Surabaya V3/V4 — Cline Rules
+# KOST48 Surabaya V5 — Cline Rules
 
-You are working as a coding agent for the KOST48 Surabaya V3/V4 project.
+You are working as a coding/audit agent for the KOST48 Surabaya V5 project.
 
 Language:
 - Use Indonesian for reports to the user.
-- Code, variable names, and technical identifiers may stay in English.
+- Code, variable names, file names, paths, DTO names, method names, and technical identifiers may stay in English.
 
 Project stack:
 - Backend: NestJS + Prisma + PostgreSQL
@@ -25,6 +25,10 @@ Default dev/UAT database:
 - Port: 5433
 - Database: kost48_v3_pro
 - User: postgres
+
+ChatGPT is the command center.
+Cline is a bounded local repo auditor/coding agent only.
+Do not make architectural decisions beyond the approved task.
 
 ============================================================
 ABSOLUTE PROJECT FOLDER BOUNDARY
@@ -51,6 +55,7 @@ Strict rules:
 Allowed folders:
 - backend/
 - frontend/
+- scripts/ only if the task explicitly requires verification scripts or patch overlay scripts
 - root config files only if directly required for the current task
 - docs/ only if the user explicitly asks for docs
 
@@ -109,6 +114,15 @@ Forbidden shell workaround:
 - Do NOT use curl.
 - Do NOT use bash commands.
 - Do NOT run hidden/background commands for build, git, API tests, or DB checks.
+- Do NOT use sed, awk, rm, cp, mv, touch, cat, grep in bash style.
+- Use PowerShell equivalents:
+  - Get-Content
+  - Select-String
+  - Get-ChildItem
+  - Set-Location
+  - Copy-Item
+  - Remove-Item only when explicitly allowed
+  - New-Item only when explicitly allowed
 
 Before running project commands, confirm current directory:
 
@@ -130,6 +144,10 @@ JSON POST/PATCH/PUT format:
 
 $token="PASTE_TOKEN_HERE"; Invoke-RestMethod -Method Patch -Uri "http://localhost:3000/api/..." -Headers @{Authorization="Bearer $token"} -ContentType "application/json" -Body '{"field":"value"}'
 
+Login format:
+
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; $token
+
 Do not use placeholder URLs like ID_STAY.
 If an ID is unknown, say:
 "replace with a real numeric ID"
@@ -148,8 +166,12 @@ Do not mix PLAN and ACT.
 
 For PLAN:
 - Do not edit files.
+- Do not create files.
+- Do not move files.
+- Do not delete files.
 - Do not run build unless explicitly requested.
 - Do not mutate database.
+- Do not run broad UAT.
 - Read only the allowed files.
 - Stop after producing audit/plan report.
 
@@ -170,6 +192,320 @@ Token and time economy:
 - Do not run broad endpoint sweeps after every small patch.
 - For code batches: audit files → patch → build → short report.
 - Large API/manual UAT should be reserved for final verification gates.
+
+============================================================
+KOST48 V5 ARCHITECTURE DIRECTION
+============================================================
+
+Current architecture direction:
+- KOST48 V5 — Multi-App Shared-DB Architecture.
+- Not a total rewrite.
+- Not pure microservices.
+- Not separate database yet.
+- Shared PostgreSQL remains.
+- PrismaService remains shared.
+- Migration style: greenfield shell + brownfield logic extraction.
+- No distributed transaction.
+- No service-to-service HTTP in Phase 0/1 unless explicitly decided.
+- Existing business logic must be respected and extracted gradually.
+- ChatGPT is the command center.
+- Cline is a local repo auditor or bounded coding agent only.
+
+Target backend apps:
+
+1. core-api
+   - owns Stay lifecycle writes
+   - owns Room occupancy/status writes
+   - owns manual check-in
+   - owns booking approval
+   - owns checkout final
+   - owns renew execution
+   - owns meter promotion
+   - owns lifecycle-mutating payment approval until command boundary is designed
+
+2. tenant-api
+   - tenant booking create/my
+   - payment submission create/my
+   - checkout request create/view
+   - renew request create/view
+   - tenant invoice/stay read-only
+   - notifications read
+   - must not execute lifecycle finalization
+   - must not mutate Stay lifecycle
+   - must not mutate Room occupancy/status
+
+3. staff-api
+   - tickets
+   - room view
+   - inventory read-only
+   - maintenance/task future
+   - should be early low-risk extraction candidate
+
+4. finance-api
+   - invoices read/list/detail
+   - invoice payments read
+   - payment review queue read
+   - finance reports
+   - expenses/deposit/damage later
+   - payment approval that mutates Stay/Room/Meter/Deposit remains core-api first
+
+5. marketing-api
+   - public rooms
+   - public room detail
+   - gallery/public profile/landing later
+   - read-only first
+   - should be early extraction candidate
+
+6. owner-api
+   - deferred
+   - do not create early
+   - avoid creating a second mini-monolith
+   
+============================================================
+V5 HIGH-RISK FLOWS — DO NOT MOVE / DO NOT PATCH CASUALLY
+============================================================
+
+Do not move, extract, rewrite, or patch these unless the user explicitly asks and a PLAN audit has been approved:
+
+- PaymentSubmissionsService.approveSubmission()
+- StaysService.create()
+- StaysService.complete()
+- StaysService.renewStay()
+- TenantBookingsService.approveBooking()
+- Checkout final
+- Renew admin approval/execution
+- Room status writes
+- Meter promotion
+- Deposit settlement
+- Damage/penalty schema
+
+Ownership:
+- These stay in core-api first.
+- finance-api may read/review payment queue later, but approval that mutates lifecycle remains core-api.
+- tenant-api may create/view requests/submissions, but must not execute lifecycle finalization.
+- checkout request tenant create/view may be tenant-api later; admin approve/reject/final checkout remains core-api.
+- renew request tenant create/view may be tenant-api later; admin approve/reject/execution remains core-api.
+- payment submission tenant create/my may be tenant-api later; approval remains core-api until audited command boundary exists.
+
+============================================================
+CURRENT WORK PRIORITY — V5
+============================================================
+
+Current baseline:
+- Project is now KOST48 V5 — Multi-App Shared-DB Architecture.
+- V5.1–V5.6 have been applied and committed.
+- Latest known commits:
+  - 6c86556 prepare v5 shared boundary hardening
+  - 4265896 prepare v5 shared boundary hardening
+  - d1a7181 automate manual check-in invoice and portal access
+- Current next work is V5.7 — Workspace & Shared Foundation Prep.
+- V5.7 is PLAN/AUDIT first, not business behavior patch.
+
+Always start by checking:
+
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
+
+If working tree is not clean:
+- Do not overwrite changes.
+- Continue read-only audit only if requested.
+- Clearly report:
+  "WORKING TREE NOT CLEAN — audit may include uncommitted changes."
+
+Current priority:
+1. V5.7 — Workspace & Shared Foundation Prep
+2. V5.8 — Marketing-api preparation / extraction candidate
+3. V5.9 — Staff-api preparation / extraction candidate
+4. Later — tenant-api read/request surfaces
+5. Later — finance-api read/review partial
+6. Later — frontend split/shared packages
+7. Later — owner-api/reporting aggregator
+
+Do not continue treating Batch B1 as next priority unless the user explicitly asks to revisit B1.
+
+Do not claim:
+- V5.7 PASS unless actual audit/report is complete and user accepts.
+- Any build PASS unless the build was actually run.
+- Any UAT PASS unless manual/API verification was actually performed.
+- Phase 4.3-D Urgency Chip PASS unless browser UAT was actually performed.
+- Any flow PASS if only code/build was done.
+
+============================================================
+V5.7 WORKSPACE & SHARED FOUNDATION PREP
+============================================================
+
+Status:
+- Current active phase.
+- PLAN/AUDIT first.
+- Do not patch by default.
+- Do not generate Nest apps.
+- Do not move modules to apps/libs.
+- Do not change schema.
+- Do not change existing routes.
+- Do not change business behavior.
+
+Goal:
+Audit whether the existing NestJS backend and React frontend can be migrated safely into Multi-App Shared-DB Architecture using greenfield shell apps + brownfield module extraction.
+
+V5.7 audit target — backend:
+- backend/package.json
+- backend/nest-cli.json
+- backend/tsconfig.json
+- backend/tsconfig.build.json
+- backend/src/main.ts
+- backend/src/app.module.ts
+- backend/src/prisma/**
+- backend/src/common/**
+- backend/src/auth/**
+- backend/src/audit-log/**
+- backend/src/modules/**
+- backend/prisma/schema.prisma
+
+V5.7 audit target — frontend:
+- frontend/package.json
+- frontend/src/api/**
+- frontend/src/types/**
+- frontend/src/auth/**
+- frontend/src/hooks/**
+- frontend/src/layouts/**
+- frontend/src/config/**
+- frontend/src/components/**
+- frontend/src/pages/**
+- frontend/src/App.tsx or routing files
+
+V5.7 docs sync target:
+Only these active docs:
+- docs/00_GROUND_STATE.md
+- docs/01_CONTRACTS.md
+- docs/02_PLAN.md
+- docs/CHECKLIST.md
+- docs/03_DECISIONS_LOG.md
+- docs/04_JOURNAL.md
+- docs/CHANGELOG.md
+
+V5.7 forbidden:
+- No code changes unless user explicitly says ACT V5.7.
+- No file creation unless user explicitly approves ACT and file list.
+- No file moves.
+- No Nest app generation.
+- No DB reset.
+- No DB mutation.
+- No schema change.
+- No npm install.
+- No service rewrite.
+- No service-to-service HTTP.
+- No docs update unless user explicitly asks.
+- No APPLY_*.ps1 patch scripts.
+- No broad cleanup.
+- No business behavior change.
+
+V5.7 audit tasks:
+1. Check git / working tree status.
+2. Compare docs vs current code.
+3. Check backend Nest workspace readiness:
+   - package.json scripts
+   - nest-cli.json structure
+   - tsconfig paths
+   - main.ts bootstrap/global pipes/filters/interceptors/CORS/prefix
+   - app.module.ts imports
+   - Prisma generated import pattern
+   - env/config pattern
+4. Map backend shared foundation candidates:
+   - prisma
+   - common decorators/guards/enums/filters/interceptors
+   - auth
+   - audit-log
+   - notifications helper
+5. Map all backend modules:
+   - controllers
+   - services
+   - imports
+   - providers
+   - injected services
+   - Prisma models touched
+   - read/write classification
+6. Confirm high-risk service boundaries:
+   - CheckoutRequestsService dependencies and mutation methods
+   - RenewRequestsService dependencies and mutation methods
+   - PaymentSubmissionsService.approveSubmission mutation set
+   - TenantBookingsService.approveBooking mutation set
+   - StaysService create/complete/renew/cancel mutation set
+   - AuditLog/Notification coupling
+7. Map Prisma model ownership.
+8. Map frontend route/surface split:
+   - marketing/public
+   - tenant portal
+   - staff
+   - admin/backoffice
+   - finance
+   - owner dashboard/reporting
+   - shared UI/API/types/auth/hooks/layout candidates
+9. Map frontend API/client coupling by domain.
+10. Recommend safe extraction order V5.7 onward.
+11. Recommend whether V5.7 ACT should be:
+   - scripts/readiness guide only
+   - tiny non-behavior source cleanup
+   - no patch/manual decision only
+   - not ready
+12. Provide PowerShell-only future verification commands.
+
+V5.7 report must include:
+A. Executive summary
+B. Git / working tree finding
+C. Docs vs code sync finding
+D. Workspace readiness verdict: READY / NEEDS MANUAL MIGRATION / NOT READY
+E. Backend module inventory map
+F. Backend shared foundation candidates
+G. High-risk flow findings
+H. Prisma model ownership map
+I. Frontend route/surface split map
+J. Frontend API/client coupling map
+K. Proposed backend app ownership table
+L. Safe extraction order V5.7 onward
+M. What must NOT be extracted yet
+N. Recommended V5.7 ACT scope
+O. PowerShell verification commands
+P. Open questions / decisions
+Q. Final risk rating
+
+Stop after PLAN report.
+Do not edit files.
+
+============================================================
+PATCH WORKFLOW — V5 OVERLAY PATCH FORMAT
+============================================================
+
+If user explicitly asks for ACT and patch ZIP:
+
+Do NOT create APPLY_*.ps1 patch scripts.
+
+Patch ZIP format must be overlay folder:
+
+KOST48_V5_X_OVERLAY_PATCH/
+├─ backend/
+├─ frontend/
+├─ scripts/
+├─ PATCH_SUMMARY.txt
+└─ README_COPY_PASTE_MERGE.txt
+
+User will copy backend/frontend/scripts into project root and choose Merge/Replace in Windows Explorer.
+
+Scripts may be included in /scripts for verify/UAT, but must not be mandatory apply scripts.
+
+Allowed patch summary format:
+- PATCH_SUMMARY.txt
+- README_COPY_PASTE_MERGE.txt
+
+Do not create .md patch summaries unless user explicitly asks.
+
+For V5.7 ACT specifically, safest expected output is likely:
+KOST48_V5_7_WORKSPACE_SHARED_FOUNDATION_OVERLAY_PATCH/
+├─ scripts/
+│  ├─ VERIFY_V5_7_PATCH.ps1
+│  └─ V5_7_WORKSPACE_READINESS_GUIDE.ps1
+├─ PATCH_SUMMARY.txt
+└─ README_COPY_PASTE_MERGE.txt
+
+But do not create this unless user explicitly says ACT V5.7.
 
 ============================================================
 DOCUMENTATION RULES
@@ -208,14 +544,14 @@ GIT HYGIENE
 Before editing:
 
 git status --short
-git log --oneline -8
+git log --oneline -5
 
 If unrelated changes exist:
 - Do not overwrite them.
 - Do not reset them unless the user explicitly asks.
 - Report them and continue only if your edits can stay scoped.
 
-Before final report:
+Before final report in ACT:
 
 git status --short
 git diff --stat
@@ -227,7 +563,7 @@ Do not deploy unless the user explicitly asks.
 Known accidental file:
 $null
 
-If $null appears inside repo, delete it using:
+If $null appears inside repo, delete it using PowerShell only:
 
 Get-ChildItem -Force | Where-Object { $_.Name -eq '$null' } | Remove-Item -Force
 
@@ -250,6 +586,8 @@ Do not touch production database.
 Do not use pgAdmin to delete databases or server connections unless the user explicitly asks.
 
 Do not modify data for UAT unless the task explicitly requires it.
+
+Do not run migrations unless the user explicitly approves a schema/database ACT.
 
 If DB verification is needed, prefer read-only checks.
 
@@ -281,290 +619,45 @@ Run only the build relevant to the touched area:
 - Backend-only patch: backend build only.
 - Frontend-only patch: frontend build only.
 - Full-stack patch: both builds.
+- V5.7 scripts-only patch: build may not be necessary unless user asks, but recommend no behavior claim without build.
 
 Build success does not mean UAT PASS.
 Do not claim final PASS without manual/API verification.
 
 ============================================================
-CURRENT WORK PRIORITY
+API / SMOKE VERIFICATION COMMANDS
 ============================================================
 
-Current baseline:
-- Project status follows 2026-05-11 business lifecycle blueprint.
-- Always start by checking:
-  git status --short
-  git log --oneline -8
+Use Invoke-RestMethod only.
+Do not use curl.
 
-Latest known completed work:
-- M2 Manual Check-in UX Reliability: PASS.
-  Scope was UX only:
-  - modal/offcanvas close,
-  - Back/Kembali button to /stays,
-  - tenant select refresh after inline tenant creation.
-- M2 did NOT include invoice auto-ISSUED or portal auto-create.
-- M3 UI Polish: PASS.
-- M4 Password Visibility Toggle: PASS.
-- Staff Inventory Read-only: PASS.
-- Tenant Identity + Duplicate Protection: CODE COMPLETE / BUILD PASS / API UAT PASS.
-- Full Checkout UAT: PASS.
-- Production handoff: PASS.
+Public rooms smoke:
 
-Do not claim:
-- Phase 4.3-D Urgency Chip PASS unless browser UAT was actually performed.
-- Batch B1 PASS unless build and UAT/manual verification are actually performed.
-- Any flow PASS if only code/build was done.
+Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
 
-Next priority:
-1. Batch B1 — Manual Check-in Business Automation
-2. Batch B2 — Invoice Lifecycle + Final Utility Audit
-3. Batch B3 — Urgency Chip Final Verification
-4. Batch B4 — Deposit Settlement Model
-5. Batch B5 — Damage / Penalty / Inventory Condition
-6. Batch B6 — Public / Marketing Polish
+Admin login:
 
-============================================================
-BATCH B1 MANUAL CHECK-IN BUSINESS AUTOMATION
-============================================================
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; $token
 
-Status:
-- NEXT P0.
-- Not started yet.
-- Must start with PLAN audit.
-- Do NOT start with ACT.
+Protected notification:
 
-Business problem:
-Manual check-in currently can produce:
-- tenant created,
-- room OCCUPIED,
-- stay ACTIVE,
-- initial meter recorded,
-but:
-- initial invoice may remain DRAFT,
-- portal user may not be auto-created,
-- tenant may not be able to login portal,
-- tenant may not see invoice,
-- admin must remember extra manual steps.
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/me/notifications" -Headers @{Authorization="Bearer $token"}
 
-B1 target:
-Manual check-in completed should produce:
-- Stay ACTIVE.
-- Room OCCUPIED.
-- Initial meter recorded.
-- Initial invoice ISSUED.
-- Portal user auto-created if tenant has email.
-- If portal user is newly created, response returns temporary password once.
-- Frontend CheckInWizard displays portal result and copy password button.
-- If tenant email is missing, check-in still succeeds and portal status is clearly shown as unavailable.
-- If portal already exists for the same tenant, check-in still succeeds with ALREADY_ACTIVE.
-- If email belongs to another user/tenant, block with clear conflict before final side effects.
+Finance read:
 
-Portal auto-create statuses:
-- MISSING_EMAIL: tenant.email is empty, skip portal creation, check-in succeeds.
-- CREATED: tenant.email exists and no portal user exists, create TENANT user and return temporary password once.
-- ALREADY_ACTIVE: portal user already exists for same tenant, no duplicate user, no error.
-- CONFLICT: email is used by another user/tenant, block before final room/stay side effects.
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/invoices" -Headers @{Authorization="Bearer $token"}
 
-B1 forbidden scope:
-- Do not modify docs unless user explicitly asks.
-- Do not change schema.
-- Do not reset database.
-- Do not touch production.
-- Do not touch deposit settlement.
-- Do not touch damage/penalty.
-- Do not touch renewal.
-- Do not touch final utility charge.
-- Do not rewrite public booking.
-- Do not touch urgency chip.
-- Do not add KTP upload.
-- Do not open large frontend/backend rewrite.
+Payment review queue:
 
-B1 PLAN audit allowed files to read:
-- backend/src/modules/stays/stays.service.ts
-- backend/src/modules/stays/stays.controller.ts
-- backend/src/modules/stays/dto/**
-- backend/src/modules/tenants/tenants.service.ts
-- backend/src/modules/tenants/tenants.controller.ts
-- backend/src/modules/tenants/dto/**
-- backend/src/modules/users/users.service.ts
-- backend/src/auth/auth.service.ts
-- backend/prisma/schema.prisma
-- frontend/src/pages/stays/CheckInWizard.tsx
-- frontend/src/pages/stays/check-in-wizard/**
-- frontend/src/api/stays.ts
-- frontend/src/api/tenants.ts
-- frontend/src/types/index.ts
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}
 
-B1 PLAN audit requirements:
-1. Trace current POST /stays manual check-in flow.
-2. Confirm invoice status created by StaysService.create(): DRAFT or ISSUED.
-3. Confirm where invoice line RENT is created.
-4. Confirm whether response currently returns enough data for frontend.
-5. Trace existing tenant portal creation method.
-6. Confirm how temporary password is generated and hashed.
-7. Confirm whether portal creation can be reused safely from StaysService.create().
-8. Identify logic needed for MISSING_EMAIL, CREATED, ALREADY_ACTIVE, CONFLICT.
-9. Confirm how to avoid side effects if email conflict happens.
-10. Propose minimal response DTO shape for CheckInWizard.
-11. Propose minimal frontend success modal change.
-12. List exact files for ACT.
-13. Give backend/frontend build commands.
-14. Give UAT checklist.
+Staff login + inventory read:
 
-B1 PLAN stop condition:
-- No code changes.
-- No docs changes.
-- No DB mutation.
-- Stop after audit report.
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"staff@kost48.com","password":"staff123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/inventory-items" -Headers @{Authorization="Bearer $token"}
 
-B1 ACT can only start after user approves PLAN.
+Staff mutation block expected 403:
 
-Likely B1 ACT files after PLAN approval:
-- backend/src/modules/stays/stays.service.ts
-- backend/src/modules/stays/stays.controller.ts only if response shape/controller typing needs adjustment
-- backend/src/modules/tenants/tenants.service.ts only if portal helper must be reused or extracted
-- frontend/src/pages/stays/CheckInWizard.tsx
-- frontend/src/pages/stays/check-in-wizard/** only if success display is there
-- frontend/src/api/stays.ts
-- frontend/src/types/index.ts
-
-B1 Definition of Done:
-- Manual check-in creates Stay ACTIVE.
-- Room becomes OCCUPIED.
-- Initial meter is recorded.
-- Initial invoice is ISSUED.
-- Portal user is created if tenant has email and no existing portal user.
-- Temporary password is returned once only when portal user is newly created.
-- Frontend displays portal status and temporary password with copy button when CREATED.
-- Missing email does not block check-in but displays portal unavailable.
-- Existing portal for same tenant does not error.
-- Email conflict blocks before final side effects.
-- Backend build PASS.
-- Frontend build PASS.
-- Manual/API UAT performed before claiming PASS.
-
-B1 UAT checklist:
-1. Manual check-in tenant baru dengan email:
-   - stay ACTIVE
-   - room OCCUPIED
-   - invoice ISSUED
-   - portalEmail + temporaryPassword shown
-   - copy password works
-   - tenant can login portal
-   - tenant sees current stay
-   - tenant sees invoice ISSUED
-2. Manual check-in tenant tanpa email:
-   - check-in succeeds
-   - portal status says unavailable/missing email
-   - no portal user created
-3. Manual check-in tenant existing with existing portal:
-   - check-in succeeds
-   - portal status ALREADY_ACTIVE
-   - no duplicate user
-4. Manual check-in with email used by another user/tenant:
-   - check-in fails with clear conflict message
-   - room status does not change
-   - stay is not created
-
-============================================================
-BATCH B2 INVOICE LIFECYCLE + FINAL UTILITY AUDIT
-============================================================
-
-Status:
-- Not open yet.
-- Do not start before B1 is complete.
-
-B2 must start with PLAN audit.
-
-B2 audit questions:
-- Does StaysService.complete() only record final meter, or also create final utility invoice line?
-- Does renewal approval create DRAFT or ISSUED invoice?
-- Does renewal approval form have nominal confirmation field?
-- What should happen if checkout final has DRAFT invoice?
-- Does invoice period coverage remain correct after renewal?
-
-Forbidden before B2:
-- Do not patch final utility charge without audit.
-- Do not change renewal invoice behavior without owner decision.
-- Do not change checkout invoice policy without owner decision.
-
-============================================================
-BATCH B3 URGENCY CHIP FINAL VERIFICATION
-============================================================
-
-Status:
-- Phase 4.3-D code status must be confirmed.
-- Do not claim PASS without browser UAT.
-
-B3 audit target:
-- Check whether urgency chip code exists.
-- If code exists, perform browser UAT.
-- If code does not exist, downgrade to implementation PLAN.
-
-UAT target if code exists:
-- Tenant with overdue invoice sees chip.
-- Tenant with booking payment deadline sees chip.
-- Tenant with due soon invoice sees chip.
-- Tenant with contract ending sees chip.
-- Chip remains after notification is read.
-- Chip disappears only after invoice paid / booking resolved / stay resolved.
-- OWNER/ADMIN/STAFF do not see tenant urgency chip.
-
-============================================================
-BATCH B4 DEPOSIT SETTLEMENT MODEL
-============================================================
-
-Status:
-- Future batch.
-- Do not mix with B1.
-
-Deposit principle:
-- Deposit is a liability, not just a number.
-- Checkout final should eventually support refund/full, refund/partial, forfeit, deducted, or pending transfer.
-
-Likely future design:
-- DepositTransaction or DepositLog.
-- Schema change likely required.
-- Must be PLAN first.
-
-Forbidden now:
-- Do not add deposit schema in B1.
-- Do not patch deposit settlement during B1.
-
-============================================================
-BATCH B5 DAMAGE / PENALTY / INVENTORY CONDITION
-============================================================
-
-Status:
-- Future batch.
-- Do not mix with B1 or B4.
-
-Principle:
-- Damage/penalty and inventory movement are different.
-- RoomFacility.condition may change when room item is damaged.
-- InventoryMovement only happens when physical stock changes.
-
-Forbidden now:
-- Do not add damage model in B1.
-- Do not modify inventory movement logic in B1.
-
-============================================================
-BATCH B6 PUBLIC / MARKETING POLISH
-============================================================
-
-Status:
-- Later P2.
-- Baseline public booking already passed UAT.
-- Do not claim guest booking is missing.
-
-Future scope:
-- Public room detail page.
-- Gallery/images.
-- SEO-friendly detail.
-- Flexible registration.
-- Better guest onboarding.
-
-Forbidden now:
-- Do not rewrite public booking in B1.
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"staff@kost48.com","password":"staff123"}'; $token=$login.data.accessToken; try { Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/room-items" -Headers @{Authorization="Bearer $token"} -ContentType "application/json" -Body '{"roomId":1,"inventoryItemId":1,"quantity":1}' } catch { $_.Exception.Response.StatusCode.value__; $_.ErrorDetails.Message }
 
 ============================================================
 SEED DEV/UAT CONTEXT
@@ -583,8 +676,150 @@ Known seeded rooms:
 Do not reset DB unless user explicitly asks.
 
 ============================================================
+LEGACY / COMPLETED BUSINESS CONTEXT
+============================================================
+
+These are historical/completed or previously planned batches.
+Do not treat them as current priority unless user explicitly asks.
+
+Completed or known baseline:
+- Booking Mandiri PASS.
+- Admin Approval PASS.
+- Payment Submission Core PASS.
+- Pricing Policy V1 PASS.
+- Reminder Preview PASS.
+- Reminder Mock Send PASS.
+- Notification Center MVP COMPLETE.
+- Announcement Access Guard PASS.
+- Pending Meter Snapshot Fresh UAT PASS.
+- Staff inventory read-only PASS.
+- Manual Check-in UX Reliability PASS.
+- UI polish PASS.
+- Password visibility toggle PASS.
+- Full checkout UAT PASS.
+- Manual Check-in Business Automation was later automated in commit d1a7181 and hardened in V5.1–V5.2.
+
+Do not blindly trust docs if code is newer.
+If code is more advanced than docs, report:
+"DOCS/CODE OUT OF SYNC."
+
+============================================================
+BATCH B2 INVOICE LIFECYCLE + FINAL UTILITY AUDIT — DEFERRED
+============================================================
+
+Status:
+- Not current V5.7 priority.
+- Do not start unless user explicitly asks.
+
+B2 must start with PLAN audit.
+
+B2 audit questions:
+- Does StaysService.complete() only record final meter, or also create final utility invoice line?
+- Does renewal approval create DRAFT or ISSUED invoice?
+- Does renewal approval form have nominal confirmation field?
+- What should happen if checkout final has DRAFT invoice?
+- Does invoice period coverage remain correct after renewal?
+
+Forbidden before B2:
+- Do not patch final utility charge without audit.
+- Do not change renewal invoice behavior without owner decision.
+- Do not change checkout invoice policy without owner decision.
+
+============================================================
+BATCH B3 URGENCY CHIP FINAL VERIFICATION — DEFERRED
+============================================================
+
+Status:
+- Phase 4.3-D code status must be confirmed.
+- Do not claim PASS without browser UAT.
+- Not current V5.7 priority unless user explicitly asks.
+
+B3 audit target:
+- Check whether urgency chip code exists.
+- If code exists, perform browser UAT.
+- If code does not exist, downgrade to implementation PLAN.
+
+UAT target if code exists:
+- Tenant with overdue invoice sees chip.
+- Tenant with booking payment deadline sees chip.
+- Tenant with due soon invoice sees chip.
+- Tenant with contract ending sees chip.
+- Chip remains after notification is read.
+- Chip disappears only after invoice paid / booking resolved / stay resolved.
+- OWNER/ADMIN/STAFF do not see tenant urgency chip.
+
+============================================================
+BATCH B4 DEPOSIT SETTLEMENT MODEL — DEFERRED
+============================================================
+
+Status:
+- Future batch.
+- Do not mix with V5.7/V5.8/V5.9.
+
+Deposit principle:
+- Deposit is a liability, not just a number.
+- Checkout final should eventually support refund/full, refund/partial, forfeit, deducted, or pending transfer.
+
+Likely future design:
+- DepositTransaction or DepositLog.
+- Schema change likely required.
+- Must be PLAN first.
+
+Forbidden now:
+- Do not add deposit schema in V5.7.
+- Do not patch deposit settlement during architecture foundation work.
+
+============================================================
+BATCH B5 DAMAGE / PENALTY / INVENTORY CONDITION — DEFERRED
+============================================================
+
+Status:
+- Future batch.
+- Do not mix with V5.7/V5.8/V5.9.
+
+Principle:
+- Damage/penalty and inventory movement are different.
+- RoomFacility.condition may change when room item is damaged.
+- InventoryMovement only happens when physical stock changes.
+
+Forbidden now:
+- Do not add damage model in V5.7.
+- Do not modify inventory movement logic in V5.7.
+
+============================================================
+BATCH B6 PUBLIC / MARKETING POLISH — DEFERRED / LATER
+============================================================
+
+Status:
+- Later P2 unless it becomes part of marketing-api extraction preparation.
+- Baseline public booking already passed UAT.
+- Do not claim guest booking is missing.
+
+Future scope:
+- Public room detail page.
+- Gallery/images.
+- SEO-friendly detail.
+- Flexible registration.
+- Better guest onboarding.
+
+Forbidden now:
+- Do not rewrite public booking.
+- Do not move marketing routes without V5.7 audit approval.
+
+============================================================
 FINAL REPORT FORMAT
 ============================================================
+
+At the end of every PLAN, report only:
+1. Current behavior / current finding
+2. Root gaps
+3. Exact patch or extraction plan
+4. Allowed files for ACT
+5. Forbidden scope
+6. Risk level
+7. Build commands
+8. UAT checklist
+9. Stop condition confirmation
 
 At the end of every ACT, report:
 
@@ -615,14 +850,3 @@ At the end of every ACT, report:
 Do not overclaim.
 Do not say PASS if only build was done.
 Do not say UAT PASS unless UAT was actually done.
-
-At the end of every PLAN, report only:
-- Current behavior
-- Root gaps
-- Exact patch plan
-- Allowed files for ACT
-- Forbidden scope
-- Risk level
-- Build commands
-- UAT checklist
-- Stop condition confirmation
