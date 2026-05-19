@@ -1,8 +1,31 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-18 V5.7/V5.8 audit sync  
+**Versi:** 2026-05-19 V5.9 rollback + V5.8-A guard line defenses  
 **Fungsi:** Satu changelog gabungan untuk backend, frontend, docs, dan architecture planning. Jangan buat changelog frontend/backend terpisah kecuali diminta.
 
 ---
+
+---
+
+## 2026-05-19 — V5.9 Multi-App Shell Rollback
+
+### Type
+Cleanup rollback. Menghapus V5.9 multi-app shell yang tidak aktif.
+
+### Changed
+- `backend/src/main.ts`: dikembalikan ke bootstrap core sederhana (tidak lagi pakai `bootstrapKost48App`).  
+- `backend/package.json`: skrip multi-app (`start:core`, `start:marketing`, `start:staff`, `start:finance`, `prisma:copy-generated` via script terpisah) dihapus. Inline copy-generated dimasukkan ke `build`.  
+- `backend/src/app.module.ts`: import `HealthModule` dihapus.  
+- `backend/src/modules/health/`: direktori dihapus.  
+- `backend/src/apps/`: direktori sebelumnya sudah dihapus oleh user.
+
+### Not changed
+- `backend/nest-cli.json`: tetap single-project.  
+- `backend/tsconfig.json` dan `backend/tsconfig.build.json`: tidak disentuh.  
+- Semua module lifecycle, payment, booking, checkout, renew: tidak disentuh.  
+- Semua V5.8-A guard line defenses: TETAP UTUH.
+
+### Reason
+V5.9 multi-app shell dibuat terlalu dini — workspace belum siap manual migration, apps tidak aktif, dan tidak seharusnya diterapkan sebelum gated PLAN/ACT sequence. Rollback ini membersihkan state ke baseline V5.8-A guard ready.
 
 ---
 
@@ -197,3 +220,42 @@ The old statement that B1 was not done is now outdated. V5.7-B audit confirmed `
 - Manual Check-in UX Reliability PASS.
 - Full Checkout UAT baseline PASS.
 - Production handoff PASS.
+
+---
+
+## 2026-05-18 — V5.9-A Multi-App Read-Only Shell Patch
+
+### Type
+Backend source patch. Multi-app shared-DB foundation without lifecycle extraction.
+
+### Added
+- Shared bootstrap helper: `backend/src/common/bootstrap/kost48-bootstrap.ts`.
+- Health endpoint module: `GET /api/health`.
+- `marketing-api` shell under `backend/src/apps/marketing-api`.
+- `staff-api` shell under `backend/src/apps/staff-api` with dedicated read-only staff module.
+- `finance-api` shell under `backend/src/apps/finance-api` with dedicated read-only finance module.
+- Backend package scripts:
+  - `start:core`
+  - `start:marketing`
+  - `start:staff`
+  - `start:finance`
+  - `start:marketing:dev`
+  - `start:staff:dev`
+  - `start:finance:dev`
+- Verification scripts:
+  - `scripts/VERIFY_V5_9_A_MULTI_APP.ps1`
+  - `scripts/UAT_V5_9_A_MULTI_APP_SMOKE.ps1`
+
+### Preserved
+- Existing core `src/main.ts` remains the default core-api entry and still builds to `dist/main.js`.
+- Existing monolith `AppModule` is not split yet.
+- Existing route behavior in core-api is preserved.
+- Payment approval, booking approval, renew execution, checkout final, room writes, and meter promotion remain core-api only.
+
+### Not changed
+- No schema change.
+- No DB migration.
+- No payment approval move.
+- No tenant-api extraction.
+- No frontend split.
+- No separate DB.

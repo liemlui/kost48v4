@@ -25,7 +25,6 @@ import { RenewRequestsModule } from './modules/renew-requests/renew-requests.mod
 import { CheckoutRequestsModule } from './modules/checkout-requests/checkout-requests.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

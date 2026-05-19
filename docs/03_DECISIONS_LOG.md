@@ -123,3 +123,17 @@ Jangan buat file baru seperti:
 - changelog frontend/backend terpisah
 
 Kecuali user eksplisit minta. Update cukup ke 7 active docs.
+
+---
+
+## 2026-05-18 — V5.9-A Multi-App Shell Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 219 | App shell baru ditempatkan di `backend/src/apps/*`, bukan root `apps/*` | Menjaga build lama tetap menghasilkan `dist/main.js` dan meminimalkan risiko start:prod pecah. |
+| 220 | Shared bootstrap dibuat untuk core/marketing/staff/finance | Setup global Nest konsisten tanpa rewrite total. |
+| 221 | `marketing-api` boleh langsung read-only shell | Public rooms tetap read-only dan tidak membawa auth/lifecycle modules. |
+| 222 | `staff-api` hanya read-only pada V5.9-A | Tidak expose POST/PATCH/DELETE inventory/room/ticket mutation. |
+| 223 | `finance-api` hanya read-only/review pada V5.9-A | Tidak expose payment approval/reject/expiry command route. |
+| 224 | Core `AppModule` belum dipecah | V5.9-A valid sebagai shell foundation, bukan full monolith split. |
+| 225 | Tenant-api tetap deferred | Request/write tenant perlu bounded audit berikutnya agar tidak menarik lifecycle coupling. |

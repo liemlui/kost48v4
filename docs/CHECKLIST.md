@@ -264,3 +264,28 @@ Retest only if touched.
 - [ ] DepositTransaction / DepositLog schema.
 - [ ] Damage/penalty model.
 - [ ] Owner-api.
+
+---
+
+## J. V5.9-A Multi-App Read-Only Shell Checklist
+
+- [ ] `backend/src/common/bootstrap/kost48-bootstrap.ts` exists.
+- [ ] `GET /api/health` works in core-api.
+- [ ] `marketing-api` builds to `dist/apps/marketing-api/main.js`.
+- [ ] `staff-api` builds to `dist/apps/staff-api/main.js`.
+- [ ] `finance-api` builds to `dist/apps/finance-api/main.js`.
+- [ ] `staff-api` exposes GET-only staff surfaces.
+- [ ] `finance-api` exposes GET-only finance/review surfaces.
+- [ ] `finance-api` does not expose payment approval route.
+- [ ] `staff-api` does not expose inventory write route.
+- [ ] Core `dist/main.js` still exists after build.
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\VERIFY_V5_9_A_MULTI_APP.ps1
+  ```
+- [ ] Start ports 3000/3001/3002/3003.
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_9_A_MULTI_APP_SMOKE.ps1
+  ```
+- [ ] Do not mark PASS until build + multi-port UAT complete.

@@ -424,3 +424,64 @@ These are completed or baseline and should not be re-opened unless touched:
 - Manual Check-in UX Reliability PASS.
 - Manual Check-in Business Automation implemented in code by `d1a7181` and hardened in V5.1–V5.2.
 - Full checkout UAT PASS before KB-2 guard decision; future guard requires new targeted UAT when patched.
+
+---
+
+## 9. V5.9-A ACT — Multi-App Read-Only Shell Foundation
+
+### Objective
+
+Membuat fondasi Multi-App Shared-DB yang bisa dibuild tanpa memindahkan high-risk business logic.
+
+### Scope implemented
+
+```text
+backend/src/common/bootstrap/kost48-bootstrap.ts
+backend/src/modules/health/*
+backend/src/apps/marketing-api/*
+backend/src/apps/staff-api/*
+backend/src/apps/finance-api/*
+backend/src/modules/staff-readonly/*
+backend/src/modules/finance-readonly/*
+backend/package.json scripts
+```
+
+### Port convention
+
+| App | Port lokal | Scope |
+|---|---:|---|
+| core-api | 3000 | Existing monolith/core lifecycle |
+| marketing-api | 3001 | Public room/marketing read-only |
+| staff-api | 3002 | Staff read-only rooms/inventory/room-items/tickets |
+| finance-api | 3003 | Finance read-only invoices/review queue/reports |
+
+### Verification
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\VERIFY_V5_9_A_MULTI_APP.ps1
+```
+
+### Multi-port UAT
+
+Start each app in separate PowerShell terminal after build:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; $env:PORT=3000; npm run start:core
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; $env:PORT=3001; npm run start:marketing
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; $env:PORT=3002; npm run start:staff
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; $env:PORT=3003; npm run start:finance
+```
+
+Then run:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_9_A_MULTI_APP_SMOKE.ps1
+```
+
+### Forbidden still active
+
+- No payment approval move to finance-api.
+- No inventory/ticket mutation move to staff-api.
+- No tenant-api lifecycle execution.
+- No schema change.
+- No separate DB.

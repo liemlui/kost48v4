@@ -246,3 +246,41 @@ Production handoff pernah PASS:
 - Reminder preview endpoint PASS.
 
 Hotfix langsung ke production `dist` tetap emergency-only.
+
+---
+
+## 2026-05-18 — V5.9-A Multi-App Read-Only Shell Patch
+
+### Konteks
+
+Setelah V5.8-A build PASS dan smoke dasar PASS, dilakukan ACT besar tetapi tetap bounded untuk membuat fondasi Multi-App Shared-DB tanpa memindahkan lifecycle writes.
+
+### Hasil patch
+
+```text
+core-api tetap entry utama: backend/src/main.ts
+marketing-api shell: backend/src/apps/marketing-api
+staff-api shell: backend/src/apps/staff-api
+finance-api shell: backend/src/apps/finance-api
+```
+
+Yang dibuat:
+
+1. Shared bootstrap helper untuk menghindari duplikasi setup Nest global pipe/filter/interceptor/CORS/swagger/static uploads.
+2. Health endpoint `GET /api/health` untuk core dan app shell baru.
+3. Marketing app shell yang hanya import `MarketingModule` + Prisma.
+4. Staff app shell dengan dedicated read-only endpoints untuk rooms, inventory items, room items, tickets, dan overview.
+5. Finance app shell dengan dedicated read-only endpoints untuk invoices, payment review queue, dan finance summary.
+
+### Boundary preserved
+
+```text
+Payment approval tetap tidak ada di finance-api.
+Inventory write tetap tidak ada di staff-api.
+Stay lifecycle writes tetap core-api.
+Room occupancy/status writes tetap core-api.
+```
+
+### Catatan penting
+
+V5.9-A adalah shell/source foundation, bukan full deployment split. UAT multi-port wajib dilakukan sebelum PASS.

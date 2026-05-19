@@ -1,42 +1,53 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-18 V5.7/V5.8 architecture audit sync  
+**Versi:** 2026-05-19 V5.9 rollback + V5.8-A guard baseline
 **Status:** Source of truth utama untuk membuka sesi baru. Baca file ini dulu sebelum `01_CONTRACTS.md`, `02_PLAN.md`, dan `CHECKLIST.md`.
 
 ---
 
 ---
 
-## 0A. V5.8-A Overlay Patch Prepared — Belum PASS
+## 0A. Current Baseline — V5.8-A Guard Line Defenses Applied, V5.9 Shell Rolled Back
 
-Status package ini:
+Status saat ini:
 
 ```text
-V5.8-A Backend Guard overlay prepared in ChatGPT sandbox.
-Local Windows build/UAT masih wajib sebelum status boleh disebut PASS.
+V5.8-A Backend Guard line defenses sudah applied di source dan terverifikasi utuh.
+V5.9 multi-app shell (apps/bootstrap/health/scripts multi-start) sudah dirollback.
+Backend kembali ke struktur core monolith bersih dengan guard KB-1 dan KB-2 intact.
+Build/UAT belum dijalankan — status PASS belum diklaim.
 ```
 
-Perubahan source yang disiapkan:
+Perubahan source V5.8-A yang masih utuh:
 
-1. `CheckoutRequestsModule` tidak lagi import dead `StaysModule`.
-2. `StaysService.renewStay()` tetap membuat invoice renewal sebagai `DRAFT` hanya sementara untuk insert line, lalu langsung update menjadi `ISSUED` + `issuedAt`.
-3. `StaysService.complete()` sekarang mengecek invoice open di dalam `$transaction()` sebelum melepas kamar. Status selain `PAID`/`CANCELLED` memblokir checkout final.
-4. `StaysService.processDeposit()` ikut memakai definisi open invoice yang sama sebelum deposit diproses.
-5. `StaysQueryService` menghitung open invoice dengan definisi `status NOT IN [PAID, CANCELLED]`, bukan hanya `ISSUED/PARTIAL`.
+1. `CheckoutRequestsModule` tidak import dead `StaysModule`.
+2. `StaysService.renewStay()` membuat invoice renewal `DRAFT` untuk insert line, lalu langsung `ISSUED` + `issuedAt`.
+3. `StaysService.complete()` mengecek semua invoice open (`NOT IN [PAID, CANCELLED]`) di dalam `$transaction()` sebelum melepas kamar.
+4. `StaysService.processDeposit()` memakai guard open invoice yang sama.
+5. `StaysQueryService` menghitung open invoice dengan definisi `NOT IN [PAID, CANCELLED]`.
 
-Yang sengaja tidak disentuh:
+Yang sudah dirollback (V5.9):
 
-- `nest-cli.json`, `app.module.ts`, `tsconfig`, `apps/`, `libs/`;
-- `schema.prisma` dan SQL migration;
-- `PaymentSubmissionsService.approveSubmission()`;
-- `TenantBookingsService.approveBooking()`;
-- frontend split;
-- marketing/staff/tenant/finance app shell.
+- `backend/src/apps/` (marketing-api, staff-api, finance-api shell).
+- `backend/src/common/bootstrap/kost48-bootstrap.ts` (belum dicek — jika masih ada, abaikan).
+- `backend/src/modules/health/`.
+- Import `HealthModule` dari `app.module.ts`.
+- `backend/src/main.ts` sudah kembali ke bootstrap core `NestFactory.create(AppModule)`.
+- Skrip multi-app di `package.json` dihapus.
 
-Next setelah merge lokal:
+Yang tetap tidak disentuh:
 
-1. Run backend build.
-2. Run smoke/UAT script.
-3. Baru lanjut V5.8-B marketing-api shell PLAN/ACT jika V5.8-A hasil lokal OK.
+- `nest-cli.json`, `tsconfig.json`, `tsconfig.build.json`.
+- `schema.prisma` dan SQL migration.
+- `PaymentSubmissionsService.approveSubmission()`.
+- `TenantBookingsService.approveBooking()`.
+- Semua module lifecycle, booking, renew, checkout, meter, room.
+- Frontend split.
+
+Next steps:
+
+1. Jalankan backend build.
+2. Jalankan smoke/UAT untuk V5.8-A guards.
+3. Baru lanjut ke V5.8-B marketing-api shell PLAN/ACT setelah hasil lokal OK.
 
 ## 0. Current Command Center State — Wajib Dibaca
 
@@ -364,3 +375,34 @@ Staff read-only smoke:
 ```powershell
 $login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"staff@kost48.com","password":"staff123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/inventory-items" -Headers @{Authorization="Bearer $token"}
 ```
+
+---
+
+## 9. V5.9-A Current Patch State — Multi-App Read-Only Shell
+
+V5.9-A introduces a safe multi-app shell foundation while keeping the existing core monolith intact.
+
+```text
+core-api: existing backend/src/main.ts, port 3000
+marketing-api: backend/src/apps/marketing-api, port 3001
+staff-api: backend/src/apps/staff-api, port 3002
+finance-api: backend/src/apps/finance-api, port 3003
+```
+
+Important implementation choice:
+
+```text
+New app shells live under backend/src/apps/* so TypeScript build still preserves dist/main.js for the existing core start:prod path.
+```
+
+V5.9-A does not mean full extraction is complete. It is a source-level shell foundation and read-only vertical split candidate.
+
+Still core-only:
+
+- payment approval/reject/expiry command,
+- booking approval,
+- renew approval/execution,
+- checkout final,
+- room occupancy/status writes,
+- meter promotion,
+- deposit settlement.

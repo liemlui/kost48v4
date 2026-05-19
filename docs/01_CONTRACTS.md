@@ -379,3 +379,32 @@ Minimum production UAT after deploy:
 - `POST /api/auth/login`
 - `GET /api/me/notifications` with Bearer token
 - If reminder touched: `GET /api/admin/reminders/preview/all`
+
+---
+
+## 13. V5.9-A Multi-App Shell Contract
+
+### 13.1 App shell contract
+
+V5.9-A app shells are allowed as long as they do not move lifecycle writes.
+
+| App shell | Allowed in V5.9-A | Forbidden in V5.9-A |
+|---|---|---|
+| `marketing-api` | `GET /api/health`, `GET /api/public/rooms`, `GET /api/public/rooms/:id` | auth-only data, room writes, booking approval |
+| `staff-api` | read-only rooms, inventory items, room items, tickets, overview | inventory write, room status write, ticket workflow mutation |
+| `finance-api` | read-only invoices, payment review queue, finance summary/reports | payment approve/reject, booking expiry command, lifecycle mutation |
+
+### 13.2 Build preservation contract
+
+The existing backend build/start contract must stay valid:
+
+```text
+npm run build
+node dist/main.js
+```
+
+Because of that, app shells are placed under `backend/src/apps/*`, not root `backend/apps/*`, until a later full workspace migration is explicitly planned.
+
+### 13.3 Read-only enforcement contract
+
+Dedicated read-only modules must be preferred for extracted shells instead of importing broad modules that expose mutation controllers.
