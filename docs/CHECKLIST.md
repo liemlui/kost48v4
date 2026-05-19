@@ -1,5 +1,5 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-19 V5.10 checklist sync
+**Versi:** 2026-05-19 V5.12 checklist sync
 
 ## A. Start Hygiene
 
@@ -108,3 +108,32 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submission
 - [ ] No schema change.
 - [ ] No multi-app files created.
 - [ ] `git status --short` reviewed before commit.
+
+
+## I. V5.12 Renew + Checkout Full Business UAT Pack
+
+- [ ] Backend build PASS after applying V5.12 scripts/docs.
+- [ ] Frontend build PASS after applying V5.12 scripts/docs.
+- [ ] `scripts/uat/KOST48_V512_RENEW_UAT.ps1` PASS.
+- [ ] Renew script proves tenant renew create -> admin approve -> invoice `ISSUED`.
+- [ ] Renew script proves double approval rejected with HTTP 409.
+- [ ] Renew script proves tenant can see approved renew request and renewal invoice.
+- [ ] `scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1` PASS.
+- [ ] Checkout guard script proves open invoice blocks checkout with HTTP 409.
+- [ ] Checkout guard script proves paid invoice allows checkout final.
+- [ ] Checkout guard script proves room becomes `AVAILABLE` after checkout final.
+- [ ] `scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1` PASS.
+- [ ] Payment script proves partial payment => `PARTIAL`.
+- [ ] Payment script proves overpayment rejected with HTTP 409.
+- [ ] Payment script proves remaining payment => `PAID`.
+- [ ] `scripts/uat/KOST48_V512_FULL_REGRESSION.ps1` PASS.
+- [ ] No schema change.
+- [ ] No DB reset.
+- [ ] No multi-app files created.
+- [ ] `git status --short` reviewed before commit.
+
+V5.12 full command:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V512_FULL_REGRESSION.ps1
+```

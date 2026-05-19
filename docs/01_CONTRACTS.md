@@ -1,5 +1,5 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-19 V5.10 boundary sync
+**Versi:** 2026-05-19 V5.12 UAT contract sync
 
 ## 0. Active Architecture Contract
 
@@ -154,3 +154,25 @@ Rules:
 3. This is read-only list filtering, not lifecycle execution.
 4. Approving a checkout request still does not complete the stay.
 5. Final checkout remains owned by `StaysService.complete()`.
+
+
+## 8. V5.12 UAT Contract
+
+V5.12 is a regression/UAT pack, not a feature extraction phase.
+
+Required UAT proofs:
+
+| Flow | Required proof | Script |
+|---|---|---|
+| Renew full flow | Tenant creates renew request, admin approves, stay extends, renewal invoice is `ISSUED`, tenant can see invoice | `scripts/uat/KOST48_V512_RENEW_UAT.ps1` |
+| Checkout guard | Checkout final with open invoice returns HTTP 409; after invoice is paid, checkout succeeds and room becomes `AVAILABLE` | `scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1` |
+| Invoice payment regression | Partial payment => `PARTIAL`, overpayment => HTTP 409, remaining payment => `PAID`, queue still healthy | `scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1` |
+| Full pack | Runs all V5.12 scripts sequentially | `scripts/uat/KOST48_V512_FULL_REGRESSION.ps1` |
+
+Rules:
+
+- Scripts may create isolated UAT tenants, rooms, stays, invoices, and payments.
+- Scripts must not reset DB.
+- Scripts must use PowerShell + `Invoke-RestMethod`.
+- Scripts must not require multi-app services.
+- Scripts must not mutate production DB.

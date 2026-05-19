@@ -1,5 +1,5 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-19 V5.10 journal sync
+**Versi:** 2026-05-19 V5.12 journal sync
 
 ## 2026-05-19 — V5.10-A Local Smoke Context
 
@@ -85,3 +85,29 @@ Setelah V5.10-B/C/D/E/F smoke lokal berjalan aman, fase berikutnya difokuskan ke
 ### Catatan
 
 Tidak ada schema change, DB reset, multi-app shell, workspace migration, atau lifecycle write extraction.
+
+
+## 2026-05-19 — V5.12 Renew + Checkout Full Business UAT Pack
+
+V5.12 adds repeatable UAT scripts for the business-critical flows that must stay stable before any future extraction roadmap is reconsidered.
+
+Added scripts:
+
+```text
+scripts/uat/KOST48_V512_RENEW_UAT.ps1
+scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1
+scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1
+scripts/uat/KOST48_V512_FULL_REGRESSION.ps1
+```
+
+The scripts create isolated UAT tenant/room/stay data and verify behavior through API calls only. No DB reset is performed.
+
+Coverage:
+
+- renew request creation and approval,
+- renewal invoice `ISSUED`,
+- double approval 409,
+- checkout final blocked by open invoice,
+- checkout final succeeds after invoice payment,
+- room release to `AVAILABLE`,
+- invoice payment partial/paid/overpay behavior.

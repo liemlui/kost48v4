@@ -1,10 +1,10 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-19 V5.10 plan sync
+**Versi:** 2026-05-19 V5.12 plan sync
 
 ## 0. Current Execution Override
 
 ```text
-Current phase: V5.11 Targeted UAT & Regression Pack
+Current phase: V5.12 Renew + Checkout Full Business UAT Pack
 Default mode: PLAN ONLY unless user explicitly says ACT
 Architecture: Stable Modular Monolith
 Multi-app: roadmap only
@@ -152,3 +152,54 @@ Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost
 Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V511_SMOKE.ps1
 Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V511_STAFF_BOUNDARY.ps1
 ```
+
+
+## 9. V5.12 — Renew + Checkout Full Business UAT Pack
+
+Goal:
+
+- prove renew request full flow after V5.10-B,
+- prove checkout final invoice guard after V5.8-A/V5.10-A,
+- prove invoice payment status transitions remain safe,
+- keep all tests repeatable via PowerShell scripts.
+
+Scope:
+
+- Add UAT scripts only under `scripts/uat`.
+- Update the 7 active docs only.
+- No backend/frontend feature code unless a script reveals a real regression later.
+
+Scripts:
+
+```text
+scripts/uat/KOST48_V512_RENEW_UAT.ps1
+scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1
+scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1
+scripts/uat/KOST48_V512_FULL_REGRESSION.ps1
+```
+
+Verification commands:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V512_FULL_REGRESSION.ps1
+```
+
+Forbidden:
+
+- no DB reset,
+- no schema change,
+- no multi-app shell,
+- no workspace migration,
+- no lifecycle rewrite,
+- no payment approval extraction,
+- no production DB touch.
+
+Definition of done:
+
+- backend build PASS,
+- frontend build PASS,
+- V5.12 full regression script PASS,
+- `git status --short` reviewed,
+- commit pushed.

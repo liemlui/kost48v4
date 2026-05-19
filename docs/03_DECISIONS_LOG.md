@@ -1,5 +1,5 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-19 V5.10 decision sync
+**Versi:** 2026-05-19 V5.12 decision sync
 
 ## 2026-05-19 — V5.10 Decisions
 
@@ -48,3 +48,15 @@
 | 231 | `stayId` invalid harus ditolak dengan HTTP 400 | Mencegah query ambigu dan memudahkan UAT/manual debugging. |
 | 232 | V5.11 menambah PowerShell UAT scripts, bukan test framework besar | Cocok dengan workflow lokal Windows + Invoke-RestMethod tanpa menambah dependency. |
 | 233 | Staff boundary regression harus dapat diulang tanpa DB reset | Forbidden-write probes memakai role guard dan expected 403 sehingga aman terhadap side effect. |
+
+
+## 2026-05-19 — V5.12 UAT Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 230 | V5.12 fokus pada full business UAT pack | Tidak membuka fitur besar baru sebelum renew/checkout/payment terbukti. |
+| 231 | UAT scripts boleh membuat isolated UAT data | Scripts boleh create tenant, room, stay, invoice, payment untuk verifikasi repeatable. |
+| 232 | V5.12 scripts tidak boleh reset DB | Data UAT dibuat additive, bukan destructive. |
+| 233 | Renew UAT wajib membuktikan renewal invoice `ISSUED` dan double approval 409 | Menutup risiko kontrak renew setelah V5.10-B. |
+| 234 | Checkout UAT wajib membuktikan open invoice block 409 dan paid invoice allows checkout | Menutup risiko guard checkout setelah V5.8-A/V5.10-A. |
+| 235 | Payment regression wajib membuktikan PARTIAL/PAID/overpay guard | Menjaga finance core behavior setelah boundary hardening. |

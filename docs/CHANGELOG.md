@@ -1,5 +1,45 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-19 V5.10 B/C/D/E/F
+**Versi:** 2026-05-19 V5.12 UAT pack
+
+
+## 2026-05-19 — V5.12 Renew + Checkout Full Business UAT Pack
+
+### Type
+
+UAT/regression scripts and docs sync only.
+
+### Added
+
+PowerShell UAT scripts:
+
+- `scripts/uat/KOST48_V512_RENEW_UAT.ps1`
+- `scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1`
+- `scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1`
+- `scripts/uat/KOST48_V512_FULL_REGRESSION.ps1`
+
+### Coverage
+
+- Renew full flow: tenant create, admin approve, invoice `ISSUED`, tenant visibility, double approval guard.
+- Checkout guard: open invoice blocks checkout with 409, full invoice payment allows checkout, room returns `AVAILABLE`.
+- Payment regression: partial payment -> `PARTIAL`, overpay -> 409, remaining payment -> `PAID`, review queue remains healthy.
+
+### Not Changed
+
+- No backend feature code.
+- No frontend feature code.
+- No schema change.
+- No DB reset.
+- No multi-app shell.
+- No workspace migration.
+
+### Verification Required
+
+- backend build PASS,
+- frontend build PASS,
+- `KOST48_V512_FULL_REGRESSION.ps1` PASS,
+- commit and push.
+
+---
 
 ## 2026-05-19 — V5.11 Checkout Filter + Regression Pack
 

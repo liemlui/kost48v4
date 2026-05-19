@@ -1,5 +1,5 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-19 V5.10-B/C/D/E/F sync  
+**Versi:** 2026-05-19 V5.12 UAT pack sync  
 **Status:** Source of truth utama untuk sesi berikutnya.
 
 ## 0. Current Command Center State
@@ -8,7 +8,7 @@ KOST48 sekarang berada pada track:
 
 ```text
 Active architecture: Stable Modular Monolith
-Current phase: V5.11 Targeted UAT & Regression Pack
+Current phase: V5.12 Renew + Checkout Full Business UAT Pack
 Default mode: PLAN ONLY, kecuali user eksplisit minta ACT
 Multi-app: ROADMAP ONLY, bukan implementasi aktif
 ```
@@ -27,6 +27,30 @@ Environment tetap:
 ```text
 C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle
 ```
+
+
+## 0.1 Latest Verified Baseline — V5.11
+
+Local verification reported by user:
+
+```text
+V5.10-V5.11 committed and pushed as f82a296.
+Public rooms smoke PASS.
+Admin login PASS.
+Notifications PASS.
+Payment review queue PASS.
+V5.11 smoke pack PASS.
+V5.11 staff boundary regression PASS.
+```
+
+V5.12 focuses on full business UAT scripts, not new feature scope:
+
+- renew full UAT,
+- checkout final invoice guard UAT,
+- invoice payment regression,
+- repeatable PowerShell scripts under `scripts/uat`.
+
+No schema change, DB reset, multi-app, or workspace migration in V5.12.
 
 ## 1. Hard Rules
 
