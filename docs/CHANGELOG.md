@@ -1,5 +1,5 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-19 V5.12 UAT pack
+**Versi:** 2026-05-19 V5.13 release readiness pack
 
 
 ## 2026-05-19 — V5.12 Renew + Checkout Full Business UAT Pack
@@ -150,3 +150,28 @@ Do not claim full PASS until:
 - renew approval UAT PASS,
 - staff restriction UAT PASS,
 - checkout invoice guard UAT PASS.
+## 2026-05-19 — V5.13 Production Deployment Readiness & Release Pack
+
+### Type
+
+Release readiness scripts and docs sync only.
+
+### Added
+
+- `scripts/release/KOST48_V513_LOCAL_RELEASE_CHECK.ps1`
+- `scripts/release/KOST48_V513_CREATE_SOURCE_LITE_ZIP.ps1`
+- `scripts/uat/KOST48_V513_PRODUCTION_SAFE_SMOKE.ps1`
+
+### Purpose
+
+- Verify local build readiness.
+- Create source-lite ZIP without heavy/generated/sensitive files.
+- Run production-safe smoke without mutating production data.
+
+### Not Changed
+
+- No backend feature code.
+- No frontend feature code.
+- No schema change.
+- No DB reset.
+- No multi-app implementation.

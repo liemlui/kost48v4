@@ -1,5 +1,5 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-19 V5.12 journal sync
+**Versi:** 2026-05-19 V5.13 release readiness journal sync
 
 ## 2026-05-19 — V5.10-A Local Smoke Context
 
@@ -111,3 +111,25 @@ Coverage:
 - checkout final succeeds after invoice payment,
 - room release to `AVAILABLE`,
 - invoice payment partial/paid/overpay behavior.
+## 2026-05-19 — V5.12 Full Regression PASS + Push
+
+User local UAT reported:
+
+- Renew full UAT PASS.
+- Checkout guard UAT PASS.
+- Payment regression PASS.
+- Full regression pack PASS.
+- Commit `e93c78a` pushed to `main`.
+
+This establishes `e93c78a` as the current stable modular monolith baseline before V5.13 release readiness.
+
+## 2026-05-19 — V5.13 Release Readiness Pack
+
+V5.13 adds release/deploy support scripts and docs only:
+
+- local release check,
+- production-safe smoke,
+- source-lite ZIP creator,
+- docs baseline sync.
+
+No feature code, schema, DB reset, or multi-app work is included.

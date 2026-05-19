@@ -1,5 +1,5 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-19 V5.12 UAT pack sync  
+**Versi:** 2026-05-19 V5.13 release readiness sync  
 **Status:** Source of truth utama untuk sesi berikutnya.
 
 ## 0. Current Command Center State
@@ -8,7 +8,7 @@ KOST48 sekarang berada pada track:
 
 ```text
 Active architecture: Stable Modular Monolith
-Current phase: V5.12 Renew + Checkout Full Business UAT Pack
+Current phase: V5.13 Production Deployment Readiness & Release Pack
 Default mode: PLAN ONLY, kecuali user eksplisit minta ACT
 Multi-app: ROADMAP ONLY, bukan implementasi aktif
 ```
@@ -191,3 +191,35 @@ Active V5.11 scope:
 - no multi-app.
 
 This does not change the ownership rule: checkout final remains in `StaysService.complete()` and request approval does not execute final checkout.
+## V5.13 Release Baseline
+
+Latest stable baseline after user local verification:
+
+```text
+Commit: e93c78a
+Branch: main
+Remote: origin/main
+Status: V5.12 full regression PASS and pushed
+Next phase: V5.13 Production Deployment Readiness & Release Pack
+```
+
+Verified by local UAT before V5.13:
+
+- Public rooms smoke PASS.
+- Admin login PASS.
+- Notifications smoke PASS.
+- Payment review queue smoke PASS.
+- V5.11 smoke + staff boundary scripts PASS.
+- V5.12 renew full UAT PASS.
+- V5.12 checkout guard UAT PASS.
+- V5.12 payment regression PASS.
+
+V5.13 scope is release readiness only:
+
+- safe production smoke script,
+- source-lite ZIP script,
+- local release check script,
+- deployment checklist/update docs,
+- no schema change,
+- no DB reset,
+- no multi-app implementation.

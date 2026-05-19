@@ -1,5 +1,5 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-19 V5.12 UAT contract sync
+**Versi:** 2026-05-19 V5.13 release readiness contract sync
 
 ## 0. Active Architecture Contract
 
@@ -176,3 +176,22 @@ Rules:
 - Scripts must use PowerShell + `Invoke-RestMethod`.
 - Scripts must not require multi-app services.
 - Scripts must not mutate production DB.
+## V5.13 Release / Deployment Contract
+
+V5.13 does not change business behavior. It only prepares release/deployment verification.
+
+Rules:
+
+1. Production smoke must be read-only unless credentials are explicitly supplied.
+2. Production smoke must not create tenant, room, stay, invoice, payment, checkout, or renew data.
+3. Production DB must never be reset by release scripts.
+4. Source ZIP must exclude heavy/sensitive/generated files:
+   - `node_modules/`,
+   - `dist/`,
+   - `backend/src/generated/`,
+   - `.prisma/`,
+   - `.env`,
+   - logs,
+   - TypeScript build info.
+5. Multi-app remains roadmap only.
+6. If production smoke fails, do not claim deploy PASS; capture the first failing endpoint and status.

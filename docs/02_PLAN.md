@@ -1,10 +1,10 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-19 V5.12 plan sync
+**Versi:** 2026-05-19 V5.13 release readiness plan sync
 
 ## 0. Current Execution Override
 
 ```text
-Current phase: V5.12 Renew + Checkout Full Business UAT Pack
+Current phase: V5.13 Production Deployment Readiness & Release Pack
 Default mode: PLAN ONLY unless user explicitly says ACT
 Architecture: Stable Modular Monolith
 Multi-app: roadmap only
@@ -203,3 +203,46 @@ Definition of done:
 - V5.12 full regression script PASS,
 - `git status --short` reviewed,
 - commit pushed.
+## V5.13 — Production Deployment Readiness & Release Pack
+
+### Objective
+
+Prepare a safe release pack after V5.12 full regression PASS.
+
+### Scope
+
+- Add local release verification script.
+- Add production-safe smoke script.
+- Add source-lite ZIP creation script.
+- Update active docs with V5.13 baseline.
+
+### Not in scope
+
+- No backend feature code.
+- No frontend feature code.
+- No Prisma schema change.
+- No DB reset.
+- No workspace/multi-app migration.
+- No production mutation script.
+
+### Recommended order
+
+1. Run local release check.
+2. Create source-lite ZIP.
+3. Deploy/pull to target environment manually.
+4. Run production-safe smoke.
+5. Commit docs/scripts if successful.
+
+### Commands
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_LOCAL_RELEASE_CHECK.ps1
+```
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_CREATE_SOURCE_LITE_ZIP.ps1
+```
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V513_PRODUCTION_SAFE_SMOKE.ps1 -BaseApi "https://api.kost48surabaya.com/api"
+```

@@ -1,5 +1,5 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-19 V5.12 checklist sync
+**Versi:** 2026-05-19 V5.13 release readiness checklist sync
 
 ## A. Start Hygiene
 
@@ -137,3 +137,26 @@ V5.12 full command:
 ```powershell
 Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V512_FULL_REGRESSION.ps1
 ```
+## V5.13 Release Readiness Checklist
+
+- [ ] Confirm clean git status before release prep.
+- [ ] Confirm latest baseline includes commit `e93c78a` or newer.
+- [ ] Run local release check:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_LOCAL_RELEASE_CHECK.ps1
+  ```
+- [ ] Create source-lite ZIP:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_CREATE_SOURCE_LITE_ZIP.ps1
+  ```
+- [ ] Run local smoke after backend is running if needed:
+  ```powershell
+  Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
+  ```
+- [ ] Run production-safe smoke after deployment:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V513_PRODUCTION_SAFE_SMOKE.ps1 -BaseApi "https://api.kost48surabaya.com/api"
+  ```
+- [ ] Do not reset production DB.
+- [ ] Do not run UAT scripts that create data against production.
+- [ ] Do not claim production PASS until smoke returns PASS.

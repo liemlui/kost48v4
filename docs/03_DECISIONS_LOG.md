@@ -1,5 +1,5 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-19 V5.12 decision sync
+**Versi:** 2026-05-19 V5.13 release readiness decision sync
 
 ## 2026-05-19 — V5.10 Decisions
 
@@ -60,3 +60,12 @@
 | 233 | Renew UAT wajib membuktikan renewal invoice `ISSUED` dan double approval 409 | Menutup risiko kontrak renew setelah V5.10-B. |
 | 234 | Checkout UAT wajib membuktikan open invoice block 409 dan paid invoice allows checkout | Menutup risiko guard checkout setelah V5.8-A/V5.10-A. |
 | 235 | Payment regression wajib membuktikan PARTIAL/PAID/overpay guard | Menjaga finance core behavior setelah boundary hardening. |
+## 2026-05-19 — V5.13 Release Readiness Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 236 | `e93c78a` menjadi baseline stabil setelah V5.12 full regression PASS | Release readiness boleh dimulai dari baseline ini. |
+| 237 | V5.13 tidak mengubah business feature code | Risiko regression dijaga rendah. |
+| 238 | Production smoke harus read-only secara default | Tidak boleh membuat/mengubah data produksi. |
+| 239 | Source-lite ZIP wajib exclude generated/heavy/sensitive files | ZIP upload/deploy lebih aman dan kecil. |
+| 240 | Multi-app tetap roadmap only setelah release readiness | Tidak ada `apps/` atau workspace migration di V5.13. |
