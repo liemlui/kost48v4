@@ -1,291 +1,110 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-18 V5.7/V5.8 audit sync
+**Versi:** 2026-05-19 V5.10 checklist sync
 
----
-
----
-
-## AA. V5.8-A Overlay Merge Checklist
-
-- [ ] Copy/merge overlay into project root.
-- [ ] Confirm changed source only includes intended files:
-  - `backend/src/modules/checkout-requests/checkout-requests.module.ts`
-  - `backend/src/modules/stays/stays.service.ts`
-  - `backend/src/modules/stays/stays-query.service.ts`
-  - active docs updates
-  - optional scripts under `scripts/`
-- [ ] Run backend build.
-- [ ] Run public/protected smoke commands.
-- [ ] UAT renew approval: invoice returned/created as `ISSUED`.
-- [ ] UAT checkout final: open invoice blocks with Indonesian error listing invoice references.
-- [ ] UAT checkout final: all invoices `PAID`/`CANCELLED` allows completion.
-- [ ] UAT deposit process: open invoice blocks deposit processing.
-- [ ] Review `git status --short`.
-- [ ] Commit only after build/UAT evidence.
-
-Do not mark V5.8-A PASS until these are complete locally.
-
-## A. Start-of-Session Hygiene
+## A. Start Hygiene
 
 - [ ] Run:
   ```powershell
   Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
   ```
-- [ ] Confirm branch from local git. Latest evidence: `main/origin/main`.
-- [ ] Do not assume working tree clean.
-- [ ] Do not start ACT if untracked/modified files are unresolved.
+- [ ] Confirm working tree state.
 - [ ] PowerShell only.
-- [ ] API test uses `Invoke-RestMethod`, not curl.
-- [ ] Do not reset DB unless explicitly asked.
-- [ ] Do not create new `.md` docs.
+- [ ] API tests use `Invoke-RestMethod`.
+- [ ] No DB reset unless user explicitly asks.
+- [ ] No new `.md` docs.
 
----
+## B. V5.10-A Verification
 
-## B. V5.7 Closeout Checklist
+- [ ] No backend import `from 'src/...` remains.
+- [ ] `CompleteStayModal` says checkout cannot proceed when open invoice exists.
+- [ ] Confirm button disabled when unpaid/open invoice count > 0.
+- [ ] `AuditLogModule` imports `PrismaModule` explicitly.
+- [ ] Prisma `binaryTargets` appropriate for dev/source-lite.
+- [ ] Backend build PASS.
+- [ ] Frontend build PASS.
+- [ ] Smoke API PASS.
 
-### B1. Cline rules / ignore
+## C. V5.10-B Renew Request
 
-- [ ] `.clinerules` updated to KOST48 V5.
-- [ ] `.clineignore` updated with active source-of-truth comments.
-- [ ] No corrupt duplicate `staff-api`/`finance-api` section.
-- [ ] Branch wording matches actual local branch.
-- [ ] Rules committed separately from frontend code.
+- [ ] Backend approve DTO accepts `plannedCheckOutDate`.
+- [ ] Backend approve DTO accepts `agreedRentAmountRupiah`.
+- [ ] Backend approve DTO accepts `reviewNotes`.
+- [ ] Backend create DTO accepts optional `requestedCheckOutDate`.
+- [ ] Frontend `ApproveRenewRequestPayload` matches backend.
+- [ ] Admin renew modal can send approval notes.
+- [ ] Approval locks renew request row with `FOR UPDATE`.
+- [ ] Stay extension, invoice issue, and request approval happen in one transaction.
+- [ ] Double approval rejected.
+- [ ] Renewal invoice is `ISSUED`.
 
-### B2. MyInvoicesPage resolution
+## D. V5.10-C Staff Boundary
 
-- [ ] Check if `frontend/src/pages/portal/MyInvoicesPage.tsx` exists.
-- [ ] Confirm it is imported/used by `frontend/src/App.tsx` route `/portal/invoices`.
-- [ ] Run frontend build before commit:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
-  ```
-- [ ] If build PASS, commit MyInvoicesPage separately.
-- [ ] If build FAIL, do not commit; paste error to command center.
+- [ ] STAFF can read meter readings.
+- [ ] STAFF cannot create/update meter readings.
+- [ ] STAFF can read expenses.
+- [ ] STAFF cannot create/update/delete expenses.
+- [ ] STAFF can read wifi sales.
+- [ ] STAFF cannot create/update/delete wifi sales.
+- [ ] Tickets operational staff behavior preserved.
 
-### B3. V5.7-B audit accepted
+## E. V5.10-D Finance Boundary
 
-- [x] CheckoutRequests dependency verified.
-- [x] RenewRequests dependency verified.
-- [x] PaymentSubmissions approval transaction verified.
-- [x] TenantBookings approval transaction verified.
-- [x] StaysService create/complete/renew behavior verified.
-- [x] Public module read-only candidate verified.
-- [x] Workspace verdict: `NEEDS MANUAL MIGRATION`.
+- [ ] Payment review queue still OWNER/ADMIN.
+- [ ] Payment approval still OWNER/ADMIN only.
+- [ ] Invoice mutation still OWNER/ADMIN only.
+- [ ] Invoice payment mutation still OWNER/ADMIN only.
+- [ ] Staff read visibility remains only where intended.
 
----
+## F. V5.10-E Docs Sync
 
-## C. V5.8 PLAN Gate
+- [ ] Active architecture says Stable Modular Monolith.
+- [ ] Multi-app described as roadmap only.
+- [ ] V5.8 stale wording removed.
+- [ ] V5.10-B/C/D changes documented.
+- [ ] No new markdown files created.
 
-V5.8 PLAN may start only if:
+## G. V5.10-F UAT Commands
 
-- [ ] Working tree clean or remaining changes explicitly known.
-- [ ] `.clinerules/.clineignore` resolved.
-- [ ] MyInvoicesPage resolved.
-- [x] Public/marketing module read-only confirmed.
-- [x] Payment approval stays core confirmed.
-- [x] Renew approval/execution stays core confirmed.
-- [x] Booking approval stays core confirmed.
-- [x] Checkout admin processing stays core confirmed.
-- [x] Room writes stay core confirmed.
-- [x] Meter promotion stays core confirmed.
+Backend build:
 
-V5.8 mode:
-
-- [ ] PLAN ONLY first.
-- [ ] No code changes.
-- [ ] No file creation.
-- [ ] No nest-cli.json modification.
-- [ ] No app.module.ts modification.
-- [ ] No module moves.
-- [ ] No schema changes.
-- [ ] No DB mutation.
-
----
-
-## D. V5.8 PLAN Tasks
-
-Cline PLAN must produce:
-
-- [ ] Public module verification:
-  - endpoints,
-  - Prisma models read,
-  - no writes,
-  - imports,
-  - extraction verdict.
-- [ ] Checkout dead import cleanup plan:
-  - exact import line,
-  - risk,
-  - file for ACT.
-- [ ] KB-1 renewal invoice ISSUED plan:
-  - choose patch location,
-  - exact expected behavior,
-  - files,
-  - UAT.
-- [ ] KB-2 checkout open invoice guard plan:
-  - guard query,
-  - open invoice definition,
-  - error message,
-  - UAT.
-- [ ] Marketing-api extraction plan:
-  - future files,
-  - shared deps,
-  - port,
-  - auth need/no need,
-  - smoke test.
-- [ ] Recommended ACT order.
-
----
-
-## E. V5.8-A Expected ACT Checklist — After PLAN Approval Only
-
-Likely scope:
-
-- [ ] Remove dead `StaysModule` import from `CheckoutRequestsModule`.
-- [ ] KB-1: renewal invoice becomes `ISSUED` after admin renew approval.
-- [ ] KB-2: `StaysService.complete()` blocks open invoices.
-
-Allowed likely files:
-
-```text
-backend/src/modules/checkout-requests/checkout-requests.module.ts
-backend/src/modules/renew-requests/renew-requests.service.ts
-backend/src/modules/stays/stays.service.ts
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
 ```
 
-Forbidden in V5.8-A:
+Frontend build:
 
-- [ ] No `nest-cli.json` migration.
-- [ ] No app generation.
-- [ ] No `app.module.ts` split.
-- [ ] No schema change.
-- [ ] No payment approval change.
-- [ ] No frontend split.
-- [ ] No marketing app shell.
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+```
 
-Build/UAT:
+Smoke:
 
-- [ ] Backend build PASS.
-- [ ] Renew request approve creates/sets invoice `ISSUED`.
-- [ ] Checkout final with open invoice fails.
-- [ ] Checkout final with all invoices `PAID`/`CANCELLED` succeeds.
-- [ ] `git status --short` reviewed.
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; $token
+Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/me/notifications" -Headers @{Authorization="Bearer $token"}
+Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}
+```
 
----
+## H. Deferred
 
-## F. V5.8-B Marketing-api Plan/Shell Gate
-
-Do not start until V5.8-A is reviewed/pass.
-
-Requirements:
-
-- [ ] Public module remains read-only.
-- [ ] No lifecycle imports.
-- [ ] No auth/JWT required for public endpoints.
-- [ ] Workspace migration plan accepted.
-- [ ] `marketing-api` port decided.
-- [ ] Existing `/api/public/rooms` behavior preserved.
-
-Forbidden:
-
-- [ ] No Room status writes.
-- [ ] No booking approval.
-- [ ] No tenant private data.
-- [ ] No payment/renew/checkout logic.
-
----
-
-## G. V5.9+ Future Gates
-
-### V5.9 — staff-api
-
-- [ ] Tickets scope audited.
-- [ ] Inventory read-only endpoints verified.
-- [ ] Staff mutation block UAT preserved.
-- [ ] Room status writes remain core.
-
-### V5.10 — tenant-api read/request
-
-Prerequisites:
-
-- [ ] KB-1 deployed and UAT PASS.
-- [ ] KB-2 deployed and UAT PASS.
-- [ ] Checkout/Renew create/view methods isolated.
-- [ ] Tenant isolation verified.
-- [ ] No lifecycle execution in tenant-api.
-
-### V5.11 — finance-api read/review
-
-- [ ] `findReviewQueue()` read-only verified.
-- [ ] Invoices read/list verified.
-- [ ] Payment approval remains core.
-- [ ] Reports read-only verified.
-
-### V5.12 — frontend split
-
-- [ ] API clients split plan.
-- [ ] App.tsx route split plan.
-- [ ] Shared UI/components plan.
-- [ ] No premature separate repo.
-
----
-
-## H. Completed / Do Not Repeat Unless Touched
-
-- [x] Booking Mandiri PASS.
-- [x] Admin Approval PASS.
-- [x] Payment Submission Core PASS.
-- [x] Pricing Policy V1 PASS.
-- [x] Reminder Preview PASS.
-- [x] Reminder Mock Send PASS.
-- [x] Notification Center MVP COMPLETE.
-- [x] Announcement Access Guard PASS.
-- [x] Pending Meter Snapshot Fresh UAT PASS.
-- [x] Staff inventory read-only PASS.
-- [x] Manual Check-in UX Reliability PASS.
-- [x] Manual Check-in Business Automation implemented according to audit.
-- [x] Full checkout UAT baseline PASS.
-- [x] Production frontend/backend connection PASS.
-
-Retest only if touched.
-
----
-
-## I. Deferred
-
-- [ ] Real WhatsApp provider.
-- [ ] Scheduler/cron reminder.
-- [ ] Browser push/service worker/PWA push.
-- [ ] SSE/websocket notification stream.
-- [ ] Advanced stage-aware announcement audience.
-- [ ] KTP upload.
-- [ ] Damage photo upload.
-- [ ] Payment gateway.
-- [ ] DB unique constraint pending data audit/cleanup.
-- [ ] DepositTransaction / DepositLog schema.
-- [ ] Damage/penalty model.
+- [ ] Multi-app shell.
+- [ ] Workspace migration.
 - [ ] Owner-api.
+- [ ] Payment gateway.
+- [ ] DepositTransaction model.
+- [ ] Damage/penalty model.
 
----
 
-## J. V5.9-A Multi-App Read-Only Shell Checklist
+## H. V5.11 Checkout Filter + Regression Pack
 
-- [ ] `backend/src/common/bootstrap/kost48-bootstrap.ts` exists.
-- [ ] `GET /api/health` works in core-api.
-- [ ] `marketing-api` builds to `dist/apps/marketing-api/main.js`.
-- [ ] `staff-api` builds to `dist/apps/staff-api/main.js`.
-- [ ] `finance-api` builds to `dist/apps/finance-api/main.js`.
-- [ ] `staff-api` exposes GET-only staff surfaces.
-- [ ] `finance-api` exposes GET-only finance/review surfaces.
-- [ ] `finance-api` does not expose payment approval route.
-- [ ] `staff-api` does not expose inventory write route.
-- [ ] Core `dist/main.js` still exists after build.
-- [ ] Run:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\VERIFY_V5_9_A_MULTI_APP.ps1
-  ```
-- [ ] Start ports 3000/3001/3002/3003.
-- [ ] Run:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\UAT_V5_9_A_MULTI_APP_SMOKE.ps1
-  ```
-- [ ] Do not mark PASS until build + multi-port UAT complete.
+- [ ] Backend build PASS after checkout request filter patch.
+- [ ] Frontend build PASS after `StayDetailPage` query patch.
+- [ ] `GET /api/admin/checkout-requests?status=PENDING&stayId=1` returns success.
+- [ ] `GET /api/admin/checkout-requests?stayId=abc` returns HTTP 400.
+- [ ] `StayDetailPage` no longer loads all pending/approved checkout requests for a single stay detail check.
+- [ ] `scripts/uat/KOST48_V511_SMOKE.ps1` PASS.
+- [ ] `scripts/uat/KOST48_V511_STAFF_BOUNDARY.ps1` PASS.
+- [ ] No schema change.
+- [ ] No multi-app files created.
+- [ ] `git status --short` reviewed before commit.

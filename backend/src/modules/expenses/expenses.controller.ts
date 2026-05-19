@@ -30,13 +30,13 @@ export class ExpensesController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateExpenseDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Expense berhasil dicatat', data: await this.expensesService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateExpenseDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Expense berhasil diperbarui', data: await this.expensesService.update(id, dto, user) };
   }

@@ -567,12 +567,14 @@ export type RenewRequest = {
 export type CreateRenewRequestPayload = {
   stayId: number;
   requestedTerm: PricingTerm;
+  requestedCheckOutDate?: string;
   requestNotes?: string;
 };
 
 export type ApproveRenewRequestPayload = {
   plannedCheckOutDate?: string;
   agreedRentAmountRupiah?: number;
+  reviewNotes?: string;
 };
 
 export type RejectRenewRequestPayload = {

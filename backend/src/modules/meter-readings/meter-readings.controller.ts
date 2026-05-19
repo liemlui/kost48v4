@@ -30,13 +30,13 @@ export class MeterReadingsController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateMeterReadingDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Meter reading berhasil dibuat', data: await this.meterreadingsService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateMeterReadingDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Meter reading berhasil diperbarui', data: await this.meterreadingsService.update(id, dto, user) };
   }

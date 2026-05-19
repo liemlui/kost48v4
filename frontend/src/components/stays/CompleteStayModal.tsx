@@ -60,9 +60,9 @@ export default function CompleteStayModal({
         <Alert variant="warning" className="small mb-3">
           Checkout Final menandakan tenant benar-benar keluar dari kamar. Status stay akan berubah menjadi selesai dan deposit diproses terpisah.
         </Alert>
-        {unpaidCount ? (
-          <Alert variant="warning">
-            Ada {unpaidCount} invoice belum lunas. Stay tetap bisa diselesaikan, tetapi pastikan penagihan sudah diurus.
+        {unpaidCount > 0 ? (
+          <Alert variant="danger">
+            <strong>Checkout tidak dapat dilakukan.</strong> Masih ada {unpaidCount} invoice yang belum lunas atau belum dibatalkan. Selesaikan semua invoice terlebih dahulu sebelum melakukan checkout final.
           </Alert>
         ) : null}
         <Alert variant="info" className="mb-3">
@@ -101,7 +101,8 @@ export default function CompleteStayModal({
         <Button variant="secondary" onClick={handleClose}>Batal</Button>
         <Button 
           onClick={handleSubmit} 
-          disabled={completeMutation.isPending || !actualCheckOutDate || !checkoutReason.trim()}
+          disabled={completeMutation.isPending || !actualCheckOutDate || !checkoutReason.trim() || unpaidCount > 0}
+          variant={unpaidCount > 0 ? 'secondary' : 'primary'}
         >
           {completeMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Konfirmasi Checkout Final'}
         </Button>

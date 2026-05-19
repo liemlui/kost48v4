@@ -45,9 +45,9 @@ export default function MyInvoicesPage() {
     queryFn: () => listResource<Invoice>('/invoices/my'),
     enabled: Boolean(userId),
     retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
     staleTime: 30_000,
   });
 

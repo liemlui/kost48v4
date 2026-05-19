@@ -36,6 +36,8 @@ export default function PaymentReviewPage() {
   const query = useQuery({
     queryKey: ['payment-review-queue', status, search],
     queryFn: () => listPaymentReviewQueue({ status, search: search.trim() || undefined, limit: 100 }),
+    refetchOnWindowFocus: true,
+    staleTime: 30_000,
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);

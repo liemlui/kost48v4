@@ -30,19 +30,19 @@ export class WifiSalesController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateWifiSaleDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil dicatat', data: await this.wifisalesService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateWifiSaleDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil diperbarui', data: await this.wifisalesService.update(id, dto, user) };
   }
 
   @Delete(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Penjualan WiFi berhasil dihapus', data: await this.wifisalesService.remove(id, user) };
   }

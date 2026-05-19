@@ -1,6 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuditLogService } from '../../audit-log/audit-log.service';
 import { StaysService } from '../stays/stays.service';
 import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
@@ -13,6 +14,7 @@ export class RenewRequestsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly staysService: StaysService,
+    private readonly audit: AuditLogService,
   ) {}
 
   /** Tenant creates a renew request for their active stay. */
@@ -51,6 +53,7 @@ export class RenewRequestsService {
         stayId: dto.stayId,
         tenantId: actor.tenantId!,
         requestedTerm: dto.requestedTerm,
+        requestedCheckOutDate: dto.requestedCheckOutDate ? new Date(dto.requestedCheckOutDate) : undefined,
         requestNotes: dto.requestNotes,
       },
     });
@@ -60,33 +63,68 @@ export class RenewRequestsService {
 
   /** Admin/owner approves a pending renew request and executes the renewal. */
   async approveRequest(id: number, dto: ApproveRenewRequestDto, actor: CurrentUserPayload) {
-    const request = await this.prisma.renewRequest.findUnique({ where: { id } });
-    if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
-    if (request.status !== RenewRequestStatus.PENDING) {
-      throw new ConflictException('Permintaan perpanjangan sudah diproses sebelumnya');
-    }
+    const result = await this.prisma.$transaction(async (tx) => {
+      const lockedRows = await tx.$queryRaw<Array<{ id: number }>>`
+        SELECT id FROM "RenewRequest" WHERE id = ${id} FOR UPDATE
+      `;
+      if (lockedRows.length === 0) {
+        throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
+      }
 
-    // Build RenewStayDto from the request. Admin can set the final plannedCheckOutDate via the existing stay DTO.
-    // We pass through to staysService.renewStay which handles the invoice + stay extension in a transaction.
-    const renewDto: RenewStayDto = {
-      plannedCheckOutDate: request.requestedCheckOutDate
-        ? request.requestedCheckOutDate.toISOString()
-        : undefined,
-    };
+      const request = await tx.renewRequest.findUnique({ where: { id } });
+      if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
+      if (request.status !== RenewRequestStatus.PENDING) {
+        throw new ConflictException('Permintaan perpanjangan sudah diproses sebelumnya');
+      }
 
-    const result = await this.staysService.renewStay(request.stayId, renewDto, actor);
+      const finalPlannedCheckOutDate = dto.plannedCheckOutDate
+        ?? (request.requestedCheckOutDate ? request.requestedCheckOutDate.toISOString() : undefined);
 
-    const updated = await this.prisma.renewRequest.update({
-      where: { id },
-      data: {
-        status: RenewRequestStatus.APPROVED,
-        reviewNotes: dto.reviewNotes ?? null,
-        reviewedById: actor.id,
-        reviewedAt: new Date(),
-      },
+      const renewDto: RenewStayDto = {
+        plannedCheckOutDate: finalPlannedCheckOutDate,
+        agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
+      };
+
+      const renewResult = await this.staysService.renewStayInTransaction(tx, request.stayId, renewDto, actor);
+
+      const updated = await tx.renewRequest.update({
+        where: { id },
+        data: {
+          status: RenewRequestStatus.APPROVED,
+          requestedCheckOutDate: finalPlannedCheckOutDate ? new Date(finalPlannedCheckOutDate) : request.requestedCheckOutDate,
+          reviewNotes: dto.reviewNotes ?? null,
+          reviewedById: actor.id,
+          reviewedAt: new Date(),
+        },
+      });
+
+      return { request: updated, ...renewResult };
     });
 
-    return { request: updated, stay: result.stay, invoice: result.invoice };
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'APPROVE',
+      entityType: 'RenewRequest',
+      entityId: String(result.request.id),
+      newData: result.request,
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'RENEW',
+      entityType: 'Stay',
+      entityId: String(result.stay.id),
+      oldData: result.oldStay,
+      newData: result.stay,
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'CREATE',
+      entityType: 'Invoice',
+      entityId: String(result.invoice.id),
+      newData: result.invoice,
+    });
+
+    return { request: result.request, stay: result.stay, invoice: result.invoice };
   }
 
   /** Admin/owner rejects a pending renew request. */

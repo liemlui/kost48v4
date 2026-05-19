@@ -5,7 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../../generated/prisma';
 import {
   BookingDepositPaymentStatus,
   InvoiceStatus,

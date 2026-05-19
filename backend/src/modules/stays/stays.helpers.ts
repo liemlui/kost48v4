@@ -1,4 +1,4 @@
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../../generated/prisma';
 
 export function normalizeStayForResponse<T extends Record<string, any>>(stay: T): T & { cancelReason: string | null } {
   return {

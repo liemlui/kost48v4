@@ -167,9 +167,12 @@ export class CheckoutRequestsService {
     return updated;
   }
 
-  /** Admin/owner list all checkout requests with optional status filter. */
-  async findAll(status?: CheckoutRequestStatus) {
-    const where = status ? { status } : {};
+  /** Admin/owner list checkout requests with optional status and stay filters. */
+  async findAll(status?: CheckoutRequestStatus, stayId?: number) {
+    const where: { status?: CheckoutRequestStatus; stayId?: number } = {};
+    if (status) where.status = status;
+    if (stayId) where.stayId = stayId;
+
     return this.prisma.checkoutRequest.findMany({
       where,
       include: {

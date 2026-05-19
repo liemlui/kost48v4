@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -35,11 +36,30 @@ export class CheckoutRequestsAdminController {
 
   @Get()
   @ApiQuery({ name: 'status', enum: CheckoutRequestStatus, required: false })
-  async findAll(@Query('status') status?: CheckoutRequestStatus) {
+  @ApiQuery({ name: 'stayId', type: Number, required: false })
+  async findAll(
+    @Query('status') status?: CheckoutRequestStatus,
+    @Query('stayId') stayId?: string,
+  ) {
+    const parsedStayId = this.parseOptionalStayId(stayId);
+
     return {
       message: 'Daftar permintaan checkout berhasil diambil',
-      data: await this.checkoutRequestsService.findAll(status),
+      data: await this.checkoutRequestsService.findAll(status, parsedStayId),
     };
+  }
+
+  private parseOptionalStayId(stayId?: string): number | undefined {
+    if (stayId === undefined || stayId === null || stayId === '') {
+      return undefined;
+    }
+
+    const parsed = Number(stayId);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      throw new BadRequestException('stayId harus berupa angka positif');
+    }
+
+    return parsed;
   }
 
   @Patch(':id/approve')

@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SubmissionEligibilityRow, SubmissionListRow, SubmissionLockRow } from './payment-submissions.types';
 import { mapSubmissionRow } from './payment-submissions.mapper';

@@ -15,7 +15,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listAdminRenewRequests, approveRenewRequest, rejectRenewRequest } from '../../api/renewRequests';
-import type { PaginatedResponse, RenewRequest } from '../../types';
+import type { ApproveRenewRequestPayload, PaginatedResponse, RenewRequest } from '../../types';
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
@@ -56,6 +56,7 @@ export default function RenewRequestsAdminPage() {
 
   const [approveTarget, setApproveTarget] = useState<RenewRequest | null>(null);
   const [plannedCheckOutDate, setPlannedCheckOutDate] = useState('');
+  const [approveReviewNotes, setApproveReviewNotes] = useState('');
 
   const [rejectTarget, setRejectTarget] = useState<RenewRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
@@ -67,12 +68,13 @@ export default function RenewRequestsAdminPage() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload?: { plannedCheckOutDate?: string } }) =>
+    mutationFn: ({ id, payload }: { id: number; payload?: ApproveRenewRequestPayload }) =>
       approveRenewRequest(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-renew-requests'] });
       setApproveTarget(null);
       setPlannedCheckOutDate('');
+      setApproveReviewNotes('');
     },
   });
 
@@ -94,11 +96,15 @@ export default function RenewRequestsAdminPage() {
 
   const handleApprove = () => {
     if (!approveTarget) return;
+    const payload: ApproveRenewRequestPayload = {};
+    const nextPlannedCheckOutDate = plannedCheckOutDate.trim();
+    const nextReviewNotes = approveReviewNotes.trim();
+    if (nextPlannedCheckOutDate) payload.plannedCheckOutDate = nextPlannedCheckOutDate;
+    if (nextReviewNotes) payload.reviewNotes = nextReviewNotes;
+
     approveMutation.mutate({
       id: approveTarget.id,
-      payload: plannedCheckOutDate.trim()
-        ? { plannedCheckOutDate: plannedCheckOutDate.trim() }
-        : undefined,
+      payload: Object.keys(payload).length > 0 ? payload : undefined,
     });
   };
 
@@ -208,7 +214,8 @@ export default function RenewRequestsAdminPage() {
                             size="sm"
                             onClick={() => {
                               setApproveTarget(rr);
-                              setPlannedCheckOutDate('');
+                              setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : '');
+                              setApproveReviewNotes('');
                             }}
                           >
                             Setujui
@@ -243,6 +250,7 @@ export default function RenewRequestsAdminPage() {
           if (!approveMutation.isPending) {
             setApproveTarget(null);
             setPlannedCheckOutDate('');
+            setApproveReviewNotes('');
           }
         }}
         centered
@@ -269,8 +277,18 @@ export default function RenewRequestsAdminPage() {
               onChange={(e) => setPlannedCheckOutDate(e.target.value)}
             />
             <Form.Text className="text-muted">
-              Kosongkan jika tidak ingin mengubah rencana checkout.
+              Kosongkan untuk mengikuti periode renewal otomatis dari sistem.
             </Form.Text>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Catatan Persetujuan (opsional)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={2}
+              value={approveReviewNotes}
+              onChange={(e) => setApproveReviewNotes(e.target.value)}
+              placeholder="Contoh: Disetujui, invoice renewal sudah diterbitkan."
+            />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
@@ -279,6 +297,7 @@ export default function RenewRequestsAdminPage() {
             onClick={() => {
               setApproveTarget(null);
               setPlannedCheckOutDate('');
+              setApproveReviewNotes('');
             }}
             disabled={approveMutation.isPending}
           >

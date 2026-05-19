@@ -37,9 +37,9 @@ export function useTenantPortalStage() {
     enabled: isTenant && Boolean(userId),
     retry: false,
     staleTime: 60_000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   const bookingsQuery = useQuery({
@@ -48,9 +48,9 @@ export function useTenantPortalStage() {
     enabled: isTenant && Boolean(userId),
     retry: false,
     staleTime: 60_000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   const stayNotFound = isNotFoundError(stayQuery.error);

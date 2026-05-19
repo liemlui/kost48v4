@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InvoiceStatus, StayStatus, TicketStatus } from '../../common/enums/app.enums';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -8,7 +9,7 @@ export class AnalyticsService {
   async marketingSummary() {
     const [tenantCount, activeStayCount, repeatTenantCount, checkoutReasons] = await Promise.all([
       this.prisma.tenant.count(),
-      this.prisma.stay.count({ where: { status: 'ACTIVE' as any } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE } }),
       this.prisma.stay.groupBy({ by: ['tenantId'], _count: { tenantId: true }, having: { tenantId: { _count: { gt: 1 } } } }),
       this.prisma.stay.groupBy({ by: ['checkoutReason'], _count: { checkoutReason: true } }),
     ]);
@@ -21,7 +22,7 @@ export class AnalyticsService {
       this.prisma.invoicePayment.aggregate({ _sum: { amountRupiah: true } }),
       this.prisma.wifiSale.aggregate({ _sum: { soldPriceRupiah: true } }),
       this.prisma.expense.aggregate({ _sum: { amountRupiah: true } }),
-      this.prisma.invoice.count({ where: { status: { in: ['ISSUED', 'PARTIAL'] as any }, dueDate: { lt: new Date() } } }),
+      this.prisma.invoice.count({ where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] }, dueDate: { lt: new Date() } } }),
     ]);
     return { totalBilledRupiah: invoiceAgg._sum.totalAmountRupiah ?? 0, totalPaidRupiah: paymentAgg._sum.amountRupiah ?? 0, totalWifiRevenueRupiah: wifiAgg._sum.soldPriceRupiah ?? 0, totalExpenseRupiah: expenseAgg._sum.amountRupiah ?? 0, overdueCount };
   }
@@ -29,9 +30,9 @@ export class AnalyticsService {
   async operationsSummary() {
     const [roomCount, activeStayCount, ticketOpenCount, ticketInProgressCount, lowStockCount] = await Promise.all([
       this.prisma.room.count({ where: { isActive: true } }),
-      this.prisma.stay.count({ where: { status: 'ACTIVE' as any } }),
-      this.prisma.ticket.count({ where: { status: 'OPEN' as any } }),
-      this.prisma.ticket.count({ where: { status: 'IN_PROGRESS' as any } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE } }),
+      this.prisma.ticket.count({ where: { status: TicketStatus.OPEN } }),
+      this.prisma.ticket.count({ where: { status: TicketStatus.IN_PROGRESS } }),
       this.prisma.inventoryItem.findMany(),
     ]);
     const lowStock = lowStockCount.filter((item) => Number(item.qtyOnHand) <= Number(item.minQty)).length;

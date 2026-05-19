@@ -18,7 +18,7 @@ export async function listMyCheckoutRequests(): Promise<PaginatedResponse<Checko
   return { items };
 }
 
-export async function listAdminCheckoutRequests(params?: { status?: string }): Promise<PaginatedResponse<CheckoutRequest>> {
+export async function listAdminCheckoutRequests(params?: { status?: string; stayId?: number }): Promise<PaginatedResponse<CheckoutRequest>> {
   const data = await listResource<CheckoutRequest>('/admin/checkout-requests', params as Record<string, unknown>) as unknown as CheckoutRequest[];
   // Backend returns a plain array; normalize to PaginatedResponse shape
   const items = Array.isArray(data) ? data : (data as unknown as PaginatedResponse<CheckoutRequest>)?.items ?? [];

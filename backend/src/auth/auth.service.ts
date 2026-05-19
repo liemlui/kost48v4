@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizePhone, denormalizePhone } from '../common/utils/phone.util';
 import { ChangePasswordDto } from './dto/change-password.dto';

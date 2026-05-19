@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../../generated/prisma';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RoomStatus, StayStatus, InvoiceStatus, UtilityType } from '../../common/enums/app.enums';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';

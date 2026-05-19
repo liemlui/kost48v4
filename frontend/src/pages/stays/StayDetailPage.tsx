@@ -77,27 +77,30 @@ export default function StayDetailPage() {
   const hasUnpaid = useMemo(() => hasUnpaidInvoices(invoices), [invoices]);
   const depositLabel = getDepositLabel(stay?.depositStatus);
 
+  const stayId = Number(id);
+  const hasValidStayId = Number.isInteger(stayId) && stayId > 0;
+
   const checkoutRequestsQuery = useQuery({
-    queryKey: ['admin-checkout-requests', 'stay', Number(id)],
-    queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }),
-    enabled: Boolean(id),
+    queryKey: ['admin-checkout-requests', 'stay', stayId, 'PENDING'],
+    queryFn: () => listAdminCheckoutRequests({ status: 'PENDING', stayId }),
+    enabled: hasValidStayId,
   });
 
   const approvedCheckoutRequestsQuery = useQuery({
-    queryKey: ['admin-checkout-requests', 'stay', Number(id), 'APPROVED'],
-    queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }),
-    enabled: Boolean(id),
+    queryKey: ['admin-checkout-requests', 'stay', stayId, 'APPROVED'],
+    queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED', stayId }),
+    enabled: hasValidStayId,
   });
 
   const pendingCheckoutRequest = useMemo(() => {
     if (!checkoutRequestsQuery.data?.items) return null;
-    return checkoutRequestsQuery.data.items.find((r) => r.stayId === Number(id)) ?? null;
-  }, [checkoutRequestsQuery.data, id]);
+    return checkoutRequestsQuery.data.items[0] ?? null;
+  }, [checkoutRequestsQuery.data]);
 
   const approvedCheckoutRequest = useMemo(() => {
     if (!approvedCheckoutRequestsQuery.data?.items) return null;
-    return approvedCheckoutRequestsQuery.data.items.find((r) => r.stayId === Number(id)) ?? null;
-  }, [approvedCheckoutRequestsQuery.data, id]);
+    return approvedCheckoutRequestsQuery.data.items[0] ?? null;
+  }, [approvedCheckoutRequestsQuery.data]);
 
   const approveCrMutation = useMutation({
     mutationFn: async (crId: number) => approveCheckoutRequest(crId),

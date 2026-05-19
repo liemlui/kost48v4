@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { StaysController } from './stays.controller';
 import { StaysService } from './stays.service';
 import { StaysQueryService } from './stays-query.service';
-import { AuditLogModule } from 'src/audit-log/audit-log.module';
+import { AuditLogModule } from '../../audit-log/audit-log.module';
 
 @Module({
   imports: [AuditLogModule],

@@ -7,7 +7,7 @@ import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceSt
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
-import { Prisma } from 'src/generated/prisma';
+import { Prisma } from '../../generated/prisma';
 import {
   normalizeStayForResponse,
   startOfDay,
@@ -499,7 +499,36 @@ export class StaysService {
   }
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
-    const stay = await this.prisma.stay.findUnique({ where: { id } });
+    try {
+      const result = await this.prisma.$transaction((tx) => this.renewStayInTransaction(tx, id, dto, actor));
+
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: 'RENEW',
+        entityType: 'Stay',
+        entityId: String(result.stay.id),
+        oldData: result.oldStay,
+        newData: result.stay,
+      });
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: 'CREATE',
+        entityType: 'Invoice',
+        entityId: String(result.invoice.id),
+        newData: result.invoice,
+      });
+
+      return { stay: result.stay, invoice: result.invoice };
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new ConflictException(`Constraint database gagal: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async renewStayInTransaction(tx: Prisma.TransactionClient, id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
+    const stay = await tx.stay.findUnique({ where: { id } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (stay.status !== 'ACTIVE') throw new ConflictException('Stay tidak aktif, tidak dapat diperpanjang');
 
@@ -521,79 +550,53 @@ export class StaysService {
 
     const rentAmount = dto.agreedRentAmountRupiah ?? stay.agreedRentAmountRupiah;
 
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        const updatedStay = await tx.stay.update({
-          where: { id },
-          data: { plannedCheckOutDate: newPlannedCheckOut },
-        });
+    const updatedStay = await tx.stay.update({
+      where: { id },
+      data: { plannedCheckOutDate: newPlannedCheckOut },
+    });
 
-        const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
-        const periodStart = logicalPeriodStart;
-        const periodEnd = newPlannedCheckOut;
-        const dueDate = calculateDueDate(periodEnd);
+    const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
+    const periodStart = logicalPeriodStart;
+    const periodEnd = newPlannedCheckOut;
+    const dueDate = calculateDueDate(periodEnd);
 
-        // Keep invoice in DRAFT while inserting lines because DB guards prevent line mutation after ISSUE.
-        // Immediately issue it after the renewal rent line exists, so approved renewals are tenant-facing.
-        let invoice = await tx.invoice.create({
-          data: {
-            invoiceNumber,
-            stayId: stay.id,
-            status: InvoiceStatus.DRAFT,
-            periodStart,
-            periodEnd,
-            dueDate,
-            createdById: actor.id,
-          },
-        });
+    // Keep invoice in DRAFT while inserting lines because DB guards prevent line mutation after ISSUE.
+    // Immediately issue it after the renewal rent line exists, so approved renewals are tenant-facing.
+    let invoice = await tx.invoice.create({
+      data: {
+        invoiceNumber,
+        stayId: stay.id,
+        status: InvoiceStatus.DRAFT,
+        periodStart,
+        periodEnd,
+        dueDate,
+        createdById: actor.id,
+      },
+    });
 
-        const unit = mapPricingTermToUnit(stay.pricingTerm);
-        await tx.invoiceLine.create({
-          data: {
-            invoiceId: invoice.id,
-            lineType: 'RENT' as any,
-            description: `Perpanjangan ${stay.pricingTerm}`,
-            qty: 1,
-            unit,
-            unitPriceRupiah: rentAmount,
-            lineAmountRupiah: rentAmount,
-            sortOrder: 0,
-          },
-        });
+    const unit = mapPricingTermToUnit(stay.pricingTerm);
+    await tx.invoiceLine.create({
+      data: {
+        invoiceId: invoice.id,
+        lineType: 'RENT' as any,
+        description: `Perpanjangan ${stay.pricingTerm}`,
+        qty: 1,
+        unit,
+        unitPriceRupiah: rentAmount,
+        lineAmountRupiah: rentAmount,
+        sortOrder: 0,
+      },
+    });
 
-        invoice = await tx.invoice.update({
-          where: { id: invoice.id },
-          data: {
-            status: InvoiceStatus.ISSUED,
-            issuedAt: new Date(),
-          },
-        });
+    invoice = await tx.invoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: InvoiceStatus.ISSUED,
+        issuedAt: new Date(),
+      },
+    });
 
-        return { stay: updatedStay, invoice };
-      });
-
-      await this.audit.log({
-        actorUserId: actor.id,
-        action: 'RENEW',
-        entityType: 'Stay',
-        entityId: String(result.stay.id),
-        oldData: stay,
-        newData: result.stay,
-      });
-      await this.audit.log({
-        actorUserId: actor.id,
-        action: 'CREATE',
-        entityType: 'Invoice',
-        entityId: String(result.invoice.id),
-        newData: result.invoice,
-      });
-
-      return result;
-    } catch (error: any) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new ConflictException(`Constraint database gagal: ${error.message}`);
-      }
-      throw error;
-    }
+    return { oldStay: stay, stay: updatedStay, invoice };
   }
+
 }
