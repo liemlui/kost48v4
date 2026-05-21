@@ -1,5 +1,5 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-19 V5.13 release readiness checklist sync
+**Versi:** 2026-05-21 V5.15 Intelligent Command Center + Finance Foundation checklist sync
 
 ## A. Start Hygiene
 
@@ -8,73 +8,243 @@
   Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
   ```
 - [ ] Confirm working tree state.
+- [ ] Confirm branch from local git.
 - [ ] PowerShell only.
 - [ ] API tests use `Invoke-RestMethod`.
 - [ ] No DB reset unless user explicitly asks.
-- [ ] No new `.md` docs.
+- [ ] No new `.md` docs unless user asks.
+- [ ] No multi-app/workspace migration.
+- [ ] No new dependency without PLAN/approval.
+- [ ] Do not claim PASS without build + verification.
+- [ ] No dark mode.
+- [ ] No production mutation.
 
-## B. V5.10-A Verification
+## B. Stable Baseline Before V5.15
 
-- [ ] No backend import `from 'src/...` remains.
-- [ ] `CompleteStayModal` says checkout cannot proceed when open invoice exists.
-- [ ] Confirm button disabled when unpaid/open invoice count > 0.
-- [ ] `AuditLogModule` imports `PrismaModule` explicitly.
-- [ ] Prisma `binaryTargets` appropriate for dev/source-lite.
+- [ ] Confirm baseline includes `e93c78a` or newer.
+- [ ] Confirm V5.12 full regression was previously PASS.
+- [ ] Confirm V5.13 release readiness scripts/docs are present if using that baseline.
+- [ ] Confirm latest V5.14 frontend Command Center zip has been merged before V5.15 ACT.
+- [ ] Preserve locked guards:
+  - [ ] Renewal invoice `ISSUED`.
+  - [ ] Checkout final blocks open invoice.
+  - [ ] `DRAFT` blocks checkout.
+  - [ ] No auto-create final utility invoice.
+  - [ ] Payment approval remains core monolith.
+  - [ ] Renew execution remains core monolith.
+  - [ ] Room status writes remain core monolith.
+  - [ ] Admin approve checkout request does not complete stay.
+
+## C. V5.14 Implementation State To Confirm Locally
+
+- [ ] `AssistantPanel` exists.
+- [ ] `ActionQueueTable` exists.
+- [ ] `CompactMetrics` exists.
+- [ ] `StatusBadge` was updated.
+- [ ] `ReadinessChecklist` exists.
+- [ ] `BlockedReasonCard` exists.
+- [ ] `LifecycleTimeline` exists.
+- [ ] `PeriodVisualizer` exists.
+- [ ] Dashboard owner/admin/staff uses Command Center pattern.
+- [ ] Tenant My Stay Guide uses tenant-friendly copy.
+- [ ] Invoices/stays/renew/tickets/reminders/public rooms received expansion patch.
+- [ ] Frontend build PASS after merge.
+- [ ] Manual browser smoke pending/done:
+  - [ ] `/dashboard`
+  - [ ] `/reports`
+  - [ ] `/invoices`
+  - [ ] `/stays`
+  - [ ] `/payment-submissions/review`
+  - [ ] `/portal/stay`
+
+## D. V5.15-A Docs Sync Checklist
+
+- [x] Product direction updated to Intelligent Command Center + Finance Foundation.
+- [x] Stable Modular Monolith preserved.
+- [x] Tier 0 rule intelligence defined.
+- [x] Tier 1 AI on-demand defined.
+- [x] Tier 2 finance foundation defined.
+- [x] Assistant vs queue dedup rule defined.
+- [x] Sidebar simplification rule defined.
+- [x] Smart chart system planned.
+- [x] Balance sheet/formal ratio readiness planned.
+- [x] Only 7 active docs updated.
+
+## E. V5.15-B UX Dedup + Sidebar Simplification
+
+Before ACT:
+
+- [ ] Inspect latest merged frontend source.
+- [ ] Identify current dashboard duplicate assistant/queue items.
+- [ ] Identify sidebar report/menu entries.
+- [ ] Confirm owner/admin/staff/tenant navigation behavior.
+
+Patch:
+
+- [ ] AssistantPanel summarizes diagnosis only.
+- [ ] ActionQueueTable lists actionable rows only.
+- [ ] Dedup by `ruleId + entityType + entityId + actionRoute`.
+- [ ] Dashboard links to reports drill-down.
+- [ ] Sidebar no longer feels like a full page dump.
+- [ ] Reports still accessible for OWNER.
+- [ ] No route removed without alternate path.
+- [ ] Frontend build PASS.
+- [ ] Manual check OWNER/ADMIN/STAFF/TENANT sidebar.
+
+## F. V5.15-C Tier 0 Rule Intelligence Hooks
+
+Create/Update:
+
+- [ ] `frontend/src/hooks/useBusinessHealthScore.ts`
+- [ ] `frontend/src/hooks/useTenantRiskProfile.ts`
+- [ ] `frontend/src/hooks/useCashflowForecast.ts`
+- [ ] `frontend/src/hooks/useOperationalStressIndex.ts`
+- [ ] `frontend/src/hooks/useMeterAnomalyDetector.ts`
+- [ ] `frontend/src/utils/smartCopy.ts`
+- [ ] `frontend/src/utils/scoring.ts`
+
+Quality:
+
+- [ ] No LLM/API call.
+- [ ] Deterministic outputs.
+- [ ] Handles empty data gracefully.
+- [ ] No fake data.
+- [ ] Business score explains drivers.
+- [ ] Tenant risk uses tenant-friendly wording.
+- [ ] Cashflow forecast labels assumptions.
+- [ ] Operational stress separates admin vs staff risk.
+- [ ] Meter anomaly is warning only unless backend rule exists.
+- [ ] Frontend build PASS.
+
+## G. V5.15-D Smart Chart System
+
+- [ ] Create/update `SmartChartPanel` if needed.
+- [ ] Support mode switching:
+  - [ ] Summary
+  - [ ] Donut
+  - [ ] Bar
+  - [ ] Line if time-series data exists
+  - [ ] Table
+- [ ] Do not show unsupported chart modes.
+- [ ] Occupancy/room condition chart links to reports drill-down.
+- [ ] No new chart dependency unless approved.
+- [ ] Frontend build PASS.
+
+## H. V5.15-E Reports + Formal Finance Readiness
+
+Reports UX:
+
+- [ ] Reports can be opened from dashboard.
+- [ ] Reports page has clear Command Center/drill-down tabs.
+- [ ] Occupancy report connects to room condition dashboard.
+- [ ] Formal ratios explain locked state.
+
+Finance readiness:
+
+- [ ] Balance sheet readiness panel exists.
+- [ ] Cash/bank source identified.
+- [ ] Accounts receivable from open invoices identified.
+- [ ] Deposit held treated as liability.
+- [ ] Expenses source identified.
+- [ ] Payables/equity missing state explained.
+- [ ] Formal ratios remain locked until data reliable.
+- [ ] No fake ratio values.
+- [ ] Frontend build PASS.
+
+## I. V5.15-F Backend Finance Summary Endpoints
+
+Only after PLAN/ACT approval:
+
+- [ ] Inspect existing reports module.
+- [ ] Confirm guards OWNER/ADMIN.
+- [ ] Add read-only endpoint only.
+- [ ] No lifecycle mutation.
+- [ ] No DB reset.
+- [ ] Return readiness object if incomplete.
+- [ ] Backend build PASS.
+- [ ] Smoke with `Invoke-RestMethod`.
+
+Candidate endpoints:
+
+- [ ] `GET /api/finance/business-health`
+- [ ] `GET /api/finance/occupancy/summary`
+- [ ] `GET /api/finance/formal-ratios/readiness`
+- [ ] `GET /api/finance/balance-sheet/draft`
+
+## J. V5.15-G Balance Sheet / Schema Plan
+
+Before schema ACT:
+
+- [ ] Write migration plan.
+- [ ] Identify current Prisma models.
+- [ ] Decide account model.
+- [ ] Decide journal/ledger model.
+- [ ] Decide deposit liability mapping.
+- [ ] Decide cash/bank source.
+- [ ] Decide opening balance strategy.
+- [ ] No DB reset.
+- [ ] Backup plan exists for production.
+
+Potential models:
+
+- [ ] `FinanceAccount`
+- [ ] `JournalEntry`
+- [ ] `LedgerEntry`
+- [ ] `BalanceSnapshot`
+- [ ] `AiCache` optional
+
+## K. V5.15-H Tier 1 AI On-Demand
+
+Backend:
+
+- [ ] `ai.module.ts`
+- [ ] `ai.service.ts`
+- [ ] `ai.controller.ts`
+- [ ] `ai-cache.service.ts`
+- [ ] provider key from env only.
+- [ ] no secret committed.
+- [ ] rate limit `/api/ai/*`.
+- [ ] cache before provider call.
+- [ ] JSON output.
+- [ ] no autonomous mutation.
+
+Frontend:
+
+- [ ] AI call only after explicit click.
+- [ ] Loading state clear.
+- [ ] Result shown as suggestion only.
+- [ ] Admin must still decide final action.
+- [ ] Errors do not block normal workflow.
+
+Smoke:
+
 - [ ] Backend build PASS.
 - [ ] Frontend build PASS.
-- [ ] Smoke API PASS.
+- [ ] API test uses `Invoke-RestMethod`.
 
-## C. V5.10-B Renew Request
+## L. V5.15-I Payment Proof Scanner
 
-- [ ] Backend approve DTO accepts `plannedCheckOutDate`.
-- [ ] Backend approve DTO accepts `agreedRentAmountRupiah`.
-- [ ] Backend approve DTO accepts `reviewNotes`.
-- [ ] Backend create DTO accepts optional `requestedCheckOutDate`.
-- [ ] Frontend `ApproveRenewRequestPayload` matches backend.
-- [ ] Admin renew modal can send approval notes.
-- [ ] Approval locks renew request row with `FOR UPDATE`.
-- [ ] Stay extension, invoice issue, and request approval happen in one transaction.
-- [ ] Double approval rejected.
-- [ ] Renewal invoice is `ISSUED`.
+- [ ] Only available from review page/modal.
+- [ ] Click “Analisa bukti” triggers AI.
+- [ ] Extracted amount/date/confidence shown.
+- [ ] Mismatch warning shown.
+- [ ] Does not approve payment.
+- [ ] Does not mutate invoice/payment/stay.
+- [ ] Result cached.
+- [ ] Admin still clicks approve/reject manually.
 
-## D. V5.10-C Staff Boundary
-
-- [ ] STAFF can read meter readings.
-- [ ] STAFF cannot create/update meter readings.
-- [ ] STAFF can read expenses.
-- [ ] STAFF cannot create/update/delete expenses.
-- [ ] STAFF can read wifi sales.
-- [ ] STAFF cannot create/update/delete wifi sales.
-- [ ] Tickets operational staff behavior preserved.
-
-## E. V5.10-D Finance Boundary
-
-- [ ] Payment review queue still OWNER/ADMIN.
-- [ ] Payment approval still OWNER/ADMIN only.
-- [ ] Invoice mutation still OWNER/ADMIN only.
-- [ ] Invoice payment mutation still OWNER/ADMIN only.
-- [ ] Staff read visibility remains only where intended.
-
-## F. V5.10-E Docs Sync
-
-- [ ] Active architecture says Stable Modular Monolith.
-- [ ] Multi-app described as roadmap only.
-- [ ] V5.8 stale wording removed.
-- [ ] V5.10-B/C/D changes documented.
-- [ ] No new markdown files created.
-
-## G. V5.10-F UAT Commands
-
-Backend build:
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
-```
+## M. Build / Smoke Commands
 
 Frontend build:
 
 ```powershell
 Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+```
+
+Backend build if backend touched:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
 ```
 
 Smoke:
@@ -86,77 +256,13 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/me/notifications" 
 Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}
 ```
 
-## H. Deferred
+## N. Deferred
 
 - [ ] Multi-app shell.
 - [ ] Workspace migration.
-- [ ] Owner-api.
+- [ ] Service-to-service HTTP.
+- [ ] WebSocket/realtime.
 - [ ] Payment gateway.
-- [ ] DepositTransaction model.
-- [ ] Damage/penalty model.
-
-
-## H. V5.11 Checkout Filter + Regression Pack
-
-- [ ] Backend build PASS after checkout request filter patch.
-- [ ] Frontend build PASS after `StayDetailPage` query patch.
-- [ ] `GET /api/admin/checkout-requests?status=PENDING&stayId=1` returns success.
-- [ ] `GET /api/admin/checkout-requests?stayId=abc` returns HTTP 400.
-- [ ] `StayDetailPage` no longer loads all pending/approved checkout requests for a single stay detail check.
-- [ ] `scripts/uat/KOST48_V511_SMOKE.ps1` PASS.
-- [ ] `scripts/uat/KOST48_V511_STAFF_BOUNDARY.ps1` PASS.
-- [ ] No schema change.
-- [ ] No multi-app files created.
-- [ ] `git status --short` reviewed before commit.
-
-
-## I. V5.12 Renew + Checkout Full Business UAT Pack
-
-- [ ] Backend build PASS after applying V5.12 scripts/docs.
-- [ ] Frontend build PASS after applying V5.12 scripts/docs.
-- [ ] `scripts/uat/KOST48_V512_RENEW_UAT.ps1` PASS.
-- [ ] Renew script proves tenant renew create -> admin approve -> invoice `ISSUED`.
-- [ ] Renew script proves double approval rejected with HTTP 409.
-- [ ] Renew script proves tenant can see approved renew request and renewal invoice.
-- [ ] `scripts/uat/KOST48_V512_CHECKOUT_GUARD_UAT.ps1` PASS.
-- [ ] Checkout guard script proves open invoice blocks checkout with HTTP 409.
-- [ ] Checkout guard script proves paid invoice allows checkout final.
-- [ ] Checkout guard script proves room becomes `AVAILABLE` after checkout final.
-- [ ] `scripts/uat/KOST48_V512_PAYMENT_REGRESSION.ps1` PASS.
-- [ ] Payment script proves partial payment => `PARTIAL`.
-- [ ] Payment script proves overpayment rejected with HTTP 409.
-- [ ] Payment script proves remaining payment => `PAID`.
-- [ ] `scripts/uat/KOST48_V512_FULL_REGRESSION.ps1` PASS.
-- [ ] No schema change.
-- [ ] No DB reset.
-- [ ] No multi-app files created.
-- [ ] `git status --short` reviewed before commit.
-
-V5.12 full command:
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V512_FULL_REGRESSION.ps1
-```
-## V5.13 Release Readiness Checklist
-
-- [ ] Confirm clean git status before release prep.
-- [ ] Confirm latest baseline includes commit `e93c78a` or newer.
-- [ ] Run local release check:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_LOCAL_RELEASE_CHECK.ps1
-  ```
-- [ ] Create source-lite ZIP:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\release\KOST48_V513_CREATE_SOURCE_LITE_ZIP.ps1
-  ```
-- [ ] Run local smoke after backend is running if needed:
-  ```powershell
-  Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
-  ```
-- [ ] Run production-safe smoke after deployment:
-  ```powershell
-  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; .\scripts\uat\KOST48_V513_PRODUCTION_SAFE_SMOKE.ps1 -BaseApi "https://api.kost48surabaya.com/api"
-  ```
-- [ ] Do not reset production DB.
-- [ ] Do not run UAT scripts that create data against production.
-- [ ] Do not claim production PASS until smoke returns PASS.
+- [ ] Autonomous AI approval.
+- [ ] Production DB mutation.
+- [ ] Dark mode.
