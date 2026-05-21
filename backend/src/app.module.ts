@@ -25,6 +25,9 @@ import { RenewRequestsModule } from './modules/renew-requests/renew-requests.mod
 import { CheckoutRequestsModule } from './modules/checkout-requests/checkout-requests.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
+import { FinanceModule } from './modules/finance/finance.module';
+import { AiModule } from './modules/ai/ai.module';
+import { StaffRoutinesModule } from './modules/staff-routines/staff-routines.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -53,6 +56,9 @@ import { MarketingModule } from './modules/marketing/marketing.module';
     CheckoutRequestsModule,
     ReportsModule,
     MarketingModule,
+    FinanceModule,
+    AiModule,
+    StaffRoutinesModule,
   ],
 })
 export class AppModule {}

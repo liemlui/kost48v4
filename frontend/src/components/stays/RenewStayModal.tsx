@@ -26,30 +26,35 @@ function formatDisplayDate(input?: string | Date | null): string {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function addCalendarMonthsClamped(base: Date, months: number) {
+  const day = base.getDate();
+  const result = new Date(base.getFullYear(), base.getMonth(), 1);
+  result.setMonth(result.getMonth() + months);
+  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+  result.setDate(Math.min(day, lastDayOfTargetMonth));
+  return result;
+}
+
 function addTerm(base: Date, pricingTerm?: string) {
-  const result = new Date(base.getTime());
+  const result = new Date(base.getFullYear(), base.getMonth(), base.getDate());
   switch (pricingTerm) {
     case 'DAILY':
       result.setDate(result.getDate() + 1);
-      break;
+      return result;
     case 'WEEKLY':
       result.setDate(result.getDate() + 7);
-      break;
+      return result;
     case 'BIWEEKLY':
       result.setDate(result.getDate() + 14);
-      break;
+      return result;
     case 'SMESTERLY':
-      result.setMonth(result.getMonth() + 6);
-      break;
+      return addCalendarMonthsClamped(result, 6);
     case 'YEARLY':
-      result.setFullYear(result.getFullYear() + 1);
-      break;
+      return addCalendarMonthsClamped(result, 12);
     case 'MONTHLY':
     default:
-      result.setMonth(result.getMonth() + 1);
-      break;
+      return addCalendarMonthsClamped(result, 1);
   }
-  return result;
 }
 
 export default function RenewStayModal({
@@ -91,18 +96,18 @@ export default function RenewStayModal({
     setError('');
 
     if (!currentEndDate) {
-      setError('Tanggal akhir stay saat ini tidak valid. Periksa data stay sebelum memperpanjang.');
+      setError('Tanggal akhir masa sewa saat ini tidak valid. Periksa data stay sebelum memperpanjang.');
       return;
     }
 
     if (plannedCheckOutDate) {
       const selectedDate = toValidDate(plannedCheckOutDate);
       if (!selectedDate) {
-        setError('Tanggal check-out baru tidak valid.');
+        setError('Tanggal renew/keluar baru tidak valid.');
         return;
       }
       if (selectedDate <= currentEndDate) {
-        setError('Tanggal perpanjangan harus setelah tanggal berakhir saat ini.');
+        setError('Tanggal renew/keluar baru harus setelah tanggal renew/keluar saat ini.');
         return;
       }
     }
@@ -125,13 +130,13 @@ export default function RenewStayModal({
       <Modal.Body>
         <Alert variant={currentEndDate ? 'info' : 'warning'} className="mb-3">
           <div className="small">
-            <strong>Perpanjangan stay akan membuat invoice DRAFT baru untuk periode lanjutan.</strong>
+            <strong>Perpanjangan stay akan membuat invoice renewal yang langsung diterbitkan untuk periode lanjutan.</strong>
             <div className="mt-1">
-              • Tanggal berakhir saat ini: <strong>{formatDisplayDate(currentEndDate)}</strong>
+              • Tanggal renew/keluar saat ini: <strong>{formatDisplayDate(currentEndDate)}</strong>
               <br />
               • Pricing term stay: <strong>{stay.pricingTerm || '-'}</strong>
               <br />
-              • Jika tanggal kosong, sistem akan memakai estimasi otomatis: <strong>{formatDisplayDate(autoDate)}</strong>
+              • Jika tanggal kosong, sistem akan memakai tanggal renew/keluar otomatis: <strong>{formatDisplayDate(autoDate)}</strong>
             </div>
           </div>
         </Alert>
@@ -139,7 +144,7 @@ export default function RenewStayModal({
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tanggal Check-out Baru (Opsional)</Form.Label>
+          <Form.Label>Tanggal Renew / Keluar Baru (Opsional)</Form.Label>
           <Form.Control
             type="date"
             value={plannedCheckOutDate}
@@ -147,7 +152,7 @@ export default function RenewStayModal({
             min={formatDateInput(minDate)}
           />
           <div className="text-muted small mt-1">
-            Kosongkan bila ingin mengikuti perpanjangan otomatis sesuai pricing term.
+            Kosongkan bila ingin mengikuti periode sewa otomatis sesuai pricing term.
             <br />
             Tanggal minimal: <strong>{formatDisplayDate(minDate)}</strong>
           </div>

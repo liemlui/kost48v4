@@ -213,7 +213,7 @@ export function usePaymentUrgency(): {
       }
     }
 
-    // P4: Stay/contract ending soon (within 10 days)
+    // P4: Masa sewa/kontrak mendekati tanggal renew/keluar (within 10 days)
     {
       const stay = stayQuery.data;
       const stayError = stayQuery.error;
@@ -226,7 +226,7 @@ export function usePaymentUrgency(): {
             const delta = daysDelta(checkoutDate);
             if (delta >= 0 && delta <= 10) {
               const variant = delta <= 3 ? ('warning' as const) : ('info' as const);
-              const label = delta === 0 ? 'Kontrak berakhir hari ini' : `Kontrak ${daysLabel(delta)}`;
+              const label = delta === 0 ? 'Masa sewa renew/keluar hari ini' : `Masa sewa ${daysLabel(delta)}`;
               return {
                 type: 'STAY_ENDING_SOON',
                 label,

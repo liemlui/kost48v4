@@ -247,11 +247,14 @@ export default function ResourceTable({
   };
 
   const hasActiveField = config.fields.some((field) => field.name === 'isActive');
+  const visibleColumns = currentUserRole === 'STAFF' && config.path === '/rooms'
+    ? config.columns.filter((column) => !['monthlyRateRupiah', 'dailyRateRupiah', 'weeklyRateRupiah', 'defaultDepositRupiah'].includes(column.key))
+    : config.columns;
 
   return (
     <>
       {searchTerm !== undefined && setSearchTerm ? (
-        <div className="mb-4">
+        <div className="mb-4 resource-table-toolbar">
           <div className="d-flex gap-2 align-items-center flex-wrap">
             {hasActiveField && showActiveOnly !== undefined && setShowActiveOnly ? (
               <FormCheck
@@ -285,11 +288,11 @@ export default function ResourceTable({
       {!isLoading && !items.length ? <Alert variant="secondary">Belum ada data.</Alert> : null}
       {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data yang sesuai dengan filter pencarian.</Alert> : null}
       {!!filteredItems.length ? (
-        <Table hover responsive>
+        <Table hover responsive className="compact-data-table">
           <thead>
             <tr>
-              {config.columns.map((column) => <th key={column.key}>{column.label}</th>)}
-              <th style={{ width: 260 }}>Aksi</th>
+              {visibleColumns.map((column) => <th key={column.key}>{column.label}</th>)}
+              <th style={{ width: 220 }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -300,7 +303,7 @@ export default function ResourceTable({
 
               return (
                 <tr key={String(item.id)}>
-                  {config.columns.map((column) => (
+                  {visibleColumns.map((column) => (
                     <td key={column.key}>{renderCell(item, column)}</td>
                   ))}
                   <td>
@@ -315,9 +318,6 @@ export default function ResourceTable({
                         <Button size="sm" variant="outline-danger" onClick={() => onDelete(Number(item.id))}>
                           Hapus
                         </Button>
-                      ) : null}
-                      {!editGuard.allowed || (!deleteGuard.allowed && config.allowDelete) ? (
-                        <span className="small text-muted">{editGuard.reason || deleteGuard.reason}</span>
                       ) : null}
                     </div>
                   </td>

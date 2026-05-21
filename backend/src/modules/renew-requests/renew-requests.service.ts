@@ -154,7 +154,7 @@ export class RenewRequestsService {
     return this.prisma.renewRequest.findMany({
       where,
       include: {
-        stay: { select: { id: true, tenant: { select: { fullName: true, phone: true } }, room: { select: { code: true } } } },
+        stay: { select: { id: true, agreedRentAmountRupiah: true, tenant: { select: { fullName: true, phone: true } }, room: { select: { code: true } } } },
         tenant: { select: { fullName: true } },
         reviewedBy: { select: { fullName: true } },
       },

@@ -181,8 +181,8 @@ export default function InvoicePrintLayout({ data }: Props) {
             <td style={{ border: 'none' }}>: {roomInfo}</td>
           </tr>
           <tr>
-            <td style={{ border: 'none', fontWeight: 600 }}>Periode</td>
-            <td style={{ border: 'none' }}>: {formatDateSafe(data.periodStart)} – {formatDateSafe(data.periodEnd)}</td>
+            <td style={{ border: 'none', fontWeight: 600 }}>Periode Sewa</td>
+            <td style={{ border: 'none' }}>: {formatDateSafe(data.periodStart)} – sebelum {formatDateSafe(data.periodEnd)}</td>
           </tr>
           <tr>
             <td style={{ border: 'none', fontWeight: 600 }}>Jatuh Tempo</td>

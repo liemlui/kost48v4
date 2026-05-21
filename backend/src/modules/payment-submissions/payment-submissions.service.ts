@@ -33,6 +33,39 @@ import {
   endOfDay,
 } from './payment-submissions.helpers';
 
+function startOfDayLocal(value: Date): Date {
+  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+}
+
+function addDaysLocal(value: Date, days: number): Date {
+  const result = startOfDayLocal(value);
+  result.setDate(result.getDate() + days);
+  return startOfDayLocal(result);
+}
+
+function addCalendarMonthsClampedLocal(value: Date, months: number): Date {
+  const day = value.getDate();
+  const result = startOfDayLocal(value);
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+  result.setDate(Math.min(day, lastDayOfTargetMonth));
+  return startOfDayLocal(result);
+}
+
+function calculateExclusivePeriodEndLocal(checkInDate: Date, pricingTerm: string): Date {
+  const result = startOfDayLocal(checkInDate);
+  switch (pricingTerm) {
+    case 'DAILY': return addDaysLocal(result, 1);
+    case 'WEEKLY': return addDaysLocal(result, 7);
+    case 'BIWEEKLY': return addDaysLocal(result, 14);
+    case 'MONTHLY': return addCalendarMonthsClampedLocal(result, 1);
+    case 'SMESTERLY': return addCalendarMonthsClampedLocal(result, 6);
+    case 'YEARLY': return addCalendarMonthsClampedLocal(result, 12);
+    default: return addCalendarMonthsClampedLocal(result, 1);
+  }
+}
+
 @Injectable()
 export class PaymentSubmissionsService {
   constructor(
@@ -453,16 +486,10 @@ export class PaymentSubmissionsService {
             });
 
             if (activationStay && activationStay.checkInDate && !activationStay.plannedCheckOutDate) {
-              const autoPlannedCheckOut = new Date(activationStay.checkInDate);
-              switch (activationStay.pricingTerm) {
-                case 'DAILY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 1); break;
-                case 'WEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 7); break;
-                case 'BIWEEKLY': autoPlannedCheckOut.setDate(autoPlannedCheckOut.getDate() + 14); break;
-                case 'MONTHLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1); break;
-                case 'SMESTERLY': autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 6); break;
-                case 'YEARLY': autoPlannedCheckOut.setFullYear(autoPlannedCheckOut.getFullYear() + 1); break;
-                default: autoPlannedCheckOut.setMonth(autoPlannedCheckOut.getMonth() + 1);
-              }
+              const autoPlannedCheckOut = calculateExclusivePeriodEndLocal(
+                activationStay.checkInDate,
+                activationStay.pricingTerm,
+              );
 
               await tx.stay.update({
                 where: { id: activationStay.id },

@@ -10,6 +10,7 @@ import { createResource, getResource } from '../../api/resources';
 import { formatDateSafe } from '../resources/simpleCrudHelpers';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import { useAuth } from '../../context/AuthContext';
+import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
 
 const paymentMethodLabels: Record<string, string> = {
   CASH: 'Tunai',
@@ -28,6 +29,14 @@ const lineTypeLabels: Record<string, string> = {
   WIFI: 'WiFi',
   OTHER: 'Lainnya',
 };
+
+function isPastDue(dueDate: string | Date | null | undefined) {
+  if (!dueDate) return false;
+  const due = new Date(dueDate);
+  if (Number.isNaN(due.getTime())) return false;
+  due.setHours(23, 59, 59, 999);
+  return due.getTime() < Date.now();
+}
 
 export default function InvoiceDetailPage() {
   const { id } = useParams();
@@ -105,6 +114,51 @@ export default function InvoiceDetailPage() {
   const isFullyPaid = outstanding <= 0 && totalInvoice > 0;
   const canTakePayment = canManageFinance && invoice && !['CANCELLED', 'DRAFT'].includes(invoice.status) && outstanding > 0;
   const isCancelled = invoice?.status === 'CANCELLED';
+  const isDraft = invoice?.status === 'DRAFT';
+  const isOpenInvoice = invoice && !['PAID', 'CANCELLED'].includes(invoice.status);
+  const isOverdue = invoice && ['ISSUED', 'PARTIAL'].includes(invoice.status) && isPastDue(invoice.dueDate);
+
+  const assistantItems: AssistantItem[] = invoice ? [
+    isOverdue ? {
+      id: 'invoice-overdue',
+      severity: 'BLOCKER',
+      title: 'Tagihan ini sudah melewati jatuh tempo',
+      message: 'Follow-up tenant atau catat pembayaran agar checkout dan cashflow tidak ikut macet.',
+      source: 'Finance',
+      actionLabel: canTakePayment ? 'Catat Pembayaran' : undefined,
+      onAction: canTakePayment ? () => setShowPaymentModal(true) : undefined,
+    } : null,
+    isOpenInvoice && !isOverdue ? {
+      id: 'invoice-open',
+      severity: isDraft ? 'MEDIUM' : 'HIGH',
+      title: isDraft ? 'Draft belum terlihat tenant' : 'Masih ada sisa tagihan',
+      message: isDraft ? 'Terbitkan tagihan setelah rincian benar agar tenant bisa melihatnya.' : 'Tagihan terbuka akan menjadi blocker saat final checkout sampai dilunasi atau dibatalkan.',
+      source: 'Business rule',
+      actionLabel: canTakePayment && !isDraft ? 'Catat Pembayaran' : undefined,
+      onAction: canTakePayment && !isDraft ? () => setShowPaymentModal(true) : undefined,
+    } : null,
+    isFullyPaid ? {
+      id: 'invoice-paid',
+      severity: 'SUCCESS',
+      title: 'Tagihan sudah lunas',
+      message: 'Invoice ini tidak lagi menjadi blocker untuk proses checkout.',
+      source: 'Finance',
+    } : null,
+  ].filter(Boolean) as AssistantItem[] : [];
+
+  const metrics: MetricChip[] = invoice ? [
+    { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `INV-${invoice.id}`, icon: '🧾', status: invoice.status },
+    { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
+    { id: 'remaining', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: isOpenInvoice ? 'Harus selesai sebelum checkout final' : 'Tidak ada sisa', icon: '⚖️', status: outstanding > 0 ? 'WARNING' : 'SUCCESS' },
+    { id: 'due', label: 'Jatuh Tempo', value: formatDateSafe(invoice.dueDate), helper: isOverdue ? 'Sudah overdue' : 'Tanggal follow-up', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
+  ] : [];
+
+  const timelineSteps: TimelineStep[] = invoice ? [
+    { id: 'draft', label: 'Draft tagihan', description: 'Rincian dibuat dan belum tenant-facing.', status: invoice.status === 'DRAFT' ? 'active' : 'done' },
+    { id: 'issued', label: 'Tagihan diterbitkan', description: 'Tenant dapat melihat dan membayar tagihan.', status: invoice.status === 'DRAFT' ? 'pending' : ['CANCELLED'].includes(invoice.status) ? 'blocked' : 'done' },
+    { id: 'payment', label: 'Pembayaran berjalan', description: 'Pembayaran bisa penuh atau sebagian.', status: invoice.status === 'PARTIAL' ? 'active' : invoice.status === 'PAID' ? 'done' : invoice.status === 'CANCELLED' ? 'blocked' : 'pending' },
+    { id: 'closed', label: invoice.status === 'CANCELLED' ? 'Dibatalkan' : 'Selesai', description: invoice.status === 'PAID' ? 'Tagihan lunas dan tidak memblokir checkout.' : 'Menunggu pelunasan atau pembatalan.', status: invoice.status === 'PAID' ? 'done' : invoice.status === 'CANCELLED' ? 'blocked' : 'pending' },
+  ] : [];
 
   const handlePrint = () => {
     window.print();
@@ -131,24 +185,49 @@ export default function InvoiceDetailPage() {
   return (
     <div>
       <PageHeader
-        title={`Detail Invoice #${id}`}
-        description="Kelola rincian tagihan, progress pembayaran, dan tindak lanjut satu invoice secara fokus."
+        title={`Detail Tagihan #${id}`}
+        description="Kelola rincian tagihan, progress pembayaran, dan blocker checkout dari satu tempat."
         actionLabel="Kembali"
         onAction={() => navigate('/invoices')}
       />
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {successMessage ? <Alert variant="success">{successMessage}</Alert> : null}
-      {detailQuery.isError ? <Alert variant="danger">Gagal mengambil detail invoice.</Alert> : null}
+      {detailQuery.isError ? <Alert variant="danger">Gagal mengambil detail tagihan.</Alert> : null}
 
       {invoice ? (
         <>
+          <AssistantPanel
+            title="Asisten Tagihan"
+            subtitle="Membaca status pembayaran, jatuh tempo, dan dampaknya ke proses checkout."
+            items={assistantItems}
+            emptyTitle="Tagihan aman"
+            emptyMessage="Tidak ada blocker besar pada tagihan ini."
+          />
+
+          <CompactMetrics metrics={metrics} />
+
+          {isOpenInvoice ? (
+            <BlockedReasonCard
+              title="Tagihan ini masih bisa memblokir final checkout"
+              reason="Business rule aktif: checkout final hanya boleh dilakukan jika semua tagihan masa sewa sudah PAID atau CANCELLED. DRAFT juga dihitung sebagai tagihan terbuka."
+              actionLabel={canTakePayment && !isDraft ? 'Catat Pembayaran' : undefined}
+              actionTo={undefined}
+              variant={isOverdue ? 'DANGER' : 'WARNING'}
+            />
+          ) : null}
+
+          <LifecycleTimeline
+            title="Lifecycle Tagihan"
+            subtitle="Alur dari draft sampai lunas/dibatalkan, supaya dampak bisnisnya terlihat."
+            steps={timelineSteps}
+          />
           <Row className="g-4 mb-4">
             <Col lg={8}>
               <Card className="detail-hero border-0 h-100">
                 <Card.Body>
                   <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
                     <div>
-                      <div className="page-eyebrow">Ringkasan invoice</div>
+                      <div className="page-eyebrow">Ringkasan tagihan</div>
                       <h4 className="mb-1">{invoice.invoiceNumber || `INV-${invoice.id}`}</h4>
                       <div className="text-muted small">
                         {tenantName || `Stay #${invoice.stayId}`}
@@ -187,16 +266,6 @@ export default function InvoiceDetailPage() {
                       </div>
                     </Col>
                   </Row>
-
-                  {canManageFinance ? (
-                    <Alert variant="info" className="mt-3 mb-0">
-                      Flow sederhana yang disarankan: pastikan line tagihan sudah benar → issue invoice → catat pembayaran dari panel kanan. Untuk perhitungan otomatis listrik/air dari meter reading, backend idealnya nanti menyiapkan endpoint preview line utilitas per periode.
-                    </Alert>
-                  ) : (
-                    <Alert variant="secondary" className="mt-3 mb-0">
-                      Mode baca staff: detail invoice dan riwayat pembayaran bisa dilihat, tetapi perubahan finance hanya untuk OWNER/ADMIN.
-                    </Alert>
-                  )}
                 </Card.Body>
               </Card>
             </Col>
@@ -222,9 +291,9 @@ export default function InvoiceDetailPage() {
                   {!canTakePayment ? (
                     <div className="small text-muted mt-3">
                       {!canManageFinance
-                        ? 'Mode baca staff: pencatatan pembayaran hanya untuk OWNER/ADMIN.'
+                        ? 'Pencatatan pembayaran dilakukan oleh admin.'
                         : invoice.status === 'DRAFT'
-                          ? 'Invoice masih draft. Issue invoice terlebih dahulu sebelum menerima pembayaran.'
+                          ? 'Tagihan masih disiapkan. Terbitkan tagihan dulu sebelum menerima pembayaran.'
                           : invoice.status === 'CANCELLED'
                             ? 'Invoice dibatalkan sehingga tidak bisa menerima pembayaran.'
                             : 'Invoice ini sudah lunas.'}
@@ -305,9 +374,6 @@ export default function InvoiceDetailPage() {
                             </Form.Group>
                           </Col>
                         </Row>
-                        <Alert variant="secondary" className="small mt-3 mb-3">
-                          Saat ini line utilitas masih diinput manual dari frontend. Backend ideal berikutnya: endpoint hitung draft invoice otomatis dari selisih meter reading dan tarif stay.
-                        </Alert>
                         <div className="d-flex gap-2">
                           <Button size="sm" onClick={() => addLineMutation.mutate()} disabled={addLineMutation.isPending || !lineForm.description || !lineForm.unitPriceRupiah}>
                             {addLineMutation.isPending ? 'Menyimpan...' : 'Simpan'}
@@ -321,7 +387,7 @@ export default function InvoiceDetailPage() {
                   ) : null}
 
                   {!invoice.lines?.length ? (
-                    <EmptyState icon="🧾" title="Belum ada rincian invoice" description="Tambahkan setidaknya satu line sebelum invoice diterbitkan." />
+                    <EmptyState icon="🧾" title="Belum ada rincian tagihan" description="Tambahkan setidaknya satu rincian sebelum tagihan diterbitkan." />
                   ) : (
                     <Table hover responsive>
                       <thead>
@@ -409,7 +475,7 @@ export default function InvoiceDetailPage() {
         </Modal.Header>
         <Modal.Body>
           <Alert variant="secondary" className="small">
-            Simpel: isi tanggal, nominal, dan metode pembayaran. Sistem akan menyesuaikan status invoice sesuai total pembayaran yang masuk.
+            Simpel: isi tanggal, nominal, dan metode pembayaran. Sistem akan menyesuaikan status tagihan sesuai total pembayaran yang masuk.
           </Alert>
           <Form>
             <Form.Group className="mb-3">

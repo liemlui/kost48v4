@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   output        = "../src/generated/prisma"
-  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -135,6 +135,29 @@ enum InventoryMovementType {
   ADJUSTMENT
 }
 
+enum StaffRoutineFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum StaffRoutineAreaType {
+  GENERAL
+  BATHROOM
+  ROOM
+  INVENTORY
+  METER
+  SECURITY
+  CLEANING
+}
+
+enum StaffRoutineStatus {
+  DONE
+  NEED_HELP
+  MISSED
+  SKIPPED
+}
+
 enum AnnouncementAudience {
   TENANT
   ALL
@@ -195,24 +218,27 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  tenant                      Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  announcementsCreated        Announcement[]       @relation("AnnouncementCreatedBy")
-  staysCreated                Stay[]               @relation("StayCreatedBy")
-  staysInitialMetersRecorded  Stay[]               @relation("StayInitialMetersRecordedBy")
-  invoicesCreated             Invoice[]            @relation("InvoiceCreatedBy")
-  paymentsCaptured            InvoicePayment[]     @relation("InvoicePaymentCapturedBy")
-  ticketsAssigned             Ticket[]             @relation("TicketAssignedTo")
-  meterReadingsRecorded       MeterReading[]       @relation("MeterReadingRecordedBy")
-  inventoryMovementsCreated   InventoryMovement[]  @relation("InventoryMovementCreatedBy")
-  wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
-  expensesCreated             Expense[]            @relation("ExpenseCreatedBy")
-  renewRequestsReviewed       RenewRequest[]       @relation("RenewRequestReviewedBy")
-  checkoutRequestsReviewed    CheckoutRequest[]    @relation("CheckoutRequestReviewedBy")
-  auditLogs                   AuditLog[]           @relation("AuditLogActor")
-  paymentSubmissionsSubmitted PaymentSubmission[]  @relation("PaymentSubmissionSubmittedBy")
-  paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
-  passwordResetTokens         PasswordResetToken[]
-  notifications               AppNotification[]
+  tenant                       Tenant?                  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  announcementsCreated         Announcement[]           @relation("AnnouncementCreatedBy")
+  staysCreated                 Stay[]                   @relation("StayCreatedBy")
+  staysInitialMetersRecorded   Stay[]                   @relation("StayInitialMetersRecordedBy")
+  invoicesCreated              Invoice[]                @relation("InvoiceCreatedBy")
+  paymentsCaptured             InvoicePayment[]         @relation("InvoicePaymentCapturedBy")
+  ticketsAssigned              Ticket[]                 @relation("TicketAssignedTo")
+  staffRoutineTemplatesCreated StaffRoutineTemplate[]   @relation("StaffRoutineTemplateCreatedBy")
+  staffRoutineAssignments      StaffRoutineAssignment[] @relation("StaffRoutineAssignedTo")
+  staffRoutineCompletions      StaffRoutineCompletion[] @relation("StaffRoutineCompletedBy")
+  meterReadingsRecorded        MeterReading[]           @relation("MeterReadingRecordedBy")
+  inventoryMovementsCreated    InventoryMovement[]      @relation("InventoryMovementCreatedBy")
+  wifiSalesCreated             WifiSale[]               @relation("WifiSaleCreatedBy")
+  expensesCreated              Expense[]                @relation("ExpenseCreatedBy")
+  renewRequestsReviewed        RenewRequest[]           @relation("RenewRequestReviewedBy")
+  checkoutRequestsReviewed     CheckoutRequest[]        @relation("CheckoutRequestReviewedBy")
+  auditLogs                    AuditLog[]               @relation("AuditLogActor")
+  paymentSubmissionsSubmitted  PaymentSubmission[]      @relation("PaymentSubmissionSubmittedBy")
+  paymentSubmissionsReviewed   PaymentSubmission[]      @relation("PaymentSubmissionReviewedBy")
+  passwordResetTokens          PasswordResetToken[]
+  notifications                AppNotification[]
 
   @@index([role])
   @@index([isActive])
@@ -276,13 +302,15 @@ model Room {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  stays              Stay[]
-  meterReadings      MeterReading[]
-  tickets            Ticket[]
-  roomItems          RoomItem[]
-  expenses           Expense[]
-  inventoryMovements InventoryMovement[]
-  facilities         RoomFacility[]
+  stays                   Stay[]
+  meterReadings           MeterReading[]
+  tickets                 Ticket[]
+  roomItems               RoomItem[]
+  staffRoutineAssignments StaffRoutineAssignment[] @relation("StaffRoutineAssignmentRoom")
+  staffRoutineCompletions StaffRoutineCompletion[] @relation("StaffRoutineCompletionRoom")
+  expenses                Expense[]
+  inventoryMovements      InventoryMovement[]
+  facilities              RoomFacility[]
 
   @@index([status])
   @@index([isActive])
@@ -552,6 +580,76 @@ model Ticket {
   @@index([roomId])
   @@index([stayId])
   @@index([status])
+}
+
+model StaffRoutineTemplate {
+  id            Int                   @id @default(autoincrement())
+  title         String
+  description   String?
+  frequency     StaffRoutineFrequency @default(DAILY)
+  areaType      StaffRoutineAreaType  @default(GENERAL)
+  dayOfWeek     Int?
+  dayOfMonth    Int?
+  requiresPhoto Boolean               @default(false)
+  requiresNote  Boolean               @default(false)
+  isActive      Boolean               @default(true)
+  sortOrder     Int                   @default(0)
+  createdById   Int?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  createdBy   User?                    @relation("StaffRoutineTemplateCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignments StaffRoutineAssignment[]
+  completions StaffRoutineCompletion[]
+
+  @@index([frequency])
+  @@index([areaType])
+  @@index([isActive, sortOrder])
+}
+
+model StaffRoutineAssignment {
+  id          Int      @id @default(autoincrement())
+  templateId  Int
+  staffUserId Int?
+  roomId      Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  template    StaffRoutineTemplate     @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  staffUser   User?                    @relation("StaffRoutineAssignedTo", fields: [staffUserId], references: [id], onDelete: Cascade)
+  room        Room?                    @relation("StaffRoutineAssignmentRoom", fields: [roomId], references: [id], onDelete: SetNull)
+  completions StaffRoutineCompletion[]
+
+  @@index([templateId])
+  @@index([staffUserId])
+  @@index([roomId])
+  @@index([isActive])
+}
+
+model StaffRoutineCompletion {
+  id           Int                @id @default(autoincrement())
+  templateId   Int
+  assignmentId Int?
+  staffUserId  Int
+  roomId       Int?
+  dueDate      DateTime           @db.Date
+  status       StaffRoutineStatus @default(DONE)
+  completedAt  DateTime?
+  note         String?
+  photoUrl     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  template   StaffRoutineTemplate    @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  assignment StaffRoutineAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  staffUser  User                    @relation("StaffRoutineCompletedBy", fields: [staffUserId], references: [id], onDelete: Cascade)
+  room       Room?                   @relation("StaffRoutineCompletionRoom", fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@unique([templateId, assignmentId, staffUserId, roomId, dueDate])
+  @@index([staffUserId, dueDate])
+  @@index([status])
+  @@index([roomId])
 }
 
 model Announcement {

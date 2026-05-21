@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Card } from 'react-bootstrap';
+import { Alert, Card, Col, Row } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
 import PageHeader from '../../components/common/PageHeader';
+import StatCard from '../../components/common/StatCard';
 import ResourceFormModal from '../../components/resources/ResourceFormModal';
 import ResourceTable from '../../components/resources/ResourceTable';
 import {
@@ -334,7 +335,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   };
 
   const createGuard = useMemo(() => canCreateResourceItem(config, user?.role), [config, user?.role]);
-  const staffReadOnlyNotice = user?.role === 'STAFF' && !createGuard.allowed ? createGuard.reason : '';
+  const isStaffView = user?.role === 'STAFF';
 
   const flowNote = getFlowNote(config.path);
   const meta = query.data?.meta;
@@ -343,33 +344,32 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
     .length > 0;
 
   return (
-    <div>
+    <div className={isStaffView ? 'staff-simple-mode' : undefined}>
       <PageHeader
-        eyebrow="Master data"
+        eyebrow={isStaffView ? 'Daftar Cek' : 'Master data'}
         title={config.title}
-        description={`Kelola data ${config.title.toLowerCase()} dengan tampilan yang lebih rapi, relasi yang lebih jelas, dan input yang lebih aman.`}
+        description={isStaffView ? `Lihat data ${config.title.toLowerCase()} yang perlu dicek. Buka detail bila perlu.` : `Kelola data ${config.title.toLowerCase()} dengan tampilan yang lebih rapi, relasi yang lebih jelas, dan input yang lebih aman.`}
         actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
         onAction={createGuard.allowed ? openCreate : undefined}
       />
 
-      {staffReadOnlyNotice ? (
-        <Alert variant="info" className="content-card border-0 mb-4">
-          <div className="fw-semibold mb-1">Mode baca staff</div>
-          <div>{staffReadOnlyNotice}</div>
-        </Alert>
-      ) : null}
-
-      {flowNote ? (
-        <Alert variant="info" className="content-card border-0 mb-4">
-          <div className="fw-semibold mb-1">{flowNote.title}</div>
-          <div className="mb-1">{flowNote.description}</div>
-          <div className="small text-muted">Catatan backend: {flowNote.backendNote}</div>
-        </Alert>
-      ) : null}
-
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
-      <Card className="content-card border-0">
+      {!isStaffView ? (
+        <Row className="g-3 mb-3">
+          <Col md={4}>
+            <StatCard title="Data aktif" value={meta?.totalItems ?? filteredItems.length} subtitle="Total record pada filter aktif" icon="▦" variant="info" />
+          </Col>
+          <Col md={4}>
+            <StatCard title="Ditampilkan" value={filteredItems.length} subtitle="Baris yang siap ditindaklanjuti" icon="≡" />
+          </Col>
+          <Col md={4}>
+            <StatCard title="Langkah" value={createGuard.allowed ? 'Kelola' : 'Lihat'} subtitle={createGuard.allowed ? 'Tambah dan ubah data tersedia' : 'Lihat data yang tersedia'} icon="◉" variant={createGuard.allowed ? 'success' : 'warning'} />
+          </Col>
+        </Row>
+      ) : null}
+
+      <Card className="content-card border-0 resource-command-card">
         <Card.Body>
           <ResourceTable
             items={items}

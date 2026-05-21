@@ -53,6 +53,12 @@ export default function StatCard({
         <div className="stat-card-value">{value}</div>
         {trendLabel ? <div className={`stat-card-trend ${trendClassName}`}>{trendLabel}</div> : null}
         {subtitle ? <div className="stat-card-subtitle">{subtitle}</div> : null}
+        <div className="stat-card-spark" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     </div>
   );

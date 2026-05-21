@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { Alert, Badge, Button, Form, Modal } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge from '../common/StatusBadge';
 import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import AiAssistButton from '../ai/AiAssistButton';
+import { analyzePaymentProof, type PaymentProofAiResult } from '../../api/ai';
 
 function formatSafeDate(value?: string | null) {
   if (!value) return '-';
@@ -138,6 +140,40 @@ export default function ReviewPaymentModal({
               </div>
             ) : null}
 
+            {mode === 'approve' ? (
+              <Alert variant="info" className="small">
+                <div className="fw-semibold mb-2">AI on-demand: bantu cek metadata bukti pembayaran</div>
+                <AiAssistButton<PaymentProofAiResult>
+                  label="Analisa Bukti"
+                  loadingLabel="Menganalisa bukti..."
+                  disabled={busy || !submission}
+                  run={() => analyzePaymentProof({
+                    submissionId: submission.id,
+                    expectedAmountRupiah: submission.targetType === 'DEPOSIT'
+                      ? Number(submission.deposit?.remainingAmountRupiah ?? submission.deposit?.amountRupiah ?? 0)
+                      : Number(submission.invoice?.remainingAmountRupiah ?? submission.invoice?.totalAmountRupiah ?? 0),
+                    submittedAmountRupiah: Number(submission.amountRupiah ?? 0),
+                    paidAt: submission.paidAt,
+                    senderName: submission.senderName,
+                    senderBankName: submission.senderBankName,
+                    referenceNumber: submission.referenceNumber,
+                    fileName: submission.originalFilename,
+                    notes: submission.notes,
+                  })}
+                  renderResult={(result) => (
+                    <div className="small">
+                      <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+                        <Badge bg={result.confidence === 'HIGH' ? 'success' : result.confidence === 'MEDIUM' ? 'warning' : 'secondary'}>Confidence {result.confidence}</Badge>
+                        <Badge bg="light" text="dark">{result.cached ? 'Cache' : result.mode ?? 'Rule'}</Badge>
+                      </div>
+                      {result.matches?.length ? <ul className="mb-2 ps-3 text-success">{result.matches.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+                      {result.warnings?.length ? <ul className="mb-2 ps-3 text-danger">{result.warnings.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+                      <div className="text-muted">{result.recommendedAction}</div>
+                    </div>
+                  )}
+                />
+              </Alert>
+            ) : null}
 
             {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
             {errorMessage ? <Alert variant="danger">{errorMessage}</Alert> : null}

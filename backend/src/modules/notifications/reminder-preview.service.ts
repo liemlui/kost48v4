@@ -244,7 +244,7 @@ export class ReminderPreviewService {
       roomCode: r.roomCode,
       plannedCheckOutDate: r.plannedCheckOutDate,
       daysRemaining: this.daysBetween(new Date(), r.plannedCheckOutDate),
-      messagePreview: `Halo ${r.tenantName}, masa tinggal kamar ${r.roomCode ?? '-'} tercatat berakhir pada ${this.formatDate(r.plannedCheckOutDate)}. Jika ingin memperpanjang, silakan hubungi pengelola.`,
+      messagePreview: `Halo ${r.tenantName}, masa sewa kamar ${r.roomCode ?? '-'} mencapai tanggal renew/keluar pada ${this.formatDate(r.plannedCheckOutDate)}. Jika ingin memperpanjang, silakan hubungi pengelola.`,
     }));
   }
 

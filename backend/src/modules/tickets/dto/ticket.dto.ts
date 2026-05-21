@@ -1,6 +1,28 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsNumberString } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class CreateBackofficeTicketDto {
+export class TicketImageFieldsDto {
+  @IsOptional()
+  @IsString()
+  issueImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  issueImageFileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  issueImageOriginalFilename?: string;
+
+  @IsOptional()
+  @IsString()
+  issueImageMimeType?: string;
+
+  @IsOptional()
+  @IsInt()
+  issueImageFileSizeBytes?: number;
+}
+
+export class CreateBackofficeTicketDto extends TicketImageFieldsDto {
   @IsInt()
   tenantId!: number;
 
@@ -25,7 +47,7 @@ export class CreateBackofficeTicketDto {
   category?: string;
 }
 
-export class CreatePortalTicketDto {
+export class CreatePortalTicketDto extends TicketImageFieldsDto {
   @IsOptional()
   @IsInt()
   tenantId?: number;
@@ -60,6 +82,26 @@ export class ResolutionDto {
   @IsOptional()
   @IsString()
   resolutionNote?: string;
+
+  @IsOptional()
+  @IsString()
+  resolutionImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  resolutionImageFileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  resolutionImageOriginalFilename?: string;
+
+  @IsOptional()
+  @IsString()
+  resolutionImageMimeType?: string;
+
+  @IsOptional()
+  @IsInt()
+  resolutionImageFileSizeBytes?: number;
 }
 
 export enum CloseTicketAction {

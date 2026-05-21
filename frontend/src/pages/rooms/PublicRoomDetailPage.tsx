@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getPublicRoomDetail } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import { CompactMetrics, type MetricChip } from '../../components/command-center';
 import type { PublicRoom, RoomFacility } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import FacilityList from '../../components/rooms/FacilityList';
@@ -71,6 +72,12 @@ export default function PublicRoomDetailPage() {
   });
 
   const room = query.data;
+  const metrics: MetricChip[] = room ? [
+    { id: 'status', label: 'Status kamar', value: room.isAvailable ? 'Tersedia' : 'Tidak tersedia', helper: room.isAvailable ? 'Bisa diajukan booking' : 'Belum bisa dipesan', icon: '🛏️', status: room.isAvailable ? 'SUCCESS' : 'WARNING' },
+    { id: 'rate', label: 'Tarif utama', value: <CurrencyDisplay amount={room.highlightedRateRupiah} /> as any, helper: room.highlightedPricingTerm ? getStatusLabel(room.highlightedPricingTerm) : 'Tarif pilihan utama', icon: '💙', status: 'INFO' },
+    { id: 'deposit', label: 'Deposit default', value: <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /> as any, helper: 'Dana jaminan, bukan biaya hangus', icon: '🛡️', status: 'SUCCESS' },
+    { id: 'terms', label: 'Term tersedia', value: room.availablePricingTerms?.length ?? 0, helper: 'Harian/mingguan/bulanan sesuai data', icon: '📅', status: 'INFO' },
+  ] : [];
 
   return (
     <div className="public-page-shell">
@@ -79,7 +86,7 @@ export default function PublicRoomDetailPage() {
           <div>
             <div className="page-eyebrow">✦ Detail Kamar — Kos48 Surabaya</div>
             <h1 className="mb-1">{room?.code ?? 'Detail kamar'}</h1>
-            <div className="text-muted">Lihat foto galeri, spesifikasi, dan rincian tarif sebelum mengajukan booking.</div>
+            <div className="text-muted">Lihat foto, fasilitas, tarif, deposit, dan langkah booking sebelum mengajukan kamar ini.</div>
           </div>
           <div className="d-flex gap-2 flex-wrap">
             <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke Katalog</Link>
@@ -97,6 +104,22 @@ export default function PublicRoomDetailPage() {
 
         {room ? (
           <>
+            <CompactMetrics metrics={metrics} />
+            <Card className="content-card border-0 mb-4">
+              <Card.Body>
+                <div className="table-meta mb-2">
+                  <div>
+                    <div className="panel-title">Cara booking kamar ini</div>
+                    <div className="panel-subtitle">Alur singkat supaya calon tenant tahu apa yang terjadi setelah klik Pesan Sekarang.</div>
+                  </div>
+                </div>
+                <div className="booking-stepper-lite">
+                  <div><strong>1. Ajukan booking</strong><span>Isi data dan tanggal check-in.</span></div>
+                  <div><strong>2. Admin review</strong><span>Kamar dicek dan tagihan awal disiapkan.</span></div>
+                  <div><strong>3. Bayar tagihan awal</strong><span>Upload bukti pembayaran lewat portal.</span></div>
+                </div>
+              </Card.Body>
+            </Card>
             <Row className="g-4">
               <Col lg={7}>
                 <Card className="content-card border-0 h-100">
@@ -197,8 +220,8 @@ export default function PublicRoomDetailPage() {
                     <ol className="mb-0 small">
                       <li className="mb-1"><strong>Ajukan booking</strong> — Isi data diri dan pilih tanggal check-in melalui tombol <strong>Pesan Sekarang</strong> di atas.</li>
                       <li className="mb-1"><strong>Admin meninjau</strong> — Booking akan ditinjau admin dalam 1×24 jam kerja. Anda akan mendapat akses Portal Tamu untuk memantau status.</li>
-                      <li className="mb-1"><strong>Tagihan awal terbit</strong> — Setelah booking disetujui, tagihan awal (sewa pertama + deposit) akan diterbitkan.</li>
-                      <li className="mb-1"><strong>Lakukan pembayaran</strong> — Kirim bukti bayar melalui Portal Tamu. Admin akan memverifikasi pembayaran Anda.</li>
+                      <li className="mb-1"><strong>Tagihan awal diterbitkan</strong> — Setelah booking disetujui, tagihan awal (sewa pertama + deposit) akan diterbitkan.</li>
+                      <li className="mb-1"><strong>Lakukan pembayaran</strong> — Kirim bukti bayar melalui Portal Tamu. Admin akan memeriksa pembayaran kamu.</li>
                       <li><strong>Kamar aktif</strong> — Setelah pembayaran awal disetujui admin, kamar Anda aktif dan siap ditempati sesuai tanggal check-in.</li>
                     </ol>
                   </Card.Body>

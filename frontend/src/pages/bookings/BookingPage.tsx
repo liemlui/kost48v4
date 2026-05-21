@@ -233,7 +233,7 @@ export default function BookingPage() {
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Rencana Check-out</Form.Label>
+                        <Form.Label>Tanggal Renew / Keluar (Opsional)</Form.Label>
                         <Form.Control
                           type="date"
                           min={formState.checkInDate || todayString()}

@@ -19,11 +19,16 @@ export default function PageHeader({
   secondaryAction,
 }: PageHeaderProps) {
   return (
-    <div className="page-header">
+    <div className="page-header page-header--command">
       <div className="page-header-copy">
-        <div className="page-eyebrow">✦ {eyebrow}</div>
+        <div className="page-eyebrow"><span className="page-eyebrow-dot" /> {eyebrow}</div>
         <h1>{title}</h1>
         {description ? <p>{description}</p> : null}
+        <div className="page-signal-strip" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
 
       {(secondaryAction || (actionLabel && onAction)) ? (

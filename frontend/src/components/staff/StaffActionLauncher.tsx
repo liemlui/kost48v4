@@ -1,0 +1,328 @@
+import { ChangeEvent, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert, Button, ButtonGroup, Form, Modal, Spinner } from 'react-bootstrap';
+import { createMeterReading } from '../../api/meterReadings';
+import { createResource, listResource } from '../../api/resources';
+import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
+import type { Room } from '../../types';
+
+type FieldReportKind = 'BARANG_RUSAK' | 'CEK_KAMAR' | 'STOK_HABIS';
+type LauncherMode = FieldReportKind | 'CATAT_METER' | null;
+
+type StaffRoomOption = Room & {
+  currentStay?: {
+    id?: number;
+    tenantId?: number;
+    tenant?: { id?: number; fullName?: string | null } | null;
+  } | null;
+};
+
+type Props = {
+  fixedRoom?: StaffRoomOption | null;
+  compact?: boolean;
+  onCreated?: () => void | Promise<void>;
+};
+
+const reportCopy: Record<FieldReportKind, { title: string; button: string; problemLabel: string; placeholder: string }> = {
+  BARANG_RUSAK: {
+    title: 'Lapor Barang Rusak',
+    button: 'Lapor Barang Rusak',
+    problemLabel: 'Barang / masalah',
+    placeholder: 'Contoh: Remote AC tidak menyala',
+  },
+  CEK_KAMAR: {
+    title: 'Cek Kamar',
+    button: 'Cek Kamar',
+    problemLabel: 'Hasil cek kamar',
+    placeholder: 'Contoh: Kamar bersih, lampu kamar mandi mati',
+  },
+  STOK_HABIS: {
+    title: 'Lapor Stok Habis',
+    button: 'Lapor Stok Habis',
+    problemLabel: 'Barang yang dibutuhkan',
+    placeholder: 'Contoh: Lampu kamar mandi habis 2 buah',
+  },
+};
+
+function roomLabel(room?: StaffRoomOption | null) {
+  if (!room) return 'Pilih kamar';
+  return `${room.code}${room.name ? ` · ${room.name}` : ''}`;
+}
+
+function activeTenantId(room?: StaffRoomOption | null) {
+  return room?.currentStay?.tenantId ?? room?.currentStay?.tenant?.id ?? null;
+}
+
+function activeStayId(room?: StaffRoomOption | null) {
+  return room?.currentStay?.id ?? room?.activeStayId ?? null;
+}
+
+async function compressImageFile(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1600;
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
+  bitmap.close();
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+}
+
+export default function StaffActionLauncher({ fixedRoom = null, compact = false, onCreated }: Props) {
+  const queryClient = useQueryClient();
+  const [mode, setMode] = useState<LauncherMode>(null);
+  const [roomId, setRoomId] = useState<string>(fixedRoom?.id ? String(fixedRoom.id) : '');
+  const [problem, setProblem] = useState('');
+  const [note, setNote] = useState('');
+  const [reportImage, setReportImage] = useState<UploadedImageMeta | null>(null);
+  const [reportPreview, setReportPreview] = useState<string | null>(null);
+  const [meterDate, setMeterDate] = useState(new Date().toISOString().slice(0, 10));
+  const [electricity, setElectricity] = useState('');
+  const [water, setWater] = useState('');
+  const [error, setError] = useState('');
+
+  const roomsQuery = useQuery({
+    queryKey: ['staff-field-rooms'],
+    queryFn: () => listResource<StaffRoomOption>('/rooms', { limit: 300 }),
+    enabled: !fixedRoom,
+  });
+
+  const rooms = useMemo(() => {
+    const base = fixedRoom ? [fixedRoom] : (roomsQuery.data?.items ?? []);
+    return base.filter((room) => room.isActive !== false);
+  }, [fixedRoom, roomsQuery.data]);
+
+  const selectedRoom = useMemo(
+    () => rooms.find((room) => String(room.id) === String(roomId)) ?? fixedRoom ?? null,
+    [rooms, roomId, fixedRoom],
+  );
+
+  const reset = () => {
+    setError('');
+    setProblem('');
+    setNote('');
+    setReportImage(null);
+    setReportPreview(null);
+    setMeterDate(new Date().toISOString().slice(0, 10));
+    setElectricity('');
+    setWater('');
+    if (!fixedRoom) setRoomId('');
+  };
+
+  const close = () => {
+    setMode(null);
+    reset();
+  };
+
+  const open = (nextMode: LauncherMode) => {
+    setMode(nextMode);
+    setError('');
+    if (fixedRoom?.id) setRoomId(String(fixedRoom.id));
+  };
+
+  const afterSuccess = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-staff'] }),
+      queryClient.invalidateQueries({ queryKey: ['room'] }),
+      queryClient.invalidateQueries({ queryKey: ['staff-field-rooms'] }),
+    ]);
+    await onCreated?.();
+  };
+
+  const reportMutation = useMutation({
+    mutationFn: async () => {
+      if (!mode || mode === 'CATAT_METER') return null;
+      const tenantId = activeTenantId(selectedRoom);
+      if (!selectedRoom?.id) throw new Error('Pilih kamar dulu.');
+      if (!tenantId) throw new Error('Kamar ini belum ada penghuni aktif. Minta admin buatkan tugas.');
+      if (!problem.trim()) throw new Error('Tulis masalahnya secara singkat.');
+      const copy = reportCopy[mode];
+      const title = mode === 'BARANG_RUSAK'
+        ? `Barang rusak - ${problem.trim().slice(0, 60)}`
+        : mode === 'STOK_HABIS'
+          ? `Stok habis - ${problem.trim().slice(0, 60)}`
+          : `Cek kamar - ${roomLabel(selectedRoom)}`;
+      const description = [
+        copy.title,
+        `Kamar: ${roomLabel(selectedRoom)}`,
+        `Masalah: ${problem.trim()}`,
+        note.trim() ? `Catatan: ${note.trim()}` : null,
+      ].filter(Boolean).join('\n');
+      return createResource('/tickets', {
+        tenantId,
+        roomId: selectedRoom.id,
+        stayId: activeStayId(selectedRoom) ?? undefined,
+        title,
+        description,
+        category: mode,
+        issueImageUrl: reportImage?.fileUrl,
+        issueImageFileKey: reportImage?.fileKey,
+        issueImageOriginalFilename: reportImage?.originalFilename,
+        issueImageMimeType: reportImage?.mimeType,
+        issueImageFileSizeBytes: reportImage?.fileSizeBytes,
+      });
+    },
+    onSuccess: async () => {
+      await afterSuccess();
+      close();
+    },
+    onError: (err: any) => setError(err?.message || err?.response?.data?.message || 'Laporan belum tersimpan. Coba lagi.'),
+  });
+
+  const meterMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedRoom?.id) throw new Error('Pilih kamar dulu.');
+      if (!electricity.trim() && !water.trim()) throw new Error('Isi angka listrik atau air.');
+      const readingAt = new Date(`${meterDate}T12:00:00`).toISOString();
+      const saved = [];
+      if (electricity.trim()) {
+        saved.push(await createMeterReading({
+          roomId: selectedRoom.id,
+          utilityType: 'ELECTRICITY',
+          readingAt,
+          readingValue: electricity.trim(),
+          note: note.trim() || 'Dicatat staf lapangan',
+        }));
+      }
+      if (water.trim()) {
+        saved.push(await createMeterReading({
+          roomId: selectedRoom.id,
+          utilityType: 'WATER',
+          readingAt,
+          readingValue: water.trim(),
+          note: note.trim() || 'Dicatat staf lapangan',
+        }));
+      }
+      return saved;
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['meter-readings'] }),
+        queryClient.invalidateQueries({ queryKey: ['room'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard-staff'] }),
+      ]);
+      await onCreated?.();
+      close();
+    },
+    onError: (err: any) => setError(err?.response?.data?.message || err?.message || 'Meter belum tersimpan. Coba lagi.'),
+  });
+
+  const handleImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError('');
+    try {
+      const compressed = await compressImageFile(file);
+      const uploaded = await uploadTicketImage(compressed);
+      setReportImage(uploaded);
+      setReportPreview(uploaded.fileUrl);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Foto belum berhasil diunggah. Coba foto lain.');
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  const isReportMode = mode && mode !== 'CATAT_METER';
+  const copy = isReportMode ? reportCopy[mode as FieldReportKind] : null;
+  const isBusy = reportMutation.isPending || meterMutation.isPending;
+
+  return (
+    <>
+      <div className={compact ? 'staff-action-launcher compact' : 'staff-action-launcher'}>
+        <ButtonGroup size="sm" className="staff-action-group">
+          <Button variant="primary" onClick={() => open('BARANG_RUSAK')}>Lapor Barang Rusak</Button>
+          <Button variant="outline-primary" onClick={() => open('CATAT_METER')}>Catat Meter</Button>
+          <Button variant="outline-primary" onClick={() => open('STOK_HABIS')}>Lapor Stok Habis</Button>
+          <Button variant="outline-primary" onClick={() => open('CEK_KAMAR')}>Cek Kamar</Button>
+        </ButtonGroup>
+      </div>
+
+      <Modal show={Boolean(mode)} onHide={close} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{mode === 'CATAT_METER' ? 'Catat Meter' : copy?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error ? <Alert variant="danger" className="py-2">{error}</Alert> : null}
+          {!fixedRoom ? (
+            <Form.Group className="mb-3">
+              <Form.Label>Kamar</Form.Label>
+              <Form.Select value={roomId} onChange={(event) => setRoomId(event.currentTarget.value)}>
+                <option value="">Pilih kamar</option>
+                {rooms.map((room) => (
+                  <option key={room.id} value={room.id}>{roomLabel(room)}</option>
+                ))}
+              </Form.Select>
+              <Form.Text>Pilih kamar yang sedang dicek.</Form.Text>
+            </Form.Group>
+          ) : (
+            <Alert variant="light" className="border py-2 mb-3">Kamar: <strong>{roomLabel(fixedRoom)}</strong></Alert>
+          )}
+
+          {mode === 'CATAT_METER' ? (
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>Tanggal</Form.Label>
+                <Form.Control type="date" value={meterDate} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setMeterDate(event.currentTarget.value)} />
+              </Form.Group>
+              <div className="row g-2">
+                <div className="col-6">
+                  <Form.Group className="mb-3">
+                    <Form.Label>Angka listrik</Form.Label>
+                    <Form.Control inputMode="decimal" value={electricity} onChange={(event) => setElectricity(event.currentTarget.value)} placeholder="Contoh: 12345" />
+                  </Form.Group>
+                </div>
+                <div className="col-6">
+                  <Form.Group className="mb-3">
+                    <Form.Label>Angka air</Form.Label>
+                    <Form.Control inputMode="decimal" value={water} onChange={(event) => setWater(event.currentTarget.value)} placeholder="Contoh: 88" />
+                  </Form.Group>
+                </div>
+              </div>
+              <Form.Group>
+                <Form.Label>Catatan singkat</Form.Label>
+                <Form.Control as="textarea" rows={2} value={note} onChange={(event) => setNote(event.currentTarget.value)} placeholder="Contoh: angka meter terlihat jelas" />
+              </Form.Group>
+            </>
+          ) : (
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>{copy?.problemLabel}</Form.Label>
+                <Form.Control value={problem} onChange={(event) => setProblem(event.currentTarget.value)} placeholder={copy?.placeholder} />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Foto bukti</Form.Label>
+                <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImage} />
+                {reportPreview ? <img className="staff-proof-preview" src={reportPreview} alt="Foto bukti" /> : null}
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Catatan singkat</Form.Label>
+                <Form.Control as="textarea" rows={2} value={note} onChange={(event) => setNote(event.currentTarget.value)} placeholder="Tulis tambahan jika perlu" />
+              </Form.Group>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={close}>Batal</Button>
+          {mode === 'CATAT_METER' ? (
+            <Button onClick={() => meterMutation.mutate()} disabled={isBusy}>
+              {isBusy ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Simpan Meter'}
+            </Button>
+          ) : (
+            <Button onClick={() => reportMutation.mutate()} disabled={isBusy}>
+              {isBusy ? <><Spinner size="sm" className="me-2" />Mengirim...</> : 'Kirim Laporan'}
+            </Button>
+          )}
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}

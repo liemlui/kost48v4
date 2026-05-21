@@ -151,7 +151,7 @@ export const coreResourceConfigs: Record<string, ResourceConfig> = {
   },
 
   rooms: {
-    title: 'Rooms',
+    title: 'Kamar',
     supportsIsActiveFilter: true,
     path: '/rooms',
     columns: [

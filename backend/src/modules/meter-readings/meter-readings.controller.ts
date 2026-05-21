@@ -30,7 +30,7 @@ export class MeterReadingsController {
   }
 
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async create(@Body() dto: CreateMeterReadingDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Meter reading berhasil dibuat', data: await this.meterreadingsService.create(dto, user) };
   }

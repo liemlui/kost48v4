@@ -63,8 +63,8 @@ export function validate(form: GuestBookingFormState): FormErrors {
   } else if (!/^\d{16}$/.test(form.identityNumber.trim())) {
     errors.identityNumber = 'Nomor KTP/NIK harus tepat 16 digit angka.';
   }
-  if (form.plannedCheckOutDate && form.plannedCheckOutDate < form.checkInDate) {
-    errors.plannedCheckOutDate = 'Rencana check-out tidak boleh sebelum check-in.';
+  if (form.plannedCheckOutDate && form.plannedCheckOutDate <= form.checkInDate) {
+    errors.plannedCheckOutDate = 'Tanggal renew/keluar harus setelah check-in.';
   }
   return errors;
 }

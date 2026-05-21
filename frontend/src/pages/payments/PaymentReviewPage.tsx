@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -13,6 +13,7 @@ import {
 } from '../../api/paymentSubmissions';
 import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { AssistantPanel, CompactMetrics, type AssistantItem, type MetricChip } from '../../components/command-center';
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
@@ -41,6 +42,28 @@ export default function PaymentReviewPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
+  const pendingAmount = useMemo(() => items.reduce((sum, item) => sum + Number(item.amountRupiah ?? 0), 0), [items]);
+  const proofCount = useMemo(() => items.filter((item) => Boolean(item.fileUrl)).length, [items]);
+  const bookingCount = useMemo(() => items.filter((item) => item.targetType !== 'DEPOSIT').length, [items]);
+  const missingProofCount = useMemo(() => items.filter((item) => !item.fileUrl).length, [items]);
+  const mismatchCount = useMemo(() => items.filter((item) => {
+    if (item.targetType === 'DEPOSIT') return false;
+    const remaining = Number(item.invoice?.remainingAmountRupiah ?? 0);
+    return remaining > 0 && Number(item.amountRupiah ?? 0) !== remaining;
+  }).length, [items]);
+
+  const assistantItems: AssistantItem[] = [
+    ...(status === 'PENDING_REVIEW' && items.length ? [{ id: 'pending', severity: 'HIGH' as const, title: 'Bukti pembayaran perlu keputusan', message: `${items.length} submission menunggu approve/reject. Verifikasi nominal dan bukti sebelum mutasi invoice/stay berjalan.`, count: items.length, source: 'Review queue' }] : []),
+    ...(missingProofCount ? [{ id: 'missing-proof', severity: 'WARNING' as const, title: 'Ada submission tanpa file bukti', message: 'Cek catatan/referensi sebelum approve agar audit trail tetap kuat.', count: missingProofCount, source: 'Proof file' }] : []),
+    ...(mismatchCount ? [{ id: 'mismatch', severity: 'WARNING' as const, title: 'Nominal tidak sama dengan sisa tagihan', message: 'Bisa jadi pembayaran parsial. Pastikan admin memahami efek invoice PARTIAL/PAID sebelum approve.', count: mismatchCount, source: 'Amount check' }] : []),
+  ];
+
+  const metrics: MetricChip[] = [
+    { id: 'submission', label: 'Submission aktif', value: items.length, helper: 'Sesuai filter status', status: status === 'PENDING_REVIEW' && items.length ? 'WARNING' : 'INFO', icon: '◈' },
+    { id: 'amount', label: 'Nominal queue', value: new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(pendingAmount), helper: 'Total nominal pada filter', status: 'SUCCESS', icon: 'Rp' },
+    { id: 'proof', label: 'Bukti tersedia', value: proofCount, helper: 'File proof bisa dibuka', status: missingProofCount ? 'WARNING' : 'SUCCESS', icon: '▣' },
+    { id: 'target', label: 'Booking/Invoice', value: bookingCount, helper: 'Selain deposit', status: 'INFO', icon: '↯' },
+  ];
 
   const refreshRelated = async () => {
     await Promise.all([
@@ -87,12 +110,27 @@ export default function PaymentReviewPage() {
   return (
     <div>
       <PageHeader
+        eyebrow="Finance command center"
         title="Review Pembayaran"
-        description={`Satu queue kerja untuk bukti bayar booking tenant. Di sinilah admin memeriksa gambar bukti, lalu memutuskan approve atau reject. ${items.length ? `Saat ini ada ${items.length} submission pada filter aktif.` : ''}`}
+        description={`Queue verifikasi pembayaran dibuat seperti cockpit: nominal, bukti, status, dan aksi approve/reject terlihat dalam satu flow ringkas. ${items.length ? `Saat ini ada ${items.length} submission pada filter aktif.` : ''}`}
       />
 
-      <Card className="content-card border-0 mb-4">
+      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Fokus pada submission yang membuat cashflow dan booking/stay tertahan." items={assistantItems} emptyTitle="Queue pembayaran aman" emptyMessage="Tidak ada masalah besar pada filter aktif." />
+      <CompactMetrics metrics={metrics} />
+
+      <Card className="content-card border-0 mb-4 command-filter-card">
         <Card.Body>
+          <div className="status-tab-bar compact-tabs mb-3">
+            {[
+              { key: 'PENDING_REVIEW', label: 'Menunggu', count: status === 'PENDING_REVIEW' ? items.length : 0, cls: 'tab-warn' },
+              { key: 'APPROVED', label: 'Disetujui', count: status === 'APPROVED' ? items.length : 0, cls: 'tab-success' },
+              { key: 'REJECTED', label: 'Ditolak', count: status === 'REJECTED' ? items.length : 0, cls: 'tab-danger' },
+            ].map((tab) => (
+              <button key={tab.key} className={`status-tab ${tab.cls}${status === tab.key ? ' active' : ''}`} onClick={() => setStatus(tab.key as any)}>
+                {tab.label}<span className="tab-badge">{tab.count}</span>
+              </button>
+            ))}
+          </div>
           <div className="row g-3 align-items-end">
             <div className="col-md-3">
               <Form.Group>
@@ -178,7 +216,7 @@ export default function PaymentReviewPage() {
                     </td>
                     <td><CurrencyDisplay amount={item.amountRupiah} /></td>
                     <td>{formatDate(item.paidAt)}</td>
-                    <td><StatusBadge status={item.status} /></td>
+                    <td><StatusBadge status={item.status} domain="payment" /></td>
                     <td>
                       <div className="d-flex gap-2 flex-wrap">
                         {item.fileUrl ? (

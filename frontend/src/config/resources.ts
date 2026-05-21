@@ -32,8 +32,8 @@ export type ResourceConfig = {
 const userRoles = [
   { value: 'OWNER', label: 'Owner' },
   { value: 'ADMIN', label: 'Admin' },
-  { value: 'STAFF', label: 'Staff' },
-  { value: 'TENANT', label: 'Tenant Portal' },
+  { value: 'STAFF', label: 'Staf' },
+  { value: 'TENANT', label: 'Penghuni Portal' },
 ];
 
 const announcementAudienceOptions = [
@@ -185,7 +185,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   rooms: {
-    title: 'Rooms',
+    title: 'Kamar',
     supportsIsActiveFilter: true,
     path: '/rooms',
     columns: [
@@ -486,7 +486,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'inventory-items': {
-    title: 'Inventory Items',
+    title: 'Stok Barang',
     path: '/inventory-items',
     columns: [
       { key: 'id', label: 'ID' },
@@ -549,13 +549,13 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'room-items': {
-    title: 'Inventaris per Kamar',
+    title: 'Barang di Kamar',
     path: '/room-items',
     createLabel: 'Catat Inventaris Kamar',
     columns: [
       { key: 'roomId', label: 'Kamar' },
       { key: 'itemId', label: 'Barang' },
-      { key: 'qty', label: 'Qty' },
+      { key: 'qty', label: 'Jumlah' },
       { key: 'status', label: 'Status' },
     ],
     fields: [
@@ -663,13 +663,13 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'inventory-movements': {
-    title: 'Histori Pergerakan Stok',
+    title: 'Catatan Stok',
     path: '/inventory-movements',
     createLabel: 'Catat Pergerakan Stok',
     columns: [
       { key: 'itemId', label: 'Barang' },
-      { key: 'movementType', label: 'Tipe' },
-      { key: 'qty', label: 'Qty' },
+      { key: 'movementType', label: 'Jenis' },
+      { key: 'qty', label: 'Jumlah' },
       { key: 'roomId', label: 'Kamar' },
       { key: 'movementDate', label: 'Tanggal' },
     ],
@@ -874,15 +874,15 @@ function getStaffReadOnlyReason(path: string) {
   if (!staffReadOnlyResourcePaths.has(path)) return null;
   switch (path) {
     case '/rooms':
-      return 'Staff hanya boleh melihat data kamar. Perubahan kamar hanya boleh dilakukan Owner/Admin.';
+      return 'Buka detail kamar untuk melihat data.';
     case '/inventory-items':
-      return 'Staff hanya boleh melihat data stok. Perubahan stok hanya boleh dilakukan Owner/Admin.';
+      return 'Cek stok barang dari daftar ini.';
     case '/inventory-movements':
-      return 'Staff hanya boleh melihat riwayat stok. Mutasi stok hanya boleh dilakukan Owner/Admin.';
+      return 'Cek catatan barang masuk dan keluar.';
     case '/room-items':
-      return 'Staff hanya boleh melihat inventaris kamar. Perubahan inventaris kamar hanya boleh dilakukan Owner/Admin.';
+      return 'Cek barang yang ada di kamar.';
     default:
-      return 'Staff hanya memiliki akses baca untuk data ini.';
+      return 'Buka data yang perlu dicek.';
   }
 }
 

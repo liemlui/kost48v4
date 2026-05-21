@@ -1,6 +1,40 @@
-export function getStatusLabel(status?: string, customLabel?: string): string {
+export type StatusLabelTone = 'admin' | 'tenant';
+export type StatusLabelDomain = 'invoice' | 'payment' | 'stay' | 'room' | 'deposit' | 'ticket' | 'renew' | 'checkout' | 'default';
+
+export function getStatusLabel(status?: string, customLabel?: string, options?: { tone?: StatusLabelTone; domain?: StatusLabelDomain }): string {
   if (customLabel) return customLabel;
   const normalized = String(status ?? '').toUpperCase();
+  const tone = options?.tone ?? 'admin';
+  const domain = options?.domain ?? 'default';
+
+  const tenantInvoiceLabels: Record<string, string> = {
+    DRAFT: 'Sedang disiapkan',
+    ISSUED: 'Perlu Dibayar',
+    PARTIAL: 'Dibayar Sebagian',
+    PAID: 'Lunas',
+    CANCELLED: 'Dibatalkan',
+    OVERDUE: 'Lewat Jatuh Tempo',
+  };
+
+  const tenantPaymentLabels: Record<string, string> = {
+    PENDING_REVIEW: 'Sedang Diperiksa',
+    APPROVED: 'Diterima',
+    REJECTED: 'Ditolak',
+    EXPIRED: 'Kedaluwarsa',
+  };
+
+  const tenantStayLabels: Record<string, string> = {
+    ACTIVE: 'Masa Sewa Aktif',
+    COMPLETED: 'Selesai',
+    CANCELLED: 'Dibatalkan',
+    RESERVED: 'Dipesan',
+  };
+
+  if (tone === 'tenant') {
+    if (domain === 'invoice' && tenantInvoiceLabels[normalized]) return tenantInvoiceLabels[normalized];
+    if (domain === 'payment' && tenantPaymentLabels[normalized]) return tenantPaymentLabels[normalized];
+    if (domain === 'stay' && tenantStayLabels[normalized]) return tenantStayLabels[normalized];
+  }
 
   const labels: Record<string, string> = {
     ACTIVE: 'Aktif',
@@ -10,20 +44,20 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     AVAILABLE: 'Tersedia',
     RESERVED: 'Dipesan',
     OCCUPIED: 'Terisi',
-    MAINTENANCE: 'Maintenance',
+    MAINTENANCE: 'Perbaikan',
     INACTIVE_ROOM: 'Nonaktif',
     INACTIVE_ROOM_STATUS: 'Nonaktif',
     UNAVAILABLE: 'Tidak Tersedia',
     PAID: 'Lunas',
-    ISSUED: 'Tagihan',
+    ISSUED: domain === 'invoice' ? 'Terbit / Perlu Dibayar' : 'Tagihan',
     PARTIAL: 'Sebagian',
     DRAFT: 'Draft',
     OVERDUE: 'Jatuh Tempo',
-    HELD: 'Ditahan',
+    HELD: 'Deposit Ditahan',
     REFUNDED: 'Dikembalikan',
     PARTIALLY_REFUNDED: 'Sebagian Dikembalikan',
     FORFEITED: 'Hangus',
-    SUCCESS: 'Sukses',
+    SUCCESS: 'Aman',
     WARNING: 'Perhatian',
     DANGER: 'Bahaya',
     INFO: 'Info',
@@ -55,8 +89,8 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     TRANSFER: 'Transfer',
     QRIS: 'QRIS',
     EWALLET: 'E-Wallet',
-    OPEN: 'Dibuka',
-    IN_PROGRESS: 'Dalam Proses',
+    OPEN: 'Baru',
+    IN_PROGRESS: 'Sedang Dikerjakan',
     DONE: 'Selesai',
     CLOSED: 'Ditutup',
     RESOLVED: 'Selesai',
@@ -67,10 +101,15 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
     FAMILY: 'Keluarga',
     MEDICAL: 'Medis',
     PROJECT: 'Proyek',
-    PENDING_REVIEW: 'Menunggu Review',
+    PENDING_REVIEW: domain === 'payment' ? 'Menunggu Dicek' : 'Menunggu Dicek',
+    PENDING: 'Menunggu Dicek',
     APPROVED: 'Disetujui',
     REJECTED: 'Ditolak',
     EXPIRED: 'Kedaluwarsa',
+    BLOCKER: 'Terhalang',
+    HIGH: 'Tinggi',
+    MEDIUM: 'Sedang',
+    OPPORTUNITY: 'Peluang',
   };
 
   if (normalized === 'INACTIVE') return labels.INACTIVE;
@@ -81,9 +120,9 @@ export function getStatusLabel(status?: string, customLabel?: string): string {
 export function getStatusVariant(status?: string): 'success' | 'warning' | 'danger' | 'info' | 'secondary' | 'primary' | 'dark' {
   const normalized = String(status ?? '').toUpperCase();
 
-  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED'].includes(normalized)) return 'success';
-  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW'].includes(normalized)) return 'warning';
-  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED'].includes(normalized)) return 'danger';
+  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY'].includes(normalized)) return 'success';
+  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM'].includes(normalized)) return 'warning';
+  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS'].includes(normalized)) return 'info';
   if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';

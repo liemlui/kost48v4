@@ -44,7 +44,8 @@ export default function MyBookingsPage() {
     enabled: Boolean(userId),
     retry: false,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     staleTime: 30_000,
   });
 
@@ -53,7 +54,9 @@ export default function MyBookingsPage() {
     queryFn: () => listMyPaymentSubmissions({ limit: 200 }),
     enabled: Boolean(userId),
     retry: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 30_000,
   });
 
   const createSubmissionMutation = useMutation({

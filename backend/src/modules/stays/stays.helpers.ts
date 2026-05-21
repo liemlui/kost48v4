@@ -76,19 +76,30 @@ export function mapPricingTermToUnit(pricingTerm: string): string {
   }
 }
 
+export function addCalendarMonthsClamped(value: Date, months: number): Date {
+  const day = value.getDate();
+  const result = new Date(value);
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+  result.setDate(Math.min(day, lastDayOfTargetMonth));
+  return startOfDay(result);
+}
+
 export function calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plannedCheckOutDate?: Date): Date {
-  if (plannedCheckOutDate) return plannedCheckOutDate;
-  const result = new Date(checkInDate);
+  // Business rule: periodStart is inclusive, periodEnd/plannedCheckOutDate is exclusive.
+  // Example: 1 Sep + 3 months => 1 Dec. 31 Jan + 1 month => 28/29 Feb.
+  if (plannedCheckOutDate) return startOfDay(plannedCheckOutDate);
+  const result = startOfDay(checkInDate);
   switch (pricingTerm) {
-    case 'DAILY': result.setDate(result.getDate() + 1); break;
-    case 'WEEKLY': result.setDate(result.getDate() + 7); break;
-    case 'BIWEEKLY': result.setDate(result.getDate() + 14); break;
-    case 'MONTHLY': result.setMonth(result.getMonth() + 1); break;
-    case 'SMESTERLY': result.setMonth(result.getMonth() + 6); break;
-    case 'YEARLY': result.setFullYear(result.getFullYear() + 1); break;
-    default: result.setMonth(result.getMonth() + 1);
+    case 'DAILY': return addDays(result, 1);
+    case 'WEEKLY': return addDays(result, 7);
+    case 'BIWEEKLY': return addDays(result, 14);
+    case 'MONTHLY': return addCalendarMonthsClamped(result, 1);
+    case 'SMESTERLY': return addCalendarMonthsClamped(result, 6);
+    case 'YEARLY': return addCalendarMonthsClamped(result, 12);
+    default: return addCalendarMonthsClamped(result, 1);
   }
-  return result;
 }
 
 export function calculateDueDate(periodEnd: Date): Date {

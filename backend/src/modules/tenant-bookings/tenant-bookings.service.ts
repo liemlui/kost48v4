@@ -19,7 +19,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { calculateRentByPricingTerm } from './pricing.helper';
-import { startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
+import { addDays, startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
 import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
@@ -123,11 +123,11 @@ export class TenantBookingsService {
 
     const checkInDate = parseDateOnly(dto.checkInDate, 'checkInDate tidak valid');
     const plannedCheckOutDate = dto.plannedCheckOutDate
-      ? parseDateOnly(dto.plannedCheckOutDate, 'plannedCheckOutDate tidak valid')
+      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal renew/keluar tidak valid')
       : null;
 
-    if (plannedCheckOutDate && plannedCheckOutDate < checkInDate) {
-      throw new BadRequestException('Tanggal rencana checkout tidak boleh sebelum check-in');
+    if (plannedCheckOutDate && plannedCheckOutDate <= checkInDate) {
+      throw new BadRequestException('Tanggal renew/keluar harus setelah check-in');
     }
 
     const now = new Date();
@@ -891,32 +891,37 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     pricingTerm: string,
     plannedCheckOutDate?: Date,
   ): Date {
-    if (plannedCheckOutDate) return plannedCheckOutDate;
+    // periodStart is inclusive; periodEnd/plannedCheckOutDate is exclusive.
+    // Monthly terms use calendar-month math with end-of-month clamp.
+    if (plannedCheckOutDate) return startOfDay(plannedCheckOutDate);
 
-    const result = new Date(checkInDate);
+    const result = startOfDay(checkInDate);
     switch (pricingTerm) {
       case PricingTerm.DAILY:
-        result.setDate(result.getDate() + 1);
-        break;
+        return addDays(result, 1);
       case PricingTerm.WEEKLY:
-        result.setDate(result.getDate() + 7);
-        break;
+        return addDays(result, 7);
       case PricingTerm.BIWEEKLY:
-        result.setDate(result.getDate() + 14);
-        break;
+        return addDays(result, 14);
       case PricingTerm.MONTHLY:
-        result.setMonth(result.getMonth() + 1);
-        break;
+        return this.addCalendarMonthsClamped(result, 1);
       case PricingTerm.SMESTERLY:
-        result.setMonth(result.getMonth() + 6);
-        break;
+        return this.addCalendarMonthsClamped(result, 6);
       case PricingTerm.YEARLY:
-        result.setFullYear(result.getFullYear() + 1);
-        break;
+        return this.addCalendarMonthsClamped(result, 12);
       default:
-        result.setMonth(result.getMonth() + 1);
+        return this.addCalendarMonthsClamped(result, 1);
     }
-    return result;
+  }
+
+  private addCalendarMonthsClamped(value: Date, months: number): Date {
+    const day = value.getDate();
+    const result = startOfDay(value);
+    result.setDate(1);
+    result.setMonth(result.getMonth() + months);
+    const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+    result.setDate(Math.min(day, lastDayOfTargetMonth));
+    return startOfDay(result);
   }
 
   private calculateDueDate(periodEnd: Date): Date {

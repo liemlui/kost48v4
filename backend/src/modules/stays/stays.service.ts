@@ -11,7 +11,6 @@ import { Prisma } from '../../generated/prisma';
 import {
   normalizeStayForResponse,
   startOfDay,
-  addDays,
   maxDate,
   resolveRent,
   mapPricingTermToUnit,
@@ -26,13 +25,13 @@ export class StaysService {
   async update(id: number, dto: UpdateStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
-    if (existing.status !== 'ACTIVE') {
+    if (existing.status !== StayStatus.ACTIVE) {
       throw new ConflictException('Stay tidak aktif, tidak bisa diperbarui');
     }
 
     const nextPlannedCheckOutDate = dto.plannedCheckOutDate ? new Date(dto.plannedCheckOutDate) : existing.plannedCheckOutDate;
-    if (nextPlannedCheckOutDate && nextPlannedCheckOutDate < existing.checkInDate) {
-      throw new ConflictException('Tanggal rencana checkout tidak boleh sebelum check-in');
+    if (nextPlannedCheckOutDate && nextPlannedCheckOutDate <= existing.checkInDate) {
+      throw new ConflictException('Tanggal renew/keluar harus setelah check-in');
     }
 
     const updated = await this.prisma.stay.update({
@@ -73,8 +72,8 @@ export class StaysService {
       throw new ConflictException('Kamar sudah ditempati stay aktif lain');
     }
 
-    if (dto.plannedCheckOutDate && new Date(dto.plannedCheckOutDate) < new Date(dto.checkInDate)) {
-      throw new ConflictException('Tanggal tidak konsisten');
+    if (dto.plannedCheckOutDate && new Date(dto.plannedCheckOutDate) <= new Date(dto.checkInDate)) {
+      throw new ConflictException('Tanggal renew/keluar harus setelah check-in');
     }
 
     const agreed = dto.agreedRentAmountRupiah || resolveRent(room, dto.pricingTerm);
@@ -446,8 +445,8 @@ export class StaysService {
   async processDeposit(id: number, dto: ProcessDepositDto, actor: CurrentUserPayload) {
     const stay = await this.prisma.stay.findUnique({ where: { id } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (stay.status !== 'COMPLETED' && stay.status !== 'CANCELLED') throw new ConflictException('Deposit belum boleh diproses');
-    if (stay.depositStatus !== 'HELD') throw new ConflictException('Deposit sudah diproses sebelumnya');
+    if (stay.status !== StayStatus.COMPLETED && stay.status !== StayStatus.CANCELLED) throw new ConflictException('Deposit belum boleh diproses');
+    if (stay.depositStatus !== DepositStatus.HELD) throw new ConflictException('Deposit sudah diproses sebelumnya');
 
     const openInvoices = await this.prisma.invoice.findMany({
       where: { stayId: id, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
@@ -534,7 +533,8 @@ export class StaysService {
 
     const today = startOfDay(new Date());
     const currentPlannedCheckOut = stay.plannedCheckOutDate ? startOfDay(stay.plannedCheckOutDate) : null;
-    const logicalPeriodStart = currentPlannedCheckOut ? maxDate(addDays(currentPlannedCheckOut, 1), today) : today;
+    // periodEnd/plannedCheckOutDate is exclusive, so the renewal starts on the current periodEnd date.
+    const logicalPeriodStart = currentPlannedCheckOut ? maxDate(currentPlannedCheckOut, today) : today;
 
     const newPlannedCheckOut = dto.plannedCheckOutDate
       ? startOfDay(new Date(dto.plannedCheckOutDate))

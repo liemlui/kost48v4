@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { HeroSkeleton } from '../../components/common/SkeletonLoader';
+import { AssistantPanel, BlockedReasonCard, ReadinessChecklist, LifecycleTimeline, type AssistantItem, type ReadinessItem, type TimelineStep } from '../../components/command-center';
 import InfoTab from '../../components/stays/InfoTab';
 import MeterTab from '../../components/stays/MeterTab';
 import FinanceTab from '../../components/stays/FinanceTab';
@@ -68,6 +69,7 @@ export default function StayDetailPage() {
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
   const [notes, setNotes] = useState('');
   const [notesError, setNotesError] = useState('');
+  const [approveCheckoutError, setApproveCheckoutError] = useState('');
 
   const { data: stay, isLoading, isError, updateMutation } = useStay(id);
   const invoicesQuery = useInvoices(id, true);
@@ -75,6 +77,7 @@ export default function StayDetailPage() {
   const invoices = invoicesQuery.data?.items ?? [];
   const overdue = useMemo(() => hasOverdue(invoices), [invoices]);
   const hasUnpaid = useMemo(() => hasUnpaidInvoices(invoices), [invoices]);
+  const openInvoiceCount = useMemo(() => stay?.openInvoiceCount ?? invoices.filter((item) => !['PAID', 'CANCELLED'].includes(item.status)).length, [stay?.openInvoiceCount, invoices]);
   const depositLabel = getDepositLabel(stay?.depositStatus);
 
   const stayId = Number(id);
@@ -105,10 +108,14 @@ export default function StayDetailPage() {
   const approveCrMutation = useMutation({
     mutationFn: async (crId: number) => approveCheckoutRequest(crId),
     onSuccess: async () => {
+      setApproveCheckoutError('');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
       ]);
+    },
+    onError: (error: any) => {
+      setApproveCheckoutError(error?.response?.data?.message ?? 'Gagal menyetujui permintaan checkout. Silakan coba lagi.');
     },
   });
 
@@ -116,6 +123,7 @@ export default function StayDetailPage() {
     mutationFn: async ({ id: crId, reviewNotes }: { id: number; reviewNotes: string }) =>
       rejectCheckoutRequest(crId, { reviewNotes }),
     onSuccess: async () => {
+      setApproveCheckoutError('');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
@@ -149,6 +157,27 @@ export default function StayDetailPage() {
   if (isLoading) return <HeroSkeleton />;
   if (isError || !stay) return <Alert variant="danger">Gagal mengambil detail stay.</Alert>;
 
+  const assistantItems: AssistantItem[] = [
+    ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Checkout sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Final checkout masih terblokir karena ada invoice open. Selesaikan / bayar / cancel invoice dulu.' : 'Tagihan terlihat clear. Admin dapat finalkan checkout setelah cek kamar dan deposit.', source: 'Checkout readiness', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Checkout', onAction: () => openInvoiceCount > 0 ? setActiveTab('finance') : setShowCompleteModal(true) }] : []),
+    ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Tenant mengajukan keluar', message: 'Setujui hanya jika jadwalnya benar. Approval request belum melepas kamar.', source: 'Checkout request' }] : []),
+    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Open invoice memblokir checkout final', message: `${openInvoiceCount} invoice masih open. DRAFT juga ikut memblokir final checkout sesuai guard backend.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => setActiveTab('finance') }] : []),
+    ...(stay.depositStatus === 'HELD' && ['COMPLETED', 'CANCELLED'].includes(stay.status) ? [{ id: 'deposit-held', severity: 'HIGH' as const, title: 'Deposit masih ditahan', message: 'Deposit adalah liability; proses refund/forfeit/partial refund agar status tidak menggantung.', source: 'Deposit', actionLabel: 'Proses Deposit', onAction: () => setShowDepositModal(true) }] : []),
+  ];
+
+  const readinessItems: ReadinessItem[] = [
+    { id: 'request', label: 'Pengajuan keluar', description: approvedCheckoutRequest ? 'Sudah disetujui admin.' : pendingCheckoutRequest ? 'Masih menunggu review admin.' : 'Belum ada pengajuan keluar aktif.', state: approvedCheckoutRequest ? 'pass' : pendingCheckoutRequest ? 'warn' : 'info' },
+    { id: 'invoice', label: 'Tagihan open', description: openInvoiceCount > 0 ? `${openInvoiceCount} invoice masih belum PAID/CANCELLED.` : 'Tidak ada invoice open dari data yang dimuat.', state: openInvoiceCount > 0 ? 'block' : 'pass' },
+    { id: 'deposit', label: 'Deposit', description: `Status deposit: ${depositLabel}.`, state: stay.depositStatus === 'HELD' ? 'warn' : 'pass' },
+    { id: 'room', label: 'Status kamar', description: `Kamar sekarang ${stay.room?.status ?? '-'}.`, state: stay.room?.status === 'OCCUPIED' ? 'pass' : 'info' },
+  ];
+
+  const timelineSteps: TimelineStep[] = [
+    { id: 'checkin', label: 'Check-in', description: formatDateSafe(stay.checkInDate), status: 'done' },
+    { id: 'active', label: 'Masa sewa aktif', description: `Akhir masa sewa: ${formatDateSafe(stay.plannedCheckOutDate)}`, status: stay.status === 'ACTIVE' ? 'active' : 'done' },
+    { id: 'checkout-request', label: 'Ajukan keluar', description: approvedCheckoutRequest ? 'Request disetujui.' : pendingCheckoutRequest ? 'Menunggu review.' : 'Belum ada request aktif.', status: approvedCheckoutRequest ? 'done' : pendingCheckoutRequest ? 'active' : 'pending' },
+    { id: 'final', label: 'Final checkout', description: openInvoiceCount > 0 ? 'Terblokir invoice open.' : 'Bisa diproses jika cek kamar/deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
+  ];
+
   return (
     <div>
       <Breadcrumb className="mb-3">
@@ -162,6 +191,20 @@ export default function StayDetailPage() {
         title={stay.tenant?.fullName ?? `Stay #${stay.id}`}
         description={`Kamar ${stay.room?.code ?? stay.roomId} · Status ${stay.status} · Deposit ${stay.depositStatus ?? 'HELD'}`}
       />
+
+      <AssistantPanel title="Asisten Checkout & Masa Sewa" subtitle="Ringkasan blocker, request keluar, invoice, dan deposit untuk stay ini." items={assistantItems} emptyTitle="Tidak ada blocker besar" emptyMessage="Stay ini tidak memiliki blocker checkout utama dari data yang dimuat." />
+
+      {openInvoiceCount > 0 && approvedCheckoutRequest ? (
+        <BlockedReasonCard
+          title="Checkout final terblokir tagihan"
+          reason="Backend akan menolak final checkout selama masih ada invoice dengan status selain PAID atau CANCELLED. Selesaikan tagihan dulu sebelum melepas kamar."
+          actionLabel="Buka Tab Keuangan"
+          actionTo={`/stays/${stay.id}?tab=finance`}
+        />
+      ) : null}
+
+      <ReadinessChecklist title="Checkout Readiness" subtitle="Checklist operasional sebelum tombol Checkout Final dipakai." items={readinessItems} />
+      <LifecycleTimeline title="Lifecycle Stay" subtitle="Alur dari check-in sampai final checkout." steps={timelineSteps} />
 
       <Card className="detail-hero border-0 mb-4">
         <Card.Body>
@@ -184,13 +227,16 @@ export default function StayDetailPage() {
               ) : null}
               {stay.status === 'ACTIVE' && stay.room?.status !== 'RESERVED' ? (
                 <>
-                  <Button onClick={() => setShowCompleteModal(true)}>Checkout Final</Button>
-                  <Button variant="outline-success" onClick={() => setShowRenewModal(true)}>Perpanjang Stay</Button>
-                  <Button variant="outline-danger" onClick={() => setShowCancelModal(true)}>Batalkan</Button>
+                  <Button onClick={() => setShowCompleteModal(true)}>Finalkan Checkout</Button>
+                  <Button variant="outline-success" onClick={() => setShowRenewModal(true)} disabled={showRenewModal}>Perpanjang Masa Sewa</Button>
+                  <Button variant="outline-danger" onClick={() => setShowCancelModal(true)} disabled={showCancelModal}>Batalkan</Button>
                 </>
               ) : null}
-              {['COMPLETED', 'CANCELLED'].includes(stay.status) ? (
+              {['COMPLETED', 'CANCELLED'].includes(stay.status) && stay.depositStatus === 'HELD' ? (
                 <Button variant="outline-primary" onClick={() => setShowDepositModal(true)}>Proses Deposit</Button>
+              ) : null}
+              {['COMPLETED', 'CANCELLED'].includes(stay.status) && stay.depositStatus !== 'HELD' ? (
+                <span className="text-muted small">Deposit: {depositLabel}</span>
               ) : null}
               <span className="app-caption text-end stay-hero-caption">Check-in {formatDateSafe(stay.checkInDate)} · Room {stay.room?.code ?? stay.roomId}</span>
             </div>
@@ -206,25 +252,25 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{formatRupiah(stay.depositAmountRupiah ?? 0)}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-tile-label">Rencana Keluar</div>
+              <div className="metric-tile-label">Tanggal Renew / Keluar</div>
               <div className="metric-tile-value">{formatDateSafe(stay.plannedCheckOutDate)}</div>
             </div>
             <div className="metric-tile">
               <div className="metric-tile-label">Invoice terbuka</div>
-              <div className="metric-tile-value">{stay.openInvoiceCount ?? invoices.filter((item) => !['PAID', 'CANCELLED'].includes(item.status)).length}</div>
+              <div className="metric-tile-value">{openInvoiceCount}</div>
             </div>
           </div>
 
           {hasUnpaid ? (
             <Alert variant="warning" className="mb-3">
-              <strong>Ada invoice yang belum dibayar.</strong>
+              <strong>Ada tagihan yang belum dibayar.</strong>
               <div className="small mt-1">Periksa tab Keuangan untuk melihat tagihan dengan status Diterbitkan atau Sebagian Dibayar.</div>
             </Alert>
           ) : null}
 
           {overdue ? (
             <Alert variant="warning" className="mb-0">
-              Ada invoice overdue untuk stay ini. Cek tab Keuangan untuk tindak lanjut pembayaran atau negosiasi tenant.
+              Ada tagihan overdue untuk masa sewa ini. Cek tab Keuangan untuk tindak lanjut pembayaran atau negosiasi tenant.
             </Alert>
           ) : null}
 
@@ -238,7 +284,7 @@ export default function StayDetailPage() {
                   · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                  Setujui rencana hanya menyetujui jadwal keluar. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
+                  Setujui rencana hanya menyetujui jadwal keluar. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Final Checkout.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
@@ -262,6 +308,12 @@ export default function StayDetailPage() {
             </Alert>
           ) : null}
 
+          {approveCheckoutError ? (
+            <Alert variant="danger" className="mt-2 mb-0">
+              {approveCheckoutError}
+            </Alert>
+          ) : null}
+
           {approvedCheckoutRequest ? (
             <Alert variant="info" className="mt-3 mb-0 d-flex justify-content-between align-items-center">
               <div>
@@ -272,7 +324,7 @@ export default function StayDetailPage() {
                   · Alasan: {approvedCheckoutRequest.checkoutReason || approvedCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                   Rencana keluar kamar telah disetujui. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
+                   Rencana keluar kamar telah disetujui. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Final Checkout.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">

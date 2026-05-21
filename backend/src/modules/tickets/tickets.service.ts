@@ -13,6 +13,16 @@ import {
 } from './dto/ticket.dto';
 import { TicketsQueryDto } from './dto/tickets-query.dto';
 
+const STAFF_FIELD_CATEGORIES = new Set([
+  'BARANG_RUSAK',
+  'CEK_KAMAR',
+  'STOK_HABIS',
+  'PERBAIKAN',
+  'CATATAN_METER',
+  'KEBERSIHAN',
+]);
+
+
 @Injectable()
 export class TicketsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
@@ -110,6 +120,10 @@ export class TicketsService {
   }
 
   async createBackoffice(dto: CreateBackofficeTicketDto, actor: CurrentUserPayload) {
+    if (actor.role === 'STAFF' && (!dto.category || !STAFF_FIELD_CATEGORIES.has(dto.category))) {
+      throw new ConflictException('Jenis laporan staf tidak sesuai');
+    }
+
     const tenant = await this.prisma.tenant.findUnique({ where: { id: dto.tenantId } });
     if (!tenant) {
       throw new NotFoundException('Tenant tidak ditemukan');
@@ -123,6 +137,12 @@ export class TicketsService {
       title: dto.title,
       description: dto.description,
       category: dto.category,
+      assignedToId: actor.role === 'STAFF' ? actor.id : undefined,
+      issueImageUrl: dto.issueImageUrl,
+      issueImageFileKey: dto.issueImageFileKey,
+      issueImageOriginalFilename: dto.issueImageOriginalFilename,
+      issueImageMimeType: dto.issueImageMimeType,
+      issueImageFileSizeBytes: dto.issueImageFileSizeBytes,
     });
 
     await this.audit.log({
@@ -161,6 +181,11 @@ export class TicketsService {
       title: dto.title,
       description: dto.description,
       category: dto.category,
+      issueImageUrl: dto.issueImageUrl,
+      issueImageFileKey: dto.issueImageFileKey,
+      issueImageOriginalFilename: dto.issueImageOriginalFilename,
+      issueImageMimeType: dto.issueImageMimeType,
+      issueImageFileSizeBytes: dto.issueImageFileSizeBytes,
     });
 
     await this.audit.log({
@@ -222,7 +247,16 @@ export class TicketsService {
 
     const updated = await this.prisma.ticket.update({
       where: { id },
-      data: { status: 'DONE', resolutionNote: dto.resolutionNote, resolvedAt: new Date() },
+      data: {
+        status: 'DONE',
+        resolutionNote: dto.resolutionNote,
+        resolvedAt: new Date(),
+        resolutionImageUrl: dto.resolutionImageUrl,
+        resolutionImageFileKey: dto.resolutionImageFileKey,
+        resolutionImageOriginalFilename: dto.resolutionImageOriginalFilename,
+        resolutionImageMimeType: dto.resolutionImageMimeType,
+        resolutionImageFileSizeBytes: dto.resolutionImageFileSizeBytes,
+      },
     });
 
     await this.audit.log({
@@ -338,23 +372,38 @@ export class TicketsService {
     title: string;
     description: string;
     category?: string;
+    assignedToId?: number;
+    issueImageUrl?: string;
+    issueImageFileKey?: string;
+    issueImageOriginalFilename?: string;
+    issueImageMimeType?: string;
+    issueImageFileSizeBytes?: number;
   }) {
+    const baseData = {
+      tenantId: input.tenantId,
+      roomId: input.roomId,
+      stayId: input.stayId,
+      title: input.title,
+      description: input.description,
+      category: input.category,
+      assignedToId: input.assignedToId,
+      issueImageUrl: input.issueImageUrl,
+      issueImageFileKey: input.issueImageFileKey,
+      issueImageOriginalFilename: input.issueImageOriginalFilename,
+      issueImageMimeType: input.issueImageMimeType,
+      issueImageFileSizeBytes: input.issueImageFileSizeBytes,
+    };
     const primaryTicketNumber = await this.generateTicketNumber();
 
     try {
       return await this.prisma.ticket.create({
         data: {
           ticketNumber: primaryTicketNumber,
-          tenantId: input.tenantId,
-          roomId: input.roomId,
-          stayId: input.stayId,
-          title: input.title,
-          description: input.description,
-          category: input.category,
+          ...baseData,
         },
       });
     } catch (error) {
-if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
         throw error;
       }
 
@@ -362,12 +411,7 @@ if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== '
       return this.prisma.ticket.create({
         data: {
           ticketNumber: fallbackTicketNumber,
-          tenantId: input.tenantId,
-          roomId: input.roomId,
-          stayId: input.stayId,
-          title: input.title,
-          description: input.description,
-          category: input.category,
+          ...baseData,
         },
       });
     }

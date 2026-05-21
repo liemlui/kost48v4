@@ -106,7 +106,7 @@ export const operationsResourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'inventory-items': {
-    title: 'Inventory Items',
+    title: 'Stok Barang',
     path: '/inventory-items',
     columns: [
       { key: 'id', label: 'ID' },
@@ -169,7 +169,7 @@ export const operationsResourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'room-items': {
-    title: 'Inventaris per Kamar',
+    title: 'Barang di Kamar',
     path: '/room-items',
     createLabel: 'Catat Inventaris Kamar',
     columns: [

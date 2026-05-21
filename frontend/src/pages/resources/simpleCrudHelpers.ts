@@ -24,8 +24,8 @@ export function formatDateSafe(dateValue: string | Date | null | undefined): str
 }
 
 /**
- * Format period range dari dua tanggal
- * Contoh: "01 Apr 2026 - 30 Apr 2026"
+ * Format period range. periodStart = mulai sewa, periodEnd = tanggal renew/keluar (exclusive).
+ * Contoh: "01/09/2026 - sebelum 01/12/2026"
  */
 export function formatPeriod(periodStart: string | Date | null | undefined, periodEnd: string | Date | null | undefined): string {
   const start = formatDateSafe(periodStart);
@@ -34,7 +34,7 @@ export function formatPeriod(periodStart: string | Date | null | undefined, peri
   if (start === '-' && end === '-') return '-';
   if (start === '-') return `? - ${end}`;
   if (end === '-') return `${start} - ?`;
-  return `${start} - ${end}`;
+  return `${start} - sebelum ${end}`;
 }
 
 export function formatValue(value: unknown) {
@@ -111,8 +111,8 @@ export function normalizeFormDataForSubmit(formState: Record<string, any>, field
 }
 
 /**
- * Fungsi untuk menghitung status countdown berdasarkan tanggal due/check-out
- * @param dueDate Tanggal due/check-out (string atau Date)
+ * Fungsi untuk menghitung status countdown berdasarkan tanggal due/renew-keluar
+ * @param dueDate Tanggal due/renew-keluar (string atau Date)
  * @param checkInDate Tanggal check-in sebagai fallback (string atau Date)
  * @returns Object dengan status countdown dan label
  */

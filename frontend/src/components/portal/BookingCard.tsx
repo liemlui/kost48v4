@@ -128,12 +128,12 @@ export default function BookingCard({
             ? `Invoice booking awal: ${booking.latestInvoiceNumber}. `
             : ''}
           {booking.plannedCheckOutDate
-            ? `Rencana checkout ${formatDateId(booking.plannedCheckOutDate, {
+            ? `Tanggal renew/keluar ${formatDateId(booking.plannedCheckOutDate, {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
               })}.`
-            : 'Belum ada rencana checkout.'}
+            : 'Tanggal renew/keluar belum ditentukan.'}
           {booking.stayPurpose
             ? ` Tujuan tinggal: ${getStatusLabel(booking.stayPurpose)}.`
             : ''}

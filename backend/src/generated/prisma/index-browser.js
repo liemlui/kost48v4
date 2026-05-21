@@ -344,6 +344,48 @@ exports.Prisma.TicketScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.StaffRoutineTemplateScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  frequency: 'frequency',
+  areaType: 'areaType',
+  dayOfWeek: 'dayOfWeek',
+  dayOfMonth: 'dayOfMonth',
+  requiresPhoto: 'requiresPhoto',
+  requiresNote: 'requiresNote',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StaffRoutineAssignmentScalarFieldEnum = {
+  id: 'id',
+  templateId: 'templateId',
+  staffUserId: 'staffUserId',
+  roomId: 'roomId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StaffRoutineCompletionScalarFieldEnum = {
+  id: 'id',
+  templateId: 'templateId',
+  assignmentId: 'assignmentId',
+  staffUserId: 'staffUserId',
+  roomId: 'roomId',
+  dueDate: 'dueDate',
+  status: 'status',
+  completedAt: 'completedAt',
+  note: 'note',
+  photoUrl: 'photoUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AnnouncementScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -633,6 +675,29 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.StaffRoutineFrequency = exports.$Enums.StaffRoutineFrequency = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY'
+};
+
+exports.StaffRoutineAreaType = exports.$Enums.StaffRoutineAreaType = {
+  GENERAL: 'GENERAL',
+  BATHROOM: 'BATHROOM',
+  ROOM: 'ROOM',
+  INVENTORY: 'INVENTORY',
+  METER: 'METER',
+  SECURITY: 'SECURITY',
+  CLEANING: 'CLEANING'
+};
+
+exports.StaffRoutineStatus = exports.$Enums.StaffRoutineStatus = {
+  DONE: 'DONE',
+  NEED_HELP: 'NEED_HELP',
+  MISSED: 'MISSED',
+  SKIPPED: 'SKIPPED'
+};
+
 exports.AnnouncementAudience = exports.$Enums.AnnouncementAudience = {
   TENANT: 'TENANT',
   ALL: 'ALL'
@@ -697,6 +762,9 @@ exports.Prisma.ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   PaymentSubmission: 'PaymentSubmission',
   Ticket: 'Ticket',
+  StaffRoutineTemplate: 'StaffRoutineTemplate',
+  StaffRoutineAssignment: 'StaffRoutineAssignment',
+  StaffRoutineCompletion: 'StaffRoutineCompletion',
   Announcement: 'Announcement',
   InventoryItem: 'InventoryItem',
   RoomItem: 'RoomItem',

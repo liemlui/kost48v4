@@ -1,8 +1,8 @@
 export const userRoles = [
   { value: 'OWNER', label: 'Owner' },
   { value: 'ADMIN', label: 'Admin' },
-  { value: 'STAFF', label: 'Staff' },
-  { value: 'TENANT', label: 'Tenant Portal' },
+  { value: 'STAFF', label: 'Staf' },
+  { value: 'TENANT', label: 'Penghuni Portal' },
 ];
 
 export const announcementAudienceOptions = [

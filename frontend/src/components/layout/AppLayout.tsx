@@ -21,9 +21,9 @@ function getRoleLabel(role?: string) {
     case 'ADMIN':
       return 'Admin';
     case 'STAFF':
-      return 'Staff';
+      return 'Staf';
     case 'TENANT':
-      return 'Tenant';
+      return 'Penghuni';
     default:
       return role || 'User';
   }
@@ -46,9 +46,9 @@ function getWorkspaceTitle(role?: string) {
     case 'ADMIN':
       return 'Workspace Admin';
     case 'STAFF':
-      return 'Workspace Staff';
+      return 'Pekerjaan Staf';
     case 'TENANT':
-      return 'Portal Tenant';
+      return 'Portal Penghuni';
     default:
       return 'Workspace';
   }
@@ -61,9 +61,9 @@ function getWorkspaceSummary(role?: string) {
     case 'ADMIN':
       return 'Surface admin dipusatkan ke operasional harian, approval, dan kontrol data penting.';
     case 'STAFF':
-      return 'Surface staff dipersempit untuk pekerjaan lapangan, ticket, dan inventory teknis.';
+      return 'Kerjakan tugas yang terlihat di daftar. Yang penting: cek kamar, kerjakan tiket, dan catat hasilnya.';
     case 'TENANT':
-      return 'Portal tenant dijaga sederhana untuk hunian, tagihan, tiket, pengumuman, dan profil.';
+      return 'Portal sederhana untuk kamar, tagihan, tiket, pengumuman, dan profil.';
     default:
       return 'Menu utama workspace.';
   }
@@ -85,7 +85,7 @@ const segmentLabelMap: Record<string, string> = {
   'inventory-movements': 'Riwayat Stok',
   'room-items': 'Inventaris Kamar',
   'wifi-sales': 'Penjualan WiFi',
-  'meter-readings': 'Meter Readings',
+  'meter-readings': 'Catatan Meter',
   'announcements': 'Pengumuman',
   'expenses': 'Pengeluaran',
 };
@@ -122,59 +122,73 @@ function SidebarContent({
   links,
   userRole,
   onNavigate,
+  onBrandClick,
 }: {
   sections: NavigationSection[];
   links: NavigationLink[];
   userRole?: string;
   onNavigate?: () => void;
+  onBrandClick?: () => void;
 }) {
   const location = useLocation();
   const activeLink = links.find((link) => location.pathname === link.to || location.pathname.startsWith(`${link.to}/`));
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const toggleSection = (title: string) => setCollapsedSections((current) => ({ ...current, [title]: !current[title] }));
 
   return (
     <>
-      <button type="button" className="brand-block border-0 bg-transparent text-start w-100" onClick={onNavigate}>
+      <button type="button" className="brand-block border-0 bg-transparent text-start w-100" onClick={onBrandClick}>
         <div className="brand-mark" aria-hidden="true">K48</div>
         <div>
           <div className="brand-title">Kost48 Surabaya</div>
-          <div className="brand-subtitle">Role-based workspace</div>
+          <div className="brand-subtitle">{userRole === 'STAFF' ? 'Pusat Kerja' : 'Command Center'}</div>
         </div>
       </button>
 
-      <div className="glass-card p-3 rounded-4 border-0 shadow-none">
-        <div className="sidebar-section-label mb-2">{getWorkspaceTitle(userRole)}</div>
-        <div className="fw-semibold">{activeLink?.label || 'Control Center'}</div>
+      <div className="sidebar-context-card">
+        <div className="sidebar-context-topline">
+          <span>{getWorkspaceTitle(userRole)}</span>
+          <strong>{activeLink?.label || 'Dashboard'}</strong>
+        </div>
         <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
       </div>
 
       <nav className="sidebar-nav-groups">
-        {sections.map((section) => (
-          <div className="sidebar-nav-group" key={section.title}>
-            <div className="sidebar-section-label">{section.title}</div>
-            <div className="d-grid gap-2">
-              {section.links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  title={link.hint ?? link.label}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                  onClick={onNavigate}
-                >
-                  <span className="sidebar-link-label">
-                    <span className="sidebar-link-icon" role="img" aria-hidden="true">{link.icon}</span>
-                    <span>{link.label}</span>
-                  </span>
-                  <span className="sidebar-link-arrow" aria-hidden="true">›</span>
-                </NavLink>
-              ))}
+        {sections.map((section) => {
+          const collapsed = collapsedSections[section.title] ?? false;
+          return (
+            <div className="sidebar-nav-group" key={section.title}>
+              <button type="button" className="sidebar-section-toggle" onClick={() => toggleSection(section.title)} aria-expanded={!collapsed}>
+                <span>{section.title}</span>
+                <em>{collapsed ? '+' : '−'}</em>
+              </button>
+              {!collapsed ? (
+                <div className="d-grid gap-2">
+                  {section.links.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      title={link.hint ?? link.label}
+                      className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                      onClick={onNavigate}
+                    >
+                      <span className="sidebar-link-label">
+                        <span className="sidebar-link-icon" role="img" aria-hidden="true">{link.icon}</span>
+                        <span>{link.label}</span>
+                      </span>
+                      <span className="sidebar-link-arrow" aria-hidden="true">›</span>
+                    </NavLink>
+                  ))}
+                </div>
+              ) : null}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
-      <div className="sidebar-footer">
-        <strong>{getWorkspaceTitle(userRole)}</strong>
-        <div className="app-caption text-white-50">{getWorkspaceSummary(userRole)}</div>
+      <div className="sidebar-footer sidebar-footer-compact">
+        <strong>{getRoleLabel(userRole)}</strong>
+        <div className="app-caption text-white-50">{userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
       </div>
     </>
   );
@@ -206,7 +220,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     <div className="app-shell">
       <div className="app-shell-grid">
         <aside className="app-sidebar d-none d-xl-flex">
-          <SidebarContent sections={sections} links={links} userRole={user?.role} onNavigate={() => navigate(defaultRoute)} />
+          <SidebarContent sections={sections} links={links} userRole={user?.role} onBrandClick={() => navigate(defaultRoute)} />
         </aside>
 
         <Offcanvas show={sidebarOpen} onHide={() => setSidebarOpen(false)} placement="start" className="app-sidebar-offcanvas">
@@ -215,7 +229,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <div className="app-sidebar app-sidebar-mobile">
-              <SidebarContent sections={sections} links={links} userRole={user?.role} onNavigate={() => { setSidebarOpen(false); navigate(defaultRoute); }} />
+              <SidebarContent sections={sections} links={links} userRole={user?.role} onBrandClick={() => { setSidebarOpen(false); navigate(defaultRoute); }} onNavigate={() => setSidebarOpen(false)} />
             </div>
           </Offcanvas.Body>
         </Offcanvas>

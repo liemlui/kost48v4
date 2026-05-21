@@ -11,18 +11,25 @@ export async function createCheckoutRequest(payload: CreateCheckoutRequestPayloa
   return createResource<CheckoutRequest>('/tenant/checkout-requests', payload as unknown as Record<string, unknown>);
 }
 
+function normalizeCheckoutRequests(data: CheckoutRequest[] | PaginatedResponse<CheckoutRequest>): PaginatedResponse<CheckoutRequest> {
+  if (Array.isArray(data)) {
+    return { items: data };
+  }
+
+  return {
+    items: Array.isArray(data?.items) ? data.items : [],
+    meta: data?.meta,
+  };
+}
+
 export async function listMyCheckoutRequests(): Promise<PaginatedResponse<CheckoutRequest>> {
-  const data = await getResource<CheckoutRequest[]>('/tenant/checkout-requests/my');
-  // Backend returns a plain array; normalize to PaginatedResponse shape
-  const items = Array.isArray(data) ? data : (data as unknown as PaginatedResponse<CheckoutRequest>)?.items ?? [];
-  return { items };
+  const data = await getResource<CheckoutRequest[] | PaginatedResponse<CheckoutRequest>>('/tenant/checkout-requests/my');
+  return normalizeCheckoutRequests(data);
 }
 
 export async function listAdminCheckoutRequests(params?: { status?: string; stayId?: number }): Promise<PaginatedResponse<CheckoutRequest>> {
-  const data = await listResource<CheckoutRequest>('/admin/checkout-requests', params as Record<string, unknown>) as unknown as CheckoutRequest[];
-  // Backend returns a plain array; normalize to PaginatedResponse shape
-  const items = Array.isArray(data) ? data : (data as unknown as PaginatedResponse<CheckoutRequest>)?.items ?? [];
-  return { items };
+  const data = await listResource<CheckoutRequest>('/admin/checkout-requests', params as Record<string, unknown>) as unknown as CheckoutRequest[] | PaginatedResponse<CheckoutRequest>;
+  return normalizeCheckoutRequests(data);
 }
 
 export async function approveCheckoutRequest(id: number, payload?: ApproveCheckoutRequestPayload): Promise<CheckoutRequest> {

@@ -1,19 +1,26 @@
-import { useMemo } from 'react';
-import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
+import { useState, type ReactNode } from 'react';
+import { Alert, Button, Card, Col, Collapse, Row, Spinner, Tab, Table, Tabs } from 'react-bootstrap';
 import { Navigate, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import StatCard from '../../components/common/StatCard';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge from '../../components/common/StatusBadge';
+import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import StaffMotivationDashboard from '../../components/staff/StaffMotivationDashboard';
+import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
 import { listResource } from '../../api/resources';
 import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
 import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
+import { fetchBusinessHealth } from '../../api/finance';
+import { fetchMyStaffRoutineKpi, fetchStaffRoutineToday } from '../../api/staffRoutines';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
-import type { CheckoutRequest, Invoice, PaymentSubmission, RenewRequest, Room, Stay } from '../../types';
+import { useBusinessHealthScore } from '../../hooks/useBusinessHealthScore';
+import { useCashflowForecast } from '../../hooks/useCashflowForecast';
+import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
+import { dedupeCommandItems } from '../../utils/commandCenterDedup';
+import type { Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
+import { useQuery } from '@tanstack/react-query';
 
 type DashboardListSummary<T> = {
   items: T[];
@@ -21,12 +28,19 @@ type DashboardListSummary<T> = {
   isTruncated: boolean;
 };
 
-async function fetchAllPagesForDashboard<T>(
-  path: string,
-  params?: Record<string, unknown>,
-  pageSize = 100,
-  maxPages = 50,
-): Promise<DashboardListSummary<T>> {
+const ACTION_QUERY_OPTIONS = {
+  staleTime: 30_000,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+};
+
+const MEDIUM_FRESH_QUERY_OPTIONS = {
+  staleTime: 60_000,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+};
+
+async function fetchAllPagesForDashboard<T>(path: string, params?: Record<string, unknown>, pageSize = 100, maxPages = 20): Promise<DashboardListSummary<T>> {
   const items: T[] = [];
   let totalPages = 1;
   let totalItems = 0;
@@ -37,41 +51,41 @@ async function fetchAllPagesForDashboard<T>(
     items.push(...(response.items ?? []));
     totalPages = response.meta?.totalPages ?? 1;
     totalItems = response.meta?.totalItems ?? items.length;
-
     if (!(response.items ?? []).length) break;
     page += 1;
   } while (page <= totalPages && page <= maxPages);
 
-  return {
-    items,
-    totalItems,
-    isTruncated: totalItems > items.length || totalPages > maxPages,
-  };
+  return { items, totalItems, isTruncated: totalItems > items.length || totalPages > maxPages };
 }
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
   if (!dateValue) return '-';
-  try {
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch {
-    return '-';
-  }
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('id-ID').format(Math.round(value));
+}
+
+function formatCurrencyCompact(value: number) {
+  return new Intl.NumberFormat('id-ID', { notation: 'compact', maximumFractionDigits: 1 }).format(Math.round(value));
 }
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
-  try {
-    const date = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-    if (Number.isNaN(date.getTime())) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  } catch {
-    return null;
-  }
+  const date = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
+  if (Number.isNaN(date.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return Math.floor((copy.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function isOpenInvoice(invoice: Invoice) {
+  return !['PAID', 'CANCELLED'].includes(invoice.status);
 }
 
 function isOverdue(invoice: Invoice) {
@@ -84,34 +98,98 @@ function isOverdue(invoice: Invoice) {
   return dueDate < today;
 }
 
+function isDueSoon(invoice: Invoice) {
+  const days = daysFromToday(invoice.dueDate);
+  return days !== null && days >= 0 && days <= 3 && isOpenInvoice(invoice);
+}
+
 function LoadingDashboard() {
   return <div className="py-5 text-center"><Spinner animation="border" /></div>;
 }
 
-function SmallTable({ title, subtitle, headers, rows, emptyTitle, emptyDescription }: {
-  title: string;
-  subtitle: string;
-  headers: string[];
-  rows: ReactNode;
-  emptyTitle: string;
-  emptyDescription: string;
-}) {
+function makePaymentCount(items: PaymentSubmission[], total?: number) {
+  if (typeof total === 'number') return total;
+  return items.filter((ps) => ps.status === 'PENDING_REVIEW').length;
+}
+
+function makeRoomPoints(rooms: Room[]): SmartChartPoint[] {
+  const occupied = rooms.filter((room) => room.status === 'OCCUPIED').length;
+  const available = rooms.filter((room) => room.status === 'AVAILABLE').length;
+  const maintenance = rooms.filter((room) => ['MAINTENANCE', 'INACTIVE'].includes(room.status)).length;
+  const reserved = rooms.filter((room) => room.status === 'RESERVED').length;
+  return [
+    { label: 'Terisi', value: occupied, detail: 'Revenue berjalan', to: '/reports?tab=operations' },
+    { label: 'Kosong', value: available, detail: 'Peluang pemasaran', to: '/rooms' },
+    { label: 'Dipesan', value: reserved, detail: 'Belum jadi penghuni aktif', to: '/stays?status=BOOKINGS' },
+    { label: 'Diperbaiki', value: maintenance, detail: 'Perlu dicek petugas', to: '/rooms' },
+  ];
+}
+
+function CompactDisclosure({ title, subtitle, children, defaultOpen = false }: { title: string; subtitle?: string; children: ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Card className="content-card compact-disclosure border-0">
+      <Card.Body>
+        <div className="table-meta">
+          <div>
+            <div className="panel-title">{title}</div>
+            {subtitle ? <div className="panel-subtitle">{subtitle}</div> : null}
+          </div>
+          <Button variant="outline-secondary" size="sm" onClick={() => setOpen((value) => !value)}>{open ? 'Sembunyikan' : 'Tampilkan'}</Button>
+        </div>
+        <Collapse in={open}><div className="pt-3">{children}</div></Collapse>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function RecentOverdueTable({ overdue }: { overdue: Invoice[] }) {
+  const navigate = useNavigate();
   return (
     <Card className="content-card border-0 h-100">
       <Card.Body>
         <div className="table-meta">
           <div>
-            <div className="panel-title">{title}</div>
-            <div className="panel-subtitle">{subtitle}</div>
+            <div className="panel-title">Tagihan Bermasalah</div>
+            <div className="panel-subtitle">Detail disembunyikan dari dashboard utama; buka saat butuh follow-up.</div>
           </div>
+          <Button variant="outline-primary" size="sm" onClick={() => navigate('/invoices')}>Lihat semua</Button>
         </div>
-        <Table responsive hover className="mt-3">
-          <thead>
-            <tr>{headers.map((header) => <th key={header}>{header}</th>)}</tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </Table>
-        {!rows ? <EmptyState icon="🗂️" title={emptyTitle} description={emptyDescription} /> : null}
+        {!overdue.length ? (
+          <EmptyState icon="✅" title="Tidak ada overdue" description="Belum ada tagihan overdue dari data yang dimuat." />
+        ) : (
+          <Table responsive hover className="mt-3">
+            <thead><tr><th>Tagihan</th><th>Tenant</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
+            <tbody>
+              {overdue.slice(0, 6).map((invoice) => (
+                <tr key={invoice.id} className="clickable-row" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                  <td><div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div><div className="small text-muted">Rp {formatNumber(Number(invoice.totalAmountRupiah ?? 0))}</div></td>
+                  <td>{invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`}</td>
+                  <td>{formatDateSafe(invoice.dueDate)}</td>
+                  <td><StatusBadge status={invoice.status} domain="invoice" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card.Body>
+    </Card>
+  );
+}
+
+function FinanceReadinessCard() {
+  return (
+    <Card className="content-card finance-readiness-card border-0 h-100">
+      <Card.Body>
+        <div className="panel-title mb-1">Balance Sheet Readiness</div>
+        <div className="panel-subtitle mb-3">Formal ratio dikunci sampai data akuntansi dasar reliable.</div>
+        <div className="readiness-mini-list">
+          <div><span>✅</span><strong>Accounts receivable</strong><small>Open invoice bisa menjadi kandidat AR.</small></div>
+          <div><span>✅</span><strong>Deposit liability</strong><small>Deposit held harus dibaca sebagai kewajiban.</small></div>
+          <div><span>🔒</span><strong>Kas / bank aktual</strong><small>Belum ada account model formal.</small></div>
+          <div><span>🔒</span><strong>Equity & capital employed</strong><small>Belum ada balance sheet-grade source.</small></div>
+        </div>
+        <Button variant="outline-primary" size="sm" className="mt-3" onClick={() => window.location.assign('/reports?tab=formal')}>Buka readiness</Button>
       </Card.Body>
     </Card>
   );
@@ -119,331 +197,215 @@ function SmallTable({ title, subtitle, headers, rows, emptyTitle, emptyDescripti
 
 function OwnerDashboard() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('priorities');
   const roomsQuery = useQuery({ queryKey: ['dashboard-owner', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
-  const staysQuery = useQuery({ queryKey: ['dashboard-owner', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
+  const activeStaysQuery = useQuery({ queryKey: ['dashboard-owner', 'stays-active'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 300 }) });
   const invoicesQuery = useQuery({ queryKey: ['dashboard-owner', 'invoices-summary'], queryFn: () => fetchAllPagesForDashboard<Invoice>('/invoices') });
   const expensesQuery = useQuery({ queryKey: ['dashboard-owner', 'expenses-summary'], queryFn: () => fetchAllPagesForDashboard<any>('/expenses') });
-  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-owner', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
-  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
-  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }) });
-  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-owner', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 1 }) });
-
-  if (roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
-  if (roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || expensesQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat dashboard owner.</Alert>;
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-owner', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), ...ACTION_QUERY_OPTIONS });
+  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-owner', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), ...ACTION_QUERY_OPTIONS });
+  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-owner', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 25 }), ...ACTION_QUERY_OPTIONS });
+  const backendBusinessHealthQuery = useQuery({ queryKey: ['dashboard-owner', 'finance-business-health'], queryFn: () => fetchBusinessHealth(), staleTime: 60_000, retry: 1 });
 
   const rooms = roomsQuery.data?.items ?? [];
-  const activeStays = staysQuery.data?.items ?? [];
+  const activeStays = activeStaysQuery.data?.items ?? [];
   const invoices = invoicesQuery.data?.items ?? [];
-  const invoiceTotalItems = invoicesQuery.data?.totalItems ?? invoices.length;
-  const invoiceIsTruncated = Boolean(invoicesQuery.data?.isTruncated);
   const expenses = expensesQuery.data?.items ?? [];
-  const expenseTotalItems = expensesQuery.data?.totalItems ?? expenses.length;
-  const expenseIsTruncated = Boolean(expensesQuery.data?.isTruncated);
-
-  const occupiedRooms = rooms.filter((room) => room.status === 'OCCUPIED').length;
-  const availableRooms = rooms.filter((room) => room.status === 'AVAILABLE').length;
-  const billed = invoices.filter((invoice) => ['ISSUED', 'PARTIAL', 'PAID'].includes(invoice.status)).reduce((sum, invoice) => sum + Number(invoice.totalAmountRupiah ?? 0), 0);
-  const collected = invoices.filter((invoice) => invoice.status === 'PAID').reduce((sum, invoice) => sum + Number(invoice.totalAmountRupiah ?? 0), 0);
-  const overdue = invoices.filter(isOverdue);
   const totalExpense = expenses.reduce((sum, expense) => sum + Number(expense.amountRupiah ?? 0), 0);
-  const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
-  const pendingCheckoutCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
-  const approvedCheckoutCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
-  const pendingPaymentReviewCount = (paymentReviewQuery.data?.items ?? []).filter((ps: PaymentSubmission) => ps.status === 'PENDING_REVIEW').length;
+  const pendingRenewCount = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) => rr.status === 'PENDING').length ?? 0;
+  const pendingCheckoutRequestCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
+  const approvedCheckoutRequestCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
+  const pendingPaymentReviewCount = makePaymentCount(paymentReviewQuery.data?.items ?? [], paymentReviewQuery.data?.meta?.totalItems);
+  const overdue = invoices.filter(isOverdue);
+  const cashflowForecast = useCashflowForecast(invoices);
+  const businessHealth = useBusinessHealthScore({ invoices, rooms, pendingPaymentReviewCount, pendingRenewCount, pendingCheckoutRequestCount, approvedCheckoutRequestCount, totalExpenseRupiah: totalExpense });
+  const backendBusinessHealth = backendBusinessHealthQuery.data;
+
+  const refreshDashboard = () => {
+    void Promise.all([
+      roomsQuery.refetch(), activeStaysQuery.refetch(), invoicesQuery.refetch(), expensesQuery.refetch(),
+      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(),
+    ]);
+  };
+
+  if (roomsQuery.isLoading || activeStaysQuery.isLoading || invoicesQuery.isLoading || expensesQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
+  if (roomsQuery.isError || activeStaysQuery.isError || invoicesQuery.isError || expensesQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat command center owner.</Alert>;
 
   return (
     <div>
       <PageHeader
-        eyebrow="Owner surface"
-        title="Dashboard Owner"
-        description="Ringkasan strategis properti untuk melihat kesehatan bisnis, koleksi tagihan, biaya, dan okupansi tanpa tenggelam di tabel operasional mentah."
-        secondaryAction={<Button variant="outline-primary" onClick={() => navigate('/invoices')}>Lihat tagihan utama</Button>}
+        eyebrow="Owner Command Center"
+        title="Compact Business Health Cockpit"
+        description="Ringkas: assistant mendiagnosis, queue berisi pekerjaan konkret, detail disembunyikan di tab dan drill-down laporan."
+        secondaryAction={<><Button variant="outline-secondary" onClick={refreshDashboard}>Refresh</Button><Button variant="outline-primary" onClick={() => navigate('/reports?tab=command')}>Buka Reports</Button></>}
       />
-
-      {invoiceIsTruncated ? (
-        <Alert variant="warning" className="mb-3 py-2 small">
-Ringkasan invoice belum memuat semua data. KPI saat ini dihitung dari <strong>{invoices.length}</strong> invoice, sementara total di database <strong>{invoiceTotalItems}</strong>.
+      {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan invoice dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint summary backend.</Alert> : null}
+      <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di queue." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
+      <CompactMetrics metrics={businessHealth.metrics} />
+      {backendBusinessHealth ? (
+        <Alert variant="info" className="py-2 small">
+          Backend Finance Core aktif: score {Math.round(backendBusinessHealth.score)} ({backendBusinessHealth.grade}) · {backendBusinessHealth.headline} · generated {formatDateSafe(backendBusinessHealth.generatedAt)}.
         </Alert>
+      ) : backendBusinessHealthQuery.isError ? (
+        <Alert variant="light" className="py-2 small text-muted">Backend finance summary belum tersedia; dashboard memakai Tier 0 frontend rule engine sebagai fallback.</Alert>
       ) : null}
 
-      {expenseIsTruncated ? (
-        <Alert variant="warning" className="mb-3 py-2 small">
-          Ringkasan expense belum memuat semua data. Total expense saat ini dihitung dari <strong>{expenses.length}</strong> data, sementara total di database <strong>{expenseTotalItems}</strong>.
-        </Alert>
-      ) : null}
-
-      <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Permintaan inti properti" icon="🏠" onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Kamar terisi" value={occupiedRooms} subtitle={`Tersedia ${availableRooms} kamar kosong`} icon="📈" onClick={() => navigate('/rooms')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Total billed" value={new Intl.NumberFormat('id-ID').format(billed)} subtitle="Estimasi tagihan yang sudah terbentuk" icon="🧾" onClick={() => navigate('/invoices')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Total collected" value={new Intl.NumberFormat('id-ID').format(collected)} subtitle={`Expense tercatat ${new Intl.NumberFormat('id-ID').format(totalExpense)}`} icon="💰" variant={collected >= totalExpense ? 'success' : 'warning'} onClick={() => navigate('/invoices')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Permintaan Perpanjangan" value={pendingRenewCount} subtitle="Butuh approval owner" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Pengajuan Keluar — Review" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Rencana Keluar — Disetujui" value={approvedCheckoutCount} subtitle="Menunggu checkout final" icon="✅" variant={approvedCheckoutCount ? 'info' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Pembayaran Review" value={pendingPaymentReviewCount} subtitle="Menunggu verifikasi" icon="💳" variant={pendingPaymentReviewCount ? 'warning' : 'success'} onClick={() => navigate('/payment-submissions/review')} /></Col>
-      </Row>
-
-      <Row className="g-4">
-        <Col xl={7}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Indikator keputusan cepat</div>
-                  <div className="panel-subtitle">Hal yang paling cepat memengaruhi cashflow dan utilisasi properti hari ini.</div>
-                </div>
-              </div>
-              <div className="kpi-list mt-3">
-                <div className="kpi-item clickable-row" onClick={() => navigate('/invoices')}><div><div className="card-title-soft">Invoice overdue</div><strong>{overdue.length}</strong></div><StatusBadge status={overdue.length ? 'WARNING' : 'SUCCESS'} customLabel={overdue.length ? 'Butuh aksi' : 'Aman'} /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/invoices')}><div><div className="card-title-soft">Collected / billed</div><strong>{billed ? `${Math.round((collected / billed) * 100)}%` : '0%'}</strong></div><StatusBadge status={collected >= billed ? 'SUCCESS' : 'INFO'} customLabel="Collection ratio" /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Occ. rate kasar</div><strong>{rooms.length ? `${Math.round((occupiedRooms / rooms.length) * 100)}%` : '0%'}</strong></div><StatusBadge status="INFO" customLabel="Occupancy" /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/reports')}><div><div className="card-title-soft">Cashflow ringkas</div><strong>{collected - totalExpense >= 0 ? 'Positif' : 'Tertekan'}</strong></div><StatusBadge status={collected - totalExpense >= 0 ? 'SUCCESS' : 'WARNING'} customLabel="Management view" /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/stays')}><div><div className="card-title-soft">Permintaan perpanjangan</div><strong>{pendingRenewCount}</strong></div><StatusBadge status={pendingRenewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingRenewCount ? 'Butuh approval' : 'Aman'} /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Pengajuan rencana keluar</div><strong>{pendingCheckoutCount}</strong></div><StatusBadge status={pendingCheckoutCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingCheckoutCount ? 'Butuh review' : 'Aman'} /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><div><div className="card-title-soft">Siap checkout final</div><strong>{approvedCheckoutCount}</strong></div><StatusBadge status={approvedCheckoutCount ? 'INFO' : 'SUCCESS'} customLabel={approvedCheckoutCount ? 'Menunggu admin' : 'Aman'} /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/payment-submissions/review')}><div><div className="card-title-soft">Pembayaran perlu review</div><strong>{pendingPaymentReviewCount}</strong></div><StatusBadge status={pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS'} customLabel={pendingPaymentReviewCount ? 'Butuh verifikasi' : 'Aman'} /></div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xl={5}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Invoice paling mendesak</div>
-                  <div className="panel-subtitle">Bantu owner melihat tekanan koleksi tanpa membuka detail operasional satu per satu.</div>
-                </div>
-              </div>
-              {!overdue.length ? (
-                <EmptyState icon="✅" title="Tidak ada overdue" description="Belum ada invoice overdue yang perlu perhatian owner saat ini." />
-              ) : (
-                <Table responsive hover className="mt-3">
-                  <thead><tr><th>Invoice</th><th>Tenant</th><th>Due</th></tr></thead>
-                  <tbody>
-                    {overdue.slice(0, 5).map((invoice) => (
-                      <tr key={invoice.id} className="clickable-row" onClick={() => navigate(`/invoices/${invoice.id}`)}>
-                        <td><div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div><div className="small text-muted">{invoice.status}</div></td>
-                        <td>{invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`}</td>
-                        <td>{formatDateSafe(invoice.dueDate)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <Tabs activeKey={activeTab} onSelect={(key) => setActiveTab(key ?? 'priorities')} className="command-tabs mb-3">
+        <Tab eventKey="priorities" title="Prioritas">
+          <Row className="g-4">
+            <Col xl={8}><ActionQueueTable title="Owner Priority Queue" subtitle="Hanya pekerjaan konkret; tidak mengulang semua isi assistant." items={businessHealth.queueItems} maxItems={8} /></Col>
+            <Col xl={4}>
+              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Business health score</div><div className="business-health-score"><strong>{Math.round(backendBusinessHealth?.score ?? businessHealth.score)}</strong><span>{backendBusinessHealth?.grade ?? businessHealth.grade}</span></div><div className="panel-subtitle mt-2">{backendBusinessHealth?.headline ?? businessHealth.headline}</div><div className="mt-3 d-flex gap-2 flex-wrap">{businessHealth.drivers.map((driver) => <span className="surface-pill" key={driver}>{driver}</span>)}</div></Card.Body></Card>
+            </Col>
+          </Row>
+        </Tab>
+        <Tab eventKey="rooms" title="Kamar">
+          <SmartChartPanel title="Kondisi Kamar" subtitle="Chart bisa diganti mode dan menjadi pintu ke occupancy report." points={makeRoomPoints(rooms)} defaultMode="summary" ctaLabel="Occupancy report" ctaTo="/reports?tab=operations" totalLabel="Kamar" />
+        </Tab>
+        <Tab eventKey="finance" title="Keuangan">
+          <Row className="g-4">
+            <Col xl={6}>
+              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Cashflow Forecast Ringan</div><div className="panel-subtitle mb-3">Deterministic rule engine dari tagihan open; bukan LLM.</div><div className="kpi-list"><div className="kpi-item"><span>Expected inflow</span><strong>Rp {formatCurrencyCompact(cashflowForecast.expectedInflowRupiah)}</strong></div><div className="kpi-item"><span>Overdue</span><strong>Rp {formatCurrencyCompact(cashflowForecast.overdueRupiah)}</strong></div><div className="kpi-item"><span>Due ≤7 hari</span><strong>Rp {formatCurrencyCompact(cashflowForecast.dueSoonRupiah)}</strong></div></div><p className="small text-muted mt-3 mb-0">{cashflowForecast.assumption}</p></Card.Body></Card>
+            </Col>
+            <Col xl={6}><FinanceReadinessCard /></Col>
+          </Row>
+          <div className="mt-4"><CompactDisclosure title="Detail tagihan bermasalah" subtitle="Dibuka hanya saat owner/admin perlu follow-up." defaultOpen={false}><RecentOverdueTable overdue={overdue} /></CompactDisclosure></div>
+        </Tab>
+        <Tab eventKey="activity" title="Aktivitas">
+          <Row className="g-3">
+            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Stay aktif</span><h3 className="mt-3 mb-0">{activeStays.length}</h3><p className="text-muted small mb-0">Tenant yang sedang berjalan.</p></Card.Body></Card></Col>
+            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Open invoice</span><h3 className="mt-3 mb-0">{cashflowForecast.openInvoiceCount}</h3><p className="text-muted small mb-0">Tagihan belum PAID/CANCELLED.</p></Card.Body></Card></Col>
+            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Reports</span><h3 className="mt-3 mb-0">Drill-down</h3><p className="text-muted small mb-0">Laporan tetap ada, tetapi tidak memenuhi sidebar.</p></Card.Body></Card></Col>
+          </Row>
+        </Tab>
+      </Tabs>
     </div>
   );
 }
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('priorities');
   const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
-  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
-  const reservedBookingsQuery = useQuery({ queryKey: ['dashboard-admin', 'reserved-bookings'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 200 }) });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 1000 }) });
-  const depositCompletedQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-completed'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'COMPLETED', limit: 50 }) });
-  const depositCancelledQuery = useQuery({ queryKey: ['dashboard-admin', 'deposit-cancelled'], queryFn: () => listResource<Stay>('/stays', { depositStatus: 'HELD', status: 'CANCELLED', limit: 50 }) });
-  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<any>('/tickets', { limit: 100 }) });
-  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }) });
-  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }) });
-  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }) });
-  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 1 }) });
-
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, checkoutRequestsPendingQuery, checkoutRequestsApprovedQuery, paymentReviewQuery].some((q) => q.isLoading)) return <LoadingDashboard />;
-  if ([roomsQuery, staysQuery, invoicesQuery, depositCompletedQuery, depositCancelledQuery, ticketsQuery, reservedBookingsQuery, renewRequestsQuery, checkoutRequestsPendingQuery, checkoutRequestsApprovedQuery, paymentReviewQuery].some((q) => q.isError)) return <Alert variant="danger">Gagal memuat dashboard admin.</Alert>;
+  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 300 }) });
+  const bookingsQuery = useQuery({ queryKey: ['dashboard-admin', 'bookings'], queryFn: () => listResource<Stay>('/stays', { limit: 300 }) });
+  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 500 }) });
+  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }) });
+  const depositCompleteStaysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-deposit-complete'], queryFn: () => listResource<Stay>('/stays', { status: 'COMPLETED', limit: 100 }) });
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), ...ACTION_QUERY_OPTIONS });
+  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), ...ACTION_QUERY_OPTIONS });
+  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 25 }), ...ACTION_QUERY_OPTIONS });
 
   const rooms = roomsQuery.data?.items ?? [];
-  const activeStays = staysQuery.data?.items ?? [];
+  const stays = staysQuery.data?.items ?? [];
+  const bookings = bookingsQuery.data?.items ?? [];
   const invoices = invoicesQuery.data?.items ?? [];
   const tickets = ticketsQuery.data?.items ?? [];
-  const depositQueue = [...(depositCompletedQuery.data?.items ?? []), ...(depositCancelledQuery.data?.items ?? [])];
-  const dueSoonInvoices = invoices.filter((invoice) => {
-    const daysLeft = daysFromToday(invoice.dueDate);
-    return !['PAID', 'CANCELLED'].includes(invoice.status) && daysLeft !== null && daysLeft >= 0 && daysLeft <= 3;
+  const depositCompleteStays = depositCompleteStaysQuery.data?.items ?? [];
+  const pendingRenewCount = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) => rr.status === 'PENDING').length ?? 0;
+  const pendingCheckoutRequestCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
+  const approvedCheckoutRequestCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
+  const pendingPaymentReviewCount = makePaymentCount(paymentReviewQuery.data?.items ?? [], paymentReviewQuery.data?.meta?.totalItems);
+  const overdueInvoices = invoices.filter(isOverdue);
+  const dueSoonInvoices = invoices.filter(isDueSoon);
+  const periodEndingSoon = stays.filter((stay) => {
+    const days = daysFromToday(stay.plannedCheckOutDate);
+    return days !== null && days >= 0 && days <= 14;
   });
-  const checkoutSoon = activeStays.filter((stay) => {
-    const daysLeft = daysFromToday(stay.plannedCheckOutDate);
-    return stay.status === 'ACTIVE' && daysLeft !== null && daysLeft >= 0 && daysLeft <= 10;
-  });
-  const allStays = reservedBookingsQuery.data?.items ?? [];
-  const reservedWithoutInvoice = allStays.filter((stay) => {
-    return (
-      stay.status === 'ACTIVE' &&
-      stay.room?.status === 'RESERVED' &&
-      stay.bookingSource === 'WEBSITE' &&
-      Boolean(stay.expiresAt) &&
-      !(Number(stay.invoiceCount ?? 0) > 0 || Boolean(stay.latestInvoiceId))
-    );
-  });
-  const pendingApprovalCount = reservedWithoutInvoice.length;
-  const pendingRenewCount = (renewRequestsQuery.data?.items ?? []).filter((rr: RenewRequest) => rr.status === 'PENDING').length;
-  const pendingCheckoutCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
-  const approvedCheckoutCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
-  const pendingPaymentReviewCount = (paymentReviewQuery.data?.items ?? []).filter((ps: PaymentSubmission) => ps.status === 'PENDING_REVIEW').length;
+  const pendingApprovalCount = bookings.filter((stay) => stay.status === 'RESERVED').length;
+  const depositQueue = depositCompleteStays.filter((stay) => stay.depositStatus === 'HELD' || Number(stay.depositAmountRupiah ?? 0) > Number(stay.depositRefundedRupiah ?? 0));
+  const opsStress = useOperationalStressIndex({ tickets, rooms, pendingCheckoutRequestCount, approvedCheckoutRequestCount, pendingRenewCount, pendingApprovalCount });
+
+  const assistantItems: AssistantItem[] = dedupeCommandItems([
+    ...(pendingPaymentReviewCount ? [{ id: 'admin-payment-review', ruleId: 'payment-review', entityType: 'payment-submission', entityId: 'summary', severity: 'HIGH' as const, title: 'Verifikasi pembayaran menahan flow', message: `${pendingPaymentReviewCount} bukti pembayaran perlu diputuskan sebelum invoice/booking dianggap clear.`, count: pendingPaymentReviewCount, source: 'Payment review', actionLabel: 'Verifikasi', actionTo: '/payment-submissions/review' }] : []),
+    ...opsStress.assistantItems,
+    ...(overdueInvoices.length ? [{ id: 'admin-overdue', ruleId: 'invoice-overdue', entityType: 'invoice', entityId: 'summary', severity: 'HIGH' as const, title: 'Tagihan overdue perlu follow-up', message: `${overdueInvoices.length} tagihan melewati jatuh tempo dan bisa memblokir flow checkout.`, count: overdueInvoices.length, source: 'Invoices', actionLabel: 'Lihat Tagihan', actionTo: '/invoices' }] : []),
+    ...(pendingRenewCount ? [{ id: 'admin-renew', ruleId: 'renew-pending', entityType: 'renew', entityId: 'summary', severity: 'MEDIUM' as const, title: 'Permintaan perpanjangan menunggu review', message: 'Approval renew akan menerbitkan invoice renewal dan memperpanjang masa sewa.', count: pendingRenewCount, source: 'Renew', actionLabel: 'Review Renew', actionTo: '/renew-requests' }] : []),
+  ]);
+
+  const metrics: MetricChip[] = [
+    ...opsStress.metrics,
+    { id: 'payment-review', label: 'Payment review', value: pendingPaymentReviewCount, helper: 'Butuh keputusan admin', status: pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '💸', to: '/payment-submissions/review' },
+    { id: 'overdue', label: 'Overdue', value: overdueInvoices.length, helper: 'Tagihan macet', status: overdueInvoices.length ? 'DANGER' : 'SUCCESS', icon: '⚠️', to: '/invoices' },
+  ];
+
+  const queueItems: ActionQueueItem[] = dedupeCommandItems([
+    ...(pendingPaymentReviewCount ? [{ id: 'payment-review', ruleId: 'payment-review', entityType: 'payment-submission', entityId: 'summary', priority: 'HIGH' as const, type: 'Pembayaran', subject: `${pendingPaymentReviewCount} bukti`, issue: 'Review agar cashflow dan aktivasi booking tidak tertahan.', recommendedAction: 'Verifikasi', actionTo: '/payment-submissions/review' }] : []),
+    ...opsStress.queueItems,
+    ...overdueInvoices.slice(0, 3).map((invoice) => ({ id: `invoice-${invoice.id}`, ruleId: 'invoice-overdue', entityType: 'invoice', entityId: invoice.id, priority: 'HIGH' as const, type: 'Tagihan overdue', subject: invoice.stay?.tenant?.fullName || invoice.invoiceNumber || `Invoice #${invoice.id}`, issue: `Jatuh tempo ${formatDateSafe(invoice.dueDate)}.`, recommendedAction: 'Lihat Tagihan', actionTo: `/invoices/${invoice.id}` })),
+    ...(pendingRenewCount ? [{ id: 'renew', ruleId: 'renew-pending', entityType: 'renew', entityId: 'summary', priority: 'MEDIUM' as const, type: 'Perpanjangan', subject: `${pendingRenewCount} request`, issue: 'Tenant menunggu keputusan masa sewa.', recommendedAction: 'Review', actionTo: '/renew-requests' }] : []),
+    ...(pendingApprovalCount ? [{ id: 'booking-approval', ruleId: 'booking-approval', entityType: 'stay', entityId: 'reserved', priority: 'MEDIUM' as const, type: 'Booking', subject: `${pendingApprovalCount} booking baru`, issue: 'Reserved tanpa invoice awal perlu approval.', recommendedAction: 'Review booking', actionTo: '/stays?status=BOOKINGS' }] : []),
+  ]);
+
+  const refreshDashboard = () => {
+    void Promise.all([
+      roomsQuery.refetch(), staysQuery.refetch(), bookingsQuery.refetch(), invoicesQuery.refetch(), ticketsQuery.refetch(), depositCompleteStaysQuery.refetch(),
+      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(),
+    ]);
+  };
+
+  if (roomsQuery.isLoading || staysQuery.isLoading || bookingsQuery.isLoading || invoicesQuery.isLoading || ticketsQuery.isLoading || depositCompleteStaysQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
+  if (roomsQuery.isError || staysQuery.isError || bookingsQuery.isError || invoicesQuery.isError || ticketsQuery.isError || depositCompleteStaysQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
 
   return (
     <div>
       <PageHeader
-        eyebrow="Admin surface"
-        title="Dashboard Admin"
-        description="Control center operasional harian: stay aktif, tagihan prioritas, ticket, dan queue yang benar-benar perlu follow-up hari ini."
-        actionLabel="Check-in Baru"
-        onAction={() => navigate('/stays/check-in')}
+        eyebrow="Admin Command Center"
+        title="Operations Action Queue Commander"
+        description="Admin melihat antrean kerja hari ini. Detail non-urgent dipindah ke tab agar dashboard tidak penuh."
+        secondaryAction={<><Button variant="outline-secondary" onClick={refreshDashboard}>Refresh</Button><Button variant="outline-primary" onClick={() => navigate('/payment-submissions/review')}>Verifikasi Pembayaran</Button></>}
       />
-
-      <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Stay aktif" value={activeStays.length} subtitle="Pusat kerja backoffice" icon="🏠" onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Due soon" value={dueSoonInvoices.length} subtitle="≤ 3 hari ke jatuh tempo" icon="🧾" variant={dueSoonInvoices.length ? 'warning' : 'success'} onClick={() => navigate('/invoices')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Checkout soon" value={checkoutSoon.length} subtitle="≤ 10 hari ke planned checkout" icon="⏳" variant={checkoutSoon.length ? 'info' : 'success'} onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Deposit queue" value={depositQueue.length} subtitle="Butuh review setelah checkout" icon="💼" variant={depositQueue.length ? 'warning' : 'success'} onClick={() => navigate('/stays')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Menunggu Approval" value={pendingApprovalCount} subtitle="Booking baru perlu ditinjau" icon="🗓️" variant={pendingApprovalCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Perpanjangan" value={pendingRenewCount} subtitle="Permintaan perpanjangan stay" icon="🔄" variant={pendingRenewCount ? 'warning' : 'success'} onClick={() => navigate('/renew-requests')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Pengajuan Rencana Keluar" value={pendingCheckoutCount} subtitle="Menunggu review" icon="🚪" variant={pendingCheckoutCount ? 'warning' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Siap Checkout Final" value={approvedCheckoutCount} subtitle="Jadwal disetujui" icon="✅" variant={approvedCheckoutCount ? 'info' : 'success'} onClick={() => navigate('/stays?status=BOOKINGS')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Pembayaran Review" value={pendingPaymentReviewCount} subtitle="Menunggu verifikasi" icon="💳" variant={pendingPaymentReviewCount ? 'warning' : 'success'} onClick={() => navigate('/payment-submissions/review')} /></Col>
-      </Row>
-
-      <Row className="g-4">
-        <Col xl={8}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Queue prioritas admin</div>
-                  <div className="panel-subtitle">Tidak ada lagi tombol check-in ganda. Fokuskan dashboard ini pada queue, bukan CTA yang redundant.</div>
-                </div>
-              </div>
-              <Table responsive hover className="mt-3">
-                <thead><tr><th>Queue</th><th>Jumlah</th><th>Catatan</th></tr></thead>
-                <tbody>
-                  <tr className="clickable-row" onClick={() => navigate('/invoices')}><td>Invoice due soon</td><td>{dueSoonInvoices.length}</td><td>Tagihan yang harus segera difollow-up</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Stay checkout soon</td><td>{checkoutSoon.length}</td><td>Persiapan perpanjangan atau checkout</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/tickets')}><td>Ticket terbuka</td><td>{tickets.filter((item) => ['OPEN', 'IN_PROGRESS'].includes(item.status)).length}</td><td>Triage, assign, dan tindak lanjut teknis</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays')}><td>Antrian deposit</td><td>{depositQueue.length}</td><td>Review setelah stay selesai / dibatalkan</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Booking baru (reserved)</td><td>{pendingApprovalCount}</td><td>Menunggu approval & pembuatan invoice awal</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/renew-requests')}><td>Permintaan perpanjangan</td><td>{pendingRenewCount}</td><td>Permintaan tenant untuk memperpanjang masa tinggal</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Pengajuan rencana keluar</td><td>{pendingCheckoutCount}</td><td>Tenant mengajukan rencana keluar, perlu ditinjau</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/stays?status=BOOKINGS')}><td>Siap checkout final</td><td>{approvedCheckoutCount}</td><td>Jadwal disetujui, tinggal checkout final oleh admin</td></tr>
-                  <tr className="clickable-row" onClick={() => navigate('/payment-submissions/review')}><td>Pembayaran perlu review</td><td>{pendingPaymentReviewCount}</td><td>Bukti pembayaran tenant menunggu verifikasi</td></tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xl={4}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Kondisi kamar</div>
-                  <div className="panel-subtitle">Ringkasan cepat untuk tindakan operasional admin.</div>
-                </div>
-              </div>
-              <div className="kpi-list mt-3">
-                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Kamar terisi</div><strong>{rooms.filter((room) => room.status === 'OCCUPIED').length}</strong></div><StatusBadge status="INFO" customLabel="Occupied" /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Kamar kosong</div><strong>{rooms.filter((room) => room.status === 'AVAILABLE').length}</strong></div><StatusBadge status="SUCCESS" customLabel="Available" /></div>
-                <div className="kpi-item clickable-row" onClick={() => navigate('/rooms')}><div><div className="card-title-soft">Maintenance / nonaktif</div><strong>{rooms.filter((room) => ['MAINTENANCE', 'INACTIVE'].includes(room.status)).length}</strong></div><StatusBadge status="WARNING" customLabel="Perlu cek" /></div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <AssistantPanel title="Asisten Operasional Admin" subtitle="Diagnosis ringkas, tidak mengulang semua row queue." items={assistantItems} maxItems={3} />
+      <CompactMetrics metrics={metrics.slice(0, 6)} />
+      <Tabs activeKey={activeTab} onSelect={(key) => setActiveTab(key ?? 'priorities')} className="command-tabs mb-3">
+        <Tab eventKey="priorities" title="Prioritas"><ActionQueueTable title="Action Queue Hari Ini" subtitle="Urutan pekerjaan paling berdampak pada cashflow, tenant, dan kamar." items={queueItems} maxItems={10} /></Tab>
+        <Tab eventKey="rooms" title="Kamar"><SmartChartPanel title="Kondisi Kamar" subtitle="Mode chart bisa diganti; detail okupansi ada di reports." points={makeRoomPoints(rooms)} defaultMode="bar" ctaLabel="Occupancy report" ctaTo="/reports?tab=operations" totalLabel="Kamar" /></Tab>
+        <Tab eventKey="exceptions" title="Exception"><Row className="g-4"><Col xl={6}><Card className="content-card border-0"><Card.Body><div className="panel-title mb-1">Exception Singkat</div><div className="panel-subtitle mb-3">Flow yang berpotensi macet.</div><div className="kpi-list"><div className="kpi-item"><span>Due soon</span><strong>{dueSoonInvoices.length}</strong></div><div className="kpi-item"><span>Masa sewa ≤14 hari</span><strong>{periodEndingSoon.length}</strong></div><div className="kpi-item"><span>Deposit queue</span><strong>{depositQueue.length}</strong></div></div></Card.Body></Card></Col><Col xl={6}><FinanceReadinessCard /></Col></Row></Tab>
+      </Tabs>
     </div>
   );
 }
 
 function StaffDashboard() {
-  const navigate = useNavigate();
-  const ticketsQuery = useQuery({ queryKey: ['dashboard-staff', 'tickets'], queryFn: () => listResource<any>('/tickets', { limit: 100 }) });
-  const inventoryQuery = useQuery({ queryKey: ['dashboard-staff', 'inventory'], queryFn: () => listResource<any>('/inventory-items', { limit: 100 }) });
-  const roomsQuery = useQuery({ queryKey: ['dashboard-staff', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 100 }) });
-
-  if (ticketsQuery.isLoading || inventoryQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
-  if (ticketsQuery.isError || inventoryQuery.isError || roomsQuery.isError) return <Alert variant="danger">Gagal memuat dashboard staff.</Alert>;
+  const { user } = useAuth();
+  const ticketsQuery = useQuery({ queryKey: ['dashboard-staff', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }), ...ACTION_QUERY_OPTIONS });
+  const inventoryQuery = useQuery({ queryKey: ['dashboard-staff', 'inventory'], queryFn: () => listResource<any>('/inventory-items', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const roomsQuery = useQuery({ queryKey: ['dashboard-staff', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const routineTodayQuery = useQuery({ queryKey: ['dashboard-staff', 'routines-today'], queryFn: fetchStaffRoutineToday, ...ACTION_QUERY_OPTIONS });
+  const routineKpiQuery = useQuery({ queryKey: ['dashboard-staff', 'routine-kpi'], queryFn: fetchMyStaffRoutineKpi, ...MEDIUM_FRESH_QUERY_OPTIONS });
 
   const tickets = ticketsQuery.data?.items ?? [];
   const inventory = inventoryQuery.data?.items ?? [];
   const rooms = roomsQuery.data?.items ?? [];
-  const openTickets = tickets.filter((item) => item.status === 'OPEN');
-  const inProgress = tickets.filter((item) => item.status === 'IN_PROGRESS');
-const lowStock = inventory.filter((item) => Number(item.qtyOnHand ?? 0) <= Number((item.lowStockThreshold ?? 0) || 3));
+  const opsStress = useOperationalStressIndex({ tickets, rooms });
+  const lowStock = inventory.filter((item) => Number(item.qtyOnHand ?? 0) <= Number((item.lowStockThreshold ?? item.minQty ?? 0) || 3));
+
+  const queueItems: ActionQueueItem[] = dedupeCommandItems([
+    ...opsStress.queueItems,
+    ...lowStock.slice(0, 4).map((item) => ({ id: `stock-${item.id}`, ruleId: 'inventory-low-stock', entityType: 'inventory', entityId: item.id, priority: 'WARNING' as const, type: 'Stok barang', subject: item.name || `Barang #${item.id}`, issue: `Sisa ${item.qtyOnHand ?? 0}. Cek apakah perlu tambah stok.`, recommendedAction: 'Cek stok', actionTo: '/inventory-items' })),
+  ]);
+
+  const refreshDashboard = () => {
+    void Promise.all([ticketsQuery.refetch(), inventoryQuery.refetch(), roomsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
+  };
+
+  if (ticketsQuery.isLoading || inventoryQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
+  if (ticketsQuery.isError || inventoryQuery.isError || roomsQuery.isError) return <Alert variant="danger">Gagal memuat beranda kerja. Muat ulang halaman.</Alert>;
+
   return (
-    <div>
-      <PageHeader
-        eyebrow="Staff surface"
-        title="Dashboard Staff"
-        description="Fokus staff dipersempit ke ticket lapangan, progress pekerjaan, kebutuhan stok, dan konteks kamar yang relevan."
-        secondaryAction={<Button variant="outline-primary" onClick={() => navigate('/tickets')}>Buka ticket</Button>}
+    <div className="staff-simple-mode">
+      <StaffMotivationDashboard
+        user={user}
+        tickets={tickets}
+        queueItems={queueItems}
+        onRefresh={refreshDashboard}
+        routineToday={routineTodayQuery.data}
+        routineKpi={routineKpiQuery.data}
+        routinesLoading={routineTodayQuery.isLoading || routineKpiQuery.isLoading}
+        onRoutineUpdated={refreshDashboard}
       />
-
-      <Row className="g-4 mb-4">
-        <Col md={6} xl={3}><StatCard title="Open ticket" value={openTickets.length} subtitle="Belum diproses" icon="🎫" variant={openTickets.length ? 'warning' : 'success'} onClick={() => navigate('/tickets')} /></Col>
-        <Col md={6} xl={3}><StatCard title="In progress" value={inProgress.length} subtitle="Pekerjaan berjalan" icon="🛠️" onClick={() => navigate('/tickets')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Low stock" value={lowStock.length} subtitle="Butuh cek inventory" icon="📦" variant={lowStock.length ? 'warning' : 'success'} onClick={() => navigate('/inventory-items')} /></Col>
-        <Col md={6} xl={3}><StatCard title="Kamar maintenance" value={rooms.filter((room) => room.status === 'MAINTENANCE').length} subtitle="Perlu tindak lanjut teknis" icon="🚪" onClick={() => navigate('/rooms')} /></Col>
-      </Row>
-
-      <Row className="g-4">
-        <Col xl={7}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Ticket lapangan aktif</div>
-                  <div className="panel-subtitle">Backoffice create ticket tidak lagi jadi fokus. Staff cukup menerima queue dan mengeksekusi pekerjaan.</div>
-                </div>
-              </div>
-              {!openTickets.length && !inProgress.length ? (
-                <EmptyState icon="✅" title="Tidak ada ticket aktif" description="Belum ada pekerjaan teknis yang membutuhkan tindak lanjut staff saat ini." />
-              ) : (
-                <Table responsive hover className="mt-3">
-                  <thead><tr><th>Tiket</th><th>Status</th><th>Relasi</th></tr></thead>
-                  <tbody>
-                    {[...openTickets, ...inProgress].slice(0, 8).map((ticket) => (
-                      <tr key={ticket.id} className="clickable-row" onClick={() => navigate('/tickets')}>
-                        <td><div className="fw-semibold">{ticket.ticketNumber || `TIK-${ticket.id}`}</div><div className="small text-muted">{ticket.title || '-'}</div></td>
-                        <td><StatusBadge status={ticket.status} /></td>
-                        <td>{ticket.roomId ? `Room #${ticket.roomId}` : ticket.stayId ? `Stay #${ticket.stayId}` : 'Context umum'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xl={5}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="table-meta">
-                <div>
-                  <div className="panel-title">Inventory low stock</div>
-                  <div className="panel-subtitle">Movement dan room items nantinya di-embed; dashboard staff cukup melihat item yang perlu tindakan.</div>
-                </div>
-              </div>
-              {!lowStock.length ? (
-                <EmptyState icon="📦" title="Stok aman" description="Tidak ada item yang melewati ambang low stock saat ini." />
-              ) : (
-                <Table responsive hover className="mt-3">
-                  <thead><tr><th>Item</th><th>Stok</th></tr></thead>
-                  <tbody>
-                    {lowStock.slice(0, 8).map((item) => (
-                      <tr key={item.id} className="clickable-row" onClick={() => navigate('/inventory-items')}>
-                        <td><div className="fw-semibold">{item.name || `Item #${item.id}`}</div><div className="small text-muted">{item.category || 'Tanpa kategori'}</div></td>
-                        <td>{item.qtyOnHand ?? 0}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
     </div>
   );
 }
@@ -454,8 +416,5 @@ export default function DashboardPage() {
   if (user?.role === 'OWNER') return <OwnerDashboard />;
   if (user?.role === 'ADMIN') return <AdminDashboard />;
   if (user?.role === 'STAFF') return <StaffDashboard />;
-  
-  // Fallback aman untuk role yang tidak dikenal atau TENANT
-  // Redirect ke route default sesuai role
   return <Navigate to={getDefaultRoute(user?.role)} replace />;
 }

@@ -1,0 +1,134 @@
+import { useState } from 'react';
+import { Button, Card, Collapse, Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import EmptyState from '../common/EmptyState';
+import StatusBadge from '../common/StatusBadge';
+import type { AssistantSeverity } from './AssistantPanel';
+
+export type ActionQueueItem = {
+  id: string | number;
+  priority: AssistantSeverity;
+  type: string;
+  subject: string;
+  issue: string;
+  age?: string;
+  recommendedAction: string;
+  actionTo?: string;
+  onAction?: () => void;
+  dedupKey?: string;
+  ruleId?: string;
+  entityType?: string;
+  entityId?: string | number | null;
+};
+
+const priorityLabel: Record<AssistantSeverity, { label: string; status: string }> = {
+  BLOCKER: { label: 'Blocker', status: 'DANGER' },
+  HIGH: { label: 'Tinggi', status: 'WARNING' },
+  MEDIUM: { label: 'Sedang', status: 'INFO' },
+  WARNING: { label: 'Perhatian', status: 'WARNING' },
+  OPPORTUNITY: { label: 'Peluang', status: 'SUCCESS' },
+  INFO: { label: 'Info', status: 'INFO' },
+  SUCCESS: { label: 'Aman', status: 'SUCCESS' },
+};
+
+const priorityRank: Record<AssistantSeverity, number> = {
+  BLOCKER: 0,
+  HIGH: 1,
+  MEDIUM: 2,
+  WARNING: 3,
+  OPPORTUNITY: 4,
+  INFO: 5,
+  SUCCESS: 6,
+};
+
+export default function ActionQueueTable({
+  title = 'Action Queue',
+  subtitle = 'Urutan kerja harian berdasarkan prioritas bisnis.',
+  items,
+  emptyTitle = 'Tidak ada antrean mendesak',
+  emptyDescription = 'Semua proses utama sedang aman. Tetap cek aktivitas terbaru dan data detail bila diperlukan.',
+  maxItems = 8,
+  collapsible = true,
+  compact = true,
+}: {
+  title?: string;
+  subtitle?: string;
+  items: ActionQueueItem[];
+  emptyTitle?: string;
+  emptyDescription?: string;
+  maxItems?: number;
+  collapsible?: boolean;
+  compact?: boolean;
+}) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
+  const sortedItems = [...items].sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority]).slice(0, maxItems);
+  const hiddenCount = Math.max(0, items.length - sortedItems.length);
+
+  return (
+    <Card className={`content-card action-queue-card border-0 h-100 ${compact ? 'action-queue-compact' : ''}`.trim()}>
+      <Card.Body>
+        <div className="table-meta">
+          <div>
+            <div className="panel-title">{title}</div>
+            <div className="panel-subtitle">{subtitle}</div>
+          </div>
+          <div className="queue-header-actions">
+            {hiddenCount ? <span className="surface-pill">+{hiddenCount}</span> : null}
+            <span className="surface-pill">{sortedItems.length} item</span>
+            {collapsible ? <Button variant="outline-secondary" size="sm" onClick={() => setOpen((value) => !value)}>{open ? 'Sembunyikan' : 'Tampilkan'}</Button> : null}
+          </div>
+        </div>
+
+        <Collapse in={open}>
+          <div>
+            {!sortedItems.length ? (
+              <EmptyState icon="✅" title={emptyTitle} description={emptyDescription} />
+            ) : (
+              <Table responsive hover className="mt-3 align-middle action-queue-table">
+                <thead>
+                  <tr>
+                    <th>Prioritas</th>
+                    <th>Tipe</th>
+                    <th>Subjek</th>
+                    <th>Masalah</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedItems.map((item) => {
+                    const meta = priorityLabel[item.priority];
+                    return (
+                      <tr
+                        key={item.id}
+                        className={item.actionTo || item.onAction ? 'clickable-row' : undefined}
+                        onClick={() => item.onAction ? item.onAction() : item.actionTo ? navigate(item.actionTo) : undefined}
+                      >
+                        <td><StatusBadge status={meta.status} customLabel={meta.label} /></td>
+                        <td><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
+                        <td>{item.subject}</td>
+                        <td className="text-muted small">{item.issue}</td>
+                        <td>
+                          {(item.actionTo || item.onAction) ? (
+                            <Button variant="outline-primary" size="sm" onClick={(event) => {
+                              event.stopPropagation();
+                              item.onAction ? item.onAction() : item.actionTo ? navigate(item.actionTo) : undefined;
+                            }}>
+                              {item.recommendedAction}
+                            </Button>
+                          ) : (
+                            <span className="text-muted small">{item.recommendedAction}</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            )}
+          </div>
+        </Collapse>
+      </Card.Body>
+    </Card>
+  );
+}

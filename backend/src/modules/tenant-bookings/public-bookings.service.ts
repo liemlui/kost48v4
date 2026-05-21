@@ -126,11 +126,11 @@ export class PublicBookingsService {
 
     const checkInDate = parseDateOnly(dto.checkInDate, 'Tanggal check-in tidak valid');
     const plannedCheckOutDate = dto.plannedCheckOutDate
-      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal rencana checkout tidak valid')
+      ? parseDateOnly(dto.plannedCheckOutDate, 'Tanggal renew/keluar tidak valid')
       : null;
 
-    if (plannedCheckOutDate && plannedCheckOutDate < checkInDate) {
-      throw new BadRequestException('Tanggal rencana checkout tidak boleh sebelum check-in');
+    if (plannedCheckOutDate && plannedCheckOutDate <= checkInDate) {
+      throw new BadRequestException('Tanggal renew/keluar harus setelah check-in');
     }
 
     const now = new Date();

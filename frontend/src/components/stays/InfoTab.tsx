@@ -101,7 +101,7 @@ export default function InfoTab({ stay }: { stay: Stay }) {
               </Col>
               <Col md={6}>
                 <DataField label="Check-in" value={formatDate(stay.checkInDate)} />
-                <DataField label="Rencana Checkout" value={formatDate(stay.plannedCheckOutDate)} />
+                <DataField label="Tanggal Renew / Keluar" value={formatDate(stay.plannedCheckOutDate)} />
                 <DataField label="Checkout Aktual" value={formatDate(stay.actualCheckOutDate)} />
                 <DataField label="Deposit" value={<CurrencyDisplay amount={stay.depositAmountRupiah} />} />
                 {stay.status === 'CANCELLED' ? (

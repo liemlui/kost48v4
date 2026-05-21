@@ -555,6 +555,7 @@ export type RenewRequest = {
   stay?: {
     id: number;
     roomId: number;
+    agreedRentAmountRupiah?: number | null;
     room?: { id: number; code?: string; name?: string } | null;
     checkInDate?: string;
     plannedCheckOutDate?: string | null;

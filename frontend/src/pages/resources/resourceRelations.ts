@@ -158,25 +158,25 @@ export function getFlowNote(configPath: string) {
       return {
         title: 'Flow inventaris yang disarankan',
         description:
-          'Inventory Items adalah master barang global. Penempatan barang ke kamar sebaiknya lewat Room Items, sedangkan perubahan stok harian dicatat di Inventory Movements.',
+          'Daftar ini berisi barang yang tersedia. Jika barang dipasang ke kamar, catat di halaman Barang di Kamar. Jika barang masuk atau keluar, catat di Catatan Stok.',
         backendNote:
-          'Backend berikutnya idealnya menyiapkan endpoint ringkasan stok per kategori, low stock, dan histori item terurut untuk dashboard operasional.',
+          'Gunakan halaman ini untuk mengecek stok dan barang yang hampir habis.',
       };
     case '/inventory-movements':
       return {
         title: 'Flow pergerakan stok',
         description:
-          'Gunakan IN untuk barang masuk, OUT untuk barang keluar, ASSIGN_TO_ROOM saat barang dipasang ke kamar, dan RETURN_FROM_ROOM saat barang kembali ke stok pusat.',
+          'Catat barang masuk, barang keluar, barang dipasang ke kamar, atau barang kembali dari kamar.',
         backendNote:
-          'Frontend sudah menampilkan nama item dan kamar lewat lookup. Backend yang lebih matang idealnya mengembalikan include item dan room langsung di response list.',
+          'Pastikan jumlah barang dan kamar ditulis benar agar catatan stok tidak membingungkan.',
       };
     case '/room-items':
       return {
         title: 'Flow aset per kamar',
         description:
-          'Room Items adalah snapshot barang yang terpasang di setiap kamar. Bila stok pusat berubah, tetap catat perpindahannya di Inventory Movements agar audit trail tidak putus.',
+          'Daftar ini menunjukkan barang yang ada di setiap kamar. Jika barang dipindah, catat juga di Catatan Stok.',
         backendNote:
-          'Jika nanti ingin lebih otomatis, backend dapat menyiapkan sinkronisasi room items dari movement tertentu.',
+          'Gunakan catatan ini saat cek kamar atau saat ada barang rusak/hilang.',
       };
     case '/expenses':
       return {

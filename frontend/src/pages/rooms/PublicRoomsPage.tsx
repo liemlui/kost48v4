@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listPublicRooms } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import { CompactMetrics, type MetricChip } from '../../components/command-center';
 import FacilityList from '../../components/rooms/FacilityList';
 import RoomComparePanel from '../../components/rooms/RoomComparePanel';
 import type { PricingTerm, PublicRoom } from '../../types';
@@ -159,6 +160,17 @@ export default function PublicRoomsPage() {
   const compareMaxWarning = compareIds.length >= 3;
 
   const hasFilters = search !== '' || pricingTerm !== '' || sort !== 'default';
+  const availableCount = rooms.filter((room) => room.isAvailable !== false).length;
+  const lowestRate = rooms
+    .map((room) => Number(room.highlightedRateRupiah ?? 0))
+    .filter((value) => value > 0)
+    .sort((a, b) => a - b)[0] ?? 0;
+  const metrics: MetricChip[] = [
+    { id: 'available', label: 'Kamar tersedia', value: availableCount, helper: 'Bisa dipesan sekarang', icon: '🛏️', status: availableCount ? 'SUCCESS' : 'WARNING' },
+    { id: 'shown', label: 'Opsi tampil', value: rooms.length, helper: hasFilters ? 'Sesuai filter' : 'Semua kamar aktif', icon: '🔎', status: 'INFO' },
+    { id: 'lowest', label: 'Mulai dari', value: lowestRate ? <CurrencyDisplay amount={lowestRate} /> as any : '-', helper: 'Tarif utama terendah', icon: '💙', status: 'SUCCESS' },
+    { id: 'compare', label: 'Dibandingkan', value: compareIds.length, helper: 'Maksimal 3 kamar', icon: '⚖️', status: compareIds.length ? 'INFO' : 'SUCCESS' },
+  ];
 
   return (
     <div className="public-page-shell">
@@ -171,21 +183,25 @@ export default function PublicRoomsPage() {
 
         <Card className="content-card border-0 public-hero-card mt-4">
           <Card.Body>
-            <div className="page-eyebrow">✦ Katalog Kamar — Kos48 Surabaya</div>
+            <div className="page-eyebrow">✦ Room Discovery — Kos48 Surabaya</div>
             <div className="public-hero-grid">
               <div>
-                <h1 className="mb-3">Katalog Kamar</h1>
+                <h1 className="mb-3">Cari kamar yang cocok, lalu booking dengan jelas</h1>
                 <p className="text-muted mb-0">
-                  Cari kamar yang sesuai dengan budget, fasilitas, dan kebutuhan tinggal Anda. Gunakan filter, urutan harga, dan perbandingan untuk memilih kamar sebelum booking.
+                  Pilih kamar berdasarkan harga, fasilitas, lantai, dan term sewa. Setelah booking, admin akan meninjau dan tagihan awal diterbitkan lewat portal.
                 </p>
               </div>
               <div className="public-hero-note">
-                <div className="fw-semibold mb-1">Katalog selalu diperbarui</div>
-                <div className="small text-muted">Hanya kamar aktif yang ditampilkan. Harga dan ketersediaan mengikuti data operasional terbaru.</div>
+                <div className="fw-semibold mb-1">Cara booking singkat</div>
+                <div className="small text-muted">1. Pilih kamar → 2. Isi data booking → 3. Bayar tagihan awal setelah disetujui.</div>
               </div>
             </div>
           </Card.Body>
         </Card>
+
+        <div className="mt-4">
+          <CompactMetrics metrics={metrics} />
+        </div>
 
         <Card className="content-card border-0 mt-4">
           <Card.Body>

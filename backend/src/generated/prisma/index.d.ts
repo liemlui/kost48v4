@@ -74,6 +74,21 @@ export type PaymentSubmission = $Result.DefaultSelection<Prisma.$PaymentSubmissi
  */
 export type Ticket = $Result.DefaultSelection<Prisma.$TicketPayload>
 /**
+ * Model StaffRoutineTemplate
+ * 
+ */
+export type StaffRoutineTemplate = $Result.DefaultSelection<Prisma.$StaffRoutineTemplatePayload>
+/**
+ * Model StaffRoutineAssignment
+ * 
+ */
+export type StaffRoutineAssignment = $Result.DefaultSelection<Prisma.$StaffRoutineAssignmentPayload>
+/**
+ * Model StaffRoutineCompletion
+ * 
+ */
+export type StaffRoutineCompletion = $Result.DefaultSelection<Prisma.$StaffRoutineCompletionPayload>
+/**
  * Model Announcement
  * 
  */
@@ -309,6 +324,38 @@ export const InventoryMovementType: {
 export type InventoryMovementType = (typeof InventoryMovementType)[keyof typeof InventoryMovementType]
 
 
+export const StaffRoutineFrequency: {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY'
+};
+
+export type StaffRoutineFrequency = (typeof StaffRoutineFrequency)[keyof typeof StaffRoutineFrequency]
+
+
+export const StaffRoutineAreaType: {
+  GENERAL: 'GENERAL',
+  BATHROOM: 'BATHROOM',
+  ROOM: 'ROOM',
+  INVENTORY: 'INVENTORY',
+  METER: 'METER',
+  SECURITY: 'SECURITY',
+  CLEANING: 'CLEANING'
+};
+
+export type StaffRoutineAreaType = (typeof StaffRoutineAreaType)[keyof typeof StaffRoutineAreaType]
+
+
+export const StaffRoutineStatus: {
+  DONE: 'DONE',
+  NEED_HELP: 'NEED_HELP',
+  MISSED: 'MISSED',
+  SKIPPED: 'SKIPPED'
+};
+
+export type StaffRoutineStatus = (typeof StaffRoutineStatus)[keyof typeof StaffRoutineStatus]
+
+
 export const AnnouncementAudience: {
   TENANT: 'TENANT',
   ALL: 'ALL'
@@ -443,6 +490,18 @@ export const RoomItemStatus: typeof $Enums.RoomItemStatus
 export type InventoryMovementType = $Enums.InventoryMovementType
 
 export const InventoryMovementType: typeof $Enums.InventoryMovementType
+
+export type StaffRoutineFrequency = $Enums.StaffRoutineFrequency
+
+export const StaffRoutineFrequency: typeof $Enums.StaffRoutineFrequency
+
+export type StaffRoutineAreaType = $Enums.StaffRoutineAreaType
+
+export const StaffRoutineAreaType: typeof $Enums.StaffRoutineAreaType
+
+export type StaffRoutineStatus = $Enums.StaffRoutineStatus
+
+export const StaffRoutineStatus: typeof $Enums.StaffRoutineStatus
 
 export type AnnouncementAudience = $Enums.AnnouncementAudience
 
@@ -704,6 +763,36 @@ export class PrismaClient<
     * ```
     */
   get ticket(): Prisma.TicketDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.staffRoutineTemplate`: Exposes CRUD operations for the **StaffRoutineTemplate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StaffRoutineTemplates
+    * const staffRoutineTemplates = await prisma.staffRoutineTemplate.findMany()
+    * ```
+    */
+  get staffRoutineTemplate(): Prisma.StaffRoutineTemplateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.staffRoutineAssignment`: Exposes CRUD operations for the **StaffRoutineAssignment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StaffRoutineAssignments
+    * const staffRoutineAssignments = await prisma.staffRoutineAssignment.findMany()
+    * ```
+    */
+  get staffRoutineAssignment(): Prisma.StaffRoutineAssignmentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.staffRoutineCompletion`: Exposes CRUD operations for the **StaffRoutineCompletion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StaffRoutineCompletions
+    * const staffRoutineCompletions = await prisma.staffRoutineCompletion.findMany()
+    * ```
+    */
+  get staffRoutineCompletion(): Prisma.StaffRoutineCompletionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.announcement`: Exposes CRUD operations for the **Announcement** model.
@@ -1250,6 +1339,9 @@ export namespace Prisma {
     PasswordResetToken: 'PasswordResetToken',
     PaymentSubmission: 'PaymentSubmission',
     Ticket: 'Ticket',
+    StaffRoutineTemplate: 'StaffRoutineTemplate',
+    StaffRoutineAssignment: 'StaffRoutineAssignment',
+    StaffRoutineCompletion: 'StaffRoutineCompletion',
     Announcement: 'Announcement',
     InventoryItem: 'InventoryItem',
     RoomItem: 'RoomItem',
@@ -1275,7 +1367,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "appNotification" | "auditLog"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "appNotification" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2167,6 +2259,228 @@ export namespace Prisma {
           }
         }
       }
+      StaffRoutineTemplate: {
+        payload: Prisma.$StaffRoutineTemplatePayload<ExtArgs>
+        fields: Prisma.StaffRoutineTemplateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StaffRoutineTemplateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StaffRoutineTemplateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          findFirst: {
+            args: Prisma.StaffRoutineTemplateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StaffRoutineTemplateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          findMany: {
+            args: Prisma.StaffRoutineTemplateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>[]
+          }
+          create: {
+            args: Prisma.StaffRoutineTemplateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          createMany: {
+            args: Prisma.StaffRoutineTemplateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StaffRoutineTemplateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>[]
+          }
+          delete: {
+            args: Prisma.StaffRoutineTemplateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          update: {
+            args: Prisma.StaffRoutineTemplateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          deleteMany: {
+            args: Prisma.StaffRoutineTemplateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StaffRoutineTemplateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StaffRoutineTemplateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>[]
+          }
+          upsert: {
+            args: Prisma.StaffRoutineTemplateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineTemplatePayload>
+          }
+          aggregate: {
+            args: Prisma.StaffRoutineTemplateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStaffRoutineTemplate>
+          }
+          groupBy: {
+            args: Prisma.StaffRoutineTemplateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineTemplateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StaffRoutineTemplateCountArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineTemplateCountAggregateOutputType> | number
+          }
+        }
+      }
+      StaffRoutineAssignment: {
+        payload: Prisma.$StaffRoutineAssignmentPayload<ExtArgs>
+        fields: Prisma.StaffRoutineAssignmentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StaffRoutineAssignmentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StaffRoutineAssignmentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          findFirst: {
+            args: Prisma.StaffRoutineAssignmentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StaffRoutineAssignmentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          findMany: {
+            args: Prisma.StaffRoutineAssignmentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>[]
+          }
+          create: {
+            args: Prisma.StaffRoutineAssignmentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          createMany: {
+            args: Prisma.StaffRoutineAssignmentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StaffRoutineAssignmentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>[]
+          }
+          delete: {
+            args: Prisma.StaffRoutineAssignmentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          update: {
+            args: Prisma.StaffRoutineAssignmentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          deleteMany: {
+            args: Prisma.StaffRoutineAssignmentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StaffRoutineAssignmentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StaffRoutineAssignmentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>[]
+          }
+          upsert: {
+            args: Prisma.StaffRoutineAssignmentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineAssignmentPayload>
+          }
+          aggregate: {
+            args: Prisma.StaffRoutineAssignmentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStaffRoutineAssignment>
+          }
+          groupBy: {
+            args: Prisma.StaffRoutineAssignmentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineAssignmentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StaffRoutineAssignmentCountArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineAssignmentCountAggregateOutputType> | number
+          }
+        }
+      }
+      StaffRoutineCompletion: {
+        payload: Prisma.$StaffRoutineCompletionPayload<ExtArgs>
+        fields: Prisma.StaffRoutineCompletionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StaffRoutineCompletionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StaffRoutineCompletionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          findFirst: {
+            args: Prisma.StaffRoutineCompletionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StaffRoutineCompletionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          findMany: {
+            args: Prisma.StaffRoutineCompletionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>[]
+          }
+          create: {
+            args: Prisma.StaffRoutineCompletionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          createMany: {
+            args: Prisma.StaffRoutineCompletionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StaffRoutineCompletionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>[]
+          }
+          delete: {
+            args: Prisma.StaffRoutineCompletionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          update: {
+            args: Prisma.StaffRoutineCompletionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          deleteMany: {
+            args: Prisma.StaffRoutineCompletionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StaffRoutineCompletionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StaffRoutineCompletionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>[]
+          }
+          upsert: {
+            args: Prisma.StaffRoutineCompletionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffRoutineCompletionPayload>
+          }
+          aggregate: {
+            args: Prisma.StaffRoutineCompletionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStaffRoutineCompletion>
+          }
+          groupBy: {
+            args: Prisma.StaffRoutineCompletionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineCompletionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StaffRoutineCompletionCountArgs<ExtArgs>
+            result: $Utils.Optional<StaffRoutineCompletionCountAggregateOutputType> | number
+          }
+        }
+      }
       Announcement: {
         payload: Prisma.$AnnouncementPayload<ExtArgs>
         fields: Prisma.AnnouncementFieldRefs
@@ -3027,6 +3341,9 @@ export namespace Prisma {
     passwordResetToken?: PasswordResetTokenOmit
     paymentSubmission?: PaymentSubmissionOmit
     ticket?: TicketOmit
+    staffRoutineTemplate?: StaffRoutineTemplateOmit
+    staffRoutineAssignment?: StaffRoutineAssignmentOmit
+    staffRoutineCompletion?: StaffRoutineCompletionOmit
     announcement?: AnnouncementOmit
     inventoryItem?: InventoryItemOmit
     roomItem?: RoomItemOmit
@@ -3123,6 +3440,9 @@ export namespace Prisma {
     invoicesCreated: number
     paymentsCaptured: number
     ticketsAssigned: number
+    staffRoutineTemplatesCreated: number
+    staffRoutineAssignments: number
+    staffRoutineCompletions: number
     meterReadingsRecorded: number
     inventoryMovementsCreated: number
     wifiSalesCreated: number
@@ -3143,6 +3463,9 @@ export namespace Prisma {
     invoicesCreated?: boolean | UserCountOutputTypeCountInvoicesCreatedArgs
     paymentsCaptured?: boolean | UserCountOutputTypeCountPaymentsCapturedArgs
     ticketsAssigned?: boolean | UserCountOutputTypeCountTicketsAssignedArgs
+    staffRoutineTemplatesCreated?: boolean | UserCountOutputTypeCountStaffRoutineTemplatesCreatedArgs
+    staffRoutineAssignments?: boolean | UserCountOutputTypeCountStaffRoutineAssignmentsArgs
+    staffRoutineCompletions?: boolean | UserCountOutputTypeCountStaffRoutineCompletionsArgs
     meterReadingsRecorded?: boolean | UserCountOutputTypeCountMeterReadingsRecordedArgs
     inventoryMovementsCreated?: boolean | UserCountOutputTypeCountInventoryMovementsCreatedArgs
     wifiSalesCreated?: boolean | UserCountOutputTypeCountWifiSalesCreatedArgs
@@ -3207,6 +3530,27 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountTicketsAssignedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaffRoutineTemplatesCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineTemplateWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaffRoutineAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineAssignmentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaffRoutineCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineCompletionWhereInput
   }
 
   /**
@@ -3354,6 +3698,8 @@ export namespace Prisma {
     meterReadings: number
     tickets: number
     roomItems: number
+    staffRoutineAssignments: number
+    staffRoutineCompletions: number
     expenses: number
     inventoryMovements: number
     facilities: number
@@ -3364,6 +3710,8 @@ export namespace Prisma {
     meterReadings?: boolean | RoomCountOutputTypeCountMeterReadingsArgs
     tickets?: boolean | RoomCountOutputTypeCountTicketsArgs
     roomItems?: boolean | RoomCountOutputTypeCountRoomItemsArgs
+    staffRoutineAssignments?: boolean | RoomCountOutputTypeCountStaffRoutineAssignmentsArgs
+    staffRoutineCompletions?: boolean | RoomCountOutputTypeCountStaffRoutineCompletionsArgs
     expenses?: boolean | RoomCountOutputTypeCountExpensesArgs
     inventoryMovements?: boolean | RoomCountOutputTypeCountInventoryMovementsArgs
     facilities?: boolean | RoomCountOutputTypeCountFacilitiesArgs
@@ -3406,6 +3754,20 @@ export namespace Prisma {
    */
   export type RoomCountOutputTypeCountRoomItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RoomItemWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountStaffRoutineAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineAssignmentWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountStaffRoutineCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineCompletionWhereInput
   }
 
   /**
@@ -3552,6 +3914,77 @@ export namespace Prisma {
    */
   export type InvoiceCountOutputTypeCountPaymentSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentSubmissionWhereInput
+  }
+
+
+  /**
+   * Count Type StaffRoutineTemplateCountOutputType
+   */
+
+  export type StaffRoutineTemplateCountOutputType = {
+    assignments: number
+    completions: number
+  }
+
+  export type StaffRoutineTemplateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assignments?: boolean | StaffRoutineTemplateCountOutputTypeCountAssignmentsArgs
+    completions?: boolean | StaffRoutineTemplateCountOutputTypeCountCompletionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * StaffRoutineTemplateCountOutputType without action
+   */
+  export type StaffRoutineTemplateCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplateCountOutputType
+     */
+    select?: StaffRoutineTemplateCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineTemplateCountOutputType without action
+   */
+  export type StaffRoutineTemplateCountOutputTypeCountAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineAssignmentWhereInput
+  }
+
+  /**
+   * StaffRoutineTemplateCountOutputType without action
+   */
+  export type StaffRoutineTemplateCountOutputTypeCountCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineCompletionWhereInput
+  }
+
+
+  /**
+   * Count Type StaffRoutineAssignmentCountOutputType
+   */
+
+  export type StaffRoutineAssignmentCountOutputType = {
+    completions: number
+  }
+
+  export type StaffRoutineAssignmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    completions?: boolean | StaffRoutineAssignmentCountOutputTypeCountCompletionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * StaffRoutineAssignmentCountOutputType without action
+   */
+  export type StaffRoutineAssignmentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignmentCountOutputType
+     */
+    select?: StaffRoutineAssignmentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineAssignmentCountOutputType without action
+   */
+  export type StaffRoutineAssignmentCountOutputTypeCountCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineCompletionWhereInput
   }
 
 
@@ -3856,6 +4289,9 @@ export namespace Prisma {
     invoicesCreated?: boolean | User$invoicesCreatedArgs<ExtArgs>
     paymentsCaptured?: boolean | User$paymentsCapturedArgs<ExtArgs>
     ticketsAssigned?: boolean | User$ticketsAssignedArgs<ExtArgs>
+    staffRoutineTemplatesCreated?: boolean | User$staffRoutineTemplatesCreatedArgs<ExtArgs>
+    staffRoutineAssignments?: boolean | User$staffRoutineAssignmentsArgs<ExtArgs>
+    staffRoutineCompletions?: boolean | User$staffRoutineCompletionsArgs<ExtArgs>
     meterReadingsRecorded?: boolean | User$meterReadingsRecordedArgs<ExtArgs>
     inventoryMovementsCreated?: boolean | User$inventoryMovementsCreatedArgs<ExtArgs>
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
@@ -3923,6 +4359,9 @@ export namespace Prisma {
     invoicesCreated?: boolean | User$invoicesCreatedArgs<ExtArgs>
     paymentsCaptured?: boolean | User$paymentsCapturedArgs<ExtArgs>
     ticketsAssigned?: boolean | User$ticketsAssignedArgs<ExtArgs>
+    staffRoutineTemplatesCreated?: boolean | User$staffRoutineTemplatesCreatedArgs<ExtArgs>
+    staffRoutineAssignments?: boolean | User$staffRoutineAssignmentsArgs<ExtArgs>
+    staffRoutineCompletions?: boolean | User$staffRoutineCompletionsArgs<ExtArgs>
     meterReadingsRecorded?: boolean | User$meterReadingsRecordedArgs<ExtArgs>
     inventoryMovementsCreated?: boolean | User$inventoryMovementsCreatedArgs<ExtArgs>
     wifiSalesCreated?: boolean | User$wifiSalesCreatedArgs<ExtArgs>
@@ -3953,6 +4392,9 @@ export namespace Prisma {
       invoicesCreated: Prisma.$InvoicePayload<ExtArgs>[]
       paymentsCaptured: Prisma.$InvoicePaymentPayload<ExtArgs>[]
       ticketsAssigned: Prisma.$TicketPayload<ExtArgs>[]
+      staffRoutineTemplatesCreated: Prisma.$StaffRoutineTemplatePayload<ExtArgs>[]
+      staffRoutineAssignments: Prisma.$StaffRoutineAssignmentPayload<ExtArgs>[]
+      staffRoutineCompletions: Prisma.$StaffRoutineCompletionPayload<ExtArgs>[]
       meterReadingsRecorded: Prisma.$MeterReadingPayload<ExtArgs>[]
       inventoryMovementsCreated: Prisma.$InventoryMovementPayload<ExtArgs>[]
       wifiSalesCreated: Prisma.$WifiSalePayload<ExtArgs>[]
@@ -4378,6 +4820,9 @@ export namespace Prisma {
     invoicesCreated<T extends User$invoicesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$invoicesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentsCaptured<T extends User$paymentsCapturedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsCapturedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ticketsAssigned<T extends User$ticketsAssignedArgs<ExtArgs> = {}>(args?: Subset<T, User$ticketsAssignedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staffRoutineTemplatesCreated<T extends User$staffRoutineTemplatesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$staffRoutineTemplatesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staffRoutineAssignments<T extends User$staffRoutineAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$staffRoutineAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staffRoutineCompletions<T extends User$staffRoutineCompletionsArgs<ExtArgs> = {}>(args?: Subset<T, User$staffRoutineCompletionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     meterReadingsRecorded<T extends User$meterReadingsRecordedArgs<ExtArgs> = {}>(args?: Subset<T, User$meterReadingsRecordedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MeterReadingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryMovementsCreated<T extends User$inventoryMovementsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryMovementsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     wifiSalesCreated<T extends User$wifiSalesCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$wifiSalesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WifiSalePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4990,6 +5435,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
+   * User.staffRoutineTemplatesCreated
+   */
+  export type User$staffRoutineTemplatesCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    where?: StaffRoutineTemplateWhereInput
+    orderBy?: StaffRoutineTemplateOrderByWithRelationInput | StaffRoutineTemplateOrderByWithRelationInput[]
+    cursor?: StaffRoutineTemplateWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineTemplateScalarFieldEnum | StaffRoutineTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * User.staffRoutineAssignments
+   */
+  export type User$staffRoutineAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    where?: StaffRoutineAssignmentWhereInput
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * User.staffRoutineCompletions
+   */
+  export type User$staffRoutineCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    where?: StaffRoutineCompletionWhereInput
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
   }
 
   /**
@@ -6956,6 +7473,8 @@ export namespace Prisma {
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
     tickets?: boolean | Room$ticketsArgs<ExtArgs>
     roomItems?: boolean | Room$roomItemsArgs<ExtArgs>
+    staffRoutineAssignments?: boolean | Room$staffRoutineAssignmentsArgs<ExtArgs>
+    staffRoutineCompletions?: boolean | Room$staffRoutineCompletionsArgs<ExtArgs>
     expenses?: boolean | Room$expensesArgs<ExtArgs>
     inventoryMovements?: boolean | Room$inventoryMovementsArgs<ExtArgs>
     facilities?: boolean | Room$facilitiesArgs<ExtArgs>
@@ -7028,6 +7547,8 @@ export namespace Prisma {
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
     tickets?: boolean | Room$ticketsArgs<ExtArgs>
     roomItems?: boolean | Room$roomItemsArgs<ExtArgs>
+    staffRoutineAssignments?: boolean | Room$staffRoutineAssignmentsArgs<ExtArgs>
+    staffRoutineCompletions?: boolean | Room$staffRoutineCompletionsArgs<ExtArgs>
     expenses?: boolean | Room$expensesArgs<ExtArgs>
     inventoryMovements?: boolean | Room$inventoryMovementsArgs<ExtArgs>
     facilities?: boolean | Room$facilitiesArgs<ExtArgs>
@@ -7043,6 +7564,8 @@ export namespace Prisma {
       meterReadings: Prisma.$MeterReadingPayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       roomItems: Prisma.$RoomItemPayload<ExtArgs>[]
+      staffRoutineAssignments: Prisma.$StaffRoutineAssignmentPayload<ExtArgs>[]
+      staffRoutineCompletions: Prisma.$StaffRoutineCompletionPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
       inventoryMovements: Prisma.$InventoryMovementPayload<ExtArgs>[]
       facilities: Prisma.$RoomFacilityPayload<ExtArgs>[]
@@ -7463,6 +7986,8 @@ export namespace Prisma {
     meterReadings<T extends Room$meterReadingsArgs<ExtArgs> = {}>(args?: Subset<T, Room$meterReadingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MeterReadingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Room$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Room$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     roomItems<T extends Room$roomItemsArgs<ExtArgs> = {}>(args?: Subset<T, Room$roomItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staffRoutineAssignments<T extends Room$staffRoutineAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, Room$staffRoutineAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staffRoutineCompletions<T extends Room$staffRoutineCompletionsArgs<ExtArgs> = {}>(args?: Subset<T, Room$staffRoutineCompletionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Room$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Room$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryMovements<T extends Room$inventoryMovementsArgs<ExtArgs> = {}>(args?: Subset<T, Room$inventoryMovementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryMovementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     facilities<T extends Room$facilitiesArgs<ExtArgs> = {}>(args?: Subset<T, Room$facilitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomFacilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7998,6 +8523,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RoomItemScalarFieldEnum | RoomItemScalarFieldEnum[]
+  }
+
+  /**
+   * Room.staffRoutineAssignments
+   */
+  export type Room$staffRoutineAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    where?: StaffRoutineAssignmentWhereInput
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * Room.staffRoutineCompletions
+   */
+  export type Room$staffRoutineCompletionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    where?: StaffRoutineCompletionWhereInput
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
   }
 
   /**
@@ -19970,6 +20543,3798 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TicketInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StaffRoutineTemplate
+   */
+
+  export type AggregateStaffRoutineTemplate = {
+    _count: StaffRoutineTemplateCountAggregateOutputType | null
+    _avg: StaffRoutineTemplateAvgAggregateOutputType | null
+    _sum: StaffRoutineTemplateSumAggregateOutputType | null
+    _min: StaffRoutineTemplateMinAggregateOutputType | null
+    _max: StaffRoutineTemplateMaxAggregateOutputType | null
+  }
+
+  export type StaffRoutineTemplateAvgAggregateOutputType = {
+    id: number | null
+    dayOfWeek: number | null
+    dayOfMonth: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type StaffRoutineTemplateSumAggregateOutputType = {
+    id: number | null
+    dayOfWeek: number | null
+    dayOfMonth: number | null
+    sortOrder: number | null
+    createdById: number | null
+  }
+
+  export type StaffRoutineTemplateMinAggregateOutputType = {
+    id: number | null
+    title: string | null
+    description: string | null
+    frequency: $Enums.StaffRoutineFrequency | null
+    areaType: $Enums.StaffRoutineAreaType | null
+    dayOfWeek: number | null
+    dayOfMonth: number | null
+    requiresPhoto: boolean | null
+    requiresNote: boolean | null
+    isActive: boolean | null
+    sortOrder: number | null
+    createdById: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineTemplateMaxAggregateOutputType = {
+    id: number | null
+    title: string | null
+    description: string | null
+    frequency: $Enums.StaffRoutineFrequency | null
+    areaType: $Enums.StaffRoutineAreaType | null
+    dayOfWeek: number | null
+    dayOfMonth: number | null
+    requiresPhoto: boolean | null
+    requiresNote: boolean | null
+    isActive: boolean | null
+    sortOrder: number | null
+    createdById: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineTemplateCountAggregateOutputType = {
+    id: number
+    title: number
+    description: number
+    frequency: number
+    areaType: number
+    dayOfWeek: number
+    dayOfMonth: number
+    requiresPhoto: number
+    requiresNote: number
+    isActive: number
+    sortOrder: number
+    createdById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StaffRoutineTemplateAvgAggregateInputType = {
+    id?: true
+    dayOfWeek?: true
+    dayOfMonth?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type StaffRoutineTemplateSumAggregateInputType = {
+    id?: true
+    dayOfWeek?: true
+    dayOfMonth?: true
+    sortOrder?: true
+    createdById?: true
+  }
+
+  export type StaffRoutineTemplateMinAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    frequency?: true
+    areaType?: true
+    dayOfWeek?: true
+    dayOfMonth?: true
+    requiresPhoto?: true
+    requiresNote?: true
+    isActive?: true
+    sortOrder?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineTemplateMaxAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    frequency?: true
+    areaType?: true
+    dayOfWeek?: true
+    dayOfMonth?: true
+    requiresPhoto?: true
+    requiresNote?: true
+    isActive?: true
+    sortOrder?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineTemplateCountAggregateInputType = {
+    id?: true
+    title?: true
+    description?: true
+    frequency?: true
+    areaType?: true
+    dayOfWeek?: true
+    dayOfMonth?: true
+    requiresPhoto?: true
+    requiresNote?: true
+    isActive?: true
+    sortOrder?: true
+    createdById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StaffRoutineTemplateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineTemplate to aggregate.
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineTemplates to fetch.
+     */
+    orderBy?: StaffRoutineTemplateOrderByWithRelationInput | StaffRoutineTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StaffRoutineTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StaffRoutineTemplates
+    **/
+    _count?: true | StaffRoutineTemplateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StaffRoutineTemplateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StaffRoutineTemplateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StaffRoutineTemplateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StaffRoutineTemplateMaxAggregateInputType
+  }
+
+  export type GetStaffRoutineTemplateAggregateType<T extends StaffRoutineTemplateAggregateArgs> = {
+        [P in keyof T & keyof AggregateStaffRoutineTemplate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStaffRoutineTemplate[P]>
+      : GetScalarType<T[P], AggregateStaffRoutineTemplate[P]>
+  }
+
+
+
+
+  export type StaffRoutineTemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineTemplateWhereInput
+    orderBy?: StaffRoutineTemplateOrderByWithAggregationInput | StaffRoutineTemplateOrderByWithAggregationInput[]
+    by: StaffRoutineTemplateScalarFieldEnum[] | StaffRoutineTemplateScalarFieldEnum
+    having?: StaffRoutineTemplateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StaffRoutineTemplateCountAggregateInputType | true
+    _avg?: StaffRoutineTemplateAvgAggregateInputType
+    _sum?: StaffRoutineTemplateSumAggregateInputType
+    _min?: StaffRoutineTemplateMinAggregateInputType
+    _max?: StaffRoutineTemplateMaxAggregateInputType
+  }
+
+  export type StaffRoutineTemplateGroupByOutputType = {
+    id: number
+    title: string
+    description: string | null
+    frequency: $Enums.StaffRoutineFrequency
+    areaType: $Enums.StaffRoutineAreaType
+    dayOfWeek: number | null
+    dayOfMonth: number | null
+    requiresPhoto: boolean
+    requiresNote: boolean
+    isActive: boolean
+    sortOrder: number
+    createdById: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: StaffRoutineTemplateCountAggregateOutputType | null
+    _avg: StaffRoutineTemplateAvgAggregateOutputType | null
+    _sum: StaffRoutineTemplateSumAggregateOutputType | null
+    _min: StaffRoutineTemplateMinAggregateOutputType | null
+    _max: StaffRoutineTemplateMaxAggregateOutputType | null
+  }
+
+  type GetStaffRoutineTemplateGroupByPayload<T extends StaffRoutineTemplateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StaffRoutineTemplateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StaffRoutineTemplateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StaffRoutineTemplateGroupByOutputType[P]>
+            : GetScalarType<T[P], StaffRoutineTemplateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StaffRoutineTemplateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    frequency?: boolean
+    areaType?: boolean
+    dayOfWeek?: boolean
+    dayOfMonth?: boolean
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+    assignments?: boolean | StaffRoutineTemplate$assignmentsArgs<ExtArgs>
+    completions?: boolean | StaffRoutineTemplate$completionsArgs<ExtArgs>
+    _count?: boolean | StaffRoutineTemplateCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineTemplate"]>
+
+  export type StaffRoutineTemplateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    frequency?: boolean
+    areaType?: boolean
+    dayOfWeek?: boolean
+    dayOfMonth?: boolean
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineTemplate"]>
+
+  export type StaffRoutineTemplateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    frequency?: boolean
+    areaType?: boolean
+    dayOfWeek?: boolean
+    dayOfMonth?: boolean
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineTemplate"]>
+
+  export type StaffRoutineTemplateSelectScalar = {
+    id?: boolean
+    title?: boolean
+    description?: boolean
+    frequency?: boolean
+    areaType?: boolean
+    dayOfWeek?: boolean
+    dayOfMonth?: boolean
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StaffRoutineTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "frequency" | "areaType" | "dayOfWeek" | "dayOfMonth" | "requiresPhoto" | "requiresNote" | "isActive" | "sortOrder" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["staffRoutineTemplate"]>
+  export type StaffRoutineTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+    assignments?: boolean | StaffRoutineTemplate$assignmentsArgs<ExtArgs>
+    completions?: boolean | StaffRoutineTemplate$completionsArgs<ExtArgs>
+    _count?: boolean | StaffRoutineTemplateCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type StaffRoutineTemplateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+  }
+  export type StaffRoutineTemplateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    createdBy?: boolean | StaffRoutineTemplate$createdByArgs<ExtArgs>
+  }
+
+  export type $StaffRoutineTemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StaffRoutineTemplate"
+    objects: {
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+      assignments: Prisma.$StaffRoutineAssignmentPayload<ExtArgs>[]
+      completions: Prisma.$StaffRoutineCompletionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      title: string
+      description: string | null
+      frequency: $Enums.StaffRoutineFrequency
+      areaType: $Enums.StaffRoutineAreaType
+      dayOfWeek: number | null
+      dayOfMonth: number | null
+      requiresPhoto: boolean
+      requiresNote: boolean
+      isActive: boolean
+      sortOrder: number
+      createdById: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["staffRoutineTemplate"]>
+    composites: {}
+  }
+
+  type StaffRoutineTemplateGetPayload<S extends boolean | null | undefined | StaffRoutineTemplateDefaultArgs> = $Result.GetResult<Prisma.$StaffRoutineTemplatePayload, S>
+
+  type StaffRoutineTemplateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StaffRoutineTemplateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StaffRoutineTemplateCountAggregateInputType | true
+    }
+
+  export interface StaffRoutineTemplateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StaffRoutineTemplate'], meta: { name: 'StaffRoutineTemplate' } }
+    /**
+     * Find zero or one StaffRoutineTemplate that matches the filter.
+     * @param {StaffRoutineTemplateFindUniqueArgs} args - Arguments to find a StaffRoutineTemplate
+     * @example
+     * // Get one StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StaffRoutineTemplateFindUniqueArgs>(args: SelectSubset<T, StaffRoutineTemplateFindUniqueArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StaffRoutineTemplate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StaffRoutineTemplateFindUniqueOrThrowArgs} args - Arguments to find a StaffRoutineTemplate
+     * @example
+     * // Get one StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StaffRoutineTemplateFindUniqueOrThrowArgs>(args: SelectSubset<T, StaffRoutineTemplateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineTemplate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateFindFirstArgs} args - Arguments to find a StaffRoutineTemplate
+     * @example
+     * // Get one StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StaffRoutineTemplateFindFirstArgs>(args?: SelectSubset<T, StaffRoutineTemplateFindFirstArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineTemplate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateFindFirstOrThrowArgs} args - Arguments to find a StaffRoutineTemplate
+     * @example
+     * // Get one StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StaffRoutineTemplateFindFirstOrThrowArgs>(args?: SelectSubset<T, StaffRoutineTemplateFindFirstOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StaffRoutineTemplates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StaffRoutineTemplates
+     * const staffRoutineTemplates = await prisma.staffRoutineTemplate.findMany()
+     * 
+     * // Get first 10 StaffRoutineTemplates
+     * const staffRoutineTemplates = await prisma.staffRoutineTemplate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const staffRoutineTemplateWithIdOnly = await prisma.staffRoutineTemplate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StaffRoutineTemplateFindManyArgs>(args?: SelectSubset<T, StaffRoutineTemplateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StaffRoutineTemplate.
+     * @param {StaffRoutineTemplateCreateArgs} args - Arguments to create a StaffRoutineTemplate.
+     * @example
+     * // Create one StaffRoutineTemplate
+     * const StaffRoutineTemplate = await prisma.staffRoutineTemplate.create({
+     *   data: {
+     *     // ... data to create a StaffRoutineTemplate
+     *   }
+     * })
+     * 
+     */
+    create<T extends StaffRoutineTemplateCreateArgs>(args: SelectSubset<T, StaffRoutineTemplateCreateArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StaffRoutineTemplates.
+     * @param {StaffRoutineTemplateCreateManyArgs} args - Arguments to create many StaffRoutineTemplates.
+     * @example
+     * // Create many StaffRoutineTemplates
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StaffRoutineTemplateCreateManyArgs>(args?: SelectSubset<T, StaffRoutineTemplateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StaffRoutineTemplates and returns the data saved in the database.
+     * @param {StaffRoutineTemplateCreateManyAndReturnArgs} args - Arguments to create many StaffRoutineTemplates.
+     * @example
+     * // Create many StaffRoutineTemplates
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StaffRoutineTemplates and only return the `id`
+     * const staffRoutineTemplateWithIdOnly = await prisma.staffRoutineTemplate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StaffRoutineTemplateCreateManyAndReturnArgs>(args?: SelectSubset<T, StaffRoutineTemplateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StaffRoutineTemplate.
+     * @param {StaffRoutineTemplateDeleteArgs} args - Arguments to delete one StaffRoutineTemplate.
+     * @example
+     * // Delete one StaffRoutineTemplate
+     * const StaffRoutineTemplate = await prisma.staffRoutineTemplate.delete({
+     *   where: {
+     *     // ... filter to delete one StaffRoutineTemplate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StaffRoutineTemplateDeleteArgs>(args: SelectSubset<T, StaffRoutineTemplateDeleteArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StaffRoutineTemplate.
+     * @param {StaffRoutineTemplateUpdateArgs} args - Arguments to update one StaffRoutineTemplate.
+     * @example
+     * // Update one StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StaffRoutineTemplateUpdateArgs>(args: SelectSubset<T, StaffRoutineTemplateUpdateArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StaffRoutineTemplates.
+     * @param {StaffRoutineTemplateDeleteManyArgs} args - Arguments to filter StaffRoutineTemplates to delete.
+     * @example
+     * // Delete a few StaffRoutineTemplates
+     * const { count } = await prisma.staffRoutineTemplate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StaffRoutineTemplateDeleteManyArgs>(args?: SelectSubset<T, StaffRoutineTemplateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StaffRoutineTemplates
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StaffRoutineTemplateUpdateManyArgs>(args: SelectSubset<T, StaffRoutineTemplateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineTemplates and returns the data updated in the database.
+     * @param {StaffRoutineTemplateUpdateManyAndReturnArgs} args - Arguments to update many StaffRoutineTemplates.
+     * @example
+     * // Update many StaffRoutineTemplates
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StaffRoutineTemplates and only return the `id`
+     * const staffRoutineTemplateWithIdOnly = await prisma.staffRoutineTemplate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StaffRoutineTemplateUpdateManyAndReturnArgs>(args: SelectSubset<T, StaffRoutineTemplateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StaffRoutineTemplate.
+     * @param {StaffRoutineTemplateUpsertArgs} args - Arguments to update or create a StaffRoutineTemplate.
+     * @example
+     * // Update or create a StaffRoutineTemplate
+     * const staffRoutineTemplate = await prisma.staffRoutineTemplate.upsert({
+     *   create: {
+     *     // ... data to create a StaffRoutineTemplate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StaffRoutineTemplate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StaffRoutineTemplateUpsertArgs>(args: SelectSubset<T, StaffRoutineTemplateUpsertArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StaffRoutineTemplates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateCountArgs} args - Arguments to filter StaffRoutineTemplates to count.
+     * @example
+     * // Count the number of StaffRoutineTemplates
+     * const count = await prisma.staffRoutineTemplate.count({
+     *   where: {
+     *     // ... the filter for the StaffRoutineTemplates we want to count
+     *   }
+     * })
+    **/
+    count<T extends StaffRoutineTemplateCountArgs>(
+      args?: Subset<T, StaffRoutineTemplateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StaffRoutineTemplateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StaffRoutineTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StaffRoutineTemplateAggregateArgs>(args: Subset<T, StaffRoutineTemplateAggregateArgs>): Prisma.PrismaPromise<GetStaffRoutineTemplateAggregateType<T>>
+
+    /**
+     * Group by StaffRoutineTemplate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineTemplateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StaffRoutineTemplateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StaffRoutineTemplateGroupByArgs['orderBy'] }
+        : { orderBy?: StaffRoutineTemplateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StaffRoutineTemplateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStaffRoutineTemplateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StaffRoutineTemplate model
+   */
+  readonly fields: StaffRoutineTemplateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StaffRoutineTemplate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StaffRoutineTemplateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    createdBy<T extends StaffRoutineTemplate$createdByArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineTemplate$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    assignments<T extends StaffRoutineTemplate$assignmentsArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineTemplate$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    completions<T extends StaffRoutineTemplate$completionsArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineTemplate$completionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StaffRoutineTemplate model
+   */
+  interface StaffRoutineTemplateFieldRefs {
+    readonly id: FieldRef<"StaffRoutineTemplate", 'Int'>
+    readonly title: FieldRef<"StaffRoutineTemplate", 'String'>
+    readonly description: FieldRef<"StaffRoutineTemplate", 'String'>
+    readonly frequency: FieldRef<"StaffRoutineTemplate", 'StaffRoutineFrequency'>
+    readonly areaType: FieldRef<"StaffRoutineTemplate", 'StaffRoutineAreaType'>
+    readonly dayOfWeek: FieldRef<"StaffRoutineTemplate", 'Int'>
+    readonly dayOfMonth: FieldRef<"StaffRoutineTemplate", 'Int'>
+    readonly requiresPhoto: FieldRef<"StaffRoutineTemplate", 'Boolean'>
+    readonly requiresNote: FieldRef<"StaffRoutineTemplate", 'Boolean'>
+    readonly isActive: FieldRef<"StaffRoutineTemplate", 'Boolean'>
+    readonly sortOrder: FieldRef<"StaffRoutineTemplate", 'Int'>
+    readonly createdById: FieldRef<"StaffRoutineTemplate", 'Int'>
+    readonly createdAt: FieldRef<"StaffRoutineTemplate", 'DateTime'>
+    readonly updatedAt: FieldRef<"StaffRoutineTemplate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StaffRoutineTemplate findUnique
+   */
+  export type StaffRoutineTemplateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineTemplate to fetch.
+     */
+    where: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineTemplate findUniqueOrThrow
+   */
+  export type StaffRoutineTemplateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineTemplate to fetch.
+     */
+    where: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineTemplate findFirst
+   */
+  export type StaffRoutineTemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineTemplate to fetch.
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineTemplates to fetch.
+     */
+    orderBy?: StaffRoutineTemplateOrderByWithRelationInput | StaffRoutineTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineTemplates.
+     */
+    cursor?: StaffRoutineTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineTemplates.
+     */
+    distinct?: StaffRoutineTemplateScalarFieldEnum | StaffRoutineTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineTemplate findFirstOrThrow
+   */
+  export type StaffRoutineTemplateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineTemplate to fetch.
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineTemplates to fetch.
+     */
+    orderBy?: StaffRoutineTemplateOrderByWithRelationInput | StaffRoutineTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineTemplates.
+     */
+    cursor?: StaffRoutineTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineTemplates.
+     */
+    distinct?: StaffRoutineTemplateScalarFieldEnum | StaffRoutineTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineTemplate findMany
+   */
+  export type StaffRoutineTemplateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineTemplates to fetch.
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineTemplates to fetch.
+     */
+    orderBy?: StaffRoutineTemplateOrderByWithRelationInput | StaffRoutineTemplateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StaffRoutineTemplates.
+     */
+    cursor?: StaffRoutineTemplateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineTemplates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineTemplates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineTemplates.
+     */
+    distinct?: StaffRoutineTemplateScalarFieldEnum | StaffRoutineTemplateScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineTemplate create
+   */
+  export type StaffRoutineTemplateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StaffRoutineTemplate.
+     */
+    data: XOR<StaffRoutineTemplateCreateInput, StaffRoutineTemplateUncheckedCreateInput>
+  }
+
+  /**
+   * StaffRoutineTemplate createMany
+   */
+  export type StaffRoutineTemplateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StaffRoutineTemplates.
+     */
+    data: StaffRoutineTemplateCreateManyInput | StaffRoutineTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StaffRoutineTemplate createManyAndReturn
+   */
+  export type StaffRoutineTemplateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * The data used to create many StaffRoutineTemplates.
+     */
+    data: StaffRoutineTemplateCreateManyInput | StaffRoutineTemplateCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineTemplate update
+   */
+  export type StaffRoutineTemplateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StaffRoutineTemplate.
+     */
+    data: XOR<StaffRoutineTemplateUpdateInput, StaffRoutineTemplateUncheckedUpdateInput>
+    /**
+     * Choose, which StaffRoutineTemplate to update.
+     */
+    where: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineTemplate updateMany
+   */
+  export type StaffRoutineTemplateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StaffRoutineTemplates.
+     */
+    data: XOR<StaffRoutineTemplateUpdateManyMutationInput, StaffRoutineTemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineTemplates to update
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * Limit how many StaffRoutineTemplates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineTemplate updateManyAndReturn
+   */
+  export type StaffRoutineTemplateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * The data used to update StaffRoutineTemplates.
+     */
+    data: XOR<StaffRoutineTemplateUpdateManyMutationInput, StaffRoutineTemplateUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineTemplates to update
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * Limit how many StaffRoutineTemplates to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineTemplate upsert
+   */
+  export type StaffRoutineTemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StaffRoutineTemplate to update in case it exists.
+     */
+    where: StaffRoutineTemplateWhereUniqueInput
+    /**
+     * In case the StaffRoutineTemplate found by the `where` argument doesn't exist, create a new StaffRoutineTemplate with this data.
+     */
+    create: XOR<StaffRoutineTemplateCreateInput, StaffRoutineTemplateUncheckedCreateInput>
+    /**
+     * In case the StaffRoutineTemplate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StaffRoutineTemplateUpdateInput, StaffRoutineTemplateUncheckedUpdateInput>
+  }
+
+  /**
+   * StaffRoutineTemplate delete
+   */
+  export type StaffRoutineTemplateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+    /**
+     * Filter which StaffRoutineTemplate to delete.
+     */
+    where: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineTemplate deleteMany
+   */
+  export type StaffRoutineTemplateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineTemplates to delete
+     */
+    where?: StaffRoutineTemplateWhereInput
+    /**
+     * Limit how many StaffRoutineTemplates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineTemplate.createdBy
+   */
+  export type StaffRoutineTemplate$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * StaffRoutineTemplate.assignments
+   */
+  export type StaffRoutineTemplate$assignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    where?: StaffRoutineAssignmentWhereInput
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineTemplate.completions
+   */
+  export type StaffRoutineTemplate$completionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    where?: StaffRoutineCompletionWhereInput
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineTemplate without action
+   */
+  export type StaffRoutineTemplateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineTemplate
+     */
+    select?: StaffRoutineTemplateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineTemplate
+     */
+    omit?: StaffRoutineTemplateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineTemplateInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StaffRoutineAssignment
+   */
+
+  export type AggregateStaffRoutineAssignment = {
+    _count: StaffRoutineAssignmentCountAggregateOutputType | null
+    _avg: StaffRoutineAssignmentAvgAggregateOutputType | null
+    _sum: StaffRoutineAssignmentSumAggregateOutputType | null
+    _min: StaffRoutineAssignmentMinAggregateOutputType | null
+    _max: StaffRoutineAssignmentMaxAggregateOutputType | null
+  }
+
+  export type StaffRoutineAssignmentAvgAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    staffUserId: number | null
+    roomId: number | null
+  }
+
+  export type StaffRoutineAssignmentSumAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    staffUserId: number | null
+    roomId: number | null
+  }
+
+  export type StaffRoutineAssignmentMinAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    staffUserId: number | null
+    roomId: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineAssignmentMaxAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    staffUserId: number | null
+    roomId: number | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineAssignmentCountAggregateOutputType = {
+    id: number
+    templateId: number
+    staffUserId: number
+    roomId: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StaffRoutineAssignmentAvgAggregateInputType = {
+    id?: true
+    templateId?: true
+    staffUserId?: true
+    roomId?: true
+  }
+
+  export type StaffRoutineAssignmentSumAggregateInputType = {
+    id?: true
+    templateId?: true
+    staffUserId?: true
+    roomId?: true
+  }
+
+  export type StaffRoutineAssignmentMinAggregateInputType = {
+    id?: true
+    templateId?: true
+    staffUserId?: true
+    roomId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineAssignmentMaxAggregateInputType = {
+    id?: true
+    templateId?: true
+    staffUserId?: true
+    roomId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineAssignmentCountAggregateInputType = {
+    id?: true
+    templateId?: true
+    staffUserId?: true
+    roomId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StaffRoutineAssignmentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineAssignment to aggregate.
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineAssignments to fetch.
+     */
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StaffRoutineAssignments
+    **/
+    _count?: true | StaffRoutineAssignmentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StaffRoutineAssignmentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StaffRoutineAssignmentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StaffRoutineAssignmentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StaffRoutineAssignmentMaxAggregateInputType
+  }
+
+  export type GetStaffRoutineAssignmentAggregateType<T extends StaffRoutineAssignmentAggregateArgs> = {
+        [P in keyof T & keyof AggregateStaffRoutineAssignment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStaffRoutineAssignment[P]>
+      : GetScalarType<T[P], AggregateStaffRoutineAssignment[P]>
+  }
+
+
+
+
+  export type StaffRoutineAssignmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineAssignmentWhereInput
+    orderBy?: StaffRoutineAssignmentOrderByWithAggregationInput | StaffRoutineAssignmentOrderByWithAggregationInput[]
+    by: StaffRoutineAssignmentScalarFieldEnum[] | StaffRoutineAssignmentScalarFieldEnum
+    having?: StaffRoutineAssignmentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StaffRoutineAssignmentCountAggregateInputType | true
+    _avg?: StaffRoutineAssignmentAvgAggregateInputType
+    _sum?: StaffRoutineAssignmentSumAggregateInputType
+    _min?: StaffRoutineAssignmentMinAggregateInputType
+    _max?: StaffRoutineAssignmentMaxAggregateInputType
+  }
+
+  export type StaffRoutineAssignmentGroupByOutputType = {
+    id: number
+    templateId: number
+    staffUserId: number | null
+    roomId: number | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: StaffRoutineAssignmentCountAggregateOutputType | null
+    _avg: StaffRoutineAssignmentAvgAggregateOutputType | null
+    _sum: StaffRoutineAssignmentSumAggregateOutputType | null
+    _min: StaffRoutineAssignmentMinAggregateOutputType | null
+    _max: StaffRoutineAssignmentMaxAggregateOutputType | null
+  }
+
+  type GetStaffRoutineAssignmentGroupByPayload<T extends StaffRoutineAssignmentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StaffRoutineAssignmentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StaffRoutineAssignmentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StaffRoutineAssignmentGroupByOutputType[P]>
+            : GetScalarType<T[P], StaffRoutineAssignmentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StaffRoutineAssignmentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+    completions?: boolean | StaffRoutineAssignment$completionsArgs<ExtArgs>
+    _count?: boolean | StaffRoutineAssignmentCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineAssignment"]>
+
+  export type StaffRoutineAssignmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineAssignment"]>
+
+  export type StaffRoutineAssignmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineAssignment"]>
+
+  export type StaffRoutineAssignmentSelectScalar = {
+    id?: boolean
+    templateId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StaffRoutineAssignmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "staffUserId" | "roomId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["staffRoutineAssignment"]>
+  export type StaffRoutineAssignmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+    completions?: boolean | StaffRoutineAssignment$completionsArgs<ExtArgs>
+    _count?: boolean | StaffRoutineAssignmentCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type StaffRoutineAssignmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+  }
+  export type StaffRoutineAssignmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    staffUser?: boolean | StaffRoutineAssignment$staffUserArgs<ExtArgs>
+    room?: boolean | StaffRoutineAssignment$roomArgs<ExtArgs>
+  }
+
+  export type $StaffRoutineAssignmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StaffRoutineAssignment"
+    objects: {
+      template: Prisma.$StaffRoutineTemplatePayload<ExtArgs>
+      staffUser: Prisma.$UserPayload<ExtArgs> | null
+      room: Prisma.$RoomPayload<ExtArgs> | null
+      completions: Prisma.$StaffRoutineCompletionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      templateId: number
+      staffUserId: number | null
+      roomId: number | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["staffRoutineAssignment"]>
+    composites: {}
+  }
+
+  type StaffRoutineAssignmentGetPayload<S extends boolean | null | undefined | StaffRoutineAssignmentDefaultArgs> = $Result.GetResult<Prisma.$StaffRoutineAssignmentPayload, S>
+
+  type StaffRoutineAssignmentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StaffRoutineAssignmentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StaffRoutineAssignmentCountAggregateInputType | true
+    }
+
+  export interface StaffRoutineAssignmentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StaffRoutineAssignment'], meta: { name: 'StaffRoutineAssignment' } }
+    /**
+     * Find zero or one StaffRoutineAssignment that matches the filter.
+     * @param {StaffRoutineAssignmentFindUniqueArgs} args - Arguments to find a StaffRoutineAssignment
+     * @example
+     * // Get one StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StaffRoutineAssignmentFindUniqueArgs>(args: SelectSubset<T, StaffRoutineAssignmentFindUniqueArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StaffRoutineAssignment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StaffRoutineAssignmentFindUniqueOrThrowArgs} args - Arguments to find a StaffRoutineAssignment
+     * @example
+     * // Get one StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StaffRoutineAssignmentFindUniqueOrThrowArgs>(args: SelectSubset<T, StaffRoutineAssignmentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineAssignment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentFindFirstArgs} args - Arguments to find a StaffRoutineAssignment
+     * @example
+     * // Get one StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StaffRoutineAssignmentFindFirstArgs>(args?: SelectSubset<T, StaffRoutineAssignmentFindFirstArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineAssignment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentFindFirstOrThrowArgs} args - Arguments to find a StaffRoutineAssignment
+     * @example
+     * // Get one StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StaffRoutineAssignmentFindFirstOrThrowArgs>(args?: SelectSubset<T, StaffRoutineAssignmentFindFirstOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StaffRoutineAssignments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StaffRoutineAssignments
+     * const staffRoutineAssignments = await prisma.staffRoutineAssignment.findMany()
+     * 
+     * // Get first 10 StaffRoutineAssignments
+     * const staffRoutineAssignments = await prisma.staffRoutineAssignment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const staffRoutineAssignmentWithIdOnly = await prisma.staffRoutineAssignment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StaffRoutineAssignmentFindManyArgs>(args?: SelectSubset<T, StaffRoutineAssignmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StaffRoutineAssignment.
+     * @param {StaffRoutineAssignmentCreateArgs} args - Arguments to create a StaffRoutineAssignment.
+     * @example
+     * // Create one StaffRoutineAssignment
+     * const StaffRoutineAssignment = await prisma.staffRoutineAssignment.create({
+     *   data: {
+     *     // ... data to create a StaffRoutineAssignment
+     *   }
+     * })
+     * 
+     */
+    create<T extends StaffRoutineAssignmentCreateArgs>(args: SelectSubset<T, StaffRoutineAssignmentCreateArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StaffRoutineAssignments.
+     * @param {StaffRoutineAssignmentCreateManyArgs} args - Arguments to create many StaffRoutineAssignments.
+     * @example
+     * // Create many StaffRoutineAssignments
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StaffRoutineAssignmentCreateManyArgs>(args?: SelectSubset<T, StaffRoutineAssignmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StaffRoutineAssignments and returns the data saved in the database.
+     * @param {StaffRoutineAssignmentCreateManyAndReturnArgs} args - Arguments to create many StaffRoutineAssignments.
+     * @example
+     * // Create many StaffRoutineAssignments
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StaffRoutineAssignments and only return the `id`
+     * const staffRoutineAssignmentWithIdOnly = await prisma.staffRoutineAssignment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StaffRoutineAssignmentCreateManyAndReturnArgs>(args?: SelectSubset<T, StaffRoutineAssignmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StaffRoutineAssignment.
+     * @param {StaffRoutineAssignmentDeleteArgs} args - Arguments to delete one StaffRoutineAssignment.
+     * @example
+     * // Delete one StaffRoutineAssignment
+     * const StaffRoutineAssignment = await prisma.staffRoutineAssignment.delete({
+     *   where: {
+     *     // ... filter to delete one StaffRoutineAssignment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StaffRoutineAssignmentDeleteArgs>(args: SelectSubset<T, StaffRoutineAssignmentDeleteArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StaffRoutineAssignment.
+     * @param {StaffRoutineAssignmentUpdateArgs} args - Arguments to update one StaffRoutineAssignment.
+     * @example
+     * // Update one StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StaffRoutineAssignmentUpdateArgs>(args: SelectSubset<T, StaffRoutineAssignmentUpdateArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StaffRoutineAssignments.
+     * @param {StaffRoutineAssignmentDeleteManyArgs} args - Arguments to filter StaffRoutineAssignments to delete.
+     * @example
+     * // Delete a few StaffRoutineAssignments
+     * const { count } = await prisma.staffRoutineAssignment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StaffRoutineAssignmentDeleteManyArgs>(args?: SelectSubset<T, StaffRoutineAssignmentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StaffRoutineAssignments
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StaffRoutineAssignmentUpdateManyArgs>(args: SelectSubset<T, StaffRoutineAssignmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineAssignments and returns the data updated in the database.
+     * @param {StaffRoutineAssignmentUpdateManyAndReturnArgs} args - Arguments to update many StaffRoutineAssignments.
+     * @example
+     * // Update many StaffRoutineAssignments
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StaffRoutineAssignments and only return the `id`
+     * const staffRoutineAssignmentWithIdOnly = await prisma.staffRoutineAssignment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StaffRoutineAssignmentUpdateManyAndReturnArgs>(args: SelectSubset<T, StaffRoutineAssignmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StaffRoutineAssignment.
+     * @param {StaffRoutineAssignmentUpsertArgs} args - Arguments to update or create a StaffRoutineAssignment.
+     * @example
+     * // Update or create a StaffRoutineAssignment
+     * const staffRoutineAssignment = await prisma.staffRoutineAssignment.upsert({
+     *   create: {
+     *     // ... data to create a StaffRoutineAssignment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StaffRoutineAssignment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StaffRoutineAssignmentUpsertArgs>(args: SelectSubset<T, StaffRoutineAssignmentUpsertArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StaffRoutineAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentCountArgs} args - Arguments to filter StaffRoutineAssignments to count.
+     * @example
+     * // Count the number of StaffRoutineAssignments
+     * const count = await prisma.staffRoutineAssignment.count({
+     *   where: {
+     *     // ... the filter for the StaffRoutineAssignments we want to count
+     *   }
+     * })
+    **/
+    count<T extends StaffRoutineAssignmentCountArgs>(
+      args?: Subset<T, StaffRoutineAssignmentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StaffRoutineAssignmentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StaffRoutineAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StaffRoutineAssignmentAggregateArgs>(args: Subset<T, StaffRoutineAssignmentAggregateArgs>): Prisma.PrismaPromise<GetStaffRoutineAssignmentAggregateType<T>>
+
+    /**
+     * Group by StaffRoutineAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineAssignmentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StaffRoutineAssignmentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StaffRoutineAssignmentGroupByArgs['orderBy'] }
+        : { orderBy?: StaffRoutineAssignmentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StaffRoutineAssignmentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStaffRoutineAssignmentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StaffRoutineAssignment model
+   */
+  readonly fields: StaffRoutineAssignmentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StaffRoutineAssignment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StaffRoutineAssignmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    template<T extends StaffRoutineTemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineTemplateDefaultArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    staffUser<T extends StaffRoutineAssignment$staffUserArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineAssignment$staffUserArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    room<T extends StaffRoutineAssignment$roomArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineAssignment$roomArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    completions<T extends StaffRoutineAssignment$completionsArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineAssignment$completionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StaffRoutineAssignment model
+   */
+  interface StaffRoutineAssignmentFieldRefs {
+    readonly id: FieldRef<"StaffRoutineAssignment", 'Int'>
+    readonly templateId: FieldRef<"StaffRoutineAssignment", 'Int'>
+    readonly staffUserId: FieldRef<"StaffRoutineAssignment", 'Int'>
+    readonly roomId: FieldRef<"StaffRoutineAssignment", 'Int'>
+    readonly isActive: FieldRef<"StaffRoutineAssignment", 'Boolean'>
+    readonly createdAt: FieldRef<"StaffRoutineAssignment", 'DateTime'>
+    readonly updatedAt: FieldRef<"StaffRoutineAssignment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StaffRoutineAssignment findUnique
+   */
+  export type StaffRoutineAssignmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineAssignment to fetch.
+     */
+    where: StaffRoutineAssignmentWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineAssignment findUniqueOrThrow
+   */
+  export type StaffRoutineAssignmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineAssignment to fetch.
+     */
+    where: StaffRoutineAssignmentWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineAssignment findFirst
+   */
+  export type StaffRoutineAssignmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineAssignment to fetch.
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineAssignments to fetch.
+     */
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineAssignments.
+     */
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineAssignments.
+     */
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineAssignment findFirstOrThrow
+   */
+  export type StaffRoutineAssignmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineAssignment to fetch.
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineAssignments to fetch.
+     */
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineAssignments.
+     */
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineAssignments.
+     */
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineAssignment findMany
+   */
+  export type StaffRoutineAssignmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineAssignments to fetch.
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineAssignments to fetch.
+     */
+    orderBy?: StaffRoutineAssignmentOrderByWithRelationInput | StaffRoutineAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StaffRoutineAssignments.
+     */
+    cursor?: StaffRoutineAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineAssignments.
+     */
+    distinct?: StaffRoutineAssignmentScalarFieldEnum | StaffRoutineAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineAssignment create
+   */
+  export type StaffRoutineAssignmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StaffRoutineAssignment.
+     */
+    data: XOR<StaffRoutineAssignmentCreateInput, StaffRoutineAssignmentUncheckedCreateInput>
+  }
+
+  /**
+   * StaffRoutineAssignment createMany
+   */
+  export type StaffRoutineAssignmentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StaffRoutineAssignments.
+     */
+    data: StaffRoutineAssignmentCreateManyInput | StaffRoutineAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StaffRoutineAssignment createManyAndReturn
+   */
+  export type StaffRoutineAssignmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to create many StaffRoutineAssignments.
+     */
+    data: StaffRoutineAssignmentCreateManyInput | StaffRoutineAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineAssignment update
+   */
+  export type StaffRoutineAssignmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StaffRoutineAssignment.
+     */
+    data: XOR<StaffRoutineAssignmentUpdateInput, StaffRoutineAssignmentUncheckedUpdateInput>
+    /**
+     * Choose, which StaffRoutineAssignment to update.
+     */
+    where: StaffRoutineAssignmentWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineAssignment updateMany
+   */
+  export type StaffRoutineAssignmentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StaffRoutineAssignments.
+     */
+    data: XOR<StaffRoutineAssignmentUpdateManyMutationInput, StaffRoutineAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineAssignments to update
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * Limit how many StaffRoutineAssignments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineAssignment updateManyAndReturn
+   */
+  export type StaffRoutineAssignmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to update StaffRoutineAssignments.
+     */
+    data: XOR<StaffRoutineAssignmentUpdateManyMutationInput, StaffRoutineAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineAssignments to update
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * Limit how many StaffRoutineAssignments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineAssignment upsert
+   */
+  export type StaffRoutineAssignmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StaffRoutineAssignment to update in case it exists.
+     */
+    where: StaffRoutineAssignmentWhereUniqueInput
+    /**
+     * In case the StaffRoutineAssignment found by the `where` argument doesn't exist, create a new StaffRoutineAssignment with this data.
+     */
+    create: XOR<StaffRoutineAssignmentCreateInput, StaffRoutineAssignmentUncheckedCreateInput>
+    /**
+     * In case the StaffRoutineAssignment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StaffRoutineAssignmentUpdateInput, StaffRoutineAssignmentUncheckedUpdateInput>
+  }
+
+  /**
+   * StaffRoutineAssignment delete
+   */
+  export type StaffRoutineAssignmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter which StaffRoutineAssignment to delete.
+     */
+    where: StaffRoutineAssignmentWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineAssignment deleteMany
+   */
+  export type StaffRoutineAssignmentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineAssignments to delete
+     */
+    where?: StaffRoutineAssignmentWhereInput
+    /**
+     * Limit how many StaffRoutineAssignments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineAssignment.staffUser
+   */
+  export type StaffRoutineAssignment$staffUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * StaffRoutineAssignment.room
+   */
+  export type StaffRoutineAssignment$roomArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Room
+     */
+    select?: RoomSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Room
+     */
+    omit?: RoomOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomInclude<ExtArgs> | null
+    where?: RoomWhereInput
+  }
+
+  /**
+   * StaffRoutineAssignment.completions
+   */
+  export type StaffRoutineAssignment$completionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    where?: StaffRoutineCompletionWhereInput
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineAssignment without action
+   */
+  export type StaffRoutineAssignmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StaffRoutineCompletion
+   */
+
+  export type AggregateStaffRoutineCompletion = {
+    _count: StaffRoutineCompletionCountAggregateOutputType | null
+    _avg: StaffRoutineCompletionAvgAggregateOutputType | null
+    _sum: StaffRoutineCompletionSumAggregateOutputType | null
+    _min: StaffRoutineCompletionMinAggregateOutputType | null
+    _max: StaffRoutineCompletionMaxAggregateOutputType | null
+  }
+
+  export type StaffRoutineCompletionAvgAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    assignmentId: number | null
+    staffUserId: number | null
+    roomId: number | null
+  }
+
+  export type StaffRoutineCompletionSumAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    assignmentId: number | null
+    staffUserId: number | null
+    roomId: number | null
+  }
+
+  export type StaffRoutineCompletionMinAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    assignmentId: number | null
+    staffUserId: number | null
+    roomId: number | null
+    dueDate: Date | null
+    status: $Enums.StaffRoutineStatus | null
+    completedAt: Date | null
+    note: string | null
+    photoUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineCompletionMaxAggregateOutputType = {
+    id: number | null
+    templateId: number | null
+    assignmentId: number | null
+    staffUserId: number | null
+    roomId: number | null
+    dueDate: Date | null
+    status: $Enums.StaffRoutineStatus | null
+    completedAt: Date | null
+    note: string | null
+    photoUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StaffRoutineCompletionCountAggregateOutputType = {
+    id: number
+    templateId: number
+    assignmentId: number
+    staffUserId: number
+    roomId: number
+    dueDate: number
+    status: number
+    completedAt: number
+    note: number
+    photoUrl: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StaffRoutineCompletionAvgAggregateInputType = {
+    id?: true
+    templateId?: true
+    assignmentId?: true
+    staffUserId?: true
+    roomId?: true
+  }
+
+  export type StaffRoutineCompletionSumAggregateInputType = {
+    id?: true
+    templateId?: true
+    assignmentId?: true
+    staffUserId?: true
+    roomId?: true
+  }
+
+  export type StaffRoutineCompletionMinAggregateInputType = {
+    id?: true
+    templateId?: true
+    assignmentId?: true
+    staffUserId?: true
+    roomId?: true
+    dueDate?: true
+    status?: true
+    completedAt?: true
+    note?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineCompletionMaxAggregateInputType = {
+    id?: true
+    templateId?: true
+    assignmentId?: true
+    staffUserId?: true
+    roomId?: true
+    dueDate?: true
+    status?: true
+    completedAt?: true
+    note?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StaffRoutineCompletionCountAggregateInputType = {
+    id?: true
+    templateId?: true
+    assignmentId?: true
+    staffUserId?: true
+    roomId?: true
+    dueDate?: true
+    status?: true
+    completedAt?: true
+    note?: true
+    photoUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StaffRoutineCompletionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineCompletion to aggregate.
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineCompletions to fetch.
+     */
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineCompletions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineCompletions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StaffRoutineCompletions
+    **/
+    _count?: true | StaffRoutineCompletionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StaffRoutineCompletionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StaffRoutineCompletionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StaffRoutineCompletionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StaffRoutineCompletionMaxAggregateInputType
+  }
+
+  export type GetStaffRoutineCompletionAggregateType<T extends StaffRoutineCompletionAggregateArgs> = {
+        [P in keyof T & keyof AggregateStaffRoutineCompletion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStaffRoutineCompletion[P]>
+      : GetScalarType<T[P], AggregateStaffRoutineCompletion[P]>
+  }
+
+
+
+
+  export type StaffRoutineCompletionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffRoutineCompletionWhereInput
+    orderBy?: StaffRoutineCompletionOrderByWithAggregationInput | StaffRoutineCompletionOrderByWithAggregationInput[]
+    by: StaffRoutineCompletionScalarFieldEnum[] | StaffRoutineCompletionScalarFieldEnum
+    having?: StaffRoutineCompletionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StaffRoutineCompletionCountAggregateInputType | true
+    _avg?: StaffRoutineCompletionAvgAggregateInputType
+    _sum?: StaffRoutineCompletionSumAggregateInputType
+    _min?: StaffRoutineCompletionMinAggregateInputType
+    _max?: StaffRoutineCompletionMaxAggregateInputType
+  }
+
+  export type StaffRoutineCompletionGroupByOutputType = {
+    id: number
+    templateId: number
+    assignmentId: number | null
+    staffUserId: number
+    roomId: number | null
+    dueDate: Date
+    status: $Enums.StaffRoutineStatus
+    completedAt: Date | null
+    note: string | null
+    photoUrl: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: StaffRoutineCompletionCountAggregateOutputType | null
+    _avg: StaffRoutineCompletionAvgAggregateOutputType | null
+    _sum: StaffRoutineCompletionSumAggregateOutputType | null
+    _min: StaffRoutineCompletionMinAggregateOutputType | null
+    _max: StaffRoutineCompletionMaxAggregateOutputType | null
+  }
+
+  type GetStaffRoutineCompletionGroupByPayload<T extends StaffRoutineCompletionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StaffRoutineCompletionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StaffRoutineCompletionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StaffRoutineCompletionGroupByOutputType[P]>
+            : GetScalarType<T[P], StaffRoutineCompletionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StaffRoutineCompletionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    assignmentId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    dueDate?: boolean
+    status?: boolean
+    completedAt?: boolean
+    note?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineCompletion"]>
+
+  export type StaffRoutineCompletionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    assignmentId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    dueDate?: boolean
+    status?: boolean
+    completedAt?: boolean
+    note?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineCompletion"]>
+
+  export type StaffRoutineCompletionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    templateId?: boolean
+    assignmentId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    dueDate?: boolean
+    status?: boolean
+    completedAt?: boolean
+    note?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }, ExtArgs["result"]["staffRoutineCompletion"]>
+
+  export type StaffRoutineCompletionSelectScalar = {
+    id?: boolean
+    templateId?: boolean
+    assignmentId?: boolean
+    staffUserId?: boolean
+    roomId?: boolean
+    dueDate?: boolean
+    status?: boolean
+    completedAt?: boolean
+    note?: boolean
+    photoUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StaffRoutineCompletionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "assignmentId" | "staffUserId" | "roomId" | "dueDate" | "status" | "completedAt" | "note" | "photoUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["staffRoutineCompletion"]>
+  export type StaffRoutineCompletionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }
+  export type StaffRoutineCompletionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }
+  export type StaffRoutineCompletionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    template?: boolean | StaffRoutineTemplateDefaultArgs<ExtArgs>
+    assignment?: boolean | StaffRoutineCompletion$assignmentArgs<ExtArgs>
+    staffUser?: boolean | UserDefaultArgs<ExtArgs>
+    room?: boolean | StaffRoutineCompletion$roomArgs<ExtArgs>
+  }
+
+  export type $StaffRoutineCompletionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StaffRoutineCompletion"
+    objects: {
+      template: Prisma.$StaffRoutineTemplatePayload<ExtArgs>
+      assignment: Prisma.$StaffRoutineAssignmentPayload<ExtArgs> | null
+      staffUser: Prisma.$UserPayload<ExtArgs>
+      room: Prisma.$RoomPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      templateId: number
+      assignmentId: number | null
+      staffUserId: number
+      roomId: number | null
+      dueDate: Date
+      status: $Enums.StaffRoutineStatus
+      completedAt: Date | null
+      note: string | null
+      photoUrl: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["staffRoutineCompletion"]>
+    composites: {}
+  }
+
+  type StaffRoutineCompletionGetPayload<S extends boolean | null | undefined | StaffRoutineCompletionDefaultArgs> = $Result.GetResult<Prisma.$StaffRoutineCompletionPayload, S>
+
+  type StaffRoutineCompletionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StaffRoutineCompletionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StaffRoutineCompletionCountAggregateInputType | true
+    }
+
+  export interface StaffRoutineCompletionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StaffRoutineCompletion'], meta: { name: 'StaffRoutineCompletion' } }
+    /**
+     * Find zero or one StaffRoutineCompletion that matches the filter.
+     * @param {StaffRoutineCompletionFindUniqueArgs} args - Arguments to find a StaffRoutineCompletion
+     * @example
+     * // Get one StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StaffRoutineCompletionFindUniqueArgs>(args: SelectSubset<T, StaffRoutineCompletionFindUniqueArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StaffRoutineCompletion that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StaffRoutineCompletionFindUniqueOrThrowArgs} args - Arguments to find a StaffRoutineCompletion
+     * @example
+     * // Get one StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StaffRoutineCompletionFindUniqueOrThrowArgs>(args: SelectSubset<T, StaffRoutineCompletionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineCompletion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionFindFirstArgs} args - Arguments to find a StaffRoutineCompletion
+     * @example
+     * // Get one StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StaffRoutineCompletionFindFirstArgs>(args?: SelectSubset<T, StaffRoutineCompletionFindFirstArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffRoutineCompletion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionFindFirstOrThrowArgs} args - Arguments to find a StaffRoutineCompletion
+     * @example
+     * // Get one StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StaffRoutineCompletionFindFirstOrThrowArgs>(args?: SelectSubset<T, StaffRoutineCompletionFindFirstOrThrowArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StaffRoutineCompletions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StaffRoutineCompletions
+     * const staffRoutineCompletions = await prisma.staffRoutineCompletion.findMany()
+     * 
+     * // Get first 10 StaffRoutineCompletions
+     * const staffRoutineCompletions = await prisma.staffRoutineCompletion.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const staffRoutineCompletionWithIdOnly = await prisma.staffRoutineCompletion.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StaffRoutineCompletionFindManyArgs>(args?: SelectSubset<T, StaffRoutineCompletionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StaffRoutineCompletion.
+     * @param {StaffRoutineCompletionCreateArgs} args - Arguments to create a StaffRoutineCompletion.
+     * @example
+     * // Create one StaffRoutineCompletion
+     * const StaffRoutineCompletion = await prisma.staffRoutineCompletion.create({
+     *   data: {
+     *     // ... data to create a StaffRoutineCompletion
+     *   }
+     * })
+     * 
+     */
+    create<T extends StaffRoutineCompletionCreateArgs>(args: SelectSubset<T, StaffRoutineCompletionCreateArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StaffRoutineCompletions.
+     * @param {StaffRoutineCompletionCreateManyArgs} args - Arguments to create many StaffRoutineCompletions.
+     * @example
+     * // Create many StaffRoutineCompletions
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StaffRoutineCompletionCreateManyArgs>(args?: SelectSubset<T, StaffRoutineCompletionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StaffRoutineCompletions and returns the data saved in the database.
+     * @param {StaffRoutineCompletionCreateManyAndReturnArgs} args - Arguments to create many StaffRoutineCompletions.
+     * @example
+     * // Create many StaffRoutineCompletions
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StaffRoutineCompletions and only return the `id`
+     * const staffRoutineCompletionWithIdOnly = await prisma.staffRoutineCompletion.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StaffRoutineCompletionCreateManyAndReturnArgs>(args?: SelectSubset<T, StaffRoutineCompletionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StaffRoutineCompletion.
+     * @param {StaffRoutineCompletionDeleteArgs} args - Arguments to delete one StaffRoutineCompletion.
+     * @example
+     * // Delete one StaffRoutineCompletion
+     * const StaffRoutineCompletion = await prisma.staffRoutineCompletion.delete({
+     *   where: {
+     *     // ... filter to delete one StaffRoutineCompletion
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StaffRoutineCompletionDeleteArgs>(args: SelectSubset<T, StaffRoutineCompletionDeleteArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StaffRoutineCompletion.
+     * @param {StaffRoutineCompletionUpdateArgs} args - Arguments to update one StaffRoutineCompletion.
+     * @example
+     * // Update one StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StaffRoutineCompletionUpdateArgs>(args: SelectSubset<T, StaffRoutineCompletionUpdateArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StaffRoutineCompletions.
+     * @param {StaffRoutineCompletionDeleteManyArgs} args - Arguments to filter StaffRoutineCompletions to delete.
+     * @example
+     * // Delete a few StaffRoutineCompletions
+     * const { count } = await prisma.staffRoutineCompletion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StaffRoutineCompletionDeleteManyArgs>(args?: SelectSubset<T, StaffRoutineCompletionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineCompletions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StaffRoutineCompletions
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StaffRoutineCompletionUpdateManyArgs>(args: SelectSubset<T, StaffRoutineCompletionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffRoutineCompletions and returns the data updated in the database.
+     * @param {StaffRoutineCompletionUpdateManyAndReturnArgs} args - Arguments to update many StaffRoutineCompletions.
+     * @example
+     * // Update many StaffRoutineCompletions
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StaffRoutineCompletions and only return the `id`
+     * const staffRoutineCompletionWithIdOnly = await prisma.staffRoutineCompletion.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StaffRoutineCompletionUpdateManyAndReturnArgs>(args: SelectSubset<T, StaffRoutineCompletionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StaffRoutineCompletion.
+     * @param {StaffRoutineCompletionUpsertArgs} args - Arguments to update or create a StaffRoutineCompletion.
+     * @example
+     * // Update or create a StaffRoutineCompletion
+     * const staffRoutineCompletion = await prisma.staffRoutineCompletion.upsert({
+     *   create: {
+     *     // ... data to create a StaffRoutineCompletion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StaffRoutineCompletion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StaffRoutineCompletionUpsertArgs>(args: SelectSubset<T, StaffRoutineCompletionUpsertArgs<ExtArgs>>): Prisma__StaffRoutineCompletionClient<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StaffRoutineCompletions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionCountArgs} args - Arguments to filter StaffRoutineCompletions to count.
+     * @example
+     * // Count the number of StaffRoutineCompletions
+     * const count = await prisma.staffRoutineCompletion.count({
+     *   where: {
+     *     // ... the filter for the StaffRoutineCompletions we want to count
+     *   }
+     * })
+    **/
+    count<T extends StaffRoutineCompletionCountArgs>(
+      args?: Subset<T, StaffRoutineCompletionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StaffRoutineCompletionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StaffRoutineCompletion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StaffRoutineCompletionAggregateArgs>(args: Subset<T, StaffRoutineCompletionAggregateArgs>): Prisma.PrismaPromise<GetStaffRoutineCompletionAggregateType<T>>
+
+    /**
+     * Group by StaffRoutineCompletion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffRoutineCompletionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StaffRoutineCompletionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StaffRoutineCompletionGroupByArgs['orderBy'] }
+        : { orderBy?: StaffRoutineCompletionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StaffRoutineCompletionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStaffRoutineCompletionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StaffRoutineCompletion model
+   */
+  readonly fields: StaffRoutineCompletionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StaffRoutineCompletion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StaffRoutineCompletionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    template<T extends StaffRoutineTemplateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineTemplateDefaultArgs<ExtArgs>>): Prisma__StaffRoutineTemplateClient<$Result.GetResult<Prisma.$StaffRoutineTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    assignment<T extends StaffRoutineCompletion$assignmentArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineCompletion$assignmentArgs<ExtArgs>>): Prisma__StaffRoutineAssignmentClient<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    staffUser<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    room<T extends StaffRoutineCompletion$roomArgs<ExtArgs> = {}>(args?: Subset<T, StaffRoutineCompletion$roomArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StaffRoutineCompletion model
+   */
+  interface StaffRoutineCompletionFieldRefs {
+    readonly id: FieldRef<"StaffRoutineCompletion", 'Int'>
+    readonly templateId: FieldRef<"StaffRoutineCompletion", 'Int'>
+    readonly assignmentId: FieldRef<"StaffRoutineCompletion", 'Int'>
+    readonly staffUserId: FieldRef<"StaffRoutineCompletion", 'Int'>
+    readonly roomId: FieldRef<"StaffRoutineCompletion", 'Int'>
+    readonly dueDate: FieldRef<"StaffRoutineCompletion", 'DateTime'>
+    readonly status: FieldRef<"StaffRoutineCompletion", 'StaffRoutineStatus'>
+    readonly completedAt: FieldRef<"StaffRoutineCompletion", 'DateTime'>
+    readonly note: FieldRef<"StaffRoutineCompletion", 'String'>
+    readonly photoUrl: FieldRef<"StaffRoutineCompletion", 'String'>
+    readonly createdAt: FieldRef<"StaffRoutineCompletion", 'DateTime'>
+    readonly updatedAt: FieldRef<"StaffRoutineCompletion", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StaffRoutineCompletion findUnique
+   */
+  export type StaffRoutineCompletionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineCompletion to fetch.
+     */
+    where: StaffRoutineCompletionWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineCompletion findUniqueOrThrow
+   */
+  export type StaffRoutineCompletionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineCompletion to fetch.
+     */
+    where: StaffRoutineCompletionWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineCompletion findFirst
+   */
+  export type StaffRoutineCompletionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineCompletion to fetch.
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineCompletions to fetch.
+     */
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineCompletions.
+     */
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineCompletions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineCompletions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineCompletions.
+     */
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineCompletion findFirstOrThrow
+   */
+  export type StaffRoutineCompletionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineCompletion to fetch.
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineCompletions to fetch.
+     */
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffRoutineCompletions.
+     */
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineCompletions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineCompletions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineCompletions.
+     */
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineCompletion findMany
+   */
+  export type StaffRoutineCompletionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffRoutineCompletions to fetch.
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffRoutineCompletions to fetch.
+     */
+    orderBy?: StaffRoutineCompletionOrderByWithRelationInput | StaffRoutineCompletionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StaffRoutineCompletions.
+     */
+    cursor?: StaffRoutineCompletionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffRoutineCompletions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffRoutineCompletions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffRoutineCompletions.
+     */
+    distinct?: StaffRoutineCompletionScalarFieldEnum | StaffRoutineCompletionScalarFieldEnum[]
+  }
+
+  /**
+   * StaffRoutineCompletion create
+   */
+  export type StaffRoutineCompletionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StaffRoutineCompletion.
+     */
+    data: XOR<StaffRoutineCompletionCreateInput, StaffRoutineCompletionUncheckedCreateInput>
+  }
+
+  /**
+   * StaffRoutineCompletion createMany
+   */
+  export type StaffRoutineCompletionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StaffRoutineCompletions.
+     */
+    data: StaffRoutineCompletionCreateManyInput | StaffRoutineCompletionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StaffRoutineCompletion createManyAndReturn
+   */
+  export type StaffRoutineCompletionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * The data used to create many StaffRoutineCompletions.
+     */
+    data: StaffRoutineCompletionCreateManyInput | StaffRoutineCompletionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineCompletion update
+   */
+  export type StaffRoutineCompletionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StaffRoutineCompletion.
+     */
+    data: XOR<StaffRoutineCompletionUpdateInput, StaffRoutineCompletionUncheckedUpdateInput>
+    /**
+     * Choose, which StaffRoutineCompletion to update.
+     */
+    where: StaffRoutineCompletionWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineCompletion updateMany
+   */
+  export type StaffRoutineCompletionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StaffRoutineCompletions.
+     */
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineCompletions to update
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * Limit how many StaffRoutineCompletions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineCompletion updateManyAndReturn
+   */
+  export type StaffRoutineCompletionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * The data used to update StaffRoutineCompletions.
+     */
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffRoutineCompletions to update
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * Limit how many StaffRoutineCompletions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffRoutineCompletion upsert
+   */
+  export type StaffRoutineCompletionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StaffRoutineCompletion to update in case it exists.
+     */
+    where: StaffRoutineCompletionWhereUniqueInput
+    /**
+     * In case the StaffRoutineCompletion found by the `where` argument doesn't exist, create a new StaffRoutineCompletion with this data.
+     */
+    create: XOR<StaffRoutineCompletionCreateInput, StaffRoutineCompletionUncheckedCreateInput>
+    /**
+     * In case the StaffRoutineCompletion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StaffRoutineCompletionUpdateInput, StaffRoutineCompletionUncheckedUpdateInput>
+  }
+
+  /**
+   * StaffRoutineCompletion delete
+   */
+  export type StaffRoutineCompletionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
+    /**
+     * Filter which StaffRoutineCompletion to delete.
+     */
+    where: StaffRoutineCompletionWhereUniqueInput
+  }
+
+  /**
+   * StaffRoutineCompletion deleteMany
+   */
+  export type StaffRoutineCompletionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffRoutineCompletions to delete
+     */
+    where?: StaffRoutineCompletionWhereInput
+    /**
+     * Limit how many StaffRoutineCompletions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffRoutineCompletion.assignment
+   */
+  export type StaffRoutineCompletion$assignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineAssignment
+     */
+    select?: StaffRoutineAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineAssignment
+     */
+    omit?: StaffRoutineAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineAssignmentInclude<ExtArgs> | null
+    where?: StaffRoutineAssignmentWhereInput
+  }
+
+  /**
+   * StaffRoutineCompletion.room
+   */
+  export type StaffRoutineCompletion$roomArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Room
+     */
+    select?: RoomSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Room
+     */
+    omit?: RoomOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomInclude<ExtArgs> | null
+    where?: RoomWhereInput
+  }
+
+  /**
+   * StaffRoutineCompletion without action
+   */
+  export type StaffRoutineCompletionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffRoutineCompletion
+     */
+    select?: StaffRoutineCompletionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffRoutineCompletion
+     */
+    omit?: StaffRoutineCompletionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffRoutineCompletionInclude<ExtArgs> | null
   }
 
 
@@ -32384,6 +36749,57 @@ export namespace Prisma {
   export type TicketScalarFieldEnum = (typeof TicketScalarFieldEnum)[keyof typeof TicketScalarFieldEnum]
 
 
+  export const StaffRoutineTemplateScalarFieldEnum: {
+    id: 'id',
+    title: 'title',
+    description: 'description',
+    frequency: 'frequency',
+    areaType: 'areaType',
+    dayOfWeek: 'dayOfWeek',
+    dayOfMonth: 'dayOfMonth',
+    requiresPhoto: 'requiresPhoto',
+    requiresNote: 'requiresNote',
+    isActive: 'isActive',
+    sortOrder: 'sortOrder',
+    createdById: 'createdById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StaffRoutineTemplateScalarFieldEnum = (typeof StaffRoutineTemplateScalarFieldEnum)[keyof typeof StaffRoutineTemplateScalarFieldEnum]
+
+
+  export const StaffRoutineAssignmentScalarFieldEnum: {
+    id: 'id',
+    templateId: 'templateId',
+    staffUserId: 'staffUserId',
+    roomId: 'roomId',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StaffRoutineAssignmentScalarFieldEnum = (typeof StaffRoutineAssignmentScalarFieldEnum)[keyof typeof StaffRoutineAssignmentScalarFieldEnum]
+
+
+  export const StaffRoutineCompletionScalarFieldEnum: {
+    id: 'id',
+    templateId: 'templateId',
+    assignmentId: 'assignmentId',
+    staffUserId: 'staffUserId',
+    roomId: 'roomId',
+    dueDate: 'dueDate',
+    status: 'status',
+    completedAt: 'completedAt',
+    note: 'note',
+    photoUrl: 'photoUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StaffRoutineCompletionScalarFieldEnum = (typeof StaffRoutineCompletionScalarFieldEnum)[keyof typeof StaffRoutineCompletionScalarFieldEnum]
+
+
   export const AnnouncementScalarFieldEnum: {
     id: 'id',
     title: 'title',
@@ -32889,6 +37305,48 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'StaffRoutineFrequency'
+   */
+  export type EnumStaffRoutineFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineFrequency'>
+    
+
+
+  /**
+   * Reference to a field of type 'StaffRoutineFrequency[]'
+   */
+  export type ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineFrequency[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StaffRoutineAreaType'
+   */
+  export type EnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineAreaType'>
+    
+
+
+  /**
+   * Reference to a field of type 'StaffRoutineAreaType[]'
+   */
+  export type ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineAreaType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StaffRoutineStatus'
+   */
+  export type EnumStaffRoutineStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'StaffRoutineStatus[]'
+   */
+  export type ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffRoutineStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'AnnouncementAudience'
    */
   export type EnumAnnouncementAudienceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AnnouncementAudience'>
@@ -33039,6 +37497,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceListRelationFilter
     paymentsCaptured?: InvoicePaymentListRelationFilter
     ticketsAssigned?: TicketListRelationFilter
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateListRelationFilter
+    staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
+    staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     meterReadingsRecorded?: MeterReadingListRelationFilter
     inventoryMovementsCreated?: InventoryMovementListRelationFilter
     wifiSalesCreated?: WifiSaleListRelationFilter
@@ -33071,6 +37532,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceOrderByRelationAggregateInput
     paymentsCaptured?: InvoicePaymentOrderByRelationAggregateInput
     ticketsAssigned?: TicketOrderByRelationAggregateInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateOrderByRelationAggregateInput
+    staffRoutineAssignments?: StaffRoutineAssignmentOrderByRelationAggregateInput
+    staffRoutineCompletions?: StaffRoutineCompletionOrderByRelationAggregateInput
     meterReadingsRecorded?: MeterReadingOrderByRelationAggregateInput
     inventoryMovementsCreated?: InventoryMovementOrderByRelationAggregateInput
     wifiSalesCreated?: WifiSaleOrderByRelationAggregateInput
@@ -33106,6 +37570,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceListRelationFilter
     paymentsCaptured?: InvoicePaymentListRelationFilter
     ticketsAssigned?: TicketListRelationFilter
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateListRelationFilter
+    staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
+    staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     meterReadingsRecorded?: MeterReadingListRelationFilter
     inventoryMovementsCreated?: InventoryMovementListRelationFilter
     wifiSalesCreated?: WifiSaleListRelationFilter
@@ -33304,6 +37771,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingListRelationFilter
     tickets?: TicketListRelationFilter
     roomItems?: RoomItemListRelationFilter
+    staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
+    staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     expenses?: ExpenseListRelationFilter
     inventoryMovements?: InventoryMovementListRelationFilter
     facilities?: RoomFacilityListRelationFilter
@@ -33331,6 +37800,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     roomItems?: RoomItemOrderByRelationAggregateInput
+    staffRoutineAssignments?: StaffRoutineAssignmentOrderByRelationAggregateInput
+    staffRoutineCompletions?: StaffRoutineCompletionOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
     inventoryMovements?: InventoryMovementOrderByRelationAggregateInput
     facilities?: RoomFacilityOrderByRelationAggregateInput
@@ -33361,6 +37832,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingListRelationFilter
     tickets?: TicketListRelationFilter
     roomItems?: RoomItemListRelationFilter
+    staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
+    staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     expenses?: ExpenseListRelationFilter
     inventoryMovements?: InventoryMovementListRelationFilter
     facilities?: RoomFacilityListRelationFilter
@@ -34489,6 +38962,292 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   }
 
+  export type StaffRoutineTemplateWhereInput = {
+    AND?: StaffRoutineTemplateWhereInput | StaffRoutineTemplateWhereInput[]
+    OR?: StaffRoutineTemplateWhereInput[]
+    NOT?: StaffRoutineTemplateWhereInput | StaffRoutineTemplateWhereInput[]
+    id?: IntFilter<"StaffRoutineTemplate"> | number
+    title?: StringFilter<"StaffRoutineTemplate"> | string
+    description?: StringNullableFilter<"StaffRoutineTemplate"> | string | null
+    frequency?: EnumStaffRoutineFrequencyFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineAreaType
+    dayOfWeek?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    dayOfMonth?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    requiresPhoto?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    requiresNote?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    isActive?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    sortOrder?: IntFilter<"StaffRoutineTemplate"> | number
+    createdById?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    createdAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    assignments?: StaffRoutineAssignmentListRelationFilter
+    completions?: StaffRoutineCompletionListRelationFilter
+  }
+
+  export type StaffRoutineTemplateOrderByWithRelationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    frequency?: SortOrder
+    areaType?: SortOrder
+    dayOfWeek?: SortOrderInput | SortOrder
+    dayOfMonth?: SortOrderInput | SortOrder
+    requiresPhoto?: SortOrder
+    requiresNote?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    createdBy?: UserOrderByWithRelationInput
+    assignments?: StaffRoutineAssignmentOrderByRelationAggregateInput
+    completions?: StaffRoutineCompletionOrderByRelationAggregateInput
+  }
+
+  export type StaffRoutineTemplateWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: StaffRoutineTemplateWhereInput | StaffRoutineTemplateWhereInput[]
+    OR?: StaffRoutineTemplateWhereInput[]
+    NOT?: StaffRoutineTemplateWhereInput | StaffRoutineTemplateWhereInput[]
+    title?: StringFilter<"StaffRoutineTemplate"> | string
+    description?: StringNullableFilter<"StaffRoutineTemplate"> | string | null
+    frequency?: EnumStaffRoutineFrequencyFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineAreaType
+    dayOfWeek?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    dayOfMonth?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    requiresPhoto?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    requiresNote?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    isActive?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    sortOrder?: IntFilter<"StaffRoutineTemplate"> | number
+    createdById?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    createdAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    assignments?: StaffRoutineAssignmentListRelationFilter
+    completions?: StaffRoutineCompletionListRelationFilter
+  }, "id">
+
+  export type StaffRoutineTemplateOrderByWithAggregationInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    frequency?: SortOrder
+    areaType?: SortOrder
+    dayOfWeek?: SortOrderInput | SortOrder
+    dayOfMonth?: SortOrderInput | SortOrder
+    requiresPhoto?: SortOrder
+    requiresNote?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StaffRoutineTemplateCountOrderByAggregateInput
+    _avg?: StaffRoutineTemplateAvgOrderByAggregateInput
+    _max?: StaffRoutineTemplateMaxOrderByAggregateInput
+    _min?: StaffRoutineTemplateMinOrderByAggregateInput
+    _sum?: StaffRoutineTemplateSumOrderByAggregateInput
+  }
+
+  export type StaffRoutineTemplateScalarWhereWithAggregatesInput = {
+    AND?: StaffRoutineTemplateScalarWhereWithAggregatesInput | StaffRoutineTemplateScalarWhereWithAggregatesInput[]
+    OR?: StaffRoutineTemplateScalarWhereWithAggregatesInput[]
+    NOT?: StaffRoutineTemplateScalarWhereWithAggregatesInput | StaffRoutineTemplateScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"StaffRoutineTemplate"> | number
+    title?: StringWithAggregatesFilter<"StaffRoutineTemplate"> | string
+    description?: StringNullableWithAggregatesFilter<"StaffRoutineTemplate"> | string | null
+    frequency?: EnumStaffRoutineFrequencyWithAggregatesFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeWithAggregatesFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineAreaType
+    dayOfWeek?: IntNullableWithAggregatesFilter<"StaffRoutineTemplate"> | number | null
+    dayOfMonth?: IntNullableWithAggregatesFilter<"StaffRoutineTemplate"> | number | null
+    requiresPhoto?: BoolWithAggregatesFilter<"StaffRoutineTemplate"> | boolean
+    requiresNote?: BoolWithAggregatesFilter<"StaffRoutineTemplate"> | boolean
+    isActive?: BoolWithAggregatesFilter<"StaffRoutineTemplate"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"StaffRoutineTemplate"> | number
+    createdById?: IntNullableWithAggregatesFilter<"StaffRoutineTemplate"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"StaffRoutineTemplate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StaffRoutineTemplate"> | Date | string
+  }
+
+  export type StaffRoutineAssignmentWhereInput = {
+    AND?: StaffRoutineAssignmentWhereInput | StaffRoutineAssignmentWhereInput[]
+    OR?: StaffRoutineAssignmentWhereInput[]
+    NOT?: StaffRoutineAssignmentWhereInput | StaffRoutineAssignmentWhereInput[]
+    id?: IntFilter<"StaffRoutineAssignment"> | number
+    templateId?: IntFilter<"StaffRoutineAssignment"> | number
+    staffUserId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    roomId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    isActive?: BoolFilter<"StaffRoutineAssignment"> | boolean
+    createdAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+    template?: XOR<StaffRoutineTemplateScalarRelationFilter, StaffRoutineTemplateWhereInput>
+    staffUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+    completions?: StaffRoutineCompletionListRelationFilter
+  }
+
+  export type StaffRoutineAssignmentOrderByWithRelationInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrderInput | SortOrder
+    roomId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    template?: StaffRoutineTemplateOrderByWithRelationInput
+    staffUser?: UserOrderByWithRelationInput
+    room?: RoomOrderByWithRelationInput
+    completions?: StaffRoutineCompletionOrderByRelationAggregateInput
+  }
+
+  export type StaffRoutineAssignmentWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: StaffRoutineAssignmentWhereInput | StaffRoutineAssignmentWhereInput[]
+    OR?: StaffRoutineAssignmentWhereInput[]
+    NOT?: StaffRoutineAssignmentWhereInput | StaffRoutineAssignmentWhereInput[]
+    templateId?: IntFilter<"StaffRoutineAssignment"> | number
+    staffUserId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    roomId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    isActive?: BoolFilter<"StaffRoutineAssignment"> | boolean
+    createdAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+    template?: XOR<StaffRoutineTemplateScalarRelationFilter, StaffRoutineTemplateWhereInput>
+    staffUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+    completions?: StaffRoutineCompletionListRelationFilter
+  }, "id">
+
+  export type StaffRoutineAssignmentOrderByWithAggregationInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrderInput | SortOrder
+    roomId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StaffRoutineAssignmentCountOrderByAggregateInput
+    _avg?: StaffRoutineAssignmentAvgOrderByAggregateInput
+    _max?: StaffRoutineAssignmentMaxOrderByAggregateInput
+    _min?: StaffRoutineAssignmentMinOrderByAggregateInput
+    _sum?: StaffRoutineAssignmentSumOrderByAggregateInput
+  }
+
+  export type StaffRoutineAssignmentScalarWhereWithAggregatesInput = {
+    AND?: StaffRoutineAssignmentScalarWhereWithAggregatesInput | StaffRoutineAssignmentScalarWhereWithAggregatesInput[]
+    OR?: StaffRoutineAssignmentScalarWhereWithAggregatesInput[]
+    NOT?: StaffRoutineAssignmentScalarWhereWithAggregatesInput | StaffRoutineAssignmentScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"StaffRoutineAssignment"> | number
+    templateId?: IntWithAggregatesFilter<"StaffRoutineAssignment"> | number
+    staffUserId?: IntNullableWithAggregatesFilter<"StaffRoutineAssignment"> | number | null
+    roomId?: IntNullableWithAggregatesFilter<"StaffRoutineAssignment"> | number | null
+    isActive?: BoolWithAggregatesFilter<"StaffRoutineAssignment"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"StaffRoutineAssignment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StaffRoutineAssignment"> | Date | string
+  }
+
+  export type StaffRoutineCompletionWhereInput = {
+    AND?: StaffRoutineCompletionWhereInput | StaffRoutineCompletionWhereInput[]
+    OR?: StaffRoutineCompletionWhereInput[]
+    NOT?: StaffRoutineCompletionWhereInput | StaffRoutineCompletionWhereInput[]
+    id?: IntFilter<"StaffRoutineCompletion"> | number
+    templateId?: IntFilter<"StaffRoutineCompletion"> | number
+    assignmentId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    staffUserId?: IntFilter<"StaffRoutineCompletion"> | number
+    roomId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    dueDate?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    status?: EnumStaffRoutineStatusFilter<"StaffRoutineCompletion"> | $Enums.StaffRoutineStatus
+    completedAt?: DateTimeNullableFilter<"StaffRoutineCompletion"> | Date | string | null
+    note?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    photoUrl?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    createdAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    template?: XOR<StaffRoutineTemplateScalarRelationFilter, StaffRoutineTemplateWhereInput>
+    assignment?: XOR<StaffRoutineAssignmentNullableScalarRelationFilter, StaffRoutineAssignmentWhereInput> | null
+    staffUser?: XOR<UserScalarRelationFilter, UserWhereInput>
+    room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+  }
+
+  export type StaffRoutineCompletionOrderByWithRelationInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrderInput | SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrderInput | SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    template?: StaffRoutineTemplateOrderByWithRelationInput
+    assignment?: StaffRoutineAssignmentOrderByWithRelationInput
+    staffUser?: UserOrderByWithRelationInput
+    room?: RoomOrderByWithRelationInput
+  }
+
+  export type StaffRoutineCompletionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    templateId_assignmentId_staffUserId_roomId_dueDate?: StaffRoutineCompletionTemplateIdAssignmentIdStaffUserIdRoomIdDueDateCompoundUniqueInput
+    AND?: StaffRoutineCompletionWhereInput | StaffRoutineCompletionWhereInput[]
+    OR?: StaffRoutineCompletionWhereInput[]
+    NOT?: StaffRoutineCompletionWhereInput | StaffRoutineCompletionWhereInput[]
+    templateId?: IntFilter<"StaffRoutineCompletion"> | number
+    assignmentId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    staffUserId?: IntFilter<"StaffRoutineCompletion"> | number
+    roomId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    dueDate?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    status?: EnumStaffRoutineStatusFilter<"StaffRoutineCompletion"> | $Enums.StaffRoutineStatus
+    completedAt?: DateTimeNullableFilter<"StaffRoutineCompletion"> | Date | string | null
+    note?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    photoUrl?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    createdAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    template?: XOR<StaffRoutineTemplateScalarRelationFilter, StaffRoutineTemplateWhereInput>
+    assignment?: XOR<StaffRoutineAssignmentNullableScalarRelationFilter, StaffRoutineAssignmentWhereInput> | null
+    staffUser?: XOR<UserScalarRelationFilter, UserWhereInput>
+    room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+  }, "id" | "templateId_assignmentId_staffUserId_roomId_dueDate">
+
+  export type StaffRoutineCompletionOrderByWithAggregationInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrderInput | SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrderInput | SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    photoUrl?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StaffRoutineCompletionCountOrderByAggregateInput
+    _avg?: StaffRoutineCompletionAvgOrderByAggregateInput
+    _max?: StaffRoutineCompletionMaxOrderByAggregateInput
+    _min?: StaffRoutineCompletionMinOrderByAggregateInput
+    _sum?: StaffRoutineCompletionSumOrderByAggregateInput
+  }
+
+  export type StaffRoutineCompletionScalarWhereWithAggregatesInput = {
+    AND?: StaffRoutineCompletionScalarWhereWithAggregatesInput | StaffRoutineCompletionScalarWhereWithAggregatesInput[]
+    OR?: StaffRoutineCompletionScalarWhereWithAggregatesInput[]
+    NOT?: StaffRoutineCompletionScalarWhereWithAggregatesInput | StaffRoutineCompletionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"StaffRoutineCompletion"> | number
+    templateId?: IntWithAggregatesFilter<"StaffRoutineCompletion"> | number
+    assignmentId?: IntNullableWithAggregatesFilter<"StaffRoutineCompletion"> | number | null
+    staffUserId?: IntWithAggregatesFilter<"StaffRoutineCompletion"> | number
+    roomId?: IntNullableWithAggregatesFilter<"StaffRoutineCompletion"> | number | null
+    dueDate?: DateTimeWithAggregatesFilter<"StaffRoutineCompletion"> | Date | string
+    status?: EnumStaffRoutineStatusWithAggregatesFilter<"StaffRoutineCompletion"> | $Enums.StaffRoutineStatus
+    completedAt?: DateTimeNullableWithAggregatesFilter<"StaffRoutineCompletion"> | Date | string | null
+    note?: StringNullableWithAggregatesFilter<"StaffRoutineCompletion"> | string | null
+    photoUrl?: StringNullableWithAggregatesFilter<"StaffRoutineCompletion"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"StaffRoutineCompletion"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StaffRoutineCompletion"> | Date | string
+  }
+
   export type AnnouncementWhereInput = {
     AND?: AnnouncementWhereInput | AnnouncementWhereInput[]
     OR?: AnnouncementWhereInput[]
@@ -35409,6 +40168,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -35440,6 +40202,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -35470,6 +40235,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -35501,6 +40269,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -35725,6 +40496,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
@@ -35752,6 +40525,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
@@ -35778,6 +40553,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
@@ -35805,6 +40582,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
@@ -37056,6 +41835,295 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type StaffRoutineTemplateCreateInput = {
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: UserCreateNestedOneWithoutStaffRoutineTemplatesCreatedInput
+    assignments?: StaffRoutineAssignmentCreateNestedManyWithoutTemplateInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateUncheckedCreateInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutTemplateInput
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateUpdateInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneWithoutStaffRoutineTemplatesCreatedNestedInput
+    assignments?: StaffRoutineAssignmentUpdateManyWithoutTemplateNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateNestedInput
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateCreateManyInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineTemplateUpdateManyMutationInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineAssignmentCreateInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutAssignmentsInput
+    staffUser?: UserCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateInput = {
+    id?: number
+    templateId: number
+    staffUserId?: number | null
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentUpdateInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutAssignmentsNestedInput
+    staffUser?: UserUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentCreateManyInput = {
+    id?: number
+    templateId: number
+    staffUserId?: number | null
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineAssignmentUpdateManyMutationInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionCreateInput = {
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutCompletionsInput
+    assignment?: StaffRoutineAssignmentCreateNestedOneWithoutCompletionsInput
+    staffUser: UserCreateNestedOneWithoutStaffRoutineCompletionsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineCompletionsInput
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutCompletionsNestedInput
+    assignment?: StaffRoutineAssignmentUpdateOneWithoutCompletionsNestedInput
+    staffUser?: UserUpdateOneRequiredWithoutStaffRoutineCompletionsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineCompletionsNestedInput
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionCreateManyInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateManyMutationInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AnnouncementCreateInput = {
     title: string
     content: string
@@ -38110,6 +43178,24 @@ export namespace Prisma {
     none?: TicketWhereInput
   }
 
+  export type StaffRoutineTemplateListRelationFilter = {
+    every?: StaffRoutineTemplateWhereInput
+    some?: StaffRoutineTemplateWhereInput
+    none?: StaffRoutineTemplateWhereInput
+  }
+
+  export type StaffRoutineAssignmentListRelationFilter = {
+    every?: StaffRoutineAssignmentWhereInput
+    some?: StaffRoutineAssignmentWhereInput
+    none?: StaffRoutineAssignmentWhereInput
+  }
+
+  export type StaffRoutineCompletionListRelationFilter = {
+    every?: StaffRoutineCompletionWhereInput
+    some?: StaffRoutineCompletionWhereInput
+    none?: StaffRoutineCompletionWhereInput
+  }
+
   export type MeterReadingListRelationFilter = {
     every?: MeterReadingWhereInput
     some?: MeterReadingWhereInput
@@ -38192,6 +43278,18 @@ export namespace Prisma {
   }
 
   export type TicketOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StaffRoutineTemplateOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StaffRoutineAssignmentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StaffRoutineCompletionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -39647,6 +44745,247 @@ export namespace Prisma {
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
   }
 
+  export type EnumStaffRoutineFrequencyFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineFrequency | EnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel> | $Enums.StaffRoutineFrequency
+  }
+
+  export type EnumStaffRoutineAreaTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineAreaType | EnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel> | $Enums.StaffRoutineAreaType
+  }
+
+  export type StaffRoutineTemplateCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    frequency?: SortOrder
+    areaType?: SortOrder
+    dayOfWeek?: SortOrder
+    dayOfMonth?: SortOrder
+    requiresPhoto?: SortOrder
+    requiresNote?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineTemplateAvgOrderByAggregateInput = {
+    id?: SortOrder
+    dayOfWeek?: SortOrder
+    dayOfMonth?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type StaffRoutineTemplateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    frequency?: SortOrder
+    areaType?: SortOrder
+    dayOfWeek?: SortOrder
+    dayOfMonth?: SortOrder
+    requiresPhoto?: SortOrder
+    requiresNote?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineTemplateMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    frequency?: SortOrder
+    areaType?: SortOrder
+    dayOfWeek?: SortOrder
+    dayOfMonth?: SortOrder
+    requiresPhoto?: SortOrder
+    requiresNote?: SortOrder
+    isActive?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineTemplateSumOrderByAggregateInput = {
+    id?: SortOrder
+    dayOfWeek?: SortOrder
+    dayOfMonth?: SortOrder
+    sortOrder?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type EnumStaffRoutineFrequencyWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineFrequency | EnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineFrequencyWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineFrequency
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel>
+  }
+
+  export type EnumStaffRoutineAreaTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineAreaType | EnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineAreaTypeWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineAreaType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel>
+  }
+
+  export type StaffRoutineTemplateScalarRelationFilter = {
+    is?: StaffRoutineTemplateWhereInput
+    isNot?: StaffRoutineTemplateWhereInput
+  }
+
+  export type StaffRoutineAssignmentCountOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineAssignmentAvgOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+  }
+
+  export type StaffRoutineAssignmentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineAssignmentMinOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineAssignmentSumOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+  }
+
+  export type EnumStaffRoutineStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineStatus | EnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineStatusFilter<$PrismaModel> | $Enums.StaffRoutineStatus
+  }
+
+  export type StaffRoutineAssignmentNullableScalarRelationFilter = {
+    is?: StaffRoutineAssignmentWhereInput | null
+    isNot?: StaffRoutineAssignmentWhereInput | null
+  }
+
+  export type StaffRoutineCompletionTemplateIdAssignmentIdStaffUserIdRoomIdDueDateCompoundUniqueInput = {
+    templateId: number
+    assignmentId: number
+    staffUserId: number
+    roomId: number
+    dueDate: Date | string
+  }
+
+  export type StaffRoutineCompletionCountOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    completedAt?: SortOrder
+    note?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineCompletionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+  }
+
+  export type StaffRoutineCompletionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    completedAt?: SortOrder
+    note?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineCompletionMinOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    completedAt?: SortOrder
+    note?: SortOrder
+    photoUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StaffRoutineCompletionSumOrderByAggregateInput = {
+    id?: SortOrder
+    templateId?: SortOrder
+    assignmentId?: SortOrder
+    staffUserId?: SortOrder
+    roomId?: SortOrder
+  }
+
+  export type EnumStaffRoutineStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineStatus | EnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineStatusWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineStatusFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineStatusFilter<$PrismaModel>
+  }
+
   export type EnumAnnouncementAudienceFilter<$PrismaModel = never> = {
     equals?: $Enums.AnnouncementAudience | EnumAnnouncementAudienceFieldRefInput<$PrismaModel>
     in?: $Enums.AnnouncementAudience[] | ListEnumAnnouncementAudienceFieldRefInput<$PrismaModel>
@@ -40416,6 +45755,27 @@ export namespace Prisma {
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
   }
 
+  export type StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput> | StaffRoutineTemplateCreateWithoutCreatedByInput[] | StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput | StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput[]
+    createMany?: StaffRoutineTemplateCreateManyCreatedByInputEnvelope
+    connect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+  }
+
+  export type StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput> | StaffRoutineAssignmentCreateWithoutStaffUserInput[] | StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput | StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput[]
+    createMany?: StaffRoutineAssignmentCreateManyStaffUserInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput> | StaffRoutineCompletionCreateWithoutStaffUserInput[] | StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput | StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput[]
+    createMany?: StaffRoutineCompletionCreateManyStaffUserInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
   export type MeterReadingCreateNestedManyWithoutRecordedByInput = {
     create?: XOR<MeterReadingCreateWithoutRecordedByInput, MeterReadingUncheckedCreateWithoutRecordedByInput> | MeterReadingCreateWithoutRecordedByInput[] | MeterReadingUncheckedCreateWithoutRecordedByInput[]
     connectOrCreate?: MeterReadingCreateOrConnectWithoutRecordedByInput | MeterReadingCreateOrConnectWithoutRecordedByInput[]
@@ -40533,6 +45893,27 @@ export namespace Prisma {
     connectOrCreate?: TicketCreateOrConnectWithoutAssignedToInput | TicketCreateOrConnectWithoutAssignedToInput[]
     createMany?: TicketCreateManyAssignedToInputEnvelope
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput> | StaffRoutineTemplateCreateWithoutCreatedByInput[] | StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput | StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput[]
+    createMany?: StaffRoutineTemplateCreateManyCreatedByInputEnvelope
+    connect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput> | StaffRoutineAssignmentCreateWithoutStaffUserInput[] | StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput | StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput[]
+    createMany?: StaffRoutineAssignmentCreateManyStaffUserInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput> | StaffRoutineCompletionCreateWithoutStaffUserInput[] | StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput | StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput[]
+    createMany?: StaffRoutineCompletionCreateManyStaffUserInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
   }
 
   export type MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput = {
@@ -40724,6 +46105,48 @@ export namespace Prisma {
     update?: TicketUpdateWithWhereUniqueWithoutAssignedToInput | TicketUpdateWithWhereUniqueWithoutAssignedToInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutAssignedToInput | TicketUpdateManyWithWhereWithoutAssignedToInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput> | StaffRoutineTemplateCreateWithoutCreatedByInput[] | StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput | StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput[]
+    upsert?: StaffRoutineTemplateUpsertWithWhereUniqueWithoutCreatedByInput | StaffRoutineTemplateUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: StaffRoutineTemplateCreateManyCreatedByInputEnvelope
+    set?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    disconnect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    delete?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    connect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    update?: StaffRoutineTemplateUpdateWithWhereUniqueWithoutCreatedByInput | StaffRoutineTemplateUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: StaffRoutineTemplateUpdateManyWithWhereWithoutCreatedByInput | StaffRoutineTemplateUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: StaffRoutineTemplateScalarWhereInput | StaffRoutineTemplateScalarWhereInput[]
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput> | StaffRoutineAssignmentCreateWithoutStaffUserInput[] | StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput | StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutStaffUserInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutStaffUserInput[]
+    createMany?: StaffRoutineAssignmentCreateManyStaffUserInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutStaffUserInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutStaffUserInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutStaffUserInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutStaffUserInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput> | StaffRoutineCompletionCreateWithoutStaffUserInput[] | StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput | StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutStaffUserInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutStaffUserInput[]
+    createMany?: StaffRoutineCompletionCreateManyStaffUserInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutStaffUserInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutStaffUserInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutStaffUserInput | StaffRoutineCompletionUpdateManyWithWhereWithoutStaffUserInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
   }
 
   export type MeterReadingUpdateManyWithoutRecordedByNestedInput = {
@@ -40978,6 +46401,48 @@ export namespace Prisma {
     update?: TicketUpdateWithWhereUniqueWithoutAssignedToInput | TicketUpdateWithWhereUniqueWithoutAssignedToInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutAssignedToInput | TicketUpdateManyWithWhereWithoutAssignedToInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput> | StaffRoutineTemplateCreateWithoutCreatedByInput[] | StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput | StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput[]
+    upsert?: StaffRoutineTemplateUpsertWithWhereUniqueWithoutCreatedByInput | StaffRoutineTemplateUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: StaffRoutineTemplateCreateManyCreatedByInputEnvelope
+    set?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    disconnect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    delete?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    connect?: StaffRoutineTemplateWhereUniqueInput | StaffRoutineTemplateWhereUniqueInput[]
+    update?: StaffRoutineTemplateUpdateWithWhereUniqueWithoutCreatedByInput | StaffRoutineTemplateUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: StaffRoutineTemplateUpdateManyWithWhereWithoutCreatedByInput | StaffRoutineTemplateUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: StaffRoutineTemplateScalarWhereInput | StaffRoutineTemplateScalarWhereInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput> | StaffRoutineAssignmentCreateWithoutStaffUserInput[] | StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput | StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutStaffUserInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutStaffUserInput[]
+    createMany?: StaffRoutineAssignmentCreateManyStaffUserInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutStaffUserInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutStaffUserInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutStaffUserInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutStaffUserInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput> | StaffRoutineCompletionCreateWithoutStaffUserInput[] | StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput | StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutStaffUserInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutStaffUserInput[]
+    createMany?: StaffRoutineCompletionCreateManyStaffUserInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutStaffUserInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutStaffUserInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutStaffUserInput | StaffRoutineCompletionUpdateManyWithWhereWithoutStaffUserInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
   }
 
   export type MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput = {
@@ -41374,6 +46839,20 @@ export namespace Prisma {
     connect?: RoomItemWhereUniqueInput | RoomItemWhereUniqueInput[]
   }
 
+  export type StaffRoutineAssignmentCreateNestedManyWithoutRoomInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput> | StaffRoutineAssignmentCreateWithoutRoomInput[] | StaffRoutineAssignmentUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutRoomInput | StaffRoutineAssignmentCreateOrConnectWithoutRoomInput[]
+    createMany?: StaffRoutineAssignmentCreateManyRoomInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionCreateNestedManyWithoutRoomInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput> | StaffRoutineCompletionCreateWithoutRoomInput[] | StaffRoutineCompletionUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutRoomInput | StaffRoutineCompletionCreateOrConnectWithoutRoomInput[]
+    createMany?: StaffRoutineCompletionCreateManyRoomInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
   export type ExpenseCreateNestedManyWithoutRoomInput = {
     create?: XOR<ExpenseCreateWithoutRoomInput, ExpenseUncheckedCreateWithoutRoomInput> | ExpenseCreateWithoutRoomInput[] | ExpenseUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: ExpenseCreateOrConnectWithoutRoomInput | ExpenseCreateOrConnectWithoutRoomInput[]
@@ -41421,6 +46900,20 @@ export namespace Prisma {
     connectOrCreate?: RoomItemCreateOrConnectWithoutRoomInput | RoomItemCreateOrConnectWithoutRoomInput[]
     createMany?: RoomItemCreateManyRoomInputEnvelope
     connect?: RoomItemWhereUniqueInput | RoomItemWhereUniqueInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput> | StaffRoutineAssignmentCreateWithoutRoomInput[] | StaffRoutineAssignmentUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutRoomInput | StaffRoutineAssignmentCreateOrConnectWithoutRoomInput[]
+    createMany?: StaffRoutineAssignmentCreateManyRoomInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput> | StaffRoutineCompletionCreateWithoutRoomInput[] | StaffRoutineCompletionUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutRoomInput | StaffRoutineCompletionCreateOrConnectWithoutRoomInput[]
+    createMany?: StaffRoutineCompletionCreateManyRoomInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
   }
 
   export type ExpenseUncheckedCreateNestedManyWithoutRoomInput = {
@@ -41507,6 +47000,34 @@ export namespace Prisma {
     update?: RoomItemUpdateWithWhereUniqueWithoutRoomInput | RoomItemUpdateWithWhereUniqueWithoutRoomInput[]
     updateMany?: RoomItemUpdateManyWithWhereWithoutRoomInput | RoomItemUpdateManyWithWhereWithoutRoomInput[]
     deleteMany?: RoomItemScalarWhereInput | RoomItemScalarWhereInput[]
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput> | StaffRoutineAssignmentCreateWithoutRoomInput[] | StaffRoutineAssignmentUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutRoomInput | StaffRoutineAssignmentCreateOrConnectWithoutRoomInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: StaffRoutineAssignmentCreateManyRoomInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutRoomInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutRoomInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput> | StaffRoutineCompletionCreateWithoutRoomInput[] | StaffRoutineCompletionUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutRoomInput | StaffRoutineCompletionCreateOrConnectWithoutRoomInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutRoomInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: StaffRoutineCompletionCreateManyRoomInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutRoomInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutRoomInput | StaffRoutineCompletionUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
   }
 
   export type ExpenseUpdateManyWithoutRoomNestedInput = {
@@ -41605,6 +47126,34 @@ export namespace Prisma {
     update?: RoomItemUpdateWithWhereUniqueWithoutRoomInput | RoomItemUpdateWithWhereUniqueWithoutRoomInput[]
     updateMany?: RoomItemUpdateManyWithWhereWithoutRoomInput | RoomItemUpdateManyWithWhereWithoutRoomInput[]
     deleteMany?: RoomItemScalarWhereInput | RoomItemScalarWhereInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput> | StaffRoutineAssignmentCreateWithoutRoomInput[] | StaffRoutineAssignmentUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutRoomInput | StaffRoutineAssignmentCreateOrConnectWithoutRoomInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: StaffRoutineAssignmentCreateManyRoomInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutRoomInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutRoomInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput> | StaffRoutineCompletionCreateWithoutRoomInput[] | StaffRoutineCompletionUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutRoomInput | StaffRoutineCompletionCreateOrConnectWithoutRoomInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutRoomInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: StaffRoutineCompletionCreateManyRoomInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutRoomInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutRoomInput | StaffRoutineCompletionUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
   }
 
   export type ExpenseUncheckedUpdateManyWithoutRoomNestedInput = {
@@ -42425,6 +47974,266 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTicketsAssignedInput, UserUpdateWithoutTicketsAssignedInput>, UserUncheckedUpdateWithoutTicketsAssignedInput>
+  }
+
+  export type UserCreateNestedOneWithoutStaffRoutineTemplatesCreatedInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type StaffRoutineAssignmentCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput> | StaffRoutineAssignmentCreateWithoutTemplateInput[] | StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput | StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput[]
+    createMany?: StaffRoutineAssignmentCreateManyTemplateInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput> | StaffRoutineCompletionCreateWithoutTemplateInput[] | StaffRoutineCompletionUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutTemplateInput | StaffRoutineCompletionCreateOrConnectWithoutTemplateInput[]
+    createMany?: StaffRoutineCompletionCreateManyTemplateInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput> | StaffRoutineAssignmentCreateWithoutTemplateInput[] | StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput | StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput[]
+    createMany?: StaffRoutineAssignmentCreateManyTemplateInputEnvelope
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateNestedManyWithoutTemplateInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput> | StaffRoutineCompletionCreateWithoutTemplateInput[] | StaffRoutineCompletionUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutTemplateInput | StaffRoutineCompletionCreateOrConnectWithoutTemplateInput[]
+    createMany?: StaffRoutineCompletionCreateManyTemplateInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
+  export type EnumStaffRoutineFrequencyFieldUpdateOperationsInput = {
+    set?: $Enums.StaffRoutineFrequency
+  }
+
+  export type EnumStaffRoutineAreaTypeFieldUpdateOperationsInput = {
+    set?: $Enums.StaffRoutineAreaType
+  }
+
+  export type UserUpdateOneWithoutStaffRoutineTemplatesCreatedNestedInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput
+    upsert?: UserUpsertWithoutStaffRoutineTemplatesCreatedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaffRoutineTemplatesCreatedInput, UserUpdateWithoutStaffRoutineTemplatesCreatedInput>, UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput> | StaffRoutineAssignmentCreateWithoutTemplateInput[] | StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput | StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: StaffRoutineAssignmentCreateManyTemplateInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutTemplateInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutTemplateInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput> | StaffRoutineCompletionCreateWithoutTemplateInput[] | StaffRoutineCompletionUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutTemplateInput | StaffRoutineCompletionCreateOrConnectWithoutTemplateInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutTemplateInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: StaffRoutineCompletionCreateManyTemplateInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutTemplateInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutTemplateInput | StaffRoutineCompletionUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput> | StaffRoutineAssignmentCreateWithoutTemplateInput[] | StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput | StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput[]
+    upsert?: StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput | StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: StaffRoutineAssignmentCreateManyTemplateInputEnvelope
+    set?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    disconnect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    delete?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    connect?: StaffRoutineAssignmentWhereUniqueInput | StaffRoutineAssignmentWhereUniqueInput[]
+    update?: StaffRoutineAssignmentUpdateWithWhereUniqueWithoutTemplateInput | StaffRoutineAssignmentUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: StaffRoutineAssignmentUpdateManyWithWhereWithoutTemplateInput | StaffRoutineAssignmentUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput> | StaffRoutineCompletionCreateWithoutTemplateInput[] | StaffRoutineCompletionUncheckedCreateWithoutTemplateInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutTemplateInput | StaffRoutineCompletionCreateOrConnectWithoutTemplateInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutTemplateInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutTemplateInput[]
+    createMany?: StaffRoutineCompletionCreateManyTemplateInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutTemplateInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutTemplateInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutTemplateInput | StaffRoutineCompletionUpdateManyWithWhereWithoutTemplateInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+  }
+
+  export type StaffRoutineTemplateCreateNestedOneWithoutAssignmentsInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedCreateWithoutAssignmentsInput>
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutAssignmentsInput
+    connect?: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutStaffRoutineAssignmentsInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineAssignmentsInput, UserUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineAssignmentsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type RoomCreateNestedOneWithoutStaffRoutineAssignmentsInput = {
+    create?: XOR<RoomCreateWithoutStaffRoutineAssignmentsInput, RoomUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutStaffRoutineAssignmentsInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type StaffRoutineCompletionCreateNestedManyWithoutAssignmentInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput> | StaffRoutineCompletionCreateWithoutAssignmentInput[] | StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput | StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput[]
+    createMany?: StaffRoutineCompletionCreateManyAssignmentInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateNestedManyWithoutAssignmentInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput> | StaffRoutineCompletionCreateWithoutAssignmentInput[] | StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput | StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput[]
+    createMany?: StaffRoutineCompletionCreateManyAssignmentInputEnvelope
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+  }
+
+  export type StaffRoutineTemplateUpdateOneRequiredWithoutAssignmentsNestedInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedCreateWithoutAssignmentsInput>
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutAssignmentsInput
+    upsert?: StaffRoutineTemplateUpsertWithoutAssignmentsInput
+    connect?: StaffRoutineTemplateWhereUniqueInput
+    update?: XOR<XOR<StaffRoutineTemplateUpdateToOneWithWhereWithoutAssignmentsInput, StaffRoutineTemplateUpdateWithoutAssignmentsInput>, StaffRoutineTemplateUncheckedUpdateWithoutAssignmentsInput>
+  }
+
+  export type UserUpdateOneWithoutStaffRoutineAssignmentsNestedInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineAssignmentsInput, UserUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineAssignmentsInput
+    upsert?: UserUpsertWithoutStaffRoutineAssignmentsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaffRoutineAssignmentsInput, UserUpdateWithoutStaffRoutineAssignmentsInput>, UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type RoomUpdateOneWithoutStaffRoutineAssignmentsNestedInput = {
+    create?: XOR<RoomCreateWithoutStaffRoutineAssignmentsInput, RoomUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutStaffRoutineAssignmentsInput
+    upsert?: RoomUpsertWithoutStaffRoutineAssignmentsInput
+    disconnect?: RoomWhereInput | boolean
+    delete?: RoomWhereInput | boolean
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutStaffRoutineAssignmentsInput, RoomUpdateWithoutStaffRoutineAssignmentsInput>, RoomUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithoutAssignmentNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput> | StaffRoutineCompletionCreateWithoutAssignmentInput[] | StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput | StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutAssignmentInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutAssignmentInput[]
+    createMany?: StaffRoutineCompletionCreateManyAssignmentInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutAssignmentInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutAssignmentInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutAssignmentInput | StaffRoutineCompletionUpdateManyWithWhereWithoutAssignmentInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentNestedInput = {
+    create?: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput> | StaffRoutineCompletionCreateWithoutAssignmentInput[] | StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput[]
+    connectOrCreate?: StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput | StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput[]
+    upsert?: StaffRoutineCompletionUpsertWithWhereUniqueWithoutAssignmentInput | StaffRoutineCompletionUpsertWithWhereUniqueWithoutAssignmentInput[]
+    createMany?: StaffRoutineCompletionCreateManyAssignmentInputEnvelope
+    set?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    disconnect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    delete?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    connect?: StaffRoutineCompletionWhereUniqueInput | StaffRoutineCompletionWhereUniqueInput[]
+    update?: StaffRoutineCompletionUpdateWithWhereUniqueWithoutAssignmentInput | StaffRoutineCompletionUpdateWithWhereUniqueWithoutAssignmentInput[]
+    updateMany?: StaffRoutineCompletionUpdateManyWithWhereWithoutAssignmentInput | StaffRoutineCompletionUpdateManyWithWhereWithoutAssignmentInput[]
+    deleteMany?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+  }
+
+  export type StaffRoutineTemplateCreateNestedOneWithoutCompletionsInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCompletionsInput, StaffRoutineTemplateUncheckedCreateWithoutCompletionsInput>
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCompletionsInput
+    connect?: StaffRoutineTemplateWhereUniqueInput
+  }
+
+  export type StaffRoutineAssignmentCreateNestedOneWithoutCompletionsInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedCreateWithoutCompletionsInput>
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutCompletionsInput
+    connect?: StaffRoutineAssignmentWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutStaffRoutineCompletionsInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineCompletionsInput, UserUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineCompletionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type RoomCreateNestedOneWithoutStaffRoutineCompletionsInput = {
+    create?: XOR<RoomCreateWithoutStaffRoutineCompletionsInput, RoomUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutStaffRoutineCompletionsInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type EnumStaffRoutineStatusFieldUpdateOperationsInput = {
+    set?: $Enums.StaffRoutineStatus
+  }
+
+  export type StaffRoutineTemplateUpdateOneRequiredWithoutCompletionsNestedInput = {
+    create?: XOR<StaffRoutineTemplateCreateWithoutCompletionsInput, StaffRoutineTemplateUncheckedCreateWithoutCompletionsInput>
+    connectOrCreate?: StaffRoutineTemplateCreateOrConnectWithoutCompletionsInput
+    upsert?: StaffRoutineTemplateUpsertWithoutCompletionsInput
+    connect?: StaffRoutineTemplateWhereUniqueInput
+    update?: XOR<XOR<StaffRoutineTemplateUpdateToOneWithWhereWithoutCompletionsInput, StaffRoutineTemplateUpdateWithoutCompletionsInput>, StaffRoutineTemplateUncheckedUpdateWithoutCompletionsInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateOneWithoutCompletionsNestedInput = {
+    create?: XOR<StaffRoutineAssignmentCreateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedCreateWithoutCompletionsInput>
+    connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutCompletionsInput
+    upsert?: StaffRoutineAssignmentUpsertWithoutCompletionsInput
+    disconnect?: StaffRoutineAssignmentWhereInput | boolean
+    delete?: StaffRoutineAssignmentWhereInput | boolean
+    connect?: StaffRoutineAssignmentWhereUniqueInput
+    update?: XOR<XOR<StaffRoutineAssignmentUpdateToOneWithWhereWithoutCompletionsInput, StaffRoutineAssignmentUpdateWithoutCompletionsInput>, StaffRoutineAssignmentUncheckedUpdateWithoutCompletionsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutStaffRoutineCompletionsNestedInput = {
+    create?: XOR<UserCreateWithoutStaffRoutineCompletionsInput, UserUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffRoutineCompletionsInput
+    upsert?: UserUpsertWithoutStaffRoutineCompletionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaffRoutineCompletionsInput, UserUpdateWithoutStaffRoutineCompletionsInput>, UserUncheckedUpdateWithoutStaffRoutineCompletionsInput>
+  }
+
+  export type RoomUpdateOneWithoutStaffRoutineCompletionsNestedInput = {
+    create?: XOR<RoomCreateWithoutStaffRoutineCompletionsInput, RoomUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutStaffRoutineCompletionsInput
+    upsert?: RoomUpsertWithoutStaffRoutineCompletionsInput
+    disconnect?: RoomWhereInput | boolean
+    delete?: RoomWhereInput | boolean
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutStaffRoutineCompletionsInput, RoomUpdateWithoutStaffRoutineCompletionsInput>, RoomUncheckedUpdateWithoutStaffRoutineCompletionsInput>
   }
 
   export type UserCreateNestedOneWithoutAnnouncementsCreatedInput = {
@@ -43350,6 +49159,57 @@ export namespace Prisma {
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumStaffRoutineFrequencyFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineFrequency | EnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel> | $Enums.StaffRoutineFrequency
+  }
+
+  export type NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineAreaType | EnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel> | $Enums.StaffRoutineAreaType
+  }
+
+  export type NestedEnumStaffRoutineFrequencyWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineFrequency | EnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineFrequency[] | ListEnumStaffRoutineFrequencyFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineFrequencyWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineFrequency
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineFrequencyFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStaffRoutineAreaTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineAreaType | EnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineAreaType[] | ListEnumStaffRoutineAreaTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineAreaTypeWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineAreaType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineAreaTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStaffRoutineStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineStatus | EnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineStatusFilter<$PrismaModel> | $Enums.StaffRoutineStatus
+  }
+
+  export type NestedEnumStaffRoutineStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StaffRoutineStatus | EnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StaffRoutineStatus[] | ListEnumStaffRoutineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStaffRoutineStatusWithAggregatesFilter<$PrismaModel> | $Enums.StaffRoutineStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStaffRoutineStatusFilter<$PrismaModel>
+    _max?: NestedEnumStaffRoutineStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumAnnouncementAudienceFilter<$PrismaModel = never> = {
     equals?: $Enums.AnnouncementAudience | EnumAnnouncementAudienceFieldRefInput<$PrismaModel>
     in?: $Enums.AnnouncementAudience[] | ListEnumAnnouncementAudienceFieldRefInput<$PrismaModel>
@@ -43913,6 +49773,117 @@ export namespace Prisma {
 
   export type TicketCreateManyAssignedToInputEnvelope = {
     data: TicketCreateManyAssignedToInput | TicketCreateManyAssignedToInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineTemplateCreateWithoutCreatedByInput = {
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: StaffRoutineAssignmentCreateNestedManyWithoutTemplateInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutTemplateInput
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateCreateOrConnectWithoutCreatedByInput = {
+    where: StaffRoutineTemplateWhereUniqueInput
+    create: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type StaffRoutineTemplateCreateManyCreatedByInputEnvelope = {
+    data: StaffRoutineTemplateCreateManyCreatedByInput | StaffRoutineTemplateCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineAssignmentCreateWithoutStaffUserInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutAssignmentsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput = {
+    id?: number
+    templateId: number
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentCreateOrConnectWithoutStaffUserInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    create: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineAssignmentCreateManyStaffUserInputEnvelope = {
+    data: StaffRoutineAssignmentCreateManyStaffUserInput | StaffRoutineAssignmentCreateManyStaffUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineCompletionCreateWithoutStaffUserInput = {
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutCompletionsInput
+    assignment?: StaffRoutineAssignmentCreateNestedOneWithoutCompletionsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineCompletionsInput
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateOrConnectWithoutStaffUserInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    create: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineCompletionCreateManyStaffUserInputEnvelope = {
+    data: StaffRoutineCompletionCreateManyStaffUserInput | StaffRoutineCompletionCreateManyStaffUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -44618,6 +50589,105 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
   }
 
+  export type StaffRoutineTemplateUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: StaffRoutineTemplateWhereUniqueInput
+    update: XOR<StaffRoutineTemplateUpdateWithoutCreatedByInput, StaffRoutineTemplateUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<StaffRoutineTemplateCreateWithoutCreatedByInput, StaffRoutineTemplateUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type StaffRoutineTemplateUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: StaffRoutineTemplateWhereUniqueInput
+    data: XOR<StaffRoutineTemplateUpdateWithoutCreatedByInput, StaffRoutineTemplateUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type StaffRoutineTemplateUpdateManyWithWhereWithoutCreatedByInput = {
+    where: StaffRoutineTemplateScalarWhereInput
+    data: XOR<StaffRoutineTemplateUpdateManyMutationInput, StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type StaffRoutineTemplateScalarWhereInput = {
+    AND?: StaffRoutineTemplateScalarWhereInput | StaffRoutineTemplateScalarWhereInput[]
+    OR?: StaffRoutineTemplateScalarWhereInput[]
+    NOT?: StaffRoutineTemplateScalarWhereInput | StaffRoutineTemplateScalarWhereInput[]
+    id?: IntFilter<"StaffRoutineTemplate"> | number
+    title?: StringFilter<"StaffRoutineTemplate"> | string
+    description?: StringNullableFilter<"StaffRoutineTemplate"> | string | null
+    frequency?: EnumStaffRoutineFrequencyFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFilter<"StaffRoutineTemplate"> | $Enums.StaffRoutineAreaType
+    dayOfWeek?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    dayOfMonth?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    requiresPhoto?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    requiresNote?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    isActive?: BoolFilter<"StaffRoutineTemplate"> | boolean
+    sortOrder?: IntFilter<"StaffRoutineTemplate"> | number
+    createdById?: IntNullableFilter<"StaffRoutineTemplate"> | number | null
+    createdAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineTemplate"> | Date | string
+  }
+
+  export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutStaffUserInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    update: XOR<StaffRoutineAssignmentUpdateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedUpdateWithoutStaffUserInput>
+    create: XOR<StaffRoutineAssignmentCreateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedCreateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateWithWhereUniqueWithoutStaffUserInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    data: XOR<StaffRoutineAssignmentUpdateWithoutStaffUserInput, StaffRoutineAssignmentUncheckedUpdateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithWhereWithoutStaffUserInput = {
+    where: StaffRoutineAssignmentScalarWhereInput
+    data: XOR<StaffRoutineAssignmentUpdateManyMutationInput, StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineAssignmentScalarWhereInput = {
+    AND?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+    OR?: StaffRoutineAssignmentScalarWhereInput[]
+    NOT?: StaffRoutineAssignmentScalarWhereInput | StaffRoutineAssignmentScalarWhereInput[]
+    id?: IntFilter<"StaffRoutineAssignment"> | number
+    templateId?: IntFilter<"StaffRoutineAssignment"> | number
+    staffUserId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    roomId?: IntNullableFilter<"StaffRoutineAssignment"> | number | null
+    isActive?: BoolFilter<"StaffRoutineAssignment"> | boolean
+    createdAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineAssignment"> | Date | string
+  }
+
+  export type StaffRoutineCompletionUpsertWithWhereUniqueWithoutStaffUserInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    update: XOR<StaffRoutineCompletionUpdateWithoutStaffUserInput, StaffRoutineCompletionUncheckedUpdateWithoutStaffUserInput>
+    create: XOR<StaffRoutineCompletionCreateWithoutStaffUserInput, StaffRoutineCompletionUncheckedCreateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineCompletionUpdateWithWhereUniqueWithoutStaffUserInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    data: XOR<StaffRoutineCompletionUpdateWithoutStaffUserInput, StaffRoutineCompletionUncheckedUpdateWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithWhereWithoutStaffUserInput = {
+    where: StaffRoutineCompletionScalarWhereInput
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserInput>
+  }
+
+  export type StaffRoutineCompletionScalarWhereInput = {
+    AND?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+    OR?: StaffRoutineCompletionScalarWhereInput[]
+    NOT?: StaffRoutineCompletionScalarWhereInput | StaffRoutineCompletionScalarWhereInput[]
+    id?: IntFilter<"StaffRoutineCompletion"> | number
+    templateId?: IntFilter<"StaffRoutineCompletion"> | number
+    assignmentId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    staffUserId?: IntFilter<"StaffRoutineCompletion"> | number
+    roomId?: IntNullableFilter<"StaffRoutineCompletion"> | number | null
+    dueDate?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    status?: EnumStaffRoutineStatusFilter<"StaffRoutineCompletion"> | $Enums.StaffRoutineStatus
+    completedAt?: DateTimeNullableFilter<"StaffRoutineCompletion"> | Date | string | null
+    note?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    photoUrl?: StringNullableFilter<"StaffRoutineCompletion"> | string | null
+    createdAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+    updatedAt?: DateTimeFilter<"StaffRoutineCompletion"> | Date | string
+  }
+
   export type MeterReadingUpsertWithWhereUniqueWithoutRecordedByInput = {
     where: MeterReadingWhereUniqueInput
     update: XOR<MeterReadingUpdateWithoutRecordedByInput, MeterReadingUncheckedUpdateWithoutRecordedByInput>
@@ -44983,6 +51053,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -45013,6 +51086,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -45312,6 +51388,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -45342,6 +51421,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -45631,6 +51713,72 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type StaffRoutineAssignmentCreateWithoutRoomInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutAssignmentsInput
+    staffUser?: UserCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateWithoutRoomInput = {
+    id?: number
+    templateId: number
+    staffUserId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentCreateOrConnectWithoutRoomInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    create: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput>
+  }
+
+  export type StaffRoutineAssignmentCreateManyRoomInputEnvelope = {
+    data: StaffRoutineAssignmentCreateManyRoomInput | StaffRoutineAssignmentCreateManyRoomInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineCompletionCreateWithoutRoomInput = {
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutCompletionsInput
+    assignment?: StaffRoutineAssignmentCreateNestedOneWithoutCompletionsInput
+    staffUser: UserCreateNestedOneWithoutStaffRoutineCompletionsInput
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateWithoutRoomInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    staffUserId: number
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateOrConnectWithoutRoomInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    create: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput>
+  }
+
+  export type StaffRoutineCompletionCreateManyRoomInputEnvelope = {
+    data: StaffRoutineCompletionCreateManyRoomInput | StaffRoutineCompletionCreateManyRoomInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ExpenseCreateWithoutRoomInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
@@ -45812,6 +51960,38 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"RoomItem"> | Date | string
   }
 
+  export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    update: XOR<StaffRoutineAssignmentUpdateWithoutRoomInput, StaffRoutineAssignmentUncheckedUpdateWithoutRoomInput>
+    create: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateWithWhereUniqueWithoutRoomInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    data: XOR<StaffRoutineAssignmentUpdateWithoutRoomInput, StaffRoutineAssignmentUncheckedUpdateWithoutRoomInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithWhereWithoutRoomInput = {
+    where: StaffRoutineAssignmentScalarWhereInput
+    data: XOR<StaffRoutineAssignmentUpdateManyMutationInput, StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomInput>
+  }
+
+  export type StaffRoutineCompletionUpsertWithWhereUniqueWithoutRoomInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    update: XOR<StaffRoutineCompletionUpdateWithoutRoomInput, StaffRoutineCompletionUncheckedUpdateWithoutRoomInput>
+    create: XOR<StaffRoutineCompletionCreateWithoutRoomInput, StaffRoutineCompletionUncheckedCreateWithoutRoomInput>
+  }
+
+  export type StaffRoutineCompletionUpdateWithWhereUniqueWithoutRoomInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    data: XOR<StaffRoutineCompletionUpdateWithoutRoomInput, StaffRoutineCompletionUncheckedUpdateWithoutRoomInput>
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithWhereWithoutRoomInput = {
+    where: StaffRoutineCompletionScalarWhereInput
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyWithoutRoomInput>
+  }
+
   export type ExpenseUpsertWithWhereUniqueWithoutRoomInput = {
     where: ExpenseWhereUniqueInput
     update: XOR<ExpenseUpdateWithoutRoomInput, ExpenseUncheckedUpdateWithoutRoomInput>
@@ -45897,6 +52077,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
   }
@@ -45923,6 +52105,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
   }
@@ -45964,6 +52148,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
   }
@@ -45990,6 +52176,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
   }
@@ -46064,6 +52252,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
@@ -46090,6 +52280,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
@@ -46116,6 +52308,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -46146,6 +52341,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -46180,6 +52378,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -46210,6 +52411,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -46601,6 +52805,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
@@ -46627,6 +52833,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
@@ -46659,6 +52867,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -46689,6 +52900,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -46729,6 +52943,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -46759,6 +52976,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -46888,6 +53108,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
@@ -46914,6 +53136,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
@@ -46941,6 +53165,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
@@ -46971,6 +53198,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -47019,6 +53249,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
@@ -47045,6 +53277,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
@@ -47078,6 +53312,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -47108,6 +53345,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -47222,6 +53462,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -47252,6 +53495,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -47522,6 +53768,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -47552,6 +53801,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -47785,6 +54037,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -47815,6 +54070,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -47910,6 +54168,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -47940,6 +54201,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -47970,6 +54234,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -48000,6 +54267,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -48045,6 +54315,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -48075,6 +54348,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -48284,6 +54560,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -48314,6 +54593,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -48348,6 +54630,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -48378,6 +54663,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -48621,6 +54909,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -48651,6 +54942,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -48691,6 +54985,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -48721,6 +55018,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -48803,6 +55103,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
@@ -48829,6 +55131,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
@@ -48941,6 +55245,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -48971,6 +55278,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -49076,6 +55386,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
@@ -49102,6 +55414,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
@@ -49226,6 +55540,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -49256,6 +55573,9 @@ export namespace Prisma {
     staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -49267,6 +55587,1073 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserCreateWithoutStaffRoutineTemplatesCreatedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput>
+  }
+
+  export type StaffRoutineAssignmentCreateWithoutTemplateInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    staffUser?: UserCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput = {
+    id?: number
+    staffUserId?: number | null
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutAssignmentInput
+  }
+
+  export type StaffRoutineAssignmentCreateOrConnectWithoutTemplateInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    create: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineAssignmentCreateManyTemplateInputEnvelope = {
+    data: StaffRoutineAssignmentCreateManyTemplateInput | StaffRoutineAssignmentCreateManyTemplateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineCompletionCreateWithoutTemplateInput = {
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignment?: StaffRoutineAssignmentCreateNestedOneWithoutCompletionsInput
+    staffUser: UserCreateNestedOneWithoutStaffRoutineCompletionsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineCompletionsInput
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateWithoutTemplateInput = {
+    id?: number
+    assignmentId?: number | null
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateOrConnectWithoutTemplateInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    create: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineCompletionCreateManyTemplateInputEnvelope = {
+    data: StaffRoutineCompletionCreateManyTemplateInput | StaffRoutineCompletionCreateManyTemplateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutStaffRoutineTemplatesCreatedInput = {
+    update: XOR<UserUpdateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput>
+    create: XOR<UserCreateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaffRoutineTemplatesCreatedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaffRoutineTemplatesCreatedInput, UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput>
+  }
+
+  export type UserUpdateWithoutStaffRoutineTemplatesCreatedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    update: XOR<StaffRoutineAssignmentUpdateWithoutTemplateInput, StaffRoutineAssignmentUncheckedUpdateWithoutTemplateInput>
+    create: XOR<StaffRoutineAssignmentCreateWithoutTemplateInput, StaffRoutineAssignmentUncheckedCreateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateWithWhereUniqueWithoutTemplateInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    data: XOR<StaffRoutineAssignmentUpdateWithoutTemplateInput, StaffRoutineAssignmentUncheckedUpdateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateManyWithWhereWithoutTemplateInput = {
+    where: StaffRoutineAssignmentScalarWhereInput
+    data: XOR<StaffRoutineAssignmentUpdateManyMutationInput, StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateInput>
+  }
+
+  export type StaffRoutineCompletionUpsertWithWhereUniqueWithoutTemplateInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    update: XOR<StaffRoutineCompletionUpdateWithoutTemplateInput, StaffRoutineCompletionUncheckedUpdateWithoutTemplateInput>
+    create: XOR<StaffRoutineCompletionCreateWithoutTemplateInput, StaffRoutineCompletionUncheckedCreateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineCompletionUpdateWithWhereUniqueWithoutTemplateInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    data: XOR<StaffRoutineCompletionUpdateWithoutTemplateInput, StaffRoutineCompletionUncheckedUpdateWithoutTemplateInput>
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithWhereWithoutTemplateInput = {
+    where: StaffRoutineCompletionScalarWhereInput
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateInput>
+  }
+
+  export type StaffRoutineTemplateCreateWithoutAssignmentsInput = {
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: UserCreateNestedOneWithoutStaffRoutineTemplatesCreatedInput
+    completions?: StaffRoutineCompletionCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateUncheckedCreateWithoutAssignmentsInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    completions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateCreateOrConnectWithoutAssignmentsInput = {
+    where: StaffRoutineTemplateWhereUniqueInput
+    create: XOR<StaffRoutineTemplateCreateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedCreateWithoutAssignmentsInput>
+  }
+
+  export type UserCreateWithoutStaffRoutineAssignmentsInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaffRoutineAssignmentsInput, UserUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type RoomCreateWithoutStaffRoutineAssignmentsInput = {
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
+    tickets?: TicketCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
+    id?: number
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayUncheckedCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutStaffRoutineAssignmentsInput, RoomUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type StaffRoutineCompletionCreateWithoutAssignmentInput = {
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutCompletionsInput
+    staffUser: UserCreateNestedOneWithoutStaffRoutineCompletionsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineCompletionsInput
+  }
+
+  export type StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput = {
+    id?: number
+    templateId: number
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateOrConnectWithoutAssignmentInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    create: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput>
+  }
+
+  export type StaffRoutineCompletionCreateManyAssignmentInputEnvelope = {
+    data: StaffRoutineCompletionCreateManyAssignmentInput | StaffRoutineCompletionCreateManyAssignmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StaffRoutineTemplateUpsertWithoutAssignmentsInput = {
+    update: XOR<StaffRoutineTemplateUpdateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedUpdateWithoutAssignmentsInput>
+    create: XOR<StaffRoutineTemplateCreateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedCreateWithoutAssignmentsInput>
+    where?: StaffRoutineTemplateWhereInput
+  }
+
+  export type StaffRoutineTemplateUpdateToOneWithWhereWithoutAssignmentsInput = {
+    where?: StaffRoutineTemplateWhereInput
+    data: XOR<StaffRoutineTemplateUpdateWithoutAssignmentsInput, StaffRoutineTemplateUncheckedUpdateWithoutAssignmentsInput>
+  }
+
+  export type StaffRoutineTemplateUpdateWithoutAssignmentsInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneWithoutStaffRoutineTemplatesCreatedNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateWithoutAssignmentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type UserUpsertWithoutStaffRoutineAssignmentsInput = {
+    update: XOR<UserUpdateWithoutStaffRoutineAssignmentsInput, UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+    create: XOR<UserCreateWithoutStaffRoutineAssignmentsInput, UserUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaffRoutineAssignmentsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaffRoutineAssignmentsInput, UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type UserUpdateWithoutStaffRoutineAssignmentsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type RoomUpsertWithoutStaffRoutineAssignmentsInput = {
+    update: XOR<RoomUpdateWithoutStaffRoutineAssignmentsInput, RoomUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+    create: XOR<RoomCreateWithoutStaffRoutineAssignmentsInput, RoomUncheckedCreateWithoutStaffRoutineAssignmentsInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutStaffRoutineAssignmentsInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutStaffRoutineAssignmentsInput, RoomUncheckedUpdateWithoutStaffRoutineAssignmentsInput>
+  }
+
+  export type RoomUpdateWithoutStaffRoutineAssignmentsInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type StaffRoutineCompletionUpsertWithWhereUniqueWithoutAssignmentInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    update: XOR<StaffRoutineCompletionUpdateWithoutAssignmentInput, StaffRoutineCompletionUncheckedUpdateWithoutAssignmentInput>
+    create: XOR<StaffRoutineCompletionCreateWithoutAssignmentInput, StaffRoutineCompletionUncheckedCreateWithoutAssignmentInput>
+  }
+
+  export type StaffRoutineCompletionUpdateWithWhereUniqueWithoutAssignmentInput = {
+    where: StaffRoutineCompletionWhereUniqueInput
+    data: XOR<StaffRoutineCompletionUpdateWithoutAssignmentInput, StaffRoutineCompletionUncheckedUpdateWithoutAssignmentInput>
+  }
+
+  export type StaffRoutineCompletionUpdateManyWithWhereWithoutAssignmentInput = {
+    where: StaffRoutineCompletionScalarWhereInput
+    data: XOR<StaffRoutineCompletionUpdateManyMutationInput, StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentInput>
+  }
+
+  export type StaffRoutineTemplateCreateWithoutCompletionsInput = {
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: UserCreateNestedOneWithoutStaffRoutineTemplatesCreatedInput
+    assignments?: StaffRoutineAssignmentCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateUncheckedCreateWithoutCompletionsInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    assignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutTemplateInput
+  }
+
+  export type StaffRoutineTemplateCreateOrConnectWithoutCompletionsInput = {
+    where: StaffRoutineTemplateWhereUniqueInput
+    create: XOR<StaffRoutineTemplateCreateWithoutCompletionsInput, StaffRoutineTemplateUncheckedCreateWithoutCompletionsInput>
+  }
+
+  export type StaffRoutineAssignmentCreateWithoutCompletionsInput = {
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    template: StaffRoutineTemplateCreateNestedOneWithoutAssignmentsInput
+    staffUser?: UserCreateNestedOneWithoutStaffRoutineAssignmentsInput
+    room?: RoomCreateNestedOneWithoutStaffRoutineAssignmentsInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedCreateWithoutCompletionsInput = {
+    id?: number
+    templateId: number
+    staffUserId?: number | null
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineAssignmentCreateOrConnectWithoutCompletionsInput = {
+    where: StaffRoutineAssignmentWhereUniqueInput
+    create: XOR<StaffRoutineAssignmentCreateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedCreateWithoutCompletionsInput>
+  }
+
+  export type UserCreateWithoutStaffRoutineCompletionsInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserUncheckedCreateWithoutStaffRoutineCompletionsInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+  }
+
+  export type UserCreateOrConnectWithoutStaffRoutineCompletionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaffRoutineCompletionsInput, UserUncheckedCreateWithoutStaffRoutineCompletionsInput>
+  }
+
+  export type RoomCreateWithoutStaffRoutineCompletionsInput = {
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
+    tickets?: TicketCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutStaffRoutineCompletionsInput = {
+    id?: number
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayUncheckedCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutStaffRoutineCompletionsInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutStaffRoutineCompletionsInput, RoomUncheckedCreateWithoutStaffRoutineCompletionsInput>
+  }
+
+  export type StaffRoutineTemplateUpsertWithoutCompletionsInput = {
+    update: XOR<StaffRoutineTemplateUpdateWithoutCompletionsInput, StaffRoutineTemplateUncheckedUpdateWithoutCompletionsInput>
+    create: XOR<StaffRoutineTemplateCreateWithoutCompletionsInput, StaffRoutineTemplateUncheckedCreateWithoutCompletionsInput>
+    where?: StaffRoutineTemplateWhereInput
+  }
+
+  export type StaffRoutineTemplateUpdateToOneWithWhereWithoutCompletionsInput = {
+    where?: StaffRoutineTemplateWhereInput
+    data: XOR<StaffRoutineTemplateUpdateWithoutCompletionsInput, StaffRoutineTemplateUncheckedUpdateWithoutCompletionsInput>
+  }
+
+  export type StaffRoutineTemplateUpdateWithoutCompletionsInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneWithoutStaffRoutineTemplatesCreatedNestedInput
+    assignments?: StaffRoutineAssignmentUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateWithoutCompletionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineAssignmentUpsertWithoutCompletionsInput = {
+    update: XOR<StaffRoutineAssignmentUpdateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedUpdateWithoutCompletionsInput>
+    create: XOR<StaffRoutineAssignmentCreateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedCreateWithoutCompletionsInput>
+    where?: StaffRoutineAssignmentWhereInput
+  }
+
+  export type StaffRoutineAssignmentUpdateToOneWithWhereWithoutCompletionsInput = {
+    where?: StaffRoutineAssignmentWhereInput
+    data: XOR<StaffRoutineAssignmentUpdateWithoutCompletionsInput, StaffRoutineAssignmentUncheckedUpdateWithoutCompletionsInput>
+  }
+
+  export type StaffRoutineAssignmentUpdateWithoutCompletionsInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutAssignmentsNestedInput
+    staffUser?: UserUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateWithoutCompletionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpsertWithoutStaffRoutineCompletionsInput = {
+    update: XOR<UserUpdateWithoutStaffRoutineCompletionsInput, UserUncheckedUpdateWithoutStaffRoutineCompletionsInput>
+    create: XOR<UserCreateWithoutStaffRoutineCompletionsInput, UserUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaffRoutineCompletionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaffRoutineCompletionsInput, UserUncheckedUpdateWithoutStaffRoutineCompletionsInput>
+  }
+
+  export type UserUpdateWithoutStaffRoutineCompletionsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+  }
+
+  export type RoomUpsertWithoutStaffRoutineCompletionsInput = {
+    update: XOR<RoomUpdateWithoutStaffRoutineCompletionsInput, RoomUncheckedUpdateWithoutStaffRoutineCompletionsInput>
+    create: XOR<RoomCreateWithoutStaffRoutineCompletionsInput, RoomUncheckedCreateWithoutStaffRoutineCompletionsInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutStaffRoutineCompletionsInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutStaffRoutineCompletionsInput, RoomUncheckedUpdateWithoutStaffRoutineCompletionsInput>
+  }
+
+  export type RoomUpdateWithoutStaffRoutineCompletionsInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -49285,6 +56672,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -49315,6 +56705,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -49360,6 +56753,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -49390,6 +56786,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -49515,6 +56914,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
@@ -49541,6 +56942,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
@@ -49618,6 +57021,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
@@ -49644,6 +57049,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
@@ -49748,6 +57155,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
   }
@@ -49774,6 +57183,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
   }
@@ -49800,6 +57211,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
@@ -49830,6 +57244,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -49921,6 +57338,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
   }
@@ -49947,6 +57366,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
   }
@@ -49979,6 +57400,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -50009,6 +57433,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -50174,6 +57601,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -50204,6 +57634,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -50397,6 +57830,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -50427,6 +57863,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -50542,6 +57981,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -50572,6 +58014,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -50709,6 +58154,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -50739,6 +58187,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -50768,6 +58219,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
@@ -50798,6 +58252,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
@@ -50843,6 +58300,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
@@ -50873,6 +58333,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -50906,6 +58369,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
   }
@@ -50932,6 +58397,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
     facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
   }
@@ -51044,6 +58511,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -51074,6 +58544,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -51123,6 +58596,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
   }
@@ -51149,6 +58624,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
     facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
   }
@@ -51273,6 +58750,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -51303,6 +58783,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -51332,6 +58815,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -51362,6 +58848,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -51407,6 +58896,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -51437,6 +58929,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -51466,6 +58961,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
@@ -51496,6 +58994,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
     paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
     ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
     meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
     inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
     wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
@@ -51541,6 +59042,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
@@ -51571,6 +59075,9 @@ export namespace Prisma {
     invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
     paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
     ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
     meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
     inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
     wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -51724,6 +59231,45 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineTemplateCreateManyCreatedByInput = {
+    id?: number
+    title: string
+    description?: string | null
+    frequency?: $Enums.StaffRoutineFrequency
+    areaType?: $Enums.StaffRoutineAreaType
+    dayOfWeek?: number | null
+    dayOfMonth?: number | null
+    requiresPhoto?: boolean
+    requiresNote?: boolean
+    isActive?: boolean
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineAssignmentCreateManyStaffUserInput = {
+    id?: number
+    templateId: number
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateManyStaffUserInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52343,6 +59889,126 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineTemplateUpdateWithoutCreatedByInput = {
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: StaffRoutineAssignmentUpdateManyWithoutTemplateNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateNestedInput
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateNestedInput
+  }
+
+  export type StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    frequency?: EnumStaffRoutineFrequencyFieldUpdateOperationsInput | $Enums.StaffRoutineFrequency
+    areaType?: EnumStaffRoutineAreaTypeFieldUpdateOperationsInput | $Enums.StaffRoutineAreaType
+    dayOfWeek?: NullableIntFieldUpdateOperationsInput | number | null
+    dayOfMonth?: NullableIntFieldUpdateOperationsInput | number | null
+    requiresPhoto?: BoolFieldUpdateOperationsInput | boolean
+    requiresNote?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineAssignmentUpdateWithoutStaffUserInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutAssignmentsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateWithoutStaffUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateWithoutStaffUserInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutCompletionsNestedInput
+    assignment?: StaffRoutineAssignmentUpdateOneWithoutCompletionsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineCompletionsNestedInput
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateWithoutStaffUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -53319,6 +60985,29 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type StaffRoutineAssignmentCreateManyRoomInput = {
+    id?: number
+    templateId: number
+    staffUserId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateManyRoomInput = {
+    id?: number
+    templateId: number
+    assignmentId?: number | null
+    staffUserId: number
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ExpenseCreateManyRoomInput = {
     id?: number
     expenseDate: Date | string
@@ -53607,6 +61296,75 @@ export namespace Prisma {
     qty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumRoomItemStatusFieldUpdateOperationsInput | $Enums.RoomItemStatus
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineAssignmentUpdateWithoutRoomInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutAssignmentsNestedInput
+    staffUser?: UserUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateWithoutRoomInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutCompletionsNestedInput
+    assignment?: StaffRoutineAssignmentUpdateOneWithoutCompletionsNestedInput
+    staffUser?: UserUpdateOneRequiredWithoutStaffRoutineCompletionsNestedInput
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -54379,6 +62137,153 @@ export namespace Prisma {
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineAssignmentCreateManyTemplateInput = {
+    id?: number
+    staffUserId?: number | null
+    roomId?: number | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionCreateManyTemplateInput = {
+    id?: number
+    assignmentId?: number | null
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineAssignmentUpdateWithoutTemplateInput = {
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffUser?: UserUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineAssignmentsNestedInput
+    completions?: StaffRoutineCompletionUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateWithoutTemplateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    completions?: StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentNestedInput
+  }
+
+  export type StaffRoutineAssignmentUncheckedUpdateManyWithoutTemplateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    staffUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateWithoutTemplateInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    assignment?: StaffRoutineAssignmentUpdateOneWithoutCompletionsNestedInput
+    staffUser?: UserUpdateOneRequiredWithoutStaffRoutineCompletionsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineCompletionsNestedInput
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateWithoutTemplateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutTemplateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    assignmentId?: NullableIntFieldUpdateOperationsInput | number | null
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionCreateManyAssignmentInput = {
+    id?: number
+    templateId: number
+    staffUserId: number
+    roomId?: number | null
+    dueDate: Date | string
+    status?: $Enums.StaffRoutineStatus
+    completedAt?: Date | string | null
+    note?: string | null
+    photoUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StaffRoutineCompletionUpdateWithoutAssignmentInput = {
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    template?: StaffRoutineTemplateUpdateOneRequiredWithoutCompletionsNestedInput
+    staffUser?: UserUpdateOneRequiredWithoutStaffRoutineCompletionsNestedInput
+    room?: RoomUpdateOneWithoutStaffRoutineCompletionsNestedInput
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateWithoutAssignmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffRoutineCompletionUncheckedUpdateManyWithoutAssignmentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    templateId?: IntFieldUpdateOperationsInput | number
+    staffUserId?: IntFieldUpdateOperationsInput | number
+    roomId?: NullableIntFieldUpdateOperationsInput | number | null
+    dueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStaffRoutineStatusFieldUpdateOperationsInput | $Enums.StaffRoutineStatus
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

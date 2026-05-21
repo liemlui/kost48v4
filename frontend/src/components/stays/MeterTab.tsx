@@ -40,8 +40,8 @@ function buildRows(readings: MeterReading[]): MeterRow[] {
 
 /**
  * Memisahkan meter readings menjadi dua kategori:
- * 1. Sejak Check-in Stay Ini (readingAt >= checkInDate)
- * 2. Riwayat Kamar Sebelumnya (readingAt < checkInDate)
+ * 1. Sejak penghuni masuk (readingAt >= checkInDate)
+ * 2. Catatan kamar sebelumnya (readingAt < checkInDate)
  */
 function categorizeReadings(readings: MeterReading[], checkInDate?: string) {
   if (!checkInDate) {
@@ -76,11 +76,13 @@ export default function MeterTab({
   readings,
   isLoading,
   isError,
+  simpleMode = false,
 }: {
   stay: Stay;
   readings?: MeterReading[];
   isLoading: boolean;
   isError: boolean;
+  simpleMode?: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
   
@@ -123,16 +125,20 @@ export default function MeterTab({
     };
   }, [sinceCheckInRows]);
 
+  const visibleSinceRows = useMemo(() => (
+    simpleMode ? sinceCheckInRows.slice(-5).reverse() : sinceCheckInRows
+  ), [simpleMode, sinceCheckInRows]);
+
   return (
     <Card className="content-card">
       <Card.Body>
         <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
           <div>
-            <h5 className="mb-1">Riwayat Meter</h5>
-            <div className="text-muted">Pencatatan listrik dan air untuk stay ini.</div>
+            <h5 className="mb-1">{simpleMode ? 'Catat Meter' : 'Riwayat Meter'}</h5>
+            <div className="text-muted">{simpleMode ? 'Cek angka terakhir, lalu catat angka baru bila diminta.' : 'Catatan listrik dan air untuk masa sewa ini.'}</div>
           </div>
           <Button onClick={() => setShowModal(true)} variant="primary">
-            + Catat Meter Terbaru
+            + Catat Meter
           </Button>
         </div>
 
@@ -141,7 +147,7 @@ export default function MeterTab({
           <div className="col-md-4">
             <Card className="border">
               <Card.Body className="py-3">
-                <div className="text-muted small">Meter Awal Check-in ({initialMeter.date})</div>
+                <div className="text-muted small">Meter awal masuk ({initialMeter.date})</div>
                 <div className="d-flex justify-content-between">
                   <div>
                     <div className="fw-semibold">Listrik</div>
@@ -179,7 +185,7 @@ export default function MeterTab({
           <div className="col-md-4">
             <Card className="border">
               <Card.Body className="py-3">
-                <div className="text-muted small">Total Pemakaian (Sejak Check-in)</div>
+                <div className="text-muted small">Total pemakaian sejak masuk</div>
                 <div className="d-flex justify-content-between">
                   <div>
                     <div className="fw-semibold">Listrik</div>
@@ -205,29 +211,29 @@ export default function MeterTab({
         
         {isError ? (
           <Alert variant="danger">
-            <div className="fw-semibold">Gagal mengambil data meter</div>
-            <div className="small">Coba refresh halaman atau hubungi administrator.</div>
+            <div className="fw-semibold">Gagal memuat catatan meter</div>
+            <div className="small">Muat ulang halaman. Kalau tetap gagal, laporkan ke admin.</div>
           </Alert>
         ) : null}
         
-        {!isLoading && !isError && sinceCheckInRows.length === 0 && beforeCheckInRows.length === 0 ? (
+        {!isLoading && !isError && sinceCheckInRows.length === 0 && (!beforeCheckInRows.length || simpleMode) ? (
           <Alert variant="secondary" className="text-center py-4">
             <div className="fw-semibold mb-2">Belum ada pencatatan meter</div>
-            <div className="small mb-3">Klik "Catat Meter Terbaru" untuk menambahkan pencatatan pertama.</div>
+            <div className="small mb-3">Klik "Catat Meter" untuk mencatat angka pertama.</div>
             <Button onClick={() => setShowModal(true)} size="sm">
-              Tambah Pencatatan Pertama
+              Catat Meter Pertama
             </Button>
           </Alert>
         ) : null}
 
-        {/* Section: Sejak Check-in Stay Ini */}
+        {/* Section: Sejak penghuni masuk */}
         {!isLoading && !isError && sinceCheckInRows.length > 0 ? (
           <>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div>
-                <h6 className="mb-0">Sejak Check-in Stay Ini</h6>
+                <h6 className="mb-0">Sejak penghuni masuk</h6>
                 <div className="text-muted small">
-                  Pencatatan meter sejak tenant check-in pada {stay.checkInDate ? new Date(stay.checkInDate).toLocaleDateString('id-ID') : '-'}
+                  Catatan meter sejak penghuni masuk tanggal {stay.checkInDate ? new Date(stay.checkInDate).toLocaleDateString('id-ID') : '-'}
                 </div>
               </div>
               <div className="text-muted small">
@@ -247,7 +253,7 @@ export default function MeterTab({
                   </tr>
                 </thead>
                 <tbody>
-                  {sinceCheckInRows.map((row) => (
+                  {visibleSinceRows.map((row) => (
                     <tr key={row.dateKey}>
                       <td className="fw-semibold">{row.dateKey}</td>
                       <td>{row.electricityKwh?.toFixed(3) ?? '-'}</td>
@@ -274,14 +280,14 @@ export default function MeterTab({
           </>
         ) : null}
 
-        {/* Section: Riwayat Kamar Sebelumnya */}
-        {!isLoading && !isError && beforeCheckInRows.length > 0 ? (
+        {/* Section: Catatan kamar sebelumnya */}
+        {!simpleMode && !isLoading && !isError && beforeCheckInRows.length > 0 ? (
           <>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div>
-                <h6 className="mb-0">Riwayat Kamar Sebelumnya</h6>
+                <h6 className="mb-0">Catatan kamar sebelumnya</h6>
                 <div className="text-muted small">
-                  Pencatatan meter sebelum tenant check-in (history kamar)
+                  Catatan meter sebelum penghuni sekarang masuk
                 </div>
               </div>
               <div className="text-muted small">

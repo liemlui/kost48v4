@@ -5,12 +5,25 @@ export async function createRenewRequest(payload: CreateRenewRequestPayload): Pr
   return createResource<RenewRequest>('/tenant/renew-requests', payload as unknown as Record<string, unknown>);
 }
 
+function normalizeRenewRequests(data: RenewRequest[] | PaginatedResponse<RenewRequest>): PaginatedResponse<RenewRequest> {
+  if (Array.isArray(data)) {
+    return { items: data };
+  }
+
+  return {
+    items: Array.isArray(data?.items) ? data.items : [],
+    meta: data?.meta,
+  };
+}
+
 export async function listMyRenewRequests(): Promise<PaginatedResponse<RenewRequest>> {
-  return getResource<PaginatedResponse<RenewRequest>>('/tenant/renew-requests/my');
+  const data = await getResource<RenewRequest[] | PaginatedResponse<RenewRequest>>('/tenant/renew-requests/my');
+  return normalizeRenewRequests(data);
 }
 
 export async function listAdminRenewRequests(params?: { status?: string }): Promise<PaginatedResponse<RenewRequest>> {
-  return listResource<RenewRequest>('/admin/renew-requests', params as Record<string, unknown>) as Promise<PaginatedResponse<RenewRequest>>;
+  const data = await listResource<RenewRequest>('/admin/renew-requests', params as Record<string, unknown>) as unknown as RenewRequest[] | PaginatedResponse<RenewRequest>;
+  return normalizeRenewRequests(data);
 }
 
 export async function approveRenewRequest(id: number, payload?: ApproveRenewRequestPayload): Promise<RenewRequest> {

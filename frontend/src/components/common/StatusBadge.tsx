@@ -1,5 +1,5 @@
 import { Badge } from 'react-bootstrap';
-import { getStatusLabel, getStatusVariant } from '../../utils/statusLabels';
+import { getStatusLabel, getStatusVariant, type StatusLabelDomain, type StatusLabelTone } from '../../utils/statusLabels';
 
 export type StatusType =
   | 'ACTIVE' | 'INACTIVE' | 'COMPLETED' | 'CANCELLED'
@@ -16,13 +16,15 @@ interface StatusBadgeProps {
   className?: string;
   showLabel?: boolean;
   customLabel?: string;
+  tone?: StatusLabelTone;
+  domain?: StatusLabelDomain;
 }
 
 export { getStatusLabel };
 
-export default function StatusBadge({ status, className = '', showLabel = true, customLabel }: StatusBadgeProps) {
+export default function StatusBadge({ status, className = '', showLabel = true, customLabel, tone, domain }: StatusBadgeProps) {
   const normalizedStatus = typeof status === 'string' ? status.toUpperCase() : status;
-  const label = getStatusLabel(normalizedStatus, customLabel);
+  const label = getStatusLabel(normalizedStatus, customLabel, { tone, domain });
   const variant = getStatusVariant(normalizedStatus);
 
   return (

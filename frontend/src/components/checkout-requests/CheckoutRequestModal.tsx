@@ -35,18 +35,18 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
     setError('');
 
     if (!requestedCheckOutDate) {
-      setError('Tanggal rencana checkout wajib diisi.');
+      setError('Tanggal rencana keluar wajib diisi.');
       return;
     }
 
     const minDate = getMinDate();
     if (requestedCheckOutDate < minDate) {
-      setError('Tanggal rencana checkout minimal H+1 dari hari ini.');
+      setError('Tanggal rencana keluar minimal H+1 dari hari ini.');
       return;
     }
 
     if (!checkoutReason.trim()) {
-      setError('Alasan checkout wajib diisi.');
+      setError('Alasan keluar wajib diisi.');
       return;
     }
 
@@ -62,7 +62,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
       handleClose();
     } catch (err: any) {
       const status = err?.response?.status;
-      const message = err?.response?.data?.message ?? 'Gagal mengajukan permintaan checkout.';
+      const message = err?.response?.data?.message ?? 'Gagal mengajukan rencana keluar.';
       setError(message);
       // 409 Conflict: already has pending request; refetch to show status card
       if (status === 409) {
@@ -86,7 +86,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
         ) : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tanggal Rencana Checkout</Form.Label>
+          <Form.Label>Tanggal Rencana Keluar</Form.Label>
           <Form.Control
             type="date"
             value={requestedCheckOutDate}
@@ -99,7 +99,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Alasan Checkout</Form.Label>
+          <Form.Label>Alasan Keluar</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}

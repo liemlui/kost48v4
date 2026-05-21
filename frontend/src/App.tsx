@@ -35,6 +35,7 @@ import CheckInWizard from './pages/stays/CheckInWizard';
 import StayDetailPage from './pages/stays/StayDetailPage';
 import StaysPage from './pages/stays/StaysPage';
 import TicketsPage from './pages/tickets/TicketsPage';
+import StaffRoutinesAdminPage from './pages/staff-routines/StaffRoutinesAdminPage';
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -104,6 +105,7 @@ export default function App() {
           <Route path="/announcements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.announcements} /></RequireRoles>} />
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['meter-readings']} /></RequireRoles>} />
           <Route path="/tickets" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><TicketsPage /></RequireRoles>} />
+          <Route path="/staff-routines" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaffRoutinesAdminPage /></RequireRoles>} />
           <Route path="/inventory-items" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['inventory-items']} /></RequireRoles>} />
           <Route path="/room-items" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['room-items']} /></RequireRoles>} />
           <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['inventory-movements']} /></RequireRoles>} />

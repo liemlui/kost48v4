@@ -25,3 +25,6 @@ export enum BookingDepositPaymentStatus { UNPAID = 'UNPAID', PARTIAL = 'PARTIAL'
 export enum RenewRequestStatus { PENDING = 'PENDING', APPROVED = 'APPROVED', REJECTED = 'REJECTED' }
 
 export enum CheckoutRequestStatus { PENDING = 'PENDING', APPROVED = 'APPROVED', REJECTED = 'REJECTED' }
+export enum StaffRoutineFrequency { DAILY = 'DAILY', WEEKLY = 'WEEKLY', MONTHLY = 'MONTHLY' }
+export enum StaffRoutineAreaType { GENERAL = 'GENERAL', BATHROOM = 'BATHROOM', ROOM = 'ROOM', INVENTORY = 'INVENTORY', METER = 'METER', SECURITY = 'SECURITY', CLEANING = 'CLEANING' }
+export enum StaffRoutineStatus { DONE = 'DONE', NEED_HELP = 'NEED_HELP', MISSED = 'MISSED', SKIPPED = 'SKIPPED' }

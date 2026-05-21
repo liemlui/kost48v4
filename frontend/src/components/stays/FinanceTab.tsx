@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstrap';
 import { useInvoices } from '../../hooks/useInvoices';
 import { Invoice, Stay } from '../../types';
 import CreateInvoiceModal from './CreateInvoiceModal';
@@ -14,6 +14,13 @@ function isOverdue(invoice: Invoice) {
   const status = invoice.status;
   if (status === 'PAID' || status === 'CANCELLED') return false;
   return new Date(invoice.dueDate).getTime() < new Date(new Date().toISOString().slice(0, 10)).getTime();
+}
+
+function extractActionError(error: unknown, fallback: string) {
+  const message = error && typeof error === 'object' && 'response' in error
+    ? ((error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? fallback)
+    : fallback;
+  return Array.isArray(message) ? message.join(', ') : message;
 }
 
 function paidAmount(invoice: Invoice): number | null {
@@ -38,36 +45,45 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'ALL' | 'OPEN' | 'OVERDUE' | 'PAID'>('ALL');
   const [actionError, setActionError] = useState('');
-  const { data, isLoading, isError, cancelMutation } = useInvoices(stay.id, enabled);
+  const [cancelTarget, setCancelTarget] = useState<Invoice | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const { data, isLoading, isError, cancelMutation, issueMutation } = useInvoices(stay.id, enabled);
   const invoices = data?.items ?? [];
   const overdueCount = useMemo(() => invoices.filter(isOverdue).length, [invoices]);
 
-  const handleCancelInvoice = async (invoice: Invoice) => {
-    const defaultReason = `Dibatalkan dari stay ${stay.id}`;
-    const input = window.prompt(
-      `Masukkan alasan pembatalan untuk ${invoice.invoiceNumber || `INV-${invoice.id}`}`,
-      defaultReason,
-    );
+  const openCancelInvoiceModal = (invoice: Invoice) => {
+    setActionError('');
+    setCancelTarget(invoice);
+    setCancelReason(`Dibatalkan dari stay ${stay.id}`);
+  };
 
-    if (input === null) return;
-
-    const cancelReason = input.trim();
-    if (!cancelReason) {
+  const handleConfirmCancelInvoice = async () => {
+    if (!cancelTarget) return;
+    const reason = cancelReason.trim();
+    if (!reason) {
       setActionError('Alasan pembatalan invoice wajib diisi.');
       return;
     }
 
     setActionError('');
     try {
-      await cancelMutation.mutateAsync({ invoiceId: invoice.id, payload: { cancelReason } });
-      if (selectedInvoiceId === invoice.id) {
+      await cancelMutation.mutateAsync({ invoiceId: cancelTarget.id, payload: { cancelReason: reason } });
+      if (selectedInvoiceId === cancelTarget.id) {
         setSelectedInvoiceId(null);
       }
+      setCancelTarget(null);
+      setCancelReason('');
     } catch (error: unknown) {
-      const message = error && typeof error === 'object' && 'response' in error
-        ? ((error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Gagal membatalkan invoice.')
-        : 'Gagal membatalkan invoice.';
-      setActionError(Array.isArray(message) ? message.join(', ') : message);
+      setActionError(extractActionError(error, 'Gagal membatalkan invoice.'));
+    }
+  };
+
+  const handleIssueInvoice = async (invoice: Invoice) => {
+    setActionError('');
+    try {
+      await issueMutation.mutateAsync(invoice.id);
+    } catch (error: unknown) {
+      setActionError(extractActionError(error, 'Gagal menerbitkan invoice.'));
     }
   };
 
@@ -187,14 +203,24 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                       <div className="d-flex gap-2 flex-wrap">
                         <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button>
                         {invoice.status === 'DRAFT' ? (
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            onClick={() => void handleCancelInvoice(invoice)}
-                            disabled={cancelMutation.isPending}
-                          >
-                            {cancelMutation.isPending ? 'Membatalkan...' : 'Cancel Invoice'}
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => void handleIssueInvoice(invoice)}
+                              disabled={issueMutation.isPending}
+                            >
+                              {issueMutation.isPending ? 'Menerbitkan...' : 'Terbitkan'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={() => openCancelInvoiceModal(invoice)}
+                              disabled={cancelMutation.isPending}
+                            >
+                              Batalkan
+                            </Button>
+                          </>
                         ) : null}
                       </div>
                     </td>
@@ -208,6 +234,56 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
 
       <CreateInvoiceModal show={showCreateModal} onHide={() => setShowCreateModal(false)} stay={stay} />
       <InvoiceDetailDrawer invoiceId={selectedInvoiceId} show={selectedInvoiceId !== null} onHide={() => setSelectedInvoiceId(null)} />
+
+      <Modal
+        show={Boolean(cancelTarget)}
+        onHide={() => {
+          if (!cancelMutation.isPending) {
+            setCancelTarget(null);
+            setCancelReason('');
+          }
+        }}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Batalkan Invoice</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-muted small">
+            Anda akan membatalkan invoice <strong>{cancelTarget?.invoiceNumber || (cancelTarget ? `INV-${cancelTarget.id}` : '-')}</strong>.
+            Invoice yang dibatalkan tidak lagi menjadi tagihan aktif tenant.
+          </p>
+          <Form.Group>
+            <Form.Label>Alasan Pembatalan</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Contoh: Invoice salah periode, akan dibuat ulang."
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setCancelTarget(null);
+              setCancelReason('');
+            }}
+            disabled={cancelMutation.isPending}
+          >
+            Batal
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => void handleConfirmCancelInvoice()}
+            disabled={cancelMutation.isPending}
+          >
+            {cancelMutation.isPending ? 'Membatalkan...' : 'Batalkan Invoice'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Card>
   );
 }

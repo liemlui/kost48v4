@@ -8,6 +8,7 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import MeterTab from '../../components/stays/MeterTab';
+import StaffActionLauncher from '../../components/staff/StaffActionLauncher';
 import FacilityManager from '../../components/rooms/FacilityManager';
 import { useAuth } from '../../context/AuthContext';
 import type { Room, RoomItem, Stay } from '../../types';
@@ -50,6 +51,8 @@ export default function RoomDetailPage() {
   const activeStay = room?.currentStay ?? activeStayQuery.data?.items?.[0] ?? null;
   const roomItems = roomItemsQuery.data?.items ?? [];
   const readings = meterQuery.data ?? [];
+  const isStaff = user?.role === 'STAFF';
+  const staffRoom = room ? { ...room, currentStay: activeStay } : null;
 
   const totalInventoryQty = useMemo(
     () => roomItems.reduce((sum, item) => sum + Number(item.qty ?? 0), 0),
@@ -65,17 +68,17 @@ export default function RoomDetailPage() {
   }
 
   return (
-    <div>
+    <div className={isStaff ? 'staff-simple-mode' : undefined}>
       <Breadcrumb className="mb-3">
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/dashboard' }}>Dashboard</Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/rooms' }}>Rooms</Breadcrumb.Item>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/dashboard' }}>Beranda</Breadcrumb.Item>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/rooms' }}>Kamar</Breadcrumb.Item>
         <Breadcrumb.Item active>{room.code}</Breadcrumb.Item>
       </Breadcrumb>
 
       <PageHeader
-        eyebrow="Room detail"
+        eyebrow="Detail Kamar"
         title={`${room.code}${room.name ? ` · ${room.name}` : ''}`}
-        description={`Lantai ${formatValue(room.floor)} · Status ${room.status}`}
+        description={isStaff ? `Lantai ${formatValue(room.floor)} · cek kamar dan catat bila ada masalah` : `Lantai ${formatValue(room.floor)} · Status kamar: ${room.status}`}
       />
 
       <Card className="detail-hero border-0 mb-4">
@@ -83,31 +86,45 @@ export default function RoomDetailPage() {
           <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
             <div className="d-flex gap-2 flex-wrap align-items-center">
               <StatusBadge status={room.status} />
-              <StatusBadge status={room.isActive === false ? 'INACTIVE' : 'ACTIVE'} customLabel={room.isActive === false ? 'Master nonaktif' : 'Master aktif'} />
+              <StatusBadge status={room.isActive === false ? 'INACTIVE' : 'ACTIVE'} customLabel={room.isActive === false ? 'Data nonaktif' : 'Data aktif'} />
             </div>
-            {activeStay ? (
+            {activeStay && !isStaff ? (
               <Button variant="outline-primary" onClick={() => navigate(`/stays/${activeStay.id}`)}>
-                Lihat Stay Aktif
+                Lihat Penghuni
               </Button>
             ) : null}
           </div>
 
+          {isStaff && staffRoom ? <StaffActionLauncher fixedRoom={staffRoom} compact /> : null}
+
           <div className="metric-grid">
+            {!isStaff ? (
+              <>
+                <div className="metric-tile">
+                  <div className="metric-tile-label">Tarif bulanan</div>
+                  <div className="metric-tile-value"><CurrencyDisplay amount={room.monthlyRateRupiah} /></div>
+                </div>
+                <div className="metric-tile">
+                  <div className="metric-tile-label">Deposit default</div>
+                  <div className="metric-tile-value"><CurrencyDisplay amount={room.defaultDepositRupiah} /></div>
+                </div>
+              </>
+            ) : null}
             <div className="metric-tile">
-              <div className="metric-tile-label">Tarif bulanan</div>
-              <div className="metric-tile-value"><CurrencyDisplay amount={room.monthlyRateRupiah} /></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-tile-label">Deposit default</div>
-              <div className="metric-tile-value"><CurrencyDisplay amount={room.defaultDepositRupiah} /></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-tile-label">Barang terpasang</div>
+              <div className="metric-tile-label">Barang kamar</div>
               <div className="metric-tile-value">{totalInventoryQty}</div>
             </div>
             <div className="metric-tile">
               <div className="metric-tile-label">Penghuni aktif</div>
               <div className="metric-tile-value">{activeStay?.tenant?.fullName ?? 'Kosong'}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-tile-label">Lantai</div>
+              <div className="metric-tile-value">{formatValue(room.floor)}</div>
+            </div>
+            <div className="metric-tile">
+              <div className="metric-tile-label">Status</div>
+              <div className="metric-tile-value">{room.status}</div>
             </div>
           </div>
         </Card.Body>
@@ -130,10 +147,21 @@ export default function RoomDetailPage() {
                   <div className="col-md-6">
                     <div className="text-muted small">Penghuni aktif</div>
                     <div className="fw-semibold mb-3">{activeStay?.tenant?.fullName ?? 'Tidak ada'}</div>
-                    <div className="text-muted small">Tarif listrik / kWh</div>
-                    <div className="fw-semibold mb-3"><CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /></div>
-                    <div className="text-muted small">Tarif air / m³</div>
-                    <div className="fw-semibold"><CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /></div>
+                    {isStaff ? (
+                      <>
+                        <div className="text-muted small">Yang perlu dicek</div>
+                        <div className="fw-semibold mb-3">Barang kamar, kondisi kamar, dan meter</div>
+                        <div className="text-muted small">Catatan kerja</div>
+                        <div className="fw-semibold">Jika ada masalah, gunakan tombol laporan di atas.</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-muted small">Tarif listrik / kWh</div>
+                        <div className="fw-semibold mb-3"><CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /></div>
+                        <div className="text-muted small">Tarif air / m³</div>
+                        <div className="fw-semibold"><CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /></div>
+                      </>
+                    )}
                   </div>
                 </div>
                 {room.notes ? (
@@ -151,7 +179,7 @@ export default function RoomDetailPage() {
             <Card className="content-card border-0">
               <Card.Body>
                 {roomItemsQuery.isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
-                {roomItemsQuery.isError ? <Alert variant="danger">Gagal memuat room items.</Alert> : null}
+                {roomItemsQuery.isError ? <Alert variant="danger">Gagal memuat barang kamar.</Alert> : null}
                 {!roomItemsQuery.isLoading && !roomItemsQuery.isError && !roomItems.length ? (
                   <Alert variant="secondary" className="mb-0">Belum ada inventaris yang terpasang pada kamar ini.</Alert>
                 ) : null}
@@ -160,21 +188,23 @@ export default function RoomDetailPage() {
                     <thead>
                       <tr>
                         <th>Barang</th>
-                        <th>Qty</th>
+                        <th>Jumlah</th>
                         <th>Status</th>
                         <th>Catatan</th>
+                        {isStaff ? <th>Aksi</th> : null}
                       </tr>
                     </thead>
                     <tbody>
                       {roomItems.map((item) => (
                         <tr key={item.id}>
                           <td>
-                            <div className="fw-semibold">{item.item?.name ?? `Item #${item.itemId}`}</div>
+                            <div className="fw-semibold">{item.item?.name ?? `Barang #${item.itemId}`}</div>
                             <div className="small text-muted">{item.item?.sku ?? `ID ${item.itemId}`}</div>
                           </td>
                           <td>{Number(item.qty ?? 0)}</td>
                           <td><StatusBadge status={item.status ?? 'SECONDARY'} /></td>
                           <td>{item.note ?? '-'}</td>
+                          {isStaff ? <td><Button size="sm" variant="outline-danger" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Laporkan di atas</Button></td> : null}
                         </tr>
                       ))}
                     </tbody>
@@ -205,6 +235,7 @@ export default function RoomDetailPage() {
               readings={readings}
               isLoading={meterQuery.isLoading}
               isError={meterQuery.isError}
+              simpleMode={isStaff}
             />
           </div>
         </Tab>

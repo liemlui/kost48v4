@@ -22,7 +22,7 @@ function formatDateTime(value?: string | null) {
 
 function formatPeriod(start?: string, end?: string) {
   if (!start && !end) return '-';
-  return `${formatDateTime(start)} – ${formatDateTime(end)}`;
+  return `${formatDateTime(start)} – sebelum ${formatDateTime(end)}`;
 }
 
 export default function InvoiceDetailDrawer({
@@ -53,7 +53,7 @@ export default function InvoiceDetailDrawer({
             <>
               <div className="mb-4">
                 <div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div>
-                <div className="text-muted small">Periode {formatPeriod(invoice.periodStart, invoice.periodEnd)}</div>
+                <div className="text-muted small">Periode sewa {formatPeriod(invoice.periodStart, invoice.periodEnd)}</div>
                 <div className="mt-2"><StatusBadge status={invoice.status} /></div>
               </div>
 

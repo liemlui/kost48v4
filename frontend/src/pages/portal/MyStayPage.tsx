@@ -6,6 +6,7 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
 import { getResource, listResource } from '../../api/resources';
 import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
@@ -13,7 +14,7 @@ import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
-import type { ApiEnvelope, PaginatedResponse } from '../../types';
+import type { PaginatedResponse } from '../../types';
 import type { CheckoutRequest, Invoice, RenewRequest, Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
 
@@ -21,11 +22,17 @@ function formatDate(value?: string | null) {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function daysUntil(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function DataField({ label, value }: { label: string; value: ReactNode }) {
@@ -40,6 +47,7 @@ function DataField({ label, value }: { label: string; value: ReactNode }) {
 function ActiveStayContent({ stay }: { stay: Stay }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['my-renew-requests', stay.id],
@@ -47,7 +55,6 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     refetchOnWindowFocus: true,
   });
 
-  // ── Payment urgency gate ──────────────────────
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
     queryKey: ['my-invoices', stay.id],
     queryFn: () => listResource<Invoice>('/invoices/my'),
@@ -56,79 +63,12 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     retry: false,
   });
 
-  const overdueInvoice = useMemo(() => {
-    const items = invoicesQuery.data?.items ?? [];
-    if (!items.length || invoicesQuery.isError) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    for (const inv of items) {
-      if (inv.status !== 'ISSUED' && inv.status !== 'PARTIAL') continue;
-      if (!inv.dueDate) continue;
-      const due = new Date(inv.dueDate);
-      due.setHours(0, 0, 0, 0);
-      if (due < today) return inv;
-    }
-    return null;
-  }, [invoicesQuery.data, invoicesQuery.isError]);
-
-  const anyUnpaidInvoice = useMemo(() => {
-    const items = invoicesQuery.data?.items ?? [];
-    if (!items.length || invoicesQuery.isError) return null;
-    return items.find((inv) => inv.status === 'ISSUED' || inv.status === 'PARTIAL') ?? null;
-  }, [invoicesQuery.data, invoicesQuery.isError]);
-
-  // ── Pending review gate ──────────────────────
   const submissionsQuery = useQuery({
     queryKey: ['my-payment-submissions'],
     queryFn: () => listMyPaymentSubmissions(),
     staleTime: 30_000,
     refetchOnWindowFocus: true,
   });
-  const hasPendingReviewForUnpaid = useMemo(() => {
-    if (!anyUnpaidInvoice) return false;
-    const items = submissionsQuery.data?.items ?? [];
-    return items.some((s: any) => s.invoiceId === anyUnpaidInvoice.id && s.status === 'PENDING_REVIEW');
-  }, [submissionsQuery.data, anyUnpaidInvoice]);
-
-  const dueSoonInvoice = useMemo(() => {
-    const items = invoicesQuery.data?.items ?? [];
-    if (!items.length || invoicesQuery.isError || overdueInvoice) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const threeDaysFromNow = new Date(today);
-    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-    for (const inv of items) {
-      if (inv.status !== 'ISSUED' && inv.status !== 'PARTIAL') continue;
-      if (!inv.dueDate) continue;
-      const due = new Date(inv.dueDate);
-      due.setHours(0, 0, 0, 0);
-      if (due >= today && due <= threeDaysFromNow) return inv;
-    }
-    return null;
-  }, [invoicesQuery.data, invoicesQuery.isError, overdueInvoice]);
-
-  const pendingRenewRequest = (renewRequestsQuery.data?.items ?? []).find(
-    (rr: RenewRequest) => rr.stayId === stay.id && rr.status === 'PENDING',
-  );
-
-  const createRenewMutation = useMutation<RenewRequest>({
-    mutationFn: (): Promise<RenewRequest> => createRenewRequest({ stayId: stay.id, requestedTerm: 'MONTHLY' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] });
-    },
-  });
-
-  const rejectedRequest = (renewRequestsQuery.data?.items ?? []).find(
-    (rr: RenewRequest) => rr.stayId === stay.id && rr.status === 'REJECTED',
-  );
-
-  const renewData = createRenewMutation.data as RenewRequest | undefined;
-  const showRenewButton =
-    !pendingRenewRequest && !createRenewMutation.isSuccess && renewData?.status !== 'PENDING';
-  const showRejectedMessage = renewData?.status === 'REJECTED' || rejectedRequest;
-
-  // ── Checkout request ──────────────────────
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const checkoutRequestsQuery = useQuery<PaginatedResponse<CheckoutRequest>>({
     queryKey: ['my-checkout-requests', stay.id],
@@ -136,260 +76,136 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     refetchOnWindowFocus: true,
   });
 
-  const pendingCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
-    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'PENDING',
-  );
+  const invoices = invoicesQuery.data?.items ?? [];
+  const openInvoices = useMemo(() => invoices.filter((inv) => inv.status !== 'PAID' && inv.status !== 'CANCELLED'), [invoices]);
+  const anyUnpaidInvoice = openInvoices.find((inv) => inv.status === 'ISSUED' || inv.status === 'PARTIAL') ?? openInvoices[0] ?? null;
+  const overdueInvoice = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return openInvoices.find((inv) => {
+      if (!inv.dueDate) return false;
+      const due = new Date(inv.dueDate);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
+    }) ?? null;
+  }, [openInvoices]);
 
-  const approvedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
-    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'APPROVED',
-  );
+  const hasPendingReviewForUnpaid = useMemo(() => {
+    if (!anyUnpaidInvoice) return false;
+    const items = submissionsQuery.data?.items ?? [];
+    return items.some((s: any) => s.invoiceId === anyUnpaidInvoice.id && s.status === 'PENDING_REVIEW');
+  }, [submissionsQuery.data, anyUnpaidInvoice]);
 
-  const rejectedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find(
-    (cr: CheckoutRequest) => cr.stayId === stay.id && cr.status === 'REJECTED',
-  );
+  const pendingRenewRequest = (renewRequestsQuery.data?.items ?? []).find((rr) => rr.stayId === stay.id && rr.status === 'PENDING');
+  const rejectedRequest = (renewRequestsQuery.data?.items ?? []).find((rr) => rr.stayId === stay.id && rr.status === 'REJECTED');
+  const pendingCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'PENDING');
+  const approvedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
+  const rejectedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
-  const showCheckoutButton = !pendingCheckoutRequest && !approvedCheckoutRequest;
+  const createRenewMutation = useMutation({
+    mutationFn: () => createRenewRequest({ stayId: stay.id, requestedTerm: 'MONTHLY' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] }),
+  });
 
   const handleCheckoutSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['my-checkout-requests', stay.id] });
   };
 
+  const endDays = daysUntil(stay.plannedCheckOutDate);
+  const endHelper = endDays === null ? 'Tanggal akhir belum diisi' : endDays < 0 ? `Lewat ${Math.abs(endDays)} hari` : endDays === 0 ? 'Berakhir hari ini' : `${endDays} hari lagi`;
+  const canRequestRenew = !pendingRenewRequest && !anyUnpaidInvoice && !approvedCheckoutRequest && !pendingCheckoutRequest;
+  const canRequestCheckout = !pendingCheckoutRequest && !approvedCheckoutRequest && !anyUnpaidInvoice;
+
+  const assistantItems: AssistantItem[] = [
+    ...(hasPendingReviewForUnpaid ? [{ id: 'payment-review', severity: 'INFO' as const, title: 'Bukti pembayaran kamu sedang diperiksa', message: 'Tidak perlu upload ulang. Admin akan memeriksa bukti pembayaranmu terlebih dahulu.', source: 'Tagihan', actionLabel: 'Lihat Tagihan', actionTo: `/portal/invoices/${anyUnpaidInvoice?.id}` }] : []),
+    ...(anyUnpaidInvoice && !hasPendingReviewForUnpaid ? [{ id: 'pay-invoice', severity: overdueInvoice ? 'HIGH' as const : 'MEDIUM' as const, title: overdueInvoice ? 'Tagihan sudah lewat jatuh tempo' : 'Kamu punya tagihan yang perlu dibayar', message: 'Selesaikan tagihan agar perpanjangan atau proses keluar tidak terblokir.', source: 'Tagihan', actionLabel: 'Bayar Tagihan', actionTo: `/portal/invoices/${anyUnpaidInvoice.id}` }] : []),
+    ...(pendingRenewRequest ? [{ id: 'renew-pending', severity: 'MEDIUM' as const, title: 'Pengajuan perpanjangan sedang diperiksa', message: 'Admin sedang meninjau permintaan perpanjangan masa sewamu.', source: 'Perpanjangan' }] : []),
+    ...(pendingCheckoutRequest ? [{ id: 'checkout-pending', severity: 'MEDIUM' as const, title: 'Pengajuan keluar sedang diperiksa', message: 'Admin sedang meninjau tanggal keluar yang kamu ajukan.', source: 'Ajukan keluar' }] : []),
+    ...(approvedCheckoutRequest ? [{ id: 'checkout-approved', severity: 'INFO' as const, title: 'Jadwal keluar sudah disetujui', message: 'Kamu masih tercatat sebagai penghuni sampai admin menyelesaikan proses keluar.', source: 'Ajukan keluar' }] : []),
+    ...(!anyUnpaidInvoice && !pendingRenewRequest && !pendingCheckoutRequest && !approvedCheckoutRequest ? [{ id: 'stable', severity: 'SUCCESS' as const, title: 'Masa sewa aktif dan tidak ada aksi mendesak', message: 'Kamu bisa melihat tagihan, mengajukan perpanjangan, mengajukan keluar, atau melapor masalah kapan saja.', source: 'Status sewa' }] : []),
+  ];
+
+  const metrics: MetricChip[] = [
+    { id: 'room', label: 'Kamar', value: stay.room?.code ?? stay.roomId, helper: stay.room?.name ?? 'Kamar aktif', status: 'SUCCESS', icon: '🏠' },
+    { id: 'end', label: 'Akhir Masa Sewa', value: formatDate(stay.plannedCheckOutDate), helper: endHelper, status: endDays !== null && endDays <= 7 ? 'WARNING' : 'INFO', icon: '📅' },
+    { id: 'invoice', label: 'Tagihan aktif', value: openInvoices.length, helper: hasPendingReviewForUnpaid ? 'Bukti sedang diperiksa' : openInvoices.length ? 'Perlu diselesaikan' : 'Tidak ada tagihan open', status: openInvoices.length ? (hasPendingReviewForUnpaid ? 'INFO' : 'WARNING') : 'SUCCESS', icon: '🧾', to: '/portal/invoices' },
+    { id: 'deposit', label: 'Deposit', value: <CurrencyDisplay amount={stay.depositAmountRupiah} /> as any, helper: getStatusLabel(stay.depositStatus, undefined, { tone: 'tenant', domain: 'deposit' }), status: stay.depositStatus ?? 'INFO', icon: '💙' },
+  ];
+
+  const timelineSteps: TimelineStep[] = [
+    { id: 'checkin', label: 'Masuk kamar', description: `Check-in ${formatDate(stay.checkInDate)}`, status: 'done' },
+    { id: 'active', label: 'Masa sewa aktif', description: `Status: ${getStatusLabel(stay.status, undefined, { tone: 'tenant', domain: 'stay' })}`, status: 'active' },
+    { id: 'billing', label: 'Tagihan', description: openInvoices.length ? `${openInvoices.length} tagihan masih perlu diselesaikan.` : 'Tidak ada tagihan open.', status: openInvoices.length ? 'pending' : 'done' },
+    { id: 'future', label: 'Perpanjang atau keluar', description: 'Pilih aksi sesuai rencana tinggalmu.', status: approvedCheckoutRequest ? 'active' : 'pending' },
+  ];
+
   return (
     <>
+      <AssistantPanel title="My Stay Guide" subtitle="Asisten sederhana untuk melihat status sewa, tagihan, dan aksi berikutnya." items={assistantItems} maxItems={4} />
+      <CompactMetrics metrics={metrics} />
+
+      {anyUnpaidInvoice ? (
+        <BlockedReasonCard
+          title={hasPendingReviewForUnpaid ? 'Bukti pembayaran sedang diperiksa' : 'Ada tagihan yang perlu diselesaikan'}
+          reason={hasPendingReviewForUnpaid ? 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.' : 'Perpanjangan dan pengajuan keluar sebaiknya dilakukan setelah tagihan diselesaikan agar proses tidak terblokir.'}
+          actionLabel="Lihat Tagihan"
+          actionTo={`/portal/invoices/${anyUnpaidInvoice.id}`}
+          variant={hasPendingReviewForUnpaid ? 'INFO' : 'DANGER'}
+        />
+      ) : null}
+
       <Card className="detail-hero border-0 mb-4">
         <Card.Body>
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div>
+              <div className="command-eyebrow">Status tinggal</div>
+              <h3 className="mb-1">Kamar {stay.room?.code ?? stay.roomId}</h3>
+              <div className="app-caption">Masa sewa aktif sejak {formatDate(stay.checkInDate)}</div>
+            </div>
             <div className="d-flex flex-wrap gap-2">
-              <StatusBadge status={stay.status} />
-              {stay.depositStatus ? <StatusBadge status={stay.depositStatus} /> : null}
-            </div>
-            <div className="app-caption">Kamar {stay.room?.code ?? stay.roomId} · Check-in {formatDate(stay.checkInDate)}</div>
-          </div>
-
-          <div className="metric-grid">
-            <div className="metric-tile">
-              <div className="metric-tile-label">Sewa Bulanan</div>
-              <div className="metric-tile-value"><CurrencyDisplay amount={stay.agreedRentAmountRupiah} /></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-tile-label">Deposit</div>
-              <div className="metric-tile-value"><CurrencyDisplay amount={stay.depositAmountRupiah} /></div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-tile-label">Rencana Checkout</div>
-              <div className="metric-tile-value">{formatDate(stay.plannedCheckOutDate)}</div>
-            </div>
-            <div className="metric-tile">
-              <div className="metric-tile-label">Status Deposit</div>
-              <div className="metric-tile-value">{getStatusLabel(stay.depositStatus)}</div>
+              <StatusBadge status={stay.status} tone="tenant" domain="stay" />
+              {stay.depositStatus ? <StatusBadge status={stay.depositStatus} tone="tenant" domain="deposit" /> : null}
             </div>
           </div>
+          <div className="tenant-action-grid">
+            <Button variant="primary" onClick={() => navigate('/portal/invoices')}>Lihat Tagihan</Button>
+            <Button variant="outline-primary" onClick={() => anyUnpaidInvoice ? navigate(`/portal/invoices/${anyUnpaidInvoice.id}`) : navigate('/portal/invoices')} disabled={!anyUnpaidInvoice || hasPendingReviewForUnpaid}>{hasPendingReviewForUnpaid ? 'Sedang Diperiksa' : 'Bayar Tagihan'}</Button>
+            <Button variant="outline-primary" onClick={() => createRenewMutation.mutate()} disabled={!canRequestRenew || createRenewMutation.isPending}>{createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}</Button>
+            <Button variant="outline-warning" onClick={() => setShowCheckoutModal(true)} disabled={!canRequestCheckout}>Ajukan Keluar</Button>
+            <Button variant="outline-secondary" onClick={() => navigate('/portal/tickets')}>Lapor Masalah</Button>
+          </div>
+          {createRenewMutation.isError ? <Alert variant="danger" className="mt-3 small">{(createRenewMutation.error as any)?.response?.data?.message ?? 'Gagal mengajukan perpanjangan.'}</Alert> : null}
         </Card.Body>
       </Card>
 
-      {/* ── Unpaid Invoice Alert ── */}
-      {anyUnpaidInvoice && hasPendingReviewForUnpaid ? (
-        <Alert variant="info" className="mb-4">
-          <strong>⏳ Bukti Pembayaran Sedang Direview</strong>
-          <br />
-          <span className="small">
-            Bukti pembayaran untuk invoice {anyUnpaidInvoice.invoiceNumber || `INV-${anyUnpaidInvoice.id}`} telah dikirim dan sedang menunggu verifikasi admin.
-          </span>
-        </Alert>
-      ) : anyUnpaidInvoice ? (
-        <Alert variant={overdueInvoice ? 'danger' : 'warning'} className="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <div>
-            <strong>{overdueInvoice ? '⚠️ Tagihan Sudah Jatuh Tempo' : '📋 Ada Tagihan Belum Lunas'}</strong>
-            <br />
-            <span className="small">
-              {overdueInvoice
-                ? `Invoice ${anyUnpaidInvoice.invoiceNumber || `INV-${anyUnpaidInvoice.id}`} sudah lewat jatuh tempo. Harap segera melakukan pembayaran.`
-                : `Anda memiliki tagihan yang belum lunas. Silakan lakukan pembayaran untuk menghindari keterlambatan.`}
-            </span>
-          </div>
-          <Button
-            variant={overdueInvoice ? 'danger' : 'primary'}
-            size="sm"
-            onClick={() => navigate(`/portal/invoices/${anyUnpaidInvoice.id}`)}
-          >
-            💳 Bayar Sekarang
-          </Button>
-        </Alert>
-      ) : null}
-
-      {/* Perpanjangan */}
-      {showRenewButton ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <h5 className="mb-2">Ajukan Perpanjangan</h5>
-            <p className="text-muted small mb-3">
-              Ajukan permintaan perpanjangan masa tinggal Anda. Admin akan meninjau dan menyetujui permintaan Anda.
-            </p>
-            {anyUnpaidInvoice ? (
-              <Alert variant="danger" className="small">
-                Anda memiliki tagihan yang belum lunas. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan perpanjangan.
-              </Alert>
-            ) : null}
-            <Button
-              variant="primary"
-              onClick={() => createRenewMutation.mutate()}
-              disabled={createRenewMutation.isPending || Boolean(anyUnpaidInvoice)}
-            >
-              {createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}
-            </Button>
-            {createRenewMutation.isError ? (
-              <Alert variant="danger" className="mt-2 small">
-                {(createRenewMutation.error as any)?.response?.data?.message ?? 'Gagal mengajukan perpanjangan.'}
-              </Alert>
-            ) : null}
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {pendingRenewRequest ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <h5 className="mb-2">Permintaan Perpanjangan</h5>
-            <Alert variant="info" className="small">
-              Permintaan perpanjangan Anda sedang <strong>Menunggu Persetujuan</strong> admin.
-              {pendingRenewRequest.requestedCheckOutDate
-                ? ` Tanggal checkout yang diajukan: ${formatDate(pendingRenewRequest.requestedCheckOutDate)}.`
-                : ''}
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {createRenewMutation.isSuccess && renewData?.status === 'APPROVED' ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <Alert variant="success" className="small">
-              Permintaan perpanjangan Anda telah <strong>Disetujui</strong>. Masa tinggal Anda telah diperpanjang.
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {showRejectedMessage ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <Alert variant="warning" className="small">
-              Permintaan perpanjangan Anda telah <strong>Ditolak</strong>.
-              {rejectedRequest?.reviewNotes ? ` Alasan: ${rejectedRequest.reviewNotes}` : ''}
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {/* Rencana Keluar Kamar */}
-      {showCheckoutButton ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <h5 className="mb-2">Ajukan Rencana Keluar Kamar</h5>
-            <p className="text-muted small mb-3">
-              Rencanakan keluar lebih awal dengan mengajukan rencana keluar kamar. Admin akan meninjau pengajuan Anda. Persetujuan admin hanya menyetujui jadwal — kamu masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
-            </p>
-            {anyUnpaidInvoice ? (
-              <Alert variant="danger" className="small">
-                Anda memiliki tagihan yang belum lunas. Silakan selesaikan pembayaran terlebih dahulu sebelum mengajukan checkout.
-              </Alert>
-            ) : null}
-            <Button
-              variant="outline-warning"
-              onClick={() => setShowCheckoutModal(true)}
-              disabled={Boolean(anyUnpaidInvoice)}
-            >
-              Ajukan Rencana Keluar
-            </Button>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {pendingCheckoutRequest ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <h5 className="mb-2">Pengajuan Keluar Kamar</h5>
-            <Alert variant="info" className="small">
-              Pengajuan keluar kamu sedang <strong>Menunggu Review</strong> admin.
-              {pendingCheckoutRequest.requestedCheckOutDate
-                ? ` Tanggal keluar yang diajukan: ${formatDate(pendingCheckoutRequest.requestedCheckOutDate)}.`
-                : ''}
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {approvedCheckoutRequest ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <h5 className="mb-2">Rencana Keluar Kamar — Rencana Disetujui</h5>
-            <Alert variant="info" className="small">
-              Jadwal checkout telah disetujui. Kamu masih tercatat sebagai penghuni sampai admin menjalankan Checkout Final.
-              {approvedCheckoutRequest.requestedCheckOutDate
-                ? ` Tanggal checkout yang diajukan: ${formatDate(approvedCheckoutRequest.requestedCheckOutDate)}.`
-                : ''}
-              {approvedCheckoutRequest.reviewNotes ? ` Catatan: ${approvedCheckoutRequest.reviewNotes}` : ''}
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      {rejectedCheckoutRequest ? (
-        <Card className="content-card border-0 mb-4">
-          <Card.Body>
-            <Alert variant="warning" className="small">
-              Pengajuan keluar kamu telah <strong>Ditolak</strong>.
-              {rejectedCheckoutRequest.reviewNotes ? ` Alasan: ${rejectedCheckoutRequest.reviewNotes}` : ''}
-            </Alert>
-          </Card.Body>
-        </Card>
-      ) : null}
-
-      <CheckoutRequestModal
-        show={showCheckoutModal}
-        onHide={() => setShowCheckoutModal(false)}
-        onSuccess={handleCheckoutSuccess}
-        stay={stay}
-      />
-
       <Row className="g-4 mb-4">
-        <Col lg={6}>
+        <Col lg={7}><LifecycleTimeline title="Alur Masa Sewa" subtitle="Ringkasan proses yang sedang berjalan." steps={timelineSteps} /></Col>
+        <Col lg={5}>
           <Card className="content-card border-0 h-100">
             <Card.Body>
-              <h5 className="mb-3">Informasi Kamar</h5>
-              <Row>
-                <Col md={6}>
-                  <DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} />
-                  <DataField label="Nama Kamar" value={stay.room?.name ?? '-'} />
-                  <DataField label="Lantai" value={stay.room?.floor ?? '-'} />
-                </Col>
-                <Col md={6}>
-                  <DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} />
-                  <DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
-                  <DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} />
-                  <DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} />
-                </Col>
-              </Row>
+              <div className="panel-title mb-1">Status Pengajuan</div>
+              <div className="panel-subtitle mb-3">Ringkasan perpanjangan dan ajukan keluar.</div>
+              <div className="kpi-list">
+                <div className="kpi-item"><span>Perpanjangan</span><strong>{pendingRenewRequest ? 'Sedang diperiksa' : rejectedRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
+                <div className="kpi-item"><span>Ajukan keluar</span><strong>{approvedCheckoutRequest ? 'Disetujui' : pendingCheckoutRequest ? 'Sedang diperiksa' : rejectedCheckoutRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
+                <div className="kpi-item"><span>Akhir masa sewa</span><strong>{formatDate(stay.plannedCheckOutDate)}</strong></div>
+              </div>
+              {pendingRenewRequest ? <Alert variant="info" className="small mt-3 mb-0">Pengajuan perpanjangan sedang diperiksa admin.{pendingRenewRequest.requestedCheckOutDate ? ` Tanggal yang diajukan: ${formatDate(pendingRenewRequest.requestedCheckOutDate)}.` : ''}</Alert> : null}
+              {approvedCheckoutRequest ? <Alert variant="info" className="small mt-3 mb-0">Jadwal keluar disetujui. Proses keluar selesai hanya setelah admin finalisasi dan tagihan clear.</Alert> : null}
+              {rejectedCheckoutRequest ? <Alert variant="warning" className="small mt-3 mb-0">Pengajuan keluar ditolak.{rejectedCheckoutRequest.reviewNotes ? ` Alasan: ${rejectedCheckoutRequest.reviewNotes}` : ''}</Alert> : null}
             </Card.Body>
           </Card>
         </Col>
+      </Row>
 
+      <CheckoutRequestModal show={showCheckoutModal} onHide={() => setShowCheckoutModal(false)} onSuccess={handleCheckoutSuccess} stay={stay} />
+
+      <Row className="g-4 mb-4">
         <Col lg={6}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <h5 className="mb-3">Ketentuan Stay</h5>
-              <Row>
-                <Col md={6}>
-                  <DataField label="Pricing Term" value={getStatusLabel(stay.pricingTerm)} />
-                  <DataField label="Booking Source" value={stay.bookingSource ?? '-'} />
-                </Col>
-                <Col md={6}>
-                  <DataField label="Tujuan Tinggal" value={stay.stayPurpose ?? '-'} />
-                  <DataField label="Catatan" value={stay.notes ?? '-'} />
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Informasi Kamar</h5><Row><Col md={6}><DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} /><DataField label="Nama Kamar" value={stay.room?.name ?? '-'} /><DataField label="Lantai" value={stay.room?.floor ?? '-'} /></Col><Col md={6}><DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} /><DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} /><DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} /><DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} /></Col></Row></Card.Body></Card>
+        </Col>
+        <Col lg={6}>
+          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Detail Masa Sewa</h5><Row><Col md={6}><DataField label="Jenis sewa" value={getStatusLabel(stay.pricingTerm)} /><DataField label="Sumber booking" value={stay.bookingSource ?? '-'} /></Col><Col md={6}><DataField label="Tujuan tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} /><DataField label="Catatan" value={stay.notes ?? '-'} /></Col></Row></Card.Body></Card>
         </Col>
       </Row>
     </>
@@ -400,7 +216,6 @@ export default function MyStayPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { stage } = useTenantPortalStage();
-
   const userId = user?.id;
   const tenantId = user?.tenantId;
 
@@ -409,91 +224,38 @@ export default function MyStayPage() {
     queryFn: () => getResource<Stay>('/stays/me/current'),
     enabled: Boolean(userId),
     retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 30_000,
   });
 
   const stay = query.data;
-
-  const stayBelongsToUser = stay
-    ? stay.tenantId === tenantId
-    : false;
+  const stayBelongsToUser = stay ? stay.tenantId === tenantId : false;
 
   if (stay && !stayBelongsToUser && import.meta.env.DEV) {
-    console.warn(
-      '[MyStayPage] Returned stay tenantId mismatch:',
-      { stayTenantId: stay.tenantId, currentUserTenantId: tenantId },
-    );
+    console.warn('[MyStayPage] Returned stay tenantId mismatch:', { stayTenantId: stay.tenantId, currentUserTenantId: tenantId });
   }
 
-  const roomStatusOccupied = stay && stayBelongsToUser
-    ? (stay.room?.status ?? '').toUpperCase() === 'OCCUPIED'
-    : false;
+  const roomStatusOccupied = stay && stayBelongsToUser ? (stay.room?.status ?? '').toUpperCase() === 'OCCUPIED' : false;
 
   return (
     <div>
-      <PageHeader title="Hunian Saya" description="Informasi kamar dan masa tinggal aktif Anda." />
-
+      <PageHeader title="My Stay Guide" description="Panduan status masa sewa, tagihan, dan aksi yang bisa kamu lakukan." />
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? (() => {
         const error = query.error as any;
         const status = error?.response?.status;
         const message = error?.response?.data?.message;
-
         if (status === 404) {
-          if (stage === 'booking') {
-            return (
-              <EmptyState
-                icon="📅"
-                title="Anda memiliki pemesanan aktif"
-                description="Selesaikan proses booking Anda terlebih dahulu sebelum dapat mengakses halaman hunian."
-                action={{ label: 'Lihat Pemesanan Saya', onClick: () => navigate('/portal/bookings') }}
-              />
-            );
-          }
-          return (
-            <EmptyState
-              icon="🛏️"
-              title="Anda belum menempati kamar"
-              description="Silakan pilih kamar dari katalog publik untuk memulai proses booking."
-              action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }}
-            />
-          );
+          if (stage === 'booking') return <EmptyState icon="📅" title="Kamu memiliki pemesanan aktif" description="Selesaikan proses booking dulu sebelum masuk ke panduan masa sewa." action={{ label: 'Lihat Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} />;
+          return <EmptyState icon="🛏️" title="Kamu belum menempati kamar" description="Pilih kamar dari katalog publik untuk memulai proses booking." action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }} />;
         }
-
-        return (
-          <Alert variant="danger" className="mt-4">
-            <div className="fw-semibold">Gagal memuat data hunian</div>
-            <div className="small mt-1">
-              {message || 'Terjadi kesalahan saat mengambil data hunian Anda. Silakan coba lagi.'}
-            </div>
-          </Alert>
-        );
+        return <Alert variant="danger" className="mt-4"><div className="fw-semibold">Gagal memuat data masa sewa</div><div className="small mt-1">{message || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}</div></Alert>;
       })() : null}
-
-      {stay && !stayBelongsToUser ? (
-        <EmptyState
-          icon="🔒"
-          title="Anda belum memiliki hunian"
-          description="Silakan pilih kamar dari katalog publik untuk memulai proses booking."
-          action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }}
-        />
-      ) : null}
-
-      {stay && stayBelongsToUser && !roomStatusOccupied ? (
-        <EmptyState
-          icon="📅"
-          title="Booking Anda masih menunggu pembayaran atau verifikasi."
-          description="Kamar Anda masih berstatus RESERVED / Dipesan. Selesaikan proses booking dan pembayaran awal dari halaman Pemesanan Saya sebelum mengakses halaman hunian."
-          action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }}
-        />
-      ) : null}
-
-      {stay && stayBelongsToUser && roomStatusOccupied ? (
-        <ActiveStayContent stay={stay} />
-      ) : null}
+      {stay && !stayBelongsToUser ? <EmptyState icon="🔒" title="Kamu belum memiliki masa sewa aktif" description="Pilih kamar dari katalog publik untuk memulai proses booking." action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }} /> : null}
+      {stay && stayBelongsToUser && !roomStatusOccupied ? <EmptyState icon="📅" title="Booking kamu masih menunggu pembayaran atau verifikasi" description="Kamar masih berstatus dipesan. Selesaikan pembayaran awal dari halaman Pemesanan Saya sebelum masuk ke panduan masa sewa." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} /> : null}
+      {stay && stayBelongsToUser && roomStatusOccupied ? <ActiveStayContent stay={stay} /> : null}
     </div>
   );
 }

@@ -43,10 +43,7 @@ export class CheckoutRequestsAdminController {
   ) {
     const parsedStayId = this.parseOptionalStayId(stayId);
 
-    return {
-      message: 'Daftar permintaan checkout berhasil diambil',
-      data: await this.checkoutRequestsService.findAll(status, parsedStayId),
-    };
+    return this.checkoutRequestsService.findAll(status, parsedStayId);
   }
 
   private parseOptionalStayId(stayId?: string): number | undefined {

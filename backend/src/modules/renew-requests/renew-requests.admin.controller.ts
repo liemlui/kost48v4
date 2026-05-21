@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole, RenewRequestStatus } from '../../common/enums/app.enums';
+import { buildMeta } from '../../common/utils/pagination';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
@@ -21,9 +22,13 @@ export class RenewRequestsAdminController {
   @Get()
   @ApiQuery({ name: 'status', enum: RenewRequestStatus, required: false })
   async findAll(@Query('status') status?: RenewRequestStatus) {
+    const items = await this.renewRequestsService.findAll(status);
     return {
       message: 'Daftar permintaan perpanjangan berhasil diambil',
-      data: await this.renewRequestsService.findAll(status),
+      data: {
+        items,
+        meta: buildMeta(1, Math.max(items.length, 1), items.length),
+      },
     };
   }
 
