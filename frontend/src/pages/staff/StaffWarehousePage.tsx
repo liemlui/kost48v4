@@ -6,7 +6,7 @@ export default function StaffWarehousePage() {
       <section className="staff-simple-hero compact">
         <span className="staff-hero-pill">Gudang</span>
         <h1>Barang Umum & Gudang</h1>
-        <p>Laporkan kondisi stok kebersihan, alat kerja, dan barang area umum. Jumlah stok resmi, mutasi barang, dan status final tetap dikonfirmasi admin/owner.</p>
+        <p>Status stok seperti habis dan menipis dihitung otomatis dari jumlah barang. Staff cukup lapor masalah fisik, selisih jumlah, atau kebutuhan restock agar admin/owner bisa mengambil keputusan resmi.</p>
       </section>
 
       <StaffGeneralInventorySection embedded />

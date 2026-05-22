@@ -49,12 +49,12 @@ export const roomConditionOptions: StaffRepairConditionOption[] = [
 ];
 
 export const warehouseConditionOptions: StaffRepairConditionOption[] = [
-  { value: 'OUT_OF_STOCK', backendStatus: 'OUT_OF_STOCK', label: 'Stok habis', helper: 'Barang di gudang sudah habis.' },
-  { value: 'LOW_STOCK', backendStatus: 'LOW_STOCK', label: 'Stok menipis', helper: 'Stok tinggal sedikit dan perlu dicek admin.' },
-  { value: 'DAMAGED', backendStatus: 'DAMAGED', label: 'Alat/barang rusak', helper: 'Barang gudang rusak dan perlu keputusan admin.' },
-  { value: 'MISSING', backendStatus: 'MISSING', label: 'Tidak ditemukan / hilang', helper: 'Barang gudang tidak ada di tempat.' },
-  { value: 'NEEDS_REPAIR', backendStatus: 'NEEDS_REPAIR', label: 'Perlu diperbaiki', helper: 'Alat gudang perlu diperbaiki sebelum dipakai lagi.' },
-  { value: 'PENDING_CHECK', backendStatus: 'PENDING_CHECK', label: 'Perlu cek admin', helper: 'Kondisi stok/barang belum pasti.' },
+  { value: 'DAMAGED', backendStatus: 'DAMAGED', label: 'Barang rusak fisik', helper: 'Contoh: alat patah, kabel terkelupas, barang tidak aman dipakai.' },
+  { value: 'MISSING', backendStatus: 'MISSING', label: 'Barang hilang / tidak ditemukan', helper: 'Barang tercatat ada, tetapi tidak ditemukan di lokasi gudang.' },
+  { value: 'COUNT_MISMATCH', backendStatus: 'PENDING_CHECK', label: 'Jumlah fisik tidak sesuai sistem', helper: 'Staff melihat selisih jumlah. Admin/owner yang memutuskan koreksi stok resmi.' },
+  { value: 'RESTOCK_REQUEST', backendStatus: 'PENDING_CHECK', label: 'Minta restock / pembelian', helper: 'Gunakan untuk catatan kebutuhan. Status habis/menipis tetap dihitung otomatis dari qty dan minimal stok.' },
+  { value: 'NEEDS_REPAIR', backendStatus: 'NEEDS_REPAIR', label: 'Perlu diperbaiki', helper: 'Alat gudang masih ada, tetapi perlu perbaikan sebelum dipakai lagi.' },
+  { value: 'PENDING_CHECK', backendStatus: 'PENDING_CHECK', label: 'Catatan gudang lain', helper: 'Ada kondisi yang perlu dilihat admin, tetapi bukan status stok habis/menipis.' },
 ];
 
 export const adminDecisionOptions: SelectOption<'APPROVE' | 'NEEDS_MORE_INFO' | 'REJECT'>[] = [
@@ -87,13 +87,17 @@ export function getTicketStatusLabel(value?: string | null, fallback = 'Perlu di
 }
 
 export const reportedConditionLabels: Record<string, string> = {
+  GOOD: 'Terlihat normal',
+  MAINTENANCE: 'Perlu perbaikan / cek admin',
   DAMAGED: 'Rusak / tidak berfungsi',
   MISSING: 'Tidak ada / hilang',
   NEEDS_REPAIR: 'Perlu diperbaiki',
   NEEDS_REPLACEMENT: 'Perlu diganti baru',
   NEEDS_CLEANING: 'Perlu dibersihkan',
-  LOW_STOCK: 'Stok menipis',
-  OUT_OF_STOCK: 'Stok habis',
+  LOW_STOCK: 'Stok menipis (otomatis)',
+  OUT_OF_STOCK: 'Stok habis (otomatis)',
+  COUNT_MISMATCH: 'Jumlah fisik tidak sesuai sistem',
+  RESTOCK_REQUEST: 'Minta restock / pembelian',
   PENDING_CHECK: 'Perlu cek admin',
 };
 
@@ -104,12 +108,10 @@ export const roomItemFinalStatusOptions: SelectOption<'GOOD' | 'MAINTENANCE' | '
   { value: 'MISSING', label: 'Hilang' },
 ];
 
-export const inventoryItemFinalStatusOptions: SelectOption<'GOOD' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'DAMAGED' | 'MISSING' | 'NEEDS_REPAIR' | 'PENDING_CHECK'>[] = [
+export const inventoryItemFinalStatusOptions: SelectOption<'GOOD' | 'DAMAGED' | 'MISSING' | 'NEEDS_REPAIR' | 'PENDING_CHECK'>[] = [
   { value: 'GOOD', label: 'Aman / sudah dicek' },
-  { value: 'LOW_STOCK', label: 'Stok menipis' },
-  { value: 'OUT_OF_STOCK', label: 'Stok habis' },
-  { value: 'DAMAGED', label: 'Rusak' },
-  { value: 'MISSING', label: 'Hilang' },
+  { value: 'DAMAGED', label: 'Rusak fisik' },
+  { value: 'MISSING', label: 'Hilang / tidak ditemukan' },
   { value: 'NEEDS_REPAIR', label: 'Perlu diperbaiki' },
   { value: 'PENDING_CHECK', label: 'Perlu cek lanjutan' },
 ];

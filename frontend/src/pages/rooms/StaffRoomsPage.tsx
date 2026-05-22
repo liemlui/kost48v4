@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Spinner } from 'react-bootstrap';
+import { Alert, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { listResource } from '../../api/resources';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -19,8 +19,28 @@ function staffRoomStatusLabel(status?: string | null) {
   }
 }
 
+function roomIssueItems(roomId: number, items: RoomItem[]) {
+  return items.filter((item) => item.roomId === roomId && PROBLEM_STATUSES.has(String(item.status ?? '').toUpperCase()));
+}
+
 function roomIssueCount(roomId: number, items: RoomItem[]) {
-  return items.filter((item) => item.roomId === roomId && PROBLEM_STATUSES.has(String(item.status ?? '').toUpperCase())).length;
+  return roomIssueItems(roomId, items).length;
+}
+
+function roomIssueSummary(roomId: number, items: RoomItem[]) {
+  const issues = roomIssueItems(roomId, items);
+  const names = issues.map((item) => item.item?.name || `Barang #${item.itemId}`).slice(0, 2);
+  if (!names.length) return '';
+  const suffix = issues.length > names.length ? ` +${issues.length - names.length} lainnya` : '';
+  return `${names.join(', ')}${suffix}`;
+}
+
+function roomIssueDetail(roomId: number, items: RoomItem[]) {
+  const first = roomIssueItems(roomId, items)[0];
+  if (!first) return 'Tidak ada masalah aktif';
+  const note = String(first.note || '').split('\n').find(Boolean)?.trim();
+  const label = first.item?.name || `Barang #${first.itemId}`;
+  return note ? `${label}: ${note}` : `${label} perlu dicek`; 
 }
 
 export default function StaffRoomsPage() {
@@ -52,23 +72,42 @@ export default function StaffRoomsPage() {
       <div className="staff-room-grid">
         {sortedRooms.map((room) => {
           const issueCount = roomIssueCount(room.id, roomItems);
+          const issueSummary = roomIssueSummary(room.id, roomItems);
           return (
-            <Card key={room.id} className={`staff-room-card border-0 ${issueCount ? 'has-issue' : ''}`}>
+            <Card
+              key={room.id}
+              className={`staff-room-card k48-clickable-card border-0 ${issueCount ? 'has-issue' : ''}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(`/rooms/${room.id}`)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  navigate(`/rooms/${room.id}`);
+                }
+              }}
+              aria-label={`Buka detail kamar ${room.code}`}
+            >
               <Card.Body>
-                <div className="d-flex justify-content-between align-items-start gap-3">
+                <div className="staff-room-card-head">
                   <div>
                     <strong>{room.code}</strong>
                     <span>{room.name || 'Kamar'}</span>
                   </div>
-                  {issueCount ? <Badge bg="danger">{issueCount} perlu cek</Badge> : <Badge bg="success">Aman</Badge>}
+                  {issueCount ? <span className="staff-badge staff-badge-danger">{issueCount} perlu cek</span> : <span className="staff-badge staff-badge-success">Aman</span>}
                 </div>
                 <div className="staff-room-meta">
                   <StatusBadge status={room.status} customLabel={staffRoomStatusLabel(room.status)} />
                   <span>Lantai {room.floor || '-'}</span>
                 </div>
-                <div className="staff-room-actions">
-                  <Button size="sm" variant="primary" onClick={() => navigate(`/rooms/${room.id}`)}>Buka</Button>
-                  {issueCount ? <Button size="sm" variant="outline-danger" onClick={() => navigate(`/rooms/${room.id}`)}>Perlu cek</Button> : null}
+                <div className={issueSummary ? 'staff-room-issue-note' : 'staff-room-ok-note'}>
+                  <span>{issueSummary ? 'Perlu dicek' : 'Status kamar'}</span>
+                  <strong>{issueSummary || 'Tidak ada masalah aktif'}</strong>
+                  <small>{issueSummary ? roomIssueDetail(room.id, roomItems) : 'Klik kartu untuk buka detail, barang kamar, meter, dan catatan.'}</small>
+                </div>
+                <div className="staff-room-card-footer">
+                  <span> Klik untuk buka detail</span>
+                  <strong aria-hidden="true">→</strong>
                 </div>
               </Card.Body>
             </Card>

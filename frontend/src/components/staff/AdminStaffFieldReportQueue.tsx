@@ -135,10 +135,21 @@ export default function AdminStaffFieldReportQueue() {
               {selected.photoUrl ? <img src={selected.photoUrl} alt="Bukti staff" style={{ width: 160, height: 100, objectFit: 'cover', borderRadius: 10 }} /> : null}
               <Form.Group className="mt-3">
                 <Form.Label>Keputusan admin</Form.Label>
-                <Form.Select value={decision} onChange={(event) => setDecision(event.currentTarget.value as any)}>
-                  {adminDecisionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </Form.Select>
-                {adminDecisionOptions.find((option) => option.value === decision)?.helper ? <Form.Text>{adminDecisionOptions.find((option) => option.value === decision)?.helper}</Form.Text> : null}
+                <div className="staff-choice-grid admin-decision-grid" role="group" aria-label="Keputusan admin">
+                  {adminDecisionOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`staff-choice-card ${decision === option.value ? 'is-active' : ''} ${option.value === 'APPROVE' ? 'tone-good' : option.value === 'REJECT' ? 'tone-danger' : 'tone-warning'}`}
+                      onClick={() => setDecision(option.value)}
+                      aria-pressed={decision === option.value}
+                    >
+                      <strong>{option.label}</strong>
+                      <span>{option.helper}</span>
+                    </button>
+                  ))}
+                </div>
+                <Form.Text>Pilih keputusan yang paling sesuai. Close tiket tetap dilakukan di alur tiket setelah pekerjaan selesai dicek.</Form.Text>
               </Form.Group>
               {selected.requestsReplacement && decision !== 'APPROVE' ? <Alert variant="warning" className="py-2 small mt-3">Mutasi stok hanya bisa dibuat jika diagnosis disetujui.</Alert> : null}
               {selected.requestsReplacement ? (

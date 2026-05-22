@@ -21,6 +21,16 @@ function formatValue(value?: string | null) {
 
 const ROOM_ITEM_PROBLEM_STATUSES = new Set(['DAMAGED', 'MISSING', 'NEEDS_REPAIR', 'PENDING_CHECK', 'MAINTENANCE']);
 
+
+const STAFF_ROOM_CONDITION_OPTIONS = [
+  { value: 'Siap huni', label: 'Siap huni', helper: 'Kamar terlihat bersih dan tidak ada masalah besar.' },
+  { value: 'Perlu dibersihkan', label: 'Perlu dibersihkan', helper: 'Kamar perlu dibersihkan sebelum dipakai lagi.' },
+  { value: 'Ada kerusakan ringan', label: 'Kerusakan ringan', helper: 'Ada masalah kecil yang perlu dicatat admin.' },
+  { value: 'Ada kerusakan berat', label: 'Kerusakan berat', helper: 'Ada masalah besar dan butuh tindak lanjut.' },
+  { value: 'Perlu dicek admin', label: 'Perlu cek admin', helper: 'Staff belum yakin dan meminta admin mengecek.' },
+];
+
+
 function simpleRoomItemNote(note?: string | null) {
   if (!note) return '-';
   const staffLine = note.split('\n').find((line) => line.toLowerCase().includes('catatan staff:'));
@@ -345,13 +355,19 @@ export default function RoomDetailPage() {
                   <div className="staff-room-condition-form">
                     <Form.Group>
                       <Form.Label>Kondisi kamar</Form.Label>
-                      <Form.Select value={roomCondition} onChange={(event) => setRoomCondition(event.currentTarget.value)}>
-                        <option>Siap huni</option>
-                        <option>Perlu dibersihkan</option>
-                        <option>Ada kerusakan ringan</option>
-                        <option>Ada kerusakan berat</option>
-                        <option>Perlu dicek admin</option>
-                      </Form.Select>
+                      <div className="staff-room-condition-choice-grid">
+                        {STAFF_ROOM_CONDITION_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={`staff-choice-card ${roomCondition === option.value ? 'is-active' : ''}`}
+                            onClick={() => setRoomCondition(option.value)}
+                          >
+                            <strong>{option.label}</strong>
+                            <span>{option.helper}</span>
+                          </button>
+                        ))}
+                      </div>
                     </Form.Group>
                     <Form.Group>
                       <Form.Label>Catatan</Form.Label>

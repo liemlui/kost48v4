@@ -2,6 +2,7 @@ import { Card } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import StaffPerformanceCategoryCard from './StaffPerformanceCategoryCard';
 import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
+import StaffRoutineChecklist from './StaffRoutineChecklist';
 import { makeStaffWorkStats, getStaffMotivation } from '../../utils/staffWorkStats';
 import type { ActionQueueItem } from '../command-center';
 import type { AuthUser, Ticket } from '../../types';
@@ -51,6 +52,12 @@ export default function StaffMotivationDashboard({ user, tickets, queueItems, on
       </Card>
 
       <StaffPerformanceCategoryCard performance={performanceQuery.data} compact />
+
+      <StaffRoutineChecklist
+        today={routineToday ?? null}
+        isLoading={routinesLoading}
+        onUpdated={onRoutineUpdated ?? onRefresh}
+      />
 
       <StaffUnifiedWorkQueue
         routines={routineToday ?? null}

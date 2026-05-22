@@ -117,7 +117,7 @@ export default function AddMeterReadingModal({
     parseReadingValue(currentWaterM3) >= previousWater;
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg">
+    <Modal show={show} onHide={handleClose} size="lg" dialogClassName="staff-meter-modal">
       <Modal.Header closeButton>
         <Modal.Title>Catat Meter Terbaru</Modal.Title>
       </Modal.Header>
@@ -126,25 +126,25 @@ export default function AddMeterReadingModal({
         
         <div className="row g-3 mb-4">
           <div className="col-md-6">
-            <Alert variant="light" className="border h-100">
+            <Alert variant="light" className="border h-100 meter-previous-card">
               <h6 className="mb-2">Meter Sebelumnya</h6>
               <div className="d-flex justify-content-between">
                 <div>
                   <div className="text-muted small">Listrik</div>
-                  <div className="fw-bold">{previousElectricity} kWh</div>
+                  <div className="fw-bold meter-number">{previousElectricity} kWh</div>
                 </div>
                 <div>
                   <div className="text-muted small">Air</div>
-                  <div className="fw-bold">{previousWater} m³</div>
+                  <div className="fw-bold meter-number">{previousWater} m³</div>
                 </div>
               </div>
             </Alert>
           </div>
           <div className="col-md-6">
-            <Alert variant="info" className="border h-100">
+            <Alert variant="info" className="border h-100 meter-info-card">
               <h6 className="mb-2">Info Penyimpanan</h6>
               <div className="small">
-                Meter disimpan sebagai dua pencatatan terpisah: listrik lalu air. Pastikan kedua nilai valid sebelum menyimpan.
+                Sistem menyimpan listrik dan air sebagai dua catatan terpisah. Pastikan angka tidak lebih kecil dari meter sebelumnya.
               </div>
             </Alert>
           </div>
