@@ -4,6 +4,7 @@ import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
 import NotificationBell from '../notifications/NotificationBell';
+import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import {
   getDefaultRoute,
@@ -204,6 +205,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const links = useMemo(() => getNavigationLinks(user?.role, tenantStage), [user?.role, tenantStage]);
   const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
+  const isStaff = user?.role === 'STAFF';
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -215,6 +217,44 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
       document.body.classList.remove('offcanvas-open');
     };
   }, [sidebarOpen]);
+
+  if (isStaff) {
+    return (
+      <div className="staff-workspace-shell">
+        <main className="staff-workspace-main">
+          <section className="staff-workspace-topbar">
+            <button type="button" className="staff-workspace-brand" onClick={() => navigate('/dashboard')}>
+              <span className="brand-mark small" aria-hidden="true">K48</span>
+              <span>
+                <strong>KOST48 Staff Workspace</strong>
+                <em>Kerja harian, kamar, gudang, dan laporan</em>
+              </span>
+            </button>
+
+            <div className="staff-workspace-userbar">
+              <NotificationBell />
+              <button type="button" className="staff-user-profile-trigger" onClick={() => navigate('/profile')} title="Buka profil">
+                <span className="text-end">
+                  <strong>{user?.fullName}</strong>
+                  <em>{getRoleLabel(user?.role)}</em>
+                </span>
+                <span className="user-avatar" role="img" aria-label={`Avatar ${user?.fullName ?? 'User'}`}>
+                  {getInitials(user?.fullName)}
+                </span>
+              </button>
+              <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
+            </div>
+          </section>
+
+          <StaffTopWorkspaceNav />
+
+          <section className="staff-workspace-content">
+            {children ?? <Outlet />}
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -256,16 +296,15 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 <NotificationBell />
                 {user?.role === 'TENANT' && <PaymentUrgencyChip />}
                 <div className="topbar-user">
-                  <div className="text-end">
-                    <div className="fw-semibold">{user?.fullName}</div>
-                    <div className="app-caption">{getRoleLabel(user?.role)}</div>
-                  </div>
-                  <div className="user-avatar" role="img" aria-label={`Avatar ${user?.fullName ?? 'User'}`}>
-                    {getInitials(user?.fullName)}
-                  </div>
-                  <Button variant="outline-secondary" size="sm" onClick={() => navigate(user?.role === 'TENANT' ? '/portal/profile' : '/profile')}>
-                    Profil
-                  </Button>
+                  <button type="button" className="topbar-profile-trigger" onClick={() => navigate(user?.role === 'TENANT' ? '/portal/profile' : '/profile')} title="Buka profil">
+                    <span className="text-end">
+                      <strong>{user?.fullName}</strong>
+                      <em>{getRoleLabel(user?.role)}</em>
+                    </span>
+                    <span className="user-avatar" role="img" aria-label={`Avatar ${user?.fullName ?? 'User'}`}>
+                      {getInitials(user?.fullName)}
+                    </span>
+                  </button>
                   <Button variant="outline-danger" size="sm" onClick={logout}>Logout</Button>
                 </div>
               </div>

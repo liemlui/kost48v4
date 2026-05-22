@@ -200,6 +200,8 @@ export type MeterReading = {
   note?: string | null;
 };
 
+export type InventoryItemStatus = 'GOOD' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'DAMAGED' | 'MISSING' | 'NEEDS_REPAIR' | 'PENDING_CHECK' | string;
+
 export type MeterRow = {
   dateKey: string;
   readingAt: string;
@@ -217,6 +219,7 @@ export type InventoryItem = {
   unit?: string | null;
   qtyOnHand?: number | string | null;
   minQty?: number | string | null;
+  status?: InventoryItemStatus | null;
   notes?: string | null;
   isActive?: boolean;
 };
@@ -230,6 +233,48 @@ export type RoomItem = {
   note?: string | null;
   item?: InventoryItem | null;
   room?: Room | null;
+};
+
+
+export type ReportedCondition = 'DAMAGED' | 'MISSING' | 'NEEDS_REPAIR' | 'NEEDS_REPLACEMENT' | 'NEEDS_CLEANING' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'PENDING_CHECK' | string;
+export type StaffFieldReportStatus = 'REPORTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'IN_REPAIR' | 'DONE' | 'CLOSED' | string;
+export type AdminDecision = 'APPROVE' | 'REJECT' | 'NEEDS_MORE_INFO' | string;
+
+export type StaffFieldReport = {
+  id: number;
+  ticketId?: number | null;
+  roomId?: number | null;
+  roomItemId?: number | null;
+  inventoryItemId?: number | null;
+  reportedByStaffId: number;
+  reportedCondition: ReportedCondition;
+  conditionNotes?: string | null;
+  photoUrl?: string | null;
+  requestsReplacement?: boolean;
+  requestedInventoryItemId?: number | null;
+  requestedQty?: number | string | null;
+  adminReviewedById?: number | null;
+  adminDecision?: AdminDecision | null;
+  adminNotes?: string | null;
+  relatedMovementId?: number | null;
+  status: StaffFieldReportStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  ticket?: Ticket | null;
+  room?: Room | null;
+  roomItem?: RoomItem | null;
+  inventoryItem?: InventoryItem | null;
+  requestedInventoryItem?: InventoryItem | null;
+  reportedByStaff?: Pick<AuthUser, 'id' | 'fullName' | 'email' | 'role'> | null;
+  adminReviewedBy?: Pick<AuthUser, 'id' | 'fullName' | 'role'> | null;
+};
+
+export type StaffFieldReportReviewQueue = {
+  pendingAssignment: Ticket[];
+  pendingStockApproval: StaffFieldReport[];
+  pendingVerification: Ticket[];
+  pendingItemDecision: StaffFieldReport[];
+  recentlyClosed: Ticket[];
 };
 
 export type WifiSale = {
@@ -520,6 +565,11 @@ export type Ticket = {
   roomId?: number | null;
   stayId?: number | null;
   assignedToId?: number | null;
+  linkedRoomItemId?: number | null;
+  linkedInventoryItemId?: number | null;
+  finalRoomItemStatus?: string | null;
+  finalInventoryItemStatus?: string | null;
+  finalAdminNote?: string | null;
   resolutionNote?: string | null;
   issueImageUrl?: string | null;
   issueImageFileKey?: string | null;
@@ -533,6 +583,9 @@ export type Ticket = {
   resolutionImageFileSizeBytes?: number | null;
   tenant?: { id: number; fullName?: string; email?: string } | null;
   room?: { id: number; code?: string; name?: string } | null;
+  linkedRoomItem?: RoomItem | null;
+  linkedInventoryItem?: InventoryItem | null;
+  staffFieldReports?: StaffFieldReport[];
   createdAt?: string;
   updatedAt?: string;
 };

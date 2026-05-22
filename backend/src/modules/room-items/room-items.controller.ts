@@ -6,7 +6,7 @@ import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { CreateRoomItemDto, UpdateRoomItemDto } from './dto/room-item.dto';
+import { CreateRoomItemDto, StaffUpdateRoomItemStatusDto, UpdateRoomItemDto } from './dto/room-item.dto';
 import { RoomItemsService } from './room-items.service';
 
 @ApiTags('room-items')
@@ -26,6 +26,14 @@ export class RoomItemsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateRoomItemDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Room item berhasil dibuat', data: await this.roomItemsService.create(dto, user) };
+  }
+
+
+
+  @Patch(':id/staff-status')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  async updateStaffStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: StaffUpdateRoomItemStatusDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Laporan kondisi barang kamar diterima dan menunggu konfirmasi admin', data: await this.roomItemsService.updateStatusFromField(id, dto, user) };
   }
 
   @Patch(':id')

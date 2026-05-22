@@ -36,6 +36,9 @@ import StayDetailPage from './pages/stays/StayDetailPage';
 import StaysPage from './pages/stays/StaysPage';
 import TicketsPage from './pages/tickets/TicketsPage';
 import StaffRoutinesAdminPage from './pages/staff-routines/StaffRoutinesAdminPage';
+import StaffMonthlyReportPage from './pages/staff/StaffMonthlyReportPage';
+import StaffWarehousePage from './pages/staff/StaffWarehousePage';
+import AdminStaffPerformancePage from './pages/admin/AdminStaffPerformancePage';
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -106,9 +109,12 @@ export default function App() {
           <Route path="/meter-readings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['meter-readings']} /></RequireRoles>} />
           <Route path="/tickets" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><TicketsPage /></RequireRoles>} />
           <Route path="/staff-routines" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaffRoutinesAdminPage /></RequireRoles>} />
-          <Route path="/inventory-items" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['inventory-items']} /></RequireRoles>} />
-          <Route path="/room-items" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['room-items']} /></RequireRoles>} />
-          <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><SimpleCrudPage config={resourceConfigs['inventory-movements']} /></RequireRoles>} />
+          <Route path="/staff-performance" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AdminStaffPerformancePage /></RequireRoles>} />
+          <Route path="/staff-report" element={<RequireRoles allowed={['STAFF']}><StaffMonthlyReportPage /></RequireRoles>} />
+          <Route path="/staff-warehouse" element={<RequireRoles allowed={['STAFF']}><StaffWarehousePage /></RequireRoles>} />
+          <Route path="/inventory-items" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['inventory-items']} /></RequireRoles>} />
+          <Route path="/room-items" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['room-items']} /></RequireRoles>} />
+          <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['inventory-movements']} /></RequireRoles>} />
           <Route path="/wifi-sales" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['wifi-sales']} /></RequireRoles>} />
           <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.expenses} /></RequireRoles>} />
           <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />

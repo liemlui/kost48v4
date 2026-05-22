@@ -36,6 +36,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Pantau tiket tenant dan progres tindak lanjut.' },
       { to: '/staff-routines', label: 'Staff Checklist', icon: '✅', hint: 'Set routine checklist and staff work progress.' },
+      { to: '/staff-performance', label: 'Staff Performance', icon: '📋', hint: 'Audit kinerja staff, bukti kerja, review tenant, dan KPI negatif.' },
       { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Komunikasi tenant dan operasional.' },
       { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp sebelum dikirim.' },
@@ -77,6 +78,7 @@ const adminSections: NavigationSection[] = [
     links: [
       { to: '/tickets', label: 'Tiket', icon: '🎫', hint: 'Triage, penugasan, progres, dan penyelesaian.' },
       { to: '/staff-routines', label: 'Checklist Staf', icon: '✅', hint: 'Atur pekerjaan harian, mingguan, dan bulanan staf.' },
+      { to: '/staff-performance', label: 'Kinerja Staf', icon: '📋', hint: 'Pantau laporan bulanan, audit random, rating tenant, dan KPI negatif.' },
       { to: '/renew-requests', label: 'Perpanjangan', icon: '🔄', hint: 'Tinjau dan proses permintaan perpanjangan tenant.' },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Pengumuman tenant dan internal.' },
       { to: '/reminders', label: 'Pengingat WhatsApp', icon: '📲', hint: 'Pratinjau kandidat pengingat WhatsApp.' },
@@ -98,25 +100,13 @@ const adminSections: NavigationSection[] = [
 
 const staffSections: NavigationSection[] = [
   {
-    title: 'Pekerjaan Lapangan',
+    title: 'Staff Workspace',
     links: [
-      { to: '/dashboard', label: 'Beranda Staf', icon: '🛠️', hint: 'Lihat tugas yang harus dikerjakan hari ini.' },
-      { to: '/tickets', label: 'Tiket Bantuan', icon: '🎫', hint: 'Kerjakan keluhan penghuni sampai selesai.' },
-      { to: '/rooms', label: 'Cek Kamar', icon: '🚪', hint: 'Lihat kamar yang perlu dicek atau diperbaiki.' },
-    ],
-  },
-  {
-    title: 'Barang & Perbaikan',
-    links: [
-      { to: '/inventory-items', label: 'Stok Barang', icon: '📦', hint: 'Lihat barang yang tersedia dan barang yang hampir habis.' },
-      { to: '/room-items', label: 'Barang di Kamar', icon: '🛏️', hint: 'Lihat barang yang ada di setiap kamar.' },
-      { to: '/inventory-movements', label: 'Catatan Stok', icon: '🔄', hint: 'Lihat catatan barang masuk dan keluar.' },
-    ],
-  },
-  {
-    title: 'Akun Saya',
-    links: [
-      { to: '/profile', label: 'Profil Saya', icon: '🙍', hint: 'Lihat profil dan ganti password akun.' },
+      { to: '/dashboard', label: 'Hari Ini', icon: '🛠️', hint: 'Checklist dan prioritas hari ini.' },
+      { to: '/tickets', label: 'Tugas', icon: '🎫', hint: 'Mulai, selesaikan, dan kirim bukti pekerjaan lapangan.' },
+      { to: '/rooms', label: 'Kamar', icon: '🚪', hint: 'Cek kondisi kamar, barang kamar, dan angka meter listrik/air.' },
+      { to: '/staff-warehouse', label: 'Gudang', icon: '🧰', hint: 'Laporkan kondisi stok kebersihan, alat kerja, dan barang area umum.' },
+      { to: '/staff-report', label: 'Laporan', icon: '📋', hint: 'Bukti kerja bulanan, rating tenant, audit, dan kategori kinerja.' },
     ],
   },
 ];

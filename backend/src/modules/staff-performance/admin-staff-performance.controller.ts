@@ -1,0 +1,42 @@
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/enums/app.enums';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { CreateStaffWorkAuditDto, StaffPerformanceMonthQueryDto } from './dto/staff-performance.dto';
+import { StaffPerformanceService } from './staff-performance.service';
+
+@ApiTags('admin-staff-performance')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('admin/staff-performance')
+export class AdminStaffPerformanceController {
+  constructor(private readonly service: StaffPerformanceService) {}
+
+  @Get('monthly')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async monthly(@Query() query: StaffPerformanceMonthQueryDto) {
+    return { message: 'Ringkasan kinerja staf berhasil diambil', data: await this.service.getAdminMonthly(query.month) };
+  }
+
+  @Get('audit-suggestions')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async auditSuggestions(@Query() query: StaffPerformanceMonthQueryDto) {
+    return { message: 'Rekomendasi audit staf berhasil diambil', data: await this.service.getAuditSuggestions(query.month) };
+  }
+
+  @Get(':staffId/monthly')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async detail(@Param('staffId', ParseIntPipe) staffId: number, @Query() query: StaffPerformanceMonthQueryDto) {
+    return { message: 'Detail kinerja staf berhasil diambil', data: await this.service.getStaffMonthly(staffId, query.month) };
+  }
+
+  @Post('audits')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async createAudit(@Body() dto: CreateStaffWorkAuditDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Audit pekerjaan staf berhasil disimpan', data: await this.service.createAudit(dto, user) };
+  }
+}

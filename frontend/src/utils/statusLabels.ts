@@ -65,6 +65,10 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     GOOD: 'Baik',
     DAMAGED: 'Rusak',
     MISSING: 'Hilang',
+    LOW_STOCK: 'Stok Menipis',
+    OUT_OF_STOCK: 'Stok Habis',
+    NEEDS_REPAIR: 'Perlu Diperbaiki',
+    PENDING_CHECK: 'Menunggu Cek Admin',
     COUNTDOWN_7PLUS: 'H-7+',
     COUNTDOWN_3_6: 'H-3–6',
     COUNTDOWN_1_2: 'H-1–2',
@@ -121,10 +125,10 @@ export function getStatusVariant(status?: string): 'success' | 'warning' | 'dang
   const normalized = String(status ?? '').toUpperCase();
 
   if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY'].includes(normalized)) return 'success';
-  if (['PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM'].includes(normalized)) return 'warning';
-  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER'].includes(normalized)) return 'danger';
+  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR'].includes(normalized)) return 'warning';
+  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER', 'OUT_OF_STOCK', 'DAMAGED'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS'].includes(normalized)) return 'info';
-  if (['DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
+  if (['CLOSED', 'DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';
   return 'secondary';
 }

@@ -3,7 +3,7 @@ import type { ApiEnvelope } from '../types';
 
 export type StaffRoutineFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 export type StaffRoutineAreaType = 'GENERAL' | 'BATHROOM' | 'ROOM' | 'INVENTORY' | 'METER' | 'SECURITY' | 'CLEANING';
-export type StaffRoutineStatus = 'TODO' | 'DONE' | 'NEED_HELP' | 'MISSED' | 'SKIPPED';
+export type StaffRoutineStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'NEED_HELP' | 'MISSED' | 'SKIPPED';
 
 export type StaffRoutineItem = {
   occurrenceKey: string;
@@ -78,6 +78,11 @@ export async function fetchStaffRoutineToday() {
 
 export async function fetchMyStaffRoutineKpi() {
   const response = await client.get<ApiEnvelope<StaffRoutineKpiResponse>>('/staff-routines/kpi/me');
+  return response.data.data;
+}
+
+export async function startStaffRoutine(templateId: number, payload: { assignmentId?: number | null; roomId?: number | null; dueDate?: string; note?: string }) {
+  const response = await client.post<ApiEnvelope<unknown>>(`/staff-routines/${templateId}/start`, payload);
   return response.data.data;
 }
 

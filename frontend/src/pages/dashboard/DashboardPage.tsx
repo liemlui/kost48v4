@@ -371,28 +371,23 @@ function AdminDashboard() {
 function StaffDashboard() {
   const { user } = useAuth();
   const ticketsQuery = useQuery({ queryKey: ['dashboard-staff', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }), ...ACTION_QUERY_OPTIONS });
-  const inventoryQuery = useQuery({ queryKey: ['dashboard-staff', 'inventory'], queryFn: () => listResource<any>('/inventory-items', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
   const roomsQuery = useQuery({ queryKey: ['dashboard-staff', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
   const routineTodayQuery = useQuery({ queryKey: ['dashboard-staff', 'routines-today'], queryFn: fetchStaffRoutineToday, ...ACTION_QUERY_OPTIONS });
   const routineKpiQuery = useQuery({ queryKey: ['dashboard-staff', 'routine-kpi'], queryFn: fetchMyStaffRoutineKpi, ...MEDIUM_FRESH_QUERY_OPTIONS });
 
   const tickets = ticketsQuery.data?.items ?? [];
-  const inventory = inventoryQuery.data?.items ?? [];
   const rooms = roomsQuery.data?.items ?? [];
   const opsStress = useOperationalStressIndex({ tickets, rooms });
-  const lowStock = inventory.filter((item) => Number(item.qtyOnHand ?? 0) <= Number((item.lowStockThreshold ?? item.minQty ?? 0) || 3));
-
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
     ...opsStress.queueItems,
-    ...lowStock.slice(0, 4).map((item) => ({ id: `stock-${item.id}`, ruleId: 'inventory-low-stock', entityType: 'inventory', entityId: item.id, priority: 'WARNING' as const, type: 'Stok barang', subject: item.name || `Barang #${item.id}`, issue: `Sisa ${item.qtyOnHand ?? 0}. Cek apakah perlu tambah stok.`, recommendedAction: 'Cek stok', actionTo: '/inventory-items' })),
   ]);
 
   const refreshDashboard = () => {
-    void Promise.all([ticketsQuery.refetch(), inventoryQuery.refetch(), roomsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
+    void Promise.all([ticketsQuery.refetch(), roomsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
   };
 
-  if (ticketsQuery.isLoading || inventoryQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
-  if (ticketsQuery.isError || inventoryQuery.isError || roomsQuery.isError) return <Alert variant="danger">Gagal memuat beranda kerja. Muat ulang halaman.</Alert>;
+  if (ticketsQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
+  if (ticketsQuery.isError || roomsQuery.isError) return <Alert variant="danger">Gagal memuat beranda kerja. Muat ulang halaman.</Alert>;
 
   return (
     <div className="staff-simple-mode">

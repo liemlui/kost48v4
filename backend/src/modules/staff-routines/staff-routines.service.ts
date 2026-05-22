@@ -45,6 +45,32 @@ function dueLabel(template: { frequency: string; dayOfWeek?: number | null; dayO
 export class StaffRoutinesService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
+  private async assertNoActiveWork(actor: CurrentUserPayload, currentRoutineId?: number) {
+    if (actor.role !== UserRole.STAFF) return;
+
+    const [activeTicket, activeRoutine] = await Promise.all([
+      this.prisma.ticket.findFirst({
+        where: { assignedToId: actor.id, status: 'IN_PROGRESS' as any },
+        select: { id: true, title: true, ticketNumber: true },
+      }),
+      this.prisma.staffRoutineCompletion.findFirst({
+        where: {
+          staffUserId: actor.id,
+          status: StaffRoutineStatus.IN_PROGRESS,
+          ...(currentRoutineId ? { id: { not: currentRoutineId } } : {}),
+        },
+        include: { template: { select: { title: true } } },
+      }),
+    ]);
+
+    if (activeTicket) {
+      throw new ConflictException(`Selesaikan pekerjaan aktif dulu: ${activeTicket.title || activeTicket.ticketNumber || `Tiket #${activeTicket.id}`}`);
+    }
+    if (activeRoutine) {
+      throw new ConflictException(`Selesaikan pekerjaan aktif dulu: ${activeRoutine.template?.title || `Pekerjaan rutin #${activeRoutine.id}`}`);
+    }
+  }
+
   async getToday(actor: CurrentUserPayload) {
     const today = startOfLocalDate();
     const templates = await this.prisma.staffRoutineTemplate.findMany({
@@ -116,6 +142,66 @@ export class StaffRoutinesService {
         completionPercent: items.length ? Math.round((completedCount / items.length) * 100) : 100,
       },
     };
+  }
+
+  async start(templateId: number, dto: CompleteRoutineDto, actor: CurrentUserPayload) {
+    const template = await this.prisma.staffRoutineTemplate.findUnique({ where: { id: templateId } });
+    if (!template || !template.isActive) throw new NotFoundException('Pekerjaan rutin tidak ditemukan');
+
+    const dueDate = parseDate(dto.dueDate);
+    if (!isTemplateDue(template, dueDate)) {
+      throw new ConflictException('Pekerjaan ini bukan jadwal hari tersebut');
+    }
+
+    let assignment = null as null | { id: number; templateId: number; staffUserId: number | null; roomId: number | null; isActive: boolean };
+    if (dto.assignmentId) {
+      assignment = await this.prisma.staffRoutineAssignment.findUnique({ where: { id: dto.assignmentId } });
+      if (!assignment || !assignment.isActive || assignment.templateId !== template.id) throw new NotFoundException('Jadwal pekerjaan tidak ditemukan');
+      if (assignment.staffUserId && assignment.staffUserId !== actor.id) throw new ConflictException('Pekerjaan ini bukan tugas akun ini');
+    }
+
+    const roomId = dto.roomId ?? assignment?.roomId ?? null;
+    const existing = await this.prisma.staffRoutineCompletion.findFirst({
+      where: {
+        templateId: template.id,
+        assignmentId: assignment?.id ?? null,
+        staffUserId: actor.id,
+        roomId,
+        dueDate,
+      },
+    });
+
+    if (existing?.status === StaffRoutineStatus.DONE) throw new ConflictException('Pekerjaan ini sudah selesai');
+    if (existing?.status === StaffRoutineStatus.NEED_HELP) throw new ConflictException('Pekerjaan ini sudah dikirim sebagai kendala');
+    if (existing?.status === StaffRoutineStatus.IN_PROGRESS) return existing;
+
+    await this.assertNoActiveWork(actor);
+
+    const saved = existing
+      ? await this.prisma.staffRoutineCompletion.update({ where: { id: existing.id }, data: { status: StaffRoutineStatus.IN_PROGRESS, completedAt: null, note: dto.note?.trim() || null } })
+      : await this.prisma.staffRoutineCompletion.create({
+          data: {
+            template: { connect: { id: template.id } },
+            assignment: assignment ? { connect: { id: assignment.id } } : undefined,
+            staffUser: { connect: { id: actor.id } },
+            room: roomId ? { connect: { id: roomId } } : undefined,
+            dueDate,
+            status: StaffRoutineStatus.IN_PROGRESS,
+            completedAt: null,
+            note: dto.note?.trim() || null,
+          },
+        });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'START_STAFF_ROUTINE',
+      entityType: 'StaffRoutineCompletion',
+      entityId: String(saved.id),
+      oldData: existing,
+      newData: saved,
+    });
+
+    return saved;
   }
 
   async complete(templateId: number, dto: CompleteRoutineDto, actor: CurrentUserPayload) {

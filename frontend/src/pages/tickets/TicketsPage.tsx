@@ -6,10 +6,11 @@ import { AssistantPanel, CompactMetrics, ActionQueueTable, type AssistantItem, t
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
+import AdminStaffFieldReportQueue from '../../components/staff/AdminStaffFieldReportQueue';
+import { getTicketStatusLabel, inventoryItemFinalStatusOptions, roomItemFinalStatusOptions } from '../../constants/staffRepairOptions';
 import { listResource, postAction } from '../../api/resources';
 import { uploadTicketImage } from '../../api/mediaUploads';
 import { useAuth } from '../../context/AuthContext';
-import StaffActionLauncher from '../../components/staff/StaffActionLauncher';
 
 type TicketItem = {
   issueImageUrl?: string | null;
@@ -24,6 +25,11 @@ type TicketItem = {
   roomId?: number;
   stayId?: number;
   assignedToId?: number | null;
+  linkedRoomItemId?: number | null;
+  linkedInventoryItemId?: number | null;
+  finalRoomItemStatus?: string | null;
+  finalInventoryItemStatus?: string | null;
+  staffFieldReports?: any[];
   createdAt?: string;
   updatedAt?: string;
   tenant?: { id: number; fullName?: string; email?: string };
@@ -69,16 +75,32 @@ async function compressImageFile(file: File): Promise<File> {
 
 
 function getStaffStatusText(status: string) {
-  switch (status) {
-    case 'OPEN':
-      return 'Belum dikerjakan';
-    case 'IN_PROGRESS':
-      return 'Sedang dikerjakan';
-    case 'DONE':
-      return 'Tunggu dicek admin';
-    default:
-      return 'Perlu dicek';
-  }
+  return getTicketStatusLabel(status);
+}
+
+function cleanStaffDescription(description?: string | null) {
+  if (!description) return '';
+  const lines = description
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !/^---$/.test(line))
+    .filter((line) => !/^(Waktu|Pelapor|RoomItem ID|InventoryItem ID|Status sementara sistem|Status final barang|Jumlah stok resmi|Keputusan final)/i.test(line));
+  const note = lines.find((line) => /^Catatan:/i.test(line));
+  const base = (note || lines.find((line) => !/^[A-Z_]+$/.test(line)) || lines[0] || '').replace(/^Catatan:\s*/i, '');
+  return base.length > 150 ? `${base.slice(0, 147)}...` : base;
+}
+
+function ticketHasRoomItemDecision(item?: TicketItem | null) {
+  return Boolean(item?.linkedRoomItemId || item?.staffFieldReports?.some((report) => report?.roomItemId));
+}
+
+function ticketHasInventoryDecision(item?: TicketItem | null) {
+  return Boolean(item?.linkedInventoryItemId || item?.staffFieldReports?.some((report) => report?.inventoryItemId));
+}
+
+function getStatusClass(status: string) {
+  return String(status || 'secondary').toLowerCase().replace(/_/g, '-');
 }
 
 function getStaffActionText(status: string) {
@@ -86,6 +108,17 @@ function getStaffActionText(status: string) {
   if (status === 'IN_PROGRESS') return 'Tandai Selesai';
   if (status === 'DONE') return 'Sudah selesai';
   return 'Lihat';
+}
+
+function getStaffCategoryText(category?: string | null) {
+  const value = String(category ?? '').toUpperCase();
+  if (value === 'BARANG_RUSAK') return 'Barang rusak / hilang';
+  if (value === 'STOK_HABIS') return 'Stok habis';
+  if (value === 'CEK_KAMAR') return 'Cek kamar';
+  if (value === 'CATATAN_METER') return 'Catat meter';
+  if (value === 'KEBERSIHAN') return 'Bersih-bersih';
+  if (value === 'PERBAIKAN') return 'Perbaikan';
+  return category || 'Tugas';
 }
 
 function getStaffLocation(item: TicketItem) {
@@ -110,7 +143,6 @@ function StaffTicketsMode({
   setActiveTab,
   simpleAction,
   setDoneTicket,
-  onCreated,
 }: {
   items: TicketItem[];
   isLoading: boolean;
@@ -119,7 +151,6 @@ function StaffTicketsMode({
   setActiveTab: (tab: StatusTab) => void;
   simpleAction: any;
   setDoneTicket: (ticket: TicketItem | null) => void;
-  onCreated: () => void | Promise<void>;
 }) {
   const activeWork = useMemo(
     () => items
@@ -133,7 +164,7 @@ function StaffTicketsMode({
   const doneCount = activeWork.filter((item) => item.status === 'DONE').length;
 
   const visibleItems = activeWork.filter((item) => {
-    if (activeTab === 'ALL') return item.status === 'OPEN' || item.status === 'IN_PROGRESS';
+    if (activeTab === 'ALL') return item.status === 'OPEN' || item.status === 'IN_PROGRESS' || item.status === 'DONE';
     if (activeTab === 'URGENT') return item.status === 'OPEN';
     if (activeTab === 'OPEN' || activeTab === 'IN_PROGRESS' || activeTab === 'DONE') return item.status === activeTab;
     return false;
@@ -149,12 +180,14 @@ function StaffTicketsMode({
   return (
     <div className="staff-simple-mode">
       <PageHeader
-        eyebrow="Pekerjaan Staf"
-        title="Tugas Hari Ini"
-        description="Kerjakan dari atas ke bawah. Kalau sudah selesai, catat hasil kerja dan foto buktinya."
+        eyebrow="Pekerjaan Lapangan"
+        title="Tugas Lapangan"
+        description="Kerjakan dari atas ke bawah. Mulai tugas, selesaikan, lalu kirim catatan dan foto bukti."
       />
 
-      <StaffActionLauncher compact onCreated={onCreated} />
+      <div className="staff-work-scope-note">
+        Halaman ini hanya untuk mengerjakan tugas aktif. Laporan baru dibuat dari Beranda Kerja atau Cek Kamar.
+      </div>
 
       {simpleAction.isError ? <Alert variant="danger" className="staff-alert">Aksi gagal. Coba sekali lagi.</Alert> : null}
       {isError ? <Alert variant="danger" className="staff-alert">Tugas belum bisa dimuat. Coba muat ulang halaman.</Alert> : null}
@@ -190,8 +223,8 @@ function StaffTicketsMode({
                   <div className="staff-work-rank">{index + 1}</div>
                   <div className="staff-work-main">
                     <div className="staff-work-topline">
-                      <span className="staff-status-pill">{getStaffStatusText(item.status)}</span>
-                      <span className="staff-category-pill">{item.category || 'Tugas'}</span>
+                      <span className={`staff-status-pill status-${getStatusClass(item.status)}`}>{getStaffStatusText(item.status)}</span>
+                      <span className="staff-category-pill">{getStaffCategoryText(item.category)}</span>
                     </div>
                     <h3>{item.title || item.ticketNumber || `Tiket #${item.id}`}</h3>
                     <p>{getStaffLocation(item)}</p>
@@ -232,13 +265,25 @@ export default function TicketsPage() {
   const [resolutionNote, setResolutionNote] = useState('Sudah dikerjakan');
   const [resolutionImageMeta, setResolutionImageMeta] = useState<any>(null);
   const [resolutionPreview, setResolutionPreview] = useState<string | null>(null);
+  const [closeTicket, setCloseTicket] = useState<TicketItem | null>(null);
+  const [finalRoomItemStatus, setFinalRoomItemStatus] = useState('GOOD');
+  const [finalInventoryItemStatus, setFinalInventoryItemStatus] = useState('GOOD');
+  const [finalAdminNote, setFinalAdminNote] = useState('');
 
   const ticketsQuery = useQuery({ queryKey: ['tickets'], queryFn: () => listResource<TicketItem>('/tickets') });
   const usersQuery = useQuery({ queryKey: ['ticket-assignees'], queryFn: () => listResource<UserOption>('/users', { limit: 100 }) });
 
   const simpleAction = useMutation({
     mutationFn: ({ path, payload }: { path: string; payload?: any }) => postAction(path, payload),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['tickets'] }); },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-dashboard'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-evidence'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-staff-performance'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-field-report-review-queue'] }),
+      ]);
+    },
   });
 
   const items = useMemo(() => ticketsQuery.data?.items ?? [], [ticketsQuery.data]);
@@ -281,6 +326,23 @@ export default function TicketsPage() {
     setResolutionPreview(null);
     setResolutionImageMeta(null);
     setResolutionNote('Sudah dikerjakan');
+  };
+
+  const submitCloseTicket = () => {
+    if (!closeTicket) return;
+    simpleAction.mutate({
+      path: `/tickets/${closeTicket.id}/close`,
+      payload: {
+        action: 'CLOSE',
+        finalRoomItemStatus: ticketHasRoomItemDecision(closeTicket) ? finalRoomItemStatus : undefined,
+        finalInventoryItemStatus: ticketHasInventoryDecision(closeTicket) ? finalInventoryItemStatus : undefined,
+        finalAdminNote: finalAdminNote.trim() || undefined,
+      },
+    });
+    setCloseTicket(null);
+    setFinalRoomItemStatus('GOOD');
+    setFinalInventoryItemStatus('GOOD');
+    setFinalAdminNote('');
   };
 
   const assistantItems: AssistantItem[] = [
@@ -355,11 +417,10 @@ export default function TicketsPage() {
           setActiveTab={setActiveTab}
           simpleAction={simpleAction}
           setDoneTicket={setDoneTicket}
-          onCreated={() => queryClient.invalidateQueries({ queryKey: ['tickets'] })}
         />
 
         <Modal show={Boolean(doneTicket)} onHide={() => setDoneTicket(null)} centered>
-          <Modal.Header closeButton><Modal.Title>Catat Pekerjaan Selesai</Modal.Title></Modal.Header>
+          <Modal.Header closeButton><Modal.Title>Tandai Pekerjaan Selesai</Modal.Title></Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Catatan hasil kerja</Form.Label>
@@ -373,7 +434,7 @@ export default function TicketsPage() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setDoneTicket(null)}>Batal</Button>
-            <Button variant="success" onClick={submitMarkDone} disabled={!resolutionImageMeta || simpleAction.isPending}>Simpan</Button>
+            <Button variant="success" onClick={submitMarkDone} disabled={!resolutionImageMeta || simpleAction.isPending}>Simpan Selesai</Button>
           </Modal.Footer>
         </Modal>
       </>
@@ -387,6 +448,8 @@ export default function TicketsPage() {
         title="Tiket Bantuan"
         description="Daftar keluhan dan pekerjaan. Kerjakan tiket dari yang paling penting, lalu upload bukti selesai."
       />
+
+      {(user?.role === 'OWNER' || user?.role === 'ADMIN') ? <AdminStaffFieldReportQueue /> : null}
 
       <AssistantPanel
         title="Arahan Kerja"
@@ -511,7 +574,7 @@ export default function TicketsPage() {
                         {canAssign ? <Button size="sm" variant="outline-primary" disabled={!assignMap[item.id] || simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/assign`, payload: { assignedToId: Number(assignMap[item.id]) } })}>Tugaskan</Button> : null}
                         {canProgress && item.status === 'OPEN' ? <Button size="sm" variant="outline-secondary" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/start` })}>Mulai Kerjakan</Button> : null}
                         {canProgress && item.status === 'IN_PROGRESS' ? <Button size="sm" variant="outline-success" disabled={simpleAction.isPending} onClick={() => setDoneTicket(item)}>Tandai Selesai</Button> : null}
-                        {canProgress && item.status === 'DONE' ? <Button size="sm" variant="success" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/close`, payload: { action: 'CLOSE' } })}>Tutup</Button> : null}
+                        {canProgress && item.status === 'DONE' ? <Button size="sm" variant="success" disabled={simpleAction.isPending} onClick={() => setCloseTicket(item)}>Tutup + Keputusan Final</Button> : null}
                       </div>
                     </td>
                   </tr>
@@ -538,6 +601,37 @@ export default function TicketsPage() {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setDoneTicket(null)}>Batal</Button>
           <Button variant="success" onClick={submitMarkDone} disabled={!resolutionImageMeta || simpleAction.isPending}>Simpan dan Tandai Selesai</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={Boolean(closeTicket)} onHide={() => setCloseTicket(null)} centered>
+        <Modal.Header closeButton><Modal.Title>Konfirmasi selesai + status akhir barang</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Alert variant="info" className="py-2 small">Tutup tiket hanya setelah bukti staff dicek. Jika ada barang terkait, pilih status akhir agar data kamar/gudang tetap rapi.</Alert>
+          {ticketHasRoomItemDecision(closeTicket) ? (
+            <Form.Group className="mb-3">
+              <Form.Label>Status akhir barang kamar</Form.Label>
+              <Form.Select value={finalRoomItemStatus} onChange={(event) => setFinalRoomItemStatus(event.currentTarget.value)}>
+                {roomItemFinalStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </Form.Select>
+            </Form.Group>
+          ) : null}
+          {ticketHasInventoryDecision(closeTicket) ? (
+            <Form.Group className="mb-3">
+              <Form.Label>Status akhir barang gudang</Form.Label>
+              <Form.Select value={finalInventoryItemStatus} onChange={(event) => setFinalInventoryItemStatus(event.currentTarget.value)}>
+                {inventoryItemFinalStatusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </Form.Select>
+            </Form.Group>
+          ) : null}
+          <Form.Group>
+            <Form.Label>Catatan final admin</Form.Label>
+            <Form.Control as="textarea" rows={3} value={finalAdminNote} onChange={(event) => setFinalAdminNote(event.currentTarget.value)} placeholder="Contoh: lampu baru sudah terpasang, status barang kembali baik" />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setCloseTicket(null)}>Batal</Button>
+          <Button variant="success" disabled={simpleAction.isPending} onClick={submitCloseTicket}>Tutup Tiket</Button>
         </Modal.Footer>
       </Modal>
     </div>

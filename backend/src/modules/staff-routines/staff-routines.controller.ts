@@ -28,6 +28,12 @@ export class StaffRoutinesController {
     return { message: 'Ringkasan kerja staf berhasil diambil', data: await this.service.getMyKpi(user) };
   }
 
+  @Post(':templateId/start')
+  @Roles(UserRole.STAFF)
+  async start(@Param('templateId', ParseIntPipe) templateId: number, @Body() dto: CompleteRoutineDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Pekerjaan rutin berhasil dimulai', data: await this.service.start(templateId, dto, user) };
+  }
+
   @Post(':templateId/complete')
   @Roles(UserRole.STAFF)
   async complete(@Param('templateId', ParseIntPipe) templateId: number, @Body() dto: CompleteRoutineDto, @CurrentUser() user: CurrentUserPayload) {

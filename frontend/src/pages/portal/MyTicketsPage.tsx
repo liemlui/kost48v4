@@ -6,6 +6,7 @@ import { uploadTicketImage } from '../../api/mediaUploads';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
+import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
 
 type PortalTicket = {
   issueImageUrl?: string | null;
@@ -108,6 +109,8 @@ export default function MyTicketsPage() {
         description="Keluhan dan permintaan bantuan yang pernah Anda ajukan. Konteks tenant, stay, dan kamar akan diisi otomatis oleh sistem."
         secondaryAction={<Button onClick={() => setShowCreate(true)}>Ajukan Tiket Baru</Button>}
       />
+
+      <TenantStaffReviewPrompt />
 
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? <Alert variant="danger">Gagal memuat tiket Anda. Silakan coba lagi.</Alert> : null}

@@ -1,4 +1,5 @@
 import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { InventoryItemStatus, RoomItemStatus } from '../../../common/enums/app.enums';
 
 export class TicketImageFieldsDto {
   @IsOptional()
@@ -23,8 +24,9 @@ export class TicketImageFieldsDto {
 }
 
 export class CreateBackofficeTicketDto extends TicketImageFieldsDto {
+  @IsOptional()
   @IsInt()
-  tenantId!: number;
+  tenantId?: number;
 
   @IsOptional()
   @IsInt()
@@ -118,4 +120,24 @@ export class CloseTicketDto {
   @IsOptional()
   @IsString()
   resolutionNote?: string;
+
+  @IsOptional()
+  @IsInt()
+  finalRoomItemId?: number;
+
+  @IsOptional()
+  @IsEnum(RoomItemStatus, { message: 'finalRoomItemStatus tidak sesuai dengan status barang kamar' })
+  finalRoomItemStatus?: RoomItemStatus;
+
+  @IsOptional()
+  @IsInt()
+  finalInventoryItemId?: number;
+
+  @IsOptional()
+  @IsEnum(InventoryItemStatus, { message: 'finalInventoryItemStatus tidak sesuai dengan status barang gudang' })
+  finalInventoryItemStatus?: InventoryItemStatus;
+
+  @IsOptional()
+  @IsString()
+  finalAdminNote?: string;
 }

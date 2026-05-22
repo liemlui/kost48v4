@@ -1,5 +1,5 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-21 V5.15 Intelligent Command Center + Finance Foundation checklist sync
+**Versi:** 2026-05-22 V5.16-G Staff Repair + Release Readiness checklist**
 
 ## A. Start Hygiene
 
@@ -8,7 +8,7 @@
   Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status --short; git log --oneline -5
   ```
 - [ ] Confirm working tree state.
-- [ ] Confirm branch from local git.
+- [ ] Confirm branch.
 - [ ] PowerShell only.
 - [ ] API tests use `Invoke-RestMethod`.
 - [ ] No DB reset unless user explicitly asks.
@@ -18,245 +18,94 @@
 - [ ] Do not claim PASS without build + verification.
 - [ ] No dark mode.
 - [ ] No production mutation.
+- [ ] No UAT script file unless user explicitly asks.
 
-## B. Stable Baseline Before V5.15
+## B. V5.16 Staff Repair Verification
 
-- [ ] Confirm baseline includes `e93c78a` or newer.
-- [ ] Confirm V5.12 full regression was previously PASS.
-- [ ] Confirm V5.13 release readiness scripts/docs are present if using that baseline.
-- [ ] Confirm latest V5.14 frontend Command Center zip has been merged before V5.15 ACT.
-- [ ] Preserve locked guards:
-  - [ ] Renewal invoice `ISSUED`.
-  - [ ] Checkout final blocks open invoice.
-  - [ ] `DRAFT` blocks checkout.
-  - [ ] No auto-create final utility invoice.
-  - [ ] Payment approval remains core monolith.
-  - [ ] Renew execution remains core monolith.
-  - [ ] Room status writes remain core monolith.
-  - [ ] Admin approve checkout request does not complete stay.
+- [x] Staff report barang kamar uses “Laporkan Kondisi” mental model.
+- [x] Staff does not decide final item status.
+- [x] Admin/owner controls final item status.
+- [x] InventoryMovement remains admin/owner.
+- [x] `StaffFieldReport` exists.
+- [x] Admin review queue exists.
+- [x] Admin review supports APPROVE / REJECT / NEEDS_MORE_INFO.
+- [x] Staff report room item fills fresh `linkedRoomItemId`.
+- [x] Staff report inventory item fills fresh `linkedInventoryItemId`.
+- [x] Ticket lifecycle manual UAT passed for ticket 6/7.
+- [x] Fresh linking manual UAT passed for ticket 8/9.
+- [x] Staff active list manual UAT passed after V5.16-G with ticket 12.
+- [x] Ticket close body uses `action`, not `reason`.
+- [x] UAT commands kept in chat, not files.
 
-## C. V5.14 Implementation State To Confirm Locally
-
-- [ ] `AssistantPanel` exists.
-- [ ] `ActionQueueTable` exists.
-- [ ] `CompactMetrics` exists.
-- [ ] `StatusBadge` was updated.
-- [ ] `ReadinessChecklist` exists.
-- [ ] `BlockedReasonCard` exists.
-- [ ] `LifecycleTimeline` exists.
-- [ ] `PeriodVisualizer` exists.
-- [ ] Dashboard owner/admin/staff uses Command Center pattern.
-- [ ] Tenant My Stay Guide uses tenant-friendly copy.
-- [ ] Invoices/stays/renew/tickets/reminders/public rooms received expansion patch.
-- [ ] Frontend build PASS after merge.
-- [ ] Manual browser smoke pending/done:
-  - [ ] `/dashboard`
-  - [ ] `/reports`
-  - [ ] `/invoices`
-  - [ ] `/stays`
-  - [ ] `/payment-submissions/review`
-  - [ ] `/portal/stay`
-
-## D. V5.15-A Docs Sync Checklist
-
-- [x] Product direction updated to Intelligent Command Center + Finance Foundation.
-- [x] Stable Modular Monolith preserved.
-- [x] Tier 0 rule intelligence defined.
-- [x] Tier 1 AI on-demand defined.
-- [x] Tier 2 finance foundation defined.
-- [x] Assistant vs queue dedup rule defined.
-- [x] Sidebar simplification rule defined.
-- [x] Smart chart system planned.
-- [x] Balance sheet/formal ratio readiness planned.
-- [x] Only 7 active docs updated.
-
-## E. V5.15-B UX Dedup + Sidebar Simplification
-
-Before ACT:
-
-- [ ] Inspect latest merged frontend source.
-- [ ] Identify current dashboard duplicate assistant/queue items.
-- [ ] Identify sidebar report/menu entries.
-- [ ] Confirm owner/admin/staff/tenant navigation behavior.
-
-Patch:
-
-- [ ] AssistantPanel summarizes diagnosis only.
-- [ ] ActionQueueTable lists actionable rows only.
-- [ ] Dedup by `ruleId + entityType + entityId + actionRoute`.
-- [ ] Dashboard links to reports drill-down.
-- [ ] Sidebar no longer feels like a full page dump.
-- [ ] Reports still accessible for OWNER.
-- [ ] No route removed without alternate path.
-- [ ] Frontend build PASS.
-- [ ] Manual check OWNER/ADMIN/STAFF/TENANT sidebar.
-
-## F. V5.15-C Tier 0 Rule Intelligence Hooks
-
-Create/Update:
-
-- [ ] `frontend/src/hooks/useBusinessHealthScore.ts`
-- [ ] `frontend/src/hooks/useTenantRiskProfile.ts`
-- [ ] `frontend/src/hooks/useCashflowForecast.ts`
-- [ ] `frontend/src/hooks/useOperationalStressIndex.ts`
-- [ ] `frontend/src/hooks/useMeterAnomalyDetector.ts`
-- [ ] `frontend/src/utils/smartCopy.ts`
-- [ ] `frontend/src/utils/scoring.ts`
-
-Quality:
-
-- [ ] No LLM/API call.
-- [ ] Deterministic outputs.
-- [ ] Handles empty data gracefully.
-- [ ] No fake data.
-- [ ] Business score explains drivers.
-- [ ] Tenant risk uses tenant-friendly wording.
-- [ ] Cashflow forecast labels assumptions.
-- [ ] Operational stress separates admin vs staff risk.
-- [ ] Meter anomaly is warning only unless backend rule exists.
-- [ ] Frontend build PASS.
-
-## G. V5.15-D Smart Chart System
-
-- [ ] Create/update `SmartChartPanel` if needed.
-- [ ] Support mode switching:
-  - [ ] Summary
-  - [ ] Donut
-  - [ ] Bar
-  - [ ] Line if time-series data exists
-  - [ ] Table
-- [ ] Do not show unsupported chart modes.
-- [ ] Occupancy/room condition chart links to reports drill-down.
-- [ ] No new chart dependency unless approved.
-- [ ] Frontend build PASS.
-
-## H. V5.15-E Reports + Formal Finance Readiness
-
-Reports UX:
-
-- [ ] Reports can be opened from dashboard.
-- [ ] Reports page has clear Command Center/drill-down tabs.
-- [ ] Occupancy report connects to room condition dashboard.
-- [ ] Formal ratios explain locked state.
-
-Finance readiness:
-
-- [ ] Balance sheet readiness panel exists.
-- [ ] Cash/bank source identified.
-- [ ] Accounts receivable from open invoices identified.
-- [ ] Deposit held treated as liability.
-- [ ] Expenses source identified.
-- [ ] Payables/equity missing state explained.
-- [ ] Formal ratios remain locked until data reliable.
-- [ ] No fake ratio values.
-- [ ] Frontend build PASS.
-
-## I. V5.15-F Backend Finance Summary Endpoints
-
-Only after PLAN/ACT approval:
-
-- [ ] Inspect existing reports module.
-- [ ] Confirm guards OWNER/ADMIN.
-- [ ] Add read-only endpoint only.
-- [ ] No lifecycle mutation.
-- [ ] No DB reset.
-- [ ] Return readiness object if incomplete.
-- [ ] Backend build PASS.
-- [ ] Smoke with `Invoke-RestMethod`.
-
-Candidate endpoints:
-
-- [ ] `GET /api/finance/business-health`
-- [ ] `GET /api/finance/occupancy/summary`
-- [ ] `GET /api/finance/formal-ratios/readiness`
-- [ ] `GET /api/finance/balance-sheet/draft`
-
-## J. V5.15-G Balance Sheet / Schema Plan
-
-Before schema ACT:
-
-- [ ] Write migration plan.
-- [ ] Identify current Prisma models.
-- [ ] Decide account model.
-- [ ] Decide journal/ledger model.
-- [ ] Decide deposit liability mapping.
-- [ ] Decide cash/bank source.
-- [ ] Decide opening balance strategy.
-- [ ] No DB reset.
-- [ ] Backup plan exists for production.
-
-Potential models:
-
-- [ ] `FinanceAccount`
-- [ ] `JournalEntry`
-- [ ] `LedgerEntry`
-- [ ] `BalanceSnapshot`
-- [ ] `AiCache` optional
-
-## K. V5.15-H Tier 1 AI On-Demand
+## C. Build / Release Gate Before Git Push
 
 Backend:
 
-- [ ] `ai.module.ts`
-- [ ] `ai.service.ts`
-- [ ] `ai.controller.ts`
-- [ ] `ai-cache.service.ts`
-- [ ] provider key from env only.
-- [ ] no secret committed.
-- [ ] rate limit `/api/ai/*`.
-- [ ] cache before provider call.
-- [ ] JSON output.
-- [ ] no autonomous mutation.
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npx prisma generate; npm run build:local
+  ```
+- [ ] Backend build PASS.
 
 Frontend:
 
-- [ ] AI call only after explicit click.
-- [ ] Loading state clear.
-- [ ] Result shown as suggestion only.
-- [ ] Admin must still decide final action.
-- [ ] Errors do not block normal workflow.
-
-Smoke:
-
-- [ ] Backend build PASS.
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+  ```
 - [ ] Frontend build PASS.
-- [ ] API test uses `Invoke-RestMethod`.
-
-## L. V5.15-I Payment Proof Scanner
-
-- [ ] Only available from review page/modal.
-- [ ] Click “Analisa bukti” triggers AI.
-- [ ] Extracted amount/date/confidence shown.
-- [ ] Mismatch warning shown.
-- [ ] Does not approve payment.
-- [ ] Does not mutate invoice/payment/stay.
-- [ ] Result cached.
-- [ ] Admin still clicks approve/reject manually.
-
-## M. Build / Smoke Commands
-
-Frontend build:
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
-```
-
-Backend build if backend touched:
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
-```
 
 Smoke:
 
-```powershell
-Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
-$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; $token
-Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/me/notifications" -Headers @{Authorization="Bearer $token"}
-Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}
-```
+- [ ] Public rooms:
+  ```powershell
+  Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
+  ```
+- [ ] Login once:
+  ```powershell
+  $adminLogin = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $adminToken=$adminLogin.data.accessToken; $staffLogin = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"staff@kost48.com","password":"staff123"}'; $staffToken=$staffLogin.data.accessToken
+  ```
+- [ ] Staff report creates active ticket:
+  ```powershell
+  Invoke-RestMethod -Method Patch -Uri "http://localhost:3000/api/room-items/1/staff-status" -Headers @{Authorization="Bearer $staffToken"} -ContentType "application/json" -Body '{"status":"MAINTENANCE","note":"Final smoke: staff list should show assigned active ticket.","requestsReplacement":false}'
+  ```
+- [ ] Staff list shows ticket:
+  ```powershell
+  $res = Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/tickets?limit=20" -Headers @{Authorization="Bearer $staffToken"}; "COUNT=$($res.data.items.Count)"; $res.data.items | Select-Object id,ticketNumber,title,status,assignedToId,roomId,linkedRoomItemId | Format-Table
+  ```
+- [ ] Cleanup smoke ticket:
+  ```powershell
+  $tickets = Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/tickets?limit=20" -Headers @{Authorization="Bearer $adminToken"}; $latest = $tickets.data.items | Where-Object { $_.title -like "*Lampu*" -and $_.status -eq "OPEN" } | Sort-Object id -Descending | Select-Object -First 1; Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/tickets/$($latest.id)/close" -Headers @{Authorization="Bearer $adminToken"} -ContentType "application/json" -Body '{"action":"CANCEL"}'
+  ```
 
-## N. Deferred
+## D. Git Push Checklist
+
+- [ ] Run `git status --short`.
+- [ ] Confirm no unwanted generated/heavy files.
+- [ ] Confirm no `.env`, `node_modules`, `dist`, generated Prisma heavy artifacts committed unless intentionally tracked.
+- [ ] Review diff:
+  ```powershell
+  git diff --stat; git diff -- docs/00_GROUND_STATE.md docs/01_CONTRACTS.md docs/02_PLAN.md docs/CHECKLIST.md docs/03_DECISIONS_LOG.md docs/04_JOURNAL.md docs/CHANGELOG.md
+  ```
+- [ ] Commit:
+  ```powershell
+  git add backend frontend docs; git commit -m "feat(staff): stabilize repair workflow and staff ticket visibility"
+  ```
+- [ ] Push:
+  ```powershell
+  git push origin main
+  ```
+
+## E. Carry-Forward V5.15 Backlog
+
+- [ ] Dashboard dedup + sidebar simplification.
+- [ ] Tier 0 rule intelligence hooks.
+- [ ] Reports drill-down.
+- [ ] Smart chart system.
+- [ ] Finance readiness.
+- [ ] AI on-demand only after Tier 0.
+
+## F. Deferred
 
 - [ ] Multi-app shell.
 - [ ] Workspace migration.

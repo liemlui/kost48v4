@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { resourceConfigs } from '../../config/resources';
 import SimpleCrudPage from '../resources/SimpleCrudPage';
 import PublicRoomsPage from './PublicRoomsPage';
+import StaffRoomsPage from './StaffRoomsPage';
 
 export default function RoomsRouteEntry() {
   const { user, loading } = useAuth();
@@ -16,7 +17,15 @@ export default function RoomsRouteEntry() {
     );
   }
 
-  if (user && ['OWNER', 'ADMIN', 'STAFF'].includes(user.role)) {
+  if (user?.role === 'STAFF') {
+    return (
+      <AppLayout>
+        <StaffRoomsPage />
+      </AppLayout>
+    );
+  }
+
+  if (user && ['OWNER', 'ADMIN'].includes(user.role)) {
     return (
       <AppLayout>
         <SimpleCrudPage config={resourceConfigs.rooms} />

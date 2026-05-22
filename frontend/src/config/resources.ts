@@ -495,6 +495,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       { key: 'category', label: 'Kategori' },
       { key: 'qtyOnHand', label: 'Stok' },
       { key: 'minQty', label: 'Min Stok' },
+      { key: 'status', label: 'Status' },
     ],
     fields: [
       {
@@ -537,6 +538,20 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         label: 'Batas Minimum',
         type: 'text',
         placeholder: 'Jumlah minimum stok',
+      },
+      {
+        name: 'status',
+        label: 'Status Barang',
+        type: 'select',
+        options: [
+          { value: 'GOOD', label: 'Baik' },
+          { value: 'LOW_STOCK', label: 'Stok Menipis' },
+          { value: 'OUT_OF_STOCK', label: 'Stok Habis' },
+          { value: 'DAMAGED', label: 'Rusak' },
+          { value: 'MISSING', label: 'Hilang' },
+          { value: 'NEEDS_REPAIR', label: 'Perlu Diperbaiki' },
+          { value: 'PENDING_CHECK', label: 'Menunggu Cek Admin' },
+        ],
       },
       {
         name: 'notes',

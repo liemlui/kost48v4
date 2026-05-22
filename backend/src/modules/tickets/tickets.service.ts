@@ -22,13 +22,69 @@ const STAFF_FIELD_CATEGORIES = new Set([
   'KEBERSIHAN',
 ]);
 
+const STAFF_ACTIVE_TICKET_STATUSES = ['OPEN', 'IN_PROGRESS', 'DONE'] as const;
+
 
 @Injectable()
 export class TicketsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
-  async findAll(query: TicketsQueryDto) {
+  async findAll(query: TicketsQueryDto, actor?: CurrentUserPayload) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
+
+    // Staff list is a work queue, not a tenant/public ticket listing.
+    // Keep this branch explicit so active staff work is never filtered out by tenant/stay defaults.
+    if (actor?.role === 'STAFF') {
+      const staffUserId = Number(actor.id);
+      const staffWhere: Prisma.TicketWhereInput = {
+        AND: [
+          query.search
+            ? {
+                OR: [
+                  { ticketNumber: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                  { title: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+                ],
+              }
+            : undefined,
+          query.status ? { status: query.status } : { status: { in: STAFF_ACTIVE_TICKET_STATUSES as any } },
+          query.roomId ? { roomId: Number(query.roomId) } : undefined,
+          query.stayId ? { stayId: Number(query.stayId) } : undefined,
+          query.linkedRoomItemId ? { linkedRoomItemId: Number(query.linkedRoomItemId) } : undefined,
+          query.linkedInventoryItemId ? { linkedInventoryItemId: Number(query.linkedInventoryItemId) } : undefined,
+          query.assignedToId ? { assignedToId: Number(query.assignedToId) } : undefined,
+          {
+            OR: [
+              { assignedToId: staffUserId },
+              { staffFieldReports: { some: { reportedByStaffId: staffUserId } } },
+            ],
+          },
+        ].filter(Boolean) as Prisma.TicketWhereInput[],
+      };
+
+      const [items, totalItems] = await this.prisma.$transaction([
+        this.prisma.ticket.findMany({
+          where: staffWhere,
+          skip,
+          take,
+          orderBy: { id: 'desc' },
+          include: {
+            tenant: true,
+            room: true,
+            stay: true,
+            assignedTo: {
+              select: { id: true, fullName: true, email: true, role: true },
+            },
+            linkedRoomItem: { include: { item: true, room: true } },
+            linkedInventoryItem: true,
+            staffFieldReports: { include: { requestedInventoryItem: true, reportedByStaff: { select: { id: true, fullName: true, role: true } } }, orderBy: { id: 'desc' } },
+          },
+        }),
+        this.prisma.ticket.count({ where: staffWhere }),
+      ]);
+
+      return { items, meta: buildMeta(page, limit, totalItems) };
+    }
+
     const where: Prisma.TicketWhereInput = {
       AND: [
         query.search
@@ -44,7 +100,9 @@ export class TicketsService {
         query.roomId ? { roomId: Number(query.roomId) } : undefined,
         query.stayId ? { stayId: Number(query.stayId) } : undefined,
         query.assignedToId ? { assignedToId: Number(query.assignedToId) } : undefined,
-      ].filter(Boolean),
+        query.linkedRoomItemId ? { linkedRoomItemId: Number(query.linkedRoomItemId) } : undefined,
+        query.linkedInventoryItemId ? { linkedInventoryItemId: Number(query.linkedInventoryItemId) } : undefined,
+      ].filter(Boolean) as Prisma.TicketWhereInput[],
     };
 
     const [items, totalItems] = await this.prisma.$transaction([
@@ -60,6 +118,9 @@ export class TicketsService {
           assignedTo: {
             select: { id: true, fullName: true, email: true, role: true },
           },
+          linkedRoomItem: { include: { item: true, room: true } },
+          linkedInventoryItem: true,
+          staffFieldReports: { include: { requestedInventoryItem: true, reportedByStaff: { select: { id: true, fullName: true, role: true } } }, orderBy: { id: 'desc' } },
         },
       }),
       this.prisma.ticket.count({ where }),
@@ -87,6 +148,8 @@ export class TicketsService {
           assignedTo: {
             select: { id: true, fullName: true, role: true },
           },
+          linkedRoomItem: { include: { item: true, room: true } },
+          linkedInventoryItem: true,
         },
       }),
       this.prisma.ticket.count({ where }),
@@ -105,6 +168,9 @@ export class TicketsService {
         assignedTo: {
           select: { id: true, fullName: true, email: true, role: true },
         },
+        linkedRoomItem: { include: { item: true, room: true } },
+        linkedInventoryItem: true,
+        staffFieldReports: { include: { requestedInventoryItem: true, reportedByStaff: { select: { id: true, fullName: true, role: true } } }, orderBy: { id: 'desc' } },
       },
     });
 
@@ -116,6 +182,14 @@ export class TicketsService {
       throw new ForbiddenException('Tidak berhak melihat tiket ini');
     }
 
+    if (user.role === 'STAFF') {
+      const isAssignedToStaff = ticket.assignedToId === user.id;
+      const hasOwnFieldReport = ticket.staffFieldReports.some((report) => report.reportedByStaff?.id === user.id);
+      if (!isAssignedToStaff && !hasOwnFieldReport) {
+        throw new ForbiddenException('Tidak berhak melihat tiket ini');
+      }
+    }
+
     return ticket;
   }
 
@@ -124,14 +198,20 @@ export class TicketsService {
       throw new ConflictException('Jenis laporan staf tidak sesuai');
     }
 
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: dto.tenantId } });
-    if (!tenant) {
-      throw new NotFoundException('Tenant tidak ditemukan');
+    if (!dto.tenantId && actor.role !== 'STAFF') {
+      throw new ConflictException('Tenant wajib diisi untuk tiket admin');
     }
 
-    const context = await this.resolveTicketContext(dto.tenantId, dto.stayId, dto.roomId);
+    if (dto.tenantId) {
+      const tenant = await this.prisma.tenant.findUnique({ where: { id: dto.tenantId } });
+      if (!tenant) {
+        throw new NotFoundException('Tenant tidak ditemukan');
+      }
+    }
+
+    const context = await this.resolveTicketContext(dto.tenantId ?? null, dto.stayId, dto.roomId);
     const created = await this.createTicketRecord({
-      tenantId: dto.tenantId,
+      tenantId: dto.tenantId ?? null,
       roomId: context.roomId,
       stayId: context.stayId,
       title: dto.title,
@@ -235,7 +315,34 @@ export class TicketsService {
     if (!ticket) throw new NotFoundException('Tiket tidak ditemukan');
     if (ticket.status !== 'OPEN') throw new ConflictException('Transisi status tidak valid');
 
-    const updated = await this.prisma.ticket.update({ where: { id }, data: { status: 'IN_PROGRESS' } });
+    if (actor.role === 'STAFF') {
+      if (ticket.assignedToId && ticket.assignedToId !== actor.id) {
+        throw new ConflictException('Tiket ini bukan tugas akun ini');
+      }
+
+      const [activeTicket, activeRoutine] = await Promise.all([
+        this.prisma.ticket.findFirst({
+          where: { id: { not: id }, assignedToId: actor.id, status: 'IN_PROGRESS' },
+          select: { id: true, title: true, ticketNumber: true },
+        }),
+        this.prisma.staffRoutineCompletion.findFirst({
+          where: { staffUserId: actor.id, status: 'IN_PROGRESS' as any },
+          include: { template: { select: { title: true } } },
+        }),
+      ]);
+
+      if (activeTicket) {
+        throw new ConflictException(`Selesaikan pekerjaan aktif dulu: ${activeTicket.title || activeTicket.ticketNumber || `Tiket #${activeTicket.id}`}`);
+      }
+      if (activeRoutine) {
+        throw new ConflictException(`Selesaikan pekerjaan aktif dulu: ${activeRoutine.template?.title || `Pekerjaan rutin #${activeRoutine.id}`}`);
+      }
+    }
+
+    const updated = await this.prisma.ticket.update({
+      where: { id },
+      data: { status: 'IN_PROGRESS', ...(actor.role === 'STAFF' ? { assignedToId: actor.id } : {}) },
+    });
     await this.audit.log({ actorUserId: actor.id, action: 'START', entityType: 'Ticket', entityId: String(updated.id), oldData: ticket, newData: updated });
     return updated;
   }
@@ -272,19 +379,69 @@ export class TicketsService {
   }
 
   async close(id: number, dto: CloseTicketDto, actor: CurrentUserPayload) {
-    const ticket = await this.prisma.ticket.findUnique({ where: { id } });
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id },
+      include: {
+        staffFieldReports: {
+          select: { roomItemId: true, inventoryItemId: true },
+          orderBy: { id: 'desc' },
+        },
+      },
+    });
     if (!ticket) throw new NotFoundException('Tiket tidak ditemukan');
 
     if (dto.action === 'CLOSE') {
       if (ticket.status !== 'DONE') throw new ConflictException('Transisi status tidak valid');
+      const reportedRoomItemId = ticket.staffFieldReports.find((report) => report.roomItemId)?.roomItemId ?? null;
+      const reportedInventoryItemId = ticket.staffFieldReports.find((report) => report.inventoryItemId)?.inventoryItemId ?? null;
+      const roomItemId = dto.finalRoomItemId ?? ticket.linkedRoomItemId ?? reportedRoomItemId;
+      const inventoryItemId = dto.finalInventoryItemId ?? ticket.linkedInventoryItemId ?? reportedInventoryItemId;
+      if (roomItemId && !dto.finalRoomItemStatus) throw new ConflictException('Status akhir barang kamar wajib dipilih sebelum tiket ditutup.');
+      if (inventoryItemId && !dto.finalInventoryItemStatus) throw new ConflictException('Status akhir barang gudang wajib dipilih sebelum tiket ditutup.');
 
-      const updated = await this.prisma.ticket.update({
-        where: { id },
-        data: {
-          status: 'CLOSED',
-          resolutionNote: dto.resolutionNote ?? ticket.resolutionNote,
-          closedAt: new Date(),
-        },
+      const updated = await this.prisma.$transaction(async (tx) => {
+        const closed = await tx.ticket.update({
+          where: { id },
+          data: {
+            status: 'CLOSED',
+            resolutionNote: dto.resolutionNote ?? ticket.resolutionNote,
+            linkedRoomItemId: ticket.linkedRoomItemId ?? roomItemId ?? undefined,
+            linkedInventoryItemId: ticket.linkedInventoryItemId ?? inventoryItemId ?? undefined,
+            finalRoomItemStatus: dto.finalRoomItemStatus as any,
+            finalInventoryItemStatus: dto.finalInventoryItemStatus as any,
+            finalAdminNote: dto.finalAdminNote,
+            closedAt: new Date(),
+          },
+        });
+
+        if (roomItemId && dto.finalRoomItemStatus) {
+          const roomItem = await tx.roomItem.findUnique({ where: { id: roomItemId }, select: { note: true } });
+          await tx.roomItem.update({
+            where: { id: roomItemId },
+            data: {
+              status: dto.finalRoomItemStatus as any,
+              note: [roomItem?.note, dto.finalAdminNote ? `Admin final: ${dto.finalAdminNote}` : null].filter(Boolean).join('\n') || undefined,
+            },
+          });
+        }
+
+        if (inventoryItemId && dto.finalInventoryItemStatus) {
+          const inventoryItem = await tx.inventoryItem.findUnique({ where: { id: inventoryItemId }, select: { notes: true } });
+          await tx.inventoryItem.update({
+            where: { id: inventoryItemId },
+            data: {
+              status: dto.finalInventoryItemStatus as any,
+              notes: [inventoryItem?.notes, dto.finalAdminNote ? `Admin final: ${dto.finalAdminNote}` : null].filter(Boolean).join('\n') || undefined,
+            },
+          });
+        }
+
+        await tx.staffFieldReport.updateMany({
+          where: { ticketId: id, status: { notIn: ['CLOSED', 'REJECTED'] as any } },
+          data: { status: 'CLOSED' as any },
+        });
+
+        return closed;
       });
 
       await this.audit.log({
@@ -294,7 +451,7 @@ export class TicketsService {
         entityId: String(updated.id),
         oldData: ticket,
         newData: updated,
-        meta: { resolutionNoteProvided: !!dto.resolutionNote },
+        meta: { resolutionNoteProvided: !!dto.resolutionNote, finalAdminNoteProvided: !!dto.finalAdminNote, finalRoomItemStatus: dto.finalRoomItemStatus, finalInventoryItemStatus: dto.finalInventoryItemStatus },
       });
 
       return updated;
@@ -323,12 +480,12 @@ export class TicketsService {
     return updated;
   }
 
-  private async resolveTicketContext(tenantId: number, stayId?: number, roomId?: number) {
-    const activeStay = await this.prisma.stay.findFirst({
+  private async resolveTicketContext(tenantId: number | null, stayId?: number, roomId?: number) {
+    const activeStay = tenantId ? await this.prisma.stay.findFirst({
       where: { tenantId, status: 'ACTIVE' },
       orderBy: [{ checkInDate: 'desc' }, { id: 'desc' }],
       select: { id: true, roomId: true },
-    });
+    }) : null;
 
     let resolvedStayId = stayId ?? activeStay?.id ?? null;
     let resolvedRoomId = roomId ?? activeStay?.roomId ?? null;
@@ -336,7 +493,7 @@ export class TicketsService {
     if (stayId) {
       const stay = await this.prisma.stay.findUnique({ where: { id: stayId } });
       if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-      if (stay.tenantId !== tenantId) {
+      if (tenantId && stay.tenantId !== tenantId) {
         throw new ConflictException('Data stay tidak konsisten dengan tenant');
       }
 
@@ -366,7 +523,7 @@ export class TicketsService {
   }
 
   private async createTicketRecord(input: {
-    tenantId: number;
+    tenantId: number | null;
     roomId: number | null;
     stayId: number | null;
     title: string;

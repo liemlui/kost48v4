@@ -1,6 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, ButtonGroup, Form, Modal, Spinner } from 'react-bootstrap';
+import { Alert, Button, ButtonGroup, Dropdown, Form, Modal, Spinner } from 'react-bootstrap';
 import { createMeterReading } from '../../api/meterReadings';
 import { createResource, listResource } from '../../api/resources';
 import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
@@ -20,27 +20,31 @@ type StaffRoomOption = Room & {
 type Props = {
   fixedRoom?: StaffRoomOption | null;
   compact?: boolean;
+  singleButton?: boolean;
   onCreated?: () => void | Promise<void>;
 };
 
-const reportCopy: Record<FieldReportKind, { title: string; button: string; problemLabel: string; placeholder: string }> = {
+const reportCopy: Record<FieldReportKind, { title: string; button: string; problemLabel: string; placeholder: string; help: string }> = {
   BARANG_RUSAK: {
-    title: 'Lapor Barang Rusak',
-    button: 'Lapor Barang Rusak',
-    problemLabel: 'Barang / masalah',
-    placeholder: 'Contoh: Remote AC tidak menyala',
+    title: 'Barang Rusak / Hilang',
+    button: 'Barang Rusak / Hilang',
+    problemLabel: 'Nama barang dan masalah',
+    placeholder: 'Contoh: Remote AC hilang / kursi patah',
+    help: 'Untuk barang kamar, lebih baik buka Kamar → Barang Kamar lalu kirim laporan kondisi agar admin mendapat konteks barangnya. Tombol ini tetap bisa dipakai untuk laporan umum.',
   },
   CEK_KAMAR: {
-    title: 'Cek Kamar',
-    button: 'Cek Kamar',
+    title: 'Laporkan Kondisi Kamar',
+    button: 'Kondisi Kamar',
     problemLabel: 'Hasil cek kamar',
     placeholder: 'Contoh: Kamar bersih, lampu kamar mandi mati',
+    help: 'Tulis kondisi yang ditemukan. Kalau aman, tulis singkat saja agar admin tahu kamar sudah dicek.',
   },
   STOK_HABIS: {
-    title: 'Lapor Stok Habis',
-    button: 'Lapor Stok Habis',
-    problemLabel: 'Barang yang dibutuhkan',
-    placeholder: 'Contoh: Lampu kamar mandi habis 2 buah',
+    title: 'Stok Gudang / Alat Habis',
+    button: 'Stok Gudang Habis',
+    problemLabel: 'Stok atau alat yang bermasalah',
+    placeholder: 'Contoh: sabun lantai habis / alat pel rusak / plastik sampah tinggal sedikit',
+    help: 'Untuk stok gudang dan barang umum, buka tab Gudang lalu kirim laporan kondisi agar admin bisa cek stok/mutasi resmi. Tombol ini tetap bisa dipakai untuk laporan cepat.',
   },
 };
 
@@ -75,7 +79,7 @@ async function compressImageFile(file: File): Promise<File> {
   return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
 }
 
-export default function StaffActionLauncher({ fixedRoom = null, compact = false, onCreated }: Props) {
+export default function StaffActionLauncher({ fixedRoom = null, compact = false, singleButton = false, onCreated }: Props) {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<LauncherMode>(null);
   const [roomId, setRoomId] = useState<string>(fixedRoom?.id ? String(fixedRoom.id) : '');
@@ -133,6 +137,8 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
       queryClient.invalidateQueries({ queryKey: ['dashboard-staff'] }),
       queryClient.invalidateQueries({ queryKey: ['room'] }),
       queryClient.invalidateQueries({ queryKey: ['staff-field-rooms'] }),
+      queryClient.invalidateQueries({ queryKey: ['staff-performance-me-dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['staff-performance-me-evidence'] }),
     ]);
     await onCreated?.();
   };
@@ -141,24 +147,23 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
     mutationFn: async () => {
       if (!mode || mode === 'CATAT_METER') return null;
       const tenantId = activeTenantId(selectedRoom);
-      if (!selectedRoom?.id) throw new Error('Pilih kamar dulu.');
-      if (!tenantId) throw new Error('Kamar ini belum ada penghuni aktif. Minta admin buatkan tugas.');
+      if (mode !== 'STOK_HABIS' && !selectedRoom?.id) throw new Error('Pilih kamar dulu.');
       if (!problem.trim()) throw new Error('Tulis masalahnya secara singkat.');
       const copy = reportCopy[mode];
       const title = mode === 'BARANG_RUSAK'
         ? `Barang rusak - ${problem.trim().slice(0, 60)}`
         : mode === 'STOK_HABIS'
-          ? `Stok habis - ${problem.trim().slice(0, 60)}`
+          ? `Stok gudang/alat - ${problem.trim().slice(0, 60)}`
           : `Cek kamar - ${roomLabel(selectedRoom)}`;
       const description = [
         copy.title,
-        `Kamar: ${roomLabel(selectedRoom)}`,
+        selectedRoom?.id ? `Lokasi/kamar: ${roomLabel(selectedRoom)}` : 'Lokasi: gudang/area umum',
         `Masalah: ${problem.trim()}`,
         note.trim() ? `Catatan: ${note.trim()}` : null,
       ].filter(Boolean).join('\n');
       return createResource('/tickets', {
-        tenantId,
-        roomId: selectedRoom.id,
+        tenantId: tenantId ?? undefined,
+        roomId: selectedRoom?.id,
         stayId: activeStayId(selectedRoom) ?? undefined,
         title,
         description,
@@ -208,6 +213,8 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
         queryClient.invalidateQueries({ queryKey: ['meter-readings'] }),
         queryClient.invalidateQueries({ queryKey: ['room'] }),
         queryClient.invalidateQueries({ queryKey: ['dashboard-staff'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-dashboard'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-performance-me-evidence'] }),
       ]);
       await onCreated?.();
       close();
@@ -238,30 +245,49 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
   return (
     <>
       <div className={compact ? 'staff-action-launcher compact' : 'staff-action-launcher'}>
-        <ButtonGroup size="sm" className="staff-action-group">
-          <Button variant="primary" onClick={() => open('BARANG_RUSAK')}>Lapor Barang Rusak</Button>
-          <Button variant="outline-primary" onClick={() => open('CATAT_METER')}>Catat Meter</Button>
-          <Button variant="outline-primary" onClick={() => open('STOK_HABIS')}>Lapor Stok Habis</Button>
-          <Button variant="outline-primary" onClick={() => open('CEK_KAMAR')}>Cek Kamar</Button>
-        </ButtonGroup>
+        {singleButton ? (
+          <Dropdown align="end">
+            <Dropdown.Toggle size="sm" variant="primary" className="staff-quick-report-toggle">
+              + Buat Laporan
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="staff-quick-report-menu">
+              <Dropdown.Item onClick={() => open('BARANG_RUSAK')}>Barang kamar rusak / hilang</Dropdown.Item>
+              <Dropdown.Item onClick={() => open('CATAT_METER')}>Catat meter listrik / air</Dropdown.Item>
+              <Dropdown.Item onClick={() => open('STOK_HABIS')}>Stok gudang / alat habis</Dropdown.Item>
+              <Dropdown.Item onClick={() => open('CEK_KAMAR')}>Catat kondisi kamar</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        ) : (
+          <ButtonGroup size="sm" className="staff-action-group">
+            <Button variant="primary" onClick={() => open('BARANG_RUSAK')}>Barang Rusak / Hilang</Button>
+            <Button variant="outline-primary" onClick={() => open('CATAT_METER')}>Meter Listrik/Air</Button>
+            <Button variant="outline-primary" onClick={() => open('STOK_HABIS')}>Stok Gudang Habis</Button>
+            <Button variant="outline-primary" onClick={() => open('CEK_KAMAR')}>Kondisi Kamar</Button>
+          </ButtonGroup>
+        )}
       </div>
 
       <Modal show={Boolean(mode)} onHide={close} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{mode === 'CATAT_METER' ? 'Catat Meter' : copy?.title}</Modal.Title>
+          <Modal.Title>{mode === 'CATAT_METER' ? 'Catat Angka Meter' : copy?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {error ? <Alert variant="danger" className="py-2">{error}</Alert> : null}
+          {mode === 'CATAT_METER' ? (
+            <Alert variant="info" className="py-2 small">Catat angka meter listrik dan/atau meter air yang terlihat hari ini. Data lama tidak bisa diedit oleh staff.</Alert>
+          ) : copy ? (
+            <Alert variant="light" className="border py-2 small">{copy.help}</Alert>
+          ) : null}
           {!fixedRoom ? (
             <Form.Group className="mb-3">
-              <Form.Label>Kamar</Form.Label>
+              <Form.Label>{mode === 'STOK_HABIS' ? 'Kamar / area terdekat (opsional)' : 'Kamar'}</Form.Label>
               <Form.Select value={roomId} onChange={(event) => setRoomId(event.currentTarget.value)}>
-                <option value="">Pilih kamar</option>
+                <option value="">{mode === 'STOK_HABIS' ? 'Gudang / area umum' : 'Pilih kamar'}</option>
                 {rooms.map((room) => (
                   <option key={room.id} value={room.id}>{roomLabel(room)}</option>
                 ))}
               </Form.Select>
-              <Form.Text>Pilih kamar yang sedang dicek.</Form.Text>
+              <Form.Text>{mode === 'STOK_HABIS' ? 'Boleh dikosongkan kalau laporan untuk gudang kebersihan atau area umum.' : 'Pilih kamar yang sedang dicek.'}</Form.Text>
             </Form.Group>
           ) : (
             <Alert variant="light" className="border py-2 mb-3">Kamar: <strong>{roomLabel(fixedRoom)}</strong></Alert>
@@ -270,19 +296,19 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
           {mode === 'CATAT_METER' ? (
             <>
               <Form.Group className="mb-3">
-                <Form.Label>Tanggal</Form.Label>
+                <Form.Label>Tanggal cek</Form.Label>
                 <Form.Control type="date" value={meterDate} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setMeterDate(event.currentTarget.value)} />
               </Form.Group>
               <div className="row g-2">
                 <div className="col-6">
                   <Form.Group className="mb-3">
-                    <Form.Label>Angka listrik</Form.Label>
+                    <Form.Label>Angka meter listrik</Form.Label>
                     <Form.Control inputMode="decimal" value={electricity} onChange={(event) => setElectricity(event.currentTarget.value)} placeholder="Contoh: 12345" />
                   </Form.Group>
                 </div>
                 <div className="col-6">
                   <Form.Group className="mb-3">
-                    <Form.Label>Angka air</Form.Label>
+                    <Form.Label>Angka meter air</Form.Label>
                     <Form.Control inputMode="decimal" value={water} onChange={(event) => setWater(event.currentTarget.value)} placeholder="Contoh: 88" />
                   </Form.Group>
                 </div>
@@ -314,7 +340,7 @@ export default function StaffActionLauncher({ fixedRoom = null, compact = false,
           <Button variant="light" onClick={close}>Batal</Button>
           {mode === 'CATAT_METER' ? (
             <Button onClick={() => meterMutation.mutate()} disabled={isBusy}>
-              {isBusy ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Simpan Meter'}
+              {isBusy ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Simpan Angka Meter'}
             </Button>
           ) : (
             <Button onClick={() => reportMutation.mutate()} disabled={isBusy}>

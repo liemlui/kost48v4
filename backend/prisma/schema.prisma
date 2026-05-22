@@ -127,6 +127,43 @@ enum RoomItemStatus {
   MISSING
 }
 
+enum InventoryItemStatus {
+  GOOD
+  LOW_STOCK
+  OUT_OF_STOCK
+  DAMAGED
+  MISSING
+  NEEDS_REPAIR
+  PENDING_CHECK
+}
+
+enum ReportedCondition {
+  DAMAGED
+  MISSING
+  NEEDS_REPAIR
+  NEEDS_REPLACEMENT
+  NEEDS_CLEANING
+  LOW_STOCK
+  OUT_OF_STOCK
+  PENDING_CHECK
+}
+
+enum AdminDecision {
+  APPROVE
+  REJECT
+  NEEDS_MORE_INFO
+}
+
+enum StaffFieldReportStatus {
+  REPORTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IN_REPAIR
+  DONE
+  CLOSED
+}
+
 enum InventoryMovementType {
   IN
   OUT
@@ -152,10 +189,50 @@ enum StaffRoutineAreaType {
 }
 
 enum StaffRoutineStatus {
+  IN_PROGRESS
   DONE
   NEED_HELP
   MISSED
   SKIPPED
+}
+
+enum StaffWorkSourceType {
+  ROUTINE
+  TICKET
+  METER
+  ROOM_CHECK
+  STOCK_REPORT
+  INVENTORY_REPORT
+  TENANT_REVIEW
+  MANUAL_AUDIT
+}
+
+enum StaffAuditResult {
+  PASS
+  NEEDS_FIX
+  FAILED
+  NOT_DONE
+}
+
+enum StaffReviewStatus {
+  VISIBLE
+  HIDDEN
+  FLAGGED
+}
+
+enum StaffPerformanceEventType {
+  ROUTINE_DONE
+  ROUTINE_NEED_HELP
+  TICKET_DONE
+  METER_RECORDED
+  STOCK_REPORTED
+  AUDIT_PASS
+  AUDIT_NEEDS_FIX
+  AUDIT_FAILED
+  TENANT_REVIEW_HIGH
+  TENANT_REVIEW_LOW
+  MISSING_PROOF
+  MANUAL_ADJUSTMENT
 }
 
 enum AnnouncementAudience {
@@ -228,6 +305,11 @@ model User {
   staffRoutineTemplatesCreated StaffRoutineTemplate[] @relation("StaffRoutineTemplateCreatedBy")
   staffRoutineAssignments      StaffRoutineAssignment[] @relation("StaffRoutineAssignedTo")
   staffRoutineCompletions      StaffRoutineCompletion[] @relation("StaffRoutineCompletedBy")
+  staffPerformanceEvents       StaffPerformanceEvent[]   @relation("StaffPerformanceEventStaff")
+  staffPerformanceAudits       StaffWorkAudit[]          @relation("StaffWorkAuditStaff")
+  staffPerformanceAuditsMade   StaffWorkAudit[]          @relation("StaffWorkAuditAuditor")
+  staffReviewsReceived         StaffReview[]             @relation("StaffReviewStaff")
+  staffReviewsModerated        StaffReview[]             @relation("StaffReviewModeratedBy")
   meterReadingsRecorded       MeterReading[]       @relation("MeterReadingRecordedBy")
   inventoryMovementsCreated   InventoryMovement[]  @relation("InventoryMovementCreatedBy")
   wifiSalesCreated            WifiSale[]           @relation("WifiSaleCreatedBy")
@@ -239,6 +321,8 @@ model User {
   paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
   passwordResetTokens         PasswordResetToken[]
   notifications               AppNotification[]
+  staffFieldReportsCreated    StaffFieldReport[] @relation("StaffFieldReportCreatedBy")
+  staffFieldReportsReviewed   StaffFieldReport[] @relation("StaffFieldReportReviewedBy")
 
   @@index([role])
   @@index([isActive])
@@ -269,6 +353,7 @@ model Tenant {
   tickets            Ticket[]
   paymentSubmissions PaymentSubmission[]
   renewRequests      RenewRequest[]
+  staffReviews       StaffReview[]
 
   @@index([fullName])
   @@index([phone])
@@ -310,6 +395,7 @@ model Room {
   staffRoutineCompletions StaffRoutineCompletion[] @relation("StaffRoutineCompletionRoom")
   expenses           Expense[]
   inventoryMovements InventoryMovement[]
+  staffFieldReports  StaffFieldReport[]
   facilities         RoomFacility[]
 
   @@index([status])
@@ -547,7 +633,7 @@ model PaymentSubmission {
 model Ticket {
   id                              Int          @id @default(autoincrement())
   ticketNumber                    String       @unique
-  tenantId                        Int
+  tenantId                        Int?
   roomId                          Int?
   stayId                          Int?
   title                           String
@@ -565,21 +651,31 @@ model Ticket {
   resolutionImageFileSizeBytes    Int?
   status                          TicketStatus @default(OPEN)
   assignedToId                    Int?
+  linkedRoomItemId                Int?
+  linkedInventoryItemId           Int?
+  finalRoomItemStatus             RoomItemStatus?
+  finalInventoryItemStatus        InventoryItemStatus?
+  finalAdminNote                  String?
   resolutionNote                  String?
   resolvedAt                      DateTime?
   closedAt                        DateTime?
   createdAt                       DateTime     @default(now())
   updatedAt                       DateTime     @updatedAt
 
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   room       Room?  @relation(fields: [roomId], references: [id], onDelete: SetNull)
   stay       Stay?  @relation(fields: [stayId], references: [id], onDelete: SetNull)
-  assignedTo User?  @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedTo            User?          @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  linkedRoomItem        RoomItem?      @relation("TicketLinkedRoomItem", fields: [linkedRoomItemId], references: [id], onDelete: SetNull)
+  linkedInventoryItem   InventoryItem? @relation("TicketLinkedInventoryItem", fields: [linkedInventoryItemId], references: [id], onDelete: SetNull)
+  staffFieldReports     StaffFieldReport[]
 
   @@index([tenantId])
   @@index([roomId])
   @@index([stayId])
   @@index([status])
+  @@index([linkedRoomItemId])
+  @@index([linkedInventoryItemId])
 }
 
 model StaffRoutineTemplate {
@@ -652,6 +748,71 @@ model StaffRoutineCompletion {
   @@index([roomId])
 }
 
+
+model StaffWorkAudit {
+  id          Int                 @id @default(autoincrement())
+  staffId     Int
+  sourceType  StaffWorkSourceType
+  sourceId    Int?
+  auditedById Int
+  result      StaffAuditResult
+  scoreDelta  Int                 @default(0)
+  notes       String?
+  photoUrl    String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  staff     User @relation("StaffWorkAuditStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  auditedBy User @relation("StaffWorkAuditAuditor", fields: [auditedById], references: [id], onDelete: Restrict)
+
+  @@index([staffId, createdAt])
+  @@index([sourceType, sourceId])
+  @@index([result])
+  @@index([auditedById])
+}
+
+model StaffPerformanceEvent {
+  id         Int                       @id @default(autoincrement())
+  staffId    Int
+  sourceType StaffWorkSourceType
+  sourceId   Int?
+  eventType  StaffPerformanceEventType
+  scoreDelta Int                       @default(0)
+  reason     String?
+  createdAt  DateTime                  @default(now())
+
+  staff User @relation("StaffPerformanceEventStaff", fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId, createdAt])
+  @@index([sourceType, sourceId])
+  @@index([eventType])
+}
+
+model StaffReview {
+  id            Int               @id @default(autoincrement())
+  staffId       Int
+  tenantId      Int
+  ticketId      Int?
+  routineCompletionId Int?
+  rating        Int
+  comment       String?
+  status        StaffReviewStatus @default(VISIBLE)
+  moderatedById Int?
+  moderatedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  staff       User    @relation("StaffReviewStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moderatedBy User?   @relation("StaffReviewModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, ticketId])
+  @@index([staffId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([ticketId])
+  @@index([status])
+}
+
 model Announcement {
   id                    Int                  @id @default(autoincrement())
   title                 String
@@ -688,6 +849,7 @@ model InventoryItem {
   unit      String   @default("pcs")
   qtyOnHand Decimal  @default(0) @db.Decimal(12, 2)
   minQty    Decimal  @default(0) @db.Decimal(12, 2)
+  status    InventoryItemStatus @default(GOOD)
   images    String[] @default([])
   notes     String?
   isActive  Boolean  @default(true)
@@ -696,9 +858,13 @@ model InventoryItem {
 
   roomItems RoomItem[]
   movements InventoryMovement[]
+  linkedTickets Ticket[] @relation("TicketLinkedInventoryItem")
+  fieldReportsAsItem StaffFieldReport[] @relation("StaffFieldReportInventoryItem")
+  fieldReportsAsRequestedItem StaffFieldReport[] @relation("StaffFieldReportRequestedInventoryItem")
 
   @@index([name])
   @@index([category])
+  @@index([status])
   @@index([isActive])
 }
 
@@ -714,6 +880,8 @@ model RoomItem {
 
   room Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
   item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  linkedTickets Ticket[] @relation("TicketLinkedRoomItem")
+  staffFieldReports StaffFieldReport[] @relation("StaffFieldReportRoomItem")
 
   @@unique([roomId, itemId])
   @@index([roomId])
@@ -735,11 +903,57 @@ model InventoryMovement {
   item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
   room      Room?         @relation(fields: [roomId], references: [id], onDelete: SetNull)
   createdBy User?         @relation("InventoryMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  fieldReports StaffFieldReport[] @relation("StaffFieldReportMovement")
 
   @@index([itemId])
   @@index([roomId])
   @@index([movementDate])
   @@index([movementType])
+}
+
+
+model StaffFieldReport {
+  id                         Int                    @id @default(autoincrement())
+  ticketId                   Int?
+  roomId                     Int?
+  roomItemId                 Int?
+  inventoryItemId            Int?
+  reportedByStaffId          Int
+  reportedCondition          ReportedCondition
+  conditionNotes             String?
+  photoUrl                   String?
+  photoFileKey               String?
+  photoOriginalFilename      String?
+  photoMimeType              String?
+  photoFileSizeBytes         Int?
+  requestsReplacement        Boolean                @default(false)
+  requestedInventoryItemId   Int?
+  requestedQty               Decimal?               @db.Decimal(12, 2)
+  adminReviewedById          Int?
+  adminDecision              AdminDecision?
+  adminNotes                 String?
+  relatedMovementId          Int?
+  status                     StaffFieldReportStatus @default(REPORTED)
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+
+  ticket                 Ticket?            @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  room                   Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomItem               RoomItem?          @relation("StaffFieldReportRoomItem", fields: [roomItemId], references: [id], onDelete: SetNull)
+  inventoryItem          InventoryItem?     @relation("StaffFieldReportInventoryItem", fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  requestedInventoryItem InventoryItem?     @relation("StaffFieldReportRequestedInventoryItem", fields: [requestedInventoryItemId], references: [id], onDelete: SetNull)
+  reportedByStaff        User               @relation("StaffFieldReportCreatedBy", fields: [reportedByStaffId], references: [id], onDelete: Restrict)
+  adminReviewedBy        User?              @relation("StaffFieldReportReviewedBy", fields: [adminReviewedById], references: [id], onDelete: SetNull)
+  relatedMovement        InventoryMovement? @relation("StaffFieldReportMovement", fields: [relatedMovementId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([roomId])
+  @@index([roomItemId])
+  @@index([inventoryItemId])
+  @@index([requestedInventoryItemId])
+  @@index([reportedByStaffId])
+  @@index([adminReviewedById])
+  @@index([status, createdAt])
 }
 
 model RenewRequest {
@@ -757,7 +971,7 @@ model RenewRequest {
   updatedAt              DateTime           @updatedAt
 
   stay       Stay   @relation(fields: [stayId], references: [id], onDelete: Cascade)
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   reviewedBy User?  @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([stayId])

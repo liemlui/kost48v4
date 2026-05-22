@@ -29,8 +29,8 @@ export class TicketsController {
 
   @Get()
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
-  async findAll(@Query() query: TicketsQueryDto) {
-    return { message: 'Daftar tiket berhasil diambil', data: await this.ticketsService.findAll(query) };
+  async findAll(@Query() query: TicketsQueryDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Daftar tiket berhasil diambil', data: await this.ticketsService.findAll(query, user) };
   }
 
   @Get('my')

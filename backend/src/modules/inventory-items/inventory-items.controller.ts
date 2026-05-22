@@ -6,7 +6,7 @@ import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { CreateInventoryItemDto, UpdateInventoryItemDto } from './dto/inventory-item.dto';
+import { CreateInventoryItemDto, StaffUpdateInventoryItemStatusDto, UpdateInventoryItemDto } from './dto/inventory-item.dto';
 import { InventoryItemsQueryDto } from './dto/inventory-items-query.dto';
 import { InventoryItemsService } from './inventory-items.service';
 
@@ -33,6 +33,14 @@ export class InventoryItemsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateInventoryItemDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Item inventory berhasil dibuat', data: await this.inventoryitemsService.create(dto, user) };
+  }
+
+
+
+  @Patch(':id/staff-status')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  async updateStaffStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: StaffUpdateInventoryItemStatusDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Laporan kondisi barang gudang diterima dan menunggu konfirmasi admin', data: await this.inventoryitemsService.updateStatusFromField(id, dto, user) };
   }
 
   @Patch(':id')

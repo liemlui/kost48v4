@@ -22,4 +22,12 @@ export class TicketsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsNumberString({}, { message: 'assignedToId harus berupa angka' })
   assignedToId?: string;
+
+  @IsOptional()
+  @IsNumberString({}, { message: 'linkedRoomItemId harus berupa angka' })
+  linkedRoomItemId?: string;
+
+  @IsOptional()
+  @IsNumberString({}, { message: 'linkedInventoryItemId harus berupa angka' })
+  linkedInventoryItemId?: string;
 }

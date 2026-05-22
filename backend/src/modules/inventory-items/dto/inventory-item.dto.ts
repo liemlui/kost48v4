@@ -1,4 +1,5 @@
-import { IsBoolean, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { InventoryItemStatus } from '../../../common/enums/app.enums';
 
 export class CreateInventoryItemDto {
   @IsOptional()
@@ -29,7 +30,53 @@ export class CreateInventoryItemDto {
   notes?: string;
 
   @IsOptional()
+  @IsEnum(InventoryItemStatus)
+  status?: InventoryItemStatus;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }
 export class UpdateInventoryItemDto extends CreateInventoryItemDto {}
+
+
+export class StaffUpdateInventoryItemStatusDto {
+  @IsEnum(InventoryItemStatus)
+  status!: InventoryItemStatus;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  photoFileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  photoOriginalFilename?: string;
+
+  @IsOptional()
+  @IsString()
+  photoMimeType?: string;
+
+  @IsOptional()
+  @IsInt()
+  photoFileSizeBytes?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  requestsReplacement?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  requestedInventoryItemId?: number;
+
+  @IsOptional()
+  @IsNumberString({}, { message: 'requestedQty harus berupa angka desimal dalam format string' })
+  requestedQty?: string;
+}

@@ -28,6 +28,9 @@ import { MarketingModule } from './modules/marketing/marketing.module';
 import { FinanceModule } from './modules/finance/finance.module';
 import { AiModule } from './modules/ai/ai.module';
 import { StaffRoutinesModule } from './modules/staff-routines/staff-routines.module';
+import { StaffPerformanceModule } from './modules/staff-performance/staff-performance.module';
+import { TenantStaffReviewsModule } from './modules/tenant-staff-reviews/tenant-staff-reviews.module';
+import { StaffFieldReportsModule } from './modules/staff-field-reports/staff-field-reports.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -59,6 +62,9 @@ import { StaffRoutinesModule } from './modules/staff-routines/staff-routines.mod
     FinanceModule,
     AiModule,
     StaffRoutinesModule,
+    StaffPerformanceModule,
+    TenantStaffReviewsModule,
+    StaffFieldReportsModule,
   ],
 })
 export class AppModule {}
