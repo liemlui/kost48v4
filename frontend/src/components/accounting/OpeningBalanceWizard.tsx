@@ -12,6 +12,12 @@ function numberValue(value: string) {
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 }
 
+function yearMonthFromInput(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+}
+
 type EditableLine = OpeningBalanceLinePayload & { key: string; debitText: string; creditText: string };
 
 export default function OpeningBalanceWizard({
@@ -37,6 +43,11 @@ export default function OpeningBalanceWizard({
   const latestOpenPeriod = periods.find((period) => period.status === 'OPEN') ?? periods[0];
   const [periodId, setPeriodId] = useState<number>(latestOpenPeriod?.id ?? 0);
   const [cutoverDate, setCutoverDate] = useState(todayInput());
+  const cutoverYearMonth = yearMonthFromInput(cutoverDate);
+  const periodForCutover = useMemo(() => {
+    if (!cutoverYearMonth) return undefined;
+    return periods.find((period) => period.year === cutoverYearMonth.year && period.month === cutoverYearMonth.month);
+  }, [periods, cutoverYearMonth?.year, cutoverYearMonth?.month]);
   const [notes, setNotes] = useState('Saldo awal accounting KOST48');
   const [lines, setLines] = useState<EditableLine[]>([
     { key: 'cash', chartOfAccountId: activeAccounts.find((a) => a.code === '1000')?.id ?? activeAccounts[0]?.id ?? 0, description: 'Kas tunai awal', debitText: '0', creditText: '0' },
@@ -49,6 +60,12 @@ export default function OpeningBalanceWizard({
     if (!latestOpenPeriod || periodId) return;
     setPeriodId(latestOpenPeriod.id);
   }, [latestOpenPeriod, periodId]);
+
+  useEffect(() => {
+    if (periodForCutover && periodForCutover.id !== periodId) {
+      setPeriodId(periodForCutover.id);
+    }
+  }, [periodForCutover, periodId]);
 
   useEffect(() => {
     if (!activeAccounts.length) return;
@@ -84,8 +101,13 @@ export default function OpeningBalanceWizard({
   }
 
   function createCurrentPeriod() {
-    const date = new Date(cutoverDate);
-    onCreatePeriod({ year: date.getFullYear(), month: date.getMonth() + 1, notes: 'Periode cutover accounting B2.' });
+    if (periodForCutover) {
+      setPeriodId(periodForCutover.id);
+      return;
+    }
+    const ym = yearMonthFromInput(cutoverDate);
+    if (!ym) return;
+    onCreatePeriod({ year: ym.year, month: ym.month, notes: 'Periode cutover accounting B2.' });
   }
 
   function submit(event: FormEvent) {
@@ -103,8 +125,15 @@ export default function OpeningBalanceWizard({
             <h3 className="panel-title mb-1">Saldo awal dan cutover</h3>
             <p className="text-muted mb-0">Debit dan kredit harus sama sebelum draft bisa diposting menjadi jurnal pembuka.</p>
           </div>
-          <Button variant="outline-primary" onClick={createCurrentPeriod}>Buat Periode dari Cutover</Button>
+          <Button variant="outline-primary" onClick={createCurrentPeriod}>
+            {periodForCutover ? 'Gunakan Periode Cutover yang Ada' : 'Buat Periode dari Cutover'}
+          </Button>
         </div>
+        {periodForCutover ? (
+          <Alert variant="info" className="mt-3 mb-0">
+            Periode {periodForCutover.year}-{String(periodForCutover.month).padStart(2, '0')} sudah ada. Wizard akan memakai periode tersebut, jadi tidak perlu membuat periode duplicate.
+          </Alert>
+        ) : null}
         <Form onSubmit={submit} className="mt-3">
           <Row className="g-3">
             <Col md={4}>
@@ -149,7 +178,7 @@ export default function OpeningBalanceWizard({
             </tbody>
             <tfoot><tr><th colSpan={2}>Total</th><th>{formatRupiah(totalDebit)}</th><th>{formatRupiah(totalCredit)}</th><th /></tr></tfoot>
           </Table>
-          {!balanced ? <Alert variant="warning">Opening balance belum bisa diposting: debit dan kredit harus sama dan lebih dari 0.</Alert> : <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>}
+          {!balanced ? <Alert variant="warning">Opening balance belum bisa diposting: total debit/kredit harus sama dan lebih dari 0.</Alert> : <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>}
           <div className="d-flex gap-2 flex-wrap">
             <Button variant="outline-primary" type="button" onClick={addLine}>Tambah Line</Button>
             <Button type="submit" disabled={!selectedPeriodId || !balanced || isCreatingDraft}>Buat Draft Opening Balance</Button>

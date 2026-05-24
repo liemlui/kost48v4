@@ -40,6 +40,14 @@ function currentAsOf() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  const maybe = error as { response?: { data?: { message?: string | string[] } }; message?: string };
+  const message = maybe.response?.data?.message ?? maybe.message;
+  if (Array.isArray(message)) return message.join(' ');
+  if (typeof message === 'string' && message.trim()) return message;
+  return fallback;
+}
+
 export default function AccountingSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -78,52 +86,57 @@ export default function AccountingSetupPage() {
 
   const seedMutation = useMutation({
     mutationFn: seedDefaultCoa,
+    onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async (result) => {
       setActionError(null);
       setActionMessage(`Default COA siap: ${result.seededCount} akun.`);
       await refreshAccounting();
     },
-    onError: (error: any) => setActionError(error?.response?.data?.message ?? 'Gagal seed default COA.'),
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal seed default COA.')); },
   });
 
   const createCashMutation = useMutation({
     mutationFn: (payload: CreateCashAccountPayload) => createCashAccount(payload),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async () => {
       setActionError(null);
       setActionMessage('Cash/bank account berhasil disimpan.');
       await refreshAccounting();
     },
-    onError: (error: any) => setActionError(error?.response?.data?.message ?? 'Gagal menyimpan cash account.'),
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menyimpan cash account.')); },
   });
 
   const createPeriodMutation = useMutation({
     mutationFn: createAccountingPeriod,
+    onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async () => {
       setActionError(null);
       setActionMessage('Accounting period berhasil dibuat.');
       await refreshAccounting();
     },
-    onError: (error: any) => setActionError(error?.response?.data?.message ?? 'Gagal membuat accounting period.'),
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuat accounting period.')); },
   });
 
   const createOpeningDraftMutation = useMutation({
     mutationFn: (payload: CreateOpeningBalanceDraftPayload) => createOpeningBalanceDraft(payload),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async () => {
       setActionError(null);
       setActionMessage('Draft opening balance berhasil dibuat. Review total debit/kredit sebelum posting.');
       await refreshAccounting();
     },
-    onError: (error: any) => setActionError(error?.response?.data?.message ?? 'Gagal membuat draft opening balance.'),
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuat draft opening balance.')); },
   });
 
   const postOpeningMutation = useMutation({
     mutationFn: postOpeningBalance,
+    onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async () => {
       setActionError(null);
       setActionMessage('Opening balance berhasil diposting sebagai jurnal pembuka. Trial Balance sekarang membaca saldo awal.');
       await refreshAccounting();
     },
-    onError: (error: any) => setActionError(error?.response?.data?.message ?? 'Gagal posting opening balance.'),
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal posting opening balance.')); },
   });
 
   return (

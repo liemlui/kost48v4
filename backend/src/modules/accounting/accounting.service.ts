@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { DEFAULT_COA } from './constants/default-coa';
@@ -28,6 +28,14 @@ function dateOnly(value: Date | string) {
 function isDateBetweenInclusive(value: Date, start: Date, end: Date) {
   const target = dateOnly(value).getTime();
   return target >= dateOnly(start).getTime() && target <= dateOnly(end).getTime();
+}
+
+function isPrismaUniqueError(error: unknown, field?: string) {
+  const candidate = error as { code?: string; meta?: { target?: string[] | string } };
+  if (candidate?.code !== 'P2002') return false;
+  if (!field) return true;
+  const target = candidate.meta?.target;
+  return Array.isArray(target) ? target.includes(field) : String(target ?? '').includes(field);
 }
 
 @Injectable()
@@ -141,24 +149,31 @@ export class AccountingService {
     await this.schemaGuard.assertReady();
     const coa = await this.ensureAccount(dto.chartOfAccountId);
     if (coa.type !== 'ASSET') throw new BadRequestException('Cash account harus terhubung ke COA bertipe ASSET.');
-    return (this.prisma as any).$transaction(async (tx: any) => {
-      if (dto.isDefault) await tx.cashAccount.updateMany({ data: { isDefault: false } });
-      return tx.cashAccount.create({
-        data: {
-          name: dto.name.trim(),
-          accountType: (dto.accountType ?? 'BANK') as any,
-          chartOfAccountId: dto.chartOfAccountId,
-          bankName: dto.bankName,
-          accountNumberMasked: dto.accountNumberMasked,
-          holderName: dto.holderName,
-          openingBalanceRupiah: dto.openingBalanceRupiah ?? 0,
-          currentBalanceRupiah: dto.currentBalanceRupiah ?? dto.openingBalanceRupiah ?? 0,
-          isDefault: dto.isDefault ?? false,
-          isActive: dto.isActive ?? true,
-          notes: dto.notes,
-        },
+    try {
+      return await (this.prisma as any).$transaction(async (tx: any) => {
+        if (dto.isDefault) await tx.cashAccount.updateMany({ data: { isDefault: false } });
+        return tx.cashAccount.create({
+          data: {
+            name: dto.name.trim(),
+            accountType: (dto.accountType ?? 'BANK') as any,
+            chartOfAccountId: dto.chartOfAccountId,
+            bankName: dto.bankName,
+            accountNumberMasked: dto.accountNumberMasked,
+            holderName: dto.holderName,
+            openingBalanceRupiah: dto.openingBalanceRupiah ?? 0,
+            currentBalanceRupiah: dto.currentBalanceRupiah ?? dto.openingBalanceRupiah ?? 0,
+            isDefault: dto.isDefault ?? false,
+            isActive: dto.isActive ?? true,
+            notes: dto.notes,
+          },
+        });
       });
-    });
+    } catch (error) {
+      if (isPrismaUniqueError(error, 'name')) {
+        throw new ConflictException(`Cash/bank account "${dto.name.trim()}" sudah ada. Gunakan nama lain atau edit akun yang tersedia.`);
+      }
+      throw error;
+    }
   }
 
   async updateCashAccount(id: number, dto: UpdateCashAccountDto) {
@@ -204,16 +219,23 @@ export class AccountingService {
   async createPeriod(dto: CreateAccountingPeriodDto) {
     await this.schemaGuard.assertReady();
     const range = monthRange(dto.year, dto.month);
-    return (this.prisma as any).accountingPeriod.create({
-      data: {
-        year: dto.year,
-        month: dto.month,
-        startDate: dto.startDate ? new Date(dto.startDate) : range.start,
-        endDate: dto.endDate ? new Date(dto.endDate) : range.end,
-        status: (dto.status ?? 'OPEN') as any,
-        notes: dto.notes,
-      },
-    });
+    try {
+      return await (this.prisma as any).accountingPeriod.create({
+        data: {
+          year: dto.year,
+          month: dto.month,
+          startDate: dto.startDate ? new Date(dto.startDate) : range.start,
+          endDate: dto.endDate ? new Date(dto.endDate) : range.end,
+          status: (dto.status ?? 'OPEN') as any,
+          notes: dto.notes,
+        },
+      });
+    } catch (error) {
+      if (isPrismaUniqueError(error, 'year') || isPrismaUniqueError(error, 'month')) {
+        throw new ConflictException(`Accounting period ${dto.year}-${String(dto.month).padStart(2, '0')} sudah ada. Gunakan periode yang tersedia.`);
+      }
+      throw error;
+    }
   }
 
   async updatePeriod(id: number, dto: UpdateAccountingPeriodDto) {
@@ -253,28 +275,35 @@ export class AccountingService {
     if (invalid) throw new BadRequestException('Satu opening balance line tidak boleh debit dan kredit sekaligus.');
     const batchNumber = dto.batchNumber?.trim() || `OB-${Date.now()}`;
 
-    return (this.prisma as any).openingBalanceBatch.create({
-      data: {
-        batchNumber,
-        accountingPeriodId: dto.accountingPeriodId,
-        cutoverDate: new Date(dto.cutoverDate),
-        notes: dto.notes,
-        totalDebitRupiah: totalDebit,
-        totalCreditRupiah: totalCredit,
-        createdById: user.id,
-        status: 'DRAFT' as any,
-        lines: {
-          create: dto.lines.map((line, index) => ({
-            chartOfAccountId: line.chartOfAccountId,
-            description: line.description,
-            debitRupiah: rupiah(line.debitRupiah),
-            creditRupiah: rupiah(line.creditRupiah),
-            sortOrder: line.sortOrder ?? index,
-          })),
+    try {
+      return await (this.prisma as any).openingBalanceBatch.create({
+        data: {
+          batchNumber,
+          accountingPeriodId: dto.accountingPeriodId,
+          cutoverDate: new Date(dto.cutoverDate),
+          notes: dto.notes,
+          totalDebitRupiah: totalDebit,
+          totalCreditRupiah: totalCredit,
+          createdById: user.id,
+          status: 'DRAFT' as any,
+          lines: {
+            create: dto.lines.map((line, index) => ({
+              chartOfAccountId: line.chartOfAccountId,
+              description: line.description,
+              debitRupiah: rupiah(line.debitRupiah),
+              creditRupiah: rupiah(line.creditRupiah),
+              sortOrder: line.sortOrder ?? index,
+            })),
+          },
         },
-      },
-      include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
-    });
+        include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
+      });
+    } catch (error) {
+      if (isPrismaUniqueError(error, 'batchNumber')) {
+        throw new ConflictException(`Nomor batch opening balance ${batchNumber} sudah ada. Buat draft baru dengan nomor batch lain.`);
+      }
+      throw error;
+    }
   }
 
 
