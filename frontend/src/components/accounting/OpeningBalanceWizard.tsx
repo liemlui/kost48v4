@@ -1,0 +1,176 @@
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
+import type { AccountingPeriod, ChartOfAccount, OpeningBalanceBatch, OpeningBalanceLinePayload } from '../../api/accounting';
+import { formatRupiah } from '../../utils/formatCurrency';
+
+function todayInput() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function numberValue(value: string) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+}
+
+type EditableLine = OpeningBalanceLinePayload & { key: string; debitText: string; creditText: string };
+
+export default function OpeningBalanceWizard({
+  accounts,
+  periods,
+  batches,
+  onCreatePeriod,
+  onCreateDraft,
+  onPost,
+  isCreatingDraft,
+  isPosting,
+}: {
+  accounts: ChartOfAccount[];
+  periods: AccountingPeriod[];
+  batches: OpeningBalanceBatch[];
+  onCreatePeriod: (payload: { year: number; month: number; notes?: string }) => void;
+  onCreateDraft: (payload: { accountingPeriodId: number; cutoverDate: string; notes?: string; lines: OpeningBalanceLinePayload[] }) => void;
+  onPost: (id: number) => void;
+  isCreatingDraft?: boolean;
+  isPosting?: boolean;
+}) {
+  const activeAccounts = useMemo(() => accounts.filter((account) => account.isActive), [accounts]);
+  const latestOpenPeriod = periods.find((period) => period.status === 'OPEN') ?? periods[0];
+  const [periodId, setPeriodId] = useState<number>(latestOpenPeriod?.id ?? 0);
+  const [cutoverDate, setCutoverDate] = useState(todayInput());
+  const [notes, setNotes] = useState('Saldo awal accounting KOST48');
+  const [lines, setLines] = useState<EditableLine[]>([
+    { key: 'cash', chartOfAccountId: activeAccounts.find((a) => a.code === '1000')?.id ?? activeAccounts[0]?.id ?? 0, description: 'Kas tunai awal', debitText: '0', creditText: '0' },
+    { key: 'bank', chartOfAccountId: activeAccounts.find((a) => a.code === '1010')?.id ?? activeAccounts[0]?.id ?? 0, description: 'Bank utama awal', debitText: '0', creditText: '0' },
+    { key: 'deposit', chartOfAccountId: activeAccounts.find((a) => a.code === '2000')?.id ?? activeAccounts[0]?.id ?? 0, description: 'Deposit tenant liability awal', debitText: '0', creditText: '0' },
+    { key: 'capital', chartOfAccountId: activeAccounts.find((a) => a.code === '3000')?.id ?? activeAccounts[0]?.id ?? 0, description: 'Modal owner awal', debitText: '0', creditText: '0' },
+  ]);
+
+  useEffect(() => {
+    if (!latestOpenPeriod || periodId) return;
+    setPeriodId(latestOpenPeriod.id);
+  }, [latestOpenPeriod, periodId]);
+
+  useEffect(() => {
+    if (!activeAccounts.length) return;
+    setLines((current) => current.map((line) => {
+      if (line.chartOfAccountId) return line;
+      const fallback =
+        line.key === 'cash' ? activeAccounts.find((account) => account.code === '1000') :
+        line.key === 'bank' ? activeAccounts.find((account) => account.code === '1010') :
+        line.key === 'deposit' ? activeAccounts.find((account) => account.code === '2000') :
+        line.key === 'capital' ? activeAccounts.find((account) => account.code === '3000') : undefined;
+      return { ...line, chartOfAccountId: fallback?.id ?? activeAccounts[0].id };
+    }));
+  }, [activeAccounts]);
+
+  const selectedPeriodId = periodId || latestOpenPeriod?.id || 0;
+  const mappedLines = lines.map((line, index) => ({
+    chartOfAccountId: Number(line.chartOfAccountId),
+    description: line.description,
+    debitRupiah: numberValue(line.debitText),
+    creditRupiah: numberValue(line.creditText),
+    sortOrder: index,
+  }));
+  const totalDebit = mappedLines.reduce((sum, line) => sum + (line.debitRupiah ?? 0), 0);
+  const totalCredit = mappedLines.reduce((sum, line) => sum + (line.creditRupiah ?? 0), 0);
+  const balanced = totalDebit > 0 && totalDebit === totalCredit;
+
+  function updateLine(key: string, patch: Partial<EditableLine>) {
+    setLines((current) => current.map((line) => line.key === key ? { ...line, ...patch } : line));
+  }
+
+  function addLine() {
+    setLines((current) => [...current, { key: String(Date.now()), chartOfAccountId: activeAccounts[0]?.id ?? 0, description: '', debitText: '0', creditText: '0' }]);
+  }
+
+  function createCurrentPeriod() {
+    const date = new Date(cutoverDate);
+    onCreatePeriod({ year: date.getFullYear(), month: date.getMonth() + 1, notes: 'Periode cutover accounting B2.' });
+  }
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedPeriodId || !balanced) return;
+    onCreateDraft({ accountingPeriodId: selectedPeriodId, cutoverDate, notes, lines: mappedLines });
+  }
+
+  return (
+    <Card className="content-card border-0 accounting-setup-card">
+      <Card.Body>
+        <div className="section-kicker mb-2">Opening Balance Wizard</div>
+        <div className="d-flex justify-content-between gap-3 align-items-start flex-wrap">
+          <div>
+            <h3 className="panel-title mb-1">Saldo awal dan cutover</h3>
+            <p className="text-muted mb-0">Debit dan kredit harus sama sebelum draft bisa diposting menjadi jurnal pembuka.</p>
+          </div>
+          <Button variant="outline-primary" onClick={createCurrentPeriod}>Buat Periode dari Cutover</Button>
+        </div>
+        <Form onSubmit={submit} className="mt-3">
+          <Row className="g-3">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Accounting period</Form.Label>
+                <Form.Select value={selectedPeriodId} onChange={(event) => setPeriodId(Number(event.target.value))}>
+                  <option value={0}>Pilih periode</option>
+                  {periods.map((period) => <option key={period.id} value={period.id}>{period.year}-{String(period.month).padStart(2, '0')} · {period.status}</option>)}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Cutover date</Form.Label>
+                <Form.Control type="date" value={cutoverDate} onChange={(event) => setCutoverDate(event.target.value)} />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Catatan</Form.Label>
+                <Form.Control value={notes} onChange={(event) => setNotes(event.target.value)} />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Table responsive className="mt-3 accounting-lines-table">
+            <thead><tr><th>COA</th><th>Deskripsi</th><th>Debit</th><th>Kredit</th><th /></tr></thead>
+            <tbody>
+              {lines.map((line) => (
+                <tr key={line.key}>
+                  <td>
+                    <Form.Select value={line.chartOfAccountId} onChange={(event) => updateLine(line.key, { chartOfAccountId: Number(event.target.value) })}>
+                      {activeAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
+                    </Form.Select>
+                  </td>
+                  <td><Form.Control value={line.description ?? ''} onChange={(event) => updateLine(line.key, { description: event.target.value })} /></td>
+                  <td><Form.Control type="number" min={0} value={line.debitText} onChange={(event) => updateLine(line.key, { debitText: event.target.value, creditText: event.target.value !== '0' ? '0' : line.creditText })} /></td>
+                  <td><Form.Control type="number" min={0} value={line.creditText} onChange={(event) => updateLine(line.key, { creditText: event.target.value, debitText: event.target.value !== '0' ? '0' : line.debitText })} /></td>
+                  <td><Button variant="link" disabled={lines.length <= 2} onClick={() => setLines((current) => current.filter((item) => item.key !== line.key))}>Hapus</Button></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot><tr><th colSpan={2}>Total</th><th>{formatRupiah(totalDebit)}</th><th>{formatRupiah(totalCredit)}</th><th /></tr></tfoot>
+          </Table>
+          {!balanced ? <Alert variant="warning">Opening balance belum bisa diposting: debit dan kredit harus sama dan lebih dari 0.</Alert> : <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>}
+          <div className="d-flex gap-2 flex-wrap">
+            <Button variant="outline-primary" type="button" onClick={addLine}>Tambah Line</Button>
+            <Button type="submit" disabled={!selectedPeriodId || !balanced || isCreatingDraft}>Buat Draft Opening Balance</Button>
+          </div>
+        </Form>
+
+        <Table responsive hover className="mt-4 mb-0 small">
+          <thead><tr><th>Batch</th><th>Status</th><th>Cutover</th><th>Total</th><th>Aksi</th></tr></thead>
+          <tbody>
+            {batches.length ? batches.map((batch) => (
+              <tr key={batch.id}>
+                <td><strong>{batch.batchNumber}</strong><br /><span className="text-muted">{batch.accountingPeriod ? `${batch.accountingPeriod.year}-${String(batch.accountingPeriod.month).padStart(2, '0')}` : 'Tanpa period'}</span></td>
+                <td><span className={`status-soft-pill ${batch.status === 'POSTED' ? 'success' : 'warning'}`}>{batch.status}</span></td>
+                <td>{String(batch.cutoverDate).slice(0, 10)}</td>
+                <td>{formatRupiah(batch.totalDebitRupiah)} / {formatRupiah(batch.totalCreditRupiah)}</td>
+                <td>{batch.status === 'DRAFT' ? <Button size="sm" disabled={isPosting} onClick={() => onPost(batch.id)}>Posting</Button> : <span className="text-muted">Sudah posted</span>}</td>
+              </tr>
+            )) : <tr><td colSpan={5} className="text-muted">Belum ada opening balance batch.</td></tr>}
+          </tbody>
+        </Table>
+      </Card.Body>
+    </Card>
+  );
+}

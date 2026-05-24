@@ -30,6 +30,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau tagihan, pembayaran, tunggakan, dan follow-up utama.' },
       { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
+      { to: '/finance/accounting-setup', label: 'Setup Accounting', icon: '📘', hint: 'Cash/bank, opening balance, readiness, trial balance, dan guard Balance Sheet.' },
     ],
   },
   {
@@ -63,7 +64,7 @@ const adminSections: NavigationSection[] = [
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Command Center ringkas berisi prioritas paling penting dari semua menu.' },
       { to: '/stays', label: 'Stays & Tenant', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, checkout, dan daftar tenant.', activePaths: ['/stays', '/tenants', '/renew-requests'] },
-      { to: '/invoices', label: 'Finance', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses'] },
+      { to: '/invoices', label: 'Finance', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup'] },
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, dan mutasi stok.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
     ],

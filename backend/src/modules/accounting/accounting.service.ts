@@ -19,6 +19,17 @@ function monthRange(year: number, month: number) {
   return { start, end };
 }
 
+function dateOnly(value: Date | string) {
+  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+  date.setUTCHours(0, 0, 0, 0);
+  return date;
+}
+
+function isDateBetweenInclusive(value: Date, start: Date, end: Date) {
+  const target = dateOnly(value).getTime();
+  return target >= dateOnly(start).getTime() && target <= dateOnly(end).getTime();
+}
+
 @Injectable()
 export class AccountingService {
   constructor(
@@ -234,7 +245,7 @@ export class AccountingService {
 
   async createOpeningBalanceDraft(dto: CreateOpeningBalanceDraftDto, user: CurrentUserPayload) {
     await this.schemaGuard.assertReady();
-    if (!dto.lines?.length) throw new BadRequestException('Opening balance membutuhkan minimal satu line.');
+    if (!dto.lines?.length || dto.lines.length < 2) throw new BadRequestException('Opening balance membutuhkan minimal dua line.');
     await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
     const totalDebit = dto.lines.reduce((sum, line) => sum + rupiah(line.debitRupiah), 0);
     const totalCredit = dto.lines.reduce((sum, line) => sum + rupiah(line.creditRupiah), 0);
@@ -263,6 +274,125 @@ export class AccountingService {
         },
       },
       include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
+
+  async getOpeningBalance(id: number) {
+    await this.schemaGuard.assertReady();
+    const row = await (this.prisma as any).openingBalanceBatch.findUnique({
+      where: { id },
+      include: {
+        accountingPeriod: true,
+        lines: { include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true, isActive: true } } }, orderBy: { sortOrder: 'asc' } },
+      },
+    });
+    if (!row) throw new NotFoundException('Opening balance tidak ditemukan.');
+    return row;
+  }
+
+  async postOpeningBalance(id: number, user: CurrentUserPayload) {
+    await this.schemaGuard.assertReady();
+
+    return (this.prisma as any).$transaction(async (tx: any) => {
+      const batch = await tx.openingBalanceBatch.findUnique({
+        where: { id },
+        include: {
+          accountingPeriod: true,
+          lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } },
+        },
+      });
+      if (!batch) throw new NotFoundException('Opening balance tidak ditemukan.');
+      if (batch.status !== 'DRAFT') throw new BadRequestException('Hanya opening balance DRAFT yang bisa diposting.');
+      if (!batch.accountingPeriodId || !batch.accountingPeriod) throw new BadRequestException('Opening balance harus terhubung ke accounting period sebelum diposting.');
+      if (batch.accountingPeriod.status !== 'OPEN') throw new BadRequestException('Accounting period harus OPEN untuk posting opening balance.');
+      if (!isDateBetweenInclusive(batch.cutoverDate, batch.accountingPeriod.startDate, batch.accountingPeriod.endDate)) {
+        throw new BadRequestException('Cutover date harus berada di dalam rentang accounting period.');
+      }
+      if (!batch.lines || batch.lines.length < 2) throw new BadRequestException('Opening balance minimal membutuhkan dua line sebelum diposting.');
+
+      const totalDebit = batch.lines.reduce((sum: number, line: any) => sum + rupiah(line.debitRupiah), 0);
+      const totalCredit = batch.lines.reduce((sum: number, line: any) => sum + rupiah(line.creditRupiah), 0);
+      if (totalDebit <= 0 || totalCredit <= 0) throw new BadRequestException('Opening balance harus memiliki nilai debit dan kredit lebih dari 0.');
+      if (totalDebit !== totalCredit) throw new BadRequestException('Opening balance belum balance. Total debit harus sama dengan total kredit sebelum posting.');
+
+      const invalidLine = batch.lines.find((line: any) => {
+        const debit = rupiah(line.debitRupiah);
+        const credit = rupiah(line.creditRupiah);
+        return (debit > 0 && credit > 0) || (debit === 0 && credit === 0) || !line.chartOfAccount?.isActive;
+      });
+      if (invalidLine) throw new BadRequestException('Setiap line harus memakai COA aktif dan hanya salah satu sisi debit/kredit yang bernilai.');
+
+      const otherPosted = await tx.openingBalanceBatch.findFirst({
+        where: {
+          id: { not: id },
+          status: 'POSTED' as any,
+          OR: [
+            { accountingPeriodId: batch.accountingPeriodId },
+            { cutoverDate: batch.cutoverDate },
+          ],
+        },
+        select: { id: true, batchNumber: true },
+      });
+      if (otherPosted) {
+        throw new BadRequestException(`Opening balance lain sudah POSTED untuk period/cutover ini (${otherPosted.batchNumber}). Void dulu jika memang perlu koreksi.`);
+      }
+
+      const existingJournal = await tx.journalEntry.findFirst({
+        where: { sourceType: 'OPENING_BALANCE' as any, sourceId: String(batch.id), status: { not: 'VOID' as any } },
+        select: { id: true, entryNumber: true },
+      });
+      if (existingJournal) throw new BadRequestException(`Opening balance ini sudah memiliki journal pembuka (${existingJournal.entryNumber}).`);
+
+      const entryNumber = `JE-OPENING-${batch.id}`;
+      const journal = await tx.journalEntry.create({
+        data: {
+          entryNumber,
+          entryDate: batch.cutoverDate,
+          accountingPeriodId: batch.accountingPeriodId,
+          status: 'POSTED' as any,
+          sourceType: 'OPENING_BALANCE' as any,
+          sourceId: String(batch.id),
+          memo: batch.notes ? `Jurnal pembuka: ${batch.notes}` : `Jurnal pembuka ${batch.batchNumber}`,
+          totalDebitRupiah: totalDebit,
+          totalCreditRupiah: totalCredit,
+          isBalanced: true,
+          createdById: batch.createdById ?? user.id,
+          postedById: user.id,
+          postedAt: new Date(),
+          lines: {
+            create: batch.lines.map((line: any, index: number) => ({
+              chartOfAccountId: line.chartOfAccountId,
+              description: line.description || `Opening balance ${batch.batchNumber}`,
+              debitRupiah: rupiah(line.debitRupiah),
+              creditRupiah: rupiah(line.creditRupiah),
+              sortOrder: line.sortOrder ?? index,
+            })),
+          },
+        },
+        include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
+      });
+
+      const updatedBatch = await tx.openingBalanceBatch.update({
+        where: { id },
+        data: {
+          status: 'POSTED' as any,
+          totalDebitRupiah: totalDebit,
+          totalCreditRupiah: totalCredit,
+          postedById: user.id,
+          postedAt: new Date(),
+        },
+        include: {
+          accountingPeriod: true,
+          lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } },
+        },
+      });
+
+      return {
+        openingBalance: updatedBatch,
+        journalEntry: journal,
+        note: 'Opening balance berhasil diposting sebagai JournalEntry OPENING_BALANCE. B2 tetap belum auto-posting transaksi operasional.',
+      };
     });
   }
 
@@ -337,7 +467,8 @@ export class AccountingService {
 
   private async ensureLinesAccounts(ids: number[]) {
     const unique = [...new Set(ids)];
-    const count = await (this.prisma as any).chartOfAccount.count({ where: { id: { in: unique } } });
-    if (count !== unique.length) throw new BadRequestException('Ada COA line yang tidak ditemukan.');
+    const rows = await (this.prisma as any).chartOfAccount.findMany({ where: { id: { in: unique } }, select: { id: true, isActive: true } });
+    if (rows.length !== unique.length) throw new BadRequestException('Ada COA line yang tidak ditemukan.');
+    if (rows.some((row: any) => !row.isActive)) throw new BadRequestException('Semua COA line harus aktif.');
   }
 }

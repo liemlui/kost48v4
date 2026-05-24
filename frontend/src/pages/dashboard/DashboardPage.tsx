@@ -1582,7 +1582,7 @@ function AdminDashboard() {
   ]);
 
   const location = useLocation();
-  const activeArea: AdminQueueArea = 'today';
+  const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   const filteredQueueItems = queueItems.filter((item) => itemMatchesAdminArea(item, activeArea));
   const topQueueItem = priorityActionFromQueue(filteredQueueItems.length ? filteredQueueItems : queueItems);
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;

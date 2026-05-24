@@ -12863,3 +12863,46 @@ button.status-strip-item:hover {
   font-size: 0.86rem;
   line-height: 1.4;
 }
+
+/* V5.24-B2 Accounting setup */
+.accounting-setup-page .status-strip-v2 { margin-bottom: 1rem; }
+.accounting-setup-card .panel-title { font-size: 1.05rem; font-weight: 650; color: #0f172a; }
+.accounting-score-pill {
+  min-width: 70px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  color: #0f172a;
+  font-weight: 750;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+.accounting-gate-list { display: grid; gap: 0.55rem; }
+.accounting-gate {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.7rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #fff;
+}
+.accounting-gate > span {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 800;
+}
+.accounting-gate.is-ready > span { background: #dcfce7; color: #166534; }
+.accounting-gate.is-missing > span { background: #fef3c7; color: #92400e; }
+.accounting-gate strong { display: block; font-size: 0.9rem; color: #0f172a; }
+.accounting-gate small { display: block; color: #64748b; line-height: 1.35; }
+.accounting-mini-form { display: grid; gap: 0.8rem; }
+.accounting-lines-table th,
+.accounting-lines-table td { vertical-align: middle; }
+.accounting-lines-table .form-select,
+.accounting-lines-table .form-control { min-width: 150px; }

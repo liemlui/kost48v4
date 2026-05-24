@@ -89,6 +89,17 @@ export class AccountingController {
     return { message: 'Daftar opening balance berhasil diambil', data: await this.accountingService.listOpeningBalances(query) };
   }
 
+  @Get('opening-balances/:id')
+  async openingBalanceDetail(@Param('id', ParseIntPipe) id: number) {
+    return { message: 'Detail opening balance berhasil diambil', data: await this.accountingService.getOpeningBalance(id) };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post('opening-balances/:id/post')
+  async postOpeningBalance(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Opening balance berhasil diposting', data: await this.accountingService.postOpeningBalance(id, user) };
+  }
+
   @Post('opening-balances/draft')
   async createOpeningBalanceDraft(@Body() dto: CreateOpeningBalanceDraftDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Draft opening balance berhasil dibuat', data: await this.accountingService.createOpeningBalanceDraft(dto, user) };

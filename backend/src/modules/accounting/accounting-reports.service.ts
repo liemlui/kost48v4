@@ -22,6 +22,7 @@ export class AccountingReportsService {
     const asOf = query.asOf ? new Date(query.asOf) : new Date();
     asOf.setHours(23, 59, 59, 999);
 
+    const openingJournalSourceIds = await this.mappedSourceIds('OPENING_BALANCE');
     const [accounts, journalSums, openingSums] = await Promise.all([
       (this.prisma as any).chartOfAccount.findMany({ where: { isActive: true }, orderBy: { code: 'asc' } }),
       (this.prisma as any).journalLine.groupBy({
@@ -40,6 +41,7 @@ export class AccountingReportsService {
         where: {
           batch: {
             status: 'POSTED' as any,
+            id: { notIn: openingJournalSourceIds },
             cutoverDate: { lte: asOf },
           },
         },
@@ -81,7 +83,7 @@ export class AccountingReportsService {
       totalCreditRupiah: totalCredit,
       isBalanced: totalDebit === totalCredit,
       lines,
-      note: 'Trial balance hanya memakai opening balance POSTED dan journal POSTED. B1/B2 belum auto-posting transaksi operasional.',
+      note: 'Trial balance memakai JournalEntry POSTED. OpeningBalanceLine POSTED hanya dibaca sebagai fallback jika belum ada JournalEntry OPENING_BALANCE agar tidak double-count.',
     };
   }
 
@@ -201,7 +203,7 @@ export class AccountingReportsService {
 
   private async mappedSourceIds(sourceType: string) {
     const rows = await (this.prisma as any).journalEntry.findMany({
-      where: { sourceType: sourceType as any, sourceId: { not: null } },
+      where: { sourceType: sourceType as any, sourceId: { not: null }, status: 'POSTED' as any },
       select: { sourceId: true },
     });
     return rows.map((row) => Number(row.sourceId)).filter((id) => Number.isFinite(id));
