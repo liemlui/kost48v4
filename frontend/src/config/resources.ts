@@ -185,7 +185,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   rooms: {
-    title: 'Kamar',
+    title: 'Kamar & Stok',
     supportsIsActiveFilter: true,
     path: '/rooms',
     columns: [
@@ -267,9 +267,9 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'images',
-        label: 'Galeri Gambar',
+        label: 'Foto Kamar',
         type: 'textarea',
-        placeholder: 'https://.../gambar-1.jpg\nhttps://.../gambar-2.jpg',
+        placeholder: 'Unggah foto kamar. Foto pertama menjadi cover utama di katalog.',
       },
       {
         name: 'notes',
@@ -738,15 +738,15 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'wifi-sales': {
-    title: 'WiFi Sales',
+    title: 'Penjualan Voucher WiFi',
     path: '/wifi-sales',
     allowDelete: true,
     columns: [
       { key: 'id', label: 'ID' },
       { key: 'saleDate', label: 'Tanggal' },
-      { key: 'customerName', label: 'Customer' },
-      { key: 'packageName', label: 'Paket' },
-      { key: 'soldPriceRupiah', label: 'Harga' },
+      { key: 'customerName', label: 'Pembeli / Tenant' },
+      { key: 'packageName', label: 'Paket Voucher' },
+      { key: 'soldPriceRupiah', label: 'Nominal' },
     ],
     fields: [
       {
@@ -758,23 +758,23 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'customerName',
-        label: 'Nama Customer',
+        label: 'Nama Pembeli / Tenant',
         type: 'text',
-        placeholder: 'Nama customer',
+        placeholder: 'Nama tenant, tamu, atau pembeli voucher',
         required: true,
       },
       {
         name: 'packageName',
-        label: 'Nama Paket',
+        label: 'Paket Voucher WiFi',
         type: 'text',
-        placeholder: 'Nama paket WiFi',
+        placeholder: 'Contoh: Harian 10 Mbps, Mingguan, Bulanan',
         required: true,
       },
       {
         name: 'soldPriceRupiah',
-        label: 'Harga',
+        label: 'Nominal Penjualan',
         type: 'currency',
-        placeholder: 'Harga jual dalam Rupiah',
+        placeholder: 'Nominal voucher WiFi yang dibayar',
         required: true,
       },
       {
@@ -787,7 +787,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   expenses: {
-    title: 'Expenses',
+    title: 'Pengeluaran Operasional',
     supportsIsActiveFilter: true,
     path: '/expenses',
     allowDelete: true,
@@ -822,17 +822,17 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         label: 'Kategori',
         type: 'select',
         options: [
-          { value: 'RENT_BUILDING', label: 'Sewa Bangunan' },
-          { value: 'SALARY', label: 'Gaji' },
-          { value: 'ELECTRICITY', label: 'Listrik' },
-          { value: 'WATER', label: 'Air' },
-          { value: 'INTERNET', label: 'Internet' },
-          { value: 'MAINTENANCE', label: 'Maintenance' },
-          { value: 'CLEANING', label: 'Kebersihan' },
-          { value: 'SUPPLIES', label: 'Supplies' },
-          { value: 'TAX', label: 'Pajak' },
-          { value: 'MARKETING', label: 'Marketing' },
-          { value: 'OTHER', label: 'Lainnya' },
+          { value: 'RENT_BUILDING', label: 'Sewa Gedung / Tanah' },
+          { value: 'SALARY', label: 'Gaji Staff / Operasional Orang' },
+          { value: 'ELECTRICITY', label: 'Listrik PLN' },
+          { value: 'WATER', label: 'Air / PDAM / Pompa' },
+          { value: 'INTERNET', label: 'Internet / ISP / Modal WiFi' },
+          { value: 'MAINTENANCE', label: 'Maintenance / Perbaikan / Pest Control' },
+          { value: 'CLEANING', label: 'Kebersihan / Laundry Partner / Jasa Bersih' },
+          { value: 'SUPPLIES', label: 'Supplies / Galon / Inventaris Kecil' },
+          { value: 'TAX', label: 'Pajak / Retribusi / Sampah' },
+          { value: 'MARKETING', label: 'Marketing / Listing / Komisi Platform' },
+          { value: 'OTHER', label: 'Lainnya / Bank Fee / Software / CCTV' },
         ],
         required: true,
       },

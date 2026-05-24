@@ -31,6 +31,8 @@ import { StaffRoutinesModule } from './modules/staff-routines/staff-routines.mod
 import { StaffPerformanceModule } from './modules/staff-performance/staff-performance.module';
 import { TenantStaffReviewsModule } from './modules/tenant-staff-reviews/tenant-staff-reviews.module';
 import { StaffFieldReportsModule } from './modules/staff-field-reports/staff-field-reports.module';
+import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
+import { AccountingModule } from './modules/accounting/accounting.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -65,6 +67,8 @@ import { StaffFieldReportsModule } from './modules/staff-field-reports/staff-fie
     StaffPerformanceModule,
     TenantStaffReviewsModule,
     StaffFieldReportsModule,
+    AutoOpsModule,
+    AccountingModule,
   ],
 })
 export class AppModule {}

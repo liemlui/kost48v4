@@ -2,14 +2,12 @@ import { useMemo, useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { usePayments } from '../../hooks/usePayments';
 import { Invoice, PaymentMethod } from '../../types';
-
-function totalPaid(invoice: Invoice) {
-  if (typeof invoice.paidAmountRupiah === 'number') return invoice.paidAmountRupiah;
-  return (invoice.payments ?? []).reduce((sum, item) => sum + Number(item.amountRupiah ?? 0), 0);
-}
+import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 
 export default function AddPaymentModal({ show, onHide, invoice }: { show: boolean; onHide: () => void; invoice: Invoice }) {
-  const remainingAmount = Math.max(0, Number(invoice.totalAmountRupiah ?? 0) - totalPaid(invoice));
+  const totalInvoice = getInvoiceTotalAmount(invoice);
+  const paidInvoice = getInvoicePaidAmount(invoice);
+  const remainingAmount = getInvoiceOutstandingAmount(invoice);
   const [amountRupiah, setAmountRupiah] = useState(String(remainingAmount || ''));
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
   const [method, setMethod] = useState<PaymentMethod>('TRANSFER');
@@ -19,12 +17,12 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
   const { createMutation } = usePayments(invoice.id, false);
 
   const previewStatus = useMemo(() => {
-    const total = Number(invoice.totalAmountRupiah ?? 0);
-    const nextPaid = totalPaid(invoice) + Number(amountRupiah || 0);
+    const total = totalInvoice;
+    const nextPaid = paidInvoice + Number(amountRupiah || 0);
     if (nextPaid >= total) return 'PAID';
     if (nextPaid > 0) return 'PARTIAL';
     return 'ISSUED';
-  }, [amountRupiah, invoice]);
+  }, [amountRupiah, paidInvoice, totalInvoice]);
 
   const handleClose = () => {
     setAmountRupiah(String(remainingAmount || ''));
@@ -61,8 +59,8 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
       <Modal.Body>
         {error ? <Alert variant="danger">{error}</Alert> : null}
         <Alert variant="light" className="border">
-          <div>Total invoice: {invoice.totalAmountRupiah ?? 0}</div>
-          <div>Sudah dibayar: {totalPaid(invoice)}</div>
+          <div>Total invoice: {totalInvoice}</div>
+          <div>Sudah dibayar: {paidInvoice}</div>
           <div>Sisa tagihan: {remainingAmount}</div>
           <div className="mt-2"><strong>Preview status setelah bayar: {previewStatus}</strong></div>
         </Alert>

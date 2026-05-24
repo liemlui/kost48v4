@@ -1,0 +1,343 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { DEFAULT_COA } from './constants/default-coa';
+import { AccountingAccountsQueryDto, CreateChartOfAccountDto, UpdateChartOfAccountDto } from './dto/accounting-account.dto';
+import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from './dto/cash-account.dto';
+import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
+import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/opening-balance.dto';
+import { CreateJournalDraftDto, JournalEntriesQueryDto } from './dto/journal-entry.dto';
+import { AccountingSchemaGuard } from './accounting-schema.guard';
+
+function rupiah(value?: number | null) {
+  return Math.max(0, Number(value ?? 0));
+}
+
+function monthRange(year: number, month: number) {
+  const start = new Date(Date.UTC(year, month - 1, 1));
+  const end = new Date(Date.UTC(year, month, 0));
+  return { start, end };
+}
+
+@Injectable()
+export class AccountingService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly schemaGuard: AccountingSchemaGuard,
+  ) {}
+
+  async seedDefaultCoa() {
+    await this.schemaGuard.assertReady();
+    const results = [] as Array<{ id: number; code: string; name: string; createdOrUpdated: 'UPSERTED' }>;
+    for (const account of DEFAULT_COA) {
+      const row = await (this.prisma as any).chartOfAccount.upsert({
+        where: { code: account.code },
+        create: {
+          code: account.code,
+          name: account.name,
+          type: account.type as any,
+          normalBalance: account.normalBalance as any,
+          description: account.description,
+          isSystemDefault: true,
+          isActive: true,
+        },
+        update: {
+          name: account.name,
+          type: account.type as any,
+          normalBalance: account.normalBalance as any,
+          description: account.description,
+          isSystemDefault: true,
+          isActive: true,
+        },
+      });
+      results.push({ id: row.id, code: row.code, name: row.name, createdOrUpdated: 'UPSERTED' });
+    }
+    return {
+      seededCount: results.length,
+      accounts: results,
+      note: 'Default COA idempotent. Deposit liability disediakan, tetapi belum ada auto-posting.',
+    };
+  }
+
+  async listAccounts(query: AccountingAccountsQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    return (this.prisma as any).chartOfAccount.findMany({
+      where: {
+        ...(query.type ? { type: query.type as any } : {}),
+        ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
+        ...(query.search
+          ? { OR: [{ code: { contains: query.search, mode: 'insensitive' as any } }, { name: { contains: query.search, mode: 'insensitive' as any } }] }
+          : {}),
+      },
+      orderBy: [{ code: 'asc' }],
+      include: { parent: { select: { id: true, code: true, name: true } } },
+    });
+  }
+
+  async createAccount(dto: CreateChartOfAccountDto) {
+    await this.schemaGuard.assertReady();
+    if (dto.parentId) await this.ensureAccount(dto.parentId);
+    return (this.prisma as any).chartOfAccount.create({
+      data: {
+        code: dto.code.trim(),
+        name: dto.name.trim(),
+        type: dto.type as any,
+        normalBalance: dto.normalBalance as any,
+        description: dto.description,
+        parentId: dto.parentId,
+        isActive: dto.isActive ?? true,
+      },
+    });
+  }
+
+  async updateAccount(id: number, dto: UpdateChartOfAccountDto) {
+    await this.schemaGuard.assertReady();
+    await this.ensureAccount(id);
+    if (dto.parentId) {
+      if (dto.parentId === id) throw new BadRequestException('Akun tidak boleh menjadi parent dirinya sendiri.');
+      await this.ensureAccount(dto.parentId);
+    }
+    return (this.prisma as any).chartOfAccount.update({
+      where: { id },
+      data: {
+        ...(dto.code !== undefined ? { code: dto.code.trim() } : {}),
+        ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+        ...(dto.type !== undefined ? { type: dto.type as any } : {}),
+        ...(dto.normalBalance !== undefined ? { normalBalance: dto.normalBalance as any } : {}),
+        ...(dto.description !== undefined ? { description: dto.description } : {}),
+        ...(dto.parentId !== undefined ? { parentId: dto.parentId } : {}),
+        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+      },
+    });
+  }
+
+  async listCashAccounts(query: CashAccountsQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    return (this.prisma as any).cashAccount.findMany({
+      where: {
+        ...(query.accountType ? { accountType: query.accountType as any } : {}),
+        ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
+        ...(query.search
+          ? { OR: [{ name: { contains: query.search, mode: 'insensitive' as any } }, { bankName: { contains: query.search, mode: 'insensitive' as any } }] }
+          : {}),
+      },
+      include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true } } },
+      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+    });
+  }
+
+  async createCashAccount(dto: CreateCashAccountDto) {
+    await this.schemaGuard.assertReady();
+    const coa = await this.ensureAccount(dto.chartOfAccountId);
+    if (coa.type !== 'ASSET') throw new BadRequestException('Cash account harus terhubung ke COA bertipe ASSET.');
+    return (this.prisma as any).$transaction(async (tx: any) => {
+      if (dto.isDefault) await tx.cashAccount.updateMany({ data: { isDefault: false } });
+      return tx.cashAccount.create({
+        data: {
+          name: dto.name.trim(),
+          accountType: (dto.accountType ?? 'BANK') as any,
+          chartOfAccountId: dto.chartOfAccountId,
+          bankName: dto.bankName,
+          accountNumberMasked: dto.accountNumberMasked,
+          holderName: dto.holderName,
+          openingBalanceRupiah: dto.openingBalanceRupiah ?? 0,
+          currentBalanceRupiah: dto.currentBalanceRupiah ?? dto.openingBalanceRupiah ?? 0,
+          isDefault: dto.isDefault ?? false,
+          isActive: dto.isActive ?? true,
+          notes: dto.notes,
+        },
+      });
+    });
+  }
+
+  async updateCashAccount(id: number, dto: UpdateCashAccountDto) {
+    await this.schemaGuard.assertReady();
+    await this.ensureCashAccount(id);
+    if (dto.chartOfAccountId) {
+      const coa = await this.ensureAccount(dto.chartOfAccountId);
+      if (coa.type !== 'ASSET') throw new BadRequestException('Cash account harus terhubung ke COA bertipe ASSET.');
+    }
+    return (this.prisma as any).$transaction(async (tx: any) => {
+      if (dto.isDefault) await tx.cashAccount.updateMany({ where: { id: { not: id } }, data: { isDefault: false } });
+      return tx.cashAccount.update({
+        where: { id },
+        data: {
+          ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+          ...(dto.accountType !== undefined ? { accountType: dto.accountType as any } : {}),
+          ...(dto.chartOfAccountId !== undefined ? { chartOfAccountId: dto.chartOfAccountId } : {}),
+          ...(dto.bankName !== undefined ? { bankName: dto.bankName } : {}),
+          ...(dto.accountNumberMasked !== undefined ? { accountNumberMasked: dto.accountNumberMasked } : {}),
+          ...(dto.holderName !== undefined ? { holderName: dto.holderName } : {}),
+          ...(dto.openingBalanceRupiah !== undefined ? { openingBalanceRupiah: dto.openingBalanceRupiah } : {}),
+          ...(dto.currentBalanceRupiah !== undefined ? { currentBalanceRupiah: dto.currentBalanceRupiah } : {}),
+          ...(dto.isDefault !== undefined ? { isDefault: dto.isDefault } : {}),
+          ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+          ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+        },
+      });
+    });
+  }
+
+  async listPeriods(query: AccountingPeriodsQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    return (this.prisma as any).accountingPeriod.findMany({
+      where: {
+        ...(query.year ? { year: query.year } : {}),
+        ...(query.month ? { month: query.month } : {}),
+        ...(query.status ? { status: query.status as any } : {}),
+      },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+  }
+
+  async createPeriod(dto: CreateAccountingPeriodDto) {
+    await this.schemaGuard.assertReady();
+    const range = monthRange(dto.year, dto.month);
+    return (this.prisma as any).accountingPeriod.create({
+      data: {
+        year: dto.year,
+        month: dto.month,
+        startDate: dto.startDate ? new Date(dto.startDate) : range.start,
+        endDate: dto.endDate ? new Date(dto.endDate) : range.end,
+        status: (dto.status ?? 'OPEN') as any,
+        notes: dto.notes,
+      },
+    });
+  }
+
+  async updatePeriod(id: number, dto: UpdateAccountingPeriodDto) {
+    await this.schemaGuard.assertReady();
+    const row = await (this.prisma as any).accountingPeriod.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException('Accounting period tidak ditemukan.');
+    return (this.prisma as any).accountingPeriod.update({
+      where: { id },
+      data: {
+        ...(dto.startDate !== undefined ? { startDate: new Date(dto.startDate) } : {}),
+        ...(dto.endDate !== undefined ? { endDate: new Date(dto.endDate) } : {}),
+        ...(dto.status !== undefined ? { status: dto.status as any, closedAt: dto.status === 'CLOSED' ? new Date() : row.closedAt } : {}),
+        ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+      },
+    });
+  }
+
+  async listOpeningBalances(query: OpeningBalancesQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    return (this.prisma as any).openingBalanceBatch.findMany({
+      where: { ...(query.status ? { status: query.status as any } : {}) },
+      include: {
+        accountingPeriod: true,
+        lines: { include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } } }, orderBy: { sortOrder: 'asc' } },
+      },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+  }
+
+  async createOpeningBalanceDraft(dto: CreateOpeningBalanceDraftDto, user: CurrentUserPayload) {
+    await this.schemaGuard.assertReady();
+    if (!dto.lines?.length) throw new BadRequestException('Opening balance membutuhkan minimal satu line.');
+    await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
+    const totalDebit = dto.lines.reduce((sum, line) => sum + rupiah(line.debitRupiah), 0);
+    const totalCredit = dto.lines.reduce((sum, line) => sum + rupiah(line.creditRupiah), 0);
+    const invalid = dto.lines.find((line) => rupiah(line.debitRupiah) > 0 && rupiah(line.creditRupiah) > 0);
+    if (invalid) throw new BadRequestException('Satu opening balance line tidak boleh debit dan kredit sekaligus.');
+    const batchNumber = dto.batchNumber?.trim() || `OB-${Date.now()}`;
+
+    return (this.prisma as any).openingBalanceBatch.create({
+      data: {
+        batchNumber,
+        accountingPeriodId: dto.accountingPeriodId,
+        cutoverDate: new Date(dto.cutoverDate),
+        notes: dto.notes,
+        totalDebitRupiah: totalDebit,
+        totalCreditRupiah: totalCredit,
+        createdById: user.id,
+        status: 'DRAFT' as any,
+        lines: {
+          create: dto.lines.map((line, index) => ({
+            chartOfAccountId: line.chartOfAccountId,
+            description: line.description,
+            debitRupiah: rupiah(line.debitRupiah),
+            creditRupiah: rupiah(line.creditRupiah),
+            sortOrder: line.sortOrder ?? index,
+          })),
+        },
+      },
+      include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
+  async listJournalEntries(query: JournalEntriesQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    return (this.prisma as any).journalEntry.findMany({
+      where: {
+        ...(query.status ? { status: query.status as any } : {}),
+        ...(query.sourceType ? { sourceType: query.sourceType as any } : {}),
+        ...(query.from || query.to ? { entryDate: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lte: new Date(query.to) } : {}) } } : {}),
+      },
+      include: {
+        accountingPeriod: true,
+        lines: { include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } }, cashAccount: true }, orderBy: { sortOrder: 'asc' } },
+      },
+      orderBy: [{ entryDate: 'desc' }, { id: 'desc' }],
+      take: 200,
+    });
+  }
+
+  async createJournalDraft(dto: CreateJournalDraftDto, user: CurrentUserPayload) {
+    await this.schemaGuard.assertReady();
+    if (!dto.lines?.length || dto.lines.length < 2) throw new BadRequestException('Journal draft minimal membutuhkan dua line.');
+    await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
+    const cashIds = dto.lines.map((line) => line.cashAccountId).filter((id): id is number => Boolean(id));
+    for (const id of cashIds) await this.ensureCashAccount(id);
+    const totalDebit = dto.lines.reduce((sum, line) => sum + rupiah(line.debitRupiah), 0);
+    const totalCredit = dto.lines.reduce((sum, line) => sum + rupiah(line.creditRupiah), 0);
+    const invalid = dto.lines.find((line) => rupiah(line.debitRupiah) > 0 && rupiah(line.creditRupiah) > 0);
+    if (invalid) throw new BadRequestException('Satu journal line tidak boleh debit dan kredit sekaligus.');
+    const entryNumber = dto.entryNumber?.trim() || `JE-${Date.now()}`;
+
+    return (this.prisma as any).journalEntry.create({
+      data: {
+        entryNumber,
+        entryDate: new Date(dto.entryDate),
+        accountingPeriodId: dto.accountingPeriodId,
+        status: 'DRAFT' as any,
+        sourceType: (dto.sourceType ?? 'MANUAL') as any,
+        sourceId: dto.sourceId,
+        memo: dto.memo,
+        totalDebitRupiah: totalDebit,
+        totalCreditRupiah: totalCredit,
+        isBalanced: totalDebit === totalCredit,
+        createdById: user.id,
+        lines: {
+          create: dto.lines.map((line, index) => ({
+            chartOfAccountId: line.chartOfAccountId,
+            cashAccountId: line.cashAccountId,
+            description: line.description,
+            debitRupiah: rupiah(line.debitRupiah),
+            creditRupiah: rupiah(line.creditRupiah),
+            sortOrder: line.sortOrder ?? index,
+          })),
+        },
+      },
+      include: { lines: { include: { chartOfAccount: true, cashAccount: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+  }
+
+  private async ensureAccount(id: number) {
+    const row = await (this.prisma as any).chartOfAccount.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException('Chart of Account tidak ditemukan.');
+    return row;
+  }
+
+  private async ensureCashAccount(id: number) {
+    const row = await (this.prisma as any).cashAccount.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException('Cash account tidak ditemukan.');
+    return row;
+  }
+
+  private async ensureLinesAccounts(ids: number[]) {
+    const unique = [...new Set(ids)];
+    const count = await (this.prisma as any).chartOfAccount.count({ where: { id: { in: unique } } });
+    if (count !== unique.length) throw new BadRequestException('Ada COA line yang tidak ditemukan.');
+  }
+}

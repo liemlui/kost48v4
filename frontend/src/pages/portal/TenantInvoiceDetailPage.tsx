@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -8,11 +8,15 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
-import { AssistantPanel, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import type { InvoicePrintData } from '../../components/reports/InvoicePrintLayout';
-import { formatDateSafe } from '../resources/simpleCrudHelpers';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { isPayableInvoiceStatus, isPendingReviewStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
+import { getInvoiceUtilitySummary, invoiceKindLabel } from '../../utils/invoiceUtility';
+import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
+import { formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
 
 const lineTypeLabels: Record<string, string> = {
   RENT: 'Sewa',
@@ -25,10 +29,8 @@ const lineTypeLabels: Record<string, string> = {
 };
 
 function isPastDue(dueDate: string | Date | null | undefined) {
-  if (!dueDate) return false;
-  const due = new Date(dueDate);
-  if (Number.isNaN(due.getTime())) return false;
-  due.setHours(23, 59, 59, 999);
+  const due = parseDateTimeSafe(dueDate);
+  if (!due) return false;
   return due.getTime() < Date.now();
 }
 
@@ -53,19 +55,18 @@ export default function TenantInvoiceDetailPage() {
 
   const invoice = detailQuery.data as InvoicePrintData | undefined;
 
-  const totalPaid = useMemo(() => {
-    if (!invoice?.payments) return 0;
-    return invoice.payments.reduce((sum, p) => sum + Number(p.amountRupiah ?? 0), 0);
-  }, [invoice]);
-
-  const totalInvoice = Number(invoice?.totalAmountRupiah ?? 0);
-  const outstanding = Math.max(totalInvoice - totalPaid, 0);
+  const totalPaid = useMemo(() => getInvoicePaidAmount(invoice as any), [invoice]);
+  const totalInvoice = useMemo(() => getInvoiceTotalAmount(invoice as any), [invoice]);
+  const outstanding = useMemo(() => getInvoiceOutstandingAmount(invoice as any), [invoice]);
   const isPaid = invoice?.status === 'PAID';
   const isCancelled = invoice?.status === 'CANCELLED';
   const tenantName = invoice?.stay?.tenant?.fullName;
   const roomInfo = invoice?.stay?.room
     ? `${invoice.stay.room.code}${invoice.stay.room.name ? ` · ${invoice.stay.room.name}` : ''}`
     : null;
+  const utilitySummary = useMemo(() => getInvoiceUtilitySummary(invoice?.lines), [invoice?.lines]);
+  const hasRenewUtilityLines = utilitySummary.hasUtilityLines;
+  const invoiceKind = invoiceKindLabel(invoice?.lines);
 
   const handlePrint = () => {
     window.print();
@@ -84,6 +85,13 @@ export default function TenantInvoiceDetailPage() {
 
   const needsPayment = !isPaid && !isCancelled;
 
+  useEffect(() => {
+    if (!showPayModal) return;
+    setPayAmount(String(outstanding));
+    setPayFile(null);
+    setPayNotes('');
+  }, [showPayModal, outstanding]);
+
   // ── Pending review detection ──
   const submissionsQuery = useQuery({
     queryKey: ['my-payment-submissions'],
@@ -93,26 +101,35 @@ export default function TenantInvoiceDetailPage() {
   });
   const hasPendingReview = useMemo(() => {
     const items = submissionsQuery.data?.items ?? [];
-    return items.some((s: any) => s.invoiceId === Number(id) && s.status === 'PENDING_REVIEW');
+    return items.some((s: any) => s.invoiceId === Number(id) && isPendingReviewStatus(s.status));
   }, [submissionsQuery.data, id]);
 
-  const isOverdue = invoice && needsPayment && isPastDue(invoice.dueDate);
+  const canSubmitPayment = Boolean(invoice && isPayableInvoiceStatus(invoice.status));
+  const isOverdue = invoice && canSubmitPayment && isPastDue(invoice.dueDate);
+  const dueMeta = getDeadlineMeta(invoice?.dueDate, 'Jatuh tempo');
   const assistantItems: AssistantItem[] = invoice ? [
     hasPendingReview ? {
       id: 'review',
       severity: 'INFO',
       title: 'Bukti pembayaran kamu sedang diperiksa',
-      message: 'Tidak perlu upload ulang. Admin sedang memeriksa bukti pembayaran kamu.',
+      message: TENANT_PAYMENT_REVIEW_MESSAGE,
       source: 'Bukti pembayaran',
     } : null,
-    needsPayment && !hasPendingReview ? {
+    canSubmitPayment && !hasPendingReview ? {
       id: 'needs-payment',
       severity: isOverdue ? 'BLOCKER' : 'HIGH',
       title: isOverdue ? 'Tagihan sudah melewati jatuh tempo' : 'Tagihan ini perlu dibayar',
-      message: 'Upload bukti pembayaran dari halaman ini agar admin bisa memverifikasi.',
+      message: invoice.dueDate ? `${dueMeta.actionLabel} Bayar dan kirim bukti dari halaman ini agar admin bisa memeriksa dan mencatat pembayaran kamu.` : 'Bayar dan kirim bukti dari halaman ini agar admin bisa memeriksa dan mencatat pembayaran kamu.',
       source: 'Tagihan',
-      actionLabel: 'Bayar sekarang',
+      actionLabel: 'Bayar & Kirim Bukti',
       onAction: () => { setPayAmount(String(outstanding)); setShowPayModal(true); },
+    } : null,
+    invoice.status === 'DRAFT' ? {
+      id: 'draft',
+      severity: 'INFO',
+      title: 'Tagihan sedang disiapkan admin',
+      message: 'Belum ada aksi bayar yang perlu kamu lakukan sampai tagihan siap.',
+      source: 'Tagihan',
     } : null,
     isPaid ? {
       id: 'paid',
@@ -126,18 +143,18 @@ export default function TenantInvoiceDetailPage() {
   const metrics: MetricChip[] = invoice ? [
     { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `TG-${invoice.id}`, icon: '🧾', status: invoice.status },
     { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
-    { id: 'outstanding', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: hasPendingReview ? 'Menunggu pemeriksaan admin' : needsPayment ? 'Perlu dibayar' : 'Selesai', icon: '⚖️', status: hasPendingReview ? 'INFO' : outstanding > 0 ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Jatuh Tempo', value: formatDateSafe(invoice.dueDate), helper: isOverdue ? 'Sudah terlambat' : 'Tanggal pembayaran', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
+    { id: 'outstanding', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: hasPendingReview ? 'Bukti sedang diperiksa' : canSubmitPayment ? 'Perlu dibayar' : invoice.status === 'DRAFT' ? 'Sedang disiapkan admin' : 'Selesai', icon: '⚖️', status: hasPendingReview ? 'INFO' : outstanding > 0 ? 'WARNING' : 'SUCCESS' },
+    { id: 'due', label: 'Jatuh Tempo', value: dueMeta.hasDate ? dueMeta.clockLabel : '-', helper: dueMeta.hasDate ? `${dueMeta.relativeLabel} · ${dueMeta.absoluteLabel}` : 'Jam belum tersedia', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
   ] : [];
 
   const timelineSteps: TimelineStep[] = invoice ? [
     { id: 'issued', label: 'Tagihan tersedia', description: 'Tagihan sudah bisa kamu lihat di portal.', status: invoice.status === 'DRAFT' ? 'pending' : 'done' },
-    { id: 'proof', label: 'Bukti pembayaran', description: hasPendingReview ? 'Bukti kamu sedang diperiksa admin.' : needsPayment ? 'Upload bukti setelah kamu membayar.' : 'Tidak ada bukti tambahan yang dibutuhkan.', status: hasPendingReview ? 'active' : needsPayment ? 'pending' : 'done' },
+    { id: 'proof', label: 'Bukti pembayaran', description: hasPendingReview ? TENANT_PAYMENT_REVIEW_MESSAGE : canSubmitPayment ? 'Bayar dan kirim bukti dalam satu langkah.' : 'Tidak ada bukti tambahan yang dibutuhkan.', status: hasPendingReview ? 'active' : canSubmitPayment ? 'pending' : 'done' },
     { id: 'verified', label: 'Verifikasi admin', description: isPaid ? 'Pembayaran sudah diverifikasi.' : 'Menunggu admin mencocokkan bukti dan nominal.', status: isPaid ? 'done' : hasPendingReview ? 'active' : 'pending' },
     { id: 'complete', label: 'Tagihan selesai', description: isPaid ? 'Tagihan sudah lunas.' : 'Selesai setelah status berubah menjadi lunas.', status: isPaid ? 'done' : isCancelled ? 'blocked' : 'pending' },
   ] : [];
 
-  const shouldDisablePay = hasPendingReview || Number(payAmount) <= 0 || Number(payAmount) > outstanding;
+  const shouldDisablePay = hasPendingReview || !canSubmitPayment || Number(payAmount) <= 0 || Number(payAmount) > outstanding;
 
   const payMutation = useMutation({
     mutationFn: async () => {
@@ -186,6 +203,8 @@ export default function TenantInvoiceDetailPage() {
     onSuccess: () => {
       setShowPayModal(false);
       queryClient.invalidateQueries({ queryKey: ['tenant-invoice', id] });
+      queryClient.invalidateQueries({ queryKey: ['my-payment-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
     },
   });
 
@@ -218,8 +237,9 @@ export default function TenantInvoiceDetailPage() {
   return (
     <div>
       <PageHeader
+        eyebrow="Portal Tenant"
         title={`Tagihan #${id}`}
-        description="Detail tagihan kamu."
+        description={hasRenewUtilityLines ? 'Tagihan perpanjangan ini sudah memasukkan sewa periode baru dan pemakaian listrik/air dari checkpoint meter. Tidak ada sistem hutang.' : 'Detail tagihan, status pembayaran, dan bukti yang sedang diperiksa. Bayar dan kirim bukti dalam satu langkah.'}
         actionLabel="Kembali"
         onAction={() => navigate('/portal/invoices')}
       />
@@ -238,15 +258,23 @@ export default function TenantInvoiceDetailPage() {
           </Alert>
         ) : null}
 
-        <AssistantPanel
+        <AssistantInsightLine
           title="Asisten Tagihan"
-          subtitle="Memberi tahu apakah kamu perlu bayar, menunggu pemeriksaan, atau sudah selesai."
-          items={assistantItems}
-          emptyTitle="Tagihan aman"
-          emptyMessage="Tidak ada aksi tambahan yang perlu kamu lakukan sekarang."
+          tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0]?.severity === 'SUCCESS' ? 'success' : 'info'}
+          message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tagihan aman. Tidak ada aksi tambahan yang perlu kamu lakukan sekarang.'}
+          actionLabel={assistantItems[0]?.actionLabel}
+          onAction={assistantItems[0]?.onAction}
         />
-        <CompactMetrics metrics={metrics} />
-        <LifecycleTimeline title="Status Pembayaran" subtitle="Urutan proses dari tagihan muncul sampai lunas." steps={timelineSteps} />
+        <StatusStrip
+          items={metrics.map((metric) => ({
+            id: metric.id,
+            label: metric.label,
+            value: metric.value,
+            helper: metric.helper,
+            tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
+          }))}
+        />
+        <LifecycleTimeline title="Status Pembayaran" subtitle={hasRenewUtilityLines ? 'Tagihan renew berjalan setelah admin mencatat meter dan sistem menghitung pemakaian utilitas.' : 'Urutan proses dari tagihan muncul sampai lunas.'} steps={timelineSteps} />
 
         <Row className="g-4 mb-4">
           <Col lg={8}>
@@ -256,13 +284,14 @@ export default function TenantInvoiceDetailPage() {
                   <div>
                     <div className="page-eyebrow">Ringkasan tagihan</div>
                     <h4 className="mb-1">{invoice.invoiceNumber || `INV-${invoice.id}`}</h4>
+                    <div className="small text-primary fw-semibold mb-1">{invoiceKind}</div>
                     <div className="text-muted small">
                       {tenantName || '-'}
                       {roomInfo ? ` · ${roomInfo}` : ''}
                     </div>
                   </div>
                   <div className="d-flex flex-wrap gap-2">
-                    <StatusBadge status={invoice.status} tone="tenant" domain="invoice" />
+                    <StatusBadge status={hasPendingReview ? 'INFO' : invoice.status} tone="tenant" domain="invoice" customLabel={hasPendingReview ? 'Sedang Diperiksa' : tenantInvoiceStatusLabel(invoice.status, Boolean(isOverdue))} />
                     {isPaid ? <StatusBadge status="PAID" customLabel="Sudah lunas" /> : null}
                   </div>
                 </div>
@@ -289,7 +318,8 @@ export default function TenantInvoiceDetailPage() {
                   <Col md={3} sm={6}>
                     <div className="metric-tile">
                       <div className="card-title-soft">Jatuh Tempo</div>
-                      <div className="fw-semibold">{formatDateSafe(invoice.dueDate)}</div>
+                      <div className="fw-semibold">{dueMeta.hasDate ? dueMeta.absoluteLabel : '-'}</div>
+                      {dueMeta.hasDate ? <div className={isOverdue ? 'small text-soft-danger mt-1' : 'small text-muted mt-1'}>{dueMeta.relativeLabel}</div> : null}
                     </div>
                   </Col>
                 </Row>
@@ -307,15 +337,18 @@ export default function TenantInvoiceDetailPage() {
                     : 'Cetak tagihan atau kwitansi untuk arsip kamu.'}
                 </div>
                 {needsPayment && hasPendingReview ? (
-                  <Alert variant="info" className="small mb-2">⏳ Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.</Alert>
+                  <Alert variant="info" className="small mb-2">🔎 {TENANT_PAYMENT_REVIEW_MESSAGE}</Alert>
                 ) : null}
-                {needsPayment && !hasPendingReview ? (
+                {invoice.status === 'DRAFT' ? (
+                  <Alert variant="info" className="small mb-2">Tagihan sedang disiapkan admin. Belum ada aksi bayar yang perlu kamu lakukan.</Alert>
+                ) : null}
+                {canSubmitPayment && !hasPendingReview ? (
                   <Button
                     variant="danger"
                     className="w-100 mb-2"
                     onClick={() => { setPayAmount(String(outstanding)); setShowPayModal(true); }}
                   >
-                    💳 Bayar Sekarang
+                    💳 Bayar & Kirim Bukti
                   </Button>
                 ) : null}
                 <Button
@@ -345,6 +378,17 @@ export default function TenantInvoiceDetailPage() {
             <Card className="content-card">
               <Card.Body>
                 <div className="panel-title mb-3">Rincian Tagihan</div>
+                {hasRenewUtilityLines ? (
+                  <Alert variant="info" className="small">
+                    <div className="fw-semibold mb-1">Tagihan perpanjangan termasuk checkpoint meter dan wajib dibayar cepat.</div>
+                    <div>Admin sudah mencatat meter terbaru. Sistem menghitung selisih dari meter sebelumnya, lalu memasukkan biaya listrik dan air ke tagihan ini.</div>
+                    <div className="d-flex flex-wrap gap-2 mt-3">
+                      <span className="badge bg-primary-subtle text-primary-emphasis">Sewa: <CurrencyDisplay amount={utilitySummary.rentAmount} /></span>
+                      <span className="badge bg-info-subtle text-info-emphasis">Listrik: {utilitySummary.electricityUsage.toFixed(3)} {utilitySummary.electricityUnit} · <CurrencyDisplay amount={utilitySummary.electricityAmount} /></span>
+                      <span className="badge bg-success-subtle text-success-emphasis">Air: {utilitySummary.waterUsage.toFixed(3)} {utilitySummary.waterUnit} · <CurrencyDisplay amount={utilitySummary.waterAmount} /></span>
+                    </div>
+                  </Alert>
+                ) : null}
                 {!invoice.lines?.length ? (
                   <EmptyState icon="🧾" title="Belum ada rincian tagihan" />
                 ) : (
@@ -394,7 +438,7 @@ export default function TenantInvoiceDetailPage() {
                     <tbody>
                       {invoice.payments.map((payment: any) => (
                         <tr key={payment.id}>
-                          <td>{formatDateSafe(payment.paymentDate)}</td>
+                          <td>{formatDateTimeWib(payment.paymentDate)}</td>
                           <td>{paymentMethodLabels[payment.method] ?? payment.method}</td>
                           <td>{payment.referenceNo || '-'}</td>
                           <td><CurrencyDisplay amount={payment.amountRupiah} /></td>
@@ -412,12 +456,22 @@ export default function TenantInvoiceDetailPage() {
       {/* ── Payment Upload Modal ── */}
       <Modal show={showPayModal} onHide={() => setShowPayModal(false)} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Upload Bukti Pembayaran</Modal.Title>
+          <Modal.Title>Bayar & Kirim Bukti Pembayaran</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Alert variant="info" className="small">
-            Upload bukti pembayaran untuk tagihan <strong>{invoice.invoiceNumber || `INV-${invoice.id}`}</strong>. Admin akan memeriksa pembayaran kamu.
+            Bayar dan kirim bukti pembayaran untuk tagihan <strong>{invoice.invoiceNumber || `TG-${invoice.id}`}</strong>. {dueMeta.hasDate ? `Batas bayar: ${dueMeta.absoluteLabel}. ${dueMeta.relativeLabel}. ` : ''}Admin akan memeriksa pembayaran kamu. Setelah terkirim, kamu tidak perlu upload ulang.
           </Alert>
+          {payMutation.isError ? (
+            <Alert variant="danger" className="small">
+              {(payMutation.error as any)?.response?.data?.message || (payMutation.error as Error)?.message || 'Gagal mengirim bukti pembayaran. Cek nominal dan file, lalu coba lagi.'}
+            </Alert>
+          ) : null}
+          {totalInvoice <= 0 && (invoice.lines?.length ?? 0) > 0 ? (
+            <Alert variant="warning" className="small">
+              Total tagihan dihitung dari rincian karena data total lama belum tersinkron.
+            </Alert>
+          ) : null}
           <Form>
             <Row className="g-3">
               <Col md={6}>
@@ -500,7 +554,7 @@ export default function TenantInvoiceDetailPage() {
               </Col>
               <Col md={12}>
                 <Form.Group>
-                  <Form.Label className="fw-semibold">Bukti pembayaran (opsional)</Form.Label>
+                  <Form.Label className="fw-semibold">Bukti pembayaran</Form.Label>
                   <Form.Control
                     type="file"
                     accept="image/*,.pdf"
@@ -509,7 +563,7 @@ export default function TenantInvoiceDetailPage() {
                       setPayFile(file);
                     }}
                   />
-                  <Form.Text className="text-muted">Format: JPG, PNG, atau PDF. Maks 5MB.</Form.Text>
+                  <Form.Text className="text-muted">Format: JPG, PNG, atau PDF. Maks 5MB. Jika membayar tunai, isi catatan agar admin mudah memeriksa.</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -524,7 +578,7 @@ export default function TenantInvoiceDetailPage() {
             onClick={() => payMutation.mutate()}
             disabled={payMutation.isPending || shouldDisablePay}
           >
-            {payMutation.isPending ? 'Mengirim...' : 'Kirim Bukti Pembayaran'}
+            {payMutation.isPending ? 'Mengirim...' : 'Bayar & Kirim Bukti'}
           </Button>
         </Modal.Footer>
       </Modal>

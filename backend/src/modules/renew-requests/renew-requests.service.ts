@@ -7,7 +7,7 @@ import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
 import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
-import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole } from '../../common/enums/app.enums';
+import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus } from '../../common/enums/app.enums';
 
 @Injectable()
 export class RenewRequestsService {
@@ -39,6 +39,16 @@ export class RenewRequestsService {
       throw new ConflictException(
         'Tidak dapat mengajukan perpanjangan karena ada permintaan checkout yang menunggu persetujuan',
       );
+    }
+
+    const openInvoices = await this.prisma.invoice.findMany({
+      where: { stayId: dto.stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
+      select: { id: true, invoiceNumber: true, status: true },
+      orderBy: { id: 'asc' },
+    });
+    if (openInvoices.length > 0) {
+      const refs = openInvoices.map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`).join(', ');
+      throw new ConflictException(`Selesaikan tagihan aktif sebelum mengajukan perpanjangan: ${refs}`);
     }
 
     const existingPending = await this.prisma.renewRequest.findFirst({
@@ -83,6 +93,9 @@ export class RenewRequestsService {
       const renewDto: RenewStayDto = {
         plannedCheckOutDate: finalPlannedCheckOutDate,
         agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
+        electricityReadingValue: dto.electricityReadingValue,
+        waterReadingValue: dto.waterReadingValue,
+        meterReadingAt: dto.meterReadingAt,
       };
 
       const renewResult = await this.staysService.renewStayInTransaction(tx, request.stayId, renewDto, actor);
@@ -124,7 +137,7 @@ export class RenewRequestsService {
       newData: result.invoice,
     });
 
-    return { request: result.request, stay: result.stay, invoice: result.invoice };
+    return { request: result.request, stay: result.stay, invoice: result.invoice, meterSummary: result.meterSummary };
   }
 
   /** Admin/owner rejects a pending renew request. */

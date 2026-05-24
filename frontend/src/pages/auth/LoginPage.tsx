@@ -1,102 +1,213 @@
-import { FormEvent, useState } from 'react';
-import { Alert, Button, Form } from 'react-bootstrap';
+import { FormEvent, useMemo, useState } from 'react';
+import { Button, Form } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/common/PasswordInput';
 import { getDefaultRoute } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
+import type { UserRole } from '../../types';
+
+type LoginMode = 'TENANT' | 'BACKOFFICE';
+
+const isBackofficeRole = (role: UserRole) => role === 'OWNER' || role === 'ADMIN' || role === 'STAFF';
+
+function normalizeLoginError(message: unknown) {
+  if (Array.isArray(message)) return message.join(', ');
+  if (typeof message === 'string' && message.trim()) return message;
+  return 'Email/nomor HP atau password belum cocok. Cek kembali data yang kamu masukkan.';
+}
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mode, setMode] = useState<LoginMode>('TENANT');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ identifier?: string; password?: string; form?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   const from = (location.state as any)?.from?.pathname;
 
+  const modeCopy = useMemo(() => {
+    if (mode === 'TENANT') {
+      return {
+        helper: 'Baru pertama kali booking? Tidak perlu buat akun dulu. Pilih kamar dari katalog, lalu akun portal akan dibuat setelah pemesanan diproses.',
+        identifierLabel: 'Email atau No. HP',
+        identifierPlaceholder: 'Contoh: nama@email.com atau 0812...',
+        passwordPlaceholder: 'Masukkan password',
+        expectedRoleError: 'Akun ini adalah akun pengelola. Gunakan tab Admin/Backoffice untuk masuk ke workspace operasional.',
+      };
+    }
+    return {
+      helper: 'Area khusus pengelola KOST48 untuk menangani pemesanan, pembayaran, kamar, dan operasional harian.',
+      identifierLabel: 'Email Admin / Staff',
+      identifierPlaceholder: 'admin@kost48.com',
+      passwordPlaceholder: 'Masukkan password admin',
+      expectedRoleError: 'Akun ini adalah akun penghuni. Gunakan tab Tenant untuk masuk ke portal kamu.',
+    };
+  }, [mode]);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setError('');
+    const nextErrors: typeof fieldErrors = {};
+
+    if (!identifier.trim()) nextErrors.identifier = mode === 'TENANT' ? 'Masukkan email atau nomor HP yang terdaftar.' : 'Masukkan email admin/staff.';
+    if (!password.trim()) nextErrors.password = 'Masukkan password.';
+
+    if (Object.keys(nextErrors).length) {
+      setFieldErrors(nextErrors);
+      return;
+    }
+
+    setFieldErrors({});
     setSubmitting(true);
     try {
-      const user = await login(identifier, password);
+      const user = await login(identifier.trim(), password);
+      if (mode === 'TENANT' && user.role !== 'TENANT') {
+        logout();
+        setFieldErrors({ form: modeCopy.expectedRoleError });
+        return;
+      }
+      if (mode === 'BACKOFFICE' && !isBackofficeRole(user.role)) {
+        logout();
+        setFieldErrors({ form: modeCopy.expectedRoleError });
+        return;
+      }
       navigate(from || getDefaultRoute(user.role), { replace: true });
     } catch (err: any) {
-      const message = err?.response?.data?.message;
-      setError(Array.isArray(message) ? message.join(', ') : (message || 'Email/No. HP atau password salah'));
+      setFieldErrors({ form: normalizeLoginError(err?.response?.data?.message) });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleModeChange = (nextMode: LoginMode) => {
+    setMode(nextMode);
+    setFieldErrors({});
+  };
+
   return (
-    <div className="login-shell">
+    <div className="login-shell login-experience-v518d">
       <div className="login-wrap">
-        <section className="login-aside">
-          <div className="login-chip">✦ Kos48 Surabaya Barat</div>
-          <div className="login-title">Kos nyaman di Surabaya Barat — booking kamar langsung dari sini.</div>
-          <div className="login-copy">
-            Kos48 menyediakan kamar siap huni dengan fasilitas yang jelas, tarif transparan, dan proses booking online yang mudah untuk calon tenant.
-          </div>
+        <section className="login-aside" aria-label="Tentang KOST48 Surabaya">
+          <div className="login-chip"><span /> KOST48 Surabaya Barat</div>
+          <h1 className="login-title">Kos nyaman di Surabaya Barat — lebih tenang dari pilih kamar sampai tinggal.</h1>
+          <p className="login-copy">
+            Pilih kamar, pantau proses pemesanan, dan urus tagihan awal dari satu portal yang jelas tanpa bolak-balik tanya.
+          </p>
 
           <div className="login-feature-list">
             <div className="login-feature-item">
-              <strong>Kamar siap huni</strong>
-              <div className="mt-1 small text-white-50">Pilih kamar dari katalog yang selalu diperbarui, lengkap dengan foto, tarif, dan fasilitas.</div>
+              <div className="login-feature-icon">✓</div>
+              <div>
+                <strong>Kamar siap dihuni</strong>
+                <div className="mt-1 small">Lihat pilihan kamar, harga, deposit, dan informasi penting sebelum mengajukan pemesanan.</div>
+              </div>
             </div>
             <div className="login-feature-item">
-              <strong>Booking transparan</strong>
-              <div className="mt-1 small text-white-50">Lihat harga, deposit, dan status ketersediaan sebelum mengajukan booking.</div>
+              <div className="login-feature-icon">✓</div>
+              <div>
+                <strong>Pemesanan lebih transparan</strong>
+                <div className="mt-1 small">Pantau apakah pemesanan sedang direview, disetujui, atau menunggu pembayaran.</div>
+              </div>
             </div>
             <div className="login-feature-item">
-              <strong>Portal tenant pribadi</strong>
-              <div className="mt-1 small text-white-50">Setelah disetujui, tenant dapat memantau tagihan, pengumuman, dan data hunian dari portal.</div>
+              <div className="login-feature-icon">✓</div>
+              <div>
+                <strong>Portal pribadi penghuni</strong>
+                <div className="mt-1 small">Saat sudah tinggal, tagihan, masa sewa, laporan, dan pengumuman ada dalam satu tempat.</div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="login-panel">
-          <div className="brand-block">
-            <div className="brand-mark">K48</div>
-            <div>
-              <div className="brand-title">Kost48 Surabaya</div>
-              <div className="brand-subtitle">Masuk ke workspace Anda</div>
-            </div>
+        <section className="login-panel" aria-label="Form masuk KOST48">
+          <div className="login-mark" aria-hidden="true">K48</div>
+          <div className="login-heading-block text-center">
+            <h2>Masuk ke Portal KOST48</h2>
+            <p>Pantau pemesanan, tagihan, dan status hunian kamu dengan lebih mudah.</p>
           </div>
 
-          <h2>Masuk ke Portal Kos48</h2>
-          <p className="text-muted mb-4">Lanjutkan ke portal tenant atau backoffice sesuai akun Anda.</p>
+          <div className="login-segment" role="tablist" aria-label="Pilih jenis akun">
+            <button
+              type="button"
+              className={mode === 'TENANT' ? 'active' : ''}
+              role="tab"
+              aria-selected={mode === 'TENANT'}
+              onClick={() => handleModeChange('TENANT')}
+            >
+              <span>◎</span> Tenant
+            </button>
+            <button
+              type="button"
+              className={mode === 'BACKOFFICE' ? 'active' : ''}
+              role="tab"
+              aria-selected={mode === 'BACKOFFICE'}
+              onClick={() => handleModeChange('BACKOFFICE')}
+            >
+              <span>▣</span> Admin/Backoffice
+            </button>
+          </div>
 
-          {error ? <Alert variant="danger">{error}</Alert> : null}
+          <div className={`login-helper-card ${mode === 'BACKOFFICE' ? 'admin' : ''}`}>
+            {modeCopy.helper}
+          </div>
 
-          <Form onSubmit={handleSubmit}>
+          {fieldErrors.form ? <div className="login-form-error" role="alert">{fieldErrors.form}</div> : null}
+
+          <Form onSubmit={handleSubmit} noValidate>
             <Form.Group className="mb-3">
-              <Form.Label>Email atau No. HP</Form.Label>
-              <Form.Control value={identifier} onChange={(e) => setIdentifier(e.target.value)} type="text" placeholder="nama@kost48.com atau 0812xxxxxxx" autoCapitalize="none" autoCorrect="off" />
+              <Form.Label>{modeCopy.identifierLabel}</Form.Label>
+              <Form.Control
+                value={identifier}
+                onChange={(e) => {
+                  setIdentifier(e.target.value);
+                  if (fieldErrors.identifier || fieldErrors.form) setFieldErrors((prev) => ({ ...prev, identifier: undefined, form: undefined }));
+                }}
+                type="text"
+                placeholder={modeCopy.identifierPlaceholder}
+                autoCapitalize="none"
+                autoCorrect="off"
+                inputMode={mode === 'TENANT' && /^\d/.test(identifier.trim()) ? 'tel' : 'email'}
+                isInvalid={Boolean(fieldErrors.identifier)}
+              />
+              {fieldErrors.identifier ? <div className="login-inline-error">{fieldErrors.identifier}</div> : null}
             </Form.Group>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="mb-2">
               <Form.Label>Password</Form.Label>
-              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" />
+              <PasswordInput
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password || fieldErrors.form) setFieldErrors((prev) => ({ ...prev, password: undefined, form: undefined }));
+                }}
+                placeholder={modeCopy.passwordPlaceholder}
+                isInvalid={Boolean(fieldErrors.password)}
+              />
+              {fieldErrors.password ? <div className="login-inline-error">{fieldErrors.password}</div> : null}
             </Form.Group>
 
-            <div className="form-helper mb-3">Belum punya akun? Tenant baru bisa booking kamar dari katalog. Akun portal akan langsung dibuat begitu booking dikirim.</div>
-
-            <div className="d-flex justify-content-end mb-4">
-              <Link to="/forgot-password" className="small text-decoration-none">Lupa password?</Link>
+            <div className="login-forgot-row">
+              <Link to="/forgot-password">Lupa password?</Link>
             </div>
 
-            <Button type="submit" disabled={submitting} className="w-100">
-              {submitting ? 'Memproses...' : 'Masuk ke Dashboard'}
+            <Button type="submit" disabled={submitting} className="w-100 login-submit-btn">
+              {submitting ? 'Memproses...' : 'Masuk'}
             </Button>
           </Form>
 
-          <div className="mt-3 text-center">
-            <Link to="/rooms" className="small text-decoration-none">Belum punya akun? Lihat katalog kamar →</Link>
-          </div>
-
+          {mode === 'TENANT' ? (
+            <div className="login-catalog-card">
+              <strong>Belum pernah booking?</strong>
+              <span>Mulai dari lihat kamar dulu. Akun portal akan dibuat setelah pemesanan diproses.</span>
+              <Link to="/rooms">Lihat Katalog Kamar →</Link>
+            </div>
+          ) : (
+            <div className="login-backoffice-note">
+              Workspace ini untuk owner, admin, dan staff KOST48. Gunakan akun penghuni di tab Tenant.
+            </div>
+          )}
         </section>
       </div>
     </div>

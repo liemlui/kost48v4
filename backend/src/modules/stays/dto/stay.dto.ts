@@ -135,4 +135,16 @@ export class RenewStayDto {
   @IsInt()
   @Min(0)
   agreedRentAmountRupiah?: number;
+
+  @IsNotEmpty({ message: 'Meter listrik terbaru wajib diisi sebelum perpanjangan disetujui' })
+  @IsNumberString({}, { message: 'Meter listrik terbaru harus berupa angka' })
+  electricityReadingValue!: string;
+
+  @IsNotEmpty({ message: 'Meter air terbaru wajib diisi sebelum perpanjangan disetujui' })
+  @IsNumberString({}, { message: 'Meter air terbaru harus berupa angka' })
+  waterReadingValue!: string;
+
+  @IsNotEmpty({ message: 'Tanggal catat meter wajib diisi sebelum perpanjangan disetujui' })
+  @IsDateString({}, { message: 'Tanggal catat meter tidak valid' })
+  meterReadingAt!: string;
 }

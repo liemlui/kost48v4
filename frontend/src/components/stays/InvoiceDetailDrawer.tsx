@@ -5,6 +5,7 @@ import { usePayments } from '../../hooks/usePayments';
 import { Invoice } from '../../types';
 import AddPaymentModal from './AddPaymentModal';
 import CurrencyDisplay from '../common/CurrencyDisplay';
+import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 
 function formatDateTime(value?: string | null) {
@@ -84,7 +85,7 @@ export default function InvoiceDetailDrawer({
                   </Table>
                   <div className="d-flex justify-content-between fw-bold mt-3 pt-3 border-top">
                     <span>Total</span>
-                    <CurrencyDisplay amount={invoice.totalAmountRupiah ?? 0} />
+                    <CurrencyDisplay amount={getInvoiceTotalAmount(invoice)} />
                   </div>
                 </>
               )}

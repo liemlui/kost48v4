@@ -98,6 +98,8 @@ export type Room = {
   activeStayId?: number | null;
   currentStay?: Stay | null;
   facilities?: RoomFacility[];
+  isAvailable?: boolean;
+  availabilityNote?: string | null;
 };
 
 export type PricingTerm = 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'SMESTERLY' | 'YEARLY' | string;
@@ -357,7 +359,6 @@ export type PublicRoom = {
   status: string;
   notes?: string | null;
   images?: string[];
-  isAvailable?: boolean;
   pricing: {
     dailyRateRupiah?: number | null;
     weeklyRateRupiah?: number | null;
@@ -371,6 +372,8 @@ export type PublicRoom = {
   highlightedRateRupiah?: number | null;
   availablePricingTerms?: PricingTerm[];
   facilities?: RoomFacility[];
+  isAvailable?: boolean;
+  availabilityNote?: string | null;
 };
 
 export type TenantBooking = {
@@ -628,6 +631,9 @@ export type CreateRenewRequestPayload = {
 export type ApproveRenewRequestPayload = {
   plannedCheckOutDate?: string;
   agreedRentAmountRupiah?: number;
+  electricityReadingValue: string;
+  waterReadingValue: string;
+  meterReadingAt: string;
   reviewNotes?: string;
 };
 

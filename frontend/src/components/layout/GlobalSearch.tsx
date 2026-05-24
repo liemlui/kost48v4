@@ -4,6 +4,7 @@ import { Form, ListGroup, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { listResource } from '../../api/resources';
 import type { Invoice, Room, Tenant } from '../../types';
+import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 
 type SearchResult =
   | { kind: 'tenant'; id: number; title: string; subtitle: string; target: string }
@@ -93,7 +94,7 @@ export default function GlobalSearch({ role }: { role?: string }) {
               kind: 'invoice' as const,
               id: item.id,
               title: item.invoiceNumber || `INV-${item.id}`,
-              subtitle: [item.status, item.totalAmountRupiah ? `Rp ${Number(item.totalAmountRupiah).toLocaleString('id-ID')}` : null]
+              subtitle: [item.status, getInvoiceTotalAmount(item) ? `Rp ${getInvoiceTotalAmount(item).toLocaleString('id-ID')}` : null]
                 .filter(Boolean)
                 .join(' · '),
               target: `/invoices/${item.id}`,

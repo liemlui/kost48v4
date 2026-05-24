@@ -20,6 +20,22 @@ function formatDateInput(input?: string | Date | null): string {
   return `${year}-${month}-${day}`;
 }
 
+function formatDateTimeLocalInput(input?: string | Date | null): string {
+  const date = toValidDate(input) ?? new Date();
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  const hours = `${date.getHours()}`.padStart(2, '0');
+  const minutes = `${date.getMinutes()}`.padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function toIsoFromDateTimeLocal(input: string): string {
+  const date = new Date(input);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString();
+}
+
 function formatDisplayDate(input?: string | Date | null): string {
   const date = toValidDate(input);
   if (!date) return '-';
@@ -57,6 +73,12 @@ function addTerm(base: Date, pricingTerm?: string) {
   }
 }
 
+function isNonNegativeNumberString(value: string) {
+  if (!value.trim()) return false;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0;
+}
+
 export default function RenewStayModal({
   show,
   onHide,
@@ -70,6 +92,10 @@ export default function RenewStayModal({
 }) {
   const { renewMutation } = useStay(stay.id);
   const [plannedCheckOutDate, setPlannedCheckOutDate] = useState('');
+  const [agreedRentAmountRupiah, setAgreedRentAmountRupiah] = useState('');
+  const [electricityReadingValue, setElectricityReadingValue] = useState('');
+  const [waterReadingValue, setWaterReadingValue] = useState('');
+  const [meterReadingAt, setMeterReadingAt] = useState(formatDateTimeLocalInput());
   const [error, setError] = useState('');
 
   const currentEndDate = useMemo(() => toValidDate(stay.plannedCheckOutDate) ?? toValidDate(stay.checkInDate), [stay.plannedCheckOutDate, stay.checkInDate]);
@@ -77,17 +103,37 @@ export default function RenewStayModal({
     if (!currentEndDate) return null;
     return addTerm(currentEndDate, stay.pricingTerm);
   }, [currentEndDate, stay.pricingTerm]);
-  const minDate = useMemo(() => currentEndDate ? new Date(currentEndDate.getTime() + ONE_DAY_MS) : null, [currentEndDate]);
+  const renewalStartDate = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return currentEndDate && currentEndDate > today ? currentEndDate : today;
+  }, [currentEndDate]);
+  const minDate = useMemo(() => new Date(renewalStartDate.getTime() + ONE_DAY_MS), [renewalStartDate]);
 
   useEffect(() => {
-    if (!show) {
+    if (show) {
       setPlannedCheckOutDate('');
+      setAgreedRentAmountRupiah(stay.agreedRentAmountRupiah ? String(stay.agreedRentAmountRupiah) : '');
+      setElectricityReadingValue('');
+      setWaterReadingValue('');
+      setMeterReadingAt(formatDateTimeLocalInput());
       setError('');
+      return;
     }
-  }, [show]);
+    setPlannedCheckOutDate('');
+    setAgreedRentAmountRupiah('');
+    setElectricityReadingValue('');
+    setWaterReadingValue('');
+    setMeterReadingAt(formatDateTimeLocalInput());
+    setError('');
+  }, [show, stay.agreedRentAmountRupiah]);
 
   const handleClose = () => {
     setPlannedCheckOutDate('');
+    setAgreedRentAmountRupiah('');
+    setElectricityReadingValue('');
+    setWaterReadingValue('');
+    setMeterReadingAt(formatDateTimeLocalInput());
     setError('');
     onHide();
   };
@@ -96,7 +142,7 @@ export default function RenewStayModal({
     setError('');
 
     if (!currentEndDate) {
-      setError('Tanggal akhir masa sewa saat ini tidak valid. Periksa data stay sebelum memperpanjang.');
+      setError('Tanggal akhir masa sewa saat ini tidak valid. Periksa data sebelum memperpanjang.');
       return;
     }
 
@@ -106,37 +152,67 @@ export default function RenewStayModal({
         setError('Tanggal renew/keluar baru tidak valid.');
         return;
       }
-      if (selectedDate <= currentEndDate) {
-        setError('Tanggal renew/keluar baru harus setelah tanggal renew/keluar saat ini.');
+      if (selectedDate <= renewalStartDate) {
+        setError('Tanggal renew/keluar baru harus setelah awal periode renewal yang baru.');
         return;
       }
     }
 
+    if (!isNonNegativeNumberString(electricityReadingValue)) {
+      setError('Meter listrik terbaru wajib diisi dan tidak boleh negatif.');
+      return;
+    }
+
+    if (!isNonNegativeNumberString(waterReadingValue)) {
+      setError('Meter air terbaru wajib diisi dan tidak boleh negatif.');
+      return;
+    }
+
+    const meterReadingAtIso = toIsoFromDateTimeLocal(meterReadingAt);
+    if (!meterReadingAtIso) {
+      setError('Tanggal catat meter tidak valid.');
+      return;
+    }
+
+    const rentAmount = agreedRentAmountRupiah.trim() ? Number(agreedRentAmountRupiah) : undefined;
+    if (rentAmount !== undefined && (!Number.isFinite(rentAmount) || rentAmount < 0)) {
+      setError('Tarif sewa periode baru tidak valid.');
+      return;
+    }
+
     try {
-      const payload = plannedCheckOutDate ? { plannedCheckOutDate } : {};
-      await renewMutation.mutateAsync(payload);
+      await renewMutation.mutateAsync({
+        plannedCheckOutDate: plannedCheckOutDate || undefined,
+        agreedRentAmountRupiah: rentAmount,
+        electricityReadingValue,
+        waterReadingValue,
+        meterReadingAt: meterReadingAtIso,
+      });
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal memperpanjang stay');
+      setError(err?.response?.data?.message || 'Gagal memperpanjang masa sewa');
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Perpanjang Stay</Modal.Title>
+        <Modal.Title>Perpanjang Masa Sewa</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Alert variant={currentEndDate ? 'info' : 'warning'} className="mb-3">
           <div className="small">
-            <strong>Perpanjangan stay akan membuat invoice renewal yang langsung diterbitkan untuk periode lanjutan.</strong>
+            <strong>Perpanjangan sekarang wajib mencatat meter terbaru terlebih dahulu.</strong>
             <div className="mt-1">
-              • Tanggal renew/keluar saat ini: <strong>{formatDisplayDate(currentEndDate)}</strong>
+              Sistem akan menghitung pemakaian listrik dan air dari catatan meter sebelumnya, lalu memasukkannya ke tagihan perpanjangan.
+            </div>
+            <div className="mt-2">
+              • Akhir masa sewa saat ini: <strong>{formatDisplayDate(currentEndDate)}</strong>
               <br />
-              • Pricing term stay: <strong>{stay.pricingTerm || '-'}</strong>
+              • Term sewa: <strong>{stay.pricingTerm || '-'}</strong>
               <br />
-              • Jika tanggal kosong, sistem akan memakai tanggal renew/keluar otomatis: <strong>{formatDisplayDate(autoDate)}</strong>
+              • Jika tanggal kosong, sistem memakai tanggal otomatis: <strong>{formatDisplayDate(autoDate)}</strong>
             </div>
           </div>
         </Alert>
@@ -152,16 +228,76 @@ export default function RenewStayModal({
             min={formatDateInput(minDate)}
           />
           <div className="text-muted small mt-1">
-            Kosongkan bila ingin mengikuti periode sewa otomatis sesuai pricing term.
+            Kosongkan bila ingin mengikuti periode sewa otomatis sesuai term.
             <br />
             Tanggal minimal: <strong>{formatDisplayDate(minDate)}</strong>
           </div>
         </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Tarif Sewa Periode Baru (Opsional)</Form.Label>
+          <Form.Control
+            type="number"
+            min="0"
+            inputMode="numeric"
+            value={agreedRentAmountRupiah}
+            onChange={(e) => setAgreedRentAmountRupiah(e.target.value)}
+            placeholder="Kosongkan untuk memakai tarif saat ini"
+          />
+          <div className="text-muted small mt-1">Kosongkan jika tarif sewa tidak berubah.</div>
+        </Form.Group>
+
+        <div className="border rounded-3 p-3 bg-light">
+          <div className="fw-semibold mb-2">Checkpoint Meter</div>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <Form.Group>
+                <Form.Label>Meter Listrik Terbaru (kWh)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  inputMode="decimal"
+                  value={electricityReadingValue}
+                  onChange={(e) => setElectricityReadingValue(e.target.value)}
+                  placeholder="Contoh: 1234"
+                />
+              </Form.Group>
+            </div>
+            <div className="col-md-6">
+              <Form.Group>
+                <Form.Label>Meter Air Terbaru (m³)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  inputMode="decimal"
+                  value={waterReadingValue}
+                  onChange={(e) => setWaterReadingValue(e.target.value)}
+                  placeholder="Contoh: 88"
+                />
+              </Form.Group>
+            </div>
+            <div className="col-md-6">
+              <Form.Group>
+                <Form.Label>Waktu Catat Meter</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={meterReadingAt}
+                  onChange={(e) => setMeterReadingAt(e.target.value)}
+                />
+              </Form.Group>
+            </div>
+          </div>
+          <div className="text-muted small mt-2">
+            Backend akan menolak angka meter yang lebih kecil dari catatan sebelumnya atau tanggal meter yang bentrok.
+          </div>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Batal</Button>
         <Button variant="success" onClick={handleSubmit} disabled={renewMutation.isPending || !currentEndDate}>
-          {renewMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Konfirmasi Perpanjangan'}
+          {renewMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Setujui & Buat Tagihan'}
         </Button>
       </Modal.Footer>
     </Modal>

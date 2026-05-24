@@ -1,7 +1,7 @@
+import { formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from './dateTime';
+
 export function parseDateSafe(value?: string | Date | null): Date | null {
-  if (!value) return null;
-  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return parseDateTimeSafe(value);
 }
 
 export function formatDateId(value?: string | Date | null, options?: Intl.DateTimeFormatOptions): string {
@@ -12,6 +12,10 @@ export function formatDateId(value?: string | Date | null, options?: Intl.DateTi
     month: 'short',
     year: 'numeric',
   });
+}
+
+export function formatDateTimeId(value?: string | Date | null): string {
+  return formatDateTimeWib(value);
 }
 
 export function daysUntilDate(value?: string | Date | null): number | null {
@@ -39,64 +43,86 @@ export type BookingExpiryMeta = {
   helperText: string;
   daysRemaining: number | null;
   isExpired: boolean;
+  absoluteLabel: string;
+  clockLabel: string;
+  relativeLabel: string;
+  compactLabel: string;
 };
 
 export function getBookingExpiryMeta(expiresAt?: string | Date | null): BookingExpiryMeta {
   const expiryDate = parseDateSafe(expiresAt);
   const daysRemaining = daysUntilDate(expiresAt);
+  const deadline = getDeadlineMeta(expiresAt, 'Berakhir');
 
   if (!expiryDate || daysRemaining === null) {
     return {
       variant: 'SECONDARY',
-      badgeLabel: 'Tanpa Batas Waktu',
-      helperText: 'Masa berlaku booking belum tersedia',
+      badgeLabel: 'Tanpa jam batas',
+      helperText: 'Masa berlaku pemesanan belum tersedia. Hubungi admin jika status tidak berubah.',
       daysRemaining: null,
       isExpired: false,
+      absoluteLabel: '-',
+      clockLabel: '-',
+      relativeLabel: 'Batas waktu belum tersedia',
+      compactLabel: 'Tanpa jam',
     };
   }
 
-  const now = new Date();
-  const diffMs = expiryDate.getTime() - now.getTime();
+  const diffMs = expiryDate.getTime() - Date.now();
   const isExpired = diffMs <= 0;
+  const hoursRemaining = diffMs / (1000 * 60 * 60);
 
   if (isExpired) {
     return {
       variant: 'DANGER',
-      badgeLabel: 'Expired',
-      helperText: 'Booking sudah lewat masa berlaku 3 jam dari pembuatan',
+      badgeLabel: deadline.compactLabel,
+      helperText: `Batas waktu sudah lewat. ${deadline.relativeLabel}. Tenant harus ajukan pemesanan ulang jika sistem sudah mereset booking ini.`,
       daysRemaining,
       isExpired: true,
+      absoluteLabel: deadline.absoluteLabel,
+      clockLabel: deadline.clockLabel,
+      relativeLabel: deadline.relativeLabel,
+      compactLabel: deadline.compactLabel,
     };
   }
 
-  const hoursRemaining = Math.ceil(diffMs / (1000 * 60 * 60));
+  if (hoursRemaining <= 6) {
+    return {
+      variant: 'DANGER',
+      badgeLabel: deadline.compactLabel,
+      helperText: `${deadline.relativeLabel}. Berakhir ${deadline.absoluteLabel}.`,
+      daysRemaining,
+      isExpired: false,
+      absoluteLabel: deadline.absoluteLabel,
+      clockLabel: deadline.clockLabel,
+      relativeLabel: deadline.relativeLabel,
+      compactLabel: deadline.compactLabel,
+    };
+  }
 
   if (hoursRemaining <= 24) {
-    const label = `Sisa ${hoursRemaining} Jam`;
-    return {
-      variant: hoursRemaining <= 6 ? 'DANGER' : 'WARNING',
-      badgeLabel: label,
-      helperText: `Booking masih berlaku sekitar ${hoursRemaining} jam lagi`,
-      daysRemaining,
-      isExpired: false,
-    };
-  }
-
-  if (daysRemaining <= 3) {
     return {
       variant: 'WARNING',
-      badgeLabel: `Sisa ${daysRemaining} Hari`,
-      helperText: `Booking masih berlaku ${daysRemaining} hari lagi`,
+      badgeLabel: deadline.compactLabel,
+      helperText: `${deadline.relativeLabel}. Berakhir ${deadline.absoluteLabel}.`,
       daysRemaining,
       isExpired: false,
+      absoluteLabel: deadline.absoluteLabel,
+      clockLabel: deadline.clockLabel,
+      relativeLabel: deadline.relativeLabel,
+      compactLabel: deadline.compactLabel,
     };
   }
 
   return {
     variant: 'INFO',
-    badgeLabel: 'Masih Berlaku',
-    helperText: `Booking masih berlaku ${daysRemaining} hari lagi`,
+    badgeLabel: deadline.compactLabel,
+    helperText: `${deadline.relativeLabel}. Berakhir ${deadline.absoluteLabel}.`,
     daysRemaining,
     isExpired: false,
+    absoluteLabel: deadline.absoluteLabel,
+    clockLabel: deadline.clockLabel,
+    relativeLabel: deadline.relativeLabel,
+    compactLabel: deadline.compactLabel,
   };
 }

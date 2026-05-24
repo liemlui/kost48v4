@@ -6,7 +6,9 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
-import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import TenantGuidePanel from '../../components/tenant/TenantGuidePanel';
+import { BlockedReasonCard, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import { getResource, listResource } from '../../api/resources';
 import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
@@ -17,22 +19,18 @@ import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
 import type { CheckoutRequest, Invoice, RenewRequest, Stay } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
+import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../utils/tenantRules';
+import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../utils/tenantCopy';
+import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
 
 function formatDate(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  return formatDateTimeWib(value);
 }
 
-function daysUntil(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+function formatEndHelper(value?: string | null) {
+  const meta = getDeadlineMeta(value, 'Akhir masa sewa');
+  if (!meta.hasDate) return 'Tanggal dan jam akhir belum diisi';
+  return meta.relativeLabel;
 }
 
 function DataField({ label, value }: { label: string; value: ReactNode }) {
@@ -77,30 +75,23 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const invoices = invoicesQuery.data?.items ?? [];
-  const openInvoices = useMemo(() => invoices.filter((inv) => inv.status !== 'PAID' && inv.status !== 'CANCELLED'), [invoices]);
-  const anyUnpaidInvoice = openInvoices.find((inv) => inv.status === 'ISSUED' || inv.status === 'PARTIAL') ?? openInvoices[0] ?? null;
-  const overdueInvoice = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return openInvoices.find((inv) => {
-      if (!inv.dueDate) return false;
-      const due = new Date(inv.dueDate);
-      due.setHours(0, 0, 0, 0);
-      return due < today;
-    }) ?? null;
-  }, [openInvoices]);
+  const paymentSubmissions = submissionsQuery.data?.items ?? [];
+  const pendingReviewInvoiceIds = useMemo(() => getPendingReviewInvoiceIds(paymentSubmissions), [paymentSubmissions]);
+  const openInvoices = useMemo(() => getOpenTenantInvoices(invoices), [invoices]);
+  const payableInvoices = useMemo(() => openInvoices.filter((invoice) => isPayableInvoiceStatus(invoice.status)), [openInvoices]);
+  const draftInvoices = openInvoices.filter((invoice) => invoice.status === 'DRAFT');
+  const primaryInvoice = useMemo(() => getPrimaryTenantInvoice(openInvoices, pendingReviewInvoiceIds), [openInvoices, pendingReviewInvoiceIds]);
+  const overdueInvoice = useMemo(() => openInvoices.find((invoice) => isTenantInvoiceOverdue(invoice)) ?? null, [openInvoices]);
+  const hasPendingReviewForPrimary = Boolean(primaryInvoice && pendingReviewInvoiceIds.has(primaryInvoice.id));
+  const reviewCount = openInvoices.filter((invoice) => pendingReviewInvoiceIds.has(invoice.id)).length;
 
-  const hasPendingReviewForUnpaid = useMemo(() => {
-    if (!anyUnpaidInvoice) return false;
-    const items = submissionsQuery.data?.items ?? [];
-    return items.some((s: any) => s.invoiceId === anyUnpaidInvoice.id && s.status === 'PENDING_REVIEW');
-  }, [submissionsQuery.data, anyUnpaidInvoice]);
-
-  const pendingRenewRequest = (renewRequestsQuery.data?.items ?? []).find((rr) => rr.stayId === stay.id && rr.status === 'PENDING');
-  const rejectedRequest = (renewRequestsQuery.data?.items ?? []).find((rr) => rr.stayId === stay.id && rr.status === 'REJECTED');
-  const pendingCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'PENDING');
-  const approvedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
-  const rejectedCheckoutRequest = (checkoutRequestsQuery.data?.items ?? []).find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
+  const renewRequests = renewRequestsQuery.data?.items ?? [];
+  const checkoutRequests = checkoutRequestsQuery.data?.items ?? [];
+  const pendingRenewRequest = renewRequests.find((rr) => rr.stayId === stay.id && rr.status === 'PENDING');
+  const rejectedRequest = renewRequests.find((rr) => rr.stayId === stay.id && rr.status === 'REJECTED');
+  const pendingCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'PENDING');
+  const approvedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
+  const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
   const createRenewMutation = useMutation({
     mutationFn: () => createRenewRequest({ stayId: stay.id, requestedTerm: 'MONTHLY' }),
@@ -111,46 +102,153 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     queryClient.invalidateQueries({ queryKey: ['my-checkout-requests', stay.id] });
   };
 
-  const endDays = daysUntil(stay.plannedCheckOutDate);
-  const endHelper = endDays === null ? 'Tanggal akhir belum diisi' : endDays < 0 ? `Lewat ${Math.abs(endDays)} hari` : endDays === 0 ? 'Berakhir hari ini' : `${endDays} hari lagi`;
-  const canRequestRenew = !pendingRenewRequest && !anyUnpaidInvoice && !approvedCheckoutRequest && !pendingCheckoutRequest;
-  const canRequestCheckout = !pendingCheckoutRequest && !approvedCheckoutRequest && !anyUnpaidInvoice;
+  const endDays = getDaysUntilTenantDate(stay.plannedCheckOutDate);
+  const endMeta = getDeadlineMeta(stay.plannedCheckOutDate, 'Akhir masa sewa');
+  const endHelper = formatEndHelper(stay.plannedCheckOutDate);
+  const nearEnd = endDays !== null && endDays >= 0 && endDays <= 10;
+  const hasOpenInvoice = openInvoices.length > 0;
+  const canRequestRenew = !pendingRenewRequest && !hasOpenInvoice && !approvedCheckoutRequest && !pendingCheckoutRequest;
+  const canRequestCheckout = !pendingCheckoutRequest && !approvedCheckoutRequest && !hasOpenInvoice;
+
+  const guide = (() => {
+    if (reviewCount) {
+      return {
+        tone: 'info' as const,
+        title: 'Bukti pembayaran kamu sedang diperiksa',
+        message: TENANT_PAYMENT_REVIEW_MESSAGE,
+        primaryLabel: 'Lihat Status Tagihan',
+        primaryRoute: primaryInvoice ? `/portal/invoices/${primaryInvoice.id}` : '/portal/invoices',
+      };
+    }
+    if (overdueInvoice) {
+      return {
+        tone: 'danger' as const,
+        title: 'Selesaikan tagihan yang sudah terlambat',
+        message: 'Tagihan yang lewat jatuh tempo membuat perpanjangan dan keluar terblokir. Tidak ada sistem hutang; segera bayar dan kirim bukti dalam satu langkah.',
+        primaryLabel: 'Bayar & Kirim Bukti',
+        primaryRoute: `/portal/invoices/${overdueInvoice.id}`,
+      };
+    }
+    if (payableInvoices.length) {
+      return {
+        tone: 'warning' as const,
+        title: 'Ada tagihan yang perlu kamu bayar',
+        message: 'Selesaikan tagihan aktif. Jika masa sewa habis dan tagihan belum dibayar, kamar dapat ditawarkan kembali.',
+        primaryLabel: 'Bayar & Kirim Bukti',
+        primaryRoute: primaryInvoice ? `/portal/invoices/${primaryInvoice.id}` : '/portal/invoices',
+      };
+    }
+    if (draftInvoices.length) {
+      return {
+        tone: 'info' as const,
+        title: 'Ada tagihan yang sedang disiapkan admin',
+        message: 'Tagihan ini belum perlu dibayar dari portal. Hubungi admin jika kamu perlu perpanjang atau keluar segera.',
+        primaryLabel: 'Lihat Tagihan',
+        primaryRoute: '/portal/invoices',
+      };
+    }
+    if (pendingRenewRequest) {
+      return {
+        tone: 'info' as const,
+        title: 'Pengajuan perpanjangan sedang menunggu keputusan admin',
+        message: endMeta.hasDate ? `Kamu tidak perlu mengajukan ulang. Admin akan mencatat meter. Akhir masa sewa ${endMeta.absoluteLabel}; setelah tagihan perpanjangan terbit, bayar sesuai jam deadline tagihan.` : 'Kamu tidak perlu mengajukan ulang. Admin akan mencatat meter. Setelah tagihan perpanjangan terbit, bayar sesuai jam deadline tagihan.',
+        primaryLabel: 'Lihat Status',
+        primaryRoute: '/portal/stay',
+      };
+    }
+    if (pendingCheckoutRequest) {
+      return {
+        tone: 'info' as const,
+        title: 'Pengajuan keluar sedang diproses',
+        message: 'Admin sedang meninjau tanggal keluar yang kamu ajukan. Proses keluar final tetap dilakukan admin setelah semua tagihan selesai.',
+        primaryLabel: 'Lihat Status',
+        primaryRoute: '/portal/stay',
+      };
+    }
+    if (nearEnd) {
+      return {
+        tone: 'warning' as const,
+        title: 'Masa sewa kamu akan segera berakhir',
+        message: 'Pilih ajukan perpanjangan jika ingin lanjut tinggal, atau ajukan keluar. Jika masa sewa habis dan belum bayar, kamar dapat ditawarkan kembali.',
+        primaryLabel: 'Ajukan Perpanjangan',
+        primaryRoute: '/portal/stay',
+      };
+    }
+    return {
+      tone: 'safe' as const,
+      title: 'Masa sewa aktif dan tidak ada aksi mendesak',
+      message: 'Kamu bisa melihat tagihan, mengajukan perpanjangan, mengajukan keluar, atau melapor masalah kapan saja.',
+      primaryLabel: 'Lihat Tagihan',
+      primaryRoute: '/portal/invoices',
+    };
+  })();
 
   const assistantItems: AssistantItem[] = [
-    ...(hasPendingReviewForUnpaid ? [{ id: 'payment-review', severity: 'INFO' as const, title: 'Bukti pembayaran kamu sedang diperiksa', message: 'Tidak perlu upload ulang. Admin akan memeriksa bukti pembayaranmu terlebih dahulu.', source: 'Tagihan', actionLabel: 'Lihat Tagihan', actionTo: `/portal/invoices/${anyUnpaidInvoice?.id}` }] : []),
-    ...(anyUnpaidInvoice && !hasPendingReviewForUnpaid ? [{ id: 'pay-invoice', severity: overdueInvoice ? 'HIGH' as const : 'MEDIUM' as const, title: overdueInvoice ? 'Tagihan sudah lewat jatuh tempo' : 'Kamu punya tagihan yang perlu dibayar', message: 'Selesaikan tagihan agar perpanjangan atau proses keluar tidak terblokir.', source: 'Tagihan', actionLabel: 'Bayar Tagihan', actionTo: `/portal/invoices/${anyUnpaidInvoice.id}` }] : []),
-    ...(pendingRenewRequest ? [{ id: 'renew-pending', severity: 'MEDIUM' as const, title: 'Pengajuan perpanjangan sedang diperiksa', message: 'Admin sedang meninjau permintaan perpanjangan masa sewamu.', source: 'Perpanjangan' }] : []),
-    ...(pendingCheckoutRequest ? [{ id: 'checkout-pending', severity: 'MEDIUM' as const, title: 'Pengajuan keluar sedang diperiksa', message: 'Admin sedang meninjau tanggal keluar yang kamu ajukan.', source: 'Ajukan keluar' }] : []),
-    ...(approvedCheckoutRequest ? [{ id: 'checkout-approved', severity: 'INFO' as const, title: 'Jadwal keluar sudah disetujui', message: 'Kamu masih tercatat sebagai penghuni sampai admin menyelesaikan proses keluar.', source: 'Ajukan keluar' }] : []),
-    ...(!anyUnpaidInvoice && !pendingRenewRequest && !pendingCheckoutRequest && !approvedCheckoutRequest ? [{ id: 'stable', severity: 'SUCCESS' as const, title: 'Masa sewa aktif dan tidak ada aksi mendesak', message: 'Kamu bisa melihat tagihan, mengajukan perpanjangan, mengajukan keluar, atau melapor masalah kapan saja.', source: 'Status sewa' }] : []),
+    ...(reviewCount ? [{ id: 'payment-review', severity: 'INFO' as const, title: 'Bukti pembayaran sedang diperiksa', message: TENANT_PAYMENT_REVIEW_MESSAGE, source: 'Tagihan', count: reviewCount, actionLabel: 'Lihat Tagihan', actionTo: primaryInvoice ? `/portal/invoices/${primaryInvoice.id}` : '/portal/invoices' }] : []),
+    ...(overdueInvoice ? [{ id: 'pay-overdue', severity: 'BLOCKER' as const, title: 'Tagihan sudah lewat jatuh tempo', message: 'Selesaikan tagihan ini. Tidak ada sistem hutang; jika masa sewa habis dan belum dibayar, kamar dapat ditawarkan kembali.', source: 'Tagihan', actionLabel: 'Bayar & Kirim Bukti', actionTo: `/portal/invoices/${overdueInvoice.id}` }] : []),
+    ...(payableInvoices.length && !reviewCount ? [{ id: 'pay-invoice', severity: 'HIGH' as const, title: `${payableInvoices.length} tagihan perlu dibayar`, message: 'Bayar dan kirim bukti dalam satu langkah. Tidak ada sistem hutang; proses aman setelah admin menyetujui pembayaran.', source: 'Tagihan', actionLabel: 'Bayar & Kirim Bukti', actionTo: primaryInvoice ? `/portal/invoices/${primaryInvoice.id}` : '/portal/invoices' }] : []),
+    ...(draftInvoices.length ? [{ id: 'draft-invoice', severity: 'INFO' as const, title: 'Tagihan sedang disiapkan admin', message: 'Belum ada aksi bayar dari kamu sampai tagihan siap. Hubungi admin jika ini menghambat rencana keluar atau perpanjangan.', source: 'Tagihan' }] : []),
+    ...(nearEnd && !pendingRenewRequest && !pendingCheckoutRequest ? [{ id: 'lease-ending', severity: 'WARNING' as const, title: 'Akhir masa sewa sudah dekat — keputusan wajib cepat', message: `Akhir masa sewa: ${formatDate(stay.plannedCheckOutDate)}. ${endHelper}. Tentukan apakah ingin perpanjang atau keluar. Setelah habis dan belum bayar, kamar dapat diiklankan kembali.`, source: 'Masa sewa' }] : []),
+    ...(pendingRenewRequest ? [{ id: 'renew-pending', severity: 'MEDIUM' as const, title: 'Pengajuan perpanjangan sedang menunggu keputusan admin', message: endMeta.hasDate ? `Admin akan mencatat meter terbaru dulu. Akhir masa sewa ${endMeta.absoluteLabel}. Jika lewat batas dan kamar diambil tenant baru, perpanjangan tidak dapat dilanjutkan.` : 'Admin akan mencatat meter terbaru dulu. Jika lewat batas dan kamar diambil tenant baru, perpanjangan tidak dapat dilanjutkan.', source: 'Perpanjangan' }] : []),
+    ...(pendingCheckoutRequest ? [{ id: 'checkout-pending', severity: 'MEDIUM' as const, title: 'Pengajuan keluar sedang diproses', message: 'Admin sedang meninjau tanggal keluar yang kamu ajukan.', source: 'Ajukan keluar' }] : []),
+    ...(approvedCheckoutRequest ? [{ id: 'checkout-approved', severity: 'INFO' as const, title: 'Tanggal keluar sudah disetujui', message: 'Kamu masih tercatat sebagai penghuni sampai admin menyelesaikan proses akhir dan semua tagihan beres.', source: 'Ajukan keluar' }] : []),
+    ...(!hasOpenInvoice && !pendingRenewRequest && !pendingCheckoutRequest && !approvedCheckoutRequest && !nearEnd ? [{ id: 'stable', severity: 'SUCCESS' as const, title: 'Semua aman', message: 'Tidak ada tagihan aktif atau pengajuan yang menunggu keputusan.', source: 'Status sewa' }] : []),
   ];
 
   const metrics: MetricChip[] = [
     { id: 'room', label: 'Kamar', value: stay.room?.code ?? stay.roomId, helper: stay.room?.name ?? 'Kamar aktif', status: 'SUCCESS', icon: '🏠' },
-    { id: 'end', label: 'Akhir Masa Sewa', value: formatDate(stay.plannedCheckOutDate), helper: endHelper, status: endDays !== null && endDays <= 7 ? 'WARNING' : 'INFO', icon: '📅' },
-    { id: 'invoice', label: 'Tagihan aktif', value: openInvoices.length, helper: hasPendingReviewForUnpaid ? 'Bukti sedang diperiksa' : openInvoices.length ? 'Perlu diselesaikan' : 'Tidak ada tagihan open', status: openInvoices.length ? (hasPendingReviewForUnpaid ? 'INFO' : 'WARNING') : 'SUCCESS', icon: '🧾', to: '/portal/invoices' },
+    { id: 'end', label: 'Akhir Masa Sewa', value: formatDate(stay.plannedCheckOutDate), helper: endHelper, status: nearEnd ? 'WARNING' : 'INFO', icon: '📅' },
+    { id: 'invoice', label: 'Tagihan Aktif', value: openInvoices.length, helper: reviewCount ? 'Bukti sedang diperiksa' : openInvoices.length ? 'Perlu ditindaklanjuti' : 'Tidak ada tagihan aktif', status: openInvoices.length ? (reviewCount ? 'INFO' : 'WARNING') : 'SUCCESS', icon: '🧾', to: '/portal/invoices' },
     { id: 'deposit', label: 'Deposit', value: <CurrencyDisplay amount={stay.depositAmountRupiah} /> as any, helper: getStatusLabel(stay.depositStatus, undefined, { tone: 'tenant', domain: 'deposit' }), status: stay.depositStatus ?? 'INFO', icon: '💙' },
   ];
 
   const timelineSteps: TimelineStep[] = [
     { id: 'checkin', label: 'Masuk kamar', description: `Check-in ${formatDate(stay.checkInDate)}`, status: 'done' },
     { id: 'active', label: 'Masa sewa aktif', description: `Status: ${getStatusLabel(stay.status, undefined, { tone: 'tenant', domain: 'stay' })}`, status: 'active' },
-    { id: 'billing', label: 'Tagihan', description: openInvoices.length ? `${openInvoices.length} tagihan masih perlu diselesaikan.` : 'Tidak ada tagihan open.', status: openInvoices.length ? 'pending' : 'done' },
-    { id: 'future', label: 'Perpanjang atau keluar', description: 'Pilih aksi sesuai rencana tinggalmu.', status: approvedCheckoutRequest ? 'active' : 'pending' },
+    { id: 'billing', label: 'Tagihan', description: openInvoices.length ? `${openInvoices.length} tagihan masih perlu ditindaklanjuti.` : 'Tidak ada tagihan aktif.', status: openInvoices.length ? 'pending' : 'done' },
+    { id: 'future', label: 'Perpanjang atau keluar', description: pendingRenewRequest ? 'Perpanjangan menunggu admin mencatat meter dan membuat tagihan baru.' : pendingCheckoutRequest ? 'Ada pengajuan keluar yang sedang menunggu keputusan admin.' : 'Pilih aksi sesuai rencana tinggalmu.', status: approvedCheckoutRequest ? 'active' : 'pending' },
   ];
 
   return (
     <>
-      <AssistantPanel title="My Stay Guide" subtitle="Asisten sederhana untuk melihat status sewa, tagihan, dan aksi berikutnya." items={assistantItems} maxItems={4} />
-      <CompactMetrics metrics={metrics} />
+      <TenantGuidePanel
+        title={guide.title}
+        message={guide.message}
+        tone={guide.tone}
+        actions={[
+          { label: guide.primaryLabel, onClick: () => navigate(guide.primaryRoute), variant: guide.tone === 'danger' ? 'danger' : 'primary' },
+          { label: 'Ajukan Perpanjangan', onClick: () => createRenewMutation.mutate(), variant: 'outline-primary', disabled: !canRequestRenew || createRenewMutation.isPending, helper: !canRequestRenew && hasOpenInvoice ? 'Selesaikan tagihan dulu' : undefined },
+          { label: 'Ajukan Keluar', onClick: () => setShowCheckoutModal(true), variant: 'outline-warning', disabled: !canRequestCheckout, helper: !canRequestCheckout && hasOpenInvoice ? 'Selesaikan tagihan dulu' : undefined },
+        ]}
+      />
 
-      {anyUnpaidInvoice ? (
+      <AssistantInsightLine
+        title="My Stay Guide"
+        tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0]?.severity === 'SUCCESS' ? 'success' : 'info'}
+        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada aksi mendesak. Status utama dan detail masa sewa ada di bawah.'}
+        actionLabel={assistantItems[0]?.actionLabel}
+        actionTo={assistantItems[0]?.actionTo}
+        onAction={assistantItems[0]?.onAction}
+      />
+      <StatusStrip
+        items={metrics.map((metric) => ({
+          id: metric.id,
+          label: metric.label,
+          value: metric.value,
+          helper: metric.helper,
+          tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
+          to: metric.to,
+          onClick: metric.onClick,
+        }))}
+      />
+
+      {hasOpenInvoice && !reviewCount ? (
         <BlockedReasonCard
-          title={hasPendingReviewForUnpaid ? 'Bukti pembayaran sedang diperiksa' : 'Ada tagihan yang perlu diselesaikan'}
-          reason={hasPendingReviewForUnpaid ? 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.' : 'Perpanjangan dan pengajuan keluar sebaiknya dilakukan setelah tagihan diselesaikan agar proses tidak terblokir.'}
+          title={reviewCount ? 'Bukti pembayaran sedang diperiksa' : 'Ada tagihan yang perlu ditindaklanjuti'}
+          reason={reviewCount ? TENANT_PAYMENT_REVIEW_MESSAGE : 'Perpanjangan dan pengajuan keluar sebaiknya dilakukan setelah tagihan selesai agar proses tidak terblokir.'}
           actionLabel="Lihat Tagihan"
-          actionTo={`/portal/invoices/${anyUnpaidInvoice.id}`}
-          variant={hasPendingReviewForUnpaid ? 'INFO' : 'DANGER'}
+          actionTo={primaryInvoice ? `/portal/invoices/${primaryInvoice.id}` : '/portal/invoices'}
+          variant={reviewCount ? 'INFO' : 'DANGER'}
         />
       ) : null}
 
@@ -158,7 +256,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         <Card.Body>
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div>
-              <div className="command-eyebrow">Status tinggal</div>
+              <div className="command-eyebrow">Status Tinggal</div>
               <h3 className="mb-1">Kamar {stay.room?.code ?? stay.roomId}</h3>
               <div className="app-caption">Masa sewa aktif sejak {formatDate(stay.checkInDate)}</div>
             </div>
@@ -167,12 +265,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               {stay.depositStatus ? <StatusBadge status={stay.depositStatus} tone="tenant" domain="deposit" /> : null}
             </div>
           </div>
-          <div className="tenant-action-grid">
-            <Button variant="primary" onClick={() => navigate('/portal/invoices')}>Lihat Tagihan</Button>
-            <Button variant="outline-primary" onClick={() => anyUnpaidInvoice ? navigate(`/portal/invoices/${anyUnpaidInvoice.id}`) : navigate('/portal/invoices')} disabled={!anyUnpaidInvoice || hasPendingReviewForUnpaid}>{hasPendingReviewForUnpaid ? 'Sedang Diperiksa' : 'Bayar Tagihan'}</Button>
-            <Button variant="outline-primary" onClick={() => createRenewMutation.mutate()} disabled={!canRequestRenew || createRenewMutation.isPending}>{createRenewMutation.isPending ? 'Mengirim...' : 'Ajukan Perpanjangan'}</Button>
-            <Button variant="outline-warning" onClick={() => setShowCheckoutModal(true)} disabled={!canRequestCheckout}>Ajukan Keluar</Button>
-            <Button variant="outline-secondary" onClick={() => navigate('/portal/tickets')}>Lapor Masalah</Button>
+          <div className="tenant-single-secondary-action">
+            <span>Butuh bantuan kamar atau fasilitas?</span>
+            <Button variant="outline-secondary" size="sm" onClick={() => navigate('/portal/tickets')}>Lapor Masalah</Button>
           </div>
           {createRenewMutation.isError ? <Alert variant="danger" className="mt-3 small">{(createRenewMutation.error as any)?.response?.data?.message ?? 'Gagal mengajukan perpanjangan.'}</Alert> : null}
         </Card.Body>
@@ -185,13 +280,17 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <Card.Body>
               <div className="panel-title mb-1">Status Pengajuan</div>
               <div className="panel-subtitle mb-3">Ringkasan perpanjangan dan ajukan keluar.</div>
+              <Alert variant="danger" className="urgent-policy-alert small">
+                <div className="urgent-policy-title">Tidak ada sistem hutang</div>
+                <div>Jika masa sewa habis dan tagihan belum dibayar, kamar dapat ditawarkan kembali. Jika ada tenant baru yang valid mengambil kamar, kamu wajib mengosongkan kamar sesuai jam deadline yang ditetapkan admin.</div>
+              </Alert>
               <div className="kpi-list">
-                <div className="kpi-item"><span>Perpanjangan</span><strong>{pendingRenewRequest ? 'Sedang diperiksa' : rejectedRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
-                <div className="kpi-item"><span>Ajukan keluar</span><strong>{approvedCheckoutRequest ? 'Disetujui' : pendingCheckoutRequest ? 'Sedang diperiksa' : rejectedCheckoutRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
+                <div className="kpi-item"><span>Perpanjangan</span><strong>{pendingRenewRequest ? 'Menunggu keputusan admin' : rejectedRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
+                <div className="kpi-item"><span>Ajukan keluar</span><strong>{approvedCheckoutRequest ? 'Disetujui' : pendingCheckoutRequest ? 'Menunggu keputusan admin' : rejectedCheckoutRequest ? 'Ditolak' : 'Belum ada'}</strong></div>
                 <div className="kpi-item"><span>Akhir masa sewa</span><strong>{formatDate(stay.plannedCheckOutDate)}</strong></div>
               </div>
-              {pendingRenewRequest ? <Alert variant="info" className="small mt-3 mb-0">Pengajuan perpanjangan sedang diperiksa admin.{pendingRenewRequest.requestedCheckOutDate ? ` Tanggal yang diajukan: ${formatDate(pendingRenewRequest.requestedCheckOutDate)}.` : ''}</Alert> : null}
-              {approvedCheckoutRequest ? <Alert variant="info" className="small mt-3 mb-0">Jadwal keluar disetujui. Proses keluar selesai hanya setelah admin finalisasi dan tagihan clear.</Alert> : null}
+              {pendingRenewRequest ? <Alert variant="info" className="small mt-3 mb-0"><strong>Pengajuan perpanjangan sedang menunggu keputusan admin.</strong>{pendingRenewRequest.requestedCheckOutDate ? ` Tanggal yang diajukan: ${formatDate(pendingRenewRequest.requestedCheckOutDate)}.` : ''}<div className="mt-1">Admin akan mencatat meter terbaru terlebih dahulu. Jika disetujui, tagihan perpanjangan berisi sewa baru + pemakaian listrik/air. Tagihan wajib dibayar sesuai jam deadline; jika masa sewa habis dan kamar sudah diambil tenant baru, perpanjangan tidak dapat dilanjutkan.</div></Alert> : null}
+              {approvedCheckoutRequest ? <Alert variant="info" className="small mt-3 mb-0">Tanggal keluar disetujui. Proses keluar selesai hanya setelah admin menyelesaikan proses akhir dan semua tagihan beres.</Alert> : null}
               {rejectedCheckoutRequest ? <Alert variant="warning" className="small mt-3 mb-0">Pengajuan keluar ditolak.{rejectedCheckoutRequest.reviewNotes ? ` Alasan: ${rejectedCheckoutRequest.reviewNotes}` : ''}</Alert> : null}
             </Card.Body>
           </Card>
@@ -205,7 +304,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Informasi Kamar</h5><Row><Col md={6}><DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} /><DataField label="Nama Kamar" value={stay.room?.name ?? '-'} /><DataField label="Lantai" value={stay.room?.floor ?? '-'} /></Col><Col md={6}><DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} /><DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} /><DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} /><DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} /></Col></Row></Card.Body></Card>
         </Col>
         <Col lg={6}>
-          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Detail Masa Sewa</h5><Row><Col md={6}><DataField label="Jenis sewa" value={getStatusLabel(stay.pricingTerm)} /><DataField label="Sumber booking" value={stay.bookingSource ?? '-'} /></Col><Col md={6}><DataField label="Tujuan tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} /><DataField label="Catatan" value={stay.notes ?? '-'} /></Col></Row></Card.Body></Card>
+          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Detail Masa Sewa</h5><Row><Col md={6}><DataField label="Jenis masa sewa" value={tenantPricingTermLabel(stay.pricingTerm)} /><DataField label="Sumber pemesanan" value={stay.bookingSource ?? '-'} /></Col><Col md={6}><DataField label="Tujuan tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} /><DataField label="Catatan" value={stay.notes ?? '-'} /></Col></Row></Card.Body></Card>
         </Col>
       </Row>
     </>
@@ -222,7 +321,7 @@ export default function MyStayPage() {
   const query = useQuery({
     queryKey: ['portal-stay', { userId, tenantId }],
     queryFn: () => getResource<Stay>('/stays/me/current'),
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && stage === 'occupied',
     retry: false,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -241,15 +340,19 @@ export default function MyStayPage() {
 
   return (
     <div>
-      <PageHeader title="My Stay Guide" description="Panduan status masa sewa, tagihan, dan aksi yang bisa kamu lakukan." />
-      {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {query.isError ? (() => {
-        const error = query.error as any;
-        const status = error?.response?.status;
-        const message = error?.response?.data?.message;
+      <PageHeader
+        eyebrow="Portal Tenant"
+        title="My Stay Guide"
+        description="Panduan masa sewa, tagihan, bukti pembayaran, dan pengajuan yang sedang berjalan."
+      />
+      {stage !== 'occupied' ? <EmptyState icon="🏠" title="Kamu belum memiliki masa sewa aktif" description="Pilih kamar atau lanjutkan pemesanan yang sedang berjalan sebelum masuk ke panduan masa sewa." action={{ label: stage === 'booking' ? 'Buka Pemesanan Saya' : 'Lihat Kamar', onClick: () => navigate(stage === 'booking' ? '/portal/bookings' : '/rooms') }} /> : null}
+      {stage === 'occupied' && query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
+      {stage === 'occupied' && query.isError ? (() => {
+        const err = query.error as any;
+        const status = err?.response?.status ?? err?.response?.data?.statusCode;
+        const message = err?.response?.data?.message;
         if (status === 404) {
-          if (stage === 'booking') return <EmptyState icon="📅" title="Kamu memiliki pemesanan aktif" description="Selesaikan proses booking dulu sebelum masuk ke panduan masa sewa." action={{ label: 'Lihat Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} />;
-          return <EmptyState icon="🛏️" title="Kamu belum menempati kamar" description="Pilih kamar dari katalog publik untuk memulai proses booking." action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }} />;
+          return <EmptyState icon="🏠" title="Kamu belum memiliki masa sewa aktif" description="Kalau kamu sedang booking, buka halaman Pemesanan Saya. Kalau belum booking, pilih kamar dari katalog." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} />;
         }
         return <Alert variant="danger" className="mt-4"><div className="fw-semibold">Gagal memuat data masa sewa</div><div className="small mt-1">{message || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}</div></Alert>;
       })() : null}

@@ -1,9 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, DepositStatus, UtilityType, UserRole } from '../../common/enums/app.enums';
+import { RoomStatus, StayStatus, PricingTerm, LeadSource, StayPurpose, InvoiceStatus, InvoiceLineType, DepositStatus, UtilityType, UserRole } from '../../common/enums/app.enums';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
@@ -21,6 +21,157 @@ import {
 @Injectable()
 export class StaysService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+
+  private assertCoreLifecycleActor(actor: CurrentUserPayload, actionLabel: string) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException(`${actionLabel} hanya boleh dilakukan oleh owner/admin`);
+    }
+  }
+
+  private formatOpenInvoiceRefs(invoices: Array<{ id: number; invoiceNumber: string | null; status: InvoiceStatus | string }>) {
+    return invoices
+      .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`)
+      .join(', ');
+  }
+
+  private async assertNoOpenInvoicesTx(tx: Prisma.TransactionClient, stayId: number, actionLabel: string) {
+    const openInvoices = await tx.invoice.findMany({
+      where: {
+        stayId,
+        status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
+      },
+      select: { id: true, invoiceNumber: true, status: true },
+      orderBy: { id: 'asc' },
+    });
+
+    if (openInvoices.length > 0) {
+      throw new ConflictException(
+        `${actionLabel} belum bisa diproses karena masih ada tagihan aktif: ${this.formatOpenInvoiceRefs(openInvoices)}. Selesaikan atau batalkan tagihan terlebih dahulu.`,
+      );
+    }
+  }
+
+  private parseMeterDecimal(value: string, label: string) {
+    try {
+      const decimalValue = new Prisma.Decimal(value);
+      if (decimalValue.lt(0)) {
+        throw new BadRequestException(`Angka meter ${label} tidak boleh negatif`);
+      }
+      return decimalValue;
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`Angka meter ${label} tidak valid`);
+    }
+  }
+
+  private async createRenewUtilityCheckpointLineTx(
+    tx: Prisma.TransactionClient,
+    params: {
+      roomId: number;
+      invoiceId: number;
+      utilityType: UtilityType;
+      label: string;
+      unit: string;
+      newReadingValue: Prisma.Decimal;
+      readingAt: Date;
+      tariffRupiah: number;
+      actorId: number;
+      sortOrder: number;
+    },
+  ) {
+    const previousReading = await tx.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: { lt: params.readingAt },
+      },
+      orderBy: { readingAt: 'desc' },
+    });
+
+    if (!previousReading) {
+      throw new ConflictException(
+        `Belum ada catatan meter ${params.label} sebelumnya. Catat meter awal dulu sebelum menyetujui perpanjangan.`,
+      );
+    }
+
+    const duplicateReading = await tx.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: params.readingAt,
+      },
+      select: { id: true },
+    });
+    if (duplicateReading) {
+      throw new ConflictException(`Catatan meter ${params.label} untuk tanggal ini sudah ada`);
+    }
+
+    const nextReading = await tx.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: { gt: params.readingAt },
+      },
+      orderBy: { readingAt: 'asc' },
+    });
+
+    if (params.newReadingValue.lt(previousReading.readingValue)) {
+      throw new ConflictException(
+        `Angka meter ${params.label} tidak boleh lebih kecil dari catatan sebelumnya (${previousReading.readingValue.toString()})`,
+      );
+    }
+
+    if (nextReading && params.newReadingValue.gt(nextReading.readingValue)) {
+      throw new ConflictException(
+        `Angka meter ${params.label} tidak boleh lebih besar dari catatan setelahnya (${nextReading.readingValue.toString()})`,
+      );
+    }
+
+    const usageDelta = params.newReadingValue.minus(previousReading.readingValue);
+    const billingQty = usageDelta.toDecimalPlaces(2);
+    const tariff = params.tariffRupiah ?? 0;
+
+    if (usageDelta.gt(0) && tariff <= 0) {
+      throw new ConflictException(`Tarif ${params.label} belum diatur, tidak bisa menghitung tagihan perpanjangan`);
+    }
+
+    const lineAmount = Math.round(billingQty.toNumber() * tariff);
+
+    const reading = await tx.meterReading.create({
+      data: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: params.readingAt,
+        readingValue: params.newReadingValue,
+        recordedById: params.actorId,
+        note: `Checkpoint perpanjangan masa sewa. Pemakaian ${params.label}: ${billingQty.toString()} ${params.unit}.`,
+      },
+    });
+
+    const line = await tx.invoiceLine.create({
+      data: {
+        invoiceId: params.invoiceId,
+        lineType: (params.utilityType === UtilityType.ELECTRICITY ? InvoiceLineType.ELECTRICITY : InvoiceLineType.WATER) as any,
+        utilityType: params.utilityType,
+        description: `Pemakaian ${params.label} periode sebelumnya: ${billingQty.toString()} ${params.unit}`,
+        qty: billingQty,
+        unit: params.unit,
+        unitPriceRupiah: tariff,
+        lineAmountRupiah: lineAmount,
+        sortOrder: params.sortOrder,
+      },
+    });
+
+    return {
+      reading,
+      line,
+      previousReadingValue: previousReading.readingValue,
+      readingValue: params.newReadingValue,
+      usageDelta,
+      tariffRupiah: tariff,
+      amountRupiah: lineAmount,
+    };
+  }
 
   async update(id: number, dto: UpdateStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
@@ -332,6 +483,7 @@ export class StaysService {
   }
 
   async complete(id: number, dto: CompleteStayDto, actor: CurrentUserPayload) {
+    this.assertCoreLifecycleActor(actor, 'Final checkout');
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
     if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
@@ -382,6 +534,7 @@ export class StaysService {
   }
 
   async cancel(id: number, dto: CancelStayDto, actor: CurrentUserPayload) {
+    this.assertCoreLifecycleActor(actor, 'Pembatalan stay');
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Stay tidak ditemukan');
     if (existing.status !== StayStatus.ACTIVE) throw new ConflictException('Stay bukan status ACTIVE');
@@ -443,6 +596,7 @@ export class StaysService {
   }
 
   async processDeposit(id: number, dto: ProcessDepositDto, actor: CurrentUserPayload) {
+    this.assertCoreLifecycleActor(actor, 'Proses deposit');
     const stay = await this.prisma.stay.findUnique({ where: { id } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (stay.status !== StayStatus.COMPLETED && stay.status !== StayStatus.CANCELLED) throw new ConflictException('Deposit belum boleh diproses');
@@ -475,10 +629,13 @@ export class StaysService {
       refunded = 0;
       depositStatus = DepositStatus.FORFEITED;
     } else {
+      if (deduction + refunded <= 0) {
+        throw new BadRequestException('Partial refund harus memiliki nilai potongan atau pengembalian lebih dari 0');
+      }
       depositStatus = DepositStatus.PARTIALLY_REFUNDED;
     }
 
-    if (deduction + refunded > stay.depositAmountRupiah) {
+    if (deduction < 0 || refunded < 0 || deduction + refunded > stay.depositAmountRupiah) {
       throw new ConflictException('Nilai deposit tidak konsisten');
     }
 
@@ -498,6 +655,7 @@ export class StaysService {
   }
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
+    this.assertCoreLifecycleActor(actor, 'Perpanjangan masa sewa');
     try {
       const result = await this.prisma.$transaction((tx) => this.renewStayInTransaction(tx, id, dto, actor));
 
@@ -527,9 +685,24 @@ export class StaysService {
   }
 
   async renewStayInTransaction(tx: Prisma.TransactionClient, id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
-    const stay = await tx.stay.findUnique({ where: { id } });
+    this.assertCoreLifecycleActor(actor, 'Perpanjangan masa sewa');
+
+    const stay = await tx.stay.findUnique({
+      where: { id },
+      include: { room: { select: { id: true, code: true } } },
+    });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (stay.status !== 'ACTIVE') throw new ConflictException('Stay tidak aktif, tidak dapat diperpanjang');
+    if (stay.status !== StayStatus.ACTIVE) throw new ConflictException('Stay tidak aktif, tidak dapat diperpanjang');
+
+    await this.assertNoOpenInvoicesTx(tx, id, 'Perpanjangan masa sewa');
+
+    const meterReadingAt = new Date(dto.meterReadingAt);
+    if (Number.isNaN(meterReadingAt.getTime())) {
+      throw new BadRequestException('Tanggal catat meter tidak valid');
+    }
+
+    const electricityReadingValue = this.parseMeterDecimal(dto.electricityReadingValue, 'listrik');
+    const waterReadingValue = this.parseMeterDecimal(dto.waterReadingValue, 'air');
 
     const today = startOfDay(new Date());
     const currentPlannedCheckOut = stay.plannedCheckOutDate ? startOfDay(stay.plannedCheckOutDate) : null;
@@ -550,18 +723,12 @@ export class StaysService {
 
     const rentAmount = dto.agreedRentAmountRupiah ?? stay.agreedRentAmountRupiah;
 
-    const updatedStay = await tx.stay.update({
-      where: { id },
-      data: { plannedCheckOutDate: newPlannedCheckOut },
-    });
-
     const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
     const periodStart = logicalPeriodStart;
     const periodEnd = newPlannedCheckOut;
     const dueDate = calculateDueDate(periodEnd);
 
-    // Keep invoice in DRAFT while inserting lines because DB guards prevent line mutation after ISSUE.
-    // Immediately issue it after the renewal rent line exists, so approved renewals are tenant-facing.
+    // Keep invoice in DRAFT while inserting all lines because DB guards prevent line mutation after ISSUE.
     let invoice = await tx.invoice.create({
       data: {
         invoiceNumber,
@@ -570,6 +737,7 @@ export class StaysService {
         periodStart,
         periodEnd,
         dueDate,
+        notes: 'Tagihan perpanjangan termasuk checkpoint meter listrik dan air periode sebelumnya.',
         createdById: actor.id,
       },
     });
@@ -578,8 +746,8 @@ export class StaysService {
     await tx.invoiceLine.create({
       data: {
         invoiceId: invoice.id,
-        lineType: 'RENT' as any,
-        description: `Perpanjangan ${stay.pricingTerm}`,
+        lineType: InvoiceLineType.RENT as any,
+        description: `Perpanjangan masa sewa ${stay.pricingTerm}`,
         qty: 1,
         unit,
         unitPriceRupiah: rentAmount,
@@ -588,15 +756,66 @@ export class StaysService {
       },
     });
 
+    const electricitySummary = await this.createRenewUtilityCheckpointLineTx(tx, {
+      roomId: stay.roomId,
+      invoiceId: invoice.id,
+      utilityType: UtilityType.ELECTRICITY,
+      label: 'listrik',
+      unit: 'kWh',
+      newReadingValue: electricityReadingValue,
+      readingAt: meterReadingAt,
+      tariffRupiah: stay.electricityTariffPerKwhRupiah,
+      actorId: actor.id,
+      sortOrder: 1,
+    });
+
+    const waterSummary = await this.createRenewUtilityCheckpointLineTx(tx, {
+      roomId: stay.roomId,
+      invoiceId: invoice.id,
+      utilityType: UtilityType.WATER,
+      label: 'air',
+      unit: 'm³',
+      newReadingValue: waterReadingValue,
+      readingAt: meterReadingAt,
+      tariffRupiah: stay.waterTariffPerM3Rupiah,
+      actorId: actor.id,
+      sortOrder: 2,
+    });
+
+    const renewalTotalAmountRupiah =
+      Number(rentAmount ?? 0) +
+      Number(electricitySummary.amountRupiah ?? 0) +
+      Number(waterSummary.amountRupiah ?? 0);
+
     invoice = await tx.invoice.update({
       where: { id: invoice.id },
       data: {
+        totalAmountRupiah: renewalTotalAmountRupiah,
         status: InvoiceStatus.ISSUED,
         issuedAt: new Date(),
       },
     });
 
-    return { oldStay: stay, stay: updatedStay, invoice };
+    const issuedInvoice = await tx.invoice.findUnique({
+      where: { id: invoice.id },
+      include: { lines: { orderBy: { sortOrder: 'asc' } } },
+    });
+
+    const updatedStay = await tx.stay.update({
+      where: { id },
+      data: { plannedCheckOutDate: newPlannedCheckOut },
+    });
+
+    return {
+      oldStay: stay,
+      stay: updatedStay,
+      invoice: issuedInvoice ?? invoice,
+      meterSummary: {
+        readingAt: meterReadingAt,
+        electricity: electricitySummary,
+        water: waterSummary,
+      },
+    };
   }
 
 }

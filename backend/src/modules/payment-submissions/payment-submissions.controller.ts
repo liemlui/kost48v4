@@ -23,6 +23,69 @@ export class PaymentSubmissionsController {
   constructor(private readonly paymentSubmissionsService: PaymentSubmissionsService) {}
 
 
+  private mapMultipartBodyToDto(body: Record<string, any>, file: any): CreatePaymentSubmissionDto {
+    if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
+    return {
+      stayId: Number(body.stayId),
+      invoiceId: Number(body.invoiceId),
+      targetType: body.targetType ?? 'INVOICE',
+      amountRupiah: Number(body.amountRupiah),
+      paidAt: body.paidAt,
+      paymentMethod: body.paymentMethod,
+      senderName: body.senderName || undefined,
+      senderBankName: body.senderBankName || undefined,
+      referenceNumber: body.referenceNumber || undefined,
+      notes: body.notes || undefined,
+      fileKey: file.filename,
+      fileUrl: `/uploads/payment-proofs/${file.filename}`,
+      originalFilename: file.originalname,
+      mimeType: file.mimetype,
+      fileSizeBytes: file.size,
+    } as CreatePaymentSubmissionDto;
+  }
+
+
+
+  @Post('submit-with-proof')
+  @Roles(UserRole.TENANT)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const targetDir = join(process.cwd(), 'uploads', 'payment-proofs');
+          if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
+          cb(null, targetDir);
+        },
+        filename: (_req, file, cb) => {
+          const safeBase = (file.originalname || 'proof')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9-_]+/g, '-')
+            .slice(0, 60) || 'proof';
+          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        },
+      }),
+      fileFilter: (_req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(new BadRequestException('Bukti bayar hanya menerima JPG, PNG, atau WebP'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  async submitWithProof(
+    @UploadedFile() file: any,
+    @Body() body: Record<string, any>,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return {
+      message: 'Pembayaran dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
+      data: await this.paymentSubmissionsService.createSubmission(user, this.mapMultipartBodyToDto(body, file)),
+    };
+  }
+
   @Post('upload-proof')
   @Roles(UserRole.TENANT)
   @ApiConsumes('multipart/form-data')

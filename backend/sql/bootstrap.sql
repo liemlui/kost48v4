@@ -72,7 +72,7 @@ WHERE status = 'ACTIVE';
 
 CREATE UNIQUE INDEX stay_one_active_per_room_uidx
 ON "Stay" ("roomId")
-WHERE status = 'ACTIVE';
+WHERE status = 'ACTIVE' AND "initialMetersPromotedAt" IS NOT NULL;
 
 -- =========================================================
 -- CHECK CONSTRAINTS

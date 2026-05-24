@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { Ticket, Room } from '../types';
 import type { AssistantItem, ActionQueueItem, MetricChip } from '../components/command-center';
 import { gradeFromScore, scoreStatus } from '../utils/scoring';
+import { addHoursToDate, formatClockWib, getDeadlineMeta } from '../utils/dateTime';
 
 type Input = {
   tickets?: Ticket[];
@@ -11,6 +12,33 @@ type Input = {
   pendingRenewCount?: number;
   pendingApprovalCount?: number;
 };
+
+
+const TICKET_SLA_HOURS = {
+  normal: 24,
+  old: 48,
+};
+
+function makeTicketQueueTime(ticket: Ticket, hours: number) {
+  const deadline = addHoursToDate(ticket.createdAt, hours);
+  const meta = getDeadlineMeta(deadline, 'Target penanganan tiket');
+  return {
+    receivedAtLabel: ticket.createdAt ? formatClockWib(ticket.createdAt) : undefined,
+    deadlineLabel: meta.hasDate ? meta.absoluteLabel : undefined,
+    timeStatusLabel: meta.hasDate ? meta.relativeLabel : undefined,
+    timeStatusTone: meta.hasDate ? (meta.isExpired ? 'danger' as const : 'info' as const) : undefined,
+  };
+}
+
+function ticketSubject(ticket: Ticket) {
+  const title = ticket.title || ticket.ticketNumber || `Tiket #${ticket.id}`;
+  const room = ticket.room?.code ? ` · ${ticket.room.code}` : '';
+  return `${title}${room}`;
+}
+
+function ticketStaffFallbackCopy(base: string) {
+  return base;
+}
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -54,8 +82,32 @@ export function useOperationalStressIndex(input: Input) {
     ];
 
     const queueItems: ActionQueueItem[] = [
-      ...oldTickets.slice(0, 4).map((ticket) => ({ id: `old-${ticket.id}`, ruleId: 'ticket-old', entityType: 'ticket', entityId: ticket.id, priority: 'HIGH' as const, type: 'Tiket lama', subject: ticket.title || ticket.ticketNumber || `Tiket #${ticket.id}`, issue: ticket.room?.code ? `Kamar ${ticket.room.code}` : 'Perlu dicek di lapangan', recommendedAction: 'Kerjakan', actionTo: '/tickets' })),
-      ...openTickets.slice(0, 4).map((ticket) => ({ id: `open-${ticket.id}`, ruleId: 'ticket-open', entityType: 'ticket', entityId: ticket.id, priority: 'MEDIUM' as const, type: 'Tiket baru', subject: ticket.title || ticket.ticketNumber || `Tiket #${ticket.id}`, issue: ticket.room?.code ? `Kamar ${ticket.room.code}` : 'Belum dikerjakan', recommendedAction: 'Kerjakan', actionTo: '/tickets' })),
+      ...oldTickets.slice(0, 4).map((ticket) => ({
+        id: `old-${ticket.id}`,
+        ruleId: 'ticket-old',
+        entityType: 'ticket',
+        entityId: ticket.id,
+        priority: 'HIGH' as const,
+        type: 'Tiket lama',
+        subject: ticketSubject(ticket),
+        issue: ticketStaffFallbackCopy('Sudah melewati target 48 jam. Perlu keputusan: kerjakan, assign ulang, atau kabari tenant.'),
+        ...makeTicketQueueTime(ticket, TICKET_SLA_HOURS.old),
+        recommendedAction: 'Kerjakan',
+        actionTo: '/tickets',
+      })),
+      ...openTickets.slice(0, 4).map((ticket) => ({
+        id: `open-${ticket.id}`,
+        ruleId: 'ticket-open',
+        entityType: 'ticket',
+        entityId: ticket.id,
+        priority: 'MEDIUM' as const,
+        type: 'Tiket baru',
+        subject: ticketSubject(ticket),
+        issue: ticketStaffFallbackCopy('Target penanganan awal 24 jam sejak tiket masuk.'),
+        ...makeTicketQueueTime(ticket, TICKET_SLA_HOURS.normal),
+        recommendedAction: 'Kerjakan',
+        actionTo: '/tickets',
+      })),
       ...maintenanceRooms.slice(0, 3).map((room) => ({ id: `maintenance-${room.id}`, ruleId: 'room-maintenance', entityType: 'room', entityId: room.id, priority: 'WARNING' as const, type: 'Kamar', subject: room.code || `Kamar #${room.id}`, issue: 'Cek kondisi dan catat hasil pekerjaan.', recommendedAction: 'Cek kamar', actionTo: `/rooms/${room.id}` })),
     ];
 

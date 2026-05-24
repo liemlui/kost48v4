@@ -2,6 +2,7 @@ import axios from 'axios';
 import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import type { TenantBooking } from '../../types';
 import { getBookingExpiryMeta } from '../../utils/bookingExpiry';
+import { formatDateTimeWib } from '../../utils/dateTime';
 
 export function ExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   const expiryMeta = getBookingExpiryMeta(expiresAt);
@@ -22,64 +23,66 @@ export function getPortalBookingStatus(
   const roomStatusUpper = (booking.room?.status ?? '').toUpperCase();
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
 
-  // 6. Booking dibatalkan
+  // 6. Pemesanan dibatalkan
   if (statusUpper === 'CANCELLED') {
     return {
       badgeStatus: 'DANGER',
-      label: 'Booking dibatalkan',
-      helper: 'Booking ini telah dibatalkan dan tidak dapat diproses lebih lanjut.',
+      label: 'Pemesanan dibatalkan',
+      helper: 'Pemesanan ini telah dibatalkan. Kamar dapat dipilih kembali oleh calon tenant lain.',
     };
   }
 
-  // 5. Booking kadaluarsa
+  // 5. Pemesanan kedaluwarsa
   if (statusUpper === 'EXPIRED' || expiryMeta.isExpired) {
     return {
       badgeStatus: 'WARNING',
-      label: 'Booking kadaluarsa',
-      helper: 'Masa berlaku booking sudah habis. Silakan lakukan pemesanan baru jika masih berminat.',
+      label: 'Pemesanan kedaluwarsa',
+      helper: `Batas waktu pemesanan sudah habis${booking.expiresAt ? ` pada ${formatDateTimeWib(booking.expiresAt)}` : ''}. Sistem akan mereset pemesanan yang melewati batas, dan tenant harus ajukan pemesanan ulang jika masih ingin kamar ini.`,
     };
   }
 
-  // 4. Booking aktif / kamar sudah ditempati
-  if (statusUpper === 'ACTIVE' || roomStatusUpper === 'OCCUPIED') {
+  // 4. Kamar sudah aktif
+  // Booking/stay can still use status ACTIVE while room is only RESERVED during admin/payment flow.
+  // For tenant-facing UX, treat it as active only when the room is actually OCCUPIED.
+  if (roomStatusUpper === 'OCCUPIED') {
     return {
       badgeStatus: 'SUCCESS',
-      label: 'Booking aktif / kamar sudah ditempati',
-      helper: 'Booking Anda sudah aktif. Silakan buka halaman Hunian Saya untuk detail hunian.',
+      label: 'Kamar sudah aktif',
+      helper: 'Pemesanan kamu sudah aktif. Silakan buka My Stay Guide untuk melihat kamar, masa sewa, dan tagihan.',
     };
   }
 
   const hasInitialInvoice =
     Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
 
-  // 3. Pembayaran sedang direview
+  // 3. Bukti pembayaran sedang diperiksa
   if (hasInitialInvoice && hasPendingPaymentSubmission) {
     return {
       badgeStatus: 'INFO',
-      label: 'Pembayaran sedang direview',
+      label: 'Bukti pembayaran sedang diperiksa',
       helper: booking.latestInvoiceNumber
-        ? `Bukti pembayaran untuk invoice ${booking.latestInvoiceNumber} telah dikirim dan sedang menunggu verifikasi admin. Mohon tunggu hasil review.`
-        : 'Bukti pembayaran telah dikirim dan sedang menunggu verifikasi admin. Mohon tunggu hasil review.',
+        ? `Bukti pembayaran untuk tagihan ${booking.latestInvoiceNumber} telah dikirim. Tidak perlu upload ulang. Mohon tunggu pemeriksaan admin.`
+        : 'Bukti pembayaran telah dikirim. Tidak perlu upload ulang. Mohon tunggu pemeriksaan admin.',
     };
   }
 
-  // 2. Booking disetujui --- menunggu pembayaran
+  // 2. Pemesanan disetujui --- menunggu pembayaran
   if (hasInitialInvoice) {
     return {
       badgeStatus: 'INFO',
-      label: 'Booking disetujui — menunggu pembayaran',
+      label: 'Pemesanan disetujui — menunggu pembayaran',
       helper: booking.latestInvoiceNumber
-        ? `Admin sudah menyetujui booking ini. Invoice awal ${booking.latestInvoiceNumber} sudah terbentuk dan menunggu pembayaran sewa pertama dan deposit.`
-        : 'Admin sudah menyetujui booking ini. Invoice awal sudah terbentuk dan menunggu pembayaran sewa pertama dan deposit.',
+        ? `Admin sudah menyetujui pemesanan ini. Tagihan awal ${booking.latestInvoiceNumber} sudah tersedia. Bayar dan kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu yang ditentukan admin'}.`
+        : `Admin sudah menyetujui pemesanan ini. Tagihan awal sudah tersedia. Bayar dan kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu yang ditentukan admin'}.`,
     };
   }
 
-  // 1. Menunggu review admin
+  // 1. Menunggu keputusan admin
   return {
     badgeStatus: 'WARNING',
-    label: 'Menunggu review admin',
+    label: 'Menunggu keputusan admin',
     helper:
-      'Booking Anda masih menunggu review admin. Jika belum ada update, Anda dapat membatalkan booking atau menghubungi admin.',
+      'Pemesanan kamu masih menunggu keputusan admin. Kamar belum terkunci; sebelum pembayaran disetujui, kamar masih dapat diminati calon tenant lain.',
   };
 }
 
@@ -116,7 +119,6 @@ export function canCancelBooking(booking: TenantBooking): boolean {
   if (statusUpper === 'CANCELLED' || statusUpper === 'EXPIRED') return false;
   if (roomStatusUpper === 'OCCUPIED' || roomStatusUpper === 'ACTIVE') return false;
   if (hasInvoice) return false;
-  if (statusUpper === 'ACTIVE') return false;
 
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
   if (expiryMeta.isExpired) return false;
@@ -125,7 +127,7 @@ export function canCancelBooking(booking: TenantBooking): boolean {
 }
 
 export function getAdminWhatsAppNumber(): string {
-  return import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '';
+  return import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628';
 }
 
 export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string {
@@ -133,7 +135,7 @@ export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string {
   if (!waNumber) return '#';
 
   const roomCode = booking.room?.code ?? `Kamar #${booking.roomId}`;
-  const message = `Halo Admin KOST48, saya ingin follow up booking ${roomCode}. Mohon info statusnya. Terima kasih.`;
+  const message = `Halo Admin KOST48, saya ingin follow up pemesanan kamar ${roomCode}. Mohon info statusnya. Terima kasih.`;
 
   return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
 }

@@ -21,13 +21,13 @@ export default function PaymentUrgencyChip() {
       type="button"
       className={`payment-urgency-chip ${variantClass}`}
       onClick={() => navigate(urgency.to)}
-      aria-label={`Pengingat pembayaran: ${urgency.label}`}
+      aria-label={`Pengingat tenant: ${urgency.label}`}
       title={urgency.detail ? `${urgency.label} · ${urgency.detail}` : urgency.label}
     >
       <span className="payment-urgency-chip-icon" aria-hidden="true">
-        {urgency.variant === 'danger' ? '⚠' : urgency.variant === 'warning' ? '⏳' : '📅'}
+        {urgency.type === 'PAYMENT_UNDER_REVIEW' ? '🔎' : urgency.variant === 'danger' ? '⚠' : urgency.variant === 'warning' ? '⏳' : '📅'}
       </span>
-      <span className="payment-urgency-chip-label">{urgency.label}</span>
+      <span className="payment-urgency-chip-text"><span className="payment-urgency-chip-label">{urgency.label}</span>{urgency.detail ? <span className="payment-urgency-chip-detail">{urgency.detail}</span> : null}</span>
     </button>
   );
 }

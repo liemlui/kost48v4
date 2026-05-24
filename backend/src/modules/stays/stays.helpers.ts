@@ -1,4 +1,6 @@
 import { Prisma } from '../../generated/prisma';
+import { AUTO_OPS_DEADLINES, hoursAfter } from '../../common/business/auto-ops.constants';
+import { calculateRentByPricingTerm } from '../tenant-bookings/pricing.helper';
 
 export function normalizeStayForResponse<T extends Record<string, any>>(stay: T): T & { cancelReason: string | null } {
   return {
@@ -61,7 +63,13 @@ export function resolveRent(room: any, pricingTerm: string) {
   if (pricingTerm === 'DAILY') return room.dailyRateRupiah ?? 0;
   if (pricingTerm === 'WEEKLY') return room.weeklyRateRupiah ?? 0;
   if (pricingTerm === 'BIWEEKLY') return room.biWeeklyRateRupiah ?? 0;
-  return room.monthlyRateRupiah;
+
+  const monthlyRate = Number(room.monthlyRateRupiah ?? 0);
+  if (pricingTerm === 'SMESTERLY' || pricingTerm === 'YEARLY') {
+    return calculateRentByPricingTerm(monthlyRate, pricingTerm as any);
+  }
+
+  return monthlyRate;
 }
 
 export function mapPricingTermToUnit(pricingTerm: string): string {
@@ -102,8 +110,8 @@ export function calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plann
   }
 }
 
-export function calculateDueDate(periodEnd: Date): Date {
-  const dueDate = new Date(periodEnd);
-  dueDate.setDate(dueDate.getDate() + 3);
-  return dueDate;
+export function calculateDueDate(_periodEnd: Date): Date {
+  // KOST48 no-debt rule: invoice is due from issue/create time, not from the rental period end.
+  // Keep the period argument for legacy call sites, but do not make long terms payable months/years later.
+  return hoursAfter(new Date(), AUTO_OPS_DEADLINES.INVOICE_DUE_AFTER_HOURS);
 }

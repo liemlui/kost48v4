@@ -2,7 +2,8 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
-import { uploadPaymentProof } from '../../api/paymentSubmissions';
+import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
+import { getDeadlineMeta } from '../../utils/dateTime';
 import type {
   CreatePaymentSubmissionPayload,
   PaymentMethod,
@@ -41,7 +42,7 @@ type Props = {
   submitting?: boolean;
   errorMessage?: string | null;
   onHide: () => void;
-  onSubmit: (payload: CreatePaymentSubmissionPayload) => Promise<unknown> | void;
+  onSubmit: (payload: CreatePaymentSubmissionPayload, file: File) => Promise<unknown> | void;
 };
 
 export default function SubmitPaymentModal({
@@ -53,15 +54,7 @@ export default function SubmitPaymentModal({
   onHide,
   onSubmit,
 }: Props) {
-  const invoiceRemaining = Math.max(
-    Number(booking?.invoiceRemainingAmountRupiah ?? 0)
-      || Math.max(
-        Number(booking?.invoiceTotalAmountRupiah ?? booking?.agreedRentAmountRupiah ?? 0)
-        - Number(booking?.invoicePaidAmountRupiah ?? 0),
-        0,
-      ),
-    0,
-  );
+  const invoiceRemaining = getBookingInvoiceRemaining(booking);
   const depositRemaining = Math.max(
     Number(booking?.depositAmountRupiah ?? 0) - Number(booking?.depositPaidAmountRupiah ?? 0),
     0,
@@ -104,17 +97,20 @@ export default function SubmitPaymentModal({
 
   const isPendingBlocked = existingPending?.status === 'PENDING_REVIEW';
   const isFullyPaid = combinedTotal <= 0;
+  const paymentDeadline = getDeadlineMeta(booking?.expiresAt, 'Batas bayar & kirim bukti');
 
   const helperText = useMemo(() => {
     if (!booking) return null;
     if (isPendingBlocked) {
-      return 'Bukti pembayaran sebelumnya masih menunggu review admin. Tunggu hasil review sebelum mengirim ulang.';
+      return 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang. Selama bukti masih direview, sistem tidak akan melepas kamar karena kamu sudah melakukan aksi.';
     }
     if (isFullyPaid) {
       return 'Pembayaran awal (sewa + deposit) sudah lunas. Tidak ada tagihan tersisa.';
     }
-    return 'Unggah bukti pembayaran gabungan sewa pertama dan deposit. Pembayaran harus sesuai total yang tertera. Admin akan memverifikasi sebelum kamar diaktifkan.';
-  }, [booking, isPendingBlocked, isFullyPaid]);
+    return booking.expiresAt
+      ? `Bayar dan kirim bukti sebelum ${paymentDeadline.absoluteLabel}. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran disetujui admin.`
+      : 'Bayar dan kirim bukti dalam satu langkah. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran disetujui admin.';
+  }, [booking, isPendingBlocked, isFullyPaid, paymentDeadline.absoluteLabel]);
 
   const handleClose = () => {
     if (!submittingRef.current) onHide();
@@ -149,7 +145,7 @@ export default function SubmitPaymentModal({
 
   const handleSubmit = async () => {
     if (!booking?.latestInvoiceId) {
-      setValidationError('Invoice booking awal belum tersedia untuk pembayaran.');
+      setValidationError('Tagihan awal belum tersedia untuk pembayaran.');
       return;
     }
 
@@ -181,7 +177,6 @@ export default function SubmitPaymentModal({
     try {
       setUploading(true);
       uploadingRef.current = true;
-      const uploadedProof = await uploadPaymentProof(selectedFile);
       await onSubmit({
         stayId: booking.id,
         invoiceId: booking.latestInvoiceId,
@@ -193,12 +188,7 @@ export default function SubmitPaymentModal({
         senderBankName: senderBankName.trim() || undefined,
         referenceNumber: referenceNumber.trim() || undefined,
         notes: notes.trim() || undefined,
-        fileUrl: uploadedProof.fileUrl,
-        fileKey: uploadedProof.fileKey,
-        originalFilename: uploadedProof.originalFilename,
-        mimeType: uploadedProof.mimeType,
-        fileSizeBytes: uploadedProof.fileSizeBytes,
-      });
+      }, selectedFile);
     } finally {
       setUploading(false);
       uploadingRef.current = false;
@@ -209,7 +199,7 @@ export default function SubmitPaymentModal({
     <>
     <Modal show={show} onHide={handleClose} size="lg" centered backdrop="static">
       <Modal.Header closeButton={!submitting && !uploading}>
-        <Modal.Title>Upload Bukti Pembayaran Awal</Modal.Title>
+        <Modal.Title>Bayar & Kirim Bukti Pembayaran</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {booking ? (
@@ -219,10 +209,13 @@ export default function SubmitPaymentModal({
                 {booking.room?.code ?? `Kamar #${booking.roomId}`} · Pembayaran Sewa + Deposit
               </div>
               <div>{helperText}</div>
+                {!isPendingBlocked && !isFullyPaid ? (
+                  <div className="urgent-rule-note mt-2">{paymentDeadline.hasDate ? `${paymentDeadline.relativeLabel} · berakhir ${paymentDeadline.absoluteLabel}` : 'Batas bayar mengikuti jam deadline dari admin.'}</div>
+                ) : null}
             </Alert>
 
             <div className="mb-3 small text-muted">
-              Invoice awal: <strong>{booking.latestInvoiceNumber ?? `INV-${booking.latestInvoiceId ?? '-'}`}</strong>
+              Tagihan awal: <strong>{booking.latestInvoiceNumber ?? `TG-${booking.latestInvoiceId ?? '-'}`}</strong>
             </div>
 
             {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
@@ -246,7 +239,7 @@ export default function SubmitPaymentModal({
             </div>
 
             <Alert variant="warning" className="small mb-3">
-              Pembayaran harus <strong>tepat sebesar total di atas</strong>. Pembayaran sebagian tidak diterima untuk pembayaran awal booking.
+              Pembayaran harus <strong>tepat sebesar total di atas</strong> dan bukti wajib dikirim di modal ini. Pembayaran sebagian tidak diterima untuk pembayaran awal booking.
             </Alert>
 
             <Form.Group className="mb-3">
@@ -275,7 +268,7 @@ export default function SubmitPaymentModal({
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>File Bukti Bayar</Form.Label>
+              <Form.Label>File Bukti Pembayaran</Form.Label>
               <Form.Control
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -352,7 +345,7 @@ export default function SubmitPaymentModal({
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose} disabled={submitting || uploading}>Tutup</Button>
         <Button onClick={handleSubmit} disabled={!booking || isPendingBlocked || isFullyPaid || submitting || uploading}>
-          {uploading ? 'Mengunggah...' : 'Kirim Bukti Pembayaran'}
+          {uploading ? 'Mengirim bukti...' : 'Bayar & Kirim Bukti'}
         </Button>
       </Modal.Footer>
     </Modal>

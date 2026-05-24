@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { InvoiceStatus, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 
 // ──────────────────────────────────────────────────
 // Types
@@ -95,7 +96,7 @@ export class ReminderPreviewService {
         AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
         AND s."expiresAt" IS NOT NULL
         AND s."expiresAt" > NOW()
-        AND s."expiresAt" <= NOW() + INTERVAL '24 hours'
+        AND s."expiresAt" <= NOW() + (${AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS} * INTERVAL '1 hour')
       ORDER BY s."expiresAt" ASC
       LIMIT 100
     `);
@@ -108,7 +109,7 @@ export class ReminderPreviewService {
       roomCode: r.roomCode,
       expiresAt: r.expiresAt,
       hoursRemaining: this.hoursBetween(new Date(), r.expiresAt),
-      messagePreview: `Halo ${r.tenantName}, booking kamar ${r.roomCode ?? '-'} akan kadaluarsa kurang dari 24 jam lagi. Mohon segera selesaikan pembayaran agar booking tidak otomatis dibatalkan.`,
+      messagePreview: `Halo ${r.tenantName}, pemesanan kamar ${r.roomCode ?? '-'} akan kedaluwarsa dalam ${AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS} jam. Pemesanan belum mengunci kamar sampai pembayaran disetujui.`,
     }));
   }
 
@@ -141,7 +142,7 @@ export class ReminderPreviewService {
       WHERE i.status IN (CAST(${InvoiceStatus.ISSUED} AS "InvoiceStatus"), CAST(${InvoiceStatus.PARTIAL} AS "InvoiceStatus"))
         AND i."dueDate" IS NOT NULL
         AND i."dueDate" >= CURRENT_DATE
-        AND i."dueDate" <= CURRENT_DATE + INTERVAL '3 days'
+        AND i."dueDate" <= CURRENT_DATE + INTERVAL '1 day'
       ORDER BY i."dueDate" ASC, i.id ASC
       LIMIT 150
     `);
@@ -156,7 +157,7 @@ export class ReminderPreviewService {
       amountRupiah: r.amountRupiah,
       dueDate: r.dueDate,
       daysRemaining: this.daysBetween(new Date(), r.dueDate),
-      messagePreview: `Halo ${r.tenantName}, tagihan ${r.invoiceNumber ?? '-'} untuk kamar ${r.roomCode ?? '-'} akan jatuh tempo pada ${this.formatDate(r.dueDate)}. Mohon lakukan pembayaran tepat waktu.`,
+      messagePreview: `Halo ${r.tenantName}, tagihan ${r.invoiceNumber ?? '-'} untuk kamar ${r.roomCode ?? '-'} akan jatuh tempo pada ${this.formatDate(r.dueDate)}. Mohon bayar dan unggah bukti dalam satu langkah. Tidak ada sistem hutang.`,
     }));
   }
 
@@ -231,7 +232,7 @@ export class ReminderPreviewService {
       WHERE s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
         AND s."plannedCheckOutDate" IS NOT NULL
         AND s."plannedCheckOutDate" >= CURRENT_DATE
-        AND s."plannedCheckOutDate" <= CURRENT_DATE + INTERVAL '10 days'
+        AND s."plannedCheckOutDate" <= CURRENT_DATE + (${AUTO_OPS_DEADLINES.RENEW_REMINDER_DAYS} * INTERVAL '1 day')
       ORDER BY s."plannedCheckOutDate" ASC, s.id ASC
       LIMIT 150
     `);
@@ -244,7 +245,7 @@ export class ReminderPreviewService {
       roomCode: r.roomCode,
       plannedCheckOutDate: r.plannedCheckOutDate,
       daysRemaining: this.daysBetween(new Date(), r.plannedCheckOutDate),
-      messagePreview: `Halo ${r.tenantName}, masa sewa kamar ${r.roomCode ?? '-'} mencapai tanggal renew/keluar pada ${this.formatDate(r.plannedCheckOutDate)}. Jika ingin memperpanjang, silakan hubungi pengelola.`,
+      messagePreview: `Halo ${r.tenantName}, masa sewa kamar ${r.roomCode ?? '-'} mencapai tanggal renew/keluar pada ${this.formatDate(r.plannedCheckOutDate)}. Jika ingin memperpanjang, ajukan segera. Setelah masa sewa habis dan belum dibayar, kamar dapat ditawarkan kembali.`,
     }));
   }
 

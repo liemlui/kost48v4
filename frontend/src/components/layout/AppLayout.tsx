@@ -5,6 +5,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
+import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import {
   getDefaultRoute,
@@ -132,7 +133,12 @@ function SidebarContent({
   onBrandClick?: () => void;
 }) {
   const location = useLocation();
-  const activeLink = links.find((link) => location.pathname === link.to || location.pathname.startsWith(`${link.to}/`));
+  const isLinkActive = (link: NavigationLink) => {
+    const paths = [link.to, ...(link.activePaths ?? [])];
+    return paths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
+  };
+  const activeLink = links.find(isLinkActive);
+  const isAdmin = userRole === 'ADMIN';
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const toggleSection = (title: string) => setCollapsedSections((current) => ({ ...current, [title]: !current[title] }));
 
@@ -146,13 +152,15 @@ function SidebarContent({
         </div>
       </button>
 
-      <div className="sidebar-context-card">
-        <div className="sidebar-context-topline">
-          <span>{getWorkspaceTitle(userRole)}</span>
-          <strong>{activeLink?.label || 'Dashboard'}</strong>
+      {!isAdmin ? (
+        <div className="sidebar-context-card">
+          <div className="sidebar-context-topline">
+            <span>{getWorkspaceTitle(userRole)}</span>
+            <strong>{activeLink?.label || 'Dashboard'}</strong>
+          </div>
+          <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
         </div>
-        <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
-      </div>
+      ) : null}
 
       <nav className="sidebar-nav-groups">
         {sections.map((section) => {
@@ -170,7 +178,7 @@ function SidebarContent({
                       key={link.to}
                       to={link.to}
                       title={link.hint ?? link.label}
-                      className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                      className={() => `sidebar-link ${isLinkActive(link) ? 'active' : ''}`}
                       onClick={onNavigate}
                     >
                       <span className="sidebar-link-label">
@@ -187,10 +195,12 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="sidebar-footer sidebar-footer-compact">
-        <strong>{getRoleLabel(userRole)}</strong>
-        <div className="app-caption text-white-50">{userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
-      </div>
+      {!isAdmin ? (
+        <div className="sidebar-footer sidebar-footer-compact">
+          <strong>{getRoleLabel(userRole)}</strong>
+          <div className="app-caption text-white-50">{userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
+        </div>
+      ) : null}
     </>
   );
 }
@@ -206,6 +216,8 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const breadcrumbParts = useMemo(() => getBreadcrumbParts(location.pathname, links), [location.pathname, links]);
   const defaultRoute = getDefaultRoute(user?.role, tenantStage);
   const isStaff = user?.role === 'STAFF';
+  const isTenant = user?.role === 'TENANT';
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -256,6 +268,25 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
     );
   }
 
+
+  if (isTenant) {
+    return (
+      <div className="tenant-workspace-shell">
+        <main className="tenant-workspace-main">
+          <TenantWorkspaceTabs
+            stage={tenantStage}
+            fullName={user?.fullName}
+            initials={getInitials(user?.fullName)}
+            onLogout={logout}
+          />
+
+          <section className="tenant-workspace-content">
+            {children ?? <Outlet />}
+          </section>
+        </main>
+      </div>
+    );
+  }
   return (
     <div className="app-shell">
       <div className="app-shell-grid">
@@ -292,8 +323,13 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               </div>
 
               <div className="d-flex align-items-center gap-3 flex-grow-1 justify-content-end flex-wrap">
-                <GlobalSearch role={user?.role} />
+                {!isAdmin ? <GlobalSearch role={user?.role} /> : null}
                 <NotificationBell />
+                {isAdmin ? (
+                  <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman">
+                    📣 <span>Pengumuman</span>
+                  </Button>
+                ) : null}
                 {user?.role === 'TENANT' && <PaymentUrgencyChip />}
                 <div className="topbar-user">
                   <button type="button" className="topbar-profile-trigger" onClick={() => navigate(user?.role === 'TENANT' ? '/portal/profile' : '/profile')} title="Buka profil">

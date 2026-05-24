@@ -74,7 +74,7 @@ export default function CancelStayModal({
             onChange={(e) => setCancelReason(e.target.value)}
             placeholder="Jelaskan alasan pembatalan stay"
           />
-          <div className="text-muted small mt-1">Frontend sekarang mengirim field <code>cancelReason</code> sesuai kontrak backend.</div>
+          <div className="text-muted small mt-1">Alasan ini tersimpan untuk catatan internal dan membantu audit operasional.</div>
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>

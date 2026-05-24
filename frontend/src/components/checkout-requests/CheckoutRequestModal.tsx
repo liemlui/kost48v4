@@ -76,7 +76,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
   return (
     <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Pengajuan Keluar Kamar</Modal.Title>
+        <Modal.Title>Ajukan Keluar</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error ? (
@@ -86,7 +86,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
         ) : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tanggal Rencana Keluar</Form.Label>
+          <Form.Label>Tanggal Keluar yang Diajukan</Form.Label>
           <Form.Control
             type="date"
             value={requestedCheckOutDate}
@@ -94,12 +94,12 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
             onChange={(e) => setRequestedCheckOutDate(e.target.value)}
           />
           <Form.Text className="text-muted">
-            Minimal H+1 dari hari ini. Admin akan meninjau pengajuan rencana keluar Anda. Persetujuan admin belum berarti Anda sudah keluar — checkout final tetap dilakukan oleh admin secara terpisah.
+            Minimal H+1 dari hari ini. Admin akan meninjau tanggal keluar yang kamu ajukan. Persetujuan admin belum berarti kamu sudah keluar; proses akhir tetap dilakukan admin setelah semua tagihan beres.
           </Form.Text>
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Alasan Keluar</Form.Label>
+          <Form.Label>Alasan keluar</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
@@ -131,7 +131,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
               Mengirim...
             </>
           ) : (
-            'Ajukan Keluar Kamar'
+            'Ajukan Keluar'
           )}
         </Button>
       </Modal.Footer>

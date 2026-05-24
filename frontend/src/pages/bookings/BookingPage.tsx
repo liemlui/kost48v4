@@ -1,70 +1,124 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { createTenantBooking, listPublicRooms } from '../../api/bookings';
-import CurrencyDisplay from '../../components/common/CurrencyDisplay';
-import EmptyState from '../../components/common/EmptyState';
-import PageHeader from '../../components/common/PageHeader';
-import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
-import type { CreateTenantBookingPayload, PricingTerm, PublicRoom } from '../../types';
-import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert, Button, Card, Col, Form, Row, Spinner } from "react-bootstrap";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { createTenantBooking, listPublicRooms } from "../../api/bookings";
+import CurrencyDisplay from "../../components/common/CurrencyDisplay";
+import EmptyState from "../../components/common/EmptyState";
+import PageHeader from "../../components/common/PageHeader";
+import StatusBadge, {
+  getStatusLabel,
+} from "../../components/common/StatusBadge";
+import type {
+  CreateTenantBookingPayload,
+  PricingTerm,
+  PublicRoom,
+} from "../../types";
+import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from "../../utils/pricing";
+import { resolveAbsoluteFileUrl } from "../../utils/resolveAbsoluteFileUrl";
+import {
+  getPublicRoomBathroomSentence,
+  getPublicRoomBusinessHighlight,
+  getPublicRoomCoolingSentence,
+  getPublicRoomUtilityCopy,
+  getPublicRoomVisibleAmenities,
+} from "../../utils/publicRoomDisplay";
 
 type BookingFormState = {
   roomId: number;
   checkInDate: string;
   pricingTerm: PricingTerm;
-  plannedCheckOutDate: string;
-  stayPurpose?: CreateTenantBookingPayload['stayPurpose'];
   notes: string;
 };
-
-const stayPurposeOptions: Array<{ value: string; label: string }> = [
-  { value: 'WORK', label: 'Kerja' },
-  { value: 'STUDY', label: 'Studi' },
-  { value: 'TRANSIT', label: 'Transit' },
-  { value: 'FAMILY', label: 'Keluarga' },
-  { value: 'MEDICAL', label: 'Medis' },
-  { value: 'PROJECT', label: 'Proyek' },
-  { value: 'OTHER', label: 'Lainnya' },
-];
 
 function todayString() {
   return new Date().toISOString().slice(0, 10);
 }
+
+function BookingRoomPhotoStrip({ room }: { room: PublicRoom }) {
+  const images = room.images ?? [];
+  const resolvedImages = images.map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
+  const cover = resolvedImages[0];
+
+  if (!cover) {
+    return (
+      <div className="booking-room-photo-empty">
+        <span>K48</span>
+        <strong>Foto kamar segera hadir</strong>
+        <small>Admin bisa kirim foto terbaru jika kamu butuh sebelum masuk.</small>
+      </div>
+    );
+  }
+
+  return (
+    <div className="booking-room-photo-strip">
+      <img src={cover} alt={`Foto utama kamar ${room.code}`} />
+      {resolvedImages.length > 1 ? (
+        <div className="booking-room-photo-thumbs" aria-label="Foto detail kamar">
+          {resolvedImages.slice(1, 5).map((imageUrl, index) => (
+            <img key={`${imageUrl}-${index}`} src={imageUrl} alt={`Foto detail kamar ${index + 2}`} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function BookingFeatureCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="booking-room-feature-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
 
 export default function BookingPage() {
   const { roomId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const initialRoom = (location.state as { room?: PublicRoom } | null)?.room ?? null;
+  const initialRoom =
+    (location.state as { room?: PublicRoom } | null)?.room ?? null;
 
   const [formState, setFormState] = useState<BookingFormState>({
     roomId: Number(roomId),
     checkInDate: todayString(),
-    pricingTerm: initialRoom?.highlightedPricingTerm ?? initialRoom?.availablePricingTerms?.[0] ?? 'MONTHLY',
-    plannedCheckOutDate: '',
-    stayPurpose: undefined,
-    notes: '',
+    pricingTerm:
+      initialRoom?.highlightedPricingTerm ??
+      initialRoom?.availablePricingTerms?.[0] ??
+      "MONTHLY",
+    notes: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const roomQuery = useQuery({
-    queryKey: ['public-room-for-booking', roomId],
+    queryKey: ["public-room-for-booking", roomId],
     queryFn: async () => {
       if (initialRoom) return initialRoom;
       const response = await listPublicRooms({ limit: 500 });
-      return response.items.find((item) => String(item.id) === String(roomId)) ?? null;
+      return (
+        response.items.find((item) => String(item.id) === String(roomId)) ??
+        null
+      );
     },
   });
 
   const room = roomQuery.data ?? initialRoom;
-  const availableTerms = room?.availablePricingTerms?.length ? room.availablePricingTerms : ['MONTHLY'];
+  const availableTerms = useMemo(
+    () =>
+      room?.availablePricingTerms?.length
+        ? room.availablePricingTerms
+        : (["MONTHLY"] as PricingTerm[]),
+    [room],
+  );
 
   useEffect(() => {
     if (!room) return;
-    const nextTerm = availableTerms.includes(formState.pricingTerm) ? formState.pricingTerm : availableTerms[0];
+    const nextTerm = availableTerms.includes(formState.pricingTerm)
+      ? formState.pricingTerm
+      : availableTerms[0];
     setFormState((prev) => ({
       ...prev,
       roomId: room.id,
@@ -73,30 +127,35 @@ export default function BookingPage() {
   }, [room, availableTerms, formState.pricingTerm]);
 
   const mutation = useMutation({
-    mutationFn: (payload: CreateTenantBookingPayload) => createTenantBooking(payload),
+    mutationFn: (payload: CreateTenantBookingPayload) =>
+      createTenantBooking(payload),
     onSuccess: async () => {
-      sessionStorage.setItem('portal-bookings-success-message', 'Booking kamar berhasil dibuat. Pantau masa berlaku booking Anda di halaman ini.');
-      await queryClient.invalidateQueries({ queryKey: ['public-rooms'] });
-      await queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] });
-      await queryClient.invalidateQueries({ queryKey: ['stays'] });
-      navigate('/portal/bookings', { replace: true });
+      const message =
+        "Pemesanan berhasil diajukan. Sekarang kamu cukup menunggu review admin.";
+      sessionStorage.setItem("kost48:portal-bookings:success-message", message);
+      await queryClient.invalidateQueries({ queryKey: ["public-rooms"] });
+      await queryClient.invalidateQueries({ queryKey: ["tenant-bookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["portal-stage"] });
+      await queryClient.invalidateQueries({ queryKey: ["stays"] });
+      navigate("/portal/bookings", { replace: true });
     },
     onError: (err: unknown) => {
-      const message = err && typeof err === 'object' && 'response' in err
-        ? ((err as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Booking gagal dibuat.')
-        : 'Booking gagal dibuat.';
-      setError(Array.isArray(message) ? message.join(', ') : message);
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? ((err as { response?: { data?: { message?: string | string[] } } })
+              .response?.data?.message ?? "Pemesanan gagal dibuat.")
+          : "Pemesanan gagal dibuat.";
+      setError(Array.isArray(message) ? message.join(", ") : message);
     },
   });
 
   const selectedRate = useMemo(() => {
     if (!room || !room.pricing?.monthlyRateRupiah) return null;
-    return calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, formState.pricingTerm);
+    return calculateRentByPricingTerm(
+      room.pricing.monthlyRateRupiah,
+      formState.pricingTerm,
+    );
   }, [room, formState.pricingTerm]);
-
-
-
-  const selectedUtilitiesIncluded = isUtilitiesIncludedForPricingTerm(formState.pricingTerm);
 
   const initialTotal = useMemo(() => {
     const rent = Number(selectedRate ?? 0);
@@ -107,16 +166,14 @@ export default function BookingPage() {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!room) {
-      setError('Ringkasan kamar belum siap. Silakan muat ulang halaman ini.');
+      setError("Ringkasan kamar belum siap. Silakan muat ulang halaman ini.");
       return;
     }
-    setError('');
+    setError("");
     const payload: CreateTenantBookingPayload = {
       roomId: room.id,
       checkInDate: formState.checkInDate,
       pricingTerm: formState.pricingTerm,
-      ...(formState.plannedCheckOutDate ? { plannedCheckOutDate: formState.plannedCheckOutDate } : {}),
-      ...(formState.stayPurpose ? { stayPurpose: formState.stayPurpose } : {}),
       ...(formState.notes?.trim() ? { notes: formState.notes.trim() } : {}),
     };
     mutation.mutate(payload);
@@ -125,160 +182,197 @@ export default function BookingPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Tenant booking"
-        title="Form Booking Kamar"
-        description="Booking mandiri tenant dibuat dari konteks kamar yang dipilih. Anda cukup melengkapi tanggal dan term yang diinginkan."
+        eyebrow="Pemesanan kamar"
+        title="Ajukan Pemesanan"
+        description="Cukup isi tanggal mulai tinggal dan masa sewa. Admin akan mengecek kamar lalu menyiapkan tagihan awal jika pemesanan disetujui."
       />
 
       {error ? <Alert variant="danger">{error}</Alert> : null}
-      {roomQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {roomQuery.isError ? <Alert variant="danger">Gagal memuat ringkasan kamar. Silakan kembali ke katalog kamar.</Alert> : null}
+      {roomQuery.isLoading ? (
+        <div className="py-5 text-center">
+          <Spinner animation="border" />
+        </div>
+      ) : null}
+      {roomQuery.isError ? (
+        <Alert variant="danger">
+          Gagal memuat ringkasan kamar. Silakan kembali ke katalog kamar.
+        </Alert>
+      ) : null}
       {!roomQuery.isLoading && !room ? (
         <EmptyState
           icon="🚪"
           title="Kamar tidak ditemukan"
           description="Kamar yang ingin dipesan tidak tersedia di katalog publik saat ini."
-          action={{ label: 'Kembali ke Katalog Kamar', onClick: () => navigate('/rooms') }}
+          action={{
+            label: "Kembali ke Katalog Kamar",
+            onClick: () => navigate("/rooms"),
+          }}
         />
       ) : null}
 
       {room ? (
         <Row className="g-4">
           <Col lg={5}>
-            <Card className="content-card border-0 h-100">
+            <Card className="content-card border-0 h-100 tenant-booking-room-summary">
               <Card.Body>
-                <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
-                  <div>
-                    <div className="fw-semibold fs-4">{room.code}</div>
-                    <div className="text-muted">{room.name || 'Nama kamar belum tersedia'}</div>
-                  </div>
-                  <StatusBadge status="RESERVED" customLabel="Siap Dibooking" />
-                </div>
+                {(() => {
+                  const utilityCopy = getPublicRoomUtilityCopy(room, formState.pricingTerm);
+                  return (
+                    <>
+                      <BookingRoomPhotoStrip room={room} />
 
-                <div className="border rounded-4 p-3 mb-3 bg-light-subtle">
-                  <div className="small text-muted mb-1">Tarif yang dipilih</div>
-                  <div className="fs-4 fw-bold"><CurrencyDisplay amount={selectedRate} /></div>
-                  <div className="small text-muted mt-1">Deposit booking <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
-                  <div className="small text-muted mt-1">Total awal booking <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong></div>
-                </div>
+                      <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div>
+                          <div className="fw-semibold fs-4">{room.code}</div>
+                          <div className="text-muted">
+                            {room.name || "Kamar KOST48 Surabaya"}
+                          </div>
+                        </div>
+                        <StatusBadge status="SUCCESS" customLabel="Bisa diajukan" />
+                      </div>
 
-                <div className="d-grid gap-3">
-                  <div>
-                    <div className="card-title-soft mb-1">Lantai</div>
-                    <div className="fw-semibold">{room.floor || '-'}</div>
-                  </div>
-                  <div>
-                    <div className="card-title-soft mb-1">Pilihan term</div>
-                    <div className="d-flex flex-wrap gap-2">
-                      {availableTerms.map((term) => <StatusBadge key={term} status={term} />)}
-                    </div>
-                  </div>
-                  <div>
-                      <div className="card-title-soft mb-1">Utilitas</div>
-                      {selectedUtilitiesIncluded ? (
-                        <div className="app-caption text-success fw-medium">Listrik & air sudah termasuk dalam tarif {getStatusLabel(formState.pricingTerm).toLowerCase()} (flat)</div>
-                      ) : (
-                        <div className="app-caption">Listrik <CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /> / kWh · Air <CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /> / m³ (meteran terpisah)</div>
-                      )}
-                  </div>
-                  {room.notes ? (
-                    <Alert variant="light" className="mb-0">
-                      <strong>Catatan kamar:</strong> {room.notes}
-                    </Alert>
-                  ) : null}
-                </div>
+                      <div className="booking-room-feature-grid mb-3">
+                        <BookingFeatureCard label="Kamar mandi" value={getPublicRoomBathroomSentence(room)} />
+                        <BookingFeatureCard label="Pendingin" value={getPublicRoomCoolingSentence(room)} />
+                      </div>
+
+                      <div className="booking-room-estimate-box mb-3">
+                        <div className="small text-muted mb-1">Estimasi tagihan awal</div>
+                        <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal} /></div>
+                        <div className="booking-room-estimate-lines">
+                          <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong></span>
+                          <span>Deposit awal <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
+                        </div>
+                      </div>
+
+                      <div className="booking-room-utility-box mb-3">
+                        <div>
+                          <strong>{utilityCopy.title}</strong>
+                          <p>{utilityCopy.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="room-market-amenities mb-3" aria-label="Fasilitas utama kamar">
+                        {getPublicRoomVisibleAmenities(room, 5).map((name) => <span key={name}>{name}</span>)}
+                      </div>
+
+                      <Alert variant="light" className="mb-0 booking-room-note">
+                        <strong>Catatan kamar:</strong> {getPublicRoomBusinessHighlight(room)}
+                      </Alert>
+                    </>
+                  );
+                })()}
               </Card.Body>
             </Card>
           </Col>
 
           <Col lg={7}>
-            <Card className="content-card border-0">
+            <Card className="content-card border-0 tenant-simple-booking-form">
               <Card.Body>
+                <div className="tenant-form-stepper mb-4">
+                  <span className="active">1. Pilih kamar</span>
+                  <span className="active">2. Ajukan</span>
+                  <span>3. Tunggu admin</span>
+                </div>
+
                 <Form onSubmit={handleSubmit}>
                   <Row className="g-3">
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Tanggal Check-in</Form.Label>
+                        <Form.Label>Tanggal mulai tinggal</Form.Label>
                         <Form.Control
                           type="date"
                           min={todayString()}
                           value={formState.checkInDate}
-                          onChange={(event) => setFormState((prev) => ({ ...prev, checkInDate: event.target.value }))}
+                          onChange={(event) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              checkInDate: event.target.value,
+                            }))
+                          }
                           required
                         />
                         <Form.Text muted>
-                          Booking hari ini hanya tersedia selama jam operasional 08.00–21.00 WIB. Di luar jam tersebut, pilih tanggal check-in mulai besok.
+                          Admin akan mengecek apakah tanggal ini bisa diproses.
                         </Form.Text>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Pricing Term</Form.Label>
+                        <Form.Label>Masa sewa</Form.Label>
                         <Form.Select
                           value={formState.pricingTerm}
-                          onChange={(event) => setFormState((prev) => ({ ...prev, pricingTerm: event.target.value as PricingTerm }))}
+                          onChange={(event) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              pricingTerm: event.target.value as PricingTerm,
+                            }))
+                          }
                           required
                         >
-                          {ALL_PRICING_TERMS.map((term) => {
-                            const rent = room?.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
-                            const incUtil = isUtilitiesIncludedForPricingTerm(term);
+                          {availableTerms.map((term) => {
+                            const rent = room?.pricing?.monthlyRateRupiah
+                              ? calculateRentByPricingTerm(
+                                  room.pricing.monthlyRateRupiah,
+                                  term,
+                                )
+                              : null;
+                            const incUtil =
+                              isUtilitiesIncludedForPricingTerm(term);
                             return (
                               <option key={term} value={term}>
-                                {getStatusLabel(term)}{rent ? ` — ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(rent)}` : ''}{incUtil ? ' (termasuk listrik & air)' : ''}
+                                {getStatusLabel(term)}
+                                {rent
+                                  ? ` — ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(rent)}`
+                                  : ""}
+                                {incUtil ? " (termasuk listrik & air)" : ""}
                               </option>
                             );
                           })}
                         </Form.Select>
                       </Form.Group>
                     </Col>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Tanggal Renew / Keluar (Opsional)</Form.Label>
-                        <Form.Control
-                          type="date"
-                          min={formState.checkInDate || todayString()}
-                          value={formState.plannedCheckOutDate ?? ''}
-                          onChange={(event) => setFormState((prev) => ({ ...prev, plannedCheckOutDate: event.target.value }))}
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Tujuan Tinggal</Form.Label>
-                        <Form.Select
-                          value={formState.stayPurpose ?? ''}
-                          onChange={(event) => setFormState((prev) => ({
-                            ...prev,
-                            stayPurpose: (event.target.value || undefined) as BookingFormState['stayPurpose'],
-                          }))}
-                        >
-                          <option value="">Pilih bila relevan</option>
-                          {stayPurposeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
                     <Col xs={12}>
                       <Form.Group>
-                        <Form.Label>Catatan Tambahan</Form.Label>
+                        <Form.Label>
+                          Catatan untuk admin{" "}
+                          <span className="text-muted fw-normal">
+                            (opsional)
+                          </span>
+                        </Form.Label>
                         <Form.Control
                           as="textarea"
-                          rows={4}
-                          value={formState.notes ?? ''}
-                          onChange={(event) => setFormState((prev) => ({ ...prev, notes: event.target.value }))}
-                          placeholder="Contoh: butuh mulai masuk sore hari, atau catatan non-teknis lain yang relevan."
+                          rows={3}
+                          value={formState.notes}
+                          onChange={(event) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              notes: event.target.value,
+                            }))
+                          }
+                          placeholder="Contoh: rencana masuk sore hari, atau pertanyaan singkat untuk admin."
                         />
                       </Form.Group>
                     </Col>
                   </Row>
 
                   <Alert variant="info" className="small mt-4 mb-0">
-                    Ringkasan awal: sewa sesuai term <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong> = total awal <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong>. Nilai ini akan terlihat oleh admin saat approval dan oleh tenant saat pembayaran awal.
+                    Setelah diajukan, admin akan mengecek kamar dan menyiapkan tagihan awal.
+                    Kamu baru perlu <strong>Bayar & Kirim Bukti</strong> setelah tagihan awal tersedia di portal tenant.
                   </Alert>
 
                   <div className="d-flex gap-2 justify-content-end mt-4 flex-wrap">
-                    <Button type="button" variant="outline-secondary" onClick={() => navigate('/rooms')}>Kembali ke Katalog</Button>
+                    <Button
+                      type="button"
+                      variant="outline-secondary"
+                      onClick={() => navigate("/rooms")}
+                    >
+                      Kembali
+                    </Button>
                     <Button type="submit" disabled={mutation.isPending}>
-                      {mutation.isPending ? 'Menyimpan Booking...' : 'Kirim Booking'}
+                      {mutation.isPending
+                        ? "Mengajukan..."
+                        : "Ajukan Pemesanan"}
                     </Button>
                   </div>
                 </Form>

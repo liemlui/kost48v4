@@ -1,13 +1,187 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-22 V5.16-G Staff Repair Flow Stable + V5.15 Intelligent Command Center Carry-Forward  
-**Status:** Source of truth utama untuk sesi berikutnya.
+**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Status:** Source of truth utama. V5.20 mengunci first-paid room priority, AutoOps deadline cepat, dan payment proof satu langkah.
+
+
+## 0.0 Latest V5.23-B Ground State — Accounting & Balance Sheet Planning
+
+```text
+Current latest generated frontend package:
+- frontend_20260524_V523A_ADMIN_IA_FINANCE_ADDON_REVENUE_FULL.zip
+
+Current latest backend package:
+- backend_20260524_V523A_ADMIN_IA_FINANCE_ADDON_REVENUE_UNCHANGED.zip
+
+Verification status:
+- V5.23-A frontend package generated.
+- Backend unchanged in V5.23-A.
+- Frontend build still needs local verification because ZIP handoff did not include node_modules.
+- Runtime/API smoke still needs local verification.
+- Do not call FULL PASS until local build + smoke + manual UI verification pass.
+```
+
+### Current active planning track
+
+```text
+Next official planning track:
+V5.23-B Accounting & Balance Sheet Foundation
+
+Goal:
+Move KOST48 finance from operational summary into accounting-ready foundation that can eventually produce:
+- Profit & Loss
+- Cashflow
+- Balance Sheet
+- Asset register
+- Deposit liability
+- Ancillary revenue profitability
+- Expense split: OPEX / COGS / CAPEX
+```
+
+### Admin IA final direction
+
+Admin sidebar is restored and must stay simple:
+
+```text
+Dashboard
+Stays & Tenant
+Finance
+Staff & Tiket
+Kamar & Stok
+```
+
+Header owns:
+
+```text
+Bell / Alert
+Pengumuman
+Akun / Settings
+Logout
+```
+
+No separate sidebar items for:
+- Pengumuman,
+- Settings,
+- Expenses,
+- Tenant,
+- Tiket,
+- Reports.
+
+Rules:
+- Tenant belongs under Stays & Tenant.
+- Expenses belongs under Finance.
+- Tiket belongs under Staff & Tiket.
+- Pengumuman belongs in header.
+- Settings belongs in header/user menu.
+- Reports is not a standalone admin sidebar item until the finance/reporting model is concrete.
+
+### Finance direction
+
+Finance must become the home for:
+
+```text
+Tagihan
+Review Pembayaran
+Voucher WiFi
+Pendapatan Tambahan
+Pengeluaran
+Riwayat Pembayaran
+Aset
+Laporan Keuangan
+```
+
+Short-term:
+- Existing `WifiSale` remains active for voucher WiFi.
+- Existing `Expense` remains active, but UI/categories should move toward kos-specific classification.
+- `AncillaryProduct` / `AncillarySale` is the recommended future model for laundry, galon, cleaning, parking, extra guest, key/card replacement, linen, snack, and similar add-on services.
+
+Accounting warning:
+- Current system has operational finance summary, not full accounting ledger.
+- Do not fake Balance Sheet, ratios, or accounting statements until required accounting data exists.
+
+
+## 0.0 Latest V5.20 Ground State
+
+```text
+Current active implementation package: V5.20 First Paid Room Priority + Fast AutoOps
+Latest generated code ZIP:
+- backend_20260524_V520_FIRST_PAID_AUTOOPS_FULL.zip
+- frontend_20260524_V520_FIRST_PAID_AUTOOPS_FULL.zip
+
+Verification status:
+- V5.19 Renew Meter Utility backend runtime UAT PASS from local user log.
+- V5.20 source ZIP generated.
+- V5.20 still requires local backend build, frontend build, DB bootstrap/reset if needed, and fresh UAT before being called FULL PASS.
+```
+
+## 2026-05-24 — V5.20 First Paid Room Priority + Fast AutoOps
+
+### Prinsip bisnis utama
+
+```text
+Prioritas kamar mengikuti pembayaran valid pertama, bukan siapa yang hanya pesan duluan.
+Booking/minat belum mengunci kamar.
+Tenant baru hanya boleh bayar setelah kamar siap dihuni.
+Tenant lama tidak boleh hutang.
+Kalau tenant lama telat melewati batas pembayaran/kontrak dan kamar sudah diambil tenant baru, tenant lama wajib mengosongkan kamar maksimal 3 jam.
+```
+
+### Deadline operasional default
+
+| Flow | Deadline default | AutoOps / eskalasi |
+|---|---:|---|
+| Booking/minat tanpa keputusan admin | 3 jam | Auto-cancel dan kamar dibuka kembali jika tidak ada bukti valid |
+| Tagihan awal setelah kamar siap | 3 jam | Auto-cancel booking jika belum bayar + belum kirim bukti |
+| Bukti pembayaran pending review | urgent 1 jam, escalate 3 jam, max 6 jam | Tidak auto-cancel tenant yang sudah kirim bukti; naik prioritas admin/owner |
+| Invoice aktif tenant berjalan | urgent 6 jam, overdue 24 jam | Renew/checkout tetap blocked sampai lunas |
+| Renew request | urgent 3 jam, escalate 6 jam | Admin wajib catat meter dan buat invoice renew utility |
+| Checkout request | urgent 3 jam, escalate 6 jam | Admin review cepat; final checkout tetap manual |
+| Checkout approved belum final | 6 jam | Owner/Admin melihat room tertahan |
+| Tenant lama telat + tenant baru valid | 3 jam | Tenant lama wajib keluar maksimal 3 jam |
+| Ticket staff | 24–48 jam | Lebih longgar karena pekerjaan fisik |
+
+### Payment UX contract
+
+```text
+Tenant tidak boleh diarahkan "bayar dulu, upload bukti nanti".
+Tenant action harus satu langkah: Bayar & Kirim Bukti.
+Backend boleh tetap menyimpan upload file dan payment submission secara terstruktur, tetapi frontend harus terasa sebagai satu aksi.
+```
+
+### Copy wajib untuk tenant/public
+
+```text
+Pemesanan belum mengunci kamar. Kamar baru aman setelah pembayaran lunas dan disetujui admin.
+Jika masa sewa habis dan tagihan perpanjangan belum dibayar, kamar dapat ditawarkan kembali.
+Jika kamar sudah diambil tenant baru yang membayar valid, perpanjangan tidak dapat dilanjutkan.
+Jika kamu telat dan kamar sudah diambil tenant baru, kamu wajib mengosongkan kamar maksimal 3 jam.
+Tidak ada sistem hutang.
+```
+
+### Batas otomatisasi
+
+Boleh otomatis:
+- expired unpaid booking auto-cancel,
+- unpaid approved booking auto-cancel,
+- orphan RESERVED room auto-release,
+- overdue/urgent notification,
+- dashboard priority/escalation,
+- duplicate/redundant alert dedup.
+
+Tetap manual:
+- approve/reject payment,
+- approve renew + catat meter,
+- final checkout,
+- refund/deduction deposit,
+- close ticket final,
+- inventory movement resmi.
+
 
 ## 0. Current State
 
 ```text
 Active architecture: Stable Modular Monolith
-Current verified implementation track: V5.16-G Staff Repair Flow
-Carry-forward product track: V5.15 Intelligent Command Center + Finance Foundation
+Current verified implementation track: V5.19 Renew Meter Utility runtime UAT PASS; V5.20 First Paid AutoOps generated pending final local verification
+Next active planning track: V5.20 local build/UAT + Admin/Owner/Tenant UI bug audit after AutoOps
 Default mode: PLAN ONLY, kecuali user eksplisit minta ACT / YOLO / patch
 Multi-app: ROADMAP ONLY, bukan implementasi aktif
 ```
@@ -43,7 +217,25 @@ Aplikasi tidak boleh terasa seperti database viewer atau dashboard dekoratif. KO
 - Tenant: status sewa saya apa, apa yang harus saya bayar, apa yang sedang diproses?
 - Public: kamar mana yang tersedia dan bagaimana cara booking?
 
-## 0.2 V5.16 Staff Repair Flow — Verified State
+## 0.2 Latest Verified Code State
+
+Latest pushed commits:
+
+```text
+484a288 feat(staff): polish workspace inventory and routine checklist ux
+42105e0 fix(frontend): include staff repair constants
+14d8e97 feat(staff): stabilize repair workflow and staff ticket visibility
+```
+
+Working tree after restore generated Prisma was clean in the last user report.
+
+V5.17-D was manually checked by user and marked:
+
+```text
+PASS — Staff Routine Work Cards + Inventory Intelligence + Clean Staff UX
+```
+
+## 0.3 V5.16 Staff Repair Flow — Verified State
 
 V5.16 menutup masalah flow staff/tenant/admin untuk barang kamar dan gudang.
 
@@ -52,6 +244,7 @@ Keputusan final:
 ```text
 Staff = lapor kondisi / diagnosis lapangan / kerjakan tugas / upload bukti.
 Admin/Owner = konfirmasi status final barang, review laporan, close/cancel ticket, dan mutasi stok resmi.
+System/Rule Intelligence = hitung status objektif yang bisa dihitung otomatis.
 ```
 
 Source of truth bisnis:
@@ -60,7 +253,8 @@ Source of truth bisnis:
 Ticket = process controller
 StaffFieldReport = laporan kondisi lapangan / diagnosis staff
 RoomItem.status = display/final state barang kamar setelah keputusan admin/owner
-InventoryItem.status = display/final state barang gudang setelah keputusan admin/owner
+InventoryItem.status = kondisi fisik/final barang gudang setelah keputusan admin/owner, bukan status stok otomatis
+Inventory health = dihitung dari qtyOnHand/minQty, bukan input manual staff
 InventoryMovement = kebenaran stok/fisik barang resmi
 ```
 
@@ -75,52 +269,69 @@ Verified UAT manual:
   - `OPEN → CANCELLED`
 - Ticket 6 manual UAT: `CLOSED`, `finalRoomItemStatus=GOOD`.
 - Ticket 7 manual UAT: `CLOSED`, `finalInventoryItemStatus=OUT_OF_STOCK`.
-- Fresh linking UAT:
-  - Ticket 8/9/10/11/12 membuktikan linking baru berjalan untuk ticket baru.
-  - Ticket 12 terlihat di staff list setelah V5.16-G.
+- Fresh linking UAT membuktikan linking baru berjalan untuk ticket baru.
+- Ticket 12 terlihat di staff list setelah V5.16-G.
 
 Important:
 - Ticket lama sebelum V5.16-E bisa tetap `linkedRoomItemId` kosong; itu data historis dev/UAT lama, bukan bug baru.
 - Future UAT tidak dibuat sebagai file script kecuali user minta. Tulis UAT commands langsung di chat.
 
-## 0.3 V5.16 Patch Timeline
+## 0.4 V5.17 Staff UX Track — Verified State
 
-### V5.16-A — Staff Repair Governance
-- Staff status update diubah menjadi laporan kondisi, bukan final decision.
-- Wording frontend berubah dari “Update Status” menjadi “Laporkan Kondisi”.
-- Tidak ada schema change.
+### V5.17-B — Clean Blue App System + On-Flow Staff/Admin Repair UX
 
-### V5.16-B — Staff Field Report + Admin Confirmation Queue
-- Tambah `StaffFieldReport` dan enum terkait.
-- Tambah admin review/report queue.
-- Ticket close dapat membawa `finalRoomItemStatus`, `finalInventoryItemStatus`, `finalAdminNote`.
+- Staff room cards dibuat clickable penuh.
+- Tombol dobel dengan fungsi sama dihapus.
+- Clean blue unified style diterapkan pada staff workspace.
+- Font weight dijaga ringan; tidak boleh terlalu tebal atau sulit dibaca.
+- Kontras teks/status diperkuat.
+- Modal laporan staff menggunakan progressive disclosure, bukan select panjang.
+- Admin review decision dibuat lebih on-flow.
 
-### V5.16-C — Stabilization
-- Validasi field report diperketat.
-- Admin review movement hanya untuk `APPROVE`.
-- Staff report wajib catatan/foto.
-- UAT script sempat dibuat lalu diputuskan tidak diteruskan sebagai file.
+### V5.17-C — Inventory Intelligence + Less Manual Admin Friction
 
-### V5.16-D — Select Contract
-- Frontend select dipisah: barang kamar vs gudang.
-- Admin decision dan final status select dirapikan.
-- Manual UAT select contract PASS.
+- Status stok gudang dihitung otomatis dari `qtyOnHand/minQty`.
+- Staff tidak memilih manual status seperti “stok habis” atau “stok menipis”.
+- Gudang dibedakan:
+  - status stok otomatis = hitungan sistem,
+  - kondisi fisik barang = laporan staff/admin.
+- Assistant staff membaca inventory health dan memberi prioritas.
+- Admin tidak dibebani konfirmasi untuk hal yang bisa dihitung sistem.
+- Admin tetap menangani exception/approval/movement resmi.
 
-### V5.16-E — Ticket Linking + UAT Safe Package
-- Fresh staff report mengisi `linkedRoomItemId` / `linkedInventoryItemId`.
-- Tidak membuat file UAT script lagi.
+### V5.17-D — Routine Work Cards
 
-### V5.16-F — UX Final Polish
-- Copy status staff/admin lebih manusiawi.
-- Staff work queue lebih bersih dari jargon teknis.
-- Belum final PASS karena staff list masih perlu hard fix.
+- Checklist harian/mingguan/bulanan dikembalikan sebagai core staff work board.
+- Checklist tampil sebagai professional cards dengan progress visual ringan.
+- Assistant strip membaca kondisi checklist:
+  - pekerjaan aktif,
+  - checklist belum selesai,
+  - kendala butuh bantuan,
+  - semua aman.
+- Tidak ada chart dependency baru.
+- User sudah cek manual dan menyatakan bagus/pass.
 
-### V5.16-G — Staff Ticket List Hard Fix
-- `GET /api/tickets` untuk STAFF dipaksa menampilkan ticket aktif:
-  - assigned ke staff,
-  - atau punya `staffFieldReports.reportedByStaffId`.
-- Default staff list hanya `OPEN`, `IN_PROGRESS`, `DONE`.
-- Manual UAT membuktikan ticket aktif #12 muncul di staff list.
+## 0.5 Next Focus Locked
+
+Next focus:
+
+```text
+PLAN FIRST: Tenant Side Full Audit
+```
+
+Jangan langsung patch sebelum audit code asli/ZIP terbaru.
+
+Tenant side harus diarahkan menjadi:
+
+```text
+Tenant = My Stay Guide
+Tenant portal bukan dashboard database, tetapi panduan tinggal yang menjawab:
+- masa sewa saya sampai kapan?
+- tagihan apa yang harus saya bayar?
+- bukti pembayaran saya sedang apa?
+- permintaan perpanjangan/keluar saya statusnya apa?
+- apa aksi paling penting sekarang?
+```
 
 ## 1. Hard Rules
 
@@ -140,8 +351,21 @@ Important:
 14. No service-to-service HTTP.
 15. No autonomous AI mutation.
 16. UAT command ditulis di chat, jangan buat file script UAT kecuali user eksplisit minta.
+17. Generated Prisma noise tidak boleh ikut commit tanpa keputusan sadar.
+18. Jika `npx prisma generate` mengubah `backend/src/generated/prisma`, jangan commit otomatis; restore sebelum push kecuali memang diputuskan tracked update.
 
-## 2. Stable Modular Monolith Remains Active
+## 2. UI/UX Direction Locked
+
+- Clean, readable, modern.
+- Hindari font terlalu tebal.
+- Hindari teks/badge low contrast.
+- Warna biru modern boleh, tetapi jangan Bootstrap demo feel.
+- Style harus konsisten app-wide, bukan staff/admin/tenant berganti tema.
+- Assistant/rule intelligence harus berguna dan on-flow, bukan dekorasi.
+- Jika sistem bisa menghitung otomatis, jangan minta input manual user.
+- Admin/staff/tenant flows harus simpel dan sesuai proses bisnis.
+
+## 3. Stable Modular Monolith Remains Active
 
 Tetap:
 
@@ -155,7 +379,7 @@ No workspace migration now.
 
 Backend/schema boleh dibuka hanya bila bounded, additive, dan migration-safe.
 
-## 3. Locked Business Guards
+## 4. Locked Business Guards
 
 Jangan hilangkan:
 
@@ -171,22 +395,204 @@ Jangan hilangkan:
 10. Tenant hanya create/view request/submission, tidak menjalankan lifecycle final.
 11. Staff tidak membuat mutasi finance/lifecycle sensitif.
 12. InventoryMovement resmi tetap OWNER/ADMIN.
+13. AI/assistant tidak melakukan autonomous mutation.
 
-## 4. Next Recommended Focus
-
-Setelah V5.16-G, next terbaik:
+## 5. Next Recommended Focus
 
 ```text
-PLAN dulu: Staff/Admin UI final smoke + Git release readiness
+Tenant Side Full Audit dulu.
 ```
 
-Sebelum lanjut fitur baru:
-- Run backend build.
-- Run frontend build.
-- Run manual smoke ringkas.
-- Commit/push to GitHub.
-- Baru lanjut V5.15 Intelligent Command Center backlog:
-  - dashboard dedup,
-  - tier 0 intelligence hooks,
-  - reports drill-down,
-  - finance readiness.
+Scope audit tenant:
+- portal home / My Stay Guide
+- invoice list/detail
+- upload payment proof
+- payment under review UX
+- renew request
+- checkout request
+- tickets/complaints from tenant side
+- notification/urgency chip
+- tenant language/microcopy
+- blocked flows and assistant cards
+- API contracts used by tenant pages
+- role guard/navigation consistency
+
+After audit:
+- produce PLAN with exact files to touch.
+- ACT only after user says ACT/YOLO/patch.
+
+
+## 0.1 Latest Pre-ACT Lock — V5.23-B1 Backend Accounting Foundation
+
+```text
+Date: 2026-05-24
+Mode: DOCS SYNC / PRE-ACT LOCK
+Clean backend snapshot received: backend_latest_for_accounting_act_CLEAN.zip
+Clean ZIP: about 15.2 MB, 255 files, includes src/prisma/sql/scripts/uploads, excludes node_modules/dist/.git/.env.
+
+Backend audit snapshot:
+- Prisma models: 29
+- Prisma enums: 34
+- AccountingModule: not present
+- ChartOfAccount / CashAccount / AccountingPeriod / OpeningBalance / JournalEntry / JournalLine: not present
+- TenantDepositLedger / Asset / Depreciation / AncillarySale: not present
+
+Combined verdict:
+PLAN complete enough.
+READY FOR ACT B1 only with strict additive-only accounting foundation scope.
+Do not touch payment, stay, checkout, renew, booking, or invoice-payment flows in B1.
+```
+
+### Cline / DeepSeek pre-ACT finding
+
+```text
+Cline verdict: CONDITIONALLY READY.
+Reason: working tree before clean ZIP was dirty: 97 modified files + 22 untracked files.
+High-risk changed files included payment-submissions.service.ts, stays.service.ts, and app.module.ts.
+Resolution: use backend_latest_for_accounting_act_CLEAN.zip as the only backend source snapshot for next ACT.
+```
+
+### Critical correction
+
+```text
+Do NOT remove or deprecate Stay deposit fields in near-term patches.
+Stay deposit fields remain operational snapshot fields because current payment, checkout, refund, report, and frontend flows still depend on them.
+Future TenantDepositLedger must be additive and synchronized gradually.
+No drop field, no lifecycle rewrite, no checkout rewrite.
+```
+
+
+## Backend Current Map — Operational Finance, Not Formal Accounting
+
+```text
+Existing operational finance truth:
+- Invoice / InvoiceLine / InvoicePayment
+- PaymentSubmission review flow
+- Expense
+- WifiSale
+- Stay deposit operational snapshot fields
+- FinanceService business-health
+- ReportsService operational reports
+- AuditLog
+- PostgreSQL trigger/constraint layer in sql/bootstrap.sql
+
+Relevant modules:
+- src/modules/finance
+- src/modules/reports
+- src/modules/invoices
+- src/modules/invoice-payments
+- src/modules/payment-submissions
+- src/modules/expenses
+- src/modules/wifi-sales
+- src/modules/stays
+- src/modules/tenant-bookings
+- src/modules/inventory-items
+- src/modules/inventory-movements
+- src/modules/room-items
+
+Existing finance/report endpoints:
+- GET /api/finance/business-health
+- GET /api/finance/occupancy/summary
+- GET /api/finance/formal-ratios/readiness
+- GET /api/finance/balance-sheet/draft
+- GET /api/reports/monthly-income
+- GET /api/reports/overdue-aging
+- GET /api/reports/deposit-liability
+- GET /api/reports/expense-summary
+- GET /api/reports/cash-flow
+- GET /api/reports/profit-loss
+- GET /api/reports/financial-ratios
+- GET /api/reports/occupancy
+
+Docs/code out-of-sync risk:
+/reports/profit-loss and /reports/financial-ratios can sound too formal.
+They must be labeled OPERATIONAL_APPROXIMATION until ledger/readiness is real.
+```
+
+
+## V5.23-B1 ACT Scope Lock — Accounting Foundation Readiness
+
+```text
+B1 is a ledger foundation and readiness patch.
+B1 is NOT auto-posting.
+B1 is NOT formal Balance Sheet.
+B1 is NOT deposit migration.
+B1 is NOT payment/stay/checkout/renew rewrite.
+```
+
+### Schema additions allowed in B1
+
+```text
+ChartOfAccount
+CashAccount
+AccountingPeriod
+OpeningBalanceBatch
+OpeningBalanceLine
+JournalEntry
+JournalLine
+```
+
+### Backend module additions allowed in B1
+
+```text
+src/modules/accounting/accounting.module.ts
+src/modules/accounting/accounting.controller.ts
+src/modules/accounting/accounting.service.ts
+src/modules/accounting/accounting-posting.service.ts
+src/modules/accounting/accounting-readiness.service.ts
+src/modules/accounting/accounting-reports.service.ts
+src/modules/accounting/constants/default-coa.ts
+src/modules/accounting/dto/*
+```
+
+### Existing files allowed to touch in B1
+
+```text
+prisma/schema.prisma
+src/app.module.ts
+src/modules/reports/reports.service.ts
+Optional only if necessary: src/common/enums/app.enums.ts
+```
+
+### Files forbidden to touch in B1
+
+```text
+src/modules/payment-submissions/payment-submissions.service.ts
+src/modules/stays/stays.service.ts
+src/modules/checkout-requests/*
+src/modules/renew-requests/*
+src/modules/tenant-bookings/*
+src/modules/invoice-payments/*
+src/modules/invoices/*
+src/modules/expenses/*
+src/modules/wifi-sales/*
+```
+
+### B1 endpoint target
+
+```text
+GET  /api/accounting/readiness
+POST /api/accounting/default-coa/seed
+GET  /api/accounting/accounts
+POST /api/accounting/accounts
+PATCH /api/accounting/accounts/:id
+GET  /api/accounting/cash-accounts
+POST /api/accounting/cash-accounts
+PATCH /api/accounting/cash-accounts/:id
+GET  /api/accounting/opening-balances
+POST /api/accounting/opening-balances/draft
+GET  /api/accounting/journal-entries
+GET  /api/accounting/trial-balance
+GET  /api/accounting/unmapped-transactions
+GET  /api/accounting/balance-sheet
+```
+
+### Report honesty rule
+
+```text
+Existing reports should include metadata:
+- basis: OPERATIONAL_APPROXIMATION
+- ledgerBacked: false
+- formalStatementReady: false
+- readinessNote: current report uses operational invoice/payment/expense data, not formal accounting ledger.
+```

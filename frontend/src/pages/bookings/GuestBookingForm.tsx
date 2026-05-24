@@ -215,7 +215,7 @@ export default function GuestBookingForm({
           </div>
 
           <Alert variant="info" className="small mt-4 mb-0">
-            <strong>Penting:</strong> Booking ini belum berarti kamar aktif. Admin akan memeriksa dan menyetujui booking terlebih dahulu. Setelah disetujui, Anda dapat login ke portal untuk melihat tagihan dan upload bukti pembayaran. Nominal final akan dikonfirmasi admin setelah booking disetujui.
+            <strong>Penting:</strong> Pemesanan ini belum mengunci kamar. Sebelum pembayaran lunas dan disetujui admin, kamar masih bisa diminati calon tenant lain. Setelah admin membuka tagihan, pembayaran dan bukti wajib dikirim dalam satu langkah sebelum jam deadline yang tampil di portal.
           </Alert>
 
           <Alert variant="light" className="small mt-2 mb-0">

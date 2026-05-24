@@ -2,6 +2,8 @@ import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PricingTerm, RoomStatus } from '../../common/enums/app.enums';
 import { BookingRow, RoomPayload } from './tenant-bookings.types';
+import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
+import { calculateRentByPricingTerm } from './pricing.helper';
 
 export function mapBookingRow(row: BookingRow) {
   return {
@@ -75,7 +77,13 @@ export function resolveRent(room: RoomPayload, pricingTerm: PricingTerm): number
   if (pricingTerm === PricingTerm.DAILY) return Number((room as any).dailyRateRupiah ?? 0);
   if (pricingTerm === PricingTerm.WEEKLY) return Number((room as any).weeklyRateRupiah ?? 0);
   if (pricingTerm === PricingTerm.BIWEEKLY) return Number((room as any).biWeeklyRateRupiah ?? 0);
-  return Number((room as any).monthlyRateRupiah ?? 0);
+
+  const monthlyRate = Number((room as any).monthlyRateRupiah ?? 0);
+  if (pricingTerm === PricingTerm.SMESTERLY || pricingTerm === PricingTerm.YEARLY) {
+    return calculateRentByPricingTerm(monthlyRate, pricingTerm);
+  }
+
+  return monthlyRate;
 }
 
 export function mapPricingTermToUnit(pricingTerm: string): string {
@@ -130,20 +138,13 @@ export function calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plann
   }
 }
 
-export function calculateDueDate(periodEnd: Date): Date {
-  const dueDate = new Date(periodEnd);
-  dueDate.setDate(dueDate.getDate() + 3);
-  return dueDate;
+export function calculateDueDate(_periodEnd: Date): Date {
+  // KOST48 no-debt rule: invoice is due from issue/create time, not from the rental period end.
+  return hoursAfter(new Date(), AUTO_OPS_DEADLINES.INVOICE_DUE_AFTER_HOURS);
 }
 
-export function calculateBookingExpiry(checkInDate: Date) {
-  const today = startOfDay(new Date());
-  const hMinusTen = addDays(checkInDate, -10);
-  const hMinusOne = addDays(checkInDate, -1);
-  const sameDayEnd = endOfDay(today);
-  if (hMinusTen > today) return endOfDay(hMinusTen);
-  if (hMinusOne > today) return endOfDay(hMinusOne);
-  return sameDayEnd;
+export function calculateBookingExpiry(_checkInDate: Date) {
+  return hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS);
 }
 
 export function addDays(date: Date, days: number) {

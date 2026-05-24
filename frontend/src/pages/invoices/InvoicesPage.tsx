@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import SearchableSelect from '../../components/common/SearchableSelect';
-import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { StatusStrip } from '../../components/workspace';
 import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
 import { cancelInvoice, issueInvoice } from '../../api/invoices';
 import { useAuth } from '../../context/AuthContext';
+import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -48,6 +50,7 @@ type StatusTab = 'ALL' | 'DRAFT' | 'BILLING' | 'OVERDUE' | 'PAID' | 'CANCELLED';
 
 export default function InvoicesPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const canManageFinance = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const [showCreate, setShowCreate] = useState(false);
@@ -163,8 +166,8 @@ export default function InvoicesPage() {
     stats.dueSoon ? {
       id: 'invoice-due-soon',
       severity: 'WARNING',
-      title: `${stats.dueSoon} tagihan jatuh tempo dalam 3 hari`,
-      message: 'Kirim pengingat atau cek bukti pembayaran agar tidak berubah menjadi overdue.',
+      title: `${stats.dueSoon} tagihan perlu dicek cepat`,
+      message: 'Follow-up cepat. Tenant wajib bayar dan kirim bukti dalam satu langkah; tidak ada sistem hutang.',
       source: 'Reminder',
       count: stats.dueSoon,
       actionLabel: 'Lihat Tagihan Aktif',
@@ -183,7 +186,7 @@ export default function InvoicesPage() {
   ].filter(Boolean) as AssistantItem[];
 
   const metrics: MetricChip[] = [
-    { id: 'billing', label: 'Tagihan aktif', value: stats.billing, helper: stats.dueSoon ? `${stats.dueSoon} jatuh tempo ≤3 hari` : 'ISSUED/PARTIAL belum overdue', icon: '🧾', status: stats.dueSoon ? 'WARNING' : 'INFO', to: undefined, onClick: () => setActiveTab('BILLING') },
+    { id: 'billing', label: 'Tagihan aktif', value: stats.billing, helper: stats.dueSoon ? `${stats.dueSoon} perlu cek ≤24 jam` : 'belum lunas', icon: '🧾', status: stats.dueSoon ? 'WARNING' : 'INFO', to: undefined, onClick: () => setActiveTab('BILLING') },
     { id: 'overdue', label: 'Overdue', value: stats.overdue, helper: 'Perlu follow-up cepat', icon: '⏰', status: stats.overdue ? 'DANGER' : 'SUCCESS', onClick: () => setActiveTab('OVERDUE') },
     { id: 'draft', label: 'Draft', value: stats.draft, helper: 'Belum tenant-facing', icon: '📝', status: stats.draft ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('DRAFT') },
     { id: 'paid', label: 'Lunas', value: stats.paid, helper: `${stats.cancelled} dibatalkan`, icon: '✅', status: 'SUCCESS', onClick: () => setActiveTab('PAID') },
@@ -220,60 +223,60 @@ export default function InvoicesPage() {
     { key: 'CANCELLED', label: 'Dibatalkan', count: stats.cancelled },
   ];
 
+  const financeMenu = [
+    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', count: stats.total, active: true },
+    { id: 'review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar yang perlu diverifikasi.', to: '/payment-submissions/review', count: undefined, active: false },
+    { id: 'wifi', icon: '📶', label: 'Voucher WiFi', helper: 'Pendapatan tambahan dari penjualan voucher WiFi.', to: '/wifi-sales', count: undefined, active: false },
+    { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Laundry, galon, cleaning, parkir, dan add-on lain.', to: '/ancillary-revenue', count: undefined, active: false },
+    { id: 'expenses', icon: '💸', label: 'Pengeluaran', helper: 'Biaya operasional kos dan COGS layanan tambahan.', to: '/expenses', count: undefined, active: false },
+    { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', count: undefined, active: false },
+  ];
+
   return (
     <div>
       <PageHeader
         eyebrow="Finance Command Center"
-        title="Tagihan & Invoice"
-        description="Prioritaskan tagihan yang macet, jatuh tempo, atau masih draft sebelum mengganggu flow checkout dan cash collection."
+        title="Finance"
+        description="Tagihan kos tetap jadi pusat, tetapi Finance juga menampung voucher WiFi, pengeluaran, dan riwayat pembayaran sebagai arus uang operasional."
         actionLabel={canManageFinance ? 'Buat Draft Tagihan' : undefined}
         onAction={canManageFinance ? () => { setError(''); setShowCreate(true); } : undefined}
       />
 
-      <AssistantPanel
-        title="Asisten Finance"
-        subtitle="Membaca antrean tagihan dari data invoice yang tersedia sekarang."
-        items={assistantItems}
-        emptyTitle="Tidak ada blocker tagihan besar"
-        emptyMessage="Tidak ada overdue di halaman ini. Tetap cek draft dan jatuh tempo dekat."
+      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Finance">
+        <div className="admin-area-internal-menu-head">
+          <span>Menu Finance</span>
+          <small>Tagihan, pembayaran, voucher WiFi, pendapatan tambahan, pengeluaran, dan riwayat tetap satu area.</small>
+        </div>
+        <div className="admin-area-internal-menu-scroll">
+          {financeMenu.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()}
+              onClick={() => navigate(item.to)}
+              title={item.helper}
+            >
+              <span className="admin-area-internal-chip-main">
+                <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
+                <span className="admin-area-internal-label">{item.label}</span>
+                {typeof item.count === 'number' ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
+              </span>
+              <small>{item.helper}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <StatusStrip
+        items={metrics.map((metric) => ({
+          id: metric.id,
+          label: metric.label,
+          value: metric.value,
+          helper: metric.helper,
+          tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
+          onClick: metric.onClick,
+        }))}
       />
-
-      <CompactMetrics metrics={metrics} />
-
-      <ActionQueueTable
-        title="Antrean Tagihan"
-        subtitle="Urutan tagihan yang paling perlu dicek oleh finance hari ini."
-        items={actionQueueItems}
-        emptyTitle="Tidak ada antrean tagihan"
-        emptyDescription="Belum ada tagihan pada filter ini. Coba tab lain atau buat draft baru."
-      />
-
-      <Card className="content-card border-0 mb-3">
-        <Card.Body className="py-3">
-          <div className="table-meta mb-0">
-            <div>
-              <div className="panel-title">Filter invoice</div>
-              <div className="panel-subtitle">Cari tenant/kamar/nomor tagihan tanpa mencampur kontrol status.</div>
-            </div>
-            <span className="table-meta-count">{filteredItems.length} dari {meta?.totalItems ?? allItems.length} tagihan</span>
-          </div>
-          <div className="compact-filter-bar mt-3">
-            <Form.Control
-              placeholder="🔍  Nomor tagihan, tenant, kamar..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              style={{ maxWidth: 320 }}
-            />
-            <Form.Control type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} style={{ maxWidth: 160 }} title="Dari tanggal jatuh tempo" />
-            <Form.Control type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} style={{ maxWidth: 160 }} title="Sampai tanggal jatuh tempo" />
-            {(keyword || dateFrom || dateTo) && (
-              <Button variant="outline-secondary" size="sm" onClick={() => { setKeyword(''); setDateFrom(''); setDateTo(''); }}>
-                Reset
-              </Button>
-            )}
-          </div>
-        </Card.Body>
-      </Card>
 
       <Card className="content-card border-0">
         <Card.Body>
@@ -302,7 +305,7 @@ export default function InvoicesPage() {
             <EmptyState
               icon="🧾"
               title={allItems.length === 0 ? 'Belum ada data tagihan' : 'Tidak ada tagihan yang cocok'}
-              description={allItems.length === 0 ? 'Buat draft tagihan pertama untuk mulai mengelola penagihan.' : 'Coba ubah tab status atau kata kunci pencarian.'}
+              description={allItems.length === 0 ? 'Buat draft tagihan pertama untuk mulai mengelola penagihan.' : 'Coba ubah badge status.'}
             />
           ) : null}
 
@@ -326,7 +329,7 @@ export default function InvoicesPage() {
                   const tenantName = item.stay?.tenant?.fullName || `Stay #${item.stayId}`;
                   const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-';
                   return (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="clickable-row" onClick={() => navigate(`/invoices/${item.id}`)}>
                       <td>
                         <div className="fw-semibold">{item.invoiceNumber || `INV-${item.id}`}</div>
                         <div className="small text-muted">Masa sewa #{item.stayId}</div>
@@ -342,16 +345,16 @@ export default function InvoicesPage() {
                       </td>
                       <td>{formatPeriod(item.periodStart, item.periodEnd)}</td>
                       <td>{formatDateSafe(item.dueDate)}</td>
-                      <td><CurrencyDisplay amount={item.totalAmountRupiah} /></td>
-                      <td>
-                        <div className="d-flex flex-wrap gap-2">
-                          <Button as={Link as any} to={`/invoices/${item.id}`} size="sm" variant="outline-primary">Buka</Button>
+                      <td><CurrencyDisplay amount={getInvoiceTotalAmount(item as any)} /></td>
+                      <td onClick={(event) => event.stopPropagation()}>
+                        <div className="d-flex flex-wrap gap-2 align-items-center">
                           {canManageFinance && item.status === 'DRAFT' ? (
                             <Button size="sm" variant="outline-success" onClick={() => issueMutation.mutate(item.id)} disabled={issueMutation.isPending}>Terbitkan</Button>
                           ) : null}
                           {canManageFinance && ['DRAFT', 'ISSUED'].includes(item.status) ? (
                             <Button size="sm" variant="outline-danger" onClick={() => cancelMutation.mutate(item.id)} disabled={cancelMutation.isPending}>Batalkan</Button>
                           ) : null}
+                          <span className="row-arrow-cell">›</span>
                         </div>
                       </td>
                     </tr>

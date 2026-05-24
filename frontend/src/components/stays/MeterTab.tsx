@@ -8,6 +8,10 @@ function numeric(value: number | string | null | undefined) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+function rupiah(value: number) {
+  return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+}
+
 function buildRows(readings: MeterReading[]): MeterRow[] {
   const sorted = [...readings].sort((a, b) => new Date(a.readingAt).getTime() - new Date(b.readingAt).getTime());
   const grouped = new Map<string, MeterRow>();
@@ -129,6 +133,19 @@ export default function MeterTab({
     simpleMode ? sinceCheckInRows.slice(-5).reverse() : sinceCheckInRows
   ), [simpleMode, sinceCheckInRows]);
 
+  const estimatedUtilityAmount = useMemo(() => {
+    const electricityRate = numeric(stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah);
+    const waterRate = numeric(stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah);
+    return {
+      electricity: totalUsageSinceCheckIn.electricity * electricityRate,
+      water: totalUsageSinceCheckIn.water * waterRate,
+      electricityRate,
+      waterRate,
+    };
+  }, [stay.room?.electricityTariffPerKwhRupiah, stay.room?.waterTariffPerM3Rupiah, stay.electricityTariffPerKwhRupiah, stay.waterTariffPerM3Rupiah, totalUsageSinceCheckIn]);
+
+  const hasNegativeUsage = sinceCheckInRows.some((row) => numeric(row.usageElectricityKwh) < 0 || numeric(row.usageWaterM3) < 0);
+
   return (
     <Card className="content-card">
       <Card.Body>
@@ -141,6 +158,15 @@ export default function MeterTab({
             + Catat Meter
           </Button>
         </div>
+
+        <Alert variant={hasNegativeUsage ? 'danger' : 'info'} className="small">
+          <div className="fw-semibold mb-1">Renew meter checkpoint</div>
+          <div>Setiap perpanjangan wajib mencatat meter terbaru. Backend akan menghitung selisih dari catatan sebelumnya dan memasukkan biaya listrik/air ke tagihan perpanjangan.</div>
+          {sinceCheckInRows.length ? (
+            <div className="mt-2">Estimasi pemakaian sejak masuk: listrik {totalUsageSinceCheckIn.electricity.toFixed(3)} kWh × {rupiah(estimatedUtilityAmount.electricityRate)} = <strong>{rupiah(estimatedUtilityAmount.electricity)}</strong>; air {totalUsageSinceCheckIn.water.toFixed(3)} m³ × {rupiah(estimatedUtilityAmount.waterRate)} = <strong>{rupiah(estimatedUtilityAmount.water)}</strong>.</div>
+          ) : null}
+          {hasNegativeUsage ? <div className="mt-2 fw-semibold">Ada angka pemakaian negatif. Cek ulang urutan/angka meter sebelum renew atau checkout.</div> : null}
+        </Alert>
 
         {/* Informasi Ringkasan */}
         <div className="row g-3 mb-4">

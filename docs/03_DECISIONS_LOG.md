@@ -1,5 +1,73 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-22 V5.16-G Staff Repair Flow decision sync**
+**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+
+
+## 2026-05-24 — V5.23 Admin IA + Accounting Foundation Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 337 | Admin sidebar final memakai 5 menu: Dashboard, Stays & Tenant, Finance, Staff & Tiket, Kamar & Stok | Mengurangi cognitive load dan menghapus menu abstrak/redundan. |
+| 338 | Pengumuman tidak masuk sidebar | Pengumuman tetap di header karena bersifat broadcast/quick action. |
+| 339 | Settings/Akun tidak masuk sidebar | Settings tetap di header/avatar karena jarang dipakai harian. |
+| 340 | Tenant digabung dengan Stays | Tenant selalu dilihat dalam konteks masa sewa, kamar, tagihan, renew, checkout. |
+| 341 | Expenses digabung dengan Finance | Semua arus uang masuk/keluar berada di satu pintu. |
+| 342 | Tiket digabung dengan Staff | Tiket adalah pekerjaan operasional staff, bukan domain utama terpisah. |
+| 343 | Reports tidak menjadi menu admin mandiri untuk sekarang | Reports terlalu abstrak sampai accounting/reporting model matang. |
+| 344 | Finance harus menampung voucher WiFi dan pendapatan tambahan | KOST48 perlu melihat revenue per kamar dan add-on revenue. |
+| 345 | `WifiSale` dipertahankan short-term | Backend sudah ada; tidak perlu migrasi risiko tinggi sebelum model generic siap. |
+| 346 | Future ancillary revenue memakai `AncillaryProduct` + `AncillarySale` | Lebih scalable daripada membuat tabel terpisah untuk Laundry/Galon/Cleaning/dll. |
+| 347 | Expense harus bergerak ke OPEX / COGS / CAPEX | Owner perlu tahu biaya operasional, HPP layanan, dan aset. |
+| 348 | Deposit tetap liability, bukan revenue | Laporan keuangan tidak boleh salah membaca deposit sebagai pendapatan. |
+| 349 | Balance Sheet tidak boleh ditampilkan sebagai valid sebelum accounting readiness terpenuhi | Menghindari laporan/rasio fake. |
+| 350 | Accounting roadmap harus bertahap dari readiness → cash/opening balance → journal → assets → statements | Mengurangi risiko overbuild dan data mismatch. |
+| 351 | Next phase adalah PLAN FIRST untuk Accounting & Balance Sheet Foundation | User akan mengirim rencana dari AI lain untuk dipertimbangkan sebelum patch. |
+
+
+## 2026-05-24 — V5.20 First Paid Room Priority + Fast AutoOps Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 317 | Prioritas kamar mengikuti pembayaran valid pertama, bukan booking pertama | Booking/minat tidak boleh dianggap mengunci kamar penuh. |
+| 318 | Tenant/public copy wajib menjelaskan bahwa sebelum lunas/disetujui, kamar masih bisa diminati orang lain | Mengurangi salah paham dan klaim hak kamar tanpa bayar. |
+| 319 | Tenant payment harus satu aksi: Bayar & Kirim Bukti | Tidak ada flow “bayar dulu, upload bukti nanti” secara UX. |
+| 320 | Booking/minat tanpa keputusan atau pembayaran valid memakai SLA 3 jam | Kamar tidak tertahan terlalu lama. |
+| 321 | Approved booking payment deadline default 3 jam | Setelah kamar siap/invoice awal terbit, tenant harus cepat bayar + kirim bukti. |
+| 322 | Bukti pembayaran pending review tidak boleh auto-cancel | Tenant sudah melakukan kewajiban; admin/owner yang harus review cepat. |
+| 323 | Payment review urgent setelah 1 jam, escalate setelah 3 jam, max 6 jam | Admin payment review menjadi action queue prioritas. |
+| 324 | Invoice aktif tenant berjalan urgent 6 jam dan overdue 24 jam | Tidak ada hutang anak kos; renew/checkout tetap blocked sampai lunas. |
+| 325 | Renew request urgent 3 jam dan escalate 6 jam | Admin harus cepat catat meter dan putuskan renew. |
+| 326 | Renew wajib meter checkpoint | Invoice renew berisi sewa + listrik + air dari selisih meter. |
+| 327 | Tenant lama yang telat melewati masa kontrak/pembayaran dapat kehilangan hak renew | Kamar bisa diiklankan ulang. |
+| 328 | Jika tenant baru valid mengambil kamar, tenant lama telat wajib keluar maksimal 3 jam | Tegas namun masih memberi waktu pengosongan. |
+| 329 | Tenant baru belum boleh bayar jika kamar belum siap dihuni | Sebelum siap, tenant baru hanya waiting/interest. |
+| 330 | AutoOps boleh auto-cancel expired unpaid booking | Admin tidak perlu review booking yang sudah jelas gagal. |
+| 331 | AutoOps boleh auto-release orphan RESERVED room | Kamar tidak tertahan oleh data tidak valid. |
+| 332 | AutoOps boleh dedup alert yang sama | Dashboard tidak boleh menampilkan pesan mirip berkali-kali. |
+| 333 | AutoOps tidak boleh approve payment | Bukti pembayaran tetap perlu keputusan manusia. |
+| 334 | AutoOps tidak boleh approve renew/final checkout/deposit refund | Lifecycle sensitif tetap core/admin. |
+| 335 | Urgent UI boleh memakai emphasis lebih besar/tegas untuk kasus special | UI harus membuat risiko bisnis terlihat jelas. |
+| 336 | Redundant assistant/alert harus dikurangi | Assistant = prioritas dan aksi, bukan spam. |
+
+## 2026-05-22 — V5.17 Staff UX / Inventory / Routine Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 301 | Staff UI memakai clean readable modern blue system, bukan tema yang berubah-ubah | Staff/admin/tenant nanti harus terasa satu keluarga UI. |
+| 302 | Font tidak boleh terlalu tebal atau sulit dibaca | Heading maksimal semibold; body tetap readable. |
+| 303 | Teks/badge low contrast dilarang | Semua status dan helper text harus terbaca jelas. |
+| 304 | Room card staff dapat diklik penuh | Tombol dobel seperti “Buka” dan “Perlu cek” dihilangkan jika fungsi sama. |
+| 305 | Modal laporan staff memakai progressive disclosure | Staff menjawab kondisi lapangan bertahap, bukan memilih semua enum sekaligus. |
+| 306 | Assistant/rule intelligence harus bekerja, bukan dekoratif | Assistant memberi prioritas dan next action dari data. |
+| 307 | Status stok gudang dihitung otomatis dari `qtyOnHand/minQty` | Staff tidak input manual “stok habis/menipis”. |
+| 308 | `InventoryItem.status` tidak boleh disalahgunakan untuk status stok otomatis | Pisahkan kondisi fisik barang dari inventory health. |
+| 309 | Admin tidak perlu mengonfirmasi hal yang bisa dihitung sistem | Admin fokus exception/approval/movement resmi. |
+| 310 | Checklist harian/mingguan/bulanan adalah core staff workflow | Tidak boleh hilang dari staff workspace. |
+| 311 | Checklist ditampilkan sebagai professional work cards | Progress visual ringan boleh dipakai tanpa dependency chart baru. |
+| 312 | V5.17-D Routine Work Cards manual PASS dari user | Staff checklist restored dan dianggap bagus. |
+| 313 | Generated Prisma noise harus di-restore sebelum commit/push kecuali ada keputusan sadar | Menghindari commit binary/generated besar yang tidak diperlukan. |
+| 314 | Commit `484a288` menjadi latest staff UX stable checkpoint | Pushed to main. |
+| 315 | Next focus adalah Tenant Side Full Audit, bukan lanjut staff besar lagi | Tenant portal perlu jadi My Stay Guide. |
+| 316 | Tenant UI harus menggunakan bahasa tenant-friendly | Hindari enum/backend jargon seperti ISSUED, PENDING_REVIEW, stay, periodEnd. |
 
 ## 2026-05-22 — V5.16 Staff Repair Decisions
 
@@ -9,7 +77,7 @@
 | 282 | `Ticket` menjadi process controller untuk staff repair flow | Ticket mengontrol OPEN/IN_PROGRESS/DONE/CLOSED/CANCELLED. |
 | 283 | `StaffFieldReport` menjadi laporan kondisi lapangan | Staff diagnosis dan permintaan barang dicatat terstruktur. |
 | 284 | `RoomItem.status` adalah display/final state setelah admin confirm | Staff tidak langsung memutuskan status akhir barang kamar. |
-| 285 | `InventoryItem.status` adalah display/final state setelah admin confirm | Staff tidak langsung memutuskan status akhir barang gudang. |
+| 285 | `InventoryItem.status` adalah display/final state kondisi fisik barang gudang setelah admin confirm | Staff tidak langsung memutuskan kondisi final barang gudang. |
 | 286 | `InventoryMovement` tetap kebenaran stok resmi dan hanya admin/owner | Staff tidak membuat movement resmi. |
 | 287 | `PATCH /room-items/:id/staff-status` menjadi report flow | Endpoint membuat/link ticket dan field report, bukan final mutation. |
 | 288 | `PATCH /inventory-items/:id/staff-status` menjadi report flow | Endpoint membuat/link ticket dan field report untuk gudang. |
@@ -65,3 +133,33 @@
 14. Backend/schema work is allowed only through bounded PLAN/ACT and migration-safe flow.
 15. PowerShell only for commands.
 16. Invoke-RestMethod only for API tests.
+17. Tenant audit next must be PLAN first.
+
+
+## Active Business Decisions — V5.20 Addendum
+
+18. Room priority follows first valid approved payment, not first booking.
+19. Booking/request alone does not lock the room.
+20. Tenant payment UX must be one-step Bayar & Kirim Bukti.
+21. Booking/payment/admin review deadlines must be 3–6 hours maximum except staff tickets.
+22. Tenant debt/hutang is not allowed.
+23. Late current tenant may lose renewal right if a new valid tenant takes the room.
+24. Late current tenant must vacate within 3 hours when the business rule is triggered.
+25. AutoOps may auto-cancel expired unpaid booking but must not approve sensitive flows.
+
+## 2026-05-24 — V5.23-B1 Backend Accounting Foundation Pre-ACT Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 352 | Backend clean source snapshot untuk ACT adalah `backend_latest_for_accounting_act_CLEAN.zip` | Menghindari patch dari ZIP lama setelah local working tree memiliki banyak perubahan. |
+| 353 | ACT B1 dinyatakan READY hanya untuk additive-only Accounting Foundation | Patch boleh besar tetapi tidak boleh menyentuh flow sensitif. |
+| 354 | ACT B1 wajib menambah COA, CashAccount, AccountingPeriod, OpeningBalance, JournalEntry/Line | Ini pondasi minimal sebelum formal statement. |
+| 355 | AccountingModule baru boleh dibuat di monolith stabil | Tidak ada multi-app split atau service-to-service HTTP. |
+| 356 | Existing payment/stay/checkout/renew/booking/invoice-payment flow tidak boleh disentuh di B1 | Mengurangi risiko regression pada lifecycle dan finance core. |
+| 357 | Auto-posting journal ditunda setelah readiness/cutover jelas | Mencegah double posting dan salah hitung data lama. |
+| 358 | Existing reports harus diberi label `OPERATIONAL_APPROXIMATION` sampai ledger-ready | Menghindari P&L/ratio/balance sheet fake. |
+| 359 | Balance Sheet endpoint baru harus return `ready=false` jika readiness belum lengkap | Tidak boleh mengklaim laporan formal sebelum COA, opening balance, journal, dan cash account siap. |
+| 360 | TenantDepositLedger tidak masuk B1 | Deposit ledger menyentuh lifecycle dan harus menjadi batch terpisah. |
+| 361 | Field deposit di `Stay` tidak boleh dihapus/deprecate dalam roadmap dekat | Field tersebut masih menjadi operational snapshot yang dipakai banyak flow. |
+| 362 | Asset register, depreciation, ancillary generic sale, owner equity masuk batch setelah foundation | Menjaga ACT B1 tetap aman dan fokus. |
+| 363 | PASS tidak boleh diklaim tanpa build + smoke + ZIP final | Status verifikasi harus jujur. |

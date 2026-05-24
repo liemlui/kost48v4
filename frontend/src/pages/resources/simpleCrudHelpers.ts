@@ -1,26 +1,12 @@
+import { formatDateTimeWib } from '../../utils/dateTime';
+
 /**
  * Fungsi aman untuk memformat tanggal
  * Handle: string, Date object, null, undefined
  * Format: DD/MM/YYYY (Indonesia)
  */
 export function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  if (!dateValue) return '-';
-  
-  try {
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    
-    // Validasi tanggal
-    if (isNaN(date.getTime())) return '-';
-    
-    // Format ke Indonesia: DD/MM/YYYY
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  } catch {
-    return '-';
-  }
+  return formatDateTimeWib(dateValue);
 }
 
 /**

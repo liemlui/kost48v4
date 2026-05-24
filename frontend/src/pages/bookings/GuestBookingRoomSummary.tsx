@@ -1,9 +1,16 @@
 import { Alert, Card } from 'react-bootstrap';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
-import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
+import StatusBadge from '../../components/common/StatusBadge';
 import type { PublicRoom } from '../../types';
-import FacilityList from '../../components/rooms/FacilityList';
-import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from '../../utils/pricing';
+import { isUtilitiesIncludedForPricingTerm } from '../../utils/pricing';
+import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import {
+  getPublicRoomBathroomSentence,
+  getPublicRoomBusinessHighlight,
+  getPublicRoomCoolingSentence,
+  getPublicRoomUtilityCopy,
+  getPublicRoomVisibleAmenities,
+} from '../../utils/publicRoomDisplay';
 import type { GuestBookingFormState } from './guestBookingUtils';
 
 interface GuestBookingRoomSummaryProps {
@@ -13,54 +20,75 @@ interface GuestBookingRoomSummaryProps {
   initialTotal: number;
 }
 
+function GuestRoomPhoto({ room }: { room: PublicRoom }) {
+  const images = (room.images ?? []).map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
+  const cover = images[0];
+  if (!cover) {
+    return (
+      <div className="booking-room-photo-empty compact">
+        <span>K48</span>
+        <strong>Foto kamar segera hadir</strong>
+      </div>
+    );
+  }
+  return (
+    <div className="booking-room-photo-strip compact">
+      <img src={cover} alt={`Foto utama kamar ${room.code}`} />
+    </div>
+  );
+}
+
 export default function GuestBookingRoomSummary({ room, form, selectedRate, initialTotal }: GuestBookingRoomSummaryProps) {
-  const availableTerms = room.availablePricingTerms?.length ? room.availablePricingTerms : ['MONTHLY'];
+  const utilityCopy = getPublicRoomUtilityCopy(room, form.pricingTerm);
 
   return (
-    <Card className="content-card border-0 h-100">
+    <Card className="content-card border-0 h-100 tenant-booking-room-summary">
       <Card.Body>
+        <GuestRoomPhoto room={room} />
+
         <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
           <div>
             <div className="fw-semibold fs-4">{room.code}</div>
-            <div className="text-muted">{room.name || 'Nama kamar belum tersedia'}</div>
+            <div className="text-muted">{room.name || 'Kamar KOST48 Surabaya'}</div>
           </div>
-          <StatusBadge status="RESERVED" customLabel="Siap Dibooking" />
+          <StatusBadge status="RESERVED" customLabel="Bisa diajukan" />
         </div>
 
-        <div className="border rounded-4 p-3 mb-3 bg-light-subtle">
-          <div className="small text-muted mb-1">Tarif yang dipilih</div>
-          <div className="fs-4 fw-bold"><CurrencyDisplay amount={selectedRate} /></div>
-          <div className="small text-muted mt-1">Deposit booking <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
-          <div className="small text-muted mt-1">Total awal booking <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong></div>
+        <div className="booking-room-feature-grid mb-3">
+          <div className="booking-room-feature-card">
+            <span>Kamar mandi</span>
+            <strong>{getPublicRoomBathroomSentence(room)}</strong>
+          </div>
+          <div className="booking-room-feature-card">
+            <span>Pendingin</span>
+            <strong>{getPublicRoomCoolingSentence(room)}</strong>
+          </div>
         </div>
 
-        <div className="d-grid gap-3">
-          <div>
-            <div className="card-title-soft mb-1">Lantai</div>
-            <div className="fw-semibold">{room.floor || '-'}</div>
+        <div className="booking-room-estimate-box mb-3">
+          <div className="small text-muted mb-1">Estimasi tagihan awal</div>
+          <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal} /></div>
+          <div className="booking-room-estimate-lines">
+            <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong></span>
+            <span>Deposit awal <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
           </div>
-          <div>
-            <div className="card-title-soft mb-1">Pilihan term</div>
-            <div className="d-flex flex-wrap gap-2">
-              {availableTerms.map((term) => <StatusBadge key={term} status={term} />)}
-            </div>
-          </div>
-          <div>
-            <div className="card-title-soft mb-1">Utilitas</div>
-            {isUtilitiesIncludedForPricingTerm(form.pricingTerm) ? (
-              <div className="app-caption text-success fw-medium">Listrik & air sudah termasuk dalam tarif {getStatusLabel(form.pricingTerm).toLowerCase()} (flat)</div>
-            ) : (
-              <div className="app-caption">Listrik <CurrencyDisplay amount={room.electricityTariffPerKwhRupiah} /> / kWh &middot; Air <CurrencyDisplay amount={room.waterTariffPerM3Rupiah} /> / m&sup3; (meteran terpisah)</div>
-            )}
-          </div>
-          {room.notes ? (
-            <Alert variant="light" className="mb-0">
-              <strong>Catatan kamar:</strong> {room.notes}
-            </Alert>
-          ) : null}
-
-          <FacilityList facilities={room.facilities ?? []} emptyMessage="Informasi fasilitas belum tersedia." />
         </div>
+
+        <div className="booking-room-utility-box mb-3">
+          <div>
+            <strong>{utilityCopy.title}</strong>
+            <p>{utilityCopy.description}</p>
+            {isUtilitiesIncludedForPricingTerm(form.pricingTerm) ? <small>Utilitas sudah termasuk untuk masa sewa yang dipilih.</small> : null}
+          </div>
+        </div>
+
+        <div className="room-market-amenities mb-3" aria-label="Fasilitas utama kamar">
+          {getPublicRoomVisibleAmenities(room, 5).map((name) => <span key={name}>{name}</span>)}
+        </div>
+
+        <Alert variant="light" className="mb-0 booking-room-note">
+          <strong>Catatan kamar:</strong> {getPublicRoomBusinessHighlight(room)}
+        </Alert>
       </Card.Body>
     </Card>
   );

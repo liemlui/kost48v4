@@ -279,6 +279,21 @@ export default function ResourceFormModal({
     setFormState({ ...formState, images: existing });
   };
 
+  const handlePromoteRoomImage = (index: number) => {
+    const existing = Array.isArray(formState.images) ? [...(formState.images as string[])] : [];
+    const [selected] = existing.splice(index, 1);
+    if (!selected) return;
+    setFormState({ ...formState, images: [selected, ...existing] });
+  };
+
+  const handleMoveRoomImage = (index: number, direction: -1 | 1) => {
+    const existing = Array.isArray(formState.images) ? [...(formState.images as string[])] : [];
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= existing.length) return;
+    [existing[index], existing[nextIndex]] = [existing[nextIndex], existing[index]];
+    setFormState({ ...formState, images: existing });
+  };
+
   return (
     <>
     <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
@@ -298,6 +313,22 @@ export default function ResourceFormModal({
           <Alert variant="warning" className="mb-4">
             Kamar ini sedang ditempati tenant aktif. Selesaikan atau batalkan stay terlebih dahulu sebelum menonaktifkan kamar.
           </Alert>
+        ) : null}
+
+        {config.path === '/expenses' ? (
+          <div className="resource-flow-guide mb-4">
+            <div><span>1</span><strong>Pilih jenis biaya</strong><small>Tetap atau variabel, lalu kategori operasional.</small></div>
+            <div><span>2</span><strong>Isi nominal</strong><small>Tulis tanggal, vendor, dan jumlah rupiah.</small></div>
+            <div><span>3</span><strong>Review catatan</strong><small>Simpan hanya setelah deskripsi jelas.</small></div>
+          </div>
+        ) : null}
+
+        {config.path === '/announcements' ? (
+          <div className="resource-flow-guide mb-4">
+            <div><span>1</span><strong>Pilih target</strong><small>Tenant, staff, atau semua audiens.</small></div>
+            <div><span>2</span><strong>Tulis pesan</strong><small>Judul dan isi harus singkat, jelas, dan operasional.</small></div>
+            <div><span>3</span><strong>Publish</strong><small>Pin atau jadwalkan hanya jika penting.</small></div>
+          </div>
         ) : null}
 
         <Row className="g-3">
@@ -393,6 +424,19 @@ export default function ResourceFormModal({
                       placeholder={relationSpec.placeholder}
                       isDisabled={isTenantIdDisabled}
                     />
+                  ) : field.type === 'select' && (config.path === '/expenses' || config.path === '/announcements') ? (
+                    <div className="flow-choice-grid" role="group" aria-label={field.label}>
+                      {getFieldOptionsForContext(config, field.name, user?.role).map((option) => (
+                        <button
+                          type="button"
+                          key={option.value}
+                          className={`flow-choice-chip${String(currentValue ?? '') === option.value ? ' active' : ''}`}
+                          onClick={() => updateField(field.name, option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   ) : field.type === 'select' ? (
                     <Form.Select
                       value={String(currentValue ?? '')}
@@ -404,21 +448,28 @@ export default function ResourceFormModal({
                       ))}
                     </Form.Select>
                   ) : config.path === '/rooms' && field.name === 'images' ? (
-                    <div>
+                    <div className="room-image-manager">
                       <Form.Control type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleRoomImageUpload} disabled={roomImageUploading} />
-                      <Form.Text muted>Unggah gambar kamar langsung. Gambar akan dikompres lebih dulu di browser agar lebih hemat storage server.</Form.Text>
+                      <Form.Text muted>Unggah beberapa foto kamar. Foto pertama otomatis menjadi cover utama di katalog, halaman detail, dan halaman booking.</Form.Text>
                       {roomImageError ? <Alert variant="danger" className="mt-2 mb-0 py-2">{roomImageError}</Alert> : null}
                       {roomImageUploading ? <div className="small mt-2 text-muted">Mengunggah gambar kamar...</div> : null}
                       {Array.isArray(currentValue) && currentValue.length ? (
-                        <div className="d-flex flex-wrap gap-2 mt-3">
+                        <div className="room-image-grid mt-3">
                           {(currentValue as string[]).map((url, index) => {
                             const absoluteUrl = resolveAbsoluteFileUrl(url);
+                            const isCover = index === 0;
                             return (
-                              <div key={`${url}-${index}`} style={{ width: 120 }}>
-                                <button type="button" className="btn btn-link p-0 border rounded overflow-hidden w-100 bg-white" onClick={() => setZoomImageUrl(absoluteUrl ?? url)}>
-                                  <img src={absoluteUrl ?? url} alt={`Gambar kamar ${index + 1}`} style={{ width: '100%', height: 90, objectFit: 'cover', display: 'block' }} />
+                              <div key={`${url}-${index}`} className={`room-image-card ${isCover ? 'is-cover' : ''}`}>
+                                <button type="button" className="room-image-preview" onClick={() => setZoomImageUrl(absoluteUrl ?? url)}>
+                                  <img src={absoluteUrl ?? url} alt={`Foto kamar ${index + 1}`} />
                                 </button>
-                                <Button size="sm" variant="outline-danger" className="w-100 mt-1" onClick={() => handleRemoveRoomImage(index)}>Hapus</Button>
+                                <div className="room-image-badge">{isCover ? 'Foto utama' : `Foto detail ${index}`}</div>
+                                <div className="room-image-actions">
+                                  {!isCover ? <Button size="sm" variant="outline-primary" onClick={() => handlePromoteRoomImage(index)}>Jadikan utama</Button> : null}
+                                  <Button size="sm" variant="outline-secondary" disabled={index === 0} onClick={() => handleMoveRoomImage(index, -1)}>←</Button>
+                                  <Button size="sm" variant="outline-secondary" disabled={index === (currentValue as string[]).length - 1} onClick={() => handleMoveRoomImage(index, 1)}>→</Button>
+                                  <Button size="sm" variant="outline-danger" onClick={() => handleRemoveRoomImage(index)}>Hapus</Button>
+                                </div>
                               </div>
                             );
                           })}

@@ -1,0 +1,209 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { AccountingReadinessService } from './accounting-readiness.service';
+import { TrialBalanceQueryDto } from './dto/journal-entry.dto';
+import { AccountingSchemaGuard } from './accounting-schema.guard';
+
+function accountBalance(type: string, debit: number, credit: number) {
+  if (type === 'ASSET' || type === 'EXPENSE' || type === 'COGS') return debit - credit;
+  return credit - debit;
+}
+
+@Injectable()
+export class AccountingReportsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly readinessService: AccountingReadinessService,
+    private readonly schemaGuard: AccountingSchemaGuard,
+  ) {}
+
+  async trialBalance(query: TrialBalanceQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    const asOf = query.asOf ? new Date(query.asOf) : new Date();
+    asOf.setHours(23, 59, 59, 999);
+
+    const [accounts, journalSums, openingSums] = await Promise.all([
+      (this.prisma as any).chartOfAccount.findMany({ where: { isActive: true }, orderBy: { code: 'asc' } }),
+      (this.prisma as any).journalLine.groupBy({
+        by: ['chartOfAccountId'],
+        _sum: { debitRupiah: true, creditRupiah: true },
+        where: {
+          journalEntry: {
+            status: 'POSTED' as any,
+            entryDate: { lte: asOf },
+          },
+        },
+      }),
+      (this.prisma as any).openingBalanceLine.groupBy({
+        by: ['chartOfAccountId'],
+        _sum: { debitRupiah: true, creditRupiah: true },
+        where: {
+          batch: {
+            status: 'POSTED' as any,
+            cutoverDate: { lte: asOf },
+          },
+        },
+      }),
+    ]);
+
+    const sums = new Map<number, { debit: number; credit: number }>();
+    for (const row of [...journalSums, ...openingSums]) {
+      const current = sums.get(row.chartOfAccountId) ?? { debit: 0, credit: 0 };
+      current.debit += Number(row._sum.debitRupiah ?? 0);
+      current.credit += Number(row._sum.creditRupiah ?? 0);
+      sums.set(row.chartOfAccountId, current);
+    }
+
+    let totalDebit = 0;
+    let totalCredit = 0;
+    const lines = accounts.map((account) => {
+      const sum = sums.get(account.id) ?? { debit: 0, credit: 0 };
+      totalDebit += sum.debit;
+      totalCredit += sum.credit;
+      return {
+        accountId: account.id,
+        code: account.code,
+        name: account.name,
+        type: account.type,
+        normalBalance: account.normalBalance,
+        debitRupiah: sum.debit,
+        creditRupiah: sum.credit,
+        balanceRupiah: accountBalance(String(account.type), sum.debit, sum.credit),
+      };
+    });
+
+    return {
+      asOf: asOf.toISOString().slice(0, 10),
+      basis: 'POSTED_JOURNAL_PLUS_POSTED_OPENING_BALANCE',
+      ledgerBacked: true,
+      formalStatementReady: false,
+      totalDebitRupiah: totalDebit,
+      totalCreditRupiah: totalCredit,
+      isBalanced: totalDebit === totalCredit,
+      lines,
+      note: 'Trial balance hanya memakai opening balance POSTED dan journal POSTED. B1/B2 belum auto-posting transaksi operasional.',
+    };
+  }
+
+  async unmappedTransactions() {
+    await this.schemaGuard.assertReady();
+    const [mappedInvoices, mappedPayments, mappedExpenses, mappedWifiSales, mappedDeposits] = await Promise.all([
+      this.mappedSourceIds('INVOICE'),
+      this.mappedSourceIds('INVOICE_PAYMENT'),
+      this.mappedSourceIds('EXPENSE'),
+      this.mappedSourceIds('WIFI_SALE'),
+      this.mappedSourceIds('DEPOSIT'),
+    ]);
+
+    const [invoices, payments, expenses, wifiSales, deposits] = await Promise.all([
+      (this.prisma as any).invoice.findMany({
+        where: { status: { not: 'CANCELLED' as any }, id: { notIn: mappedInvoices } },
+        select: { id: true, invoiceNumber: true, status: true, totalAmountRupiah: true, periodStart: true, periodEnd: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 25,
+      }),
+      (this.prisma as any).invoicePayment.findMany({
+        where: { id: { notIn: mappedPayments } },
+        select: { id: true, invoiceId: true, amountRupiah: true, paymentDate: true, method: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 25,
+      }),
+      (this.prisma as any).expense.findMany({
+        where: { id: { notIn: mappedExpenses } },
+        select: { id: true, expenseDate: true, category: true, description: true, amountRupiah: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 25,
+      }),
+      (this.prisma as any).wifiSale.findMany({
+        where: { id: { notIn: mappedWifiSales } },
+        select: { id: true, saleDate: true, customerName: true, packageName: true, soldPriceRupiah: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 25,
+      }),
+      (this.prisma as any).stay.findMany({
+        where: { depositPaidAmountRupiah: { gt: 0 }, id: { notIn: mappedDeposits } },
+        select: { id: true, tenantId: true, roomId: true, status: true, depositPaidAmountRupiah: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 25,
+      }),
+    ]);
+
+    return {
+      basis: 'UNMAPPED_OPERATIONAL_TRANSACTION_SCAN',
+      ledgerBacked: false,
+      formalStatementReady: false,
+      summary: {
+        invoiceSampleCount: invoices.length,
+        invoicePaymentSampleCount: payments.length,
+        expenseSampleCount: expenses.length,
+        wifiSaleSampleCount: wifiSales.length,
+        depositSnapshotSampleCount: deposits.length,
+      },
+      samples: { invoices, payments, expenses, wifiSales, depositSnapshots: deposits },
+      note: 'Scanner ini hanya menunjukkan transaksi operasional yang belum punya JournalEntry. B1 belum auto-posting agar tidak double-posting/mengubah lifecycle.',
+    };
+  }
+
+  async balanceSheet(query: TrialBalanceQueryDto = {}) {
+    const readiness = await this.readinessService.getReadiness();
+    if (readiness.schemaStatus && !readiness.schemaStatus.ready) {
+      return {
+        ready: false,
+        basis: 'ACCOUNTING_SCHEMA_NOT_APPLIED',
+        ledgerBacked: false,
+        formalStatementReady: false,
+        readiness,
+        trialBalancePreview: null,
+        statement: null,
+        readinessNote: 'Backend accounting sudah terpasang, tetapi migration database belum diterapkan. Jalankan npx prisma migrate deploy atau npx prisma db push sebelum membaca Balance Sheet.',
+      };
+    }
+
+    const trial = await this.trialBalance(query);
+    if (!readiness.ready) {
+      return {
+        ready: false,
+        basis: 'ACCOUNTING_READINESS_GUARD',
+        ledgerBacked: false,
+        formalStatementReady: false,
+        readiness,
+        trialBalancePreview: {
+          asOf: trial.asOf,
+          totalDebitRupiah: trial.totalDebitRupiah,
+          totalCreditRupiah: trial.totalCreditRupiah,
+          isBalanced: trial.isBalanced,
+        },
+        statement: null,
+        readinessNote: 'Balance Sheet belum valid. Lengkapi COA, cash account, accounting period, opening balance posted, dan ledger journal yang balance terlebih dahulu.',
+      };
+    }
+
+    const lines = trial.lines as Array<{ type: string; balanceRupiah: number }>;
+    const assets = lines.filter((l) => l.type === 'ASSET').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const liabilities = lines.filter((l) => l.type === 'LIABILITY').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const equity = lines.filter((l) => l.type === 'EQUITY').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    return {
+      ready: assets === liabilities + equity,
+      basis: 'ACCOUNTING_LEDGER',
+      ledgerBacked: true,
+      formalStatementReady: assets === liabilities + equity,
+      asOf: trial.asOf,
+      statement: {
+        assetsRupiah: assets,
+        liabilitiesRupiah: liabilities,
+        equityRupiah: equity,
+        liabilitiesAndEquityRupiah: liabilities + equity,
+        balanced: assets === liabilities + equity,
+      },
+      readiness,
+    };
+  }
+
+  private async mappedSourceIds(sourceType: string) {
+    const rows = await (this.prisma as any).journalEntry.findMany({
+      where: { sourceType: sourceType as any, sourceId: { not: null } },
+      select: { sourceId: true },
+    });
+    return rows.map((row) => Number(row.sourceId)).filter((id) => Number.isFinite(id));
+  }
+}

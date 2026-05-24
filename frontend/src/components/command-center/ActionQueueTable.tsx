@@ -12,9 +12,16 @@ export type ActionQueueItem = {
   subject: string;
   issue: string;
   age?: string;
+  receivedAtLabel?: string;
+  deadlineLabel?: string;
+  timeStatusLabel?: string;
+  timeStatusTone?: 'danger' | 'warning' | 'info' | 'success';
   recommendedAction: string;
   actionTo?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  secondaryActionTo?: string;
+  onSecondaryAction?: () => void;
   dedupKey?: string;
   ruleId?: string;
   entityType?: string;
@@ -41,6 +48,21 @@ const priorityRank: Record<AssistantSeverity, number> = {
   SUCCESS: 6,
 };
 
+const ADMIN_WHATSAPP_NUMBER = (import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628').replace(/\D/g, '');
+
+function openActionTarget(target: string, navigate: (to: string) => void) {
+  if (/^https?:\/\//i.test(target)) {
+    window.open(target, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  navigate(target);
+}
+
+function buildStaffUnavailableUrl(item: ActionQueueItem) {
+  const message = `Admin KOST48: staff sedang libur/tidak tersedia untuk ${item.subject}. Mohon koordinasi via WhatsApp. Target penanganan mengikuti kesepakatan chat ini.`;
+  return `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
 export default function ActionQueueTable({
   title = 'Action Queue',
   subtitle = 'Urutan kerja harian berdasarkan prioritas bisnis.',
@@ -50,6 +72,7 @@ export default function ActionQueueTable({
   maxItems = 8,
   collapsible = true,
   compact = true,
+  hideActions = false,
 }: {
   title?: string;
   subtitle?: string;
@@ -59,6 +82,7 @@ export default function ActionQueueTable({
   maxItems?: number;
   collapsible?: boolean;
   compact?: boolean;
+  hideActions?: boolean;
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
@@ -89,10 +113,12 @@ export default function ActionQueueTable({
                 <thead>
                   <tr>
                     <th>Prioritas</th>
-                    <th>Tipe</th>
-                    <th>Subjek</th>
-                    <th>Masalah</th>
-                    <th>Aksi</th>
+                    <th>Flow</th>
+                    <th>Subjek & masalah</th>
+                    <th>Masuk</th>
+                    <th>Deadline</th>
+                    <th>Status waktu</th>
+                    {!hideActions ? <th>Aksi</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -102,24 +128,46 @@ export default function ActionQueueTable({
                       <tr
                         key={item.id}
                         className={item.actionTo || item.onAction ? 'clickable-row' : undefined}
-                        onClick={() => item.onAction ? item.onAction() : item.actionTo ? navigate(item.actionTo) : undefined}
+                        onClick={() => item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined}
                       >
                         <td><StatusBadge status={meta.status} customLabel={meta.label} /></td>
                         <td><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
-                        <td>{item.subject}</td>
-                        <td className="text-muted small">{item.issue}</td>
-                        <td>
-                          {(item.actionTo || item.onAction) ? (
-                            <Button variant="outline-primary" size="sm" onClick={(event) => {
-                              event.stopPropagation();
-                              item.onAction ? item.onAction() : item.actionTo ? navigate(item.actionTo) : undefined;
-                            }}>
-                              {item.recommendedAction}
-                            </Button>
-                          ) : (
-                            <span className="text-muted small">{item.recommendedAction}</span>
-                          )}
-                        </td>
+                        <td className="action-queue-subject-cell"><strong>{item.subject}</strong><small>{item.issue}</small></td>
+                        <td className="small action-queue-time-mini">{item.receivedAtLabel ? <strong>{item.receivedAtLabel}</strong> : <span className="text-muted">-</span>}</td>
+                        <td className="small action-queue-deadline-mini">{item.deadlineLabel ? <strong>{item.deadlineLabel}</strong> : <span className="text-muted">-</span>}</td>
+                        <td className="small">{item.timeStatusLabel ? <span className={`queue-time-status ${item.timeStatusTone ?? 'info'}`}>{item.timeStatusLabel}</span> : <span className="text-muted">-</span>}</td>
+                        {!hideActions ? (
+                          <td>
+                            {(item.actionTo || item.onAction) ? (
+                              <div className="queue-action-stack">
+                                <Button variant="outline-primary" size="sm" onClick={(event) => {
+                                  event.stopPropagation();
+                                  item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined;
+                                }}>
+                                  {item.recommendedAction}
+                                </Button>
+                                {item.entityType === 'ticket' ? (
+                                  <Button variant="outline-secondary" size="sm" onClick={(event) => {
+                                    event.stopPropagation();
+                                    window.open(buildStaffUnavailableUrl(item), '_blank', 'noopener,noreferrer');
+                                  }}>
+                                    Staff libur
+                                  </Button>
+                                ) : null}
+                                {(item.secondaryActionTo || item.onSecondaryAction) ? (
+                                  <Button variant="outline-secondary" size="sm" onClick={(event) => {
+                                    event.stopPropagation();
+                                    item.onSecondaryAction ? item.onSecondaryAction() : item.secondaryActionTo ? openActionTarget(item.secondaryActionTo, navigate) : undefined;
+                                  }}>
+                                    {item.secondaryActionLabel ?? 'Aksi lain'}
+                                  </Button>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <span className="text-muted small">{item.recommendedAction}</span>
+                            )}
+                          </td>
+                        ) : null}
                       </tr>
                     );
                   })}

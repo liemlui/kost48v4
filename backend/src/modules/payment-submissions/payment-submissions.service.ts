@@ -21,6 +21,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { UserRole } from '../../common/enums/app.enums';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
@@ -257,6 +258,7 @@ export class PaymentSubmissionsService {
             },
             invoice: {
               include: {
+                lines: { select: { lineAmountRupiah: true } },
                 payments: { select: { amountRupiah: true } },
               },
             },
@@ -318,6 +320,7 @@ export class PaymentSubmissionsService {
             },
             invoice: {
               include: {
+                lines: { select: { lineAmountRupiah: true } },
                 payments: { select: { amountRupiah: true } },
               },
             },
@@ -516,28 +519,50 @@ export class PaymentSubmissionsService {
 
               if (hasElectricity) {
                 const electricityValue = submission.stayInitialElectricityKwhPending!;
-                await tx.meterReading.create({
-                  data: {
+                const existingElectricity = await tx.meterReading.findFirst({
+                  where: {
                     roomId: stay.roomId,
                     utilityType: UtilityType.ELECTRICITY,
                     readingAt,
-                    readingValue: electricityValue,
-                    recordedById,
                   },
+                  select: { id: true },
                 });
+                if (!existingElectricity) {
+                  await tx.meterReading.create({
+                    data: {
+                      roomId: stay.roomId,
+                      utilityType: UtilityType.ELECTRICITY,
+                      readingAt,
+                      readingValue: electricityValue,
+                      recordedById,
+                      note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
+                    },
+                  });
+                }
               }
 
               if (hasWater) {
                 const waterValue = submission.stayInitialWaterM3Pending!;
-                await tx.meterReading.create({
-                  data: {
+                const existingWater = await tx.meterReading.findFirst({
+                  where: {
                     roomId: stay.roomId,
                     utilityType: UtilityType.WATER,
                     readingAt,
-                    readingValue: waterValue,
-                    recordedById,
                   },
+                  select: { id: true },
                 });
+                if (!existingWater) {
+                  await tx.meterReading.create({
+                    data: {
+                      roomId: stay.roomId,
+                      utilityType: UtilityType.WATER,
+                      readingAt,
+                      readingValue: waterValue,
+                      recordedById,
+                      note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
+                    },
+                  });
+                }
               }
 
               await tx.stay.update({
@@ -551,6 +576,13 @@ export class PaymentSubmissionsService {
                 },
               });
             }
+
+            await this.cancelCompetingUnpaidBookingsTx(tx, {
+              roomId: submission.roomId,
+              winningStayId: submission.stayId,
+              actorUserId: user.id,
+              paymentSubmissionId: submissionId,
+            });
           }
         }
 
@@ -583,6 +615,84 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       this.handleSchemaError(error);
       throw error;
     }
+  }
+
+  private async cancelCompetingUnpaidBookingsTx(
+    tx: Prisma.TransactionClient,
+    params: {
+      roomId: number;
+      winningStayId: number;
+      actorUserId: number;
+      paymentSubmissionId: number;
+    },
+  ) {
+    const competingBookings = await tx.stay.findMany({
+      where: {
+        roomId: params.roomId,
+        status: StayStatus.ACTIVE,
+        id: { not: params.winningStayId },
+        initialMetersPromotedAt: null,
+      },
+      select: { id: true },
+    });
+
+    const competingStayIds = competingBookings.map((stay) => stay.id);
+    if (competingStayIds.length === 0) {
+      return { cancelledCount: 0, stayIds: [] as number[] };
+    }
+
+    const cancelReason =
+      'Kamar sudah diamankan oleh pembayaran tenant lain. Prioritas kamar mengikuti pembayaran valid pertama.';
+
+    await tx.invoice.updateMany({
+      where: {
+        stayId: { in: competingStayIds },
+        status: { in: [InvoiceStatus.DRAFT, InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
+      },
+      data: { status: InvoiceStatus.CANCELLED, cancelReason },
+    });
+
+    await tx.paymentSubmission.updateMany({
+      where: {
+        stayId: { in: competingStayIds },
+        status: PaymentSubmissionStatus.PENDING_REVIEW,
+      },
+      data: {
+        status: PaymentSubmissionStatus.EXPIRED,
+        reviewedById: params.actorUserId,
+        reviewedAt: new Date(),
+        reviewNotes: cancelReason,
+      },
+    });
+
+    await tx.stay.updateMany({
+      where: { id: { in: competingStayIds } },
+      data: {
+        status: StayStatus.CANCELLED,
+        checkoutReason: cancelReason,
+        initialElectricityKwhPending: null,
+        initialWaterM3Pending: null,
+        initialMetersRecordedAt: null,
+        initialMetersRecordedById: null,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorUserId: params.actorUserId,
+        action: 'AUTO_CANCEL_COMPETING_BOOKINGS_FIRST_PAID',
+        entityType: 'Room',
+        entityId: String(params.roomId),
+        meta: {
+          winningStayId: params.winningStayId,
+          paymentSubmissionId: params.paymentSubmissionId,
+          cancelledStayIds: competingStayIds,
+          policy: 'first_paid_valid_payment_wins',
+        } as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    return { cancelledCount: competingStayIds.length, stayIds: competingStayIds };
   }
 
   async rejectSubmission(user: CurrentUserPayload, submissionId: number, reviewNotes: string) {
@@ -620,6 +730,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             } as unknown as Prisma.InputJsonValue,
           },
         });
+
+        await this.autoCancelRejectedExpiredBookingTx(tx, submission.stayId, submission.roomId, user.id, submissionId);
 
         return this.findSubmissionByIdTx(tx, submissionId);
       });
@@ -682,7 +794,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           },
           data: {
             status: 'CANCELLED',
-            cancelReason: 'Booking ditutup manual oleh admin',
+            cancelReason: 'Booking dibatalkan. Pemesanan saja belum mengunci kamar; prioritas mengikuti pembayaran valid pertama.',
           },
         });
 
@@ -690,7 +802,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           where: { id: stayId },
           data: {
             status: StayStatus.CANCELLED,
-            checkoutReason: 'Booking ditutup manual oleh admin',
+            checkoutReason: 'Booking dibatalkan. Pemesanan saja belum mengunci kamar; prioritas mengikuti pembayaran valid pertama.',
             initialElectricityKwhPending: null,
             initialWaterM3Pending: null,
             initialMetersRecordedAt: null,
@@ -717,7 +829,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         });
       });
 
-      return { message: 'Booking berhasil ditutup', stayId };
+      return { message: 'Booking berhasil dibatalkan dan kamar dilepas', stayId };
     } catch (error) {
       this.handleSchemaError(error);
       throw error;
@@ -726,6 +838,16 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
 
   async runExpiryCheck(user?: CurrentUserPayload) {
     try {
+      const heldForPaymentReview = await this.prisma.stay.count({
+        where: {
+          status: StayStatus.ACTIVE,
+          room: { status: RoomStatus.RESERVED },
+          initialMetersPromotedAt: null,
+          expiresAt: { not: null, lt: new Date() },
+          paymentSubmissions: { some: { status: PaymentSubmissionStatus.PENDING_REVIEW } },
+        },
+      });
+
       const expiredBookings = await this.prisma.stay.findMany({
         where: {
           status: StayStatus.ACTIVE,
@@ -734,8 +856,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           expiresAt: { not: null, lt: new Date() },
           paymentSubmissions: {
             none: {
-              status: PaymentSubmissionStatus.APPROVED,
-              reviewedAt: { gte: new Date(Date.now() - 60 * 1000) },
+              status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] },
             },
           },
         },
@@ -761,7 +882,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             },
             data: {
               status: 'CANCELLED',
-              cancelReason: 'Booking kadaluarsa otomatis',
+              cancelReason: 'Otomatis dibatalkan: batas 3 jam terlewati tanpa bukti pembayaran valid.',
             },
           });
 
@@ -769,7 +890,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             where: { id: booking.id },
             data: {
               status: StayStatus.CANCELLED,
-              checkoutReason: 'Booking kadaluarsa otomatis',
+              checkoutReason: 'Otomatis dibatalkan: batas 3 jam terlewati. Pemesanan saja belum mengunci kamar.',
               initialElectricityKwhPending: null,
               initialWaterM3Pending: null,
               initialMetersRecordedAt: null,
@@ -801,12 +922,73 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
 
       return {
         expiredCount: processedStayIds.length,
+        heldForPaymentReview,
         stayIds: processedStayIds,
       };
     } catch (error) {
       this.handleSchemaError(error);
       throw error;
     }
+  }
+
+
+  private async autoCancelRejectedExpiredBookingTx(
+    tx: Prisma.TransactionClient,
+    stayId: number,
+    roomId: number,
+    actorUserId: number,
+    submissionId: number,
+  ) {
+    const booking = await tx.stay.findFirst({
+      where: {
+        id: stayId,
+        status: StayStatus.ACTIVE as any,
+        room: { status: RoomStatus.RESERVED as any },
+        initialMetersPromotedAt: null,
+        expiresAt: { not: null, lt: new Date() },
+        paymentSubmissions: {
+          none: {
+            status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] as any },
+          },
+        },
+      },
+      select: { id: true, roomId: true },
+    });
+    if (!booking) return;
+
+    await tx.invoice.updateMany({
+      where: { stayId, status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] as any } },
+      data: {
+        status: 'CANCELLED' as any,
+        cancelReason: 'Bukti pembayaran ditolak setelah batas waktu. Pemesanan dibatalkan otomatis dan kamar dilepas.',
+      },
+    });
+    await tx.stay.update({
+      where: { id: stayId },
+      data: {
+        status: StayStatus.CANCELLED as any,
+        checkoutReason: 'Bukti pembayaran ditolak setelah batas waktu 3 jam. Kamar dilepas otomatis untuk calon tenant lain.',
+        initialElectricityKwhPending: null,
+        initialWaterM3Pending: null,
+        initialMetersRecordedAt: null,
+        initialMetersRecordedById: null,
+      },
+    });
+    await tx.room.update({ where: { id: roomId }, data: { status: RoomStatus.AVAILABLE as any } });
+    await tx.auditLog.create({
+      data: {
+        actorUserId,
+        action: 'AUTO_CANCEL_REJECTED_EXPIRED_BOOKING',
+        entityType: 'Stay',
+        entityId: String(stayId),
+        meta: {
+          roomId,
+          submissionId,
+          slaHours: AUTO_OPS_DEADLINES.APPROVED_BOOKING_PAYMENT_DEADLINE_HOURS,
+          policy: 'first_paid_room_priority_no_debt',
+        } as unknown as Prisma.InputJsonValue,
+      },
+    });
   }
 
   private async findEligibleSubmissionTarget(tenantId: number, stayId: number, invoiceId: number) {
@@ -830,6 +1012,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             invoiceNumber: true,
             status: true,
             totalAmountRupiah: true,
+            lines: { select: { lineAmountRupiah: true } },
             payments: { select: { amountRupiah: true } },
           },
         },
@@ -842,6 +1025,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     if (!invoice) return null;
 
     const paidAmount = invoice.payments.reduce((sum, p) => sum + p.amountRupiah, 0);
+    const lineTotal = invoice.lines.reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0);
+    const invoiceTotalAmount = Number(invoice.totalAmountRupiah ?? 0) > 0
+      ? Number(invoice.totalAmountRupiah)
+      : lineTotal;
 
     return {
       stayId: stay.id,
@@ -856,7 +1043,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       stayExpiresAt: stay.expiresAt,
       invoiceNumber: invoice.invoiceNumber,
       invoiceStatus: invoice.status,
-      invoiceTotalAmountRupiah: invoice.totalAmountRupiah,
+      invoiceTotalAmountRupiah: invoiceTotalAmount,
       invoicePaidAmountRupiah: paidAmount,
       stayDepositAmountRupiah: stay.depositAmountRupiah,
       stayDepositPaidAmountRupiah: stay.depositPaidAmountRupiah,
@@ -906,7 +1093,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         i."invoiceNumber",
         i.status AS "invoiceStatus",
         i."issuedAt" AS "invoiceIssuedAt",
-        i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+        COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
         COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah"
       FROM "PaymentSubmission" ps
       INNER JOIN "Stay" s ON s.id = ps."stayId"
@@ -929,6 +1116,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         },
         invoice: {
           include: {
+            lines: { select: { lineAmountRupiah: true } },
             payments: { select: { amountRupiah: true } },
           },
         },

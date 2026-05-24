@@ -33,5 +33,13 @@ export default function RoomsRouteEntry() {
     );
   }
 
+  if (user?.role === 'TENANT') {
+    return (
+      <AppLayout>
+        <PublicRoomsPage />
+      </AppLayout>
+    );
+  }
+
   return <PublicRoomsPage />;
 }

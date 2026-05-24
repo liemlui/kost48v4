@@ -282,6 +282,61 @@ enum ExpenseCategory {
   OTHER
 }
 
+
+enum AccountingAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  COGS
+  EXPENSE
+}
+
+enum AccountingNormalBalance {
+  DEBIT
+  CREDIT
+}
+
+enum AccountingPeriodStatus {
+  OPEN
+  CLOSED
+  LOCKED
+}
+
+enum CashAccountType {
+  CASH
+  BANK
+  QRIS
+  EWALLET
+  OTHER
+}
+
+enum OpeningBalanceBatchStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum JournalSourceType {
+  MANUAL
+  OPENING_BALANCE
+  SYSTEM_PLACEHOLDER
+  INVOICE
+  INVOICE_PAYMENT
+  PAYMENT_SUBMISSION
+  EXPENSE
+  WIFI_SALE
+  DEPOSIT
+  INVENTORY
+  ADJUSTMENT
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   fullName          String
@@ -1078,3 +1133,162 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
 }
+
+model ChartOfAccount {
+  id              Int                     @id @default(autoincrement())
+  code            String                  @unique
+  name            String
+  type            AccountingAccountType
+  normalBalance   AccountingNormalBalance
+  description     String?
+  parentId        Int?
+  isSystemDefault Boolean                 @default(false)
+  isActive        Boolean                 @default(true)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  parent              ChartOfAccount?      @relation("ChartOfAccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children            ChartOfAccount[]     @relation("ChartOfAccountHierarchy")
+  cashAccounts        CashAccount[]
+  openingBalanceLines OpeningBalanceLine[]
+  journalLines        JournalLine[]
+
+  @@index([type])
+  @@index([normalBalance])
+  @@index([parentId])
+  @@index([isActive])
+}
+
+model CashAccount {
+  id                    Int             @id @default(autoincrement())
+  name                  String          @unique
+  accountType           CashAccountType @default(BANK)
+  chartOfAccountId      Int
+  bankName              String?
+  accountNumberMasked   String?
+  holderName            String?
+  openingBalanceRupiah  Int             @default(0)
+  currentBalanceRupiah  Int             @default(0)
+  isDefault             Boolean         @default(false)
+  isActive              Boolean         @default(true)
+  notes                 String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+  journalLines   JournalLine[]
+
+  @@index([accountType])
+  @@index([chartOfAccountId])
+  @@index([isActive])
+  @@index([isDefault])
+}
+
+model AccountingPeriod {
+  id        Int                    @id @default(autoincrement())
+  year      Int
+  month     Int
+  startDate DateTime               @db.Date
+  endDate   DateTime               @db.Date
+  status    AccountingPeriodStatus @default(OPEN)
+  closedAt  DateTime?
+  notes     String?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  openingBalanceBatches OpeningBalanceBatch[]
+  journalEntries        JournalEntry[]
+
+  @@unique([year, month])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model OpeningBalanceBatch {
+  id                Int                       @id @default(autoincrement())
+  batchNumber       String                    @unique
+  accountingPeriodId Int?
+  cutoverDate       DateTime                  @db.Date
+  status            OpeningBalanceBatchStatus @default(DRAFT)
+  notes             String?
+  totalDebitRupiah  Int                       @default(0)
+  totalCreditRupiah Int                       @default(0)
+  createdById       Int?
+  postedById        Int?
+  postedAt          DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+
+  accountingPeriod AccountingPeriod?    @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
+  lines            OpeningBalanceLine[]
+
+  @@index([accountingPeriodId])
+  @@index([cutoverDate])
+  @@index([status])
+}
+
+model OpeningBalanceLine {
+  id                Int      @id @default(autoincrement())
+  batchId           Int
+  chartOfAccountId  Int
+  description       String?
+  debitRupiah       Int      @default(0)
+  creditRupiah      Int      @default(0)
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+
+  batch          OpeningBalanceBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  chartOfAccount ChartOfAccount      @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+
+  @@index([batchId])
+  @@index([chartOfAccountId])
+}
+
+model JournalEntry {
+  id                 Int                @id @default(autoincrement())
+  entryNumber        String             @unique
+  entryDate          DateTime           @db.Date
+  accountingPeriodId Int?
+  status             JournalEntryStatus @default(DRAFT)
+  sourceType         JournalSourceType  @default(MANUAL)
+  sourceId           String?
+  memo               String?
+  totalDebitRupiah   Int                @default(0)
+  totalCreditRupiah  Int                @default(0)
+  isBalanced         Boolean            @default(false)
+  createdById        Int?
+  postedById         Int?
+  postedAt           DateTime?
+  voidedAt           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  accountingPeriod AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
+  lines            JournalLine[]
+
+  @@index([entryDate])
+  @@index([accountingPeriodId])
+  @@index([status])
+  @@index([sourceType, sourceId])
+}
+
+model JournalLine {
+  id               Int      @id @default(autoincrement())
+  journalEntryId   Int
+  chartOfAccountId Int
+  cashAccountId    Int?
+  description      String?
+  debitRupiah      Int      @default(0)
+  creditRupiah     Int      @default(0)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  journalEntry   JournalEntry   @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+  cashAccount    CashAccount?   @relation(fields: [cashAccountId], references: [id], onDelete: SetNull)
+
+  @@index([journalEntryId])
+  @@index([chartOfAccountId])
+  @@index([cashAccountId])
+}
+

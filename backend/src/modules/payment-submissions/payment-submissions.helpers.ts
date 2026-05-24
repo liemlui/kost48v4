@@ -92,7 +92,7 @@ export interface SubmissionLockRow {
 export type PaymentSubmissionWithIncludes = Prisma.PaymentSubmissionGetPayload<{
   include: {
     stay: { include: { room: true } };
-    invoice: { include: { payments: { select: { amountRupiah: true } } } };
+    invoice: { include: { lines: { select: { lineAmountRupiah: true } }; payments: { select: { amountRupiah: true } } } };
     tenant: { select: { id: true; fullName: true; phone: true } };
     submittedBy: { select: { id: true; fullName: true } };
     reviewedBy: { select: { id: true; fullName: true } };
@@ -105,7 +105,9 @@ export type PaymentSubmissionWithIncludes = Prisma.PaymentSubmissionGetPayload<{
 
 export function mapSubmissionFromPrisma(item: PaymentSubmissionWithIncludes): SubmissionDetail {
   const paidAmount = item.invoice?.payments?.reduce((sum, p) => sum + p.amountRupiah, 0) ?? 0;
-  const totalAmount = item.invoice?.totalAmountRupiah ?? 0;
+  const lineTotal = item.invoice?.lines?.reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0) ?? 0;
+  const storedTotal = Number(item.invoice?.totalAmountRupiah ?? 0);
+  const totalAmount = storedTotal > 0 ? storedTotal : lineTotal;
   const remainingAmount = Math.max(totalAmount - paidAmount, 0);
 
   return {

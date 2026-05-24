@@ -178,9 +178,9 @@ export default function ReminderPreviewPage() {
 
   const metrics: MetricChip[] = [
     { id: 'overdue', label: 'Tagihan terlambat', value: invoiceOverdue.length, helper: 'Prioritas follow-up', icon: '🔴', status: invoiceOverdue.length ? 'DANGER' : 'SUCCESS', onClick: () => setActiveTab('INVOICE_OVERDUE') },
-    { id: 'due', label: 'Jatuh tempo dekat', value: invoiceDue.length, helper: 'Dalam 3 hari', icon: '🟡', status: invoiceDue.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('INVOICE_DUE') },
-    { id: 'booking', label: 'Booking expiry', value: bookingExpiry.length, helper: 'Reserved hampir habis', icon: '⏳', status: bookingExpiry.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('BOOKING_EXPIRY') },
-    { id: 'checkout', label: 'Renew/Keluar', value: checkout.length, helper: 'Akhir masa sewa dekat', icon: '📅', status: checkout.length ? 'INFO' : 'SUCCESS', onClick: () => setActiveTab('CHECKOUT') },
+    { id: 'due', label: 'Jatuh tempo dekat', value: invoiceDue.length, helper: 'Dalam 24 jam', icon: '🟡', status: invoiceDue.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('INVOICE_DUE') },
+    { id: 'booking', label: 'Booking expiry', value: bookingExpiry.length, helper: 'Ikuti jam deadline per booking', icon: '⏳', status: bookingExpiry.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('BOOKING_EXPIRY') },
+    { id: 'checkout', label: 'Renew/Keluar', value: checkout.length, helper: 'H-3/H-1', icon: '📅', status: checkout.length ? 'INFO' : 'SUCCESS', onClick: () => setActiveTab('CHECKOUT') },
   ];
 
   const tabs: { key: ReminderTab; label: string; count: number; cls?: string }[] = [
@@ -259,7 +259,7 @@ export default function ReminderPreviewPage() {
 
           {activeTab === 'INVOICE_DUE' && (
             invoiceDue.length === 0
-              ? <div className="p-4"><EmptyState icon="✅" title="Tidak ada tagihan mendekati jatuh tempo" description="Tidak ada invoice yang jatuh tempo dalam 3 hari ke depan." /></div>
+              ? <div className="p-4"><EmptyState icon="✅" title="Tidak ada tagihan mendekati jatuh tempo" description="Tidak ada invoice yang jatuh tempo dalam 24 jam ke depan." /></div>
               : <CandidateTable>
                   {invoiceDue.map((item: InvoiceDueCandidate) => (
                     <tr key={`due-${item.invoiceId}`}>
@@ -295,7 +295,7 @@ export default function ReminderPreviewPage() {
 
           {activeTab === 'CHECKOUT' && (
             checkout.length === 0
-              ? <div className="p-4"><EmptyState icon="✅" title="Tidak ada renew/keluar mendekat" description="Tidak ada tenant yang renew/keluar dalam 10 hari ke depan." /></div>
+              ? <div className="p-4"><EmptyState icon="✅" title="Tidak ada renew/keluar mendekat" description="Tidak ada tenant yang renew/keluar dalam 3 hari ke depan." /></div>
               : <CandidateTable>
                   {checkout.map((item: CheckoutCandidate) => (
                     <tr key={`checkout-${item.stayId}`}>

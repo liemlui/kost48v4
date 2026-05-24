@@ -21,6 +21,12 @@ export class InvoicePaymentsService {
     }
   }
 
+  private invoiceTotal(invoice: { totalAmountRupiah?: number | null; lines?: Array<{ lineAmountRupiah?: number | null }> }): number {
+    const storedTotal = Number(invoice.totalAmountRupiah ?? 0);
+    const lineTotal = (invoice.lines ?? []).reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0);
+    return storedTotal > 0 ? storedTotal : lineTotal;
+  }
+
 
   async findAll(query: InvoicePaymentsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -69,7 +75,7 @@ export class InvoicePaymentsService {
     this.assertFinanceMutationAllowed(actor);
     const invoice = await this.prisma.invoice.findUnique({
       where: { id: dto.invoiceId },
-      include: { payments: true, stay: true },
+      include: { lines: true, payments: true, stay: true },
     });
 
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
@@ -78,7 +84,7 @@ export class InvoicePaymentsService {
     }
 
     const totalPaid = invoice.payments.reduce((sum, item) => sum + item.amountRupiah, 0);
-    if (totalPaid + dto.amountRupiah > invoice.totalAmountRupiah) {
+    if (totalPaid + dto.amountRupiah > this.invoiceTotal(invoice)) {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
@@ -111,14 +117,14 @@ export class InvoicePaymentsService {
 
     const invoice = await this.prisma.invoice.findUnique({
       where: { id: existing.invoiceId },
-      include: { payments: true },
+      include: { lines: true, payments: true },
     });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status === 'CANCELLED') throw new ConflictException('Update menyebabkan overpayment atau invoice CANCELLED');
 
     const otherPaid = invoice.payments.filter((p) => p.id !== id).reduce((sum, p) => sum + p.amountRupiah, 0);
     const nextAmount = dto.amountRupiah ?? existing.amountRupiah;
-    if (otherPaid + nextAmount > invoice.totalAmountRupiah) {
+    if (otherPaid + nextAmount > this.invoiceTotal(invoice)) {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
@@ -158,8 +164,12 @@ export class InvoicePaymentsService {
   }
 
   private async syncInvoiceStatus(tx: Prisma.TransactionClient, invoiceId: number) {
-    const invoice = await tx.invoice.findUnique({ where: { id: invoiceId }, include: { payments: true } });
+    const invoice = await tx.invoice.findUnique({ where: { id: invoiceId }, include: { lines: true, payments: true } });
     if (!invoice) return;
+
+    if ([InvoiceStatus.CANCELLED, InvoiceStatus.DRAFT].includes(invoice.status as InvoiceStatus)) {
+      return;
+    }
 
     const totalPaid = invoice.payments.reduce((sum, payment) => sum + payment.amountRupiah, 0);
     let status: InvoiceStatus = invoice.status as InvoiceStatus;
@@ -167,7 +177,7 @@ export class InvoicePaymentsService {
 
     if (totalPaid === 0) {
       status = InvoiceStatus.ISSUED;
-    } else if (totalPaid < invoice.totalAmountRupiah) {
+    } else if (totalPaid < this.invoiceTotal(invoice)) {
       status = InvoiceStatus.PARTIAL;
     } else {
       status = InvoiceStatus.PAID;

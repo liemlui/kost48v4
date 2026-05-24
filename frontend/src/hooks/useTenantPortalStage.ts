@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getResource } from '../api/resources';
 import { listMyTenantBookings } from '../api/bookings';
 import type { Stay } from '../types';
+import { getActionableTenantBookings } from '../utils/tenantBookingRules';
 
 export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
@@ -64,8 +65,8 @@ export function useTenantPortalStage() {
       return roomStatus === 'OCCUPIED' ? 'occupied' : 'booking';
     }
 
-    const bookingCount = bookingsQuery.data?.items?.length ?? 0;
-    if (bookingCount > 0) return 'booking';
+    const actionableBookingCount = getActionableTenantBookings(bookingsQuery.data?.items ?? []).length;
+    if (actionableBookingCount > 0) return 'booking';
 
     return 'browsing';
   }, [isTenant, stayQuery.data, bookingsQuery.data]);

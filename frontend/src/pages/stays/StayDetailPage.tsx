@@ -19,21 +19,11 @@ import { useStay } from '../../hooks/useStay';
 import { useInvoices } from '../../hooks/useInvoices';
 import { useMeterReadings } from '../../hooks/useMeterReadings';
 import { formatRupiah } from '../../utils/formatCurrency';
+import { formatDateTimeWib } from '../../utils/dateTime';
 import type { CheckoutRequest } from '../../types';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  if (!dateValue) return '-';
-  try {
-    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
-    if (isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  } catch {
-    return '-';
-  }
+  return formatDateTimeWib(dateValue);
 }
 
 function hasOverdue(invoices: Array<{ dueDate?: string | null; status: string }>) {
@@ -73,12 +63,21 @@ export default function StayDetailPage() {
 
   const { data: stay, isLoading, isError, updateMutation } = useStay(id);
   const invoicesQuery = useInvoices(id, true);
-  const metersQuery = useMeterReadings(stay?.roomId, activeTab === 'meter');
+  const metersQuery = useMeterReadings(stay?.roomId, Boolean(stay?.roomId));
   const invoices = invoicesQuery.data?.items ?? [];
   const overdue = useMemo(() => hasOverdue(invoices), [invoices]);
   const hasUnpaid = useMemo(() => hasUnpaidInvoices(invoices), [invoices]);
   const openInvoiceCount = useMemo(() => stay?.openInvoiceCount ?? invoices.filter((item) => !['PAID', 'CANCELLED'].includes(item.status)).length, [stay?.openInvoiceCount, invoices]);
   const depositLabel = getDepositLabel(stay?.depositStatus);
+  const meterCount = metersQuery.data?.length ?? 0;
+  const latestMeterReadingAt = useMemo(() => {
+    const readings = metersQuery.data ?? [];
+    if (!readings.length) return null;
+    return readings.reduce<string | null>((latest, reading) => {
+      if (!latest) return reading.readingAt;
+      return new Date(reading.readingAt).getTime() > new Date(latest).getTime() ? reading.readingAt : latest;
+    }, null);
+  }, [metersQuery.data]);
 
   const stayId = Number(id);
   const hasValidStayId = Number.isInteger(stayId) && stayId > 0;
@@ -160,7 +159,8 @@ export default function StayDetailPage() {
   const assistantItems: AssistantItem[] = [
     ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Checkout sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Final checkout masih terblokir karena ada invoice open. Selesaikan / bayar / cancel invoice dulu.' : 'Tagihan terlihat clear. Admin dapat finalkan checkout setelah cek kamar dan deposit.', source: 'Checkout readiness', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Checkout', onAction: () => openInvoiceCount > 0 ? setActiveTab('finance') : setShowCompleteModal(true) }] : []),
     ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Tenant mengajukan keluar', message: 'Setujui hanya jika jadwalnya benar. Approval request belum melepas kamar.', source: 'Checkout request' }] : []),
-    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Open invoice memblokir checkout final', message: `${openInvoiceCount} invoice masih open. DRAFT juga ikut memblokir final checkout sesuai guard backend.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => setActiveTab('finance') }] : []),
+    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Tagihan aktif memblokir checkout final', message: `${openInvoiceCount} tagihan masih belum lunas/dibatalkan. DRAFT juga ikut memblokir final checkout sesuai guard backend.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => setActiveTab('finance') }] : []),
+    ...(!meterCount ? [{ id: 'meter-missing', severity: 'WARNING' as const, title: 'Belum ada catatan meter untuk kamar ini', message: 'Renew wajib mencatat meter. Pastikan meter awal dan checkpoint berikutnya tersedia agar biaya listrik/air tidak salah.', source: 'Meter' }] : []),
     ...(stay.depositStatus === 'HELD' && ['COMPLETED', 'CANCELLED'].includes(stay.status) ? [{ id: 'deposit-held', severity: 'HIGH' as const, title: 'Deposit masih ditahan', message: 'Deposit adalah liability; proses refund/forfeit/partial refund agar status tidak menggantung.', source: 'Deposit', actionLabel: 'Proses Deposit', onAction: () => setShowDepositModal(true) }] : []),
   ];
 
@@ -168,6 +168,7 @@ export default function StayDetailPage() {
     { id: 'request', label: 'Pengajuan keluar', description: approvedCheckoutRequest ? 'Sudah disetujui admin.' : pendingCheckoutRequest ? 'Masih menunggu review admin.' : 'Belum ada pengajuan keluar aktif.', state: approvedCheckoutRequest ? 'pass' : pendingCheckoutRequest ? 'warn' : 'info' },
     { id: 'invoice', label: 'Tagihan open', description: openInvoiceCount > 0 ? `${openInvoiceCount} invoice masih belum PAID/CANCELLED.` : 'Tidak ada invoice open dari data yang dimuat.', state: openInvoiceCount > 0 ? 'block' : 'pass' },
     { id: 'deposit', label: 'Deposit', description: `Status deposit: ${depositLabel}.`, state: stay.depositStatus === 'HELD' ? 'warn' : 'pass' },
+    { id: 'meter', label: 'Checkpoint meter', description: meterCount ? `Catatan terakhir: ${formatDateSafe(latestMeterReadingAt)}. Renew akan menghitung selisih meter dari catatan ini.` : 'Belum ada catatan meter. Renew dan final billing rawan salah jika meter belum dicatat.', state: meterCount ? 'pass' : 'warn' },
     { id: 'room', label: 'Status kamar', description: `Kamar sekarang ${stay.room?.status ?? '-'}.`, state: stay.room?.status === 'OCCUPIED' ? 'pass' : 'info' },
   ];
 
@@ -203,7 +204,7 @@ export default function StayDetailPage() {
         />
       ) : null}
 
-      <ReadinessChecklist title="Checkout Readiness" subtitle="Checklist operasional sebelum tombol Checkout Final dipakai." items={readinessItems} />
+      <ReadinessChecklist title="Checkout Readiness" subtitle="Checklist operasional sebelum tombol Checkout Final dipakai. Renew juga wajib memakai checkpoint meter agar tagihan utilitas akurat." items={readinessItems} />
       <LifecycleTimeline title="Lifecycle Stay" subtitle="Alur dari check-in sampai final checkout." steps={timelineSteps} />
 
       <Card className="detail-hero border-0 mb-4">
@@ -227,7 +228,7 @@ export default function StayDetailPage() {
               ) : null}
               {stay.status === 'ACTIVE' && stay.room?.status !== 'RESERVED' ? (
                 <>
-                  <Button onClick={() => setShowCompleteModal(true)}>Finalkan Checkout</Button>
+                  <Button onClick={() => setShowCompleteModal(true)} disabled={openInvoiceCount > 0} title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum final checkout' : undefined}>Finalkan Checkout</Button>
                   <Button variant="outline-success" onClick={() => setShowRenewModal(true)} disabled={showRenewModal}>Perpanjang Masa Sewa</Button>
                   <Button variant="outline-danger" onClick={() => setShowCancelModal(true)} disabled={showCancelModal}>Batalkan</Button>
                 </>
@@ -260,6 +261,10 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{openInvoiceCount}</div>
             </div>
           </div>
+
+          <Alert variant="info" className="mb-3">
+            <strong>Rule renew terbaru:</strong> perpanjangan wajib mencatat meter terbaru. Selisih listrik dan air akan otomatis masuk ke tagihan perpanjangan.
+          </Alert>
 
           {hasUnpaid ? (
             <Alert variant="warning" className="mb-3">
@@ -347,6 +352,8 @@ export default function StayDetailPage() {
                     size="sm"
                     variant="primary"
                     onClick={() => setShowCompleteModal(true)}
+                    disabled={openInvoiceCount > 0}
+                    title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum final checkout' : undefined}
                   >
                     Checkout Final
                   </Button>

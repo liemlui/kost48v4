@@ -1,5 +1,239 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-22 V5.16-G Staff Repair Flow Stable**
+**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+
+
+## 2026-05-24 — V5.23-A Admin IA + Finance Add-on Revenue Foundation
+
+### Type
+
+Frontend IA/product patch. Backend unchanged.
+
+### Added / Changed
+
+- Admin sidebar restored with final 5-menu structure:
+  - Dashboard
+  - Stays & Tenant
+  - Finance
+  - Staff & Tiket
+  - Kamar & Stok
+- Removed admin top workspace tabs as primary navigation.
+- Dashboard repositioned as cross-menu Command Center.
+- Finance IA expanded to include:
+  - Tagihan
+  - Review Pembayaran
+  - Voucher WiFi
+  - Pendapatan Tambahan
+  - Pengeluaran
+  - Riwayat Pembayaran
+- Existing `WifiSale` placed as voucher WiFi revenue stream.
+- Added Finance placeholder/plan page for future ancillary revenue.
+- Expanded expense UI/category copy for kos business context.
+- Expanded tenant ticket categories for kos-specific issue reporting.
+
+### Not Changed
+
+- Backend unchanged.
+- No schema migration.
+- No DB reset.
+- No formal accounting ledger yet.
+- No Balance Sheet claim.
+
+### Verification
+
+- Source ZIP generated.
+- Touched-file syntax checks passed.
+- Full frontend build still requires local environment with dependencies.
+- Runtime/API smoke still required before PASS.
+
+---
+
+## 2026-05-24 — V5.23-B Accounting & Balance Sheet Foundation Planning
+
+### Type
+
+Planning direction / docs sync.
+
+### Added
+
+- Next official planning track:
+  - Accounting Readiness
+  - OPEX / COGS / CAPEX
+  - AncillaryProduct / AncillarySale
+  - CashAccount
+  - ChartOfAccount
+  - JournalEntry / JournalLine
+  - Asset Register
+  - Depreciation
+  - Opening Balance
+  - Balance Sheet readiness
+- Clarified that existing finance is operational summary, not formal accounting.
+
+### Not Allowed
+
+- Do not fake Balance Sheet.
+- Do not treat deposit as revenue.
+- Do not reset DB.
+- Do not force full double-entry in one patch without plan.
+- Do not create standalone Reports menu until finance/reporting model is concrete.
+
+
+## 2026-05-24 — V5.20 First Paid Room Priority + Fast AutoOps
+
+### Type
+
+Backend + frontend business-rule patch, AutoOps, payment UX, urgent UI, and docs sync.
+
+### Added
+
+- AutoOps module for deterministic business automation.
+- Fast operational deadlines:
+  - booking/payment SLA 3 hours,
+  - payment review urgent 1 hour,
+  - payment review escalate 3 hours,
+  - payment review max 6 hours,
+  - invoice overdue 24 hours,
+  - old late tenant vacate rule 3 hours.
+- First-paid room priority contract.
+- One-step tenant payment proof flow: `Bayar & Kirim Bukti`.
+- Auto-cancel expired unpaid booking.
+- Auto-release orphan RESERVED rooms.
+- Urgent UI emphasis for special/high-risk cases.
+- Dedup direction for repeated assistant/alert copy.
+
+### Changed
+
+- Booking/minat no longer means room fully locked.
+- Tenant/public copy now warns that room is secured only after payment is valid and approved.
+- Renew/no-debt copy is more explicit.
+- Admin/Owner dashboards should prioritize business blockers, not duplicated decorative alerts.
+
+### Not Allowed
+
+- AutoOps must not approve payment.
+- AutoOps must not approve renew.
+- AutoOps must not final checkout.
+- AutoOps must not refund/deduct deposit automatically.
+- AutoOps must not create official inventory movements.
+
+### Verification
+
+- Source ZIP generated.
+- Static ZIP integrity/source generation completed during patch.
+- Local build/UAT still required before FULL PASS.
+
+---
+
+## 2026-05-23 — V5.19 Renew Meter Utility Checkpoint
+
+### Type
+
+Backend lifecycle hardening + frontend renew/payment/checkout UX.
+
+### Added / Fixed
+
+- Renew approval requires electricity/water meter checkpoint.
+- Renewal invoice includes rent + electricity + water.
+- Meter delta is calculated from previous reading.
+- Checkout remains blocked by open invoice.
+- Staff removed from sensitive lifecycle actions.
+- Runtime UAT from user confirmed:
+  - renew without meter fails,
+  - renew with meter succeeds,
+  - renewal invoice has 3 lines,
+  - checkout blocked while invoice open,
+  - final checkout succeeds after clear,
+  - room returns AVAILABLE,
+  - deposit refund succeeds.
+
+### Verification
+
+- Backend runtime UAT PASS from local user log.
+- Frontend build was user-confirmed PASS for V5.19B/C before V5.20 work.
+
+---
+
+## 2026-05-22 — V5.17-D Routine Work Cards + Inventory/Staff UX Push
+
+### Type
+
+Frontend staff workspace UX polish.
+
+### Added / Updated
+
+- Restored staff checklist harian/mingguan/bulanan as professional work cards.
+- Added progress-style checklist summary without new chart dependency.
+- Improved assistant strip so it reads active work/checklist state.
+- Improved inventory health UX:
+  - stock habis/menipis/aman is computed from quantity/minimum stock.
+  - staff no longer manually chooses stock health status.
+- Improved staff room/card UX.
+- Improved staff report modal readability and progressive flow.
+- Improved admin staff field report decision UI.
+- Added `frontend/src/utils/inventoryHealth.ts`.
+
+### Verified
+
+- User manual check: “Sudah saya cek sip bagus pass.”
+- Commit pushed:
+
+```text
+484a288 feat(staff): polish workspace inventory and routine checklist ux
+```
+
+### Not Changed
+
+- Backend unchanged for V5.17-D.
+- No new chart dependency.
+- No dark mode.
+- No DB reset.
+- Generated Prisma noise restored and not committed.
+
+---
+
+## 2026-05-22 — V5.17-C Inventory Intelligence
+
+### Type
+
+Frontend rule-intelligence UX.
+
+### Changed
+
+- Inventory stock health is now treated as computed information from `qtyOnHand/minQty`.
+- Staff warehouse report no longer treats “stok habis/menipis” as manual condition input.
+- Warehouse flow is split:
+  - physical condition report,
+  - stock health warning,
+  - restock/action suggestion.
+- Assistant highlights stock risk and restock blocker.
+
+### Not Changed
+
+- No backend schema change.
+- No official InventoryMovement mutation by staff.
+
+---
+
+## 2026-05-22 — V5.17-B Clean Blue Staff UI + On-Flow Staff/Admin Repair UX
+
+### Type
+
+Frontend UI/UX polish.
+
+### Changed
+
+- Staff room cards became clickable full cards.
+- Removed duplicate “Buka” / “Perlu cek” actions when they navigated to the same place.
+- Cleaner blue design direction applied.
+- Font weights reduced to improve readability.
+- Low-contrast text/badge issues reduced.
+- Admin review decision input changed from plain select to more on-flow choices.
+
+### Not Changed
+
+- No backend change.
+- No new UI dependency.
+
+---
 
 ## 2026-05-22 — V5.16-G Staff Ticket List Hard Fix
 
@@ -33,8 +267,7 @@ Manual UAT:
 
 ### Not Changed
 
-- No schema change.
-- No frontend source change required.
+- No frontend source change required for V5.16-G itself.
 - No UAT script file added.
 - No DB reset.
 
@@ -191,3 +424,38 @@ Product/UX/architecture planning docs sync only.
 - No frontend source code changed by docs pack.
 - No schema migration applied.
 - No DB reset.
+
+
+## 2026-05-24 — V5.23-B1 Backend Accounting Foundation Pre-ACT Docs Lock
+
+### Type
+
+Docs/context sync only. No backend/frontend source patch in this docs package.
+
+### Added
+
+- Consolidated backend audit findings from ChatGPT and Cline/DeepSeek.
+- Clean backend source snapshot reference: `backend_latest_for_accounting_act_CLEAN.zip`.
+- Pre-ACT verdict: READY FOR ACT B1 with additive-only scope.
+- B1 Accounting Foundation locked scope: COA, CashAccount, AccountingPeriod, OpeningBalance, JournalEntry/Line, readiness, default COA seed, trial balance draft, unmapped transaction scanner.
+- Allowed and forbidden file lists for ACT B1.
+- Report honesty rule: existing reports must be marked operational approximation.
+- Roadmap correction: TenantDepositLedger is deferred; Stay deposit fields must not be removed/deprecated yet.
+- New-chat execution prompt file for the next ChatGPT ACT session.
+
+### Not Changed
+
+- No backend source code changed by this docs sync.
+- No frontend source code changed by this docs sync.
+- No schema migration applied.
+- No DB reset.
+- No auto-posting implemented.
+- No payment/stay/checkout/renew flow changed.
+
+### Verification
+
+```text
+Docs package generated only.
+Code build/smoke not applicable to this docs sync.
+Next ACT must run backend build and API smoke before claiming PASS.
+```

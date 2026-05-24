@@ -26,6 +26,7 @@ import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
 
 interface RoomPricingSnapshot {
   id: number;
@@ -178,14 +179,23 @@ export class TenantBookingsService {
         const room = lockedRooms[0];
         if (!room) throw new NotFoundException('Kamar tidak ditemukan');
         if (!room.isActive) throw new ConflictException('Kamar tidak aktif untuk pemesanan');
-        if (room.status !== RoomStatus.AVAILABLE) throw new ConflictException('Kamar tidak tersedia untuk dipesan');
+        if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
+          throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia');
+        }
 
-        const existingRoomStay = await tx.stay.findFirst({
-          where: { roomId: dto.roomId, status: StayStatus.ACTIVE as any },
+        const existingPaidOrOccupiedStay = await tx.stay.findFirst({
+          where: {
+            roomId: dto.roomId,
+            status: StayStatus.ACTIVE as any,
+            OR: [
+              { initialMetersPromotedAt: { not: null } },
+              { room: { status: RoomStatus.OCCUPIED as any } },
+            ],
+          },
           select: { id: true },
         });
-        if (existingRoomStay) {
-          throw new ConflictException('Kamar sudah memiliki booking atau stay aktif lain');
+        if (existingPaidOrOccupiedStay) {
+          throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
 
         const agreedRentAmountRupiah = this.resolveRent(room, dto.pricingTerm);
@@ -334,11 +344,15 @@ export class TenantBookingsService {
             roomId: booking.roomId,
             status: StayStatus.ACTIVE as any,
             NOT: { id: stayId },
+            OR: [
+              { initialMetersPromotedAt: { not: null } },
+              { room: { status: RoomStatus.OCCUPIED as any } },
+            ],
           },
           select: { id: true },
         });
         if (conflictingRoomStay) {
-          throw new ConflictException('Kamar masih memiliki stay aktif lain');
+          throw new ConflictException('Kamar sudah aktif ditempati. Tenant baru belum boleh bayar sampai kamar siap huni.');
         }
 
         const existingInvoice = await tx.invoice.findFirst({
@@ -399,6 +413,7 @@ export class TenantBookingsService {
         await tx.invoice.update({
           where: { id: invoice.id },
           data: {
+            totalAmountRupiah: dto.agreedRentAmountRupiah,
             status: 'ISSUED' as any,
             issuedAt: new Date(),
           },
@@ -716,13 +731,19 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           (SELECT i.id FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1) AS "latestInvoiceId",
           (SELECT i."invoiceNumber" FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1) AS "latestInvoiceNumber",
           (SELECT i.status FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1) AS "latestInvoiceStatus",
-          (SELECT i."totalAmountRupiah" FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1) AS "invoiceTotalAmountRupiah",
+          (SELECT COALESCE(NULLIF(i."totalAmountRupiah", 0), (
+             SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id
+           ))
+           FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1) AS "invoiceTotalAmountRupiah",
           (SELECT COALESCE(SUM(ip."amountRupiah")::int, 0)
            FROM "InvoicePayment" ip
            WHERE ip."invoiceId" = (
              SELECT i.id FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1
            )) AS "invoicePaidAmountRupiah",
-          (SELECT GREATEST(i."totalAmountRupiah" - COALESCE(
+          (SELECT GREATEST(
+             COALESCE(NULLIF(i."totalAmountRupiah", 0), (
+               SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id
+             )) - COALESCE(
              (SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0)
            FROM "Invoice" i WHERE i."stayId" = s.id ORDER BY i.id DESC LIMIT 1
           ) AS "invoiceRemainingAmountRupiah"
@@ -924,15 +945,13 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     return startOfDay(result);
   }
 
-  private calculateDueDate(periodEnd: Date): Date {
-    const dueDate = new Date(periodEnd);
-    dueDate.setDate(dueDate.getDate() + 3);
-    return dueDate;
+  private calculateDueDate(_periodEnd: Date): Date {
+    // KOST48 no-debt rule: invoice is due from issue/create time, not from the rental period end.
+    return hoursAfter(new Date(), AUTO_OPS_DEADLINES.INVOICE_DUE_AFTER_HOURS);
   }
 
   private calculateBookingExpiry(_checkInDate: Date): Date {
-    const now = new Date();
-    return new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    return hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS);
   }
 
   private async resolveTenantPortalUser(tenantId: number): Promise<number | null> {

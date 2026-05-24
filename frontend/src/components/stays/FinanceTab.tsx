@@ -5,6 +5,7 @@ import { Invoice, Stay } from '../../types';
 import CreateInvoiceModal from './CreateInvoiceModal';
 import InvoiceDetailDrawer from './InvoiceDetailDrawer';
 import CurrencyDisplay from '../common/CurrencyDisplay';
+import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import EmptyState from '../common/EmptyState';
 import { formatDateSafe, formatPeriod } from '../../pages/resources/simpleCrudHelpers';
@@ -54,7 +55,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
   const openCancelInvoiceModal = (invoice: Invoice) => {
     setActionError('');
     setCancelTarget(invoice);
-    setCancelReason(`Dibatalkan dari stay ${stay.id}`);
+    setCancelReason('');
   };
 
   const handleConfirmCancelInvoice = async () => {
@@ -195,7 +196,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                       <div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div>
                       <div className="small text-muted">{periodDisplay}</div>
                     </td>
-                    <td><CurrencyDisplay amount={invoice.totalAmountRupiah} /></td>
+                    <td><CurrencyDisplay amount={getInvoiceTotalAmount(invoice)} /></td>
                     <td><CurrencyDisplay amount={paidAmount(invoice)} /></td>
                     <td className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
                     <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status)} /></td>

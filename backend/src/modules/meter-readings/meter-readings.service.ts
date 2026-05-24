@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
@@ -12,6 +12,76 @@ import { UtilityType } from '../../common/enums/app.enums';
 export class MeterReadingsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
+  private parseReadingValue(value: string | Prisma.Decimal, label = 'meter') {
+    try {
+      const decimalValue = value instanceof Prisma.Decimal ? value : new Prisma.Decimal(value);
+      if (decimalValue.lt(0)) {
+        throw new BadRequestException(`Angka ${label} tidak boleh negatif`);
+      }
+      return decimalValue;
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`Angka ${label} tidak valid`);
+    }
+  }
+
+  private async assertReadingIsChronological(params: {
+    roomId: number;
+    utilityType: UtilityType;
+    readingAt: Date;
+    readingValue: Prisma.Decimal;
+    excludeId?: number;
+  }) {
+    if (Number.isNaN(params.readingAt.getTime())) {
+      throw new BadRequestException('Tanggal catat meter tidak valid');
+    }
+
+    const duplicate = await this.prisma.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: params.readingAt,
+        ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
+      },
+      select: { id: true },
+    });
+    if (duplicate) {
+      throw new ConflictException('Catatan meter untuk tanggal ini sudah ada');
+    }
+
+    const previous = await this.prisma.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: { lt: params.readingAt },
+        ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
+      },
+      orderBy: { readingAt: 'desc' },
+    });
+
+    if (previous && params.readingValue.lt(previous.readingValue)) {
+      throw new ConflictException(
+        `Angka meter tidak boleh lebih kecil dari catatan sebelumnya (${previous.readingValue.toString()})`,
+      );
+    }
+
+    const next = await this.prisma.meterReading.findFirst({
+      where: {
+        roomId: params.roomId,
+        utilityType: params.utilityType,
+        readingAt: { gt: params.readingAt },
+        ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
+      },
+      orderBy: { readingAt: 'asc' },
+    });
+
+    if (next && params.readingValue.gt(next.readingValue)) {
+      throw new ConflictException(
+        `Angka meter tidak boleh lebih besar dari catatan setelahnya (${next.readingValue.toString()})`,
+      );
+    }
+  }
+
   async findAll(query: MeterReadingsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
     const where: Prisma.MeterReadingWhereInput = {
@@ -21,7 +91,7 @@ export class MeterReadingsService {
         query.from || query.to
           ? { readingAt: { gte: query.from ? new Date(query.from) : undefined, lte: query.to ? new Date(query.to) : undefined } }
           : undefined,
-      ].filter(Boolean),
+      ].filter(Boolean) as Prisma.MeterReadingWhereInput[],
     };
     const [items, totalItems] = await this.prisma.$transaction([
       this.prisma.meterReading.findMany({
@@ -43,32 +113,69 @@ export class MeterReadingsService {
   }
 
   async create(dto: CreateMeterReadingDto, actor: CurrentUserPayload) {
-    const room = await this.prisma.room.findUnique({ where: { id: Number(dto.roomId) } });
+    const roomId = Number(dto.roomId);
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
-    const createData: Prisma.MeterReadingCreateInput = {
-      room: { connect: { id: Number(dto.roomId) } },
-      utilityType: dto.utilityType as UtilityType,
-      readingAt: new Date(dto.readingAt),
-      readingValue: dto.readingValue,
-      note: dto.note,
-      recordedBy: { connect: { id: actor.id } },
-    };
-    const created = await this.prisma.meterReading.create({ data: createData });
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(created.id), newData: created });
-    return created;
+
+    const readingAt = new Date(dto.readingAt);
+    const readingValue = this.parseReadingValue(dto.readingValue, 'meter');
+    const utilityType = dto.utilityType as UtilityType;
+
+    await this.assertReadingIsChronological({ roomId, utilityType, readingAt, readingValue });
+
+    try {
+      const created = await this.prisma.meterReading.create({
+        data: {
+          room: { connect: { id: roomId } },
+          utilityType,
+          readingAt,
+          readingValue,
+          note: dto.note,
+          recordedBy: { connect: { id: actor.id } },
+        },
+      });
+      await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(created.id), newData: created });
+      return created;
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Catatan meter untuk tanggal ini sudah ada');
+      }
+      throw error;
+    }
   }
 
   async update(id: number, dto: UpdateMeterReadingDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.meterReading.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Meter reading tidak ditemukan');
-    const updateData: Prisma.MeterReadingUpdateInput = {
-      readingAt: dto.readingAt ? new Date(dto.readingAt) : undefined,
-      readingValue: dto.readingValue ?? undefined,
-      note: dto.note ?? undefined,
-      recordedBy: { connect: { id: actor.id } },
-    };
-    const updated = await this.prisma.meterReading.update({ where: { id }, data: updateData });
-    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'MeterReading', entityId: String(updated.id), oldData: existing, newData: updated });
-    return updated;
+
+    const readingAt = dto.readingAt ? new Date(dto.readingAt) : existing.readingAt;
+    const readingValue = dto.readingValue ? this.parseReadingValue(dto.readingValue, 'meter') : existing.readingValue;
+
+    await this.assertReadingIsChronological({
+      roomId: existing.roomId,
+      utilityType: existing.utilityType as UtilityType,
+      readingAt,
+      readingValue,
+      excludeId: id,
+    });
+
+    try {
+      const updated = await this.prisma.meterReading.update({
+        where: { id },
+        data: {
+          readingAt: dto.readingAt ? readingAt : undefined,
+          readingValue: dto.readingValue ? readingValue : undefined,
+          note: dto.note ?? undefined,
+          recordedBy: { connect: { id: actor.id } },
+        },
+      });
+      await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'MeterReading', entityId: String(updated.id), oldData: existing, newData: updated });
+      return updated;
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Catatan meter untuk tanggal ini sudah ada');
+      }
+      throw error;
+    }
   }
 }

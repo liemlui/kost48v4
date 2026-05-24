@@ -21,8 +21,14 @@ function formatMoneyPreview(rawDigits: string) {
   }).format(num);
 }
 
+function roundUpToNearest(amount: number, nearest = 5000) {
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return Math.ceil(amount / nearest) * nearest;
+}
+
 function resolveRateFromPricingTerm(booking: Stay | null) {
   if (!booking?.room || !booking?.pricingTerm) return null;
+  const monthlyRate = Number(booking.room.monthlyRateRupiah ?? 0);
   switch (booking.pricingTerm) {
     case 'DAILY':
       return booking.room.dailyRateRupiah ?? null;
@@ -32,6 +38,10 @@ function resolveRateFromPricingTerm(booking: Stay | null) {
       return booking.room.biWeeklyRateRupiah ?? null;
     case 'MONTHLY':
       return booking.room.monthlyRateRupiah ?? null;
+    case 'SMESTERLY':
+      return roundUpToNearest(monthlyRate * 5.5);
+    case 'YEARLY':
+      return roundUpToNearest(monthlyRate * 10);
     default:
       return booking.agreedRentAmountRupiah ?? null;
   }

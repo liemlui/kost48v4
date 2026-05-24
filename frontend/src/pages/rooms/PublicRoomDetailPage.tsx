@@ -1,22 +1,126 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';
+import { Accordion, Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getPublicRoomDetail } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
-import { CompactMetrics, type MetricChip } from '../../components/command-center';
-import type { PublicRoom, RoomFacility } from '../../types';
+import type { PricingTerm, PublicRoom } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
-import FacilityList from '../../components/rooms/FacilityList';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 
-function SafeImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const [failed, setFailed] = useState(false);
-  const resolved = src ? resolveAbsoluteFileUrl(src) : null;
-  if (!resolved || failed) return null;
-  return <img src={resolved} alt={alt} className={className} onError={() => setFailed(true)} />;
+type RoomFeatureKind = 'bathroom' | 'cooling' | 'size';
+
+type TermRow = {
+  term: PricingTerm;
+  label: string;
+  rent: number;
+  utilitiesIncluded: boolean;
+};
+
+function normalizeText(value: unknown) {
+  return String(value ?? '').toLowerCase();
+}
+
+function allRoomText(room: PublicRoom) {
+  return [
+    room.code,
+    room.name,
+    room.notes,
+    room.floor,
+    ...(room.facilities ?? []).map((facility) => `${facility.name} ${facility.category ?? ''} ${facility.note ?? ''}`),
+  ].map(normalizeText).join(' ');
+}
+
+function getBathroomType(room: PublicRoom) {
+  const text = allRoomText(room);
+  if (/km\s*dalam|kamar mandi dalam|mandi dalam|private bathroom|bathroom dalam|toilet dalam/.test(text)) return 'Dalam';
+  return 'Luar';
+}
+
+function getCoolingType(room: PublicRoom) {
+  const text = allRoomText(room);
+  if (/\bac\b|air conditioner|pendingin ruangan/.test(text)) return 'AC';
+  return 'Kipas angin';
+}
+
+function getRoomSize(room: PublicRoom) {
+  const text = allRoomText(room);
+  if (/besar|large|deluxe|luas|vip|premium|superior/.test(text)) return 'Besar';
+  return 'Standar';
+}
+
+function getFeature(room: PublicRoom, kind: RoomFeatureKind) {
+  if (kind === 'bathroom') return { icon: '🚿', label: 'Kamar mandi', value: getBathroomType(room) };
+  if (kind === 'cooling') return { icon: getCoolingType(room) === 'AC' ? '❄️' : '🌬️', label: 'Pendingin', value: getCoolingType(room) };
+  return { icon: '📐', label: 'Ukuran', value: getRoomSize(room) };
+}
+
+function getVisibleAmenities(room: PublicRoom) {
+  const hidden = /kamar mandi|km\s|toilet|wc|ac|kipas|pendingin|standar|besar|ukuran|lantai/i;
+  const names = (room.facilities ?? [])
+    .filter((facility) => facility.publicVisible !== false)
+    .map((facility) => facility.name?.trim())
+    .filter((name): name is string => Boolean(name && !hidden.test(name)));
+  const unique = Array.from(new Set(names));
+  return unique.length ? unique.slice(0, 8) : ['Kasur', 'Harga transparan'];
+}
+
+function getBusinessHighlight(room: PublicRoom) {
+  const raw = (room.notes ?? '').trim();
+  if (raw && !/seed|dummy|test|uat|\.ps1|auto[- ]?created|checkout[_ -]?guard|script|developer/i.test(raw)) return raw;
+  const bathroom = getBathroomType(room).toLowerCase();
+  const cooling = getCoolingType(room).toLowerCase();
+  return `Kamar siap dipilih dengan kamar mandi ${bathroom}, ${cooling}, dan informasi harga yang transparan.`;
+}
+
+function getTermRent(room: PublicRoom, term: PricingTerm) {
+  if (term === 'DAILY') return Number(room.pricing?.dailyRateRupiah ?? 0);
+  if (term === 'WEEKLY') return Number(room.pricing?.weeklyRateRupiah ?? 0);
+  if (term === 'MONTHLY') return Number(room.pricing?.monthlyRateRupiah ?? room.highlightedRateRupiah ?? 0);
+  const monthly = Number(room.pricing?.monthlyRateRupiah ?? 0);
+  return monthly > 0 ? calculateRentByPricingTerm(monthly, term) : 0;
+}
+
+function buildTermRows(room: PublicRoom): TermRow[] {
+  const availableTerms = room.availablePricingTerms?.length ? room.availablePricingTerms : [...ALL_PRICING_TERMS];
+  const rows = availableTerms
+    .map((term) => ({
+      term,
+      label: getStatusLabel(term),
+      rent: getTermRent(room, term),
+      utilitiesIncluded: isUtilitiesIncludedForPricingTerm(term),
+    }))
+    .filter((row) => row.rent > 0);
+
+  if (rows.length) return rows;
+
+  const fallback = Number(room.highlightedRateRupiah ?? 0);
+  return fallback > 0 ? [{ term: room.highlightedPricingTerm ?? 'MONTHLY', label: getStatusLabel(room.highlightedPricingTerm ?? 'MONTHLY'), rent: fallback, utilitiesIncluded: false }] : [];
+}
+
+function getDefaultTerm(rows: TermRow[]) {
+  return rows.find((row) => row.term === 'MONTHLY')?.term ?? rows[0]?.term ?? 'MONTHLY';
+}
+
+function buildWhatsAppUrl(room: PublicRoom) {
+  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
+  const roomCode = room.code || `Kamar #${room.id}`;
+  const message = `Halo Admin KOST48, saya ingin tanya detail kamar ${roomCode}. Apakah fotonya bisa dikirim?`;
+  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+function DetailFeatureCard({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="room-detail-feature-card">
+      <span aria-hidden="true">{icon}</span>
+      <div>
+        <small>{label}</small>
+        <strong>{value}</strong>
+      </div>
+    </div>
+  );
 }
 
 function RoomImageBlock({ room }: { room: PublicRoom }) {
@@ -26,35 +130,51 @@ function RoomImageBlock({ room }: { room: PublicRoom }) {
 
   if (!resolvedImages.length) {
     return (
-      <div className="public-room-placeholder public-room-detail-placeholder">
-        <div className="public-room-placeholder-mark">{room.code.slice(0, 3).toUpperCase()}</div>
-        <div className="small text-muted mt-2">Galeri kamar belum tersedia</div>
-        <div className="small text-muted">Foto akan ditampilkan setelah tersedia.</div>
+      <div className="room-detail-photo-empty">
+        <div className="room-detail-photo-empty-icon">📷</div>
+        <div>
+          <strong>Foto kamar segera hadir</strong>
+          <span>Admin bisa mengirim foto terbaru lewat WhatsApp sebelum kamu booking.</span>
+        </div>
+        <a href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+          Minta foto via WhatsApp
+        </a>
       </div>
     );
   }
 
-  if (resolvedImages.length === 1) {
-    return <SafeImage src={resolvedImages[0]} alt={room.code} className="public-room-image" />;
-  }
-
   return (
-    <div>
+    <div className="room-detail-gallery">
       <Carousel
         interval={null}
-        indicators={resolvedImages.length > 1}
+        indicators={false}
         activeIndex={activeIndex}
         onSelect={(index) => setActiveIndex(index ?? 0)}
       >
         {resolvedImages.map((imageUrl, index) => (
           <Carousel.Item key={`${room.id}-${index}`}>
-            <SafeImage src={imageUrl} alt={`${room.code}-${index + 1}`} className="public-room-image" />
+            <img src={imageUrl} alt={`Foto kamar ${room.code} ${index + 1}`} className="room-detail-gallery-image" />
           </Carousel.Item>
         ))}
       </Carousel>
-      <div className="d-flex justify-content-between align-items-center mt-2">
-        <div className="small text-muted">Foto {activeIndex + 1}/{resolvedImages.length}</div>
-        <div className="small text-muted">Geser untuk melihat foto lainnya</div>
+      {resolvedImages.length > 1 ? (
+        <div className="room-detail-gallery-thumbs" aria-label="Pilih foto kamar">
+          {resolvedImages.map((imageUrl, index) => (
+            <button
+              key={`${room.id}-thumb-${index}`}
+              type="button"
+              className={index === activeIndex ? 'active' : ''}
+              onClick={() => setActiveIndex(index)}
+              aria-label={`Lihat foto ${index + 1}`}
+            >
+              <img src={imageUrl} alt="" />
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="room-detail-gallery-caption">
+        <span>Foto {activeIndex + 1}/{resolvedImages.length}</span>
+        {resolvedImages.length > 1 ? <span>Gunakan panah atau thumbnail untuk melihat foto lain.</span> : null}
       </div>
     </div>
   );
@@ -64,6 +184,7 @@ export default function PublicRoomDetailPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const id = Number(roomId);
+  const [selectedTerm, setSelectedTerm] = useState<PricingTerm>('MONTHLY');
 
   const query = useQuery({
     queryKey: ['public-room-detail', id],
@@ -72,29 +193,27 @@ export default function PublicRoomDetailPage() {
   });
 
   const room = query.data;
-  const metrics: MetricChip[] = room ? [
-    { id: 'status', label: 'Status kamar', value: room.isAvailable ? 'Tersedia' : 'Tidak tersedia', helper: room.isAvailable ? 'Bisa diajukan booking' : 'Belum bisa dipesan', icon: '🛏️', status: room.isAvailable ? 'SUCCESS' : 'WARNING' },
-    { id: 'rate', label: 'Tarif utama', value: <CurrencyDisplay amount={room.highlightedRateRupiah} /> as any, helper: room.highlightedPricingTerm ? getStatusLabel(room.highlightedPricingTerm) : 'Tarif pilihan utama', icon: '💙', status: 'INFO' },
-    { id: 'deposit', label: 'Deposit default', value: <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /> as any, helper: 'Dana jaminan, bukan biaya hangus', icon: '🛡️', status: 'SUCCESS' },
-    { id: 'terms', label: 'Term tersedia', value: room.availablePricingTerms?.length ?? 0, helper: 'Harian/mingguan/bulanan sesuai data', icon: '📅', status: 'INFO' },
-  ] : [];
+  const termRows = useMemo(() => (room ? buildTermRows(room) : []), [room]);
+  const defaultTerm = useMemo(() => getDefaultTerm(termRows), [termRows]);
+  const effectiveTerm = termRows.some((row) => row.term === selectedTerm) ? selectedTerm : defaultTerm;
+  const selectedRow = termRows.find((row) => row.term === effectiveTerm) ?? termRows[0];
+
+  const handleBook = () => {
+    if (!room?.isAvailable) return;
+    navigate(`/booking/${id}`, { state: { room, pricingTerm: effectiveTerm } });
+  };
 
   return (
-    <div className="public-page-shell">
+    <div className="public-page-shell room-detail-redesign-shell">
       <Container fluid="xl" className="py-4 py-lg-5">
-        <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
+        <div className="room-detail-topline mb-4">
           <div>
-            <div className="page-eyebrow">✦ Detail Kamar — Kos48 Surabaya</div>
+            <div className="page-eyebrow">Detail Kamar — KOST48 Surabaya</div>
             <h1 className="mb-1">{room?.code ?? 'Detail kamar'}</h1>
-            <div className="text-muted">Lihat foto, fasilitas, tarif, deposit, dan langkah booking sebelum mengajukan kamar ini.</div>
+            <div className="text-muted">Lihat foto, fasilitas, term sewa, dan deposit sebelum mengajukan pemesanan.</div>
           </div>
           <div className="d-flex gap-2 flex-wrap">
-            <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke Katalog</Link>
-            {room?.isAvailable ? (
-              <Button onClick={() => navigate(`/booking/${id}`, { state: { room } })}>Pesan Sekarang</Button>
-            ) : (
-              <Button disabled variant="secondary">Kamar Tidak Tersedia</Button>
-            )}
+            <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke daftar kamar</Link>
           </div>
         </div>
 
@@ -104,130 +223,159 @@ export default function PublicRoomDetailPage() {
 
         {room ? (
           <>
-            <CompactMetrics metrics={metrics} />
-            <Card className="content-card border-0 mb-4">
-              <Card.Body>
-                <div className="table-meta mb-2">
-                  <div>
-                    <div className="panel-title">Cara booking kamar ini</div>
-                    <div className="panel-subtitle">Alur singkat supaya calon tenant tahu apa yang terjadi setelah klik Pesan Sekarang.</div>
-                  </div>
+            <Row className="g-4 align-items-start">
+              <Col lg={8}>
+                <div className="d-grid gap-4">
+                  <Card className="content-card border-0 room-detail-section-card">
+                    <Card.Body>
+                      <RoomImageBlock room={room} />
+                    </Card.Body>
+                  </Card>
+
+                  <Card className="content-card border-0 room-detail-section-card">
+                    <Card.Body>
+                      <div className="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                        <div>
+                          <h2 className="room-detail-section-title">Spesifikasi kamar</h2>
+                          <p className="room-detail-section-subtitle mb-0">Informasi utama yang biasanya paling menentukan sebelum memilih kamar.</p>
+                        </div>
+                        <StatusBadge status={room.status} />
+                      </div>
+
+                      <div className="room-detail-feature-grid mb-3">
+                        <DetailFeatureCard {...getFeature(room, 'bathroom')} />
+                        <DetailFeatureCard {...getFeature(room, 'cooling')} />
+                        <DetailFeatureCard {...getFeature(room, 'size')} />
+                        <DetailFeatureCard icon="🛡️" label="Deposit" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
+                      </div>
+
+                      <div className="room-detail-amenities" aria-label="Fasilitas kamar">
+                        {getVisibleAmenities(room).map((name) => <span key={name}>{name}</span>)}
+                      </div>
+
+                      <Alert variant="light" className="room-detail-clean-note mt-3 mb-0">
+                        {getBusinessHighlight(room)}
+                      </Alert>
+                    </Card.Body>
+                  </Card>
+
+                  <Card className="content-card border-0 room-detail-section-card">
+                    <Card.Body>
+                      <div className="d-flex justify-content-between gap-3 flex-wrap mb-3">
+                        <div>
+                          <h2 className="room-detail-section-title">Daftar tarif lengkap</h2>
+                          <p className="room-detail-section-subtitle mb-0">Pilih term di panel kanan untuk menyorot tarif yang ingin kamu pakai.</p>
+                        </div>
+                        <Badge className="room-detail-popular-badge">Bulanan biasanya paling populer</Badge>
+                      </div>
+
+                      <Table responsive className="room-detail-rate-table mb-0">
+                        <thead>
+                          <tr>
+                            <th>Term sewa</th>
+                            <th className="text-end">Tarif</th>
+                            <th>Listrik & air</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {termRows.map((row) => {
+                            const isActive = row.term === effectiveTerm;
+                            return (
+                              <tr key={row.term} className={isActive ? 'is-active' : row.term === 'MONTHLY' ? 'is-recommended' : ''}>
+                                <td>
+                                  <button type="button" onClick={() => setSelectedTerm(row.term)} className="room-detail-rate-term-button">
+                                    {row.label}
+                                  </button>
+                                </td>
+                                <td className="text-end fw-semibold"><CurrencyDisplay amount={row.rent} showZero={false} /></td>
+                                <td>
+                                  <span className={`room-detail-utility-badge ${row.utilitiesIncluded ? 'included' : 'metered'}`}>
+                                    {row.utilitiesIncluded ? 'Termasuk' : 'Meteran terpisah'}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+
+                      <Alert variant="light" className="room-detail-disclaimer mt-3 mb-0">
+                        Deposit awal dan tarif utilitas akan mengikuti data kamar serta keputusan admin saat pemesanan disetujui.
+                      </Alert>
+                    </Card.Body>
+                  </Card>
+
+                  <Accordion className="room-detail-booking-accordion">
+                    <Accordion.Item eventKey="booking">
+                      <Accordion.Header>Cara booking kamar ini</Accordion.Header>
+                      <Accordion.Body>
+                        <div className="booking-stepper-lite">
+                          <div><strong>1. Ajukan pemesanan</strong><span>Pilih term sewa, isi tanggal mulai tinggal, lalu kirim pemesanan.</span></div>
+                          <div><strong>2. Admin review</strong><span>Admin mengecek kamar dan menyiapkan tagihan awal.</span></div>
+                          <div><strong>3. Bayar & kirim bukti</strong><span>Jika admin membuka tagihan awal, pembayaran dan bukti dikirim dalam satu langkah lewat portal.</span></div>
+                        </div>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
                 </div>
-                <div className="booking-stepper-lite">
-                  <div><strong>1. Ajukan booking</strong><span>Isi data dan tanggal check-in.</span></div>
-                  <div><strong>2. Admin review</strong><span>Kamar dicek dan tagihan awal disiapkan.</span></div>
-                  <div><strong>3. Bayar tagihan awal</strong><span>Upload bukti pembayaran lewat portal.</span></div>
-                </div>
-              </Card.Body>
-            </Card>
-            <Row className="g-4">
-              <Col lg={7}>
-                <Card className="content-card border-0 h-100">
-                  <Card.Body>
-                    <RoomImageBlock room={room} />
-                  </Card.Body>
-                </Card>
               </Col>
-              <Col lg={5}>
-                <Card className="content-card border-0 h-100">
-                  <Card.Body className="d-flex flex-column gap-3">
-                    <div className="d-flex justify-content-between align-items-start gap-3">
+
+              <Col lg={4}>
+                <Card className="content-card border-0 room-detail-booking-card">
+                  <Card.Body>
+                    <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
                       <div>
-                        <div className="fw-semibold fs-4">{room.code}</div>
-                        <div className="text-muted">{room.name || 'Nama kamar belum tersedia'}</div>
+                        <div className="room-detail-booking-label">Kamar dipilih</div>
+                        <h2>{room.name || `Kamar ${room.code}`}</h2>
+                        <div className="text-muted small">{room.code}</div>
                       </div>
                       <StatusBadge status={room.status} />
                     </div>
 
-                     <div className="d-flex flex-wrap gap-2">
-                      {room.floor ? <Badge bg="secondary" className="status-badge">Lantai {room.floor}</Badge> : null}
-                      {(room.availablePricingTerms ?? []).map((term) => (
-                        <Badge bg="light" text="dark" key={term} className="border">
-                          {getStatusLabel(term)}{isUtilitiesIncludedForPricingTerm(term) ? ' · flat' : ''}
-                        </Badge>
-                      ))}
+                    <div className="room-detail-term-selector" aria-label="Pilih term sewa">
+                      <div className="room-detail-booking-label mb-2">Term tersedia</div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {termRows.map((row) => (
+                          <button
+                            key={row.term}
+                            type="button"
+                            className={`room-detail-term-pill ${row.term === effectiveTerm ? 'active' : ''}`}
+                            onClick={() => setSelectedTerm(row.term)}
+                          >
+                            {row.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="border rounded-4 p-3 bg-light-subtle">
-                      <div className="small text-muted mb-1">Tarif utama</div>
-                      <div className="fs-4 fw-bold"><CurrencyDisplay amount={room.highlightedRateRupiah} /></div>
-                      <div className="small text-muted mt-1">Deposit default <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
+                    <div className="room-detail-selected-price">
+                      <span>{selectedRow?.label ?? 'Tarif'}</span>
+                      <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
+                      <small>{selectedRow?.utilitiesIncluded ? 'Listrik & air termasuk untuk term ini.' : 'Listrik & air memakai meteran terpisah.'}</small>
                     </div>
 
-                     <h5 className="mt-2">📋 Spesifikasi Kamar</h5>
+                    <div className="room-detail-booking-summary">
+                      <div><span>Deposit</span><strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></div>
+                      <div><span>Kamar mandi</span><strong>{getBathroomType(room)}</strong></div>
+                      <div><span>Pendingin</span><strong>{getCoolingType(room)}</strong></div>
+                    </div>
 
-                     <Row className="g-2">
-                       <Col xs={6}>
-                         <div className="card-title-soft mb-1">Status</div>
-                         <StatusBadge status={room.status} />
-                       </Col>
-                       <Col xs={6}>
-                         <div className="card-title-soft mb-1">Lantai</div>
-                         <div className="fw-semibold">{room.floor || '-'}</div>
-                       </Col>
-                       <Col xs={6}>
-                         <div className="card-title-soft mb-1">Tarif Bulanan</div>
-                         <div className="fw-semibold"><CurrencyDisplay amount={room.pricing?.monthlyRateRupiah ?? 0} showZero={false} /></div>
-                       </Col>
-                       <Col xs={6}>
-                         <div className="card-title-soft mb-1">Deposit</div>
-                         <div className="fw-semibold"><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></div>
-                       </Col>
-                     </Row>
-
-                     <FacilityList facilities={room.facilities ?? []} emptyMessage="Belum ada informasi fasilitas kamar." />
-
-                     {room.notes ? <Alert variant="light" className="mb-0">{room.notes}</Alert> : null}
-
-                     <h5 className="mt-2">📊 Daftar Tarif Lengkap</h5>
-
-                     <Table size="sm" className="mb-0">
-                       <thead>
-                         <tr>
-                            <th className="text-muted">Term</th>
-                            <th className="text-end">Tarif</th>
-                            <th className="text-muted small">Listrik & Air</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         {ALL_PRICING_TERMS.map((term) => {
-                           const rent = room.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(room.pricing.monthlyRateRupiah, term) : null;
-                           const incUtil = isUtilitiesIncludedForPricingTerm(term);
-                           return (
-                             <tr key={term}>
-                               <td className="text-muted">{getStatusLabel(term)}</td>
-                               <td className="text-end fw-semibold"><CurrencyDisplay amount={rent} showZero={false} /></td>
-                               <td className="small">{incUtil ? 'Termasuk (flat)' : 'Meteran terpisah'}</td>
-                             </tr>
-                           );
-                         })}
-                       </tbody>
-                      </Table>
-
-                      <Alert variant="light" className="mt-3 mb-0 p-2 small">
-                        Tarif dan status kamar dapat berubah sewaktu-waktu. Booking yang sudah dikonfirmasi akan mengikuti tarif pada saat persetujuan.
-                      </Alert>
-                   </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-
-            <Row className="mt-4">
-              <Col>
-                <Card className="content-card border-0">
-                  <Card.Body>
-                    <h5>📝 Cara Booking</h5>
-                    <ol className="mb-0 small">
-                      <li className="mb-1"><strong>Ajukan booking</strong> — Isi data diri dan pilih tanggal check-in melalui tombol <strong>Pesan Sekarang</strong> di atas.</li>
-                      <li className="mb-1"><strong>Admin meninjau</strong> — Booking akan ditinjau admin dalam 1×24 jam kerja. Anda akan mendapat akses Portal Tamu untuk memantau status.</li>
-                      <li className="mb-1"><strong>Tagihan awal diterbitkan</strong> — Setelah booking disetujui, tagihan awal (sewa pertama + deposit) akan diterbitkan.</li>
-                      <li className="mb-1"><strong>Lakukan pembayaran</strong> — Kirim bukti bayar melalui Portal Tamu. Admin akan memeriksa pembayaran kamu.</li>
-                      <li><strong>Kamar aktif</strong> — Setelah pembayaran awal disetujui admin, kamar Anda aktif dan siap ditempati sesuai tanggal check-in.</li>
-                    </ol>
+                    <div className="d-grid gap-2 mt-3">
+                      <Button size="lg" onClick={handleBook} disabled={!room.isAvailable}>Pesan Sekarang</Button>
+                      <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>
             </Row>
+
+            <div className="room-detail-mobile-sticky">
+              <div>
+                <span>{selectedRow?.label ?? 'Tarif'}</span>
+                <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
+              </div>
+              <Button onClick={handleBook} disabled={!room.isAvailable}>Pesan Sekarang</Button>
+            </div>
           </>
         ) : null}
       </Container>

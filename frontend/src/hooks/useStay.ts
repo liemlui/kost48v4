@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cancelStay, completeStay, getStayById, processDeposit, renewStay, updateStay } from '../api/stays';
+import { cancelStay, completeStay, getStayById, processDeposit, renewStay, updateStay, type RenewStayPayload } from '../api/stays';
 import { CancelStayPayload, CompleteStayPayload, ProcessDepositPayload, Stay } from '../types';
 
 function isDashboardKey(value: unknown) {
@@ -52,7 +52,7 @@ export function useStay(id?: number | string) {
   });
 
   const renewMutation = useMutation({
-    mutationFn: (payload?: { plannedCheckOutDate?: string; agreedRentAmountRupiah?: number }) =>
+    mutationFn: (payload: RenewStayPayload) =>
       renewStay(id as number | string, payload),
     onSuccess: invalidate,
   });

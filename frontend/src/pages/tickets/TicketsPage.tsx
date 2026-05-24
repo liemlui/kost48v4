@@ -1,8 +1,9 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import { AssistantPanel, CompactMetrics, ActionQueueTable, type AssistantItem, type MetricChip, type ActionQueueItem } from '../../components/command-center';
+import PaginationControls from '../../components/common/PaginationControls';
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -257,11 +258,13 @@ function StaffTicketsMode({
 
 export default function TicketsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [assignMap, setAssignMap] = useState<Record<number, string>>({});
   const [activeTab, setActiveTab] = useState<StatusTab>('ALL');
-  const [keyword, setKeyword] = useState('');
+  const [page, setPage] = useState(1);
   const [doneTicket, setDoneTicket] = useState<TicketItem | null>(null);
+  const [detailTicket, setDetailTicket] = useState<TicketItem | null>(null);
   const [resolutionNote, setResolutionNote] = useState('Sudah dikerjakan');
   const [resolutionImageMeta, setResolutionImageMeta] = useState<any>(null);
   const [resolutionPreview, setResolutionPreview] = useState<string | null>(null);
@@ -270,7 +273,8 @@ export default function TicketsPage() {
   const [finalInventoryItemStatus, setFinalInventoryItemStatus] = useState('GOOD');
   const [finalAdminNote, setFinalAdminNote] = useState('');
 
-  const ticketsQuery = useQuery({ queryKey: ['tickets'], queryFn: () => listResource<TicketItem>('/tickets') });
+  const PAGE_SIZE = 20;
+  const ticketsQuery = useQuery({ queryKey: ['tickets'], queryFn: () => listResource<TicketItem>('/tickets', { limit: 200 }) });
   const usersQuery = useQuery({ queryKey: ['ticket-assignees'], queryFn: () => listResource<UserOption>('/users', { limit: 100 }) });
 
   const simpleAction = useMutation({
@@ -287,7 +291,7 @@ export default function TicketsPage() {
   });
 
   const items = useMemo(() => ticketsQuery.data?.items ?? [], [ticketsQuery.data]);
-  const assignableUsers = useMemo(() => (usersQuery.data?.items ?? []).filter((item) => ['OWNER', 'ADMIN', 'STAFF'].includes(item.role)), [usersQuery.data]);
+  const assignableUsers = useMemo(() => (usersQuery.data?.items ?? []).filter((item) => item.role === 'STAFF'), [usersQuery.data]);
 
   const counts = {
     all: items.length,
@@ -298,13 +302,10 @@ export default function TicketsPage() {
   };
 
   const filteredItems = useMemo(() => {
-    const term = keyword.trim().toLowerCase();
-    return items.filter((item) => {
-      const matchTab = activeTab === 'ALL' ? true : item.status === activeTab;
-      const matchKeyword = !term ? true : [item.ticketNumber, item.title, item.description, item.category].some((v) => String(v ?? '').toLowerCase().includes(term));
-      return matchTab && matchKeyword;
-    });
-  }, [items, keyword, activeTab]);
+    return items.filter((item) => activeTab === 'ALL' ? true : item.status === activeTab);
+  }, [items, activeTab]);
+  const visibleItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
 
   const canAssign = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const canProgress = user?.role === 'OWNER' || user?.role === 'ADMIN' || user?.role === 'STAFF';
@@ -345,59 +346,6 @@ export default function TicketsPage() {
     setFinalAdminNote('');
   };
 
-  const assistantItems: AssistantItem[] = [
-    counts.open ? {
-      id: 'ticket-open',
-      severity: 'HIGH',
-      title: `${counts.open} tiket belum dikerjakan`,
-      message: 'Buka tiketnya, lalu mulai kerjakan. Kalau butuh bantuan, laporkan ke admin.',
-      source: 'Daftar kerja',
-      count: counts.open,
-      actionLabel: 'Lihat tiket baru',
-      onAction: () => setActiveTab('OPEN'),
-    } : null,
-    counts.inProgress ? {
-      id: 'ticket-progress',
-      severity: 'MEDIUM',
-      title: `${counts.inProgress} tiket sedang dikerjakan`,
-      message: 'Selesaikan pekerjaan, foto hasilnya, lalu tandai selesai.',
-      source: 'Perbaikan',
-      count: counts.inProgress,
-      actionLabel: 'Lihat yang dikerjakan',
-      onAction: () => setActiveTab('IN_PROGRESS'),
-    } : null,
-    counts.done ? {
-      id: 'ticket-done',
-      severity: 'INFO',
-      title: `${counts.done} tiket menunggu dicek admin`,
-      message: 'Hasil kerja sudah ditandai selesai. Admin bisa cek lalu tutup tiket.',
-      source: 'Cek hasil',
-      count: counts.done,
-      actionLabel: 'Lihat selesai',
-      onAction: () => setActiveTab('DONE'),
-    } : null,
-  ].filter(Boolean) as AssistantItem[];
-
-  const metrics: MetricChip[] = [
-    { id: 'open', label: 'Baru', value: counts.open, helper: 'Belum ditangani', icon: '🔴', status: counts.open ? 'DANGER' : 'SUCCESS', onClick: () => setActiveTab('OPEN') },
-    { id: 'progress', label: 'Dikerjakan', value: counts.inProgress, helper: 'Sedang dikerjakan', icon: '🟡', status: counts.inProgress ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('IN_PROGRESS') },
-    { id: 'done', label: 'Selesai', value: counts.done, helper: 'Menunggu dicek', icon: '✅', status: counts.done ? 'INFO' : 'SUCCESS', onClick: () => setActiveTab('DONE') },
-    { id: 'closed', label: 'Ditutup', value: counts.closed, helper: 'Sudah ditutup', icon: '□', status: 'SUCCESS', onClick: () => setActiveTab('CLOSED') },
-  ];
-
-  const actionQueueItems: ActionQueueItem[] = filteredItems
-    .filter((item) => item.status !== 'CLOSED')
-    .slice(0, 8)
-    .map((item) => ({
-      id: item.id,
-      priority: item.status === 'OPEN' ? 'HIGH' : item.status === 'IN_PROGRESS' ? 'MEDIUM' : 'INFO',
-      type: item.category || 'Tiket',
-      subject: item.title || item.ticketNumber || `Tiket #${item.id}`,
-      issue: formatRelations(item),
-      age: `Diperbarui ${formatDate(item.updatedAt || item.createdAt)}`,
-      recommendedAction: item.status === 'OPEN' ? 'Mulai kerjakan' : item.status === 'IN_PROGRESS' ? 'Tandai selesai' : 'Cek hasil',
-    }));
-
   const tabs: { key: StatusTab; label: string; count: number; cls?: string }[] = [
     { key: 'ALL', label: 'Semua', count: counts.all },
     { key: 'OPEN', label: '🔴 Baru', count: counts.open, cls: 'tab-danger' },
@@ -405,6 +353,11 @@ export default function TicketsPage() {
     { key: 'DONE', label: '✅ Selesai', count: counts.done, cls: 'tab-success' },
     { key: 'CLOSED', label: 'Ditutup', count: counts.closed },
   ];
+
+  const handleTabChange = (tab: StatusTab) => {
+    setActiveTab(tab);
+    setPage(1);
+  };
 
   if (user?.role === 'STAFF') {
     return (
@@ -419,7 +372,29 @@ export default function TicketsPage() {
           setDoneTicket={setDoneTicket}
         />
 
-        <Modal show={Boolean(doneTicket)} onHide={() => setDoneTicket(null)} centered>
+        <Modal show={Boolean(detailTicket)} onHide={() => setDetailTicket(null)} centered size="lg">
+        <Modal.Header closeButton><Modal.Title>{detailTicket?.ticketNumber ?? `Tiket #${detailTicket?.id ?? ''}`}</Modal.Title></Modal.Header>
+        <Modal.Body>
+          {detailTicket ? (
+            <>
+              <div className="entity-detail-grid mb-3">
+                <div className="entity-detail-item"><span>Status</span><strong><StatusBadge status={detailTicket.status} /></strong></div>
+                <div className="entity-detail-item"><span>Lokasi / orang</span><strong>{formatRelations(detailTicket)}</strong></div>
+                <div className="entity-detail-item"><span>Petugas</span><strong>{detailTicket.assignedToId ? `Petugas #${detailTicket.assignedToId}` : 'Belum ditugaskan'}</strong></div>
+                <div className="entity-detail-item"><span>Diperbarui</span><strong>{formatDate(detailTicket.updatedAt || detailTicket.createdAt)}</strong></div>
+              </div>
+              <h6 className="fw-semibold">{detailTicket.title || `Tiket #${detailTicket.id}`}</h6>
+              <p className="text-muted mb-0">{detailTicket.description || 'Tidak ada deskripsi tambahan.'}</p>
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setDetailTicket(null)}>Tutup</Button>
+          {detailTicket?.status === 'DONE' ? <Button variant="success" onClick={() => { if (detailTicket) { setCloseTicket(detailTicket); setDetailTicket(null); } }}>Selesai</Button> : null}
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={Boolean(doneTicket)} onHide={() => setDoneTicket(null)} centered>
           <Modal.Header closeButton><Modal.Title>Tandai Pekerjaan Selesai</Modal.Title></Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
@@ -444,60 +419,45 @@ export default function TicketsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Papan Kerja"
-        title="Tiket Bantuan"
-        description="Daftar keluhan dan pekerjaan. Kerjakan tiket dari yang paling penting, lalu upload bukti selesai."
+        eyebrow="Staff & Tiket"
+        title="Staff & Tiket Operasional"
+        description="Tiket digabung dengan staff karena ini pekerjaan operasional. Tiket, checklist, laporan lapangan, dan skor staff berada dalam satu area."
       />
+
+      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Staff dan Tiket">
+        <div className="admin-area-internal-menu-head">
+          <span>Menu Staff & Tiket</span>
+          <small>Tiket dan kinerja staff satu area, bukan menu terpisah.</small>
+        </div>
+        <div className="admin-area-internal-menu-scroll">
+          {[
+            { id: 'tickets', icon: '🎫', label: 'Semua Tiket', helper: 'Daftar tiket aktif dan selesai.', to: '/tickets', count: counts.all, active: true },
+            { id: 'assign', icon: '👷', label: 'Perlu Assign', helper: 'Tiket baru yang belum ada petugas.', to: '/tickets', count: items.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length, active: false },
+            { id: 'checklist', icon: '📋', label: 'Checklist', helper: 'Checklist harian/mingguan/bulanan staff.', to: '/staff-routines', count: undefined, active: false },
+            { id: 'field', icon: '📝', label: 'Laporan Lapangan', helper: 'Laporan kondisi dari staff.', to: '/tickets', count: items.filter((ticket) => Boolean(ticket.linkedRoomItemId || ticket.linkedInventoryItemId)).length, active: false },
+            { id: 'score', icon: '📈', label: 'Kinerja Staff', helper: 'Skor staff dan ulasan.', to: '/staff-performance', count: undefined, active: false },
+          ].map((item) => (
+            <button type="button" key={item.id} className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()} onClick={() => navigate(item.to)} title={item.helper}>
+              <span className="admin-area-internal-chip-main">
+                <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
+                <span className="admin-area-internal-label">{item.label}</span>
+                {typeof item.count === 'number' ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
+              </span>
+              <small>{item.helper}</small>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {(user?.role === 'OWNER' || user?.role === 'ADMIN') ? <AdminStaffFieldReportQueue /> : null}
 
-      <AssistantPanel
-        title="Arahan Kerja"
-        subtitle="Yang perlu dikerjakan dulu. Bahasa singkat supaya mudah diikuti."
-        items={assistantItems}
-        emptyTitle="Tidak ada tiket aktif"
-        emptyMessage="Belum ada keluhan atau pekerjaan yang perlu dikerjakan sekarang."
-      />
-      <CompactMetrics metrics={metrics} />
-      <ActionQueueTable
-        title="Daftar Kerja Hari Ini"
-        subtitle="Ambil dari atas. Klik tombol aksi, kerjakan, lalu catat hasilnya."
-        items={actionQueueItems}
-        emptyTitle="Tidak ada tugas tiket"
-        emptyDescription="Semua tiket pada filter ini sudah selesai atau belum ada data."
-      />
-
-      <Card className="content-card border-0 mb-3 command-filter-card">
-        <Card.Body className="py-3">
-          <div className="table-meta mb-0">
-            <div>
-              <div className="panel-title">Cari tiket</div>
-              <div className="panel-subtitle">Pilih status atau ketik nomor/judul tiket.</div>
-            </div>
-            <span className="table-meta-count">{filteredItems.length} dari {items.length} tiket</span>
-          </div>
-          <div className="compact-filter-bar mt-3">
-            <Form.Select
-              aria-label="Filter status tiket"
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as StatusTab)}
-              style={{ maxWidth: 220 }}
-            >
-              <option value="ALL">Semua status</option>
-              <option value="OPEN">Baru</option>
-              <option value="IN_PROGRESS">Sedang dikerjakan</option>
-              <option value="DONE">Selesai dikerjakan</option>
-              <option value="CLOSED">Ditutup</option>
-            </Form.Select>
-            <Form.Control
-              placeholder="🔍  Nomor tiket, judul, atau jenis pekerjaan..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              style={{ maxWidth: 320 }}
-            />
-          </div>
-        </Card.Body>
-      </Card>
+      <div className="ticket-status-strip mb-3">
+        <button type="button" className={`ticket-status-badge${activeTab === 'ALL' ? ' active' : ''}`} onClick={() => handleTabChange('ALL')}><span>Semua</span><strong>{counts.all}</strong></button>
+        <button type="button" className={`ticket-status-badge danger${activeTab === 'OPEN' ? ' active' : ''}`} onClick={() => handleTabChange('OPEN')}><span>Baru</span><strong>{counts.open}</strong></button>
+        <button type="button" className={`ticket-status-badge warning${activeTab === 'IN_PROGRESS' ? ' active' : ''}`} onClick={() => handleTabChange('IN_PROGRESS')}><span>Dikerjakan</span><strong>{counts.inProgress}</strong></button>
+        <button type="button" className={`ticket-status-badge info${activeTab === 'DONE' ? ' active' : ''}`} onClick={() => handleTabChange('DONE')}><span>Perlu cek</span><strong>{counts.done}</strong></button>
+        <button type="button" className={`ticket-status-badge success${activeTab === 'CLOSED' ? ' active' : ''}`} onClick={() => handleTabChange('CLOSED')}><span>Selesai</span><strong>{counts.closed}</strong></button>
+      </div>
 
       {simpleAction.isError ? <Alert variant="danger" className="mb-3">Gagal menjalankan aksi tiket. Coba lagi.</Alert> : null}
 
@@ -508,26 +468,15 @@ export default function TicketsPage() {
               <div className="panel-title">Daftar tiket</div>
               <div className="panel-subtitle">Pilih status, lalu kerjakan satu per satu.</div>
             </div>
-            <div className="status-tab-bar compact-tabs">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  className={`status-tab${tab.cls ? ` ${tab.cls}` : ''}${activeTab === tab.key ? ' active' : ''}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  {tab.label}
-                  <span className="tab-badge">{tab.count}</span>
-                </button>
-              ))}
-            </div>
+<span className="unified-table-hint">Klik row untuk detail</span>
           </div>
           {ticketsQuery.isLoading ? <TableSkeleton rows={5} cols={6} /> : null}
           {ticketsQuery.isError ? <Alert variant="danger">Gagal memuat tiket. Muat ulang halaman.</Alert> : null}
-          {!ticketsQuery.isLoading && !ticketsQuery.isError && !filteredItems.length ? (
+          {!ticketsQuery.isLoading && !ticketsQuery.isError && !visibleItems.length ? (
             <EmptyState icon="🎫" title="Belum ada tiket" description="Belum ada tiket yang perlu dikerjakan sekarang." />
           ) : null}
 
-          {!ticketsQuery.isLoading && !ticketsQuery.isError && filteredItems.length > 0 ? (
+          {!ticketsQuery.isLoading && !ticketsQuery.isError && visibleItems.length > 0 ? (
             <Table hover responsive>
               <thead>
                 <tr>
@@ -537,12 +486,12 @@ export default function TicketsPage() {
                   <th>Lokasi/Orang</th>
                   <th>Petugas</th>
                   <th>Diperbarui</th>
-                  <th style={{ width: 270 }}>Aksi</th>
+                  <th style={{ width: 190 }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
-                  <tr key={item.id}>
+                {visibleItems.map((item) => (
+                  <tr key={item.id} className="clickable-row" onClick={() => setDetailTicket(item)}>
                     <td>
                       <div className="fw-semibold">{item.ticketNumber ?? `TIK-${item.id}`}</div>
                       <div className="small text-muted">{item.category || 'Umum'}</div>
@@ -555,7 +504,7 @@ export default function TicketsPage() {
                     </td>
                     <td><StatusBadge status={item.status} /></td>
                     <td><div className="small">{formatRelations(item)}</div></td>
-                    <td>
+                    <td onClick={(event) => event.stopPropagation()}>
                       {canAssign ? (
                         <>
                           <Form.Select size="sm" value={assignMap[item.id] ?? String(item.assignedToId ?? '')} onChange={(e) => setAssignMap((prev) => ({ ...prev, [item.id]: e.target.value }))} disabled={usersQuery.isLoading}>
@@ -569,12 +518,13 @@ export default function TicketsPage() {
                       )}
                     </td>
                     <td>{formatDate(item.updatedAt || item.createdAt)}</td>
-                    <td>
-                      <div className="d-flex flex-wrap gap-2">
+                    <td onClick={(event) => event.stopPropagation()}>
+                      <div className="d-flex flex-wrap gap-2 align-items-center">
                         {canAssign ? <Button size="sm" variant="outline-primary" disabled={!assignMap[item.id] || simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/assign`, payload: { assignedToId: Number(assignMap[item.id]) } })}>Tugaskan</Button> : null}
                         {canProgress && item.status === 'OPEN' ? <Button size="sm" variant="outline-secondary" disabled={simpleAction.isPending} onClick={() => simpleAction.mutate({ path: `/tickets/${item.id}/start` })}>Mulai Kerjakan</Button> : null}
                         {canProgress && item.status === 'IN_PROGRESS' ? <Button size="sm" variant="outline-success" disabled={simpleAction.isPending} onClick={() => setDoneTicket(item)}>Tandai Selesai</Button> : null}
-                        {canProgress && item.status === 'DONE' ? <Button size="sm" variant="success" disabled={simpleAction.isPending} onClick={() => setCloseTicket(item)}>Tutup + Keputusan Final</Button> : null}
+                        {canProgress && item.status === 'DONE' ? <Button size="sm" variant="success" disabled={simpleAction.isPending} onClick={() => setCloseTicket(item)}>Selesai</Button> : null}
+                        <span className="row-arrow-cell">›</span>
                       </div>
                     </td>
                   </tr>
@@ -582,8 +532,42 @@ export default function TicketsPage() {
               </tbody>
             </Table>
           ) : null}
+          {!ticketsQuery.isLoading && !ticketsQuery.isError && filteredItems.length > PAGE_SIZE ? (
+            <div className="mt-3">
+              <PaginationControls
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={filteredItems.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+                isLoading={ticketsQuery.isLoading}
+              />
+            </div>
+          ) : null}
         </Card.Body>
       </Card>
+
+      <Modal show={Boolean(detailTicket)} onHide={() => setDetailTicket(null)} centered size="lg">
+        <Modal.Header closeButton><Modal.Title>{detailTicket?.ticketNumber ?? `Tiket #${detailTicket?.id ?? ''}`}</Modal.Title></Modal.Header>
+        <Modal.Body>
+          {detailTicket ? (
+            <>
+              <div className="entity-detail-grid mb-3">
+                <div className="entity-detail-item"><span>Status</span><strong><StatusBadge status={detailTicket.status} /></strong></div>
+                <div className="entity-detail-item"><span>Lokasi / orang</span><strong>{formatRelations(detailTicket)}</strong></div>
+                <div className="entity-detail-item"><span>Petugas</span><strong>{detailTicket.assignedToId ? `Petugas #${detailTicket.assignedToId}` : 'Belum ditugaskan'}</strong></div>
+                <div className="entity-detail-item"><span>Diperbarui</span><strong>{formatDate(detailTicket.updatedAt || detailTicket.createdAt)}</strong></div>
+              </div>
+              <h6 className="fw-semibold">{detailTicket.title || `Tiket #${detailTicket.id}`}</h6>
+              <p className="text-muted mb-0">{detailTicket.description || 'Tidak ada deskripsi tambahan.'}</p>
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setDetailTicket(null)}>Tutup</Button>
+          {detailTicket?.status === 'DONE' ? <Button variant="success" onClick={() => { if (detailTicket) { setCloseTicket(detailTicket); setDetailTicket(null); } }}>Selesai</Button> : null}
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={Boolean(doneTicket)} onHide={() => setDoneTicket(null)} centered>
         <Modal.Header closeButton><Modal.Title>Catat Pekerjaan Selesai</Modal.Title></Modal.Header>
@@ -605,7 +589,7 @@ export default function TicketsPage() {
       </Modal>
 
       <Modal show={Boolean(closeTicket)} onHide={() => setCloseTicket(null)} centered>
-        <Modal.Header closeButton><Modal.Title>Konfirmasi selesai + status akhir barang</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title>Konfirmasi Tiket Selesai</Modal.Title></Modal.Header>
         <Modal.Body>
           <Alert variant="info" className="py-2 small">Tutup tiket hanya setelah bukti staff dicek. Jika ada barang terkait, pilih status akhir agar data kamar/gudang tetap rapi.</Alert>
           {ticketHasRoomItemDecision(closeTicket) ? (
@@ -631,7 +615,7 @@ export default function TicketsPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="light" onClick={() => setCloseTicket(null)}>Batal</Button>
-          <Button variant="success" disabled={simpleAction.isPending} onClick={submitCloseTicket}>Tutup Tiket</Button>
+          <Button variant="success" disabled={simpleAction.isPending} onClick={submitCloseTicket}>Selesai</Button>
         </Modal.Footer>
       </Modal>
     </div>

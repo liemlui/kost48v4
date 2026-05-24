@@ -1,5 +1,216 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-22 V5.16-G Staff Repair Flow journal sync**
+**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+
+
+## 2026-05-24 — V5.23-A Admin IA + Finance Add-on Revenue Package
+
+### Konteks
+
+Setelah beberapa iterasi V5.22, user mengarahkan kembali IA admin agar sidebar menjadi navigasi utama, bukan top workspace tabs. User juga memutuskan penggabungan domain:
+
+```text
+Tenant gabung Stays.
+Expenses gabung Finance.
+Tiket gabung Staff.
+Pengumuman tetap header.
+Settings tetap header.
+Reports tidak perlu dulu.
+```
+
+### Package terakhir
+
+Latest generated frontend package:
+
+```text
+frontend_20260524_V523A_ADMIN_IA_FINANCE_ADDON_REVENUE_FULL.zip
+```
+
+Latest backend package:
+
+```text
+backend_20260524_V523A_ADMIN_IA_FINANCE_ADDON_REVENUE_UNCHANGED.zip
+```
+
+### Isi patch V5.23-A
+
+- Admin sidebar final 5 menu:
+  - Dashboard
+  - Stays & Tenant
+  - Finance
+  - Staff & Tiket
+  - Kamar & Stok
+- Dashboard kembali menjadi command center lintas menu.
+- Finance menerima sub-menu:
+  - Tagihan
+  - Review Pembayaran
+  - Voucher WiFi
+  - Pendapatan Tambahan
+  - Pengeluaran
+  - Riwayat Bayar
+- Existing `WifiSale` diposisikan sebagai revenue stream voucher WiFi.
+- Halaman placeholder/plan untuk Pendapatan Tambahan dibuat.
+- Expense category UI dibuat lebih cocok untuk usaha kos.
+- Ticket tenant category diperluas menjadi lebih kos-specific.
+
+### Verification
+
+```text
+Syntax check for touched files: OK.
+Frontend full build: not verified in container because node_modules not available.
+Backend unchanged.
+Runtime/API smoke not run.
+FULL PASS not claimed.
+```
+
+## 2026-05-24 — V5.23-B Accounting & Balance Sheet Planning
+
+### Konteks
+
+User bertanya apakah revenue dan cost sudah masuk ke akuntansi kos. Kesimpulan:
+
+```text
+Saat ini sudah ada finance operasional.
+Belum ada accounting ledger formal.
+Belum ada Chart of Accounts.
+Belum ada CashAccount.
+Belum ada JournalEntry / JournalLine.
+Belum ada Asset Register.
+Belum ada Depreciation.
+Belum ada Equity/Owner Capital.
+Balance Sheet belum valid.
+```
+
+### Direction
+
+Next phase harus merancang **Accounting & Balance Sheet Foundation** sampai sistem mampu mencapai:
+
+- Profit & Loss,
+- Cashflow,
+- Balance Sheet,
+- Asset register,
+- Deposit liability,
+- OPEX / COGS / CAPEX,
+- Ancillary revenue profitability.
+
+### Important warning
+
+Jangan langsung lompat ke full double-entry accounting patch besar tanpa PLAN. Buat roadmap bertahap dan migration-safe.
+
+
+## 2026-05-24 — V5.20 First Paid Room Priority + Fast AutoOps Docs Sync
+
+### Konteks
+
+User menegaskan aturan bisnis yang sebenarnya:
+
+```text
+Prioritas kamar berdasarkan siapa yang sudah bayar valid duluan, bukan siapa yang hanya pesan duluan.
+Booking belum melunasi pembayaran tidak boleh mengunci kamar.
+Tenant baru belum boleh bayar kalau kamar belum siap dihuni.
+Tenant lama yang telat bayar/perpanjang tidak boleh berhutang.
+Jika tenant lama telat dan ada tenant baru valid, tenant lama wajib mengosongkan kamar maksimal 3 jam.
+```
+
+### Patch code sebelumnya
+
+V5.20 code package sudah dibuat:
+- `backend_20260524_V520_FIRST_PAID_AUTOOPS_FULL.zip`
+- `frontend_20260524_V520_FIRST_PAID_AUTOOPS_FULL.zip`
+
+Isi package mencakup:
+- AutoOps module,
+- deadline cepat 3 jam,
+- one-step payment proof endpoint,
+- first-paid competing booking behavior,
+- urgent UI emphasis,
+- dedup alert/copy yang mirip.
+
+### Docs sync ini
+
+Docs aktif diperbarui agar source of truth mengikuti V5.20:
+- ground state,
+- contracts,
+- plan,
+- decisions log,
+- journal,
+- changelog,
+- checklist.
+
+### Verification status
+
+```text
+V5.19 Renew Meter Utility backend runtime UAT PASS.
+V5.20 source ZIP generated.
+V5.20 still needs local backend build, frontend build, and fresh UAT/manual UI smoke before FULL PASS.
+```
+
+
+## 2026-05-22 — V5.17-D Staff Routine Work Cards PASS + Push
+
+### Konteks
+
+Setelah staff workspace dipoles, user menemukan bahwa checklist harian/mingguan/bulanan sempat hilang/tergeser. Ini dianggap regression karena checklist adalah core work board staff.
+
+### Patch
+
+V5.17-D mengembalikan checklist sebagai professional routine work cards:
+- Harian,
+- Mingguan,
+- Bulanan,
+- progress visual ringan,
+- status tugas,
+- tombol start/done/help,
+- assistant strip berbasis kondisi checklist.
+
+### Verification
+
+User melakukan manual check dan menyatakan:
+
+```text
+Sudah saya cek sip bagus pass
+```
+
+Patch staff UX terbaru kemudian dipush:
+
+```text
+484a288 feat(staff): polish workspace inventory and routine checklist ux
+```
+
+Generated Prisma noise di-restore, working tree clean, branch `main` sama dengan `origin/main`.
+
+## 2026-05-22 — V5.17-C Inventory Intelligence
+
+### Konteks
+
+User menegaskan bahwa status stok gudang seperti “stok habis” dan “stok menipis” tidak perlu diisi staff. Jika bisa dihitung otomatis dari jumlah stok, sistem/AI rule intelligence harus menghitungnya.
+
+### Patch Direction
+
+- Status stok gudang dihitung dari `qtyOnHand/minQty`.
+- Staff tidak memilih manual “stok habis/menipis”.
+- Gudang dibedakan antara:
+  - health stok otomatis,
+  - kondisi fisik barang.
+- Assistant staff memberi prioritas restock/stock risk.
+- Admin tidak dibebani konfirmasi hal yang objektif dan bisa dihitung sistem.
+
+## 2026-05-22 — V5.17-B Clean Blue Staff UI
+
+### Konteks
+
+User tidak menyukai font terlalu berat, warna low contrast, tombol dobel, dan UI staff yang belum modern. User juga menegaskan:
+- jangan font yang tebal/sulit dibaca,
+- warna jangan sampai tidak terbaca,
+- assistant harus bekerja,
+- admin/staff flow harus simpel dan on-flow.
+
+### Patch Direction
+
+- Clean blue unified UI style.
+- Card kamar clickable penuh.
+- Hapus tombol dobel yang memiliki fungsi sama.
+- Modal laporan progressive dan lebih readable.
+- Admin review decision dibuat lebih dekat dengan flow.
 
 ## 2026-05-22 — V5.16-G Staff Ticket List Hard Fix PASS
 
@@ -119,10 +330,65 @@ V5.14 implemented frontend-first command center components:
 - `LifecycleTimeline`
 - `PeriodVisualizer`
 
-## Historical Notes
+## Next Journal Target
 
-- V5.12 full regression PASS and pushed earlier.
-- V5.13 release readiness scripts/docs only.
-- V5.14 Command Center frontend packages build PASS in patch environment.
-- V5.15 docs/product direction synced.
-- V5.16 staff flow became the active code stabilization track.
+Next chat should start with:
+
+```text
+PLAN Tenant Side Full Audit
+```
+
+Focus:
+- tenant portal home,
+- My Stay Guide,
+- invoice/payment UX,
+- renew/checkout request UX,
+- tenant assistant,
+- tenant microcopy,
+- API/data availability,
+- exact patch plan.
+
+
+## 2026-05-24 — V5.23-B1 Backend Accounting Foundation Pre-ACT Audit Lock
+
+### Context
+
+User asked to start from backend design and requested a full backend audit using the real backend ZIP. The backend was inspected as a monolithic NestJS + Prisma + PostgreSQL system. A second opinion audit was requested through Cline + DeepSeek V4 Pro. Cline initially stopped because of output/context limits, then provided pre-ACT validation and generated a clean backend ZIP.
+
+### Clean backend source for next ACT
+
+```text
+backend_latest_for_accounting_act_CLEAN.zip
+node_modules: excluded
+dist: excluded
+.git: excluded
+.env files: excluded
+source/prisma/sql/scripts/uploads: included
+```
+
+### Main audit findings
+
+```text
+Backend is strong for operational kos finance.
+Backend is not yet accounting-ledger-grade.
+There is no COA/cash/opening balance/journal/accounting period model yet.
+Existing /finance/balance-sheet/draft is safe because it admits draft/not balance-sheet-grade.
+Existing /reports/profit-loss and /reports/financial-ratios need operational approximation labeling.
+Cline found local working tree was dirty before clean ZIP creation, so ACT must use the clean ZIP snapshot.
+```
+
+### ACT B1 conclusion
+
+```text
+READY FOR ACT B1 with strict additive-only scope.
+Patch target: Accounting Foundation Readiness.
+No auto-posting.
+No lifecycle integration.
+No payment/stay/checkout/renew/booking touch.
+```
+
+### Next chat should start with
+
+```text
+ACT V5.23-B1 Backend Accounting Foundation Readiness using backend_latest_for_accounting_act_CLEAN.zip and the updated docs.
+```

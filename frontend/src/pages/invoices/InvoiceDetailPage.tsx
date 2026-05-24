@@ -8,6 +8,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 import EmptyState from '../../components/common/EmptyState';
 import { createResource, getResource } from '../../api/resources';
 import { formatDateSafe } from '../resources/simpleCrudHelpers';
+import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import { useAuth } from '../../context/AuthContext';
 import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
@@ -104,13 +105,9 @@ export default function InvoiceDetailPage() {
 
   const invoice = detailQuery.data;
 
-  const totalPaid = useMemo(() => {
-    if (!invoice?.payments) return 0;
-    return invoice.payments.reduce((sum: number, payment: any) => sum + Number(payment.amountRupiah || 0), 0);
-  }, [invoice]);
-
-  const totalInvoice = Number(invoice?.totalAmountRupiah ?? 0);
-  const outstanding = Math.max(totalInvoice - totalPaid, 0);
+  const totalPaid = useMemo(() => getInvoicePaidAmount(invoice as any), [invoice]);
+  const totalInvoice = useMemo(() => getInvoiceTotalAmount(invoice as any), [invoice]);
+  const outstanding = useMemo(() => getInvoiceOutstandingAmount(invoice as any), [invoice]);
   const isFullyPaid = outstanding <= 0 && totalInvoice > 0;
   const canTakePayment = canManageFinance && invoice && !['CANCELLED', 'DRAFT'].includes(invoice.status) && outstanding > 0;
   const isCancelled = invoice?.status === 'CANCELLED';

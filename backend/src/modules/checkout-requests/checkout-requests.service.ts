@@ -17,6 +17,7 @@ import {
   CheckoutRequestStatus,
   RenewRequestStatus,
   UserRole,
+  InvoiceStatus,
 } from '../../common/enums/app.enums';
 
 @Injectable()
@@ -27,6 +28,18 @@ export class CheckoutRequestsService {
     private readonly prisma: PrismaService,
     private readonly appNotificationService: AppNotificationService,
   ) {}
+
+  private async assertNoOpenInvoices(stayId: number, messagePrefix: string) {
+    const openInvoices = await this.prisma.invoice.findMany({
+      where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
+      select: { id: true, invoiceNumber: true, status: true },
+      orderBy: { id: 'asc' },
+    });
+    if (openInvoices.length > 0) {
+      const refs = openInvoices.map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`).join(', ');
+      throw new ConflictException(`${messagePrefix}: ${refs}`);
+    }
+  }
 
   /** Tenant creates a checkout request for their active stay. */
   async createRequest(dto: CreateCheckoutRequestDto, actor: CurrentUserPayload) {
@@ -59,6 +72,11 @@ export class CheckoutRequestsService {
         'Tidak dapat mengajukan checkout karena ada permintaan perpanjangan yang menunggu persetujuan',
       );
     }
+
+    await this.assertNoOpenInvoices(
+      dto.stayId,
+      'Selesaikan tagihan aktif sebelum mengajukan keluar',
+    );
 
     const existingPending = await this.prisma.checkoutRequest.findFirst({
       where: { stayId: dto.stayId, status: CheckoutRequestStatus.PENDING },
@@ -96,7 +114,7 @@ export class CheckoutRequestsService {
     });
 
     // Notify OWNER/ADMIN — non-blocking
-    await this.notifyOwnerAdminOnCreate(request.id, stay);
+    await this.notifyOwnerAdminOnCreate(request.id, stay.id);
 
     return request;
   }
@@ -117,6 +135,11 @@ export class CheckoutRequestsService {
         'Permintaan checkout sudah diproses sebelumnya',
       );
     }
+
+    await this.assertNoOpenInvoices(
+      request.stayId,
+      'Pengajuan keluar belum bisa disetujui karena masih ada tagihan aktif',
+    );
 
     const updated = await this.prisma.checkoutRequest.update({
       where: { id },
@@ -212,17 +235,34 @@ export class CheckoutRequestsService {
 
   private async notifyOwnerAdminOnCreate(
     requestId: number,
-    stay: { tenantId: number; roomId: number },
+    stayId: number,
   ) {
     try {
-      const ownerAdminUsers = await this.prisma.user.findMany({
-        where: { role: { in: [UserRole.OWNER, UserRole.ADMIN] }, isActive: true },
-        select: { id: true, fullName: true },
-      });
+      const [ownerAdminUsers, stay] = await Promise.all([
+        this.prisma.user.findMany({
+          where: { role: { in: [UserRole.OWNER, UserRole.ADMIN] }, isActive: true },
+          select: { id: true, fullName: true },
+        }),
+        this.prisma.stay.findUnique({
+          where: { id: stayId },
+          select: {
+            tenant: { select: { fullName: true, phone: true } },
+            room: { select: { code: true, name: true } },
+            plannedCheckOutDate: true,
+          },
+        }),
+      ]);
 
       if (ownerAdminUsers.length === 0) return;
 
-      const body = `Tenant mengajukan permintaan checkout untuk stay #${stay.tenantId} di kamar #${stay.roomId}.`;
+      const tenantName = stay?.tenant?.fullName || 'Tenant';
+      const roomLabel = stay?.room?.code
+        ? `${stay.room.code}${stay.room.name ? ` - ${stay.room.name}` : ''}`
+        : 'kamar terkait';
+      const requestedDate = stay?.plannedCheckOutDate
+        ? ` Target akhir masa sewa saat ini: ${stay.plannedCheckOutDate.toLocaleDateString('id-ID')}.`
+        : '';
+      const body = `${tenantName} mengajukan keluar dari ${roomLabel}.${requestedDate}`;
 
       const notifications = ownerAdminUsers.map((user) =>
         this.appNotificationService.create({

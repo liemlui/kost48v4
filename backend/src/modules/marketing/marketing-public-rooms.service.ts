@@ -75,7 +75,7 @@ export class MarketingPublicRoomsService {
       where: {
         id,
         isActive: true,
-        status: RoomStatus.AVAILABLE as any,
+        status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.RESERVED as any] },
       },
       select: PUBLIC_ROOM_SELECT,
     });
@@ -98,7 +98,7 @@ export class MarketingPublicRoomsService {
     return {
       AND: [
         { isActive: true },
-        { status: RoomStatus.AVAILABLE as any },
+        { status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.RESERVED as any] } },
         query.search
           ? {
               OR: [
@@ -167,7 +167,8 @@ export class MarketingPublicRoomsService {
       highlightedPricingTerm,
       highlightedRateRupiah: this.resolveRent(room, highlightedPricingTerm),
       availablePricingTerms: this.getAvailablePricingTerms(room),
-      isAvailable: room.status === RoomStatus.AVAILABLE,
+      isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
+      availabilityNote: room.status === RoomStatus.RESERVED ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.' : null,
       facilities,
     };
   }

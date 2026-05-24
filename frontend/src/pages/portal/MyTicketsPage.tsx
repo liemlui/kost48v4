@@ -7,6 +7,8 @@ import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
+import { AssistantPanel, type AssistantItem } from '../../components/command-center';
+import { tenantCategoryLabel } from '../../utils/tenantCopy';
 
 type PortalTicket = {
   issueImageUrl?: string | null;
@@ -21,6 +23,7 @@ type PortalTicket = {
   createdAt?: string;
   updatedAt?: string;
   lastMessage?: string;
+  category?: string | null;
 };
 
 function formatDate(value?: string) {
@@ -35,6 +38,24 @@ function formatDate(value?: string) {
 }
 
 const initialForm = { title: '', description: '', category: 'GENERAL', issueImageUrl: '', issueImageFileKey: '', issueImageOriginalFilename: '', issueImageMimeType: '', issueImageFileSizeBytes: 0 };
+
+const ticketCategoryOptions = [
+  { value: 'GENERAL', label: 'Bantuan umum' },
+  { value: 'ELECTRICITY', label: 'Listrik' },
+  { value: 'PLUMBING', label: 'Air / Plumbing' },
+  { value: 'AC', label: 'AC' },
+  { value: 'WIFI', label: 'WiFi' },
+  { value: 'DOOR_KEY', label: 'Kunci / Pintu' },
+  { value: 'FURNITURE', label: 'Furniture' },
+  { value: 'CLEANING', label: 'Kebersihan' },
+  { value: 'PEST', label: 'Hama' },
+  { value: 'SECURITY', label: 'Keamanan' },
+  { value: 'NOISE', label: 'Keributan' },
+  { value: 'CHECKIN_CHECKOUT', label: 'Bantuan Check-in / Keluar' },
+  { value: 'PAYMENT_ADMIN', label: 'Tagihan / Admin' },
+  { value: 'EMERGENCY', label: 'Darurat' },
+  { value: 'OTHER', label: 'Lainnya' },
+];
 
 async function compressImageFile(file: File): Promise<File> {
   const bitmap = await createImageBitmap(file);
@@ -84,6 +105,25 @@ export default function MyTicketsPage() {
   });
 
   const tickets = useMemo(() => query.data?.items ?? [], [query.data]);
+  const activeTickets = useMemo(() => tickets.filter((ticket) => !['CLOSED', 'CANCELLED'].includes((ticket.status ?? '').toUpperCase())), [tickets]);
+  const doneWaitingTickets = useMemo(() => tickets.filter((ticket) => (ticket.status ?? '').toUpperCase() === 'DONE'), [tickets]);
+  const assistantItems: AssistantItem[] = [
+    activeTickets.length ? {
+      id: 'active-ticket',
+      severity: doneWaitingTickets.length ? 'INFO' : 'MEDIUM',
+      title: doneWaitingTickets.length ? 'Ada laporan yang sudah selesai dikerjakan' : 'Ada laporan yang masih ditangani',
+      message: doneWaitingTickets.length ? 'Staff sudah menandai pekerjaan selesai. Admin akan menutup laporan setelah pengecekan akhir.' : 'Pantau status laporan dari daftar di bawah. Admin atau staff akan memberi pembaruan jika ada progres.',
+      source: 'Laporan',
+      count: activeTickets.length,
+    } : null,
+    !activeTickets.length ? {
+      id: 'no-active-ticket',
+      severity: 'SUCCESS',
+      title: 'Tidak ada laporan aktif',
+      message: 'Kalau ada masalah kamar, WiFi, atau tagihan, buat laporan baru dari tombol di atas.',
+      source: 'Laporan',
+    } : null,
+  ].filter(Boolean) as AssistantItem[];
 
   const handleTicketImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -105,21 +145,23 @@ export default function MyTicketsPage() {
   return (
     <div>
       <PageHeader
-        title="Tiket Saya"
-        description="Keluhan dan permintaan bantuan yang pernah Anda ajukan. Konteks tenant, stay, dan kamar akan diisi otomatis oleh sistem."
-        secondaryAction={<Button onClick={() => setShowCreate(true)}>Ajukan Tiket Baru</Button>}
+        title="Laporan Saya"
+        description="Lihat laporan bantuan yang pernah kamu ajukan. Sistem otomatis menghubungkan laporan dengan kamar aktif kamu."
+        secondaryAction={<Button onClick={() => setShowCreate(true)}>Buat Laporan Baru</Button>}
       />
+
+      <AssistantPanel title="Asisten Laporan Kamu" subtitle="Ringkasan laporan yang masih perlu dipantau." items={assistantItems} maxItems={2} />
 
       <TenantStaffReviewPrompt />
 
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-      {query.isError ? <Alert variant="danger">Gagal memuat tiket Anda. Silakan coba lagi.</Alert> : null}
+      {query.isError ? <Alert variant="danger">Gagal memuat laporan kamu. Silakan coba lagi.</Alert> : null}
       {!query.isLoading && !query.isError && !tickets.length ? (
         <EmptyState
           icon="🎫"
-          title="Belum ada tiket"
-          description="Gunakan tombol di atas untuk membuat tiket baru saat membutuhkan bantuan."
-          action={{ label: 'Ajukan Tiket Baru', onClick: () => setShowCreate(true) }}
+          title="Belum ada laporan"
+          description="Gunakan tombol di atas untuk membuat laporan saat membutuhkan bantuan."
+          action={{ label: 'Buat Laporan Baru', onClick: () => setShowCreate(true) }}
         />
       ) : null}
 
@@ -133,11 +175,12 @@ export default function MyTicketsPage() {
                   <div className="small text-muted">Dibuat {formatDate(ticket.createdAt)} · Update {formatDate(ticket.updatedAt)}</div>
                 </div>
                 <div className="d-flex gap-2 flex-wrap">
-                  <StatusBadge status={ticket.status} />
+                  <StatusBadge status={ticket.status} tone="tenant" domain="ticket" />
+                  {ticket.category ? <StatusBadge status="INFO" customLabel={tenantCategoryLabel(ticket.category)} /> : null}
                   {ticket.priority ? <StatusBadge status="SECONDARY" customLabel={ticket.priority} /> : null}
                 </div>
               </div>
-              {ticket.issueImageUrl ? <div className="mb-2"><img src={ticket.issueImageUrl} alt="Bukti tiket" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
+              {ticket.issueImageUrl ? <div className="mb-2"><img src={ticket.issueImageUrl} alt="Bukti laporan" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
               {ticket.resolutionImageUrl ? <div className="mb-2"><img src={ticket.resolutionImageUrl} alt="Bukti selesai" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
               <div className="app-caption">{ticket.lastMessage || ticket.description || 'Belum ada pembaruan tambahan.'}</div>
             </Card.Body>
@@ -147,12 +190,12 @@ export default function MyTicketsPage() {
 
       <Modal show={showCreate} onHide={() => setShowCreate(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Ajukan Tiket Baru</Modal.Title>
+          <Modal.Title>Buat Laporan Baru</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {error ? <Alert variant="danger">{error}</Alert> : null}
           <Alert variant="light" className="small">
-            Tenant, stay, dan kamar akan ditentukan otomatis dari akun portal Anda. Anda tidak perlu mengisi ID teknis apa pun.
+            Sistem otomatis menghubungkan laporan dengan kamar aktif kamu. Kamu tidak perlu mengisi ID teknis apa pun.
           </Alert>
           <Form.Group className="mb-3">
             <Form.Label>Judul</Form.Label>
@@ -160,13 +203,18 @@ export default function MyTicketsPage() {
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Kategori</Form.Label>
-            <Form.Select value={formState.category} onChange={(event) => setFormState((prev) => ({ ...prev, category: event.target.value }))}>
-              <option value="GENERAL">Umum</option>
-              <option value="MAINTENANCE">Maintenance</option>
-              <option value="BILLING">Billing</option>
-              <option value="WIFI">WiFi</option>
-              <option value="OTHER">Lainnya</option>
-            </Form.Select>
+            <div className="flow-choice-grid" role="group" aria-label="Kategori laporan">
+              {ticketCategoryOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  className={`flow-choice-chip${formState.category === option.value ? ' active' : ''}`}
+                  onClick={() => setFormState((prev) => ({ ...prev, category: option.value }))}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Deskripsi</Form.Label>
@@ -175,14 +223,14 @@ export default function MyTicketsPage() {
           <Form.Group>
             <Form.Label>Foto Masalah (opsional)</Form.Label>
             <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleTicketImage} disabled={uploadingImage} />
-            <Form.Text muted>Preview akan dibuat kecil. Klik setelah tiket dibuat untuk melihat hasil di daftar tiket.</Form.Text>
+            <Form.Text muted>Preview akan dibuat kecil. Klik setelah laporan dibuat untuk melihat hasil di daftar tiket.</Form.Text>
             {imagePreview ? <div className="mt-2"><img src={imagePreview} alt="Preview tiket" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowCreate(false)}>Batal</Button>
           <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !formState.title.trim()}>
-            {createMutation.isPending ? 'Menyimpan...' : 'Kirim Tiket'}
+            {createMutation.isPending ? 'Menyimpan...' : 'Kirim Laporan'}
           </Button>
         </Modal.Footer>
       </Modal>

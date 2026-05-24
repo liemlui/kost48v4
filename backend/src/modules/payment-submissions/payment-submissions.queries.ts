@@ -24,7 +24,7 @@ export async function findEligibleSubmissionTarget(
       s."expiresAt" AS "stayExpiresAt",
       i."invoiceNumber",
       i.status AS "invoiceStatus",
-      i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+      COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
       COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah"
     FROM "Stay" s
     INNER JOIN "Tenant" t ON t.id = s."tenantId"
@@ -75,7 +75,7 @@ export async function lockSubmissionTx(tx: Prisma.TransactionClient, submissionI
       i."invoiceNumber",
       i.status AS "invoiceStatus",
       i."issuedAt" AS "invoiceIssuedAt",
-      i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+      COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
       COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah"
     FROM "PaymentSubmission" ps
     INNER JOIN "Stay" s ON s.id = ps."stayId"
@@ -125,9 +125,9 @@ export async function findSubmissionByIdTx(tx: Prisma.TransactionClient, submiss
       s."expiresAt" AS "stayExpiresAt",
       i."invoiceNumber",
       i.status AS "invoiceStatus",
-      i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+      COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
       COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-      GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
+      GREATEST(COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
       submitter."fullName" AS "submittedByName",
       reviewer."fullName" AS "reviewedByName"
     FROM "PaymentSubmission" ps
@@ -176,9 +176,9 @@ export async function findSubmissionMinePage(
       t."fullName" AS "tenantFullName", t.phone AS "tenantPhone",
       r.id AS "roomId", r.code AS "roomCode", r.name AS "roomName", r.status AS "roomStatus",
       s.status AS "stayStatus", s."expiresAt" AS "stayExpiresAt",
-      i."invoiceNumber", i.status AS "invoiceStatus", i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+      i."invoiceNumber", i.status AS "invoiceStatus", COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
       COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-      GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
+      GREATEST(COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
       submitter."fullName" AS "submittedByName", reviewer."fullName" AS "reviewedByName"
     FROM "PaymentSubmission" ps
     INNER JOIN "Stay" s ON s.id = ps."stayId"
@@ -240,9 +240,9 @@ export async function findSubmissionReviewQueuePage(
       t."fullName" AS "tenantFullName", t.phone AS "tenantPhone",
       r.id AS "roomId", r.code AS "roomCode", r.name AS "roomName", r.status AS "roomStatus",
       s.status AS "stayStatus", s."expiresAt" AS "stayExpiresAt",
-      i."invoiceNumber", i.status AS "invoiceStatus", i."totalAmountRupiah" AS "invoiceTotalAmountRupiah",
+      i."invoiceNumber", i.status AS "invoiceStatus", COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) AS "invoiceTotalAmountRupiah",
       COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0) AS "invoicePaidAmountRupiah",
-      GREATEST(i."totalAmountRupiah" - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
+      GREATEST(COALESCE(NULLIF(i."totalAmountRupiah", 0), (SELECT COALESCE(SUM(il."lineAmountRupiah")::int, 0) FROM "InvoiceLine" il WHERE il."invoiceId" = i.id)) - COALESCE((SELECT SUM(ip."amountRupiah")::int FROM "InvoicePayment" ip WHERE ip."invoiceId" = i.id), 0), 0) AS "invoiceRemainingAmountRupiah",
       submitter."fullName" AS "submittedByName", reviewer."fullName" AS "reviewedByName"
     FROM "PaymentSubmission" ps
     INNER JOIN "Stay" s ON s.id = ps."stayId"

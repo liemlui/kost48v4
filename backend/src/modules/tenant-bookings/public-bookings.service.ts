@@ -9,6 +9,7 @@ import { Prisma } from '../../generated/prisma';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import { LeadSource, PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
+import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops.constants';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -182,19 +183,23 @@ export class PublicBookingsService {
         if (!room.isActive) {
           throw new ConflictException('Kamar ini sudah tidak tersedia untuk booking.');
         }
-        if (room.status !== RoomStatus.AVAILABLE) {
-          throw new ConflictException('Kamar ini sudah tidak tersedia untuk booking.');
+        if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
+          throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia.');
         }
 
-        const existingRoomStay = await tx.stay.findFirst({
+        const existingPaidOrOccupiedStay = await tx.stay.findFirst({
           where: {
             roomId: dto.roomId,
             status: StayStatus.ACTIVE as any,
+            OR: [
+              { initialMetersPromotedAt: { not: null } },
+              { room: { status: RoomStatus.OCCUPIED as any } },
+            ],
           },
           select: { id: true },
         });
-        if (existingRoomStay) {
-          throw new ConflictException('Kamar ini sudah tidak tersedia untuk booking.');
+        if (existingPaidOrOccupiedStay) {
+          throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
 
         const existingTenantWithActiveBooking = await tx.tenant.findFirst({
@@ -271,7 +276,7 @@ export class PublicBookingsService {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
 
-        const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+        const expiresAt = hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS, now);
         const stayPurposeSql = dto.stayPurpose
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
           : Prisma.sql`NULL`;

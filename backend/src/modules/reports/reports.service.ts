@@ -6,6 +6,16 @@ import { InvoiceStatus } from '../../common/enums/app.enums';
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private operationalApproximationMetadata(reportName: string) {
+    return {
+      reportName,
+      basis: 'OPERATIONAL_APPROXIMATION',
+      ledgerBacked: false,
+      formalStatementReady: false,
+      readinessNote: 'Laporan ini memakai data operasional invoice/payment/expense, belum jurnal akuntansi formal.',
+    };
+  }
+
   /**
    * Monthly Income Summary
    * Total billed, paid, wifi revenue, outstanding, invoice counts.
@@ -275,6 +285,7 @@ export class ReportsService {
         totalRupiah: totalCashOut,
       },
       netCashFlowRupiah: totalCashIn - totalCashOut,
+      metadata: this.operationalApproximationMetadata('cash-flow'),
     };
   }
 
@@ -343,6 +354,7 @@ export class ReportsService {
       netProfitRupiah: netProfit,
       netProfitMarginPercent: netProfitMargin,
       expenseCategories,
+      metadata: this.operationalApproximationMetadata('profit-loss'),
     };
   }
 
@@ -440,6 +452,7 @@ export class ReportsService {
       occupancyRatePercent: occupancyRate,
       occupancyRateNote:
         'Okupansi real-time berdasarkan stay aktif vs kamar operasional saat ini (bukan rata-rata bulanan)',
+      metadata: this.operationalApproximationMetadata('financial-ratios'),
     };
   }
 

@@ -37,6 +37,25 @@ export async function expireReservedBooking(stayId: number | string) {
 }
 
 
+export async function submitPaymentWithProof(payload: CreatePaymentSubmissionPayload, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('stayId', String(payload.stayId));
+  formData.append('invoiceId', String(payload.invoiceId));
+  formData.append('targetType', payload.targetType);
+  formData.append('amountRupiah', String(payload.amountRupiah));
+  formData.append('paidAt', payload.paidAt);
+  formData.append('paymentMethod', payload.paymentMethod);
+  if (payload.senderName) formData.append('senderName', payload.senderName);
+  if (payload.senderBankName) formData.append('senderBankName', payload.senderBankName);
+  if (payload.referenceNumber) formData.append('referenceNumber', payload.referenceNumber);
+  if (payload.notes) formData.append('notes', payload.notes);
+  const { data } = await apiClient.post('/payment-submissions/submit-with-proof', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data as PaymentSubmission;
+}
+
 export async function uploadPaymentProof(file: File) {
   const formData = new FormData();
   formData.append('file', file);

@@ -1,4 +1,4 @@
-import { Alert, Button, Col, Form, FormCheck, InputGroup, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import PaginationControls from '../common/PaginationControls';
@@ -28,6 +28,7 @@ interface ResourceTableProps {
   meta?: { totalItems: number; totalPages: number; page: number; limit: number };
   currentPage?: number;
   onPageChange?: (page: number) => void;
+  onRowOpen?: (item: Record<string, unknown>) => void;
 }
 
 export default function ResourceTable({
@@ -47,6 +48,7 @@ export default function ResourceTable({
   meta,
   currentPage,
   onPageChange,
+  onRowOpen,
 }: ResourceTableProps) {
   const navigate = useNavigate();
 
@@ -229,70 +231,31 @@ export default function ResourceTable({
       if (currentStay?.id) {
         return (
           <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/stays/${currentStay.id}`)}>
-            Lihat Stay
+            Lihat masa sewa
           </Button>
         );
       }
     }
 
-    if (config.path === '/rooms') {
-      return (
-        <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/rooms/${item.id}`)}>
-          Detail
-        </Button>
-      );
-    }
-
     return null;
   };
 
-  const hasActiveField = config.fields.some((field) => field.name === 'isActive');
   const visibleColumns = currentUserRole === 'STAFF' && config.path === '/rooms'
     ? config.columns.filter((column) => !['monthlyRateRupiah', 'dailyRateRupiah', 'weeklyRateRupiah', 'defaultDepositRupiah'].includes(column.key))
     : config.columns;
 
   return (
     <>
-      {searchTerm !== undefined && setSearchTerm ? (
-        <div className="mb-4 resource-table-toolbar">
-          <div className="d-flex gap-2 align-items-center flex-wrap">
-            {hasActiveField && showActiveOnly !== undefined && setShowActiveOnly ? (
-              <FormCheck
-                type="switch"
-                id={`${config.path.replace(/[^a-z0-9]/gi, '-')}-active-only-switch`}
-                label="Aktif saja"
-                checked={showActiveOnly}
-                onChange={(event) => setShowActiveOnly(event.target.checked)}
-              />
-            ) : null}
-            <InputGroup>
-              <Form.Control
-                type="text"
-                placeholder={`Cari ${config.title}...`}
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-              {searchTerm ? (
-                <Button variant="outline-secondary" onClick={() => setSearchTerm('')}>
-                  Reset
-                </Button>
-              ) : null}
-            </InputGroup>
-          </div>
-          <div className="mt-2 text-muted small">Menampilkan {filteredItems.length} dari {meta?.totalItems ?? items.length} data</div>
-        </div>
-      ) : null}
-
       {isLoading ? <div className="py-5 text-center"><Spinner /></div> : null}
       {isError ? <Alert variant="danger">Gagal mengambil data.</Alert> : null}
       {!isLoading && !items.length ? <Alert variant="secondary">Belum ada data.</Alert> : null}
-      {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data yang sesuai dengan filter pencarian.</Alert> : null}
+      {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data yang sesuai dengan badge filter aktif.</Alert> : null}
       {!!filteredItems.length ? (
         <Table hover responsive className="compact-data-table">
           <thead>
             <tr>
               {visibleColumns.map((column) => <th key={column.key}>{column.label}</th>)}
-              <th style={{ width: 220 }}>Aksi</th>
+              <th style={{ width: 160 }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -302,11 +265,23 @@ export default function ResourceTable({
               const quickAction = renderQuickActions(item);
 
               return (
-                <tr key={String(item.id)}>
+                <tr
+                  key={String(item.id)}
+                  className={onRowOpen ? 'clickable-row' : undefined}
+                  onClick={() => onRowOpen?.(item)}
+                  tabIndex={onRowOpen ? 0 : undefined}
+                  role={onRowOpen ? 'button' : undefined}
+                  onKeyDown={onRowOpen ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onRowOpen(item);
+                    }
+                  } : undefined}
+                >
                   {visibleColumns.map((column) => (
                     <td key={column.key}>{renderCell(item, column)}</td>
                   ))}
-                  <td>
+                  <td onClick={(event) => event.stopPropagation()}>
                     <div className="d-flex gap-2 flex-wrap align-items-center">
                       {quickAction}
                       {editGuard.allowed ? (
@@ -319,6 +294,7 @@ export default function ResourceTable({
                           Hapus
                         </Button>
                       ) : null}
+                      {onRowOpen ? <span className="row-arrow-cell">›</span> : null}
                     </div>
                   </td>
                 </tr>

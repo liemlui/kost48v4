@@ -86,9 +86,17 @@ export async function cancelStay(id: number | string, payload: CancelStayPayload
   return postAction<Stay>(`/stays/${id}/cancel`, payload as unknown as Record<string, unknown>);
 }
 
+export type RenewStayPayload = {
+  plannedCheckOutDate?: string;
+  agreedRentAmountRupiah?: number;
+  electricityReadingValue: string;
+  waterReadingValue: string;
+  meterReadingAt: string;
+};
+
 export async function renewStay(
   id: number | string,
-  payload?: { plannedCheckOutDate?: string; agreedRentAmountRupiah?: number }
+  payload: RenewStayPayload
 ) {
-  return postAction<CreateStayResponse>(`/stays/${id}/renew`, payload || {});
+  return postAction<CreateStayResponse>(`/stays/${id}/renew`, payload as unknown as Record<string, unknown>);
 }

@@ -11,15 +11,17 @@ import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { getBookingStatusLabel } from '../../utils/statusLabels';
-import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { ActionQueueTable, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
+import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
 import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
 import type { CheckoutRequest, PaginatedResponse, Stay } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { daysUntilDate, formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
+import { formatDateTimeWib } from '../../utils/dateTime';
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
-  return formatDateId(dateValue);
+  return formatDateTimeWib(dateValue);
 }
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
@@ -33,6 +35,10 @@ function isReservedBooking(stay: Stay): boolean {
     stay.bookingSource === 'WEBSITE' &&
     Boolean(stay.expiresAt)
   );
+}
+
+function isExpiredReservedBooking(stay: Stay): boolean {
+  return isReservedBooking(stay) && getBookingExpiryMeta(stay.expiresAt).isExpired;
 }
 
 function isOperationalActiveStay(stay: Stay): boolean {
@@ -105,14 +111,14 @@ async function listAllActiveStaysForBookings(maxPages = 50): Promise<PaginatedRe
   };
 }
 
-type StayViewFilter = 'ACTIVE' | 'BOOKINGS' | 'ALL';
+type StayViewFilter = 'ALL' | 'BOOKINGS' | 'ACTIVE';
 
 export default function StaysPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get('status') || undefined;
-  const initialFilter: StayViewFilter = statusFromUrl === 'ACTIVE' || statusFromUrl === 'BOOKINGS' ? statusFromUrl : 'BOOKINGS';
+  const initialFilter: StayViewFilter = statusFromUrl === 'ACTIVE' || statusFromUrl === 'BOOKINGS' ? statusFromUrl : 'ALL';
   const [statusFilter, setStatusFilter] = useState<StayViewFilter>(initialFilter);
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
@@ -121,7 +127,7 @@ export default function StaysPage() {
   const PAGE_SIZE = 20;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
-  const apiStatusFilter = statusFilter === 'ALL' ? undefined : 'ACTIVE';
+  const apiStatusFilter = 'ACTIVE';
 
   const expireMutation = useMutation({
     mutationFn: async (stayId?: number) => (stayId ? expireReservedBooking(stayId) : runPaymentSubmissionExpiryCheck()),
@@ -188,30 +194,15 @@ export default function StaysPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const reservedBookings = useMemo(() => items.filter((item) => isReservedBooking(item)), [items]);
+  const reservedBookings = useMemo(() => items.filter((item) => isReservedBooking(item) && !isExpiredReservedBooking(item)), [items]);
   const operationalActive = useMemo(() => items.filter((item) => isOperationalActiveStay(item)), [items]);
   const checkoutDue = useMemo(() => operationalActive.filter((item) => isCheckoutDueOrOverdue(item)), [operationalActive]);
 
   const filteredItems = useMemo(() => {
-    const baseItems = statusFilter === 'BOOKINGS'
-      ? [...reservedBookings, ...checkoutDue]
-      : statusFilter === 'ACTIVE'
-        ? operationalActive
-        : items;
-
-    const term = keyword.trim().toLowerCase();
-    return baseItems.filter((item) =>
-      !term || [
-        item.tenant?.fullName,
-        item.room?.code,
-        item.room?.name,
-        item.pricingTerm,
-        item.bookingSource,
-        item.stayPurpose,
-        item.latestInvoiceNumber,
-      ].some((value) => String(value ?? '').toLowerCase().includes(term)),
-    );
-  }, [items, keyword, operationalActive, reservedBookings, statusFilter]);
+    if (statusFilter === 'BOOKINGS') return [...reservedBookings, ...checkoutDue];
+    if (statusFilter === 'ACTIVE') return operationalActive;
+    return items.filter((item) => item.status === 'ACTIVE' && !isExpiredReservedBooking(item));
+  }, [checkoutDue, items, operationalActive, reservedBookings, statusFilter]);
 
   const handleStatusFilterChange = (filter: StayViewFilter) => {
     setStatusFilter(filter);
@@ -226,12 +217,12 @@ export default function StaysPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, keyword]);
+  }, [statusFilter]);
 
   const checkoutSoonCount = checkoutDue.length;
   const pendingCheckoutRequestCount = pendingCheckoutRequests.length;
   const approvedCheckoutRequestCount = approvedCheckoutRequests.length;
-  const expiredBookingsCount = reservedBookings.filter((item) => getBookingExpiryMeta(item.expiresAt).isExpired).length;
+  const expiredBookingsCount = 0;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
   const meta = query.data?.meta;
@@ -335,60 +326,67 @@ export default function StaysPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Lifecycle Command Center"
-        title="Masa Sewa & Booking"
-        description="Pisahkan booking, masa sewa aktif, akhir masa sewa, dan pengajuan keluar supaya admin tahu flow mana yang perlu tindakan."
+        eyebrow="Stays & Tenant"
+        title="Stays & Tenant"
+        description="Masa sewa dan tenant disatukan: booking, aktif, perpanjangan, checkout, dan daftar tenant tetap dalam satu area lifecycle."
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
 
-      <AssistantPanel
+      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Stays dan Tenant">
+        <div className="admin-area-internal-menu-head">
+          <span>Menu Stays & Tenant</span>
+          <small>Tenant tidak dipisah dari masa sewa karena action operasionalnya selalu terkait kamar/tagihan.</small>
+        </div>
+        <div className="admin-area-internal-menu-scroll">
+          {[
+            { id: 'process', icon: '🏠', label: 'Semua Proses', helper: 'Booking dan masa sewa aktif yang masih berjalan.', to: '/stays', count: operationalActive.length + reservedBookings.length, active: true },
+            { id: 'booking', icon: '📝', label: 'Booking Baru', helper: 'Booking yang perlu review atau bayar.', to: '/stays?status=BOOKINGS', count: reservedBookings.length, active: false },
+            { id: 'active', icon: '🛏️', label: 'Stay Aktif', helper: 'Tenant yang sedang menempati kamar.', to: '/stays?status=ACTIVE', count: operationalActive.length, active: false },
+            { id: 'renew', icon: '🔁', label: 'Perpanjangan', helper: 'Review perpanjangan dan meter checkpoint.', to: '/renew-requests', count: 0, active: false },
+            { id: 'checkout', icon: '🚪', label: 'Checkout', helper: 'Pengajuan keluar dan final checkout.', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, active: false },
+            { id: 'tenant', icon: '👤', label: 'Tenant', helper: 'Daftar tenant dan akses portal.', to: '/tenants', count: undefined, active: false },
+          ].map((item) => (
+            <button type="button" key={item.id} className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()} onClick={() => navigate(item.to)} title={item.helper}>
+              <span className="admin-area-internal-chip-main">
+                <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
+                <span className="admin-area-internal-label">{item.label}</span>
+                {typeof item.count === 'number' ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
+              </span>
+              <small>{item.helper}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <AssistantInsightLine
         title="Asisten Lifecycle"
-        subtitle="Prioritas booking, renew/keluar, dan final checkout berdasarkan data masa sewa."
-        items={assistantItems}
-        emptyTitle="Tidak ada lifecycle blocker besar"
-        emptyMessage="Tidak ada pengajuan keluar atau booking expired yang menonjol pada data saat ini."
+        tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0] ? 'info' : 'success'}
+        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada lifecycle blocker besar. Detail pekerjaan dipusatkan di tabel sesuai tab.'}
+        actionLabel={assistantItems[0]?.actionLabel}
+        actionTo={assistantItems[0]?.actionTo}
+        onAction={assistantItems[0]?.onAction}
       />
-      <CompactMetrics metrics={metrics} />
-      <ActionQueueTable
-        title="Lifecycle Action Queue"
-        subtitle="Antrean yang paling berdampak ke kamar tertahan, tenant keluar, atau booking belum selesai."
-        items={actionQueueItems}
-        emptyTitle="Tidak ada antrean lifecycle"
-        emptyDescription="Booking, renew/keluar, dan final checkout sedang aman pada filter ini."
+      <StatusStrip
+        items={metrics.map((metric) => ({
+          id: metric.id,
+          label: metric.label,
+          value: metric.value,
+          helper: metric.helper,
+          tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
+          to: metric.to,
+          onClick: metric.onClick,
+        }))}
       />
 
       <Card className="content-card border-0 mb-3">
         <Card.Body className="py-3">
           <div className="table-meta mb-0">
             <div>
-              <div className="panel-title">Fokus Data</div>
-              <div className="panel-subtitle">Pilih mode kerja dulu, lalu tab di atas tabel akan mengikuti konteksnya.</div>
+              <div className="panel-title">Workspace Masa Sewa</div>
+              <div className="panel-subtitle">Filter cukup lewat badge/tab. Tabel tetap menjadi tempat utama semua stay.</div>
             </div>
             <span className="table-meta-count">{tableCountText}</span>
-          </div>
-          <div className="compact-filter-bar mt-3">
-            <Form.Select
-              aria-label="Fokus data stay"
-              value={statusFilter}
-              onChange={(e) => handleStatusFilterChange(e.target.value as StayViewFilter)}
-              style={{ maxWidth: 260 }}
-            >
-              <option value="BOOKINGS">Perlu Tindakan</option>
-              <option value="ACTIVE">Masa Sewa Aktif</option>
-              <option value="ALL">Semua Masa Sewa</option>
-            </Form.Select>
-            <Form.Control
-              placeholder="🔍  Tenant, kamar, invoice..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              style={{ maxWidth: 320 }}
-            />
-            <div className="summary-strip compact-summary">
-              <span className="summary-chip"><span className="summary-chip-label">Booking</span><span className="summary-chip-value">{reservedBookings.length}</span></span>
-              <span className="summary-chip"><span className="summary-chip-label">Due</span><span className="summary-chip-value">{checkoutDue.length}</span></span>
-              <span className="summary-chip"><span className="summary-chip-label">Rencana keluar</span><span className="summary-chip-value">{pendingCheckoutRequestCount}</span></span>
-            </div>
           </div>
         </Card.Body>
       </Card>
@@ -397,21 +395,21 @@ export default function StaysPage() {
         <Card.Body>
           <div className="table-meta align-items-start">
             <div>
-              <div className="panel-title">{isBookingsMode ? 'Queue booking & renew/keluar' : statusFilter === 'ACTIVE' ? 'Masa sewa operasional aktif' : 'Semua data masa sewa'}</div>
-              <div className="panel-subtitle">Tab pills langsung mengontrol data tabel, tanpa alert panjang.</div>
+              <div className="panel-title">{isBookingsMode ? 'Booking & checkout dalam proses' : statusFilter === 'ACTIVE' ? 'Masa sewa aktif' : 'Semua Proses Sewa'}</div>
+              <div className="panel-subtitle">Badge filter mengontrol table. Expired dan batal tidak ditampilkan di command view.</div>
             </div>
             <div className="status-tab-bar compact-tabs">
+              <button className={`status-tab${statusFilter === 'ALL' ? ' active' : ''}`} onClick={() => handleStatusFilterChange('ALL')}>
+                Semua Proses
+                <span className="tab-badge">{items.filter((item) => item.status === 'ACTIVE' && !isExpiredReservedBooking(item)).length}</span>
+              </button>
               <button className={`status-tab tab-danger${statusFilter === 'BOOKINGS' ? ' active' : ''}`} onClick={() => handleStatusFilterChange('BOOKINGS')}>
-                Perlu Tindakan
+                Booking & Checkout
                 <span className="tab-badge">{isBookingsMode ? bookingsTotalItems + pendingCheckoutRequestCount : checkoutDue.length + reservedBookings.length + pendingCheckoutRequestCount}</span>
               </button>
               <button className={`status-tab tab-success${statusFilter === 'ACTIVE' ? ' active' : ''}`} onClick={() => handleStatusFilterChange('ACTIVE')}>
-                Masa Sewa Aktif
+                Aktif
                 <span className="tab-badge">{operationalActive.length}</span>
-              </button>
-              <button className={`status-tab${statusFilter === 'ALL' ? ' active' : ''}`} onClick={() => handleStatusFilterChange('ALL')}>
-                Semua Masa Sewa
-                <span className="tab-badge">{items.length}</span>
               </button>
             </div>
           </div>
@@ -670,17 +668,18 @@ export default function StaysPage() {
               <tbody>
                 {visibleItems.map((item) => {
                   const reminderBadge = getCheckoutReminderBadge(item);
-                  const isReservedBooking = item.room?.status === 'RESERVED';
+                  const isReservedBookingRow = item.room?.status === 'RESERVED';
                   const expiryMeta = getBookingExpiryMeta(item.expiresAt);
+                  const approvalMeta = getBookingApprovalMeta(item);
                   const onOpen = () => navigate(`/stays/${item.id}`);
                   return (
                     <tr
                       key={item.id}
-                      className={isReservedBooking ? '' : 'clickable-row'}
-                      onClick={isReservedBooking ? undefined : onOpen}
-                      tabIndex={isReservedBooking ? undefined : 0}
-                      role={isReservedBooking ? undefined : 'button'}
-                      onKeyDown={isReservedBooking ? undefined : (event) => {
+                      className="clickable-row"
+                      onClick={onOpen}
+                      tabIndex={0}
+                      role="button"
+                      onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
                           event.preventDefault();
                           onOpen();
@@ -703,7 +702,7 @@ export default function StaysPage() {
                       </td>
                       <td>
                         <div>{item.checkInDate ? formatDateSafe(item.checkInDate) : 'Belum Check-in'}</div>
-                        {isReservedBooking ? <div className="small text-muted">Berlaku s.d. {formatDateSafe(item.expiresAt)} · {expiryMeta.helperText}</div> : null}
+                        {isReservedBookingRow ? <div className="small text-muted">Berakhir {formatDateSafe(item.expiresAt)} · {expiryMeta.helperText}</div> : null}
                       </td>
                       <td>
                         <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
@@ -723,11 +722,13 @@ export default function StaysPage() {
                           </div>
                         ) : null}
                       </td>
-                      <td>
-                        {isReservedBooking ? (
-                          <Button size="sm" variant="outline-secondary" onClick={(event) => { event.stopPropagation(); handleStatusFilterChange('BOOKINGS'); }}>Mode Booking</Button>
+                      <td onClick={(event) => event.stopPropagation()}>
+                        {isReservedBookingRow && approvalMeta.isPendingApproval ? (
+                          <Button size="sm" onClick={() => setSelectedBooking(item)}>Review</Button>
+                        ) : isReservedBookingRow ? (
+                          <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/stays/${item.id}`)}>Detail</Button>
                         ) : (
-                          <div style={{ width: 32, textAlign: 'center', color: 'var(--text-muted)' }}>›</div>
+                          <div className="row-arrow-cell">›</div>
                         )}
                       </td>
                     </tr>

@@ -13,6 +13,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import RenewRequestsAdminPage from './pages/renew-requests/RenewRequestsAdminPage';
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
+import AncillaryRevenuePage from './pages/finance/AncillaryRevenuePage';
 import PaymentReviewPage from './pages/payments/PaymentReviewPage';
 import ReminderPreviewPage from './pages/reminders/ReminderPreviewPage';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -25,6 +26,7 @@ import ProfilePage from './pages/profile/ProfilePage';
 import MyStayPage from './pages/portal/MyStayPage';
 import MyTicketsPage from './pages/portal/MyTicketsPage';
 import WifiOrderPage from './pages/portal/WifiOrderPage';
+import TenantBookingGate from './components/tenant/TenantBookingGate';
 import SimpleCrudPage from './pages/resources/SimpleCrudPage';
 import BookingPage from './pages/bookings/BookingPage';
 import GuestBookingPage from './pages/bookings/GuestBookingPage';
@@ -47,6 +49,14 @@ function RequireRoles({ allowed, children }: { allowed: Role[]; children: ReactN
   const { stage } = useTenantPortalStage();
   if (!user) return null;
   return allowed.includes(user.role as Role) ? <>{children}</> : <Navigate to={getDefaultRoute(user.role, stage)} replace />;
+}
+
+
+function TenantBookingRouteGuard({ children }: { children: ReactNode }) {
+  const { stage, isLoading } = useTenantPortalStage();
+  if (isLoading) return null;
+  if (stage !== 'browsing') return <TenantBookingGate mode="booking-route" />;
+  return <>{children}</>;
 }
 
 function RootRedirect() {
@@ -97,7 +107,7 @@ export default function App() {
           <Route path="/users" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.users} /></RequireRoles>} />
           <Route path="/tenants" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.tenants} /></RequireRoles>} />
           <Route path="/rooms/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><RoomDetailPage /></RequireRoles>} />
-          <Route path="/portal/booking/:roomId" element={<RequireRoles allowed={['TENANT']}><BookingPage /></RequireRoles>} />
+          <Route path="/portal/booking/:roomId" element={<RequireRoles allowed={['TENANT']}><TenantBookingRouteGuard><BookingPage /></TenantBookingRouteGuard></RequireRoles>} />
           <Route path="/stays" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StaysPage /></RequireRoles>} />
           <Route path="/stays/check-in" element={<RequireRoles allowed={['ADMIN', 'OWNER']}><CheckInWizard /></RequireRoles>} />
           <Route path="/stays/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><StayDetailPage /></RequireRoles>} />
@@ -116,6 +126,7 @@ export default function App() {
           <Route path="/room-items" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['room-items']} /></RequireRoles>} />
           <Route path="/inventory-movements" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['inventory-movements']} /></RequireRoles>} />
           <Route path="/wifi-sales" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['wifi-sales']} /></RequireRoles>} />
+          <Route path="/ancillary-revenue" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AncillaryRevenuePage /></RequireRoles>} />
           <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.expenses} /></RequireRoles>} />
           <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />
           <Route path="/reports" element={<RequireRoles allowed={['OWNER']}><ReportsPage /></RequireRoles>} />

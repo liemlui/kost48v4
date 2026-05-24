@@ -61,13 +61,13 @@ export class StaysController {
   }
 
   @Post(':id/complete')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async complete(@Param('id', ParseIntPipe) id: number, @Body() dto: CompleteStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil diselesaikan', data: await this.staysService.complete(id, dto, user) };
   }
 
   @Post(':id/cancel')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async cancel(@Param('id', ParseIntPipe) id: number, @Body() dto: CancelStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil dibatalkan', data: await this.staysService.cancel(id, dto, user) };
   }
@@ -79,7 +79,7 @@ export class StaysController {
   }
 
   @Post(':id/renew')
-  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
   async renewStay(@Param('id', ParseIntPipe) id: number, @Body() dto: RenewStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil diperpanjang', data: await this.staysService.renewStay(id, dto, user) };
   }

@@ -58,11 +58,19 @@ export default function CompleteStayModal({
       </Modal.Header>
       <Modal.Body>
         <Alert variant="warning" className="small mb-3">
-          Checkout Final menandakan tenant benar-benar keluar dari kamar. Status stay akan berubah menjadi selesai dan deposit diproses terpisah.
+          Checkout Final menandakan tenant benar-benar keluar dari kamar. Status masa sewa akan berubah menjadi selesai, kamar bisa dilepas, dan deposit diproses terpisah.
+        </Alert>
+        <Alert variant="info" className="small mb-3">
+          <div className="fw-semibold mb-1">Checklist sebelum final checkout</div>
+          <ul className="mb-0 ps-3">
+            <li>Semua tagihan harus lunas atau dibatalkan.</li>
+            <li>Meter akhir sebaiknya sudah dicatat jika ada pemakaian listrik/air terakhir.</li>
+            <li>Cek kondisi kamar dan barang sebelum memutuskan refund deposit.</li>
+          </ul>
         </Alert>
         {unpaidCount > 0 ? (
           <Alert variant="danger">
-            <strong>Checkout tidak dapat dilakukan.</strong> Masih ada {unpaidCount} invoice yang belum lunas atau belum dibatalkan. Selesaikan semua invoice terlebih dahulu sebelum melakukan checkout final.
+            <strong>Checkout tidak dapat dilakukan.</strong> Masih ada {unpaidCount} tagihan yang belum lunas atau belum dibatalkan. Selesaikan semua tagihan terlebih dahulu sebelum melakukan checkout final.
           </Alert>
         ) : null}
         <Alert variant="info" className="mb-3">

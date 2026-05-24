@@ -3,13 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { listResource, getResource } from '../api/resources';
 import { listMyTenantBookings } from '../api/bookings';
+import { listMyPaymentSubmissions } from '../api/paymentSubmissions';
 import { getBookingExpiryMeta, parseDateSafe } from '../utils/bookingExpiry';
+import { getDeadlineMeta } from '../utils/dateTime';
 import type { Invoice, Stay } from '../types';
+import { TENANT_PAYMENT_REVIEW_MESSAGE, isPendingReviewStatus } from '../utils/tenantCopy';
 
 export type PaymentUrgencyVariant = 'danger' | 'warning' | 'info';
 
 export interface PaymentUrgency {
-  type: 'INVOICE_OVERDUE' | 'BOOKING_PAYMENT_DEADLINE' | 'INVOICE_DUE_SOON' | 'STAY_ENDING_SOON';
+  type: 'PAYMENT_UNDER_REVIEW' | 'INVOICE_OVERDUE' | 'BOOKING_PAYMENT_DEADLINE' | 'INVOICE_DUE_SOON' | 'STAY_ENDING_SOON';
   label: string;
   detail?: string;
   variant: PaymentUrgencyVariant;
@@ -107,10 +110,36 @@ export function usePaymentUrgency(): {
     retry: false,
   });
 
+  // --- Payment submissions ---
+  const submissionsQuery = useQuery({
+    queryKey: ['payment-urgency', 'payment-submissions', { userId }],
+    queryFn: () => listMyPaymentSubmissions(),
+    enabled: isTenant && Boolean(userId),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
   const urgency = useMemo<PaymentUrgency | null>(() => {
     if (!isTenant) return null;
-    if (invoicesQuery.isLoading || bookingsQuery.isLoading || stayQuery.isLoading) return null;
-    if (invoicesQuery.isError && bookingsQuery.isError && stayQuery.isError) return null;
+    if (invoicesQuery.isLoading || bookingsQuery.isLoading || stayQuery.isLoading || submissionsQuery.isLoading) return null;
+    if (invoicesQuery.isError && bookingsQuery.isError && stayQuery.isError && submissionsQuery.isError) return null;
+
+    // P0: Bukti pembayaran sudah dikirim dan sedang diperiksa
+    {
+      const submissions = submissionsQuery.data?.items ?? [];
+      const pendingSubmission = submissions.find((submission) => isPendingReviewStatus(submission.status));
+      if (pendingSubmission) {
+        return {
+          type: 'PAYMENT_UNDER_REVIEW',
+          label: 'Bukti sedang diperiksa',
+          detail: TENANT_PAYMENT_REVIEW_MESSAGE,
+          variant: 'info',
+          to: pendingSubmission.invoiceId ? `/portal/invoices/${pendingSubmission.invoiceId}` : '/portal/invoices',
+          priority: 0,
+        };
+      }
+    }
 
     // P1: Invoice overdue
     {
@@ -130,11 +159,11 @@ export function usePaymentUrgency(): {
       }
 
       if (worstInvoice) {
-        const absDays = Math.abs(worstOverdueDays);
+        const dueMeta = getDeadlineMeta(worstInvoice.dueDate, 'Jatuh tempo');
         return {
           type: 'INVOICE_OVERDUE',
-          label: absDays === 1 ? 'Terlambat 1 hari' : `Terlambat ${absDays} hari`,
-          detail: worstInvoice.invoiceNumber ?? undefined,
+          label: dueMeta.hasDate ? dueMeta.relativeLabel : 'Tagihan terlambat',
+          detail: dueMeta.hasDate ? `${worstInvoice.invoiceNumber ?? 'Tagihan'} · jatuh tempo ${dueMeta.absoluteLabel}` : worstInvoice.invoiceNumber ?? undefined,
           variant: 'danger',
           to: '/portal/invoices',
           priority: 1,
@@ -170,12 +199,12 @@ export function usePaymentUrgency(): {
         if (isPaid) continue;
 
         const variant = hrs <= 6 ? ('danger' as const) : ('warning' as const);
-        const label = hrs <= 1 ? 'Bayar segera' : `Bayar sebelum ${hrs} jam`;
+        const deadlineMeta = getDeadlineMeta(expiryDate, 'Batas bayar');
 
         return {
           type: 'BOOKING_PAYMENT_DEADLINE',
-          label,
-          detail: booking.room?.code ?? undefined,
+          label: hrs <= 1 ? 'Bayar segera' : deadlineMeta.relativeLabel,
+          detail: `${booking.room?.code ?? 'Booking'} · batas ${deadlineMeta.absoluteLabel}`,
           variant,
           to: '/portal/bookings',
           priority: 2,
@@ -201,11 +230,11 @@ export function usePaymentUrgency(): {
       }
 
       if (closestInvoice) {
-        const label = closestDays === 0 ? 'Jatuh tempo hari ini' : `Tagihan ${daysLabel(closestDays)}`;
+        const dueMeta = getDeadlineMeta(closestInvoice.dueDate, 'Jatuh tempo');
         return {
           type: 'INVOICE_DUE_SOON',
-          label,
-          detail: closestInvoice.invoiceNumber ?? undefined,
+          label: dueMeta.hasDate ? dueMeta.relativeLabel : closestDays === 0 ? 'Jatuh tempo hari ini' : `Tagihan ${daysLabel(closestDays)}`,
+          detail: dueMeta.hasDate ? `${closestInvoice.invoiceNumber ?? 'Tagihan'} · ${dueMeta.absoluteLabel}` : closestInvoice.invoiceNumber ?? undefined,
           variant: 'warning',
           to: '/portal/invoices',
           priority: 3,
@@ -226,11 +255,12 @@ export function usePaymentUrgency(): {
             const delta = daysDelta(checkoutDate);
             if (delta >= 0 && delta <= 10) {
               const variant = delta <= 3 ? ('warning' as const) : ('info' as const);
-              const label = delta === 0 ? 'Masa sewa renew/keluar hari ini' : `Masa sewa ${daysLabel(delta)}`;
+              const endMeta = getDeadlineMeta(checkoutDate, 'Akhir masa sewa');
+              const label = endMeta.hasDate ? endMeta.relativeLabel : delta === 0 ? 'Masa sewa renew/keluar hari ini' : `Masa sewa ${daysLabel(delta)}`;
               return {
                 type: 'STAY_ENDING_SOON',
                 label,
-                detail: stay.room?.code ?? undefined,
+                detail: endMeta.hasDate ? `${stay.room?.code ?? 'Kamar'} · akhir masa sewa ${endMeta.absoluteLabel}` : stay.room?.code ?? undefined,
                 variant,
                 to: '/portal/stay',
                 priority: 4,
@@ -242,9 +272,9 @@ export function usePaymentUrgency(): {
     }
 
     return null;
-  }, [isTenant, invoicesQuery.data, invoicesQuery.isLoading, invoicesQuery.isError, bookingsQuery.data, bookingsQuery.isLoading, bookingsQuery.isError, stayQuery.data, stayQuery.isLoading, stayQuery.isError]);
+  }, [isTenant, invoicesQuery.data, invoicesQuery.isLoading, invoicesQuery.isError, bookingsQuery.data, bookingsQuery.isLoading, bookingsQuery.isError, stayQuery.data, stayQuery.isLoading, stayQuery.isError, submissionsQuery.data, submissionsQuery.isLoading, submissionsQuery.isError]);
 
-  const isLoading = isTenant && (invoicesQuery.isLoading || bookingsQuery.isLoading || stayQuery.isLoading);
+  const isLoading = isTenant && (invoicesQuery.isLoading || bookingsQuery.isLoading || stayQuery.isLoading || submissionsQuery.isLoading);
 
   return { urgency, isLoading };
 }
