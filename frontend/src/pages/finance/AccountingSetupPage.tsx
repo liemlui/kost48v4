@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
 import { StatusStrip } from '../../components/workspace';
 import AccountingReadinessCard from '../../components/accounting/AccountingReadinessCard';
@@ -52,6 +53,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 export default function AccountingSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const asOf = currentAsOf();
@@ -72,6 +74,7 @@ export default function AccountingSetupPage() {
 
   const postedOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'POSTED'), [openingBalances]);
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
+  const canManageOpeningBalance = user?.role === 'OWNER';
 
   async function refreshAccounting() {
     await Promise.all([
@@ -177,6 +180,11 @@ export default function AccountingSetupPage() {
 
       {actionError ? <Alert variant="danger">{actionError}</Alert> : null}
       {actionMessage ? <Alert variant="success" onClose={() => setActionMessage(null)} dismissible>{actionMessage}</Alert> : null}
+      {!canManageOpeningBalance ? (
+        <Alert variant="info" className="mb-3">
+          Setup accounting bisa dipantau oleh Admin, tetapi pembuatan draft, posting, dan pembatalan saldo awal hanya boleh dilakukan Owner karena menjadi dasar neraca.
+        </Alert>
+      ) : null}
 
       {isInitialLoading ? (
         <Card className="content-card border-0"><Card.Body><Spinner animation="border" size="sm" className="me-2" /> Memuat setup accounting...</Card.Body></Card>
@@ -214,6 +222,7 @@ export default function AccountingSetupPage() {
             onCreateDraft={(payload) => createOpeningDraftMutation.mutate(payload)}
             onPost={(id) => postOpeningMutation.mutate(id)}
             onVoid={(id) => voidOpeningMutation.mutate(id)}
+            canManageOpeningBalance={canManageOpeningBalance}
             isCreatingDraft={createOpeningDraftMutation.isPending}
             isPosting={postOpeningMutation.isPending}
             isVoiding={voidOpeningMutation.isPending}

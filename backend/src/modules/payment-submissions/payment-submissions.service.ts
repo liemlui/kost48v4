@@ -22,6 +22,7 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
+import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
@@ -33,39 +34,6 @@ import {
   parseDateOnly,
   endOfDay,
 } from './payment-submissions.helpers';
-
-function startOfDayLocal(value: Date): Date {
-  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
-}
-
-function addDaysLocal(value: Date, days: number): Date {
-  const result = startOfDayLocal(value);
-  result.setDate(result.getDate() + days);
-  return startOfDayLocal(result);
-}
-
-function addCalendarMonthsClampedLocal(value: Date, months: number): Date {
-  const day = value.getDate();
-  const result = startOfDayLocal(value);
-  result.setDate(1);
-  result.setMonth(result.getMonth() + months);
-  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-  result.setDate(Math.min(day, lastDayOfTargetMonth));
-  return startOfDayLocal(result);
-}
-
-function calculateExclusivePeriodEndLocal(checkInDate: Date, pricingTerm: string): Date {
-  const result = startOfDayLocal(checkInDate);
-  switch (pricingTerm) {
-    case 'DAILY': return addDaysLocal(result, 1);
-    case 'WEEKLY': return addDaysLocal(result, 7);
-    case 'BIWEEKLY': return addDaysLocal(result, 14);
-    case 'MONTHLY': return addCalendarMonthsClampedLocal(result, 1);
-    case 'SMESTERLY': return addCalendarMonthsClampedLocal(result, 6);
-    case 'YEARLY': return addCalendarMonthsClampedLocal(result, 12);
-    default: return addCalendarMonthsClampedLocal(result, 1);
-  }
-}
 
 @Injectable()
 export class PaymentSubmissionsService {
@@ -489,7 +457,7 @@ export class PaymentSubmissionsService {
             });
 
             if (activationStay && activationStay.checkInDate && !activationStay.plannedCheckOutDate) {
-              const autoPlannedCheckOut = calculateExclusivePeriodEndLocal(
+              const autoPlannedCheckOut = calculatePeriodEnd(
                 activationStay.checkInDate,
                 activationStay.pricingTerm,
               );

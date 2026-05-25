@@ -92,7 +92,7 @@ export default function CreateInvoiceModal({ show, onHide, stay }: { show: boole
   const [error, setError] = useState('');
   const [fallbackInfo, setFallbackInfo] = useState('');
   const [selectedWifiSaleId, setSelectedWifiSaleId] = useState('');
-  const { createMutation, addLineMutation } = useInvoices(stay.id, false);
+  const { createMutation, addLineMutation, issueMutation } = useInvoices(stay.id, false);
 
   useEffect(() => {
     if (!show) return;
@@ -208,6 +208,7 @@ export default function CreateInvoiceModal({ show, onHide, stay }: { show: boole
         });
       }
 
+      await issueMutation.mutateAsync(invoice.id);
       handleClose();
     } catch (err: unknown) {
       const message = err && typeof err === 'object' && 'response' in err
@@ -330,8 +331,10 @@ export default function CreateInvoiceModal({ show, onHide, stay }: { show: boole
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Batal</Button>
-        <Button onClick={handleSubmit} disabled={createMutation.isPending || addLineMutation.isPending || !items.length}>
-          {createMutation.isPending || addLineMutation.isPending ? <><Spinner size="sm" className="me-2" />Menyimpan...</> : 'Simpan Invoice'}
+        <Button onClick={handleSubmit} disabled={createMutation.isPending || addLineMutation.isPending || issueMutation.isPending || !items.length}>
+          {createMutation.isPending || addLineMutation.isPending || issueMutation.isPending
+            ? <><Spinner size="sm" className="me-2" />Membuat dan menerbitkan tagihan...</>
+            : 'Simpan & Terbitkan Tagihan'}
         </Button>
       </Modal.Footer>
     </Modal>

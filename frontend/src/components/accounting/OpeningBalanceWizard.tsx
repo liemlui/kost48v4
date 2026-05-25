@@ -28,6 +28,7 @@ export default function OpeningBalanceWizard({
   onCreateDraft,
   onPost,
   onVoid,
+  canManageOpeningBalance = true,
   isCreatingDraft,
   isPosting,
   isVoiding,
@@ -39,6 +40,7 @@ export default function OpeningBalanceWizard({
   onCreateDraft: (payload: { accountingPeriodId: number; cutoverDate: string; notes?: string; lines: OpeningBalanceLinePayload[] }) => void;
   onPost: (id: number) => void;
   onVoid: (id: number) => void;
+  canManageOpeningBalance?: boolean;
   isCreatingDraft?: boolean;
   isPosting?: boolean;
   isVoiding?: boolean;
@@ -109,7 +111,7 @@ export default function OpeningBalanceWizard({
       String(batch.cutoverDate).slice(0, 10) === selectedCutoverDate
     ),
   );
-  const canCreateDraft = Boolean(selectedPeriodId && balanced && !postedForSelectedCutover && !draftForSelectedCutover);
+  const canCreateDraft = Boolean(canManageOpeningBalance && selectedPeriodId && balanced && !postedForSelectedCutover && !draftForSelectedCutover);
 
   function updateLine(key: string, patch: Partial<EditableLine>) {
     setLines((current) => current.map((line) => line.key === key ? { ...line, ...patch } : line));
@@ -144,10 +146,15 @@ export default function OpeningBalanceWizard({
             <h3 className="panel-title mb-1">Saldo awal dan cutover</h3>
             <p className="text-muted mb-0">Debit dan kredit harus sama sebelum draft bisa diposting menjadi jurnal pembuka.</p>
           </div>
-          <Button variant="outline-primary" onClick={createCurrentPeriod}>
+          <Button variant="outline-primary" onClick={createCurrentPeriod} disabled={!canManageOpeningBalance}>
             {periodForCutover ? 'Gunakan Periode Cutover yang Ada' : 'Buat Periode dari Cutover'}
           </Button>
         </div>
+        {!canManageOpeningBalance ? (
+          <Alert variant="info" className="mt-3 mb-0">
+            Mode lihat saja untuk Admin. Owner yang membuat draft, posting, atau membatalkan opening balance agar saldo awal neraca tidak berubah tanpa otorisasi.
+          </Alert>
+        ) : null}
         {periodForCutover ? (
           <Alert variant="info" className="mt-3 mb-0">
             Periode {periodForCutover.year}-{String(periodForCutover.month).padStart(2, '0')} sudah ada. Wizard akan memakai periode tersebut, jadi tidak perlu membuat periode duplicate.
@@ -167,7 +174,7 @@ export default function OpeningBalanceWizard({
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Accounting period</Form.Label>
-                <Form.Select value={selectedPeriodId} onChange={(event) => setPeriodId(Number(event.target.value))}>
+                <Form.Select value={selectedPeriodId} disabled={!canManageOpeningBalance} onChange={(event) => setPeriodId(Number(event.target.value))}>
                   <option value={0}>Pilih periode</option>
                   {periods.map((period) => <option key={period.id} value={period.id}>{period.year}-{String(period.month).padStart(2, '0')} · {period.status}</option>)}
                 </Form.Select>
@@ -176,13 +183,13 @@ export default function OpeningBalanceWizard({
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Cutover date</Form.Label>
-                <Form.Control type="date" value={cutoverDate} onChange={(event) => setCutoverDate(event.target.value)} />
+                <Form.Control type="date" value={cutoverDate} disabled={!canManageOpeningBalance} onChange={(event) => setCutoverDate(event.target.value)} />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Catatan</Form.Label>
-                <Form.Control value={notes} onChange={(event) => setNotes(event.target.value)} />
+                <Form.Control value={notes} disabled={!canManageOpeningBalance} onChange={(event) => setNotes(event.target.value)} />
               </Form.Group>
             </Col>
           </Row>
@@ -193,20 +200,22 @@ export default function OpeningBalanceWizard({
               {lines.map((line) => (
                 <tr key={line.key}>
                   <td>
-                    <Form.Select value={line.chartOfAccountId} onChange={(event) => updateLine(line.key, { chartOfAccountId: Number(event.target.value) })}>
+                    <Form.Select value={line.chartOfAccountId} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { chartOfAccountId: Number(event.target.value) })}>
                       {activeAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
                     </Form.Select>
                   </td>
-                  <td><Form.Control value={line.description ?? ''} onChange={(event) => updateLine(line.key, { description: event.target.value })} /></td>
-                  <td><Form.Control type="number" min={0} value={line.debitText} onChange={(event) => updateLine(line.key, { debitText: event.target.value, creditText: event.target.value !== '0' ? '0' : line.creditText })} /></td>
-                  <td><Form.Control type="number" min={0} value={line.creditText} onChange={(event) => updateLine(line.key, { creditText: event.target.value, debitText: event.target.value !== '0' ? '0' : line.debitText })} /></td>
-                  <td><Button variant="link" disabled={lines.length <= 2} onClick={() => setLines((current) => current.filter((item) => item.key !== line.key))}>Hapus</Button></td>
+                  <td><Form.Control value={line.description ?? ''} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { description: event.target.value })} /></td>
+                  <td><Form.Control type="number" min={0} value={line.debitText} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { debitText: event.target.value, creditText: event.target.value !== '0' ? '0' : line.creditText })} /></td>
+                  <td><Form.Control type="number" min={0} value={line.creditText} disabled={!canManageOpeningBalance} onChange={(event) => updateLine(line.key, { creditText: event.target.value, debitText: event.target.value !== '0' ? '0' : line.debitText })} /></td>
+                  <td><Button variant="link" disabled={!canManageOpeningBalance || lines.length <= 2} onClick={() => setLines((current) => current.filter((item) => item.key !== line.key))}>Hapus</Button></td>
                 </tr>
               ))}
             </tbody>
             <tfoot><tr><th colSpan={2}>Total</th><th>{formatRupiah(totalDebit)}</th><th>{formatRupiah(totalCredit)}</th><th /></tr></tfoot>
           </Table>
-          {!balanced ? (
+          {!canManageOpeningBalance ? (
+            <Alert variant="info">Admin dapat melihat status opening balance, tetapi action saldo awal dikunci untuk Owner.</Alert>
+          ) : !balanced ? (
             <Alert variant="warning">Opening balance belum bisa diposting: total debit/kredit harus sama dan lebih dari 0.</Alert>
           ) : postedForSelectedCutover ? (
             <Alert variant="info">Opening balance untuk period/cutover ini sudah POSTED. Draft baru tidak perlu dibuat.</Alert>
@@ -216,9 +225,9 @@ export default function OpeningBalanceWizard({
             <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>
           )}
           <div className="d-flex gap-2 flex-wrap">
-            <Button variant="outline-primary" type="button" onClick={addLine}>Tambah Line</Button>
+            <Button variant="outline-primary" type="button" onClick={addLine} disabled={!canManageOpeningBalance}>Tambah Line</Button>
             <Button type="submit" disabled={!canCreateDraft || isCreatingDraft}>
-              {postedForSelectedCutover ? 'Opening Balance Sudah Posted' : draftForSelectedCutover ? 'Draft Sudah Ada' : 'Buat Draft Opening Balance'}
+              {!canManageOpeningBalance ? 'Khusus Owner' : postedForSelectedCutover ? 'Opening Balance Sudah Posted' : draftForSelectedCutover ? 'Draft Sudah Ada' : 'Buat Draft Opening Balance'}
             </Button>
           </div>
         </Form>
@@ -235,8 +244,8 @@ export default function OpeningBalanceWizard({
                 <td>
                   {batch.status === 'DRAFT' ? (
                     <div className="d-flex gap-2 flex-wrap">
-                      <Button size="sm" disabled={isPosting} onClick={() => onPost(batch.id)}>Posting</Button>
-                      <Button size="sm" variant="outline-danger" disabled={isVoiding} onClick={() => onVoid(batch.id)}>Batalkan Draft</Button>
+                      <Button size="sm" disabled={!canManageOpeningBalance || isPosting} onClick={() => onPost(batch.id)}>{canManageOpeningBalance ? 'Posting' : 'Khusus Owner'}</Button>
+                      <Button size="sm" variant="outline-danger" disabled={!canManageOpeningBalance || isVoiding} onClick={() => onVoid(batch.id)}>Batalkan Draft</Button>
                     </div>
                   ) : batch.status === 'VOID' ? (
                     <span className="text-muted">Dibatalkan</span>

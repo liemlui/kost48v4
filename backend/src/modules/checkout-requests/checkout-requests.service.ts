@@ -29,8 +29,8 @@ export class CheckoutRequestsService {
     private readonly appNotificationService: AppNotificationService,
   ) {}
 
-  private async assertNoOpenInvoices(stayId: number, messagePrefix: string) {
-    const openInvoices = await this.prisma.invoice.findMany({
+  private async assertNoOpenInvoices(stayId: number, messagePrefix: string, db: PrismaService | any = this.prisma) {
+    const openInvoices = await db.invoice.findMany({
       where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
       select: { id: true, invoiceNumber: true, status: true },
       orderBy: { id: 'asc' },
@@ -73,20 +73,6 @@ export class CheckoutRequestsService {
       );
     }
 
-    await this.assertNoOpenInvoices(
-      dto.stayId,
-      'Selesaikan tagihan aktif sebelum mengajukan keluar',
-    );
-
-    const existingPending = await this.prisma.checkoutRequest.findFirst({
-      where: { stayId: dto.stayId, status: CheckoutRequestStatus.PENDING },
-    });
-    if (existingPending) {
-      throw new ConflictException(
-        'Masih ada permintaan checkout yang menunggu persetujuan',
-      );
-    }
-
     // Normalize requestedCheckOutDate to Date at start of day (Jakarta time)
     const requestedDate = new Date(dto.requestedCheckOutDate);
     if (isNaN(requestedDate.getTime())) {
@@ -104,13 +90,30 @@ export class CheckoutRequestsService {
       );
     }
 
-    const request = await this.prisma.checkoutRequest.create({
-      data: {
-        stayId: dto.stayId,
-        requestedCheckOutDate: requestedDate,
-        checkoutReason: dto.checkoutReason,
-        requestNotes: dto.requestNotes ?? null,
-      },
+    const request = await this.prisma.$transaction(async (tx) => {
+      await this.assertNoOpenInvoices(
+        dto.stayId,
+        'Selesaikan tagihan aktif sebelum mengajukan keluar',
+        tx,
+      );
+
+      const existingPending = await tx.checkoutRequest.findFirst({
+        where: { stayId: dto.stayId, status: CheckoutRequestStatus.PENDING },
+      });
+      if (existingPending) {
+        throw new ConflictException(
+          'Masih ada permintaan checkout yang menunggu persetujuan',
+        );
+      }
+
+      return tx.checkoutRequest.create({
+        data: {
+          stayId: dto.stayId,
+          requestedCheckOutDate: requestedDate,
+          checkoutReason: dto.checkoutReason,
+          requestNotes: dto.requestNotes ?? null,
+        },
+      });
     });
 
     // Notify OWNER/ADMIN — non-blocking
@@ -136,19 +139,22 @@ export class CheckoutRequestsService {
       );
     }
 
-    await this.assertNoOpenInvoices(
-      request.stayId,
-      'Pengajuan keluar belum bisa disetujui karena masih ada tagihan aktif',
-    );
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await this.assertNoOpenInvoices(
+        request.stayId,
+        'Pengajuan keluar belum bisa disetujui karena masih ada tagihan aktif',
+        tx,
+      );
 
-    const updated = await this.prisma.checkoutRequest.update({
-      where: { id },
-      data: {
-        status: CheckoutRequestStatus.APPROVED,
-        reviewNotes: dto.reviewNotes ?? null,
-        reviewedById: actor.id,
-        reviewedAt: new Date(),
-      },
+      return tx.checkoutRequest.update({
+        where: { id },
+        data: {
+          status: CheckoutRequestStatus.APPROVED,
+          reviewNotes: dto.reviewNotes ?? null,
+          reviewedById: actor.id,
+          reviewedAt: new Date(),
+        },
+      });
     });
 
     // Notify tenant — non-blocking

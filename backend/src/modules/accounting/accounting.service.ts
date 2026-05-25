@@ -47,34 +47,37 @@ export class AccountingService {
 
   async seedDefaultCoa() {
     await this.schemaGuard.assertReady();
-    const results = [] as Array<{ id: number; code: string; name: string; createdOrUpdated: 'UPSERTED' }>;
-    for (const account of DEFAULT_COA) {
-      const row = await (this.prisma as any).chartOfAccount.upsert({
-        where: { code: account.code },
-        create: {
-          code: account.code,
-          name: account.name,
-          type: account.type as any,
-          normalBalance: account.normalBalance as any,
-          description: account.description,
-          isSystemDefault: true,
-          isActive: true,
-        },
-        update: {
-          name: account.name,
-          type: account.type as any,
-          normalBalance: account.normalBalance as any,
-          description: account.description,
-          isSystemDefault: true,
-          isActive: true,
-        },
-      });
-      results.push({ id: row.id, code: row.code, name: row.name, createdOrUpdated: 'UPSERTED' });
-    }
+    const results = await (this.prisma as any).$transaction(async (tx: any) => {
+      const rows = [] as Array<{ id: number; code: string; name: string; createdOrUpdated: 'UPSERTED' }>;
+      for (const account of DEFAULT_COA) {
+        const row = await tx.chartOfAccount.upsert({
+          where: { code: account.code },
+          create: {
+            code: account.code,
+            name: account.name,
+            type: account.type as any,
+            normalBalance: account.normalBalance as any,
+            description: account.description,
+            isSystemDefault: true,
+            isActive: true,
+          },
+          update: {
+            name: account.name,
+            type: account.type as any,
+            normalBalance: account.normalBalance as any,
+            description: account.description,
+            isSystemDefault: true,
+            isActive: true,
+          },
+        });
+        rows.push({ id: row.id, code: row.code, name: row.name, createdOrUpdated: 'UPSERTED' });
+      }
+      return rows;
+    });
     return {
       seededCount: results.length,
       accounts: results,
-      note: 'Default COA idempotent. Deposit liability disediakan, tetapi belum ada auto-posting.',
+      note: 'Default COA idempotent dan diproses dalam satu transaksi. Deposit liability disediakan, tetapi belum ada auto-posting.',
     };
   }
 

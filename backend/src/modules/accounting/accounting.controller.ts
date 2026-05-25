@@ -106,6 +106,7 @@ export class AccountingController {
     return { message: 'Draft opening balance berhasil dibatalkan', data: await this.accountingService.voidOpeningBalance(id, user) };
   }
 
+  @Roles(UserRole.OWNER)
   @Post('opening-balances/draft')
   async createOpeningBalanceDraft(@Body() dto: CreateOpeningBalanceDraftDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Draft opening balance berhasil dibuat', data: await this.accountingService.createOpeningBalanceDraft(dto, user) };
