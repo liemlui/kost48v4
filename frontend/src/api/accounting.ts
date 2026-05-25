@@ -153,6 +153,55 @@ export type AutoJournalBackfillResult = {
   note?: string;
 };
 
+
+export type AutoJournalLine = {
+  id: number;
+  chartOfAccountId: number;
+  cashAccountId?: number | null;
+  description?: string | null;
+  debitRupiah: number;
+  creditRupiah: number;
+  sortOrder: number;
+  chartOfAccount?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type' | 'normalBalance'> | null;
+  cashAccount?: Pick<CashAccount, 'id' | 'name' | 'accountType' | 'isDefault'> | null;
+};
+
+export type AutoJournalEntry = {
+  id: number;
+  entryNumber: string;
+  entryDate: string;
+  accountingPeriod?: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'status'> | null;
+  status: 'DRAFT' | 'POSTED' | 'VOID';
+  sourceType: string;
+  sourceId?: string | null;
+  memo?: string | null;
+  totalDebitRupiah: number;
+  totalCreditRupiah: number;
+  isBalanced: boolean;
+  postedAt?: string | null;
+  createdAt: string;
+  lines: AutoJournalLine[];
+};
+
+export type RecentAutoJournals = {
+  basis: string;
+  ledgerBacked: boolean;
+  sourceTypes: string[];
+  limit: number;
+  items: AutoJournalEntry[];
+  note?: string;
+};
+
+export type JournalBySourceResult = {
+  basis: string;
+  ledgerBacked: boolean;
+  sourceType: string;
+  sourceId: string;
+  found: boolean;
+  item: AutoJournalEntry | null;
+  note?: string;
+};
+
 export type CreateCashAccountPayload = {
   name: string;
   accountType: CashAccountType;
@@ -252,4 +301,17 @@ export async function fetchUnmappedTransactions() {
 
 export async function runAutoJournalBackfill(payload: AutoJournalBackfillPayload = {}) {
   return unwrap<AutoJournalBackfillResult>(client.post('/accounting/auto-journal/backfill', payload));
+}
+
+
+export async function fetchRecentAutoJournals(params?: { sourceTypes?: string[]; limit?: number }) {
+  const query = {
+    limit: params?.limit,
+    sourceTypes: params?.sourceTypes?.join(','),
+  };
+  return unwrap<RecentAutoJournals>(client.get('/accounting/recent-journals', { params: query }));
+}
+
+export async function fetchJournalBySource(params: { sourceType: string; sourceId: string | number }) {
+  return unwrap<JournalBySourceResult>(client.get('/accounting/journal-by-source', { params }));
 }

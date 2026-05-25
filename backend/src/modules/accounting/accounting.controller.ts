@@ -14,7 +14,7 @@ import { AccountingAccountsQueryDto, CreateChartOfAccountDto, UpdateChartOfAccou
 import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from './dto/cash-account.dto';
 import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
 import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/opening-balance.dto';
-import { CreateJournalDraftDto, JournalEntriesQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
+import { CreateJournalDraftDto, JournalBySourceQueryDto, JournalEntriesQueryDto, RecentJournalsQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
 import { AutoJournalBackfillDto } from './dto/auto-journal.dto';
 
 @ApiTags('accounting')
@@ -111,6 +111,16 @@ export class AccountingController {
   @Post('opening-balances/draft')
   async createOpeningBalanceDraft(@Body() dto: CreateOpeningBalanceDraftDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Draft opening balance berhasil dibuat', data: await this.accountingService.createOpeningBalanceDraft(dto, user) };
+  }
+
+  @Get('recent-journals')
+  async recentJournals(@Query() query: RecentJournalsQueryDto) {
+    return { message: 'Aktivitas jurnal otomatis berhasil diambil', data: await this.reportsService.recentJournals(query) };
+  }
+
+  @Get('journal-by-source')
+  async journalBySource(@Query() query: JournalBySourceQueryDto) {
+    return { message: 'Jurnal berdasarkan source berhasil diambil', data: await this.reportsService.journalBySource(query) };
   }
 
   @Get('journal-entries')

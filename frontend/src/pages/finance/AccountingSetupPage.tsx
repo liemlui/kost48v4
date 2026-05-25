@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
@@ -21,6 +21,7 @@ import {
   fetchCashAccounts,
   fetchOpeningBalances,
   fetchPostingBoundary,
+  fetchRecentAutoJournals,
   fetchTrialBalance,
   fetchUnmappedTransactions,
   postOpeningBalance,
@@ -53,6 +54,30 @@ function getApiErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+
+function formatRupiah(value?: number | null) {
+  return `Rp ${Number(value ?? 0).toLocaleString('id-ID')}`;
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function sourceLabel(sourceType?: string | null) {
+  const labels: Record<string, string> = {
+    INVOICE: 'Invoice',
+    INVOICE_PAYMENT: 'Pembayaran',
+    EXPENSE: 'Expense',
+    WIFI_SALE: 'WiFi',
+    OPENING_BALANCE: 'Opening',
+    DEPOSIT: 'Deposit',
+  };
+  return labels[String(sourceType ?? '')] ?? sourceType ?? '-';
+}
+
 export default function AccountingSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -70,6 +95,11 @@ export default function AccountingSetupPage() {
   const balanceSheetQuery = useQuery({ queryKey: ['accounting-balance-sheet', asOf], queryFn: () => fetchBalanceSheetGuard({ asOf }), staleTime: 30_000 });
   const postingBoundaryQuery = useQuery({ queryKey: ['accounting-posting-boundary'], queryFn: fetchPostingBoundary, staleTime: 30_000 });
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
+  const recentJournalsQuery = useQuery({
+    queryKey: ['accounting-recent-auto-journals'],
+    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'], limit: 8 }),
+    staleTime: 20_000,
+  });
 
   const accounts = accountsQuery.data ?? [];
   const cashAccounts = cashAccountsQuery.data ?? [];
@@ -81,6 +111,8 @@ export default function AccountingSetupPage() {
   const unmappedOperationalCount = unmappedSummary
     ? unmappedSummary.invoiceSampleCount + unmappedSummary.invoicePaymentSampleCount + unmappedSummary.expenseSampleCount + unmappedSummary.wifiSaleSampleCount
     : 0;
+  const recentJournals = recentJournalsQuery.data?.items ?? [];
+  const latestAutoJournal = recentJournals[0];
 
   const postedOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'POSTED'), [openingBalances]);
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
@@ -97,6 +129,7 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-balance-sheet'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-journal-entries'] }),
     ]);
   }
@@ -255,6 +288,67 @@ export default function AccountingSetupPage() {
               {backfillMutation.isPending ? 'Backfill...' : 'Backfill 25 Transaksi'}
             </Button>
           </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="content-card border-0 mb-3">
+        <Card.Body>
+          <div className="d-flex flex-column flex-lg-row gap-2 justify-content-between align-items-lg-start mb-3">
+            <div>
+              <div className="small text-uppercase text-muted fw-semibold mb-1">Auto Journal Activity · B3.1B</div>
+              <h3 className="h5 mb-1">Jurnal otomatis terbaru</h3>
+              <p className="text-muted mb-0">Gunakan ini untuk membuktikan invoice, pembayaran, expense, dan WiFi sale baru benar-benar membuat JournalEntry POSTED.</p>
+            </div>
+            <div className="text-lg-end">
+              <Badge bg={latestAutoJournal?.isBalanced ? 'success' : recentJournals.length ? 'warning' : 'secondary'}>
+                {recentJournalsQuery.isLoading ? 'Memuat...' : `${recentJournals.length} jurnal`}
+              </Badge>
+              <div className="small text-muted mt-1">Terbaru: {latestAutoJournal ? formatDateTime(latestAutoJournal.postedAt ?? latestAutoJournal.createdAt) : '-'}</div>
+            </div>
+          </div>
+
+          {recentJournalsQuery.isLoading ? (
+            <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Memuat aktivitas auto journal...</div>
+          ) : recentJournals.length ? (
+            <div className="table-responsive">
+              <Table hover size="sm" className="align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Jurnal</th>
+                    <th>Source</th>
+                    <th>Debit</th>
+                    <th>Kredit</th>
+                    <th>Status</th>
+                    <th>Waktu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentJournals.map((journal) => (
+                    <tr key={journal.id}>
+                      <td>
+                        <div className="fw-semibold">{journal.entryNumber}</div>
+                        <small className="text-muted">{journal.memo || 'Auto journal'}</small>
+                      </td>
+                      <td>
+                        <Badge bg="light" text="dark" className="border">{sourceLabel(journal.sourceType)}</Badge>
+                        <div className="small text-muted">ID {journal.sourceId || '-'}</div>
+                      </td>
+                      <td>{formatRupiah(journal.totalDebitRupiah)}</td>
+                      <td>{formatRupiah(journal.totalCreditRupiah)}</td>
+                      <td><Badge bg={journal.isBalanced ? 'success' : 'danger'}>{journal.isBalanced ? 'Balanced' : 'Tidak balance'}</Badge></td>
+                      <td><small>{formatDateTime(journal.postedAt ?? journal.createdAt)}</small></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          ) : (
+            <Alert variant="light" className="border mb-0">
+              Belum ada auto journal untuk source B3.1. Ini normal jika belum ada invoice/payment/expense/WiFi baru sejak auto journal aktif.
+            </Alert>
+          )}
+
+          {recentJournalsQuery.data?.note ? <small className="text-muted d-block mt-3">{recentJournalsQuery.data.note}</small> : null}
         </Card.Body>
       </Card>
 

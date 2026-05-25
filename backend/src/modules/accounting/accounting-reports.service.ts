@@ -146,6 +146,77 @@ export class AccountingReportsService {
     };
   }
 
+
+  async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
+    await this.schemaGuard.assertReady();
+    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'OPENING_BALANCE', 'MANUAL'];
+    const sourceTypes = String(query.sourceTypes ?? 'INVOICE,INVOICE_PAYMENT,EXPENSE,WIFI_SALE')
+      .split(',')
+      .map((item) => item.trim().toUpperCase())
+      .filter((item) => allowedSourceTypes.includes(item));
+    const limit = Math.min(Math.max(Number(query.limit ?? 20), 1), 50);
+
+    const entries = await (this.prisma as any).journalEntry.findMany({
+      where: {
+        status: 'POSTED' as any,
+        ...(sourceTypes.length ? { sourceType: { in: sourceTypes as any } } : {}),
+      },
+      include: {
+        accountingPeriod: { select: { id: true, year: true, month: true, status: true } },
+        lines: {
+          orderBy: { sortOrder: 'asc' },
+          include: {
+            chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+            cashAccount: { select: { id: true, name: true, accountType: true, isDefault: true } },
+          },
+        },
+      },
+      orderBy: [{ postedAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+    });
+
+    return {
+      basis: 'RECENT_AUTO_JOURNAL_ACTIVITY',
+      ledgerBacked: true,
+      sourceTypes: sourceTypes.length ? sourceTypes : ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'],
+      limit,
+      items: entries.map((entry: any) => this.formatJournalEntry(entry)),
+      note: 'Aktivitas ini membantu UAT B3.1B: transaksi operasional baru harus muncul sebagai JournalEntry POSTED yang balance.',
+    };
+  }
+
+  async journalBySource(query: { sourceType: string; sourceId: string }) {
+    await this.schemaGuard.assertReady();
+    const entry = await (this.prisma as any).journalEntry.findFirst({
+      where: {
+        sourceType: String(query.sourceType).toUpperCase() as any,
+        sourceId: String(query.sourceId),
+        status: 'POSTED' as any,
+      },
+      include: {
+        accountingPeriod: { select: { id: true, year: true, month: true, status: true } },
+        lines: {
+          orderBy: { sortOrder: 'asc' },
+          include: {
+            chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+            cashAccount: { select: { id: true, name: true, accountType: true, isDefault: true } },
+          },
+        },
+      },
+      orderBy: [{ postedAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+    });
+
+    return {
+      basis: 'JOURNAL_BY_SOURCE_LOOKUP',
+      ledgerBacked: true,
+      sourceType: String(query.sourceType).toUpperCase(),
+      sourceId: String(query.sourceId),
+      found: Boolean(entry),
+      item: entry ? this.formatJournalEntry(entry) : null,
+      note: entry ? 'JournalEntry POSTED ditemukan untuk source ini.' : 'Belum ada JournalEntry POSTED untuk source ini. Cek readiness, period, COA, atau unmapped scanner.',
+    };
+  }
+
   async balanceSheet(query: TrialBalanceQueryDto = {}) {
     const readiness = await this.readinessService.getReadiness();
     if (readiness.schemaStatus && !readiness.schemaStatus.ready) {
@@ -198,6 +269,36 @@ export class AccountingReportsService {
         balanced: assets === liabilities + equity,
       },
       readiness,
+    };
+  }
+
+
+  private formatJournalEntry(entry: any) {
+    return {
+      id: entry.id,
+      entryNumber: entry.entryNumber,
+      entryDate: entry.entryDate,
+      accountingPeriod: entry.accountingPeriod ?? null,
+      status: entry.status,
+      sourceType: entry.sourceType,
+      sourceId: entry.sourceId,
+      memo: entry.memo,
+      totalDebitRupiah: Number(entry.totalDebitRupiah ?? 0),
+      totalCreditRupiah: Number(entry.totalCreditRupiah ?? 0),
+      isBalanced: Boolean(entry.isBalanced),
+      postedAt: entry.postedAt,
+      createdAt: entry.createdAt,
+      lines: (entry.lines ?? []).map((line: any) => ({
+        id: line.id,
+        chartOfAccountId: line.chartOfAccountId,
+        cashAccountId: line.cashAccountId,
+        description: line.description,
+        debitRupiah: Number(line.debitRupiah ?? 0),
+        creditRupiah: Number(line.creditRupiah ?? 0),
+        sortOrder: line.sortOrder,
+        chartOfAccount: line.chartOfAccount ?? null,
+        cashAccount: line.cashAccount ?? null,
+      })),
     };
   }
 

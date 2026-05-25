@@ -11,6 +11,16 @@ export class JournalEntriesQueryDto {
   @IsOptional() @IsDateString() to?: string;
 }
 
+export class RecentJournalsQueryDto {
+  @IsOptional() @IsString() sourceTypes?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) limit?: number;
+}
+
+export class JournalBySourceQueryDto {
+  @IsIn(JOURNAL_SOURCE_TYPES) sourceType!: string;
+  @IsString() sourceId!: string;
+}
+
 export class TrialBalanceQueryDto {
   @IsOptional() @IsDateString() asOf?: string;
 }
