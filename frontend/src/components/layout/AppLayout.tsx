@@ -152,15 +152,13 @@ function SidebarContent({
         </div>
       </button>
 
-      {!isAdmin ? (
-        <div className="sidebar-context-card">
-          <div className="sidebar-context-topline">
-            <span>{getWorkspaceTitle(userRole)}</span>
-            <strong>{activeLink?.label || 'Dashboard'}</strong>
-          </div>
-          <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
+      <div className={`sidebar-context-card ${isAdmin ? 'sidebar-context-card-admin' : ''}`}>
+        <div className="sidebar-context-topline">
+          <span>{isAdmin ? 'Admin Command Center' : getWorkspaceTitle(userRole)}</span>
+          <strong>{activeLink?.label || 'Dashboard'}</strong>
         </div>
-      ) : null}
+        <div className="app-caption mt-1">{activeLink?.hint || getWorkspaceSummary(userRole)}</div>
+      </div>
 
       <nav className="sidebar-nav-groups">
         {sections.map((section) => {
@@ -195,12 +193,10 @@ function SidebarContent({
         })}
       </nav>
 
-      {!isAdmin ? (
-        <div className="sidebar-footer sidebar-footer-compact">
-          <strong>{getRoleLabel(userRole)}</strong>
-          <div className="app-caption text-white-50">{userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
-        </div>
-      ) : null}
+      <div className={`sidebar-footer sidebar-footer-compact ${isAdmin ? 'sidebar-footer-admin' : ''}`}>
+        <strong>{getRoleLabel(userRole)}</strong>
+        <div className="app-caption text-white-50">{isAdmin ? 'Sidebar adalah navigasi utama · detail tetap di halaman area' : userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
+      </div>
     </>
   );
 }

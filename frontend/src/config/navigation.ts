@@ -60,7 +60,7 @@ const ownerSections: NavigationSection[] = [
 
 const adminSections: NavigationSection[] = [
   {
-    title: 'Admin Menu',
+    title: 'Operasional Kos',
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: '📊', hint: 'Command Center ringkas berisi prioritas paling penting dari semua menu.' },
       { to: '/stays', label: 'Stays & Tenant', icon: '🏠', hint: 'Booking, masa sewa aktif, perpanjangan, checkout, dan daftar tenant.', activePaths: ['/stays', '/tenants', '/renew-requests'] },

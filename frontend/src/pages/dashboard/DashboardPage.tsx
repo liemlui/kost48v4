@@ -1233,26 +1233,28 @@ function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendi
   const occupied = rooms.filter((room) => room.status === 'OCCUPIED').length;
   const available = rooms.filter((room) => room.status === 'AVAILABLE').length;
   const activeTickets = tickets.filter((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status)).length;
+  const waitingAdminTickets = tickets.filter((ticket) => ticket.status === 'DONE').length;
   const lowStock = inventoryItems.filter(isLowStockItem).length;
   const openInvoices = invoices.filter(isOpenInvoice).length;
   const overdueInvoices = invoices.filter(isOverdue).length;
   const occupancyPercent = makePercent(occupied, rooms.length);
   const financeRisk = overdueInvoices + pendingPaymentReviewCount;
   const stayWork = pendingApprovalCount + pendingRenewCount + checkoutCount;
-  const strips = [
-    { label: 'Hunian', value: `${occupied}/${rooms.length || 0}`, helper: `${available} kamar kosong`, percent: occupancyPercent, tone: occupancyPercent >= 80 ? 'success' : 'info' },
-    { label: 'Stays', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'lifecycle aman', percent: Math.min(100, stayWork * 24), tone: stayWork ? 'warning' : 'success' },
-    { label: 'Finance', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', percent: Math.min(100, openInvoices * 12), tone: financeRisk ? 'danger' : 'success' },
-    { label: 'Staff & Tiket', value: String(activeTickets), helper: activeTickets ? 'tiket aktif/perlu cek' : 'staff & tiket aman', percent: Math.min(100, activeTickets * 18), tone: activeTickets ? 'warning' : 'success' },
-    { label: 'Kamar & Stok', value: String(lowStock), helper: lowStock ? 'stok menipis' : 'stok aman', percent: Math.min(100, lowStock * 25), tone: lowStock ? 'warning' : 'success' },
+  const strips: Array<{ label: string; value: string; helper: string; detail: string; tone: string; percent?: number }> = [
+    { label: 'Hunian', value: `${occupied}/${rooms.length || 0}`, helper: `${available} kamar kosong`, detail: `${occupancyPercent}% terisi`, percent: occupancyPercent, tone: occupancyPercent >= 80 ? 'success' : 'info' },
+    { label: 'Stays', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'lifecycle aman', detail: `${pendingApprovalCount} booking · ${pendingRenewCount} renew · ${checkoutCount} checkout`, tone: stayWork ? 'warning' : 'success' },
+    { label: 'Finance', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', detail: `${overdueInvoices} overdue · ${pendingPaymentReviewCount} bukti review`, tone: financeRisk ? 'danger' : 'success' },
+    { label: 'Staff & Tiket', value: String(activeTickets), helper: activeTickets ? 'tiket aktif/perlu cek' : 'staff & tiket aman', detail: `${waitingAdminTickets} menunggu cek admin`, tone: waitingAdminTickets ? 'warning' : activeTickets ? 'info' : 'success' },
+    { label: 'Kamar & Stok', value: String(lowStock), helper: lowStock ? 'stok menipis' : 'stok aman', detail: `${inventoryItems.length} item dipantau`, tone: lowStock ? 'warning' : 'success' },
   ];
   return (
     <div className="admin-today-status-strip" aria-label="Kondisi operasional hari ini">
       {strips.map((strip) => (
         <div className={`admin-today-status-item ${strip.tone}`} key={strip.label}>
           <div className="status-strip-top"><span>{strip.label}</span><strong>{strip.value}</strong></div>
-          <div className="status-strip-bar" aria-hidden="true"><i style={{ width: `${strip.percent}%` }} /></div>
+          {strip.percent !== undefined ? <div className="status-strip-bar" aria-hidden="true"><i style={{ width: `${strip.percent}%` }} /></div> : null}
           <small>{strip.helper}</small>
+          <em>{strip.detail}</em>
         </div>
       ))}
     </div>
@@ -1398,27 +1400,26 @@ function OwnerDashboard() {
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
   const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items'], queryFn: () => listResource<any>('/inventory-items', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
   const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 300 }) });
-  const bookingsQuery = useQuery({ queryKey: ['dashboard-admin', 'bookings'], queryFn: () => listResource<Stay>('/stays', { limit: 300 }) });
   const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 500 }) });
   const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }) });
-  const depositCompleteStaysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-deposit-complete'], queryFn: () => listResource<Stay>('/stays', { status: 'COMPLETED', limit: 100 }) });
   const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), ...MEDIUM_FRESH_QUERY_OPTIONS });
   const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), ...ACTION_QUERY_OPTIONS });
   const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), ...ACTION_QUERY_OPTIONS });
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 25 }), ...ACTION_QUERY_OPTIONS });
-  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'staff', ...MEDIUM_FRESH_QUERY_OPTIONS });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, ...ACTION_QUERY_OPTIONS });
 
   const rooms = roomsQuery.data?.items ?? [];
   const inventoryItems = inventoryItemsQuery.data?.items ?? [];
   const stays = staysQuery.data?.items ?? [];
-  const bookings = bookingsQuery.data?.items ?? [];
+  const bookings = stays;
   const invoices = invoicesQuery.data?.items ?? [];
   const tickets = ticketsQuery.data?.items ?? [];
-  const depositCompleteStays = depositCompleteStaysQuery.data?.items ?? [];
   const renewRequests = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) => rr.status === 'PENDING') ?? [];
   const checkoutPendingRequests = checkoutRequestsPendingQuery.data?.items ?? [];
   const checkoutApprovedRequests = checkoutRequestsApprovedQuery.data?.items ?? [];
@@ -1438,7 +1439,6 @@ function AdminDashboard() {
   const waitingInitialPaymentBookings = bookings.filter((stay) => isReservedBookingWaitingPayment(stay) && !isExpiredAdminBooking(stay));
   const pendingApprovalCount = pendingApprovalBookings.length;
   const waitingInitialPaymentCount = waitingInitialPaymentBookings.length;
-  const depositQueue = depositCompleteStays.filter((stay) => stay.depositStatus === 'HELD' || Number(stay.depositAmountRupiah ?? 0) > Number(stay.depositRefundedRupiah ?? 0));
   const opsStress = useOperationalStressIndex({ tickets, rooms, pendingCheckoutRequestCount, approvedCheckoutRequestCount, pendingRenewCount, pendingApprovalCount });
 
   const bookingReviewDeadlines = pendingApprovalBookings.map((stay) => getStayDeadline(stay, ADMIN_SLA_HOURS.bookingReview));
@@ -1591,8 +1591,6 @@ function AdminDashboard() {
     ...opsStress.queueItems,
   ]);
 
-  const location = useLocation();
-  const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
   const filteredQueueItems = queueItems.filter((item) => itemMatchesAdminArea(item, activeArea));
   const topQueueItem = priorityActionFromQueue(filteredQueueItems.length ? filteredQueueItems : queueItems);
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
@@ -1632,14 +1630,21 @@ function AdminDashboard() {
   ] : [];
 
   const refreshDashboard = () => {
-    void Promise.all([
-      roomsQuery.refetch(), inventoryItemsQuery.refetch(), staysQuery.refetch(), bookingsQuery.refetch(), invoicesQuery.refetch(), ticketsQuery.refetch(), depositCompleteStaysQuery.refetch(),
-      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), staffPerformanceQuery.refetch(), autoOpsQuery.refetch(),
-    ]);
+    const refetches: Array<Promise<unknown>> = [
+      roomsQuery.refetch(), inventoryItemsQuery.refetch(), staysQuery.refetch(), invoicesQuery.refetch(), ticketsQuery.refetch(),
+      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), autoOpsQuery.refetch(),
+    ];
+    if (activeArea === 'staff') refetches.push(staffPerformanceQuery.refetch());
+    void Promise.all(refetches);
   };
 
-  if (roomsQuery.isLoading || inventoryItemsQuery.isLoading || staysQuery.isLoading || bookingsQuery.isLoading || invoicesQuery.isLoading || ticketsQuery.isLoading || depositCompleteStaysQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading) return <LoadingDashboard />;
-  if (roomsQuery.isError || inventoryItemsQuery.isError || staysQuery.isError || bookingsQuery.isError || invoicesQuery.isError || ticketsQuery.isError || depositCompleteStaysQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
+  const coreQueriesLoading = roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || ticketsQuery.isLoading;
+  const supportQueriesLoading = inventoryItemsQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading || autoOpsQuery.isLoading;
+  const coreQueriesError = roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || ticketsQuery.isError;
+  const supportQueriesError = inventoryItemsQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError || autoOpsQuery.isError;
+
+  if (coreQueriesLoading) return <LoadingDashboard />;
+  if (coreQueriesError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;
 
   return (
     <div className="admin-dashboard-queue-first admin-dashboard-simplified">
@@ -1652,9 +1657,15 @@ function AdminDashboard() {
 
       <AssistantInsightLine
         title="Asisten Operasional"
-        tone={urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
-        message={topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman. Data utama ada di table, sub-menu area ada tepat di bawah ini.`}
+        tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
+        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat. Coba refresh atau buka menu detail terkait.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman. Data utama ada di table, sub-menu area ada tepat di bawah ini.`}
       />
+
+      {supportQueriesLoading ? (
+        <Alert variant="info" className="admin-support-loading-note">
+          Data pendukung seperti review pembayaran, renew, checkout, stok, atau AutoOps sedang dimuat. Dashboard utama tetap bisa dipakai.
+        </Alert>
+      ) : null}
 
       {activeArea !== 'today' ? (
         <AdminAreaInternalMenu
