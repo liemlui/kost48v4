@@ -22,6 +22,7 @@ import {
   fetchTrialBalance,
   postOpeningBalance,
   seedDefaultCoa,
+  voidOpeningBalance,
   type CreateCashAccountPayload,
   type CreateOpeningBalanceDraftPayload,
 } from '../../api/accounting';
@@ -139,6 +140,17 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal posting opening balance.')); },
   });
 
+  const voidOpeningMutation = useMutation({
+    mutationFn: voidOpeningBalance,
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async () => {
+      setActionError(null);
+      setActionMessage('Draft opening balance berhasil dibatalkan. Draft ini tidak lagi dipakai untuk setup accounting.');
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membatalkan draft opening balance.')); },
+  });
+
   return (
     <div className="accounting-setup-page">
       <PageHeader
@@ -201,8 +213,10 @@ export default function AccountingSetupPage() {
             onCreatePeriod={(payload) => createPeriodMutation.mutate(payload)}
             onCreateDraft={(payload) => createOpeningDraftMutation.mutate(payload)}
             onPost={(id) => postOpeningMutation.mutate(id)}
+            onVoid={(id) => voidOpeningMutation.mutate(id)}
             isCreatingDraft={createOpeningDraftMutation.isPending}
             isPosting={postOpeningMutation.isPending}
+            isVoiding={voidOpeningMutation.isPending}
           />
         </Col>
       </Row>

@@ -100,6 +100,12 @@ export class AccountingController {
     return { message: 'Opening balance berhasil diposting', data: await this.accountingService.postOpeningBalance(id, user) };
   }
 
+  @Roles(UserRole.OWNER)
+  @Patch('opening-balances/:id/void')
+  async voidOpeningBalance(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Draft opening balance berhasil dibatalkan', data: await this.accountingService.voidOpeningBalance(id, user) };
+  }
+
   @Post('opening-balances/draft')
   async createOpeningBalanceDraft(@Body() dto: CreateOpeningBalanceDraftDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Draft opening balance berhasil dibuat', data: await this.accountingService.createOpeningBalanceDraft(dto, user) };

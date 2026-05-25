@@ -27,8 +27,10 @@ export default function OpeningBalanceWizard({
   onCreatePeriod,
   onCreateDraft,
   onPost,
+  onVoid,
   isCreatingDraft,
   isPosting,
+  isVoiding,
 }: {
   accounts: ChartOfAccount[];
   periods: AccountingPeriod[];
@@ -36,8 +38,10 @@ export default function OpeningBalanceWizard({
   onCreatePeriod: (payload: { year: number; month: number; notes?: string }) => void;
   onCreateDraft: (payload: { accountingPeriodId: number; cutoverDate: string; notes?: string; lines: OpeningBalanceLinePayload[] }) => void;
   onPost: (id: number) => void;
+  onVoid: (id: number) => void;
   isCreatingDraft?: boolean;
   isPosting?: boolean;
+  isVoiding?: boolean;
 }) {
   const activeAccounts = useMemo(() => accounts.filter((account) => account.isActive), [accounts]);
   const latestOpenPeriod = periods.find((period) => period.status === 'OPEN') ?? periods[0];
@@ -91,6 +95,21 @@ export default function OpeningBalanceWizard({
   const totalDebit = mappedLines.reduce((sum, line) => sum + (line.debitRupiah ?? 0), 0);
   const totalCredit = mappedLines.reduce((sum, line) => sum + (line.creditRupiah ?? 0), 0);
   const balanced = totalDebit > 0 && totalDebit === totalCredit;
+  const selectedPeriod = periods.find((period) => period.id === selectedPeriodId);
+  const selectedCutoverDate = cutoverDate;
+  const postedForSelectedCutover = batches.find((batch) =>
+    batch.status === 'POSTED' && (
+      (selectedPeriodId && batch.accountingPeriodId === selectedPeriodId) ||
+      String(batch.cutoverDate).slice(0, 10) === selectedCutoverDate
+    ),
+  );
+  const draftForSelectedCutover = batches.find((batch) =>
+    batch.status === 'DRAFT' && (
+      (selectedPeriodId && batch.accountingPeriodId === selectedPeriodId) ||
+      String(batch.cutoverDate).slice(0, 10) === selectedCutoverDate
+    ),
+  );
+  const canCreateDraft = Boolean(selectedPeriodId && balanced && !postedForSelectedCutover && !draftForSelectedCutover);
 
   function updateLine(key: string, patch: Partial<EditableLine>) {
     setLines((current) => current.map((line) => line.key === key ? { ...line, ...patch } : line));
@@ -112,7 +131,7 @@ export default function OpeningBalanceWizard({
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!selectedPeriodId || !balanced) return;
+    if (!canCreateDraft) return;
     onCreateDraft({ accountingPeriodId: selectedPeriodId, cutoverDate, notes, lines: mappedLines });
   }
 
@@ -132,6 +151,15 @@ export default function OpeningBalanceWizard({
         {periodForCutover ? (
           <Alert variant="info" className="mt-3 mb-0">
             Periode {periodForCutover.year}-{String(periodForCutover.month).padStart(2, '0')} sudah ada. Wizard akan memakai periode tersebut, jadi tidak perlu membuat periode duplicate.
+          </Alert>
+        ) : null}
+        {postedForSelectedCutover ? (
+          <Alert variant="success" className="mt-3 mb-0">
+            Sudah ada opening balance POSTED untuk {selectedPeriod ? `${selectedPeriod.year}-${String(selectedPeriod.month).padStart(2, '0')}` : 'periode ini'}. Draft baru dikunci agar saldo awal tidak dobel.
+          </Alert>
+        ) : draftForSelectedCutover ? (
+          <Alert variant="warning" className="mt-3 mb-0">
+            Ada draft opening balance yang belum dipakai untuk period/cutover ini. Posting draft tersebut atau batalkan draft sebelum membuat draft baru.
           </Alert>
         ) : null}
         <Form onSubmit={submit} className="mt-3">
@@ -178,10 +206,20 @@ export default function OpeningBalanceWizard({
             </tbody>
             <tfoot><tr><th colSpan={2}>Total</th><th>{formatRupiah(totalDebit)}</th><th>{formatRupiah(totalCredit)}</th><th /></tr></tfoot>
           </Table>
-          {!balanced ? <Alert variant="warning">Opening balance belum bisa diposting: total debit/kredit harus sama dan lebih dari 0.</Alert> : <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>}
+          {!balanced ? (
+            <Alert variant="warning">Opening balance belum bisa diposting: total debit/kredit harus sama dan lebih dari 0.</Alert>
+          ) : postedForSelectedCutover ? (
+            <Alert variant="info">Opening balance untuk period/cutover ini sudah POSTED. Draft baru tidak perlu dibuat.</Alert>
+          ) : draftForSelectedCutover ? (
+            <Alert variant="warning">Draft opening balance untuk period/cutover ini sudah ada. Posting atau batalkan draft tersebut sebelum membuat draft baru.</Alert>
+          ) : (
+            <Alert variant="success">Opening balance balance. Draft bisa dibuat, lalu Owner dapat posting sebagai jurnal pembuka.</Alert>
+          )}
           <div className="d-flex gap-2 flex-wrap">
             <Button variant="outline-primary" type="button" onClick={addLine}>Tambah Line</Button>
-            <Button type="submit" disabled={!selectedPeriodId || !balanced || isCreatingDraft}>Buat Draft Opening Balance</Button>
+            <Button type="submit" disabled={!canCreateDraft || isCreatingDraft}>
+              {postedForSelectedCutover ? 'Opening Balance Sudah Posted' : draftForSelectedCutover ? 'Draft Sudah Ada' : 'Buat Draft Opening Balance'}
+            </Button>
           </div>
         </Form>
 
@@ -194,7 +232,18 @@ export default function OpeningBalanceWizard({
                 <td><span className={`status-soft-pill ${batch.status === 'POSTED' ? 'success' : 'warning'}`}>{batch.status}</span></td>
                 <td>{String(batch.cutoverDate).slice(0, 10)}</td>
                 <td>{formatRupiah(batch.totalDebitRupiah)} / {formatRupiah(batch.totalCreditRupiah)}</td>
-                <td>{batch.status === 'DRAFT' ? <Button size="sm" disabled={isPosting} onClick={() => onPost(batch.id)}>Posting</Button> : <span className="text-muted">Sudah posted</span>}</td>
+                <td>
+                  {batch.status === 'DRAFT' ? (
+                    <div className="d-flex gap-2 flex-wrap">
+                      <Button size="sm" disabled={isPosting} onClick={() => onPost(batch.id)}>Posting</Button>
+                      <Button size="sm" variant="outline-danger" disabled={isVoiding} onClick={() => onVoid(batch.id)}>Batalkan Draft</Button>
+                    </div>
+                  ) : batch.status === 'VOID' ? (
+                    <span className="text-muted">Dibatalkan</span>
+                  ) : (
+                    <span className="text-muted">Sudah posted</span>
+                  )}
+                </td>
               </tr>
             )) : <tr><td colSpan={5} className="text-muted">Belum ada opening balance batch.</td></tr>}
           </tbody>

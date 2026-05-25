@@ -268,6 +268,25 @@ export class AccountingService {
   async createOpeningBalanceDraft(dto: CreateOpeningBalanceDraftDto, user: CurrentUserPayload) {
     await this.schemaGuard.assertReady();
     if (!dto.lines?.length || dto.lines.length < 2) throw new BadRequestException('Opening balance membutuhkan minimal dua line.');
+
+    const cutoverDate = dateOnly(dto.cutoverDate);
+    const existingForCutover = await (this.prisma as any).openingBalanceBatch.findFirst({
+      where: {
+        status: { in: ['DRAFT', 'POSTED'] as any },
+        OR: [
+          ...(dto.accountingPeriodId ? [{ accountingPeriodId: dto.accountingPeriodId }] : []),
+          { cutoverDate },
+        ],
+      },
+      select: { id: true, batchNumber: true, status: true },
+    });
+    if (existingForCutover?.status === 'POSTED') {
+      throw new ConflictException(`Opening balance untuk periode/cutover ini sudah POSTED (${existingForCutover.batchNumber}). Draft baru tidak dibuat agar saldo awal tidak dobel.`);
+    }
+    if (existingForCutover?.status === 'DRAFT') {
+      throw new ConflictException(`Masih ada draft opening balance untuk periode/cutover ini (${existingForCutover.batchNumber}). Posting atau batalkan draft tersebut sebelum membuat draft baru.`);
+    }
+
     await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
     const totalDebit = dto.lines.reduce((sum, line) => sum + rupiah(line.debitRupiah), 0);
     const totalCredit = dto.lines.reduce((sum, line) => sum + rupiah(line.creditRupiah), 0);
@@ -280,7 +299,7 @@ export class AccountingService {
         data: {
           batchNumber,
           accountingPeriodId: dto.accountingPeriodId,
-          cutoverDate: new Date(dto.cutoverDate),
+          cutoverDate,
           notes: dto.notes,
           totalDebitRupiah: totalDebit,
           totalCreditRupiah: totalCredit,
@@ -318,6 +337,29 @@ export class AccountingService {
     });
     if (!row) throw new NotFoundException('Opening balance tidak ditemukan.');
     return row;
+  }
+
+
+  async voidOpeningBalance(id: number, user: CurrentUserPayload) {
+    await this.schemaGuard.assertReady();
+    const row = await (this.prisma as any).openingBalanceBatch.findUnique({
+      where: { id },
+      include: { lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } } },
+    });
+    if (!row) throw new NotFoundException('Opening balance tidak ditemukan.');
+    if (row.status !== 'DRAFT') throw new BadRequestException('Hanya draft opening balance yang bisa dibatalkan. Opening balance POSTED membutuhkan reversal plan terpisah.');
+
+    return (this.prisma as any).openingBalanceBatch.update({
+      where: { id },
+      data: {
+        status: 'VOID' as any,
+        notes: [row.notes, `Draft dibatalkan oleh user #${user.id} pada ${new Date().toISOString()}`].filter(Boolean).join('\\n'),
+      },
+      include: {
+        accountingPeriod: true,
+        lines: { include: { chartOfAccount: true }, orderBy: { sortOrder: 'asc' } },
+      },
+    });
   }
 
   async postOpeningBalance(id: number, user: CurrentUserPayload) {

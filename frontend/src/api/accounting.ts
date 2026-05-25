@@ -188,6 +188,10 @@ export async function postOpeningBalance(id: number) {
   return unwrap<{ openingBalance: OpeningBalanceBatch; journalEntry: unknown; note: string }>(client.post(`/accounting/opening-balances/${id}/post`));
 }
 
+export async function voidOpeningBalance(id: number) {
+  return unwrap<OpeningBalanceBatch>(client.patch(`/accounting/opening-balances/${id}/void`));
+}
+
 export async function fetchTrialBalance(params?: { asOf?: string }) {
   return unwrap<TrialBalance>(client.get('/accounting/trial-balance', { params }));
 }
