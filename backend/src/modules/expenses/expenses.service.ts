@@ -5,10 +5,15 @@ import { CreateExpenseDto, UpdateExpenseDto } from './dto/expense.dto';
 import { ExpensesQueryDto } from './dto/expenses-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
 export class ExpensesService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly accountingPosting: AccountingPostingService,
+  ) {}
 
   async findAll(query: ExpensesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -45,6 +50,7 @@ export class ExpensesService {
     await this.validateRelations(dto.roomId, dto.stayId);
     const created = await this.prisma.expense.create({ data: { ...dto, expenseDate: new Date(dto.expenseDate), createdById: actor.id } });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Expense', entityId: String(created.id), newData: created });
+    await this.accountingPosting.postExpense(created.id, actor.id).catch(() => undefined);
     return created;
   }
 

@@ -9,6 +9,6 @@ import { AccountingSchemaGuard } from './accounting-schema.guard';
 @Module({
   controllers: [AccountingController],
   providers: [AccountingService, AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard],
-  exports: [AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard],
+  exports: [AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard],
 })
 export class AccountingModule {}

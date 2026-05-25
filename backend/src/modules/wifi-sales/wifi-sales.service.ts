@@ -5,10 +5,15 @@ import { CreateWifiSaleDto, UpdateWifiSaleDto } from './dto/wifi-sale.dto';
 import { WifiSalesQueryDto } from './dto/wifi-sales-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
 export class WifiSalesService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly accountingPosting: AccountingPostingService,
+  ) {}
 
   async findAll(query: WifiSalesQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
@@ -35,6 +40,7 @@ export class WifiSalesService {
   async create(dto: CreateWifiSaleDto, actor: CurrentUserPayload) {
     const created = await this.prisma.wifiSale.create({ data: { ...dto, saleDate: new Date(dto.saleDate), createdById: actor.id } });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'WifiSale', entityId: String(created.id), newData: created });
+    await this.accountingPosting.postWifiSale(created.id, actor.id).catch(() => undefined);
     return created;
   }
 

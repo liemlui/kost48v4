@@ -112,6 +112,47 @@ export type BalanceSheetGuard = {
   statement?: { assetsRupiah: number; liabilitiesRupiah: number; equityRupiah: number; liabilitiesAndEquityRupiah: number; balanced: boolean } | null;
 };
 
+export type PostingBoundary = {
+  autoPostingEnabled: boolean;
+  basis?: string;
+  sourceTypes?: string[];
+  behavior?: string;
+  excluded?: string[];
+  note?: string;
+};
+
+export type UnmappedTransactions = {
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  summary: {
+    invoiceSampleCount: number;
+    invoicePaymentSampleCount: number;
+    expenseSampleCount: number;
+    wifiSaleSampleCount: number;
+    depositSnapshotSampleCount: number;
+  };
+  samples?: Record<string, unknown[]>;
+  note?: string;
+};
+
+export type AutoJournalBackfillPayload = {
+  sourceTypes?: Array<'INVOICE' | 'INVOICE_PAYMENT' | 'EXPENSE' | 'WIFI_SALE'>;
+  limit?: number;
+};
+
+export type AutoJournalBackfillResult = {
+  basis: string;
+  limit: number;
+  sourceTypes: string[];
+  createdCount: number;
+  skippedCount: number;
+  failedCount: number;
+  warnings: string[];
+  items: Array<{ sourceType: string; sourceId: number; result: unknown }>;
+  note?: string;
+};
+
 export type CreateCashAccountPayload = {
   name: string;
   accountType: CashAccountType;
@@ -198,4 +239,17 @@ export async function fetchTrialBalance(params?: { asOf?: string }) {
 
 export async function fetchBalanceSheetGuard(params?: { asOf?: string }) {
   return unwrap<BalanceSheetGuard>(client.get('/accounting/balance-sheet', { params }));
+}
+
+
+export async function fetchPostingBoundary() {
+  return unwrap<PostingBoundary>(client.get('/accounting/posting-boundary'));
+}
+
+export async function fetchUnmappedTransactions() {
+  return unwrap<UnmappedTransactions>(client.get('/accounting/unmapped-transactions'));
+}
+
+export async function runAutoJournalBackfill(payload: AutoJournalBackfillPayload = {}) {
+  return unwrap<AutoJournalBackfillResult>(client.post('/accounting/auto-journal/backfill', payload));
 }

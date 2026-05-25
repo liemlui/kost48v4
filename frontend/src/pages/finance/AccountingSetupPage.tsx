@@ -20,8 +20,11 @@ import {
   fetchBalanceSheetGuard,
   fetchCashAccounts,
   fetchOpeningBalances,
+  fetchPostingBoundary,
   fetchTrialBalance,
+  fetchUnmappedTransactions,
   postOpeningBalance,
+  runAutoJournalBackfill,
   seedDefaultCoa,
   voidOpeningBalance,
   type CreateCashAccountPayload,
@@ -65,12 +68,19 @@ export default function AccountingSetupPage() {
   const openingBalancesQuery = useQuery({ queryKey: ['accounting-opening-balances'], queryFn: () => fetchOpeningBalances(), staleTime: 30_000 });
   const trialBalanceQuery = useQuery({ queryKey: ['accounting-trial-balance', asOf], queryFn: () => fetchTrialBalance({ asOf }), staleTime: 30_000 });
   const balanceSheetQuery = useQuery({ queryKey: ['accounting-balance-sheet', asOf], queryFn: () => fetchBalanceSheetGuard({ asOf }), staleTime: 30_000 });
+  const postingBoundaryQuery = useQuery({ queryKey: ['accounting-posting-boundary'], queryFn: fetchPostingBoundary, staleTime: 30_000 });
+  const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
 
   const accounts = accountsQuery.data ?? [];
   const cashAccounts = cashAccountsQuery.data ?? [];
   const periods = periodsQuery.data ?? [];
   const openingBalances = openingBalancesQuery.data ?? [];
   const isInitialLoading = readinessQuery.isLoading || accountsQuery.isLoading;
+  const autoJournalEnabled = Boolean(postingBoundaryQuery.data?.autoPostingEnabled);
+  const unmappedSummary = unmappedQuery.data?.summary;
+  const unmappedOperationalCount = unmappedSummary
+    ? unmappedSummary.invoiceSampleCount + unmappedSummary.invoicePaymentSampleCount + unmappedSummary.expenseSampleCount + unmappedSummary.wifiSaleSampleCount
+    : 0;
 
   const postedOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'POSTED'), [openingBalances]);
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
@@ -85,6 +95,9 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-opening-balances'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-trial-balance'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-balance-sheet'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-journal-entries'] }),
     ]);
   }
 
@@ -154,12 +167,24 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membatalkan draft opening balance.')); },
   });
 
+
+  const backfillMutation = useMutation({
+    mutationFn: () => runAutoJournalBackfill({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'], limit: 25 }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setActionMessage(`Auto Journal Lite diproses: ${result.createdCount} dibuat, ${result.skippedCount} diskip, ${result.failedCount} gagal.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan backfill auto journal.')); },
+  });
+
   return (
     <div className="accounting-setup-page">
       <PageHeader
         eyebrow="Finance · Accounting Setup"
         title="Setup Accounting Owner"
-        description="B2 membuat foundation accounting mulai berguna: cash/bank account, accounting period, opening balance, trial balance, dan Balance Sheet guard yang tetap jujur."
+        description="B3 mulai menghubungkan transaksi operasional ke ledger: cash/bank account, opening balance, auto journal lite, trial balance, dan Balance Sheet guard yang tetap jujur."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
       />
 
@@ -196,6 +221,8 @@ export default function AccountingSetupPage() {
           { id: 'cash', label: 'Cash/Bank', value: cashAccounts.length, helper: 'Minimal 1 akun', tone: cashAccounts.length ? 'success' : 'warning' },
           { id: 'period', label: 'Period', value: periods.length, helper: 'Periode cutover', tone: periods.length ? 'success' : 'warning' },
           { id: 'opening', label: 'Opening Balance', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Starting point Balance Sheet', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },
+          { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'B3 Lite', tone: autoJournalEnabled ? 'success' : 'warning' },
+          { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
 
@@ -203,6 +230,33 @@ export default function AccountingSetupPage() {
         <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
         <Col xl={6}><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
       </Row>
+
+
+      <Card className="content-card border-0 mb-3">
+        <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+          <div>
+            <div className="small text-uppercase text-muted fw-semibold mb-1">Auto Journal Lite · B3.1</div>
+            <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto-posting operasional aktif' : 'Auto-posting belum aktif'}</h3>
+            <p className="text-muted mb-0">
+              Invoice issued, pembayaran invoice, expense, dan penjualan WiFi akan dicatat sebagai JournalEntry POSTED secara idempotent. Deposit dan reversal masih deferred.
+            </p>
+            {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
+          </div>
+          <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+            <div className="text-sm-end">
+              <div className="fw-semibold">{unmappedQuery.isLoading ? 'Memuat...' : `${unmappedOperationalCount} sample belum terjurnal`}</div>
+              <small className="text-muted">Invoice, payment, expense, WiFi</small>
+            </div>
+            <Button
+              variant="outline-primary"
+              disabled={!canManageOpeningBalance || backfillMutation.isPending}
+              onClick={() => backfillMutation.mutate()}
+            >
+              {backfillMutation.isPending ? 'Backfill...' : 'Backfill 25 Transaksi'}
+            </Button>
+          </div>
+        </Card.Body>
+      </Card>
 
       <Row className="g-3 mb-3">
         <Col xl={5}>

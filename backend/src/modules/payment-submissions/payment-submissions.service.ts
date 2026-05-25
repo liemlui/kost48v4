@@ -21,6 +21,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
@@ -40,6 +41,7 @@ export class PaymentSubmissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly appNotificationService: AppNotificationService,
+    private readonly accountingPosting: AccountingPostingService,
   ) {}
 
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
@@ -374,8 +376,10 @@ export class PaymentSubmissionsService {
           depositPortion = 0;
         }
 
+        let invoicePaymentId: number | null = null;
+
         if (rentPortion > 0) {
-          await tx.invoicePayment.create({
+          const invoicePayment = await tx.invoicePayment.create({
             data: {
               invoiceId: submission.invoiceId,
               paymentDate: new Date(submission.paidAt),
@@ -386,6 +390,7 @@ export class PaymentSubmissionsService {
               capturedById: user.id,
             },
           });
+          invoicePaymentId = invoicePayment.id;
         }
 
         const nextPaidAmount = freshPaidAmount + rentPortion;
@@ -414,6 +419,15 @@ export class PaymentSubmissionsService {
             paidAt: nextPaidAt,
           },
         });
+
+        try {
+          await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId, user.id);
+          if (invoicePaymentId) {
+            await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
+          }
+        } catch {
+          // Auto Journal Lite must not block payment approval. Readiness/backfill can repair skipped journal later.
+        }
 
         await tx.paymentSubmission.update({
           where: { id: submissionId },

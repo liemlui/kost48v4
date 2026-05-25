@@ -15,6 +15,7 @@ import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from
 import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
 import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/opening-balance.dto';
 import { CreateJournalDraftDto, JournalEntriesQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
+import { AutoJournalBackfillDto } from './dto/auto-journal.dto';
 
 @ApiTags('accounting')
 @ApiBearerAuth()
@@ -140,5 +141,14 @@ export class AccountingController {
   @Get('posting-boundary')
   async postingBoundary() {
     return { message: 'Batas auto-posting accounting berhasil diambil', data: this.postingService.explainPostingBoundary() };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post('auto-journal/backfill')
+  async backfillAutoJournal(@Body() dto: AutoJournalBackfillDto, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'Backfill auto journal berhasil diproses',
+      data: await this.postingService.backfillAutoJournal(dto, user.id),
+    };
   }
 }

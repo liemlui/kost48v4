@@ -8,10 +8,15 @@ import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
 import { InvoicesQueryDto } from './dto/invoices-query.dto';
 import { InvoiceLineType, InvoiceStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
 export class InvoicesService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly accountingPosting: AccountingPostingService,
+  ) {}
 
   private numeric(value: unknown): number {
     const parsed = Number(value ?? 0);
@@ -226,6 +231,7 @@ export class InvoicesService {
     if ((invoice.totalAmountRupiah ?? 0) <= 0) throw new ConflictException('Invoice tidak valid: total harus lebih dari 0');
     const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.ISSUED, issuedAt: new Date() } });
     await this.audit.log({ actorUserId: actor.id, action: 'ISSUE', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
+    await this.accountingPosting.postInvoiceIssued(updated.id, actor.id).catch(() => undefined);
     return updated;
   }
 

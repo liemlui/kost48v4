@@ -142,7 +142,7 @@ export class AccountingReportsService {
         depositSnapshotSampleCount: deposits.length,
       },
       samples: { invoices, payments, expenses, wifiSales, depositSnapshots: deposits },
-      note: 'Scanner ini hanya menunjukkan transaksi operasional yang belum punya JournalEntry. B1 belum auto-posting agar tidak double-posting/mengubah lifecycle.',
+      note: 'Scanner ini menunjukkan transaksi operasional yang belum punya JournalEntry POSTED. B3 Auto Journal Lite memproses INVOICE, INVOICE_PAYMENT, EXPENSE, dan WIFI_SALE; deposit/reversal tetap deferred.',
     };
   }
 
