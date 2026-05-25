@@ -12845,6 +12845,44 @@ button.status-strip-item:hover {
   background: #f3f8ff;
   color: #215a9b;
 }
+
+.ancillary-roadmap-box {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.9), rgba(255, 255, 255, 0.92));
+}
+.ancillary-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+.ancillary-roadmap-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  padding: 0.65rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+.ancillary-roadmap-item strong {
+  display: block;
+  font-size: 0.86rem;
+  color: #0f172a;
+}
+.ancillary-roadmap-item small {
+  display: block;
+  color: #64748b;
+  line-height: 1.35;
+}
+@media (max-width: 768px) {
+  .ancillary-roadmap-grid { grid-template-columns: 1fr; }
+}
+
 .ancillary-model-box {
   border: 1px solid #dbe8f8;
   background: linear-gradient(180deg, #f9fcff 0%, #f2f8ff 100%);

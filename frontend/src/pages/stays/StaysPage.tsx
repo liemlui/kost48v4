@@ -127,7 +127,7 @@ export default function StaysPage() {
   const PAGE_SIZE = 20;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
-  const apiStatusFilter = 'ACTIVE';
+  const apiStatusFilter = statusFilter === 'ALL' || statusFilter === 'BOOKINGS' ? undefined : statusFilter;
 
   const expireMutation = useMutation({
     mutationFn: async (stayId?: number) => (stayId ? expireReservedBooking(stayId) : runPaymentSubmissionExpiryCheck()),
@@ -201,7 +201,7 @@ export default function StaysPage() {
   const filteredItems = useMemo(() => {
     if (statusFilter === 'BOOKINGS') return [...reservedBookings, ...checkoutDue];
     if (statusFilter === 'ACTIVE') return operationalActive;
-    return items.filter((item) => item.status === 'ACTIVE' && !isExpiredReservedBooking(item));
+    return items;
   }, [checkoutDue, items, operationalActive, reservedBookings, statusFilter]);
 
   const handleStatusFilterChange = (filter: StayViewFilter) => {
@@ -222,7 +222,7 @@ export default function StaysPage() {
   const checkoutSoonCount = checkoutDue.length;
   const pendingCheckoutRequestCount = pendingCheckoutRequests.length;
   const approvedCheckoutRequestCount = approvedCheckoutRequests.length;
-  const expiredBookingsCount = 0;
+  const expiredBookingsCount = items.filter((item) => isReservedBooking(item) && isExpiredReservedBooking(item)).length;
   const pendingApprovalCount = reservedBookings.filter((item) => getBookingApprovalMeta(item).isPendingApproval).length;
   const waitingPaymentCount = reservedBookings.filter((item) => !getBookingApprovalMeta(item).isPendingApproval).length;
   const meta = query.data?.meta;

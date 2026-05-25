@@ -8,7 +8,7 @@ import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem,
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import StaffMotivationDashboard from '../../components/staff/StaffMotivationDashboard';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
-import { listResource } from '../../api/resources';
+import { listResource, postAction } from '../../api/resources';
 import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
 import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
@@ -25,7 +25,7 @@ import { dedupeCommandItems } from '../../utils/commandCenterDedup';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { addHoursToDate, formatClockWib, formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
 import type { CheckoutRequest, Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type AutoOpsStatusLike = { expiredCandidates?: number; heldForPaymentReview?: number; orphanReservedRooms?: number; intervalMinutes?: number; policy?: string; deadlines?: Record<string, number> };
 
@@ -463,7 +463,7 @@ function AdminAreaInternalMenu({ title, items, onNavigate }: { title: string; it
     <div className="admin-area-internal-menu" aria-label={`Sub-menu ${title}`}>
       <div className="admin-area-internal-menu-head">
         <span>{title}</span>
-        <small>Sub-menu area, bukan card besar.</small>
+        <small>Pilih data area ini tanpa keluar dari command center.</small>
       </div>
       <div className="admin-area-internal-menu-scroll">
         {items.map((item) => (
@@ -871,9 +871,28 @@ function AdminFinanceWorkspace({
 
 type AdminTicketDashboardFilter = 'ALL' | 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CLOSED';
 
+function getTicketAssigneeLabel(ticket: Ticket) {
+  return ticket.assignedTo?.fullName || (ticket.assignedToId ? `Staff #${ticket.assignedToId}` : 'Belum ditugaskan');
+}
+
 function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onNavigate: (to: string) => void }) {
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<AdminTicketDashboardFilter>('ALL');
   const [detailTicket, setDetailTicket] = useState<Ticket | null>(null);
+  const [closeTarget, setCloseTarget] = useState<Ticket | null>(null);
+  const closeTicketMutation = useMutation({
+    mutationFn: (ticket: Ticket) => postAction(`/tickets/${ticket.id}/close`, { action: 'CLOSE' }),
+    onSuccess: async () => {
+      setCloseTarget(null);
+      setDetailTicket(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['dashboard-admin', 'tickets'] }),
+        queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+        queryClient.invalidateQueries({ queryKey: ['staff-field-report-review-queue'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-staff-performance'] }),
+      ]);
+    },
+  });
   const activeTickets = tickets.filter((ticket) => ticket.status !== 'CANCELLED');
   const countBy = (value: AdminTicketDashboardFilter) => value === 'ALL' ? activeTickets.length : activeTickets.filter((ticket) => ticket.status === value).length;
   const rows = activeTickets
@@ -890,7 +909,7 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
         <div className="table-meta align-items-start">
           <div>
             <div className="panel-title">Semua tiket aktif</div>
-            <div className="panel-subtitle">Tiket langsung tampil di tab ini. Sub-menu tiket tetap tersedia di atas table; tiket selesai cukup punya aksi singkat “Selesai”.</div>
+            <div className="panel-subtitle">Tiket langsung tampil di tab ini. Tiket DONE bisa ditutup setelah admin mengecek hasil staff.</div>
           </div>
           <span className="unified-table-hint">Maks. 20 tiket</span>
         </div>
@@ -914,10 +933,10 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
                   <td><strong>{ticket.ticketNumber ?? `TIK-${ticket.id}`}</strong><div className="small text-muted">{ticket.title ?? 'Tiket operasional'}</div></td>
                   <td><StatusBadge status={ticket.status} /></td>
                   <td>{ticket.tenant?.fullName || ticket.room?.code || ticket.room?.name || (ticket.roomId ? `Kamar #${ticket.roomId}` : 'Belum ada lokasi')}</td>
-                  <td>{ticket.assignedToId ? `Staff #${ticket.assignedToId}` : <span className="text-muted">Belum ditugaskan</span>}</td>
+                  <td>{ticket.assignedToId ? getTicketAssigneeLabel(ticket) : <span className="text-muted">Belum ditugaskan</span>}</td>
                   <td>{formatDateSafe(ticket.updatedAt ?? ticket.createdAt)}</td>
                   <td onClick={(event) => event.stopPropagation()}>
-                    {ticket.status === 'DONE' ? <Button size="sm" variant="success" onClick={() => onNavigate('/tickets')}>Selesai</Button> : <span className="row-arrow-cell">›</span>}
+                    {ticket.status === 'DONE' ? <Button size="sm" variant="success" onClick={() => setCloseTarget(ticket)} disabled={closeTicketMutation.isPending}>Tutup</Button> : <span className="row-arrow-cell">›</span>}
                   </td>
                 </tr>
               ))}
@@ -933,7 +952,7 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
               <div className="entity-detail-grid mb-3">
                 <div className="entity-detail-item"><span>Status</span><strong><StatusBadge status={detailTicket.status} /></strong></div>
                 <div className="entity-detail-item"><span>Lokasi / orang</span><strong>{detailTicket.tenant?.fullName || detailTicket.room?.code || detailTicket.room?.name || '-'}</strong></div>
-                <div className="entity-detail-item"><span>Petugas</span><strong>{detailTicket.assignedToId ? `Staff #${detailTicket.assignedToId}` : 'Belum ditugaskan'}</strong></div>
+                <div className="entity-detail-item"><span>Petugas</span><strong>{getTicketAssigneeLabel(detailTicket)}</strong></div>
                 <div className="entity-detail-item"><span>Diperbarui</span><strong>{formatDateSafe(detailTicket.updatedAt ?? detailTicket.createdAt)}</strong></div>
               </div>
               <h6 className="fw-semibold">{detailTicket.title || `Tiket #${detailTicket.id}`}</h6>
@@ -943,7 +962,30 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
         </Modal.Body>
         <Modal.Footer>
           <Button variant="light" onClick={() => setDetailTicket(null)}>Tutup</Button>
-          {detailTicket?.status === 'DONE' ? <Button variant="success" onClick={() => onNavigate('/tickets')}>Selesai</Button> : null}
+          {detailTicket?.status === 'DONE' ? <Button variant="success" onClick={() => setCloseTarget(detailTicket)} disabled={closeTicketMutation.isPending}>Tutup Tiket</Button> : null}
+        </Modal.Footer>
+      </Modal>
+      <Modal show={Boolean(closeTarget)} onHide={() => setCloseTarget(null)} centered>
+        <Modal.Header closeButton><Modal.Title>Tutup tiket selesai</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Alert variant="info" className="py-2 small">
+            Pastikan pekerjaan staff sudah dicek. Aksi ini mengubah tiket dari DONE menjadi CLOSED dan mengurangi antrean “Perlu Cek”.
+          </Alert>
+          {closeTicketMutation.isError ? (
+            <Alert variant="danger" className="py-2 small">
+              Gagal menutup tiket. Buka halaman Tiket jika tiket membutuhkan status final barang kamar/gudang yang lebih detail.
+            </Alert>
+          ) : null}
+          <div className="small text-muted">
+            {closeTarget?.ticketNumber ?? `Tiket #${closeTarget?.id ?? ''}`} · {closeTarget?.title ?? 'Tiket operasional'}
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setCloseTarget(null)}>Batal</Button>
+          <Button variant="success" onClick={() => closeTarget ? closeTicketMutation.mutate(closeTarget) : undefined} disabled={!closeTarget || closeTicketMutation.isPending}>
+            {closeTicketMutation.isPending ? 'Menutup...' : 'Tutup Tiket'}
+          </Button>
+          <Button variant="outline-primary" onClick={() => onNavigate('/tickets')}>Buka Halaman Tiket</Button>
         </Modal.Footer>
       </Modal>
     </Card>
@@ -1122,22 +1164,6 @@ function itemMatchesAdminArea(item: ActionQueueItem, area: AdminQueueArea): bool
   return true;
 }
 
-function AdminAreaTabs({ activeArea, counts, onSelect }: { activeArea: AdminQueueArea; counts: Record<AdminQueueArea, number>; onSelect: (area: AdminQueueArea) => void }) {
-  return (
-    <div className="admin-area-tabs admin-primary-tabs" aria-label="Navigasi utama admin">
-      {ADMIN_QUEUE_AREAS.map((area) => {
-        const count = counts[area.id] ?? 0;
-        return (
-          <button type="button" key={area.id} className={area.id === activeArea ? 'active' : ''} onClick={() => onSelect(area.id)} title={area.helper}>
-            <span>{area.label}</span>
-            {count > 0 ? <strong>{count}</strong> : null}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function AdminSlaMiniNote({ status }: { status?: AutoOpsStatusLike | null }) {
   const reviewHours = Number(status?.deadlines?.BOOKING_REVIEW_DEADLINE_HOURS ?? ADMIN_SLA_HOURS.bookingReview);
   const tenantPaymentHours = Number(status?.deadlines?.APPROVED_BOOKING_PAYMENT_DEADLINE_HOURS ?? ADMIN_SLA_HOURS.tenantPayment);
@@ -1149,22 +1175,6 @@ function AdminSlaMiniNote({ status }: { status?: AutoOpsStatusLike | null }) {
     </div>
   );
 }
-
-function AdminAreaFooter({ activeArea, metrics }: { activeArea: AdminQueueArea; metrics: MetricChip[] }) {
-  const visibleMetrics = metrics.filter((metric) => {
-    if (activeArea === 'today') return Number(metric.value) > 0;
-    if (activeArea === 'stays') return ['booking-review', 'waiting-initial-payment', 'renew', 'checkout'].includes(String(metric.id));
-    if (activeArea === 'finance') return ['payment-review', 'waiting-initial-payment', 'overdue'].includes(String(metric.id));
-    if (activeArea === 'tickets' || activeArea === 'staff') return String(metric.id).includes('ticket') || String(metric.label).toLowerCase().includes('tiket');
-    if (activeArea === 'rooms') return String(metric.label).toLowerCase().includes('kamar') || String(metric.id).includes('room');
-    return false;
-  });
-  if (!visibleMetrics.length) return null;
-  return <AdminHealthChips metrics={visibleMetrics} />;
-}
-
-
-
 
 function makeAdminFinancePoints(invoices: Invoice[], pendingPaymentReviewCount: number): SmartChartPoint[] {
   const open = invoices.filter(isOpenInvoice).length;
@@ -1587,20 +1597,6 @@ function AdminDashboard() {
   const topQueueItem = priorityActionFromQueue(filteredQueueItems.length ? filteredQueueItems : queueItems);
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
-  const areaCounts = ADMIN_QUEUE_AREAS.reduce((acc, area) => {
-    acc[area.id] = queueItems.filter((item) => itemMatchesAdminArea(item, area.id)).length;
-    return acc;
-  }, {} as Record<AdminQueueArea, number>);
-
-  const metrics: MetricChip[] = [
-    { id: 'booking-review', label: 'Booking review', value: pendingApprovalCount, helper: pendingApprovalCount ? 'Butuh keputusan admin' : 'Aman', status: pendingApprovalCount ? 'INFO' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
-    { id: 'payment-review', label: 'Payment review', value: pendingPaymentReviewCount, helper: pendingPaymentReviewCount ? 'Butuh keputusan admin' : 'Aman', status: pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '💸', to: '/payment-submissions/review' },
-    { id: 'waiting-initial-payment', label: 'Menunggu bayar', value: waitingInitialPaymentCount, helper: waitingInitialPaymentCount ? 'Tenant punya deadline bayar' : 'Aman', status: waitingInitialPaymentCount ? 'INFO' : 'SUCCESS', icon: '⏳', to: '/stays?status=BOOKINGS' },
-    { id: 'renew', label: 'Renew meter', value: pendingRenewCount, helper: pendingRenewCount ? 'Perlu meter checkpoint' : 'Aman', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
-    { id: 'checkout', label: 'Checkout', value: pendingCheckoutRequestCount + approvedCheckoutRequestCount, helper: approvedCheckoutRequestCount ? 'Ada yang bisa final' : pendingCheckoutRequestCount ? 'Butuh review' : 'Aman', status: approvedCheckoutRequestCount ? 'INFO' : pendingCheckoutRequestCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
-    { id: 'overdue', label: 'Overdue', value: overdueInvoices.length, helper: overdueInvoices.length ? 'Tagihan macet' : 'Aman', status: overdueInvoices.length ? 'DANGER' : 'SUCCESS', icon: '⚠️', to: '/invoices' },
-  ];
-
   const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays' ? [
     { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Table utama proses sewa aktif', to: '/dashboard?area=stays', count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
     { id: 'stays-bookings', icon: '📝', label: 'Booking Baru', helper: 'Review booking dan bayar awal', to: '/stays?status=BOOKINGS', count: pendingApprovalCount + waitingInitialPaymentCount, tone: pendingApprovalCount ? 'warning' : 'info' },
@@ -1655,7 +1651,7 @@ function AdminDashboard() {
       />
 
       <AssistantInsightLine
-        title={urgentQueueCount ? 'Asisten Operasional' : 'Asisten Operasional'}
+        title="Asisten Operasional"
         tone={urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
         message={topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman. Data utama ada di table, sub-menu area ada tepat di bawah ini.`}
       />

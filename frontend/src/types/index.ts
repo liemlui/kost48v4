@@ -568,6 +568,7 @@ export type Ticket = {
   roomId?: number | null;
   stayId?: number | null;
   assignedToId?: number | null;
+  assignedTo?: { id: number; fullName?: string; role?: string } | null;
   linkedRoomItemId?: number | null;
   linkedInventoryItemId?: number | null;
   finalRoomItemStatus?: string | null;

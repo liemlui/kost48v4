@@ -323,7 +323,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               </div>
 
               <div className="d-flex align-items-center gap-3 flex-grow-1 justify-content-end flex-wrap">
-                {!isAdmin ? <GlobalSearch role={user?.role} /> : null}
+                <GlobalSearch role={user?.role} />
                 <NotificationBell />
                 {isAdmin ? (
                   <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman">
