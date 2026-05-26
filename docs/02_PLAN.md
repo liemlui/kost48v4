@@ -1,28 +1,31 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
+**Versi:** 2026-05-26 V5.28-B8 Pushed + Next Plan B9
 
 
-## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+## 0.0 Latest Current State — V5.28-B8 Pushed + Next Plan B9
 
 ```text
 Current GitHub latest commit:
-cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+286e512 fix(accounting): block manual edits in closed period governance
 
-Recent release chain:
-e653cca feat: ship command center autoops and accounting foundation
-2308f17 feat(accounting): add opening balance setup workflow
-c04aec5 fix(accounting): harden setup workflow messages
-eb198b2 fix(accounting): allow voiding draft opening balances
-cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+Recent accounting release chain:
+a72eabe fix(accounting): balance sheet contra asset presentation
+182057b feat(accounting): add fixed asset ledger alignment workflow
+ff2008f feat(accounting): add period close retained earnings workflow
+5c38672 feat(accounting): add closed period governance workflow
+286e512 fix(accounting): block manual edits in closed period governance
 
 Status:
-- main is pushed to origin/main through cb93fe6.
-- V5.24-B2 accounting setup is functionally verified.
-- Opening balance was posted and produced JE-OPENING-1.
-- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
-- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
-- V5.24-C admin UI hardening is pushed.
-- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+- main is pushed to origin/main through 286e512.
+- Working tree is clean: ## main...origin/main.
+- V5.27-B7 Period Close + Retained Earnings runtime UAT PASS.
+- V5.28-B8 Closed Period Governance + Reopen/Reversal runtime UAT PASS.
+- Accounting period 2026-05 was closed, reopened through CLOSING_REVERSAL, then re-closed as JE-CLOSE-2026-05-V2.
+- Duplicate close after re-close is blocked with "Accounting period 2026-05 sudah CLOSED."
+- Trial Balance after re-close: Debit 34.170.000 = Kredit 34.170.000.
+- Balance Sheet after re-close: Assets 29.915.000 = Liabilities + Equity 29.915.000; difference 0.
+- P&L remains operational/readable after close/reopen because CLOSING_ENTRY and CLOSING_REVERSAL are excluded by default.
+- Generated Prisma was restored before commit; do not commit backend/src/generated/prisma unless explicitly decided.
 ```
 
 ### Important local hygiene
@@ -39,21 +42,132 @@ git status -sb
 ### Next official planning focus
 
 ```text
-PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+PLAN V5.29-B9 — Accounting Data Quality & Statement Command Center Hardening
 
 Why:
-V5.24-C fixed urgent admin UI workflow bugs.
-Remaining audit items are structural/performance/UX cleanup:
-- RoleWorkspaceTabs dead/unrendered code decision.
-- Dashboard/sidebar dual navigation consistency.
-- Dashboard 13 blocking queries and overlapping stays/bookings queries.
-- Admin sidebar lacks context card/footer.
-- Status strip progress percentages are not meaningful.
-- Non-standard font-weight cleanup in touched areas.
-- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+B1-B8 moved KOST48 from operational finance into a ledger-backed accounting foundation:
+- COA, cash account, accounting period, opening balance, journal entry/line.
+- Auto journal visibility, statement lite, deposit/reversal visibility.
+- Asset register, depreciation, fixed asset ledger alignment.
+- Period close to Retained Earnings.
+- Closed period governance with reopen/reversal and re-close versioning.
 
-Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+Remaining gap:
+Owner/finance UI now needs a stronger statement command center and audit/data-quality layer so the numbers are readable, explainable, and safe for business use. Some older UI copy/checklist wording still says "B1/B2" or "no auto-posting" and should be refreshed so docs/UI do not confuse the owner.
+
+B9 should be frontend-first with small backend read-only additions only if needed.
 ```
+
+### Source-of-truth note
+
+```text
+This section supersedes old V5.24-C/V5.24-D top-of-file state.
+Older sections below remain as historical record, not the current release state.
+For coding, inspect the latest repo/ZIP first. If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+## 0.0 Current Execution Override — V5.29-B9 Accounting Data Quality & Statement Command Center
+
+```text
+Next target:
+PLAN V5.29-B9 — Accounting Data Quality & Statement Command Center Hardening
+
+Mode:
+PLAN first in new chat.
+ACT only if user says ACT / YOLO / patch / implementasikan.
+
+Recommended scope:
+Frontend-first, backend read-only if necessary.
+No lifecycle/payment/stay/checkout/renew rewrite.
+No destructive schema change.
+No DB reset.
+```
+
+### Why B9
+
+B8 made the accounting engine safer. B9 should make it usable and understandable.
+
+Current accounting foundation is strong:
+- COA/cash/period/opening balance.
+- Journal ledger.
+- Trial Balance.
+- Balance Sheet.
+- P&L operational report.
+- Asset register + depreciation.
+- Fixed asset ledger alignment.
+- Period close.
+- Closed period reopen/reversal.
+- Manual closed-period guard.
+
+But the owner experience still needs a better command center:
+- clear statement tiles,
+- audit trail,
+- period close timeline,
+- data quality warnings,
+- old copy cleanup,
+- better explanation of current profit vs retained earnings,
+- better navigation from Finance.
+
+### B9 PLAN output required
+
+A. Executive summary  
+B. Current source verification state  
+C. Current accounting frontend/backend map  
+D. Statement Command Center UX design  
+E. Data quality/readiness model  
+F. Journal audit trail UX  
+G. Period close history/timeline UX  
+H. Copy cleanup list  
+I. Exact files to touch/create  
+J. Backend unchanged/needed decision  
+K. UAT/smoke commands  
+L. PASS criteria  
+M. ACT recommendation  
+
+### B9 likely file scope
+
+Frontend:
+```text
+frontend/src/api/accounting.ts
+frontend/src/components/accounting/AccountingCommandCenterLite.tsx
+frontend/src/components/accounting/BalanceSheetGuardPanel.tsx
+frontend/src/components/accounting/ProfitLossLitePanel.tsx
+frontend/src/components/accounting/PeriodClosePanel.tsx
+frontend/src/pages/finance/AccountingSetupPage.tsx
+frontend/src/pages/finance/FinancePage.tsx or finance navigation files if present
+```
+
+Optional new components:
+```text
+StatementCommandCenterPanel.tsx
+AccountingDataQualityPanel.tsx
+PeriodCloseTimeline.tsx
+JournalAuditTrailPanel.tsx
+StatementStatusCard.tsx
+```
+
+Backend optional read-only:
+```text
+GET /api/accounting/statement-command-center?asOf=YYYY-MM-DD
+GET /api/accounting/period-close/history
+GET /api/accounting/data-quality
+```
+
+Only add backend if existing endpoints cannot provide the data cleanly.
+
+### B9 must not do
+
+- No DB reset.
+- No production DB mutation.
+- No payment/stay/renew/checkout rewrite.
+- No new accounting mutation beyond existing B8 governance.
+- No new chart dependency unless clearly justified.
+- No dark mode.
+- No microservices/apps folder.
+- No generated Prisma commit.
+
+
+
 
 ## 0.0 Current Execution Override — V5.23-B Accounting & Balance Sheet Foundation
 

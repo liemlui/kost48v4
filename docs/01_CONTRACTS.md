@@ -1,28 +1,31 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
+**Versi:** 2026-05-26 V5.28-B8 Pushed + Next Plan B9
 
 
-## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+## 0.0 Latest Current State — V5.28-B8 Pushed + Next Plan B9
 
 ```text
 Current GitHub latest commit:
-cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+286e512 fix(accounting): block manual edits in closed period governance
 
-Recent release chain:
-e653cca feat: ship command center autoops and accounting foundation
-2308f17 feat(accounting): add opening balance setup workflow
-c04aec5 fix(accounting): harden setup workflow messages
-eb198b2 fix(accounting): allow voiding draft opening balances
-cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+Recent accounting release chain:
+a72eabe fix(accounting): balance sheet contra asset presentation
+182057b feat(accounting): add fixed asset ledger alignment workflow
+ff2008f feat(accounting): add period close retained earnings workflow
+5c38672 feat(accounting): add closed period governance workflow
+286e512 fix(accounting): block manual edits in closed period governance
 
 Status:
-- main is pushed to origin/main through cb93fe6.
-- V5.24-B2 accounting setup is functionally verified.
-- Opening balance was posted and produced JE-OPENING-1.
-- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
-- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
-- V5.24-C admin UI hardening is pushed.
-- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+- main is pushed to origin/main through 286e512.
+- Working tree is clean: ## main...origin/main.
+- V5.27-B7 Period Close + Retained Earnings runtime UAT PASS.
+- V5.28-B8 Closed Period Governance + Reopen/Reversal runtime UAT PASS.
+- Accounting period 2026-05 was closed, reopened through CLOSING_REVERSAL, then re-closed as JE-CLOSE-2026-05-V2.
+- Duplicate close after re-close is blocked with "Accounting period 2026-05 sudah CLOSED."
+- Trial Balance after re-close: Debit 34.170.000 = Kredit 34.170.000.
+- Balance Sheet after re-close: Assets 29.915.000 = Liabilities + Equity 29.915.000; difference 0.
+- P&L remains operational/readable after close/reopen because CLOSING_ENTRY and CLOSING_REVERSAL are excluded by default.
+- Generated Prisma was restored before commit; do not commit backend/src/generated/prisma unless explicitly decided.
 ```
 
 ### Important local hygiene
@@ -39,21 +42,97 @@ git status -sb
 ### Next official planning focus
 
 ```text
-PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+PLAN V5.29-B9 — Accounting Data Quality & Statement Command Center Hardening
 
 Why:
-V5.24-C fixed urgent admin UI workflow bugs.
-Remaining audit items are structural/performance/UX cleanup:
-- RoleWorkspaceTabs dead/unrendered code decision.
-- Dashboard/sidebar dual navigation consistency.
-- Dashboard 13 blocking queries and overlapping stays/bookings queries.
-- Admin sidebar lacks context card/footer.
-- Status strip progress percentages are not meaningful.
-- Non-standard font-weight cleanup in touched areas.
-- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+B1-B8 moved KOST48 from operational finance into a ledger-backed accounting foundation:
+- COA, cash account, accounting period, opening balance, journal entry/line.
+- Auto journal visibility, statement lite, deposit/reversal visibility.
+- Asset register, depreciation, fixed asset ledger alignment.
+- Period close to Retained Earnings.
+- Closed period governance with reopen/reversal and re-close versioning.
 
-Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+Remaining gap:
+Owner/finance UI now needs a stronger statement command center and audit/data-quality layer so the numbers are readable, explainable, and safe for business use. Some older UI copy/checklist wording still says "B1/B2" or "no auto-posting" and should be refreshed so docs/UI do not confuse the owner.
+
+B9 should be frontend-first with small backend read-only additions only if needed.
 ```
+
+### Source-of-truth note
+
+```text
+This section supersedes old V5.24-C/V5.24-D top-of-file state.
+Older sections below remain as historical record, not the current release state.
+For coding, inspect the latest repo/ZIP first. If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+## 0.0 Latest Contract Addendum — V5.27-B7 / V5.28-B8 Accounting Close Governance
+
+### Period close contract
+
+```text
+Period close is the official way to move current period profit/loss into Retained Earnings.
+It must be Owner-controlled, balanced, auditable, and never a silent status flip.
+```
+
+Active period close endpoints:
+
+```text
+GET  /api/accounting/period-close/readiness?year=YYYY&month=M
+POST /api/accounting/period-close/preview
+POST /api/accounting/period-close/post
+POST /api/accounting/period-close/reopen-preview
+POST /api/accounting/period-close/reopen
+```
+
+Rules:
+- `post` close is OWNER only.
+- `reopen` is OWNER only.
+- Closing creates `JournalEntry.sourceType = CLOSING_ENTRY`.
+- Reopen creates `JournalEntry.sourceType = CLOSING_REVERSAL`.
+- Reopen must not delete or mutate the old closing journal.
+- Re-close after reopen must create the next version, for example `JE-CLOSE-2026-05-V2`.
+- Duplicate close while period is `CLOSED` must be blocked.
+- P&L operational report excludes `CLOSING_ENTRY` and `CLOSING_REVERSAL` by default so owner can still read operational performance after close/reopen.
+- Balance Sheet should move closed-period current profit/loss into Retained Earnings and show `currentProfitRupiah = 0` for closed periods.
+- Manual `AccountingPeriod.status` mutation is blocked; close/reopen workflow must be used.
+- Manual journal draft or posting into a CLOSED period must be blocked unless it is part of controlled close/reopen governance.
+
+### Accounting period metadata contract
+
+`AccountingPeriod` can store:
+
+```text
+closedAt
+closedById
+closingJournalEntryId
+closingNote
+closeBasis
+closeVersion
+reopenedAt
+reopenedById
+reopenJournalEntryId
+reopenReason
+reopenVersion
+```
+
+These fields are audit metadata. They must support timeline/history UI in B9.
+
+### Statement command center contract
+
+B9 should make the following readable in Finance:
+- Trial Balance status.
+- Balance Sheet status.
+- Profit & Loss status.
+- Period close state: OPEN / CLOSED / REOPENED / RECLOSED.
+- Closing journal and reversal journal references.
+- Asset register vs ledger alignment.
+- Data quality warnings: unmapped operational data, draft journals, unbalanced journals, stale copy, and period state mismatch.
+
+Do not expose accounting mutation to STAFF or TENANT.
+
+
+
 
 ## 0.0 V5.23-B Accounting & Finance Contract
 
