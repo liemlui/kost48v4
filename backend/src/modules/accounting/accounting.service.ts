@@ -38,6 +38,10 @@ function isPrismaUniqueError(error: unknown, field?: string) {
   return Array.isArray(target) ? target.includes(field) : String(target ?? '').includes(field);
 }
 
+function periodLabel(period: { year: number; month: number }) {
+  return `${period.year}-${String(period.month).padStart(2, '0')}`;
+}
+
 @Injectable()
 export class AccountingService {
   constructor(
@@ -245,12 +249,14 @@ export class AccountingService {
     await this.schemaGuard.assertReady();
     const row = await (this.prisma as any).accountingPeriod.findUnique({ where: { id } });
     if (!row) throw new NotFoundException('Accounting period tidak ditemukan.');
+    if (dto.status !== undefined && dto.status !== row.status) {
+      throw new BadRequestException('Status accounting period tidak boleh diubah manual setelah B8. Gunakan workflow Tutup Periode atau Buka Ulang agar jurnal closing/reversal tetap auditable.');
+    }
     return (this.prisma as any).accountingPeriod.update({
       where: { id },
       data: {
         ...(dto.startDate !== undefined ? { startDate: new Date(dto.startDate) } : {}),
         ...(dto.endDate !== undefined ? { endDate: new Date(dto.endDate) } : {}),
-        ...(dto.status !== undefined ? { status: dto.status as any, closedAt: dto.status === 'CLOSED' ? new Date() : row.closedAt } : {}),
         ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
       },
     });
@@ -490,6 +496,7 @@ export class AccountingService {
   async createJournalDraft(dto: CreateJournalDraftDto, user: CurrentUserPayload) {
     await this.schemaGuard.assertReady();
     if (!dto.lines?.length || dto.lines.length < 2) throw new BadRequestException('Journal draft minimal membutuhkan dua line.');
+    await this.assertPeriodOpenForDraft(dto.entryDate, dto.accountingPeriodId);
     await this.ensureLinesAccounts(dto.lines.map((line) => line.chartOfAccountId));
     const cashIds = dto.lines.map((line) => line.cashAccountId).filter((id): id is number => Boolean(id));
     for (const id of cashIds) await this.ensureCashAccount(id);
@@ -525,6 +532,23 @@ export class AccountingService {
       },
       include: { lines: { include: { chartOfAccount: true, cashAccount: true }, orderBy: { sortOrder: 'asc' } } },
     });
+  }
+
+  private async assertPeriodOpenForDraft(entryDateInput: string, accountingPeriodId?: number) {
+    const entryDate = dateOnly(entryDateInput);
+    const period = accountingPeriodId
+      ? await (this.prisma as any).accountingPeriod.findUnique({ where: { id: accountingPeriodId } })
+      : await (this.prisma as any).accountingPeriod.findFirst({
+          where: { startDate: { lte: entryDate }, endDate: { gte: entryDate } },
+          orderBy: [{ year: 'desc' }, { month: 'desc' }],
+        });
+    if (!period) return;
+    if (!isDateBetweenInclusive(entryDate, period.startDate, period.endDate)) {
+      throw new BadRequestException(`Tanggal jurnal tidak masuk rentang accounting period ${periodLabel(period)}.`);
+    }
+    if (period.status !== 'OPEN') {
+      throw new BadRequestException(`Periode ${periodLabel(period)} sudah ${period.status}. Buat correction lewat Buka Ulang Periode atau adjustment periode berjalan, bukan draft langsung ke periode tertutup.`);
+    }
   }
 
   private async ensureAccount(id: number) {

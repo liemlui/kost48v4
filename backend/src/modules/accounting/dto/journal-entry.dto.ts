@@ -2,7 +2,7 @@ import { Type } from 'class-transformer';
 import { IsArray, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
 
 export const JOURNAL_ENTRY_STATUSES = ['DRAFT', 'POSTED', 'VOID'] as const;
-export const JOURNAL_SOURCE_TYPES = ['MANUAL', 'OPENING_BALANCE', 'SYSTEM_PLACEHOLDER', 'INVOICE', 'INVOICE_PAYMENT', 'PAYMENT_SUBMISSION', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'INVENTORY', 'DEPRECIATION', 'ADJUSTMENT', 'CLOSING_ENTRY'] as const;
+export const JOURNAL_SOURCE_TYPES = ['MANUAL', 'OPENING_BALANCE', 'SYSTEM_PLACEHOLDER', 'INVOICE', 'INVOICE_PAYMENT', 'PAYMENT_SUBMISSION', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'INVENTORY', 'DEPRECIATION', 'ADJUSTMENT', 'CLOSING_ENTRY', 'CLOSING_REVERSAL'] as const;
 
 export class JournalEntriesQueryDto {
   @IsOptional() @IsIn(JOURNAL_ENTRY_STATUSES) status?: string;
