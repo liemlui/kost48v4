@@ -27,11 +27,11 @@ export default function ProfitLossLitePanel({ profitLoss }: { profitLoss?: Profi
       <Card.Body>
         <div className="d-flex justify-content-between gap-3 align-items-start mb-3">
           <div>
-            <div className="section-kicker mb-2">Profit &amp; Loss Lite</div>
+            <div className="section-kicker mb-2">Profit &amp; Loss Lite · {profitLoss?.period?.key ?? 'periode berjalan'}</div>
             <h3 className="panel-title mb-1">Laba rugi dari posted ledger</h3>
-            <p className="text-muted mb-0">Revenue berasal dari invoice issued journal. Pembayaran invoice hanya pelunasan A/R, bukan revenue kedua.</p>
+            <p className="text-muted mb-0">Revenue berasal dari invoice issued journal. Pembayaran invoice hanya pelunasan A/R, bukan revenue kedua. Jurnal closing dikecualikan agar performa periode tetap terbaca.</p>
           </div>
-          <Badge bg={profitLoss?.formalStatementReady ? 'success' : 'warning'}>{profitLoss?.formalStatementReady ? 'Ledger ready' : 'Guarded'}</Badge>
+          <Badge bg={profitLoss?.closing?.periodClosed ? 'success' : profitLoss?.formalStatementReady ? 'primary' : 'warning'}>{profitLoss?.closing?.periodClosed ? 'Closed to Retained Earnings' : profitLoss?.formalStatementReady ? 'Ledger ready' : 'Guarded'}</Badge>
         </div>
 
         <div className="status-strip-v2 mb-3">
@@ -54,6 +54,7 @@ export default function ProfitLossLitePanel({ profitLoss }: { profitLoss?: Profi
             <StatementRows lines={profitLoss?.lines.expenses ?? []} emptyLabel="Belum ada expense terjurnal." />
           </tbody>
         </Table>
+        {profitLoss?.closing?.periodClosed ? <Alert variant="success" className="mt-3 mb-0">Periode ini sudah ditutup ke Laba Ditahan melalui {profitLoss.closing.closingEntryNumber ?? `journal #${profitLoss.closing.closingJournalEntryId}`}. Angka P&amp;L tetap operasional, bukan nol setelah close.</Alert> : null}
         {profitLoss?.note ? <small className="text-muted d-block mt-3">{profitLoss.note}</small> : null}
       </Card.Body>
     </Card>

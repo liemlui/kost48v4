@@ -1,8 +1,8 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDateString, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsIn, IsInt, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
 
 export const JOURNAL_ENTRY_STATUSES = ['DRAFT', 'POSTED', 'VOID'] as const;
-export const JOURNAL_SOURCE_TYPES = ['MANUAL', 'OPENING_BALANCE', 'SYSTEM_PLACEHOLDER', 'INVOICE', 'INVOICE_PAYMENT', 'PAYMENT_SUBMISSION', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'INVENTORY', 'ADJUSTMENT'] as const;
+export const JOURNAL_SOURCE_TYPES = ['MANUAL', 'OPENING_BALANCE', 'SYSTEM_PLACEHOLDER', 'INVOICE', 'INVOICE_PAYMENT', 'PAYMENT_SUBMISSION', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'INVENTORY', 'DEPRECIATION', 'ADJUSTMENT', 'CLOSING_ENTRY'] as const;
 
 export class JournalEntriesQueryDto {
   @IsOptional() @IsIn(JOURNAL_ENTRY_STATUSES) status?: string;
@@ -23,6 +23,8 @@ export class JournalBySourceQueryDto {
 
 export class TrialBalanceQueryDto {
   @IsOptional() @IsDateString() asOf?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(2020) @Max(2100) year?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(12) month?: number;
 }
 
 export class JournalLineDraftDto {

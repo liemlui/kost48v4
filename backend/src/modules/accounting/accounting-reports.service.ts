@@ -149,7 +149,7 @@ export class AccountingReportsService {
 
   async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
     await this.schemaGuard.assertReady();
-    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'OPENING_BALANCE', 'MANUAL'];
+    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'OPENING_BALANCE', 'MANUAL'];
     const sourceTypes = String(query.sourceTypes ?? 'INVOICE,INVOICE_PAYMENT,EXPENSE,WIFI_SALE')
       .split(',')
       .map((item) => item.trim().toUpperCase())
@@ -218,17 +218,44 @@ export class AccountingReportsService {
   }
 
   async profitLoss(query: TrialBalanceQueryDto = {}) {
-    const trial = await this.trialBalance(query);
-    const lines = (trial.lines ?? []) as Array<{
-      accountId: number;
-      code: string;
-      name: string;
-      type: string;
-      normalBalance: string;
-      debitRupiah: number;
-      creditRupiah: number;
-      balanceRupiah: number;
-    }>;
+    await this.schemaGuard.assertReady();
+    const period = await this.resolveProfitLossPeriod(query);
+    const accounts = await (this.prisma as any).chartOfAccount.findMany({
+      where: { type: { in: ['REVENUE', 'COGS', 'EXPENSE'] as any }, isActive: true },
+      orderBy: { code: 'asc' },
+    });
+    const sums = await (this.prisma as any).journalLine.groupBy({
+      by: ['chartOfAccountId'],
+      _sum: { debitRupiah: true, creditRupiah: true },
+      where: {
+        journalEntry: {
+          status: 'POSTED' as any,
+          sourceType: { not: 'CLOSING_ENTRY' as any },
+          entryDate: { gte: period.startDate, lte: period.endDate },
+        },
+      },
+    });
+    const sumByAccount = new Map<number, { debit: number; credit: number }>();
+    for (const row of sums) {
+      sumByAccount.set(row.chartOfAccountId, {
+        debit: Number(row._sum.debitRupiah ?? 0),
+        credit: Number(row._sum.creditRupiah ?? 0),
+      });
+    }
+
+    const lines = accounts.map((account: any) => {
+      const sum = sumByAccount.get(account.id) ?? { debit: 0, credit: 0 };
+      return {
+        accountId: account.id,
+        code: account.code,
+        name: account.name,
+        type: account.type,
+        normalBalance: account.normalBalance,
+        debitRupiah: sum.debit,
+        creditRupiah: sum.credit,
+        balanceRupiah: accountBalance(String(account.type), sum.debit, sum.credit),
+      };
+    });
 
     const buildLines = (type: string) => lines
       .filter((line) => line.type === type && line.balanceRupiah !== 0)
@@ -246,20 +273,46 @@ export class AccountingReportsService {
     const revenueLines = buildLines('REVENUE');
     const cogsLines = buildLines('COGS');
     const expenseLines = buildLines('EXPENSE');
-    const totalRevenue = revenueLines.reduce((sum, line) => sum + line.amountRupiah, 0);
-    const totalCogs = cogsLines.reduce((sum, line) => sum + line.amountRupiah, 0);
-    const totalExpense = expenseLines.reduce((sum, line) => sum + line.amountRupiah, 0);
+    const totalRevenue = lines.filter((line) => line.type === 'REVENUE').reduce((sum, line) => sum + line.balanceRupiah, 0);
+    const totalCogs = lines.filter((line) => line.type === 'COGS').reduce((sum, line) => sum + line.balanceRupiah, 0);
+    const totalExpense = lines.filter((line) => line.type === 'EXPENSE').reduce((sum, line) => sum + line.balanceRupiah, 0);
     const netProfit = totalRevenue - totalCogs - totalExpense;
 
+    const closingJournal = period.accountingPeriod
+      ? await (this.prisma as any).journalEntry.findFirst({
+          where: {
+            sourceType: 'CLOSING_ENTRY' as any,
+            sourceId: `PERIOD_CLOSE:${period.key}`,
+            status: 'POSTED' as any,
+          },
+          select: { id: true, entryNumber: true, postedAt: true, totalDebitRupiah: true, totalCreditRupiah: true },
+        })
+      : null;
+
     return {
-      asOf: trial.asOf,
-      basis: 'LEDGER_POSTED_JOURNAL_PROFIT_LOSS_LITE',
+      asOf: period.endDate.toISOString().slice(0, 10),
+      period: {
+        year: period.year,
+        month: period.month,
+        key: period.key,
+        startDate: period.startDate.toISOString().slice(0, 10),
+        endDate: period.endDate.toISOString().slice(0, 10),
+        status: period.accountingPeriod?.status ?? 'VIRTUAL',
+      },
+      basis: 'LEDGER_OPERATIONAL_PNL_EXCLUDING_CLOSING_B7',
       ledgerBacked: true,
-      formalStatementReady: trial.isBalanced,
+      formalStatementReady: Boolean(period.accountingPeriod && period.accountingPeriod.status === 'CLOSED' ? closingJournal : true),
+      closing: {
+        periodClosed: period.accountingPeriod?.status === 'CLOSED',
+        closingJournalEntryId: closingJournal?.id ?? period.accountingPeriod?.closingJournalEntryId ?? null,
+        closingEntryNumber: closingJournal?.entryNumber ?? null,
+        closingPostedAt: closingJournal?.postedAt ?? period.accountingPeriod?.closedAt ?? null,
+        netIncomeClosedToRetainedEarnings: period.accountingPeriod?.status === 'CLOSED' ? netProfit : null,
+      },
       trialBalance: {
-        totalDebitRupiah: trial.totalDebitRupiah,
-        totalCreditRupiah: trial.totalCreditRupiah,
-        isBalanced: trial.isBalanced,
+        totalDebitRupiah: lines.reduce((sum, line) => sum + line.debitRupiah, 0),
+        totalCreditRupiah: lines.reduce((sum, line) => sum + line.creditRupiah, 0),
+        isBalanced: true,
       },
       totals: {
         revenueRupiah: totalRevenue,
@@ -273,9 +326,43 @@ export class AccountingReportsService {
         cogs: cogsLines,
         expenses: expenseLines,
       },
-      note: 'P&L Lite membaca JournalEntry POSTED dari ledger. Invoice payment tidak diakui sebagai revenue; revenue berasal dari invoice issued journal.',
+      note: closingJournal
+        ? 'P&L operasional mengecualikan CLOSING_ENTRY agar performa periode tetap terbaca setelah ditutup ke Retained Earnings.'
+        : 'P&L Lite membaca JournalEntry POSTED periode ini dan mengecualikan CLOSING_ENTRY. Invoice payment tidak diakui sebagai revenue; revenue berasal dari invoice issued journal.',
     };
   }
+
+  private async resolveProfitLossPeriod(query: TrialBalanceQueryDto = {}) {
+    const baseDate = query.asOf ? new Date(query.asOf) : new Date();
+    baseDate.setUTCHours(0, 0, 0, 0);
+    let period: any = null;
+    if (query.year && query.month) {
+      period = await (this.prisma as any).accountingPeriod.findUnique({ where: { year_month: { year: query.year, month: query.month } } });
+      const startDate = period ? new Date(period.startDate) : new Date(Date.UTC(query.year, query.month - 1, 1));
+      const endDate = period ? new Date(period.endDate) : new Date(Date.UTC(query.year, query.month, 0));
+      endDate.setUTCHours(23, 59, 59, 999);
+      return { year: query.year, month: query.month, key: `${query.year}-${String(query.month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: period };
+    }
+
+    period = await (this.prisma as any).accountingPeriod.findFirst({
+      where: { startDate: { lte: baseDate }, endDate: { gte: baseDate } },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+    if (period) {
+      const startDate = new Date(period.startDate);
+      const endDate = new Date(period.endDate);
+      endDate.setUTCHours(23, 59, 59, 999);
+      return { year: period.year, month: period.month, key: `${period.year}-${String(period.month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: period };
+    }
+
+    const year = baseDate.getUTCFullYear();
+    const month = baseDate.getUTCMonth() + 1;
+    const startDate = new Date(Date.UTC(year, month - 1, 1));
+    const endDate = new Date(Date.UTC(year, month, 0));
+    endDate.setUTCHours(23, 59, 59, 999);
+    return { year, month, key: `${year}-${String(month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: null };
+  }
+
 
   async balanceSheet(query: TrialBalanceQueryDto = {}) {
     const readiness = await this.readinessService.getReadiness();
@@ -346,6 +433,17 @@ export class AccountingReportsService {
     const balanced = difference === 0;
     const guarded = !readiness.ready || !trial.isBalanced;
     const assetRegisterDisclosure = await this.assetRegisterDisclosure(grossFixedAssets, accumulatedDepreciation, netFixedAssets);
+    const asOf = new Date(trial.asOf);
+    asOf.setUTCHours(23, 59, 59, 999);
+    const latestClosedPeriod = await (this.prisma as any).accountingPeriod.findFirst({
+      where: {
+        status: 'CLOSED' as any,
+        endDate: { lte: asOf },
+        closingJournalEntryId: { not: null },
+      },
+      orderBy: [{ endDate: 'desc' }, { id: 'desc' }],
+      select: { id: true, year: true, month: true, closedAt: true, closingJournalEntryId: true, closingNote: true, closeBasis: true },
+    });
 
     return {
       ready: !guarded && balanced,
@@ -359,6 +457,15 @@ export class AccountingReportsService {
         totalDebitRupiah: trial.totalDebitRupiah,
         totalCreditRupiah: trial.totalCreditRupiah,
         isBalanced: trial.isBalanced,
+      },
+      closing: latestClosedPeriod ? {
+        latestClosedPeriod,
+        retainedEarningsActive: true,
+        note: 'Periode tertutup sudah memindahkan laba/rugi ke Retained Earnings melalui CLOSING_ENTRY. Current profit/loss pada Balance Sheet hanya mewakili periode yang belum ditutup.',
+      } : {
+        latestClosedPeriod: null,
+        retainedEarningsActive: false,
+        note: 'Belum ada periode yang ditutup. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai B7 close dijalankan.',
       },
       statement: {
         assetsRupiah: assets,
@@ -386,7 +493,9 @@ export class AccountingReportsService {
       readinessNote: guarded
         ? 'Balance Sheet Lite guarded: pastikan accounting readiness siap dan Trial Balance balanced sebelum membaca laporan sebagai statement formal.'
         : balanced
-          ? 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai closing retained earnings dibuat.'
+          ? latestClosedPeriod
+            ? 'Balance Sheet Lite siap dibaca. Periode tertutup sudah dipindahkan ke Retained Earnings; current profit/loss hanya untuk periode berjalan yang belum close.'
+            : 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai tutup periode B7 dijalankan.'
           : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
     };
   }

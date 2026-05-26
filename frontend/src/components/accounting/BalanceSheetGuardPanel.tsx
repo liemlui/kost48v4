@@ -46,12 +46,13 @@ export default function BalanceSheetGuardPanel({ guard }: { guard?: BalanceSheet
           </div>
           <span className={`status-soft-pill ${guard?.ready ? 'success' : 'warning'}`}>{guard?.ready ? 'Ready' : 'Guarded'}</span>
         </div>
+        {guard?.closing?.note ? <Alert variant={guard.closing.retainedEarningsActive ? 'success' : 'info'} className="mb-3">{guard.closing.note}</Alert> : null}
         {statement ? (
           <>
             <div className="status-strip-v2">
               <div className="status-strip-item info"><span className="status-strip-label">Assets</span><strong>{formatRupiah(statement.assetsRupiah)}</strong></div>
               <div className="status-strip-item warning"><span className="status-strip-label">Liabilities</span><strong>{formatRupiah(statement.liabilitiesRupiah)}</strong></div>
-              <div className="status-strip-item success"><span className="status-strip-label">Equity + Profit</span><strong>{formatRupiah(statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah)}</strong></div>
+              <div className="status-strip-item success"><span className="status-strip-label">Equity / RE + Profit</span><strong>{formatRupiah(statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah)}</strong></div>
               <div className="status-strip-item info"><span className="status-strip-label">Difference</span><strong>{formatRupiah(statement.differenceRupiah ?? 0)}</strong></div>
             </div>
             <Table responsive hover size="sm" className="mb-0 align-middle">

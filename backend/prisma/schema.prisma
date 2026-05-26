@@ -336,6 +336,7 @@ enum JournalSourceType {
   INVENTORY
   DEPRECIATION
   ADJUSTMENT
+  CLOSING_ENTRY
 }
 
 
@@ -1358,16 +1359,21 @@ model CashAccount {
 }
 
 model AccountingPeriod {
-  id        Int                    @id @default(autoincrement())
-  year      Int
-  month     Int
-  startDate DateTime               @db.Date
-  endDate   DateTime               @db.Date
-  status    AccountingPeriodStatus @default(OPEN)
-  closedAt  DateTime?
-  notes     String?
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
+  id                    Int                    @id @default(autoincrement())
+  year                  Int
+  month                 Int
+  startDate             DateTime               @db.Date
+  endDate               DateTime               @db.Date
+  status                AccountingPeriodStatus @default(OPEN)
+  closedAt              DateTime?
+  closedById            Int?
+  closingJournalEntryId Int?
+  closingNote           String?
+  closeBasis            String?
+  closeVersion          Int                    @default(0)
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 
   openingBalanceBatches OpeningBalanceBatch[]
   journalEntries        JournalEntry[]
@@ -1375,6 +1381,8 @@ model AccountingPeriod {
   @@unique([year, month])
   @@index([status])
   @@index([startDate, endDate])
+  @@index([closedById])
+  @@index([closingJournalEntryId])
 }
 
 model OpeningBalanceBatch {

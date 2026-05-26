@@ -8,7 +8,7 @@ const AUTO_SOURCE_TYPES = [
   "WIFI_SALE",
 ] as const;
 type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
-type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION";
+type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION" | "CLOSING_ENTRY";
 
 type JournalLineInput = {
   chartOfAccountId: number;
@@ -60,7 +60,7 @@ export class AccountingPostingService {
     return {
       autoPostingEnabled: true,
       basis: "V5.25_B3_AUTO_JOURNAL_LITE",
-      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION"],
+      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY"],
       behavior:
         "Idempotent by sourceType/sourceId. Jika COA, cash account, atau accounting period belum siap, transaksi bisnis tetap aman dan journal auto-posting akan diskip dengan warning.",
       excluded: ["INVENTORY", "PAYMENT_REVERSAL"],

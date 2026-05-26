@@ -42,6 +42,12 @@ export type AccountingPeriod = {
   startDate: string;
   endDate: string;
   status: AccountingPeriodStatus;
+  closedAt?: string | null;
+  closedById?: number | null;
+  closingJournalEntryId?: number | null;
+  closingNote?: string | null;
+  closeBasis?: string | null;
+  closeVersion?: number;
   notes?: string | null;
 };
 
@@ -124,6 +130,11 @@ export type BalanceSheetGuard = {
   asOf?: string;
   readinessNote?: string;
   trialBalancePreview?: { asOf: string; totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean } | null;
+  closing?: {
+    latestClosedPeriod?: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'closedAt' | 'closingJournalEntryId' | 'closingNote' | 'closeBasis'> | null;
+    retainedEarningsActive?: boolean;
+    note?: string;
+  } | null;
   statement?: {
     assetsRupiah: number;
     currentAssetsRupiah?: number;
@@ -166,6 +177,21 @@ export type ProfitLossLite = {
   basis: string;
   ledgerBacked: boolean;
   formalStatementReady: boolean;
+  period?: {
+    year: number;
+    month: number;
+    key: string;
+    startDate: string;
+    endDate: string;
+    status: AccountingPeriodStatus | 'VIRTUAL';
+  };
+  closing?: {
+    periodClosed: boolean;
+    closingJournalEntryId?: number | null;
+    closingEntryNumber?: string | null;
+    closingPostedAt?: string | null;
+    netIncomeClosedToRetainedEarnings?: number | null;
+  };
   trialBalance: { totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean };
   totals: {
     revenueRupiah: number;
@@ -180,6 +206,87 @@ export type ProfitLossLite = {
     expenses: StatementLine[];
   };
   note?: string;
+};
+
+
+export type PeriodCloseCheck = {
+  key: string;
+  label: string;
+  ready: boolean;
+  count?: number;
+  note?: string;
+};
+
+export type PeriodCloseReadiness = {
+  basis: string;
+  year: number;
+  month: number;
+  period: AccountingPeriod | null;
+  ready: boolean;
+  canPost: boolean;
+  blockedReasons: string[];
+  warnings: string[];
+  checks: PeriodCloseCheck[];
+  profitLoss: {
+    revenueRupiah: number;
+    cogsRupiah: number;
+    expenseRupiah: number;
+    netIncomeRupiah: number;
+  } | null;
+  supporting?: Record<string, unknown>;
+  note?: string;
+};
+
+export type PeriodClosePreviewLine = {
+  chartOfAccountId: number;
+  accountCode: string;
+  accountName: string;
+  accountType: AccountingAccountType;
+  description: string;
+  debitRupiah: number;
+  creditRupiah: number;
+  sortOrder: number;
+};
+
+export type PeriodClosePreview = {
+  basis: string;
+  year: number;
+  month: number;
+  period: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'status' | 'startDate' | 'endDate'>;
+  sourceType: 'CLOSING_ENTRY';
+  sourceId: string;
+  entryDate: string;
+  totals: {
+    revenueRupiah: number;
+    cogsRupiah: number;
+    expenseRupiah: number;
+  };
+  netIncomeRupiah: number;
+  retainedEarningsAccount?: Pick<ChartOfAccount, 'id' | 'code' | 'name'> | null;
+  totalDebitRupiah: number;
+  totalCreditRupiah: number;
+  isBalanced: boolean;
+  lines: PeriodClosePreviewLine[];
+  blockedReasons: string[];
+  readiness?: PeriodCloseReadiness;
+  canPost?: boolean;
+  notes?: string | null;
+  note?: string;
+};
+
+export type PeriodClosePostResult = {
+  basis: string;
+  posted: boolean;
+  period: AccountingPeriod;
+  journalEntry: AutoJournalEntry;
+  preview: PeriodClosePreview;
+  note?: string;
+};
+
+export type PeriodClosePayload = {
+  year: number;
+  month: number;
+  notes?: string;
 };
 
 export type PostingBoundary = {
@@ -562,8 +669,20 @@ export async function fetchAssetReadiness() {
   return unwrap<AssetReadiness>(client.get('/accounting/asset-readiness'));
 }
 
-export async function fetchProfitLossLite(params?: { asOf?: string }) {
+export async function fetchProfitLossLite(params?: { asOf?: string; year?: number; month?: number }) {
   return unwrap<ProfitLossLite>(client.get('/accounting/profit-loss', { params }));
+}
+
+export async function fetchPeriodCloseReadiness(params: { year: number; month: number }) {
+  return unwrap<PeriodCloseReadiness>(client.get('/accounting/period-close/readiness', { params }));
+}
+
+export async function previewPeriodClose(payload: PeriodClosePayload) {
+  return unwrap<PeriodClosePreview>(client.post('/accounting/period-close/preview', payload));
+}
+
+export async function postPeriodClose(payload: PeriodClosePayload) {
+  return unwrap<PeriodClosePostResult>(client.post('/accounting/period-close/post', payload));
 }
 
 
