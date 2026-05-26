@@ -217,6 +217,66 @@ export class AccountingReportsService {
     };
   }
 
+  async profitLoss(query: TrialBalanceQueryDto = {}) {
+    const trial = await this.trialBalance(query);
+    const lines = (trial.lines ?? []) as Array<{
+      accountId: number;
+      code: string;
+      name: string;
+      type: string;
+      normalBalance: string;
+      debitRupiah: number;
+      creditRupiah: number;
+      balanceRupiah: number;
+    }>;
+
+    const buildLines = (type: string) => lines
+      .filter((line) => line.type === type && line.balanceRupiah !== 0)
+      .map((line) => ({
+        accountId: line.accountId,
+        code: line.code,
+        name: line.name,
+        type: line.type,
+        debitRupiah: line.debitRupiah,
+        creditRupiah: line.creditRupiah,
+        amountRupiah: Math.abs(line.balanceRupiah),
+      }))
+      .sort((a, b) => b.amountRupiah - a.amountRupiah || a.code.localeCompare(b.code));
+
+    const revenueLines = buildLines('REVENUE');
+    const cogsLines = buildLines('COGS');
+    const expenseLines = buildLines('EXPENSE');
+    const totalRevenue = revenueLines.reduce((sum, line) => sum + line.amountRupiah, 0);
+    const totalCogs = cogsLines.reduce((sum, line) => sum + line.amountRupiah, 0);
+    const totalExpense = expenseLines.reduce((sum, line) => sum + line.amountRupiah, 0);
+    const netProfit = totalRevenue - totalCogs - totalExpense;
+
+    return {
+      asOf: trial.asOf,
+      basis: 'LEDGER_POSTED_JOURNAL_PROFIT_LOSS_LITE',
+      ledgerBacked: true,
+      formalStatementReady: trial.isBalanced,
+      trialBalance: {
+        totalDebitRupiah: trial.totalDebitRupiah,
+        totalCreditRupiah: trial.totalCreditRupiah,
+        isBalanced: trial.isBalanced,
+      },
+      totals: {
+        revenueRupiah: totalRevenue,
+        cogsRupiah: totalCogs,
+        expenseRupiah: totalExpense,
+        netProfitRupiah: netProfit,
+        netProfitMarginPercent: totalRevenue > 0 ? Number(((netProfit / totalRevenue) * 100).toFixed(2)) : 0,
+      },
+      lines: {
+        revenue: revenueLines,
+        cogs: cogsLines,
+        expenses: expenseLines,
+      },
+      note: 'P&L Lite membaca JournalEntry POSTED dari ledger. Invoice payment tidak diakui sebagai revenue; revenue berasal dari invoice issued journal.',
+    };
+  }
+
   async balanceSheet(query: TrialBalanceQueryDto = {}) {
     const readiness = await this.readinessService.getReadiness();
     if (readiness.schemaStatus && !readiness.schemaStatus.ready) {
@@ -228,47 +288,81 @@ export class AccountingReportsService {
         readiness,
         trialBalancePreview: null,
         statement: null,
+        lines: null,
         readinessNote: 'Backend accounting sudah terpasang, tetapi migration database belum diterapkan. Jalankan npx prisma migrate deploy atau npx prisma db push sebelum membaca Balance Sheet.',
       };
     }
 
     const trial = await this.trialBalance(query);
-    if (!readiness.ready) {
-      return {
-        ready: false,
-        basis: 'ACCOUNTING_READINESS_GUARD',
-        ledgerBacked: false,
-        formalStatementReady: false,
-        readiness,
-        trialBalancePreview: {
-          asOf: trial.asOf,
-          totalDebitRupiah: trial.totalDebitRupiah,
-          totalCreditRupiah: trial.totalCreditRupiah,
-          isBalanced: trial.isBalanced,
-        },
-        statement: null,
-        readinessNote: 'Balance Sheet belum valid. Lengkapi COA, cash account, accounting period, opening balance posted, dan ledger journal yang balance terlebih dahulu.',
-      };
-    }
+    const typedLines = (trial.lines ?? []) as Array<{
+      accountId: number;
+      code: string;
+      name: string;
+      type: string;
+      normalBalance: string;
+      debitRupiah: number;
+      creditRupiah: number;
+      balanceRupiah: number;
+    }>;
 
-    const lines = trial.lines as Array<{ type: string; balanceRupiah: number }>;
-    const assets = lines.filter((l) => l.type === 'ASSET').reduce((sum, l) => sum + l.balanceRupiah, 0);
-    const liabilities = lines.filter((l) => l.type === 'LIABILITY').reduce((sum, l) => sum + l.balanceRupiah, 0);
-    const equity = lines.filter((l) => l.type === 'EQUITY').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const statementLine = (line: typeof typedLines[number]) => ({
+      accountId: line.accountId,
+      code: line.code,
+      name: line.name,
+      type: line.type,
+      debitRupiah: line.debitRupiah,
+      creditRupiah: line.creditRupiah,
+      balanceRupiah: Math.abs(line.balanceRupiah),
+    });
+    const assetsLines = typedLines.filter((l) => l.type === 'ASSET' && l.balanceRupiah !== 0).map(statementLine);
+    const liabilitiesLines = typedLines.filter((l) => l.type === 'LIABILITY' && l.balanceRupiah !== 0).map(statementLine);
+    const equityLines = typedLines.filter((l) => l.type === 'EQUITY' && l.balanceRupiah !== 0).map(statementLine);
+    const revenue = typedLines.filter((l) => l.type === 'REVENUE').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const cogs = typedLines.filter((l) => l.type === 'COGS').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const expenses = typedLines.filter((l) => l.type === 'EXPENSE').reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const currentProfit = revenue - cogs - expenses;
+
+    const assets = assetsLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const liabilities = liabilitiesLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const equityBase = equityLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const equityIncludingCurrentProfit = equityBase + currentProfit;
+    const liabilitiesAndEquity = liabilities + equityIncludingCurrentProfit;
+    const balanced = assets === liabilitiesAndEquity;
+    const guarded = !readiness.ready || !trial.isBalanced;
+
     return {
-      ready: assets === liabilities + equity,
-      basis: 'ACCOUNTING_LEDGER',
+      ready: !guarded && balanced,
+      basis: 'LEDGER_BALANCE_SHEET_LITE_GUARDED',
       ledgerBacked: true,
-      formalStatementReady: assets === liabilities + equity,
+      formalStatementReady: !guarded && balanced,
       asOf: trial.asOf,
+      readiness,
+      trialBalancePreview: {
+        asOf: trial.asOf,
+        totalDebitRupiah: trial.totalDebitRupiah,
+        totalCreditRupiah: trial.totalCreditRupiah,
+        isBalanced: trial.isBalanced,
+      },
       statement: {
         assetsRupiah: assets,
         liabilitiesRupiah: liabilities,
-        equityRupiah: equity,
-        liabilitiesAndEquityRupiah: liabilities + equity,
-        balanced: assets === liabilities + equity,
+        equityRupiah: equityBase,
+        currentProfitRupiah: currentProfit,
+        equityIncludingCurrentProfitRupiah: equityIncludingCurrentProfit,
+        liabilitiesAndEquityRupiah: liabilitiesAndEquity,
+        differenceRupiah: assets - liabilitiesAndEquity,
+        balanced,
       },
-      readiness,
+      lines: {
+        assets: assetsLines,
+        liabilities: liabilitiesLines,
+        equity: equityLines,
+      },
+      readinessNote: guarded
+        ? 'Balance Sheet Lite guarded: pastikan accounting readiness siap dan Trial Balance balanced sebelum membaca laporan sebagai statement formal.'
+        : balanced
+          ? 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai closing retained earnings dibuat.'
+          : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
     };
   }
 

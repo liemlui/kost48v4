@@ -143,6 +143,11 @@ export class AccountingController {
     return { message: 'Scanner transaksi belum terpetakan berhasil diambil', data: await this.reportsService.unmappedTransactions() };
   }
 
+  @Get('profit-loss')
+  async profitLoss(@Query() query: TrialBalanceQueryDto) {
+    return { message: 'Profit & Loss Lite berhasil diambil', data: await this.reportsService.profitLoss(query) };
+  }
+
   @Get('balance-sheet')
   async balanceSheet(@Query() query: TrialBalanceQueryDto) {
     return { message: 'Guard balance sheet berhasil diambil', data: await this.reportsService.balanceSheet(query) };

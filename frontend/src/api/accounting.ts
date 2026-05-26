@@ -102,14 +102,57 @@ export type TrialBalance = {
   note?: string;
 };
 
+export type StatementLine = {
+  accountId: number;
+  code: string;
+  name: string;
+  type: AccountingAccountType;
+  debitRupiah: number;
+  creditRupiah: number;
+  balanceRupiah?: number;
+  amountRupiah?: number;
+};
+
 export type BalanceSheetGuard = {
   ready: boolean;
   basis: string;
   ledgerBacked: boolean;
   formalStatementReady: boolean;
+  asOf?: string;
   readinessNote?: string;
   trialBalancePreview?: { asOf: string; totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean } | null;
-  statement?: { assetsRupiah: number; liabilitiesRupiah: number; equityRupiah: number; liabilitiesAndEquityRupiah: number; balanced: boolean } | null;
+  statement?: {
+    assetsRupiah: number;
+    liabilitiesRupiah: number;
+    equityRupiah: number;
+    currentProfitRupiah?: number;
+    equityIncludingCurrentProfitRupiah?: number;
+    liabilitiesAndEquityRupiah: number;
+    differenceRupiah?: number;
+    balanced: boolean;
+  } | null;
+  lines?: { assets: StatementLine[]; liabilities: StatementLine[]; equity: StatementLine[] } | null;
+};
+
+export type ProfitLossLite = {
+  asOf: string;
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  trialBalance: { totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean };
+  totals: {
+    revenueRupiah: number;
+    cogsRupiah: number;
+    expenseRupiah: number;
+    netProfitRupiah: number;
+    netProfitMarginPercent: number;
+  };
+  lines: {
+    revenue: StatementLine[];
+    cogs: StatementLine[];
+    expenses: StatementLine[];
+  };
+  note?: string;
 };
 
 export type PostingBoundary = {
@@ -288,6 +331,10 @@ export async function fetchTrialBalance(params?: { asOf?: string }) {
 
 export async function fetchBalanceSheetGuard(params?: { asOf?: string }) {
   return unwrap<BalanceSheetGuard>(client.get('/accounting/balance-sheet', { params }));
+}
+
+export async function fetchProfitLossLite(params?: { asOf?: string }) {
+  return unwrap<ProfitLossLite>(client.get('/accounting/profit-loss', { params }));
 }
 
 

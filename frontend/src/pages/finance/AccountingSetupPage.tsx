@@ -10,6 +10,8 @@ import CashAccountSetupPanel from '../../components/accounting/CashAccountSetupP
 import OpeningBalanceWizard from '../../components/accounting/OpeningBalanceWizard';
 import TrialBalancePreview from '../../components/accounting/TrialBalancePreview';
 import BalanceSheetGuardPanel from '../../components/accounting/BalanceSheetGuardPanel';
+import AccountingCommandCenterLite from '../../components/accounting/AccountingCommandCenterLite';
+import ProfitLossLitePanel from '../../components/accounting/ProfitLossLitePanel';
 import {
   createAccountingPeriod,
   createCashAccount,
@@ -21,6 +23,7 @@ import {
   fetchCashAccounts,
   fetchOpeningBalances,
   fetchPostingBoundary,
+  fetchProfitLossLite,
   fetchRecentAutoJournals,
   fetchTrialBalance,
   fetchUnmappedTransactions,
@@ -93,6 +96,7 @@ export default function AccountingSetupPage() {
   const openingBalancesQuery = useQuery({ queryKey: ['accounting-opening-balances'], queryFn: () => fetchOpeningBalances(), staleTime: 30_000 });
   const trialBalanceQuery = useQuery({ queryKey: ['accounting-trial-balance', asOf], queryFn: () => fetchTrialBalance({ asOf }), staleTime: 30_000 });
   const balanceSheetQuery = useQuery({ queryKey: ['accounting-balance-sheet', asOf], queryFn: () => fetchBalanceSheetGuard({ asOf }), staleTime: 30_000 });
+  const profitLossQuery = useQuery({ queryKey: ['accounting-profit-loss-lite', asOf], queryFn: () => fetchProfitLossLite({ asOf }), staleTime: 30_000 });
   const postingBoundaryQuery = useQuery({ queryKey: ['accounting-posting-boundary'], queryFn: fetchPostingBoundary, staleTime: 30_000 });
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
@@ -127,6 +131,7 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-opening-balances'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-trial-balance'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-balance-sheet'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-profit-loss-lite'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
@@ -216,8 +221,8 @@ export default function AccountingSetupPage() {
     <div className="accounting-setup-page">
       <PageHeader
         eyebrow="Finance · Accounting Setup"
-        title="Setup Accounting Owner"
-        description="B3 mulai menghubungkan transaksi operasional ke ledger: cash/bank account, opening balance, auto journal lite, trial balance, dan Balance Sheet guard yang tetap jujur."
+        title="Accounting Command Center"
+        description="B3.2 membaca ledger POSTED untuk membuktikan auto journal, Trial Balance, Profit & Loss Lite, dan Balance Sheet Lite tanpa angka palsu."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
       />
 
@@ -259,11 +264,21 @@ export default function AccountingSetupPage() {
         ]}
       />
 
+      <AccountingCommandCenterLite
+        readiness={readinessQuery.data}
+        trial={trialBalanceQuery.data}
+        balanceSheet={balanceSheetQuery.data}
+        profitLoss={profitLossQuery.data}
+        unmapped={unmappedQuery.data}
+        recentJournals={recentJournals}
+        autoJournalEnabled={autoJournalEnabled}
+        isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || profitLossQuery.isLoading}
+      />
+
       <Row className="g-3 mb-3">
         <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
         <Col xl={6}><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
       </Row>
-
 
       <Card className="content-card border-0 mb-3">
         <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
@@ -353,6 +368,15 @@ export default function AccountingSetupPage() {
       </Card>
 
       <Row className="g-3 mb-3">
+        <Col xl={6}>
+          <ProfitLossLitePanel profitLoss={profitLossQuery.data} />
+        </Col>
+        <Col xl={6}>
+          <TrialBalancePreview trial={trialBalanceQuery.data} />
+        </Col>
+      </Row>
+
+      <Row className="g-3 mb-3">
         <Col xl={5}>
           <CashAccountSetupPanel
             accounts={accounts}
@@ -378,7 +402,6 @@ export default function AccountingSetupPage() {
         </Col>
       </Row>
 
-      <TrialBalancePreview trial={trialBalanceQuery.data} />
     </div>
   );
 }
