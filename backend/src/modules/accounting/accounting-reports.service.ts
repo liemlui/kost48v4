@@ -305,30 +305,47 @@ export class AccountingReportsService {
       balanceRupiah: number;
     }>;
 
+    const isContraAsset = (line: typeof typedLines[number]) => line.type === 'ASSET' && line.normalBalance === 'CREDIT';
+    const isFixedAsset = (line: typeof typedLines[number]) => line.type === 'ASSET' && !isContraAsset(line) && String(line.code).startsWith('15');
+    const isCurrentAsset = (line: typeof typedLines[number]) => line.type === 'ASSET' && !isContraAsset(line) && !isFixedAsset(line);
+    const isNonZero = (line: typeof typedLines[number]) => line.balanceRupiah !== 0 || line.debitRupiah !== 0 || line.creditRupiah !== 0;
     const statementLine = (line: typeof typedLines[number]) => ({
       accountId: line.accountId,
       code: line.code,
       name: line.name,
       type: line.type,
+      normalBalance: line.normalBalance,
       debitRupiah: line.debitRupiah,
       creditRupiah: line.creditRupiah,
-      balanceRupiah: Math.abs(line.balanceRupiah),
+      balanceRupiah: line.balanceRupiah,
+      amountRupiah: Math.abs(line.balanceRupiah),
+      isContraAsset: isContraAsset(line),
+      presentationLabel: isContraAsset(line) ? `Less: ${line.name}` : line.name,
     });
-    const assetsLines = typedLines.filter((l) => l.type === 'ASSET' && l.balanceRupiah !== 0).map(statementLine);
-    const liabilitiesLines = typedLines.filter((l) => l.type === 'LIABILITY' && l.balanceRupiah !== 0).map(statementLine);
-    const equityLines = typedLines.filter((l) => l.type === 'EQUITY' && l.balanceRupiah !== 0).map(statementLine);
+    const currentAssetLines = typedLines.filter((l) => isCurrentAsset(l) && isNonZero(l)).map(statementLine);
+    const fixedAssetLines = typedLines.filter((l) => isFixedAsset(l) && isNonZero(l)).map(statementLine);
+    const contraAssetLines = typedLines.filter((l) => isContraAsset(l) && isNonZero(l)).map(statementLine);
+    const assetsLines = [...currentAssetLines, ...fixedAssetLines, ...contraAssetLines];
+    const liabilitiesLines = typedLines.filter((l) => l.type === 'LIABILITY' && isNonZero(l)).map(statementLine);
+    const equityLines = typedLines.filter((l) => l.type === 'EQUITY' && isNonZero(l)).map(statementLine);
     const revenue = typedLines.filter((l) => l.type === 'REVENUE').reduce((sum, l) => sum + l.balanceRupiah, 0);
     const cogs = typedLines.filter((l) => l.type === 'COGS').reduce((sum, l) => sum + l.balanceRupiah, 0);
     const expenses = typedLines.filter((l) => l.type === 'EXPENSE').reduce((sum, l) => sum + l.balanceRupiah, 0);
     const currentProfit = revenue - cogs - expenses;
 
-    const assets = assetsLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
-    const liabilities = liabilitiesLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
-    const equityBase = equityLines.reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const currentAssets = currentAssetLines.reduce((sum, l) => sum + (l.balanceRupiah ?? 0), 0);
+    const grossFixedAssets = fixedAssetLines.reduce((sum, l) => sum + (l.balanceRupiah ?? 0), 0);
+    const accumulatedDepreciation = contraAssetLines.reduce((sum, l) => sum + Math.abs(l.balanceRupiah ?? 0), 0);
+    const netFixedAssets = grossFixedAssets + contraAssetLines.reduce((sum, l) => sum + (l.balanceRupiah ?? 0), 0);
+    const assets = currentAssets + netFixedAssets;
+    const liabilities = liabilitiesLines.reduce((sum, l) => sum + (l.balanceRupiah ?? 0), 0);
+    const equityBase = equityLines.reduce((sum, l) => sum + (l.balanceRupiah ?? 0), 0);
     const equityIncludingCurrentProfit = equityBase + currentProfit;
     const liabilitiesAndEquity = liabilities + equityIncludingCurrentProfit;
-    const balanced = assets === liabilitiesAndEquity;
+    const difference = assets - liabilitiesAndEquity;
+    const balanced = difference === 0;
     const guarded = !readiness.ready || !trial.isBalanced;
+    const assetRegisterDisclosure = await this.assetRegisterDisclosure(grossFixedAssets, accumulatedDepreciation, netFixedAssets);
 
     return {
       ready: !guarded && balanced,
@@ -345,25 +362,79 @@ export class AccountingReportsService {
       },
       statement: {
         assetsRupiah: assets,
+        currentAssetsRupiah: currentAssets,
+        grossFixedAssetsRupiah: grossFixedAssets,
+        accumulatedDepreciationRupiah: accumulatedDepreciation,
+        netFixedAssetsRupiah: netFixedAssets,
         liabilitiesRupiah: liabilities,
         equityRupiah: equityBase,
         currentProfitRupiah: currentProfit,
         equityIncludingCurrentProfitRupiah: equityIncludingCurrentProfit,
         liabilitiesAndEquityRupiah: liabilitiesAndEquity,
-        differenceRupiah: assets - liabilitiesAndEquity,
+        differenceRupiah: difference,
         balanced,
       },
       lines: {
         assets: assetsLines,
+        currentAssets: currentAssetLines,
+        fixedAssets: fixedAssetLines,
+        contraAssets: contraAssetLines,
         liabilities: liabilitiesLines,
         equity: equityLines,
       },
+      assetRegisterDisclosure,
       readinessNote: guarded
         ? 'Balance Sheet Lite guarded: pastikan accounting readiness siap dan Trial Balance balanced sebelum membaca laporan sebagai statement formal.'
         : balanced
           ? 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai closing retained earnings dibuat.'
           : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
     };
+  }
+
+
+  private async assetRegisterDisclosure(grossFixedAssets: number, accumulatedDepreciation: number, netFixedAssets: number) {
+    try {
+      const [assetAgg, assetCount] = await Promise.all([
+        (this.prisma as any).fixedAsset.aggregate({
+          _sum: { acquisitionCostRupiah: true, accumulatedDepreciationRupiah: true },
+        }),
+        (this.prisma as any).fixedAsset.count(),
+      ]);
+      const registerAcquisitionCost = Number(assetAgg?._sum?.acquisitionCostRupiah ?? 0);
+      const registerAccumulatedDepreciation = Number(assetAgg?._sum?.accumulatedDepreciationRupiah ?? 0);
+      const registerNetBookValue = Math.max(registerAcquisitionCost - registerAccumulatedDepreciation, 0);
+      const ledgerNetFixedAssets = netFixedAssets;
+
+      return {
+        basis: 'ASSET_REGISTER_DISCLOSURE_B5',
+        assetCount,
+        registerAcquisitionCostRupiah: registerAcquisitionCost,
+        registerAccumulatedDepreciationRupiah: registerAccumulatedDepreciation,
+        registerNetBookValueRupiah: registerNetBookValue,
+        ledgerGrossFixedAssetsRupiah: grossFixedAssets,
+        ledgerAccumulatedDepreciationRupiah: accumulatedDepreciation,
+        ledgerNetFixedAssetsRupiah: ledgerNetFixedAssets,
+        registerVsLedgerNetDifferenceRupiah: registerNetBookValue - ledgerNetFixedAssets,
+        aligned: registerNetBookValue === ledgerNetFixedAssets,
+        warning: registerNetBookValue === ledgerNetFixedAssets
+          ? 'Asset register dan ledger fixed asset sudah selaras.'
+          : 'Asset register adalah disclosure operasional. Untuk Balance Sheet formal, nilai perolehan aset harus masuk ledger Fixed Assets melalui opening balance/adjustment yang terkontrol, bukan acquisition journal otomatis.',
+      };
+    } catch (error) {
+      return {
+        basis: 'ASSET_REGISTER_DISCLOSURE_B5',
+        assetCount: 0,
+        registerAcquisitionCostRupiah: 0,
+        registerAccumulatedDepreciationRupiah: 0,
+        registerNetBookValueRupiah: 0,
+        ledgerGrossFixedAssetsRupiah: grossFixedAssets,
+        ledgerAccumulatedDepreciationRupiah: accumulatedDepreciation,
+        ledgerNetFixedAssetsRupiah: netFixedAssets,
+        registerVsLedgerNetDifferenceRupiah: 0 - netFixedAssets,
+        aligned: false,
+        warning: 'Asset register belum bisa dibaca untuk disclosure. Balance Sheet tetap memakai ledger sebagai source of truth.',
+      };
+    }
   }
 
 

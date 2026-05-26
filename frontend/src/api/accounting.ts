@@ -107,10 +107,13 @@ export type StatementLine = {
   code: string;
   name: string;
   type: AccountingAccountType;
+  normalBalance?: NormalBalance;
   debitRupiah: number;
   creditRupiah: number;
   balanceRupiah?: number;
   amountRupiah?: number;
+  isContraAsset?: boolean;
+  presentationLabel?: string;
 };
 
 export type BalanceSheetGuard = {
@@ -123,6 +126,10 @@ export type BalanceSheetGuard = {
   trialBalancePreview?: { asOf: string; totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean } | null;
   statement?: {
     assetsRupiah: number;
+    currentAssetsRupiah?: number;
+    grossFixedAssetsRupiah?: number;
+    accumulatedDepreciationRupiah?: number;
+    netFixedAssetsRupiah?: number;
     liabilitiesRupiah: number;
     equityRupiah: number;
     currentProfitRupiah?: number;
@@ -131,7 +138,27 @@ export type BalanceSheetGuard = {
     differenceRupiah?: number;
     balanced: boolean;
   } | null;
-  lines?: { assets: StatementLine[]; liabilities: StatementLine[]; equity: StatementLine[] } | null;
+  lines?: {
+    assets: StatementLine[];
+    currentAssets?: StatementLine[];
+    fixedAssets?: StatementLine[];
+    contraAssets?: StatementLine[];
+    liabilities: StatementLine[];
+    equity: StatementLine[];
+  } | null;
+  assetRegisterDisclosure?: {
+    basis: string;
+    assetCount: number;
+    registerAcquisitionCostRupiah: number;
+    registerAccumulatedDepreciationRupiah: number;
+    registerNetBookValueRupiah: number;
+    ledgerGrossFixedAssetsRupiah: number;
+    ledgerAccumulatedDepreciationRupiah: number;
+    ledgerNetFixedAssetsRupiah: number;
+    registerVsLedgerNetDifferenceRupiah: number;
+    aligned: boolean;
+    warning?: string;
+  } | null;
 };
 
 export type ProfitLossLite = {
