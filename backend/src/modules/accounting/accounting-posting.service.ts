@@ -8,7 +8,7 @@ const AUTO_SOURCE_TYPES = [
   "WIFI_SALE",
 ] as const;
 type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
-type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT";
+type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION";
 
 type JournalLineInput = {
   chartOfAccountId: number;
@@ -60,11 +60,11 @@ export class AccountingPostingService {
     return {
       autoPostingEnabled: true,
       basis: "V5.25_B3_AUTO_JOURNAL_LITE",
-      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT"],
+      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION"],
       behavior:
         "Idempotent by sourceType/sourceId. Jika COA, cash account, atau accounting period belum siap, transaksi bisnis tetap aman dan journal auto-posting akan diskip dengan warning.",
-      excluded: ["DEPRECIATION", "INVENTORY", "PAYMENT_REVERSAL"],
-      note: "B3.3 mem-post invoice issued, invoice payment, expense, WiFi sale, deposit liability, dan reversal invoice cancel berbasis ADJUSTMENT tanpa schema change.",
+      excluded: ["INVENTORY", "PAYMENT_REVERSAL"],
+      note: "B4 menambahkan depreciation posting untuk asset register additive. Acquisition journal tetap tidak otomatis agar tidak double-count opening balance.",
     };
   }
 
@@ -125,6 +125,65 @@ export class AccountingPostingService {
     return (this.prisma as any).$transaction((tx: any) =>
       this.postInvoiceCancellationReversalTx(tx, invoiceId, createdById),
     );
+  }
+
+  async postDepreciationRunTx(
+    tx: any,
+    depreciationRunId: number,
+    entryDate: Date | string,
+    amountRupiah: number,
+    createdById?: number | null,
+  ) {
+    const amount = rupiah(amountRupiah);
+    if (amount <= 0) {
+      return this.skip(
+        "DEPRECIATION",
+        depreciationRunId,
+        "Jumlah depresiasi 0.",
+      );
+    }
+
+    const depreciationExpense = await this.findAccountByCodeTx(tx, "6700");
+    if (!depreciationExpense) {
+      return this.skip(
+        "DEPRECIATION",
+        depreciationRunId,
+        "COA 6700 Depreciation belum tersedia.",
+      );
+    }
+
+    const accumulatedDepreciation = await this.findAccountByCodeTx(tx, "1590");
+    if (!accumulatedDepreciation) {
+      return this.skip(
+        "DEPRECIATION",
+        depreciationRunId,
+        "COA 1590 Accumulated Depreciation belum tersedia.",
+      );
+    }
+
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "DEPRECIATION",
+      sourceId: String(depreciationRunId),
+      entryDate: dateOnly(entryDate),
+      memo: `Auto journal depresiasi aset run #${depreciationRunId}`,
+      createdById: createdById ?? null,
+      lines: [
+        {
+          chartOfAccountId: depreciationExpense.id,
+          description: `Beban depresiasi aset run #${depreciationRunId}`,
+          debitRupiah: amount,
+          creditRupiah: 0,
+          sortOrder: 0,
+        },
+        {
+          chartOfAccountId: accumulatedDepreciation.id,
+          description: `Akumulasi depresiasi aset run #${depreciationRunId}`,
+          debitRupiah: 0,
+          creditRupiah: amount,
+          sortOrder: 1,
+        },
+      ],
+    });
   }
 
   async postInvoiceIssuedTx(

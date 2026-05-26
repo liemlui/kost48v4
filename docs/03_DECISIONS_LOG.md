@@ -1,6 +1,59 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## 2026-05-24 — V5.23 Admin IA + Accounting Foundation Decisions
 
@@ -163,3 +216,21 @@
 | 361 | Field deposit di `Stay` tidak boleh dihapus/deprecate dalam roadmap dekat | Field tersebut masih menjadi operational snapshot yang dipakai banyak flow. |
 | 362 | Asset register, depreciation, ancillary generic sale, owner equity masuk batch setelah foundation | Menjaga ACT B1 tetap aman dan fokus. |
 | 363 | PASS tidak boleh diklaim tanpa build + smoke + ZIP final | Status verifikasi harus jujur. |
+
+## 2026-05-25 — V5.24-B2/C Accounting + Admin UI Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 364 | Opening Balance POSTED menjadi starting point accounting resmi | Trial Balance dan Balance Sheet guard mulai punya angka awal. |
+| 365 | Posting opening balance membuat JournalEntry `OPENING_BALANCE` | Ledger tidak hanya menyimpan batch, tetapi juga journal pembuka. |
+| 366 | Trial Balance tidak boleh double-count opening balance | Jika JournalEntry opening sudah ada, OpeningBalanceLine tidak dihitung ulang. |
+| 367 | Draft opening balance boleh di-void | Data UAT/draft salah bisa dibersihkan tanpa DB reset. |
+| 368 | Opening balance POSTED tidak boleh di-void tanpa reversal plan | Mencegah perubahan ledger historis tanpa jejak koreksi. |
+| 369 | Accounting readiness 100% bukan izin auto-posting operasional | Invoice/payment/expense/stay belum auto-journal sampai B3. |
+| 370 | Generated Prisma tetap tidak boleh ikut commit | Build lokal perlu generate, tetapi commit harus restore generated noise. |
+| 371 | GlobalSearch wajib tersedia untuk admin | Admin perlu cari tenant/kamar/invoice dari mana saja. |
+| 372 | Tombol dashboard ticket `DONE` tidak boleh misleading | Harus close benar atau masuk review/close flow yang jelas. |
+| 373 | `StaysPage` filter tidak boleh hardcoded ACTIVE saat UI bilang ALL | UI filter harus jujur terhadap query. |
+| 374 | AncillaryRevenuePage harus memisahkan fitur aktif dari roadmap | Future items tidak boleh terlihat seperti action aktif admin. |
+| 375 | Sidebar tetap primary admin navigation untuk sekarang | RoleWorkspaceTabs tidak dihidupkan sebagai top nav tanpa keputusan baru. |
+| 376 | Next recommended phase adalah V5.24-D Admin UI Architecture + Performance Hardening | Selesaikan sisa audit UI sebelum B3 auto-journal kecuali user override. |

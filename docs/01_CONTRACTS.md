@@ -1,6 +1,59 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## 0.0 V5.23-B Accounting & Finance Contract
 
@@ -696,3 +749,36 @@ Existing reports should include metadata:
 - formalStatementReady: false
 - readinessNote: current report uses operational invoice/payment/expense data, not formal accounting ledger.
 ```
+
+## 0.0 Latest Contract Addendum — V5.24-B2/C
+
+### Accounting setup contract
+
+```text
+Opening balance is the accounting starting point.
+Posting opening balance creates JournalEntry with sourceType=OPENING_BALANCE.
+Trial Balance must read posted JournalEntry and avoid double-counting OpeningBalanceLine.
+Draft opening balance can be voided.
+Posted opening balance must not be voided without a future reversal plan.
+```
+
+Rules:
+- Only DRAFT opening balance may be voided in current system.
+- POSTED opening balance requires a reversal/correction plan before any mutation.
+- Duplicate DRAFT for same period/cutover should be blocked after POSTED exists.
+- No auto-posting from invoice/payment/expense/stay yet.
+- No backfill of old operational transactions yet.
+- Balance Sheet can preview opening-balance ledger, but full business financial statements are not complete until operational auto-journal/cutover rules exist.
+
+### Admin UI contract after V5.24-C
+
+```text
+Sidebar remains primary admin navigation.
+Dashboard remains cross-menu command center.
+GlobalSearch is allowed and expected for admin.
+Dashboard ticket close action must either actually close DONE tickets or clearly route to review/close flow.
+StaysPage filters must match actual query behavior; do not show ALL if backend still filters ACTIVE.
+Ancillary revenue page must separate active features from roadmap/future items.
+```
+
+Do not reintroduce admin top workspace tabs as primary navigation unless explicitly re-approved.

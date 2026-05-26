@@ -1,6 +1,59 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## 2026-05-24 — V5.23-A Admin IA + Finance Add-on Revenue Foundation
 
@@ -459,3 +512,74 @@ Docs package generated only.
 Code build/smoke not applicable to this docs sync.
 Next ACT must run backend build and API smoke before claiming PASS.
 ```
+
+## 2026-05-25 — V5.24-C Admin UI Critical Workflow Hardening
+
+### Type
+
+Frontend admin UI/UX hardening. Backend unchanged.
+
+### Added / Changed
+
+- GlobalSearch restored for admin topbar.
+- Dashboard ticket DONE action hardened so it is no longer misleading.
+- StaysPage filter behavior corrected so ALL is not hardcoded ACTIVE.
+- Dashboard dead code/copy partially cleaned.
+- AncillaryRevenuePage changed from roadmap-heavy future list into a more operational finance page.
+
+### Verification
+
+- API smoke confirmed:
+  - `GET /api/tickets?limit=20`
+  - `GET /api/public/rooms`
+- Commit pushed:
+  - `cb93fe6 fix(admin): harden dashboard search tickets and finance ux`
+
+### Not Changed
+
+- No backend lifecycle/payment/renew/checkout rewrite.
+- No schema change.
+- No generated Prisma committed.
+- No B3 auto-journal.
+
+---
+
+## 2026-05-25 — V5.24-B2A/B/B2C Accounting Setup
+
+### Type
+
+Backend + frontend accounting setup hardening.
+
+### Added / Changed
+
+- Owner Accounting Setup UI.
+- Cash/bank account setup surface.
+- Accounting period setup.
+- Opening balance draft/post workflow.
+- Opening balance posting creates `JournalEntry` with `sourceType=OPENING_BALANCE`.
+- Trial Balance avoids double-counting opening balance.
+- Duplicate period/cash/opening balance messages hardened.
+- Draft opening balance can be voided.
+- POSTED opening balance remains protected from void until reversal plan exists.
+
+### Verified
+
+- COA seeded.
+- Cash account created.
+- Accounting period created.
+- Opening balance posted.
+- `JE-OPENING-1` created.
+- Trial Balance balanced: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard reads opening balance.
+- Draft duplicate voided.
+- Commits pushed:
+  - `2308f17 feat(accounting): add opening balance setup workflow`
+  - `c04aec5 fix(accounting): harden setup workflow messages`
+  - `eb198b2 fix(accounting): allow voiding draft opening balances`
+
+### Not Changed
+
+- No invoice/payment/expense/stay auto-posting yet.
+- No TenantDepositLedger yet.
+- No asset/depreciation yet.
+- No destructive schema change.

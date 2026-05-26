@@ -334,7 +334,50 @@ enum JournalSourceType {
   WIFI_SALE
   DEPOSIT
   INVENTORY
+  DEPRECIATION
   ADJUSTMENT
+}
+
+
+enum FixedAssetCategory {
+  BUILDING
+  RENOVATION
+  ROOM_EQUIPMENT
+  FURNITURE
+  ELECTRONIC
+  UTILITY_EQUIPMENT
+  VEHICLE
+  SOFTWARE
+  OTHER
+}
+
+enum FixedAssetStatus {
+  DRAFT
+  ACTIVE
+  FULLY_DEPRECIATED
+  DISPOSED
+  WRITTEN_OFF
+}
+
+enum FixedAssetLocationType {
+  GENERAL
+  ROOM
+  WAREHOUSE
+}
+
+enum FixedAssetCapitalizationSource {
+  OPENING_BALANCE
+  PURCHASE_JOURNAL
+  DISCLOSURE_ONLY
+}
+
+enum FixedAssetDepreciationMethod {
+  STRAIGHT_LINE
+}
+
+enum AssetDepreciationRunStatus {
+  POSTED
+  VOID
 }
 
 model User {
@@ -378,6 +421,8 @@ model User {
   notifications               AppNotification[]
   staffFieldReportsCreated    StaffFieldReport[] @relation("StaffFieldReportCreatedBy")
   staffFieldReportsReviewed   StaffFieldReport[] @relation("StaffFieldReportReviewedBy")
+  fixedAssetsCreated          FixedAsset[] @relation("FixedAssetCreatedBy")
+  assetDepreciationRunsCreated AssetDepreciationRun[] @relation("AssetDepreciationRunCreatedBy")
 
   @@index([role])
   @@index([isActive])
@@ -452,6 +497,7 @@ model Room {
   inventoryMovements InventoryMovement[]
   staffFieldReports  StaffFieldReport[]
   facilities         RoomFacility[]
+  fixedAssets        FixedAsset[]
 
   @@index([status])
   @@index([isActive])
@@ -916,6 +962,7 @@ model InventoryItem {
   linkedTickets Ticket[] @relation("TicketLinkedInventoryItem")
   fieldReportsAsItem StaffFieldReport[] @relation("StaffFieldReportInventoryItem")
   fieldReportsAsRequestedItem StaffFieldReport[] @relation("StaffFieldReportRequestedInventoryItem")
+  fixedAssets FixedAsset[]
 
   @@index([name])
   @@index([category])
@@ -937,6 +984,7 @@ model RoomItem {
   item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
   linkedTickets Ticket[] @relation("TicketLinkedRoomItem")
   staffFieldReports StaffFieldReport[] @relation("StaffFieldReportRoomItem")
+  fixedAssets FixedAsset[]
 
   @@unique([roomId, itemId])
   @@index([roomId])
@@ -1089,12 +1137,104 @@ model Expense {
   room      Room? @relation(fields: [roomId], references: [id], onDelete: SetNull)
   stay      Stay? @relation(fields: [stayId], references: [id], onDelete: SetNull)
   createdBy User? @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  fixedAssets FixedAsset[]
 
   @@index([expenseDate])
   @@index([type])
   @@index([category])
   @@index([roomId])
   @@index([stayId])
+}
+
+
+model FixedAsset {
+  id                            Int                             @id @default(autoincrement())
+  assetCode                     String                          @unique
+  name                          String
+  category                      FixedAssetCategory              @default(OTHER)
+  status                        FixedAssetStatus                @default(ACTIVE)
+  locationType                  FixedAssetLocationType          @default(GENERAL)
+  capitalizationSource          FixedAssetCapitalizationSource  @default(DISCLOSURE_ONLY)
+  depreciationMethod            FixedAssetDepreciationMethod    @default(STRAIGHT_LINE)
+  acquisitionDate               DateTime                        @db.Date
+  depreciationStartDate         DateTime?                       @db.Date
+  acquisitionCostRupiah         Int
+  salvageValueRupiah            Int                             @default(0)
+  usefulLifeMonths              Int
+  accumulatedDepreciationRupiah Int                             @default(0)
+  depreciationEnabled           Boolean                         @default(false)
+  roomId                        Int?
+  inventoryItemId               Int?
+  roomItemId                    Int?
+  expenseId                     Int?
+  createdById                   Int?
+  notes                         String?
+  disposedAt                    DateTime?                       @db.Date
+  disposalNote                  String?
+  createdAt                     DateTime                        @default(now())
+  updatedAt                     DateTime                        @updatedAt
+
+  room             Room?                    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  inventoryItem    InventoryItem?           @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  roomItem         RoomItem?                @relation(fields: [roomItemId], references: [id], onDelete: SetNull)
+  expense          Expense?                 @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  createdBy        User?                    @relation("FixedAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  depreciationLines AssetDepreciationLine[]
+
+  @@index([status])
+  @@index([category])
+  @@index([locationType])
+  @@index([capitalizationSource])
+  @@index([depreciationEnabled])
+  @@index([roomId])
+  @@index([inventoryItemId])
+  @@index([roomItemId])
+  @@index([expenseId])
+  @@index([acquisitionDate])
+}
+
+model AssetDepreciationRun {
+  id                       Int                         @id @default(autoincrement())
+  runNumber                String                      @unique
+  periodYear               Int
+  periodMonth              Int
+  runDate                  DateTime                    @db.Date
+  status                   AssetDepreciationRunStatus  @default(POSTED)
+  totalDepreciationRupiah  Int                         @default(0)
+  journalEntryId           Int?
+  createdById              Int?
+  postedAt                 DateTime?
+  voidedAt                 DateTime?
+  notes                    String?
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
+
+  journalEntry JournalEntry?              @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdBy    User?                      @relation("AssetDepreciationRunCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  lines        AssetDepreciationLine[]
+
+  @@unique([periodYear, periodMonth])
+  @@index([status])
+  @@index([runDate])
+  @@index([journalEntryId])
+}
+
+model AssetDepreciationLine {
+  id                            Int      @id @default(autoincrement())
+  runId                         Int
+  fixedAssetId                  Int
+  depreciationAmountRupiah      Int
+  accumulatedBeforeRupiah       Int
+  accumulatedAfterRupiah        Int
+  bookValueBeforeRupiah         Int
+  bookValueAfterRupiah          Int
+  createdAt                     DateTime @default(now())
+
+  run        AssetDepreciationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  fixedAsset FixedAsset           @relation(fields: [fixedAssetId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, fixedAssetId])
+  @@index([fixedAssetId])
 }
 
 model AppNotification {
@@ -1265,6 +1405,7 @@ model JournalEntry {
 
   accountingPeriod AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
   lines            JournalLine[]
+  depreciationRuns AssetDepreciationRun[]
 
   @@index([entryDate])
   @@index([accountingPeriodId])

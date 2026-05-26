@@ -149,7 +149,7 @@ export class AccountingReportsService {
 
   async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
     await this.schemaGuard.assertReady();
-    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'OPENING_BALANCE', 'MANUAL'];
+    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'OPENING_BALANCE', 'MANUAL'];
     const sourceTypes = String(query.sourceTypes ?? 'INVOICE,INVOICE_PAYMENT,EXPENSE,WIFI_SALE')
       .split(',')
       .map((item) => item.trim().toUpperCase())
@@ -363,6 +363,159 @@ export class AccountingReportsService {
         : balanced
           ? 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai closing retained earnings dibuat.'
           : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
+    };
+  }
+
+
+  async assetReadiness() {
+    await this.schemaGuard.assertReady();
+    const requiredAccountCodes = ['1500', '1590', '6700'];
+    const runtimeProofSources = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'];
+    const allAutoJournalSources = [...runtimeProofSources, 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION'];
+
+    const [requiredAccounts, inventoryCount, roomItemCount, assignedRoomItemCount, inboundMovementCount, candidateExpenses, journalCounts, latestProofJournals] = await Promise.all([
+      (this.prisma as any).chartOfAccount.findMany({
+        where: { code: { in: requiredAccountCodes }, isActive: true },
+        select: { id: true, code: true, name: true, type: true, normalBalance: true },
+        orderBy: { code: 'asc' },
+      }),
+      (this.prisma as any).inventoryItem.count({ where: { isActive: true } }),
+      (this.prisma as any).roomItem.count(),
+      (this.prisma as any).roomItem.count({ where: { qty: { gt: 0 } } }),
+      (this.prisma as any).inventoryMovement.count({ where: { movementType: { in: ['IN', 'ASSIGN_TO_ROOM'] as any } } }),
+      (this.prisma as any).expense.findMany({
+        where: {
+          category: { in: ['MAINTENANCE', 'SUPPLIES', 'OTHER'] as any },
+          amountRupiah: { gte: 500000 },
+        },
+        select: { id: true, expenseDate: true, category: true, description: true, amountRupiah: true, vendorName: true, roomId: true },
+        orderBy: [{ amountRupiah: 'desc' }, { expenseDate: 'desc' }],
+        take: 10,
+      }),
+      (this.prisma as any).journalEntry.groupBy({
+        by: ['sourceType'],
+        _count: { id: true },
+        where: { status: 'POSTED' as any, sourceType: { in: allAutoJournalSources as any } },
+      }),
+      (this.prisma as any).journalEntry.findMany({
+        where: { status: 'POSTED' as any, sourceType: { in: allAutoJournalSources as any } },
+        select: { id: true, entryNumber: true, entryDate: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true, postedAt: true },
+        orderBy: [{ postedAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+        take: 12,
+      }),
+    ]);
+
+    const accountByCode = new Map(requiredAccounts.map((account: any) => [String(account.code), account]));
+    const missingAccountCodes = requiredAccountCodes.filter((code) => !accountByCode.has(code));
+    const journalCountBySource = new Map<string, number>(
+      journalCounts.map((row: any): [string, number] => [String(row.sourceType), Number(row._count?.id ?? 0)]),
+    );
+    const runtimeProof = runtimeProofSources.map((sourceType) => {
+      const postedJournalCount = journalCountBySource.get(sourceType) ?? 0;
+
+      return {
+        sourceType,
+        postedJournalCount,
+        proven: postedJournalCount > 0,
+      };
+    });
+    const runtimeProofReady = runtimeProof.every((item) => item.proven);
+    const operationalCandidateCount = Number(inventoryCount ?? 0) + Number(roomItemCount ?? 0) + Number(candidateExpenses.length ?? 0);
+    const coreAccountsReady = missingAccountCodes.length === 0;
+    const sourceProofCount = runtimeProof.filter((item) => item.proven).length;
+    const score = Math.round(((coreAccountsReady ? 35 : 0) + (operationalCandidateCount > 0 ? 20 : 0) + (sourceProofCount / runtimeProofSources.length) * 25 + 10) * 10) / 10;
+
+    return {
+      basis: 'B4_ASSET_READINESS_SCHEMA_APPROVED',
+      ledgerBacked: true,
+      formalStatementReady: false,
+      readyForAssetSchemaAct: coreAccountsReady && runtimeProofReady,
+      schemaChangeRequired: false,
+      schemaChangeApproved: true,
+      noSchemaChangePatch: false,
+      score,
+      status: coreAccountsReady && runtimeProofReady ? 'B4_SCHEMA_FOUNDATION_ACTIVE' : 'RUNTIME_PROOF_REQUIRED',
+      accountingAccounts: {
+        fixedAssetAccount: accountByCode.get('1500') ?? null,
+        accumulatedDepreciationAccount: accountByCode.get('1590') ?? null,
+        depreciationExpenseAccount: accountByCode.get('6700') ?? null,
+        missingAccountCodes,
+      },
+      operationalScan: {
+        inventoryItemCount: Number(inventoryCount ?? 0),
+        roomItemCount: Number(roomItemCount ?? 0),
+        assignedRoomItemCount: Number(assignedRoomItemCount ?? 0),
+        inboundOrAssignedMovementCount: Number(inboundMovementCount ?? 0),
+        capexReviewCandidateExpenseCount: candidateExpenses.length,
+        capexReviewCandidateExpenses: candidateExpenses.map((expense: any) => ({
+          id: expense.id,
+          expenseDate: expense.expenseDate,
+          category: expense.category,
+          description: expense.description,
+          amountRupiah: Number(expense.amountRupiah ?? 0),
+          vendorName: expense.vendorName ?? null,
+          roomId: expense.roomId ?? null,
+          reason: 'Nilai pengeluaran cukup besar dan kategorinya berpotensi maintenance/supplies/other; perlu owner review apakah expense atau fixed asset.',
+        })),
+      },
+      runtimeProof: {
+        requiredSources: runtimeProof,
+        ready: runtimeProofReady,
+        latestProofJournals: latestProofJournals.map((journal: any) => ({
+          id: journal.id,
+          entryNumber: journal.entryNumber,
+          entryDate: journal.entryDate,
+          sourceType: journal.sourceType,
+          sourceId: journal.sourceId,
+          totalDebitRupiah: Number(journal.totalDebitRupiah ?? 0),
+          totalCreditRupiah: Number(journal.totalCreditRupiah ?? 0),
+          isBalanced: Boolean(journal.isBalanced),
+          postedAt: journal.postedAt,
+        })),
+      },
+      gates: [
+        {
+          key: 'ASSET_COA_READY',
+          label: 'COA aset/depresiasi tersedia',
+          ready: coreAccountsReady,
+          note: coreAccountsReady
+            ? 'Akun 1500 Fixed Assets, 1590 Accumulated Depreciation, dan 6700 Depreciation siap dipakai.'
+            : `Akun wajib belum lengkap: ${missingAccountCodes.join(', ')}.`,
+        },
+        {
+          key: 'RUNTIME_AUTO_JOURNAL_PROOF',
+          label: 'Runtime proof auto journal B3 selesai',
+          ready: runtimeProofReady,
+          note: runtimeProofReady
+            ? 'Invoice, payment, expense, dan WiFi sale sudah punya JournalEntry POSTED.'
+            : 'Buat transaksi nyata invoice/payment/expense/WiFi, lalu pastikan JournalEntry POSTED muncul sebelum schema B4.',
+        },
+        {
+          key: 'OPERATIONAL_ASSET_CANDIDATES',
+          label: 'Kandidat aset operasional terdeteksi',
+          ready: operationalCandidateCount > 0,
+          note: operationalCandidateCount > 0
+            ? 'Inventory/room item/expense kandidat tersedia untuk dipetakan setelah schema asset register disetujui.'
+            : 'Belum ada data kandidat aset dari inventory, room item, atau pengeluaran besar.',
+        },
+        {
+          key: 'SCHEMA_APPROVAL_REQUIRED',
+          label: 'Approval schema B4 diperlukan',
+          ready: false,
+          note: 'Schema B4 sudah additive. Gunakan /api/assets untuk register aset dan depreciation run.',
+        },
+      ],
+      recommendedNextActions: [
+        'Selesaikan runtime proof: INVOICE, INVOICE_PAYMENT, EXPENSE, dan WIFI_SALE harus muncul sebagai JournalEntry POSTED.',
+        'Review kandidat expense besar: pisahkan biaya operasional biasa dari pembelian aset yang perlu dikapitalisasi.',
+        'Tambahkan aset awal sebagai OPENING_BALANCE/DISCLOSURE_ONLY, lalu aktifkan depreciationEnabled hanya jika aman.',
+      ],
+      warnings: [
+        'Jangan membuat acquisition journal otomatis untuk aset opening/disclosure agar Balance Sheet tidak double-count.',
+        'Jika nilai aset sudah masuk dalam opening balance, onboarding FixedAsset harus disclosure-only dulu atau ditandai opening asset, bukan purchase baru.',
+        'Tidak ada DB reset dan tidak ada lifecycle/payment/stay/checkout/renew mutation dalam patch B4 ini.',
+      ],
+      note: 'Endpoint ini membaca kesiapan COA, bukti runtime auto journal, dan kandidat aset. Schema asset register sekarang tersedia via /api/assets.',
     };
   }
 

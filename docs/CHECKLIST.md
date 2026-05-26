@@ -1,6 +1,59 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## A0. V5.23-B Accounting & Balance Sheet Foundation Checklist
 
@@ -340,3 +393,49 @@ Tenant smoke must use PowerShell/Invoke-RestMethod only. Do not use curl.
 - [ ] trial balance smoke
 - [ ] final backend ZIP generated
 - [ ] frontend unchanged ZIP generated if frontend not touched
+
+## A0. Latest Release Checklist — V5.24-B2/C
+
+### Completed
+
+- [x] V5.23-B1B accounting foundation pushed.
+- [x] V5.24-B2A opening balance setup workflow pushed.
+- [x] V5.24-B2B setup hardening pushed.
+- [x] V5.24-B2C draft void pushed.
+- [x] V5.24-C admin UI critical hardening pushed.
+- [x] Opening balance posted.
+- [x] Trial Balance balanced non-zero.
+- [x] Draft duplicate voided.
+- [x] Public rooms smoke passed.
+- [x] Tickets smoke passed.
+- [x] Generated Prisma not committed.
+
+### Must do before any next commit
+
+- [ ] Run:
+  ```powershell
+  Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb
+  ```
+- [ ] If generated Prisma appears:
+  ```powershell
+  git restore --staged backend/src/generated/prisma
+  git restore backend/src/generated/prisma
+  ```
+- [ ] Confirm no unrelated local changes.
+- [ ] Do not claim PASS without build/smoke relevant to the patch.
+
+## A0.1 Next Active Checklist — V5.24-D Admin UI Architecture + Performance
+
+- [ ] Inspect latest source after `cb93fe6`.
+- [ ] Confirm admin GlobalSearch visible.
+- [ ] Confirm dashboard ticket close flow still works or is clearly routed.
+- [ ] Audit dashboard loading condition and 13 query blocking.
+- [ ] Consolidate or reduce overlapping stays/bookings query only if safe.
+- [ ] Decide RoleWorkspaceTabs: remove dead code or keep explicitly deferred.
+- [ ] Add/restore admin sidebar context card if useful and not cluttered.
+- [ ] Replace fake progress percentages with meaningful counts or real denominator metrics.
+- [ ] Keep sidebar primary; do not reintroduce top nav tabs without approval.
+- [ ] Keep AncillaryRevenuePage operational, not roadmap-heavy.
+- [ ] Frontend build PASS.
+- [ ] API smoke: tickets + public rooms.
+- [ ] Git clean after push.

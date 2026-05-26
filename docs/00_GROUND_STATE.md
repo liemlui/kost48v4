@@ -1,7 +1,60 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
-**Status:** Source of truth utama. V5.20 mengunci first-paid room priority, AutoOps deadline cepat, dan payment proof satu langkah.
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
+**Status:** Source of truth utama setelah V5.24-C. Accounting foundation B2 sudah functional; admin UI critical hardening sudah pushed.
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## 0.0 Latest V5.23-B Ground State — Accounting & Balance Sheet Planning
 
@@ -595,4 +648,61 @@ Existing reports should include metadata:
 - ledgerBacked: false
 - formalStatementReady: false
 - readinessNote: current report uses operational invoice/payment/expense data, not formal accounting ledger.
+```
+
+## 0.1 Active Ground State — After V5.24-C
+
+```text
+Active architecture: Stable Modular Monolith.
+Current verified product direction: KOST48 Command Center + Accounting-ready finance foundation.
+Current latest pushed commit: cb93fe6.
+Current release state: V5.24-C pushed after B2 accounting setup hardening.
+```
+
+### Accounting state
+
+```text
+B1/B2 foundation exists:
+- ChartOfAccount
+- CashAccount
+- AccountingPeriod
+- OpeningBalanceBatch/Line
+- JournalEntry/Line
+- Accounting readiness
+- Trial Balance
+- Balance Sheet guard
+- Owner Accounting Setup UI
+- Void draft opening balance
+
+Verified UAT:
+- COA seeded: 37 accounts
+- Cash account created: Bank Utama KOST48
+- Accounting period: 2026-05 OPEN
+- Opening balance posted: 30.000.000 debit / 30.000.000 credit
+- JournalEntry created: JE-OPENING-1
+- Trial Balance balanced
+- Draft duplicate voided
+```
+
+### Admin UI state
+
+```text
+V5.24-C fixed:
+- GlobalSearch restored for admin.
+- Dashboard DONE tickets no longer use misleading "Selesai" navigation-only behavior.
+- StaysPage ALL filter no longer hardcoded ACTIVE.
+- AncillaryRevenuePage no longer presents future items as active actions.
+- Dashboard dead code/copy partly cleaned.
+```
+
+### Carry-forward
+
+```text
+Do not start B3 auto-journal blindly.
+First decide whether to run V5.24-D Admin UI Architecture + Performance Hardening:
+- reduce dashboard blocking queries,
+- clean dead RoleWorkspaceTabs path,
+- improve admin sidebar context,
+- make progress indicators meaningful,
+- keep sidebar as primary admin navigation.
 ```

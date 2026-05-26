@@ -388,6 +388,61 @@ export type ReversalWatch = {
   note?: string;
 };
 
+
+export type AssetReadiness = {
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  readyForAssetSchemaAct: boolean;
+  schemaChangeRequired: boolean;
+  schemaChangeApproved: boolean;
+  noSchemaChangePatch: boolean;
+  score: number;
+  status: string;
+  accountingAccounts: {
+    fixedAssetAccount?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type' | 'normalBalance'> | null;
+    accumulatedDepreciationAccount?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type' | 'normalBalance'> | null;
+    depreciationExpenseAccount?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type' | 'normalBalance'> | null;
+    missingAccountCodes: string[];
+  };
+  operationalScan: {
+    inventoryItemCount: number;
+    roomItemCount: number;
+    assignedRoomItemCount: number;
+    inboundOrAssignedMovementCount: number;
+    capexReviewCandidateExpenseCount: number;
+    capexReviewCandidateExpenses: Array<{
+      id: number;
+      expenseDate: string;
+      category: string;
+      description: string;
+      amountRupiah: number;
+      vendorName?: string | null;
+      roomId?: number | null;
+      reason: string;
+    }>;
+  };
+  runtimeProof: {
+    requiredSources: Array<{ sourceType: string; postedJournalCount: number; proven: boolean }>;
+    ready: boolean;
+    latestProofJournals: Array<{
+      id: number;
+      entryNumber: string;
+      entryDate: string;
+      sourceType: string;
+      sourceId?: string | null;
+      totalDebitRupiah: number;
+      totalCreditRupiah: number;
+      isBalanced: boolean;
+      postedAt?: string | null;
+    }>;
+  };
+  gates: Array<{ key: string; label: string; ready: boolean; note?: string }>;
+  recommendedNextActions: string[];
+  warnings: string[];
+  note?: string;
+};
+
 export type CreateCashAccountPayload = {
   name: string;
   accountType: CashAccountType;
@@ -474,6 +529,10 @@ export async function fetchTrialBalance(params?: { asOf?: string }) {
 
 export async function fetchBalanceSheetGuard(params?: { asOf?: string }) {
   return unwrap<BalanceSheetGuard>(client.get('/accounting/balance-sheet', { params }));
+}
+
+export async function fetchAssetReadiness() {
+  return unwrap<AssetReadiness>(client.get('/accounting/asset-readiness'));
 }
 
 export async function fetchProfitLossLite(params?: { asOf?: string }) {

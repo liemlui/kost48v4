@@ -15,6 +15,7 @@ import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
 import AncillaryRevenuePage from './pages/finance/AncillaryRevenuePage';
 import AccountingSetupPage from './pages/finance/AccountingSetupPage';
+import AssetRegisterPage from './pages/finance/AssetRegisterPage';
 import PaymentReviewPage from './pages/payments/PaymentReviewPage';
 import ReminderPreviewPage from './pages/reminders/ReminderPreviewPage';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -129,6 +130,7 @@ export default function App() {
           <Route path="/wifi-sales" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs['wifi-sales']} /></RequireRoles>} />
           <Route path="/ancillary-revenue" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AncillaryRevenuePage /></RequireRoles>} />
           <Route path="/finance/accounting-setup" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AccountingSetupPage /></RequireRoles>} />
+          <Route path="/finance/assets" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><AssetRegisterPage /></RequireRoles>} />
           <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.expenses} /></RequireRoles>} />
           <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />
           <Route path="/reports" element={<RequireRoles allowed={['OWNER']}><ReportsPage /></RequireRoles>} />

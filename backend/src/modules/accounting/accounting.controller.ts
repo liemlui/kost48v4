@@ -153,6 +153,11 @@ export class AccountingController {
     return { message: 'Guard balance sheet berhasil diambil', data: await this.reportsService.balanceSheet(query) };
   }
 
+  @Get('asset-readiness')
+  async assetReadiness() {
+    return { message: 'Kesiapan asset register berhasil diambil', data: await this.reportsService.assetReadiness() };
+  }
+
   @Get('deposit-position')
   async depositPosition() {
     return { message: 'Posisi liability deposit berhasil diambil', data: await this.reportsService.depositPosition() };

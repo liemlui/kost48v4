@@ -1,6 +1,59 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-24 V5.23-B1 Backend Accounting Foundation Pre-ACT Lock
+**Versi:** 2026-05-26 V5.24-C Released + Next Plan Lock
 
+
+## 0.0 Latest Current State — V5.24-C Released + Next Plan Lock
+
+```text
+Current GitHub latest commit:
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Recent release chain:
+e653cca feat: ship command center autoops and accounting foundation
+2308f17 feat(accounting): add opening balance setup workflow
+c04aec5 fix(accounting): harden setup workflow messages
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+
+Status:
+- main is pushed to origin/main through cb93fe6.
+- V5.24-B2 accounting setup is functionally verified.
+- Opening balance was posted and produced JE-OPENING-1.
+- Trial Balance reached non-zero balanced state: Debit 30.000.000 = Kredit 30.000.000.
+- Balance Sheet guard can read opening balance and should remain honest about no operational auto-journal yet.
+- V5.24-C admin UI hardening is pushed.
+- API smoke after V5.24-C: GET /api/tickets and GET /api/public/rooms returned success.
+```
+
+### Important local hygiene
+
+```text
+After every npx prisma generate, backend/src/generated/prisma may be modified locally.
+Generated Prisma must be restored before commit unless explicitly decided.
+Run before commit:
+git restore --staged backend/src/generated/prisma
+git restore backend/src/generated/prisma
+git status -sb
+```
+
+### Next official planning focus
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+
+Why:
+V5.24-C fixed urgent admin UI workflow bugs.
+Remaining audit items are structural/performance/UX cleanup:
+- RoleWorkspaceTabs dead/unrendered code decision.
+- Dashboard/sidebar dual navigation consistency.
+- Dashboard 13 blocking queries and overlapping stays/bookings queries.
+- Admin sidebar lacks context card/footer.
+- Status strip progress percentages are not meaningful.
+- Non-standard font-weight cleanup in touched areas.
+- Continue keeping GlobalSearch, ticket close, Stays filter, and ancillary page fixes stable.
+
+Accounting B3 Auto Journal Lite is deferred until V5.24-D is either done or explicitly skipped by user.
+```
 
 ## 2026-05-24 — V5.23-A Admin IA + Finance Add-on Revenue Package
 
@@ -392,3 +445,59 @@ No payment/stay/checkout/renew/booking touch.
 ```text
 ACT V5.23-B1 Backend Accounting Foundation Readiness using backend_latest_for_accounting_act_CLEAN.zip and the updated docs.
 ```
+
+## 2026-05-25 — V5.24-B2A/B/C + V5.24-C Release Journal
+
+### Accounting B2A/B/B2C
+
+Accounting foundation naik dari schema/readiness menjadi setup yang dapat dipakai Owner.
+
+Verified flow:
+```text
+Cash account created.
+Accounting period created.
+Opening balance draft created.
+Opening balance posted.
+JE-OPENING-1 created.
+Trial Balance reads 30.000.000 debit and 30.000.000 credit.
+Duplicate draft was voided.
+Readiness reached 100%.
+```
+
+Important carry-forward:
+```text
+This is still not B3 auto-journal.
+Operational invoices/payments/expenses are not automatically posted yet.
+Future B3 must design idempotency, source mapping, and failure isolation.
+```
+
+### Admin UI V5.24-C
+
+V5.24-C addressed critical admin UI audit issues:
+```text
+GlobalSearch restored for admin.
+Dashboard ticket DONE behavior hardened.
+StaysPage ALL filter fixed.
+AncillaryRevenuePage made operational instead of roadmap-heavy.
+Dashboard dead code/copy partially cleaned.
+```
+
+Latest pushed commits:
+```text
+eb198b2 fix(accounting): allow voiding draft opening balances
+cb93fe6 fix(admin): harden dashboard search tickets and finance ux
+```
+
+### Next Journal Target
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+```
+
+Focus:
+- dashboard query loading/performance,
+- sidebar/dashboard navigation consistency,
+- RoleWorkspaceTabs dead code decision,
+- admin sidebar context,
+- meaningful status strip metrics,
+- limited font-weight cleanup.

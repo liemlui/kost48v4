@@ -12,12 +12,14 @@ import TrialBalancePreview from '../../components/accounting/TrialBalancePreview
 import BalanceSheetGuardPanel from '../../components/accounting/BalanceSheetGuardPanel';
 import AccountingCommandCenterLite from '../../components/accounting/AccountingCommandCenterLite';
 import ProfitLossLitePanel from '../../components/accounting/ProfitLossLitePanel';
+import AssetReadinessPanel from '../../components/accounting/AssetReadinessPanel';
 import {
   createAccountingPeriod,
   createCashAccount,
   createOpeningBalanceDraft,
   fetchAccountingPeriods,
   fetchAccountingReadiness,
+  fetchAssetReadiness,
   fetchAccounts,
   fetchBalanceSheetGuard,
   fetchCashAccounts,
@@ -47,6 +49,7 @@ const financeMenu = [
   { id: 'expenses', icon: '💸', label: 'Pengeluaran', helper: 'Biaya operasional kos dan COGS layanan tambahan.', to: '/expenses', active: false },
   { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', active: false },
   { id: 'accounting', icon: '📘', label: 'Setup Accounting', helper: 'Cash/bank, opening balance, readiness, dan trial balance.', to: '/finance/accounting-setup', active: true },
+  { id: 'assets', icon: '🏗️', label: 'Asset Register', helper: 'Aset tetap, nilai buku, dan depresiasi bulanan.', to: '/finance/assets', active: false },
 ];
 
 function currentAsOf() {
@@ -101,12 +104,13 @@ export default function AccountingSetupPage() {
   const openingBalancesQuery = useQuery({ queryKey: ['accounting-opening-balances'], queryFn: () => fetchOpeningBalances(), staleTime: 30_000 });
   const trialBalanceQuery = useQuery({ queryKey: ['accounting-trial-balance', asOf], queryFn: () => fetchTrialBalance({ asOf }), staleTime: 30_000 });
   const balanceSheetQuery = useQuery({ queryKey: ['accounting-balance-sheet', asOf], queryFn: () => fetchBalanceSheetGuard({ asOf }), staleTime: 30_000 });
+  const assetReadinessQuery = useQuery({ queryKey: ['accounting-asset-readiness'], queryFn: fetchAssetReadiness, staleTime: 30_000 });
   const profitLossQuery = useQuery({ queryKey: ['accounting-profit-loss-lite', asOf], queryFn: () => fetchProfitLossLite({ asOf }), staleTime: 30_000 });
   const postingBoundaryQuery = useQuery({ queryKey: ['accounting-posting-boundary'], queryFn: fetchPostingBoundary, staleTime: 30_000 });
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
     queryKey: ['accounting-recent-auto-journals'],
-    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT'], limit: 8 }),
+    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION'], limit: 8 }),
     staleTime: 20_000,
   });
 
@@ -140,6 +144,7 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-opening-balances'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-trial-balance'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-balance-sheet'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-asset-readiness'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-profit-loss-lite'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
@@ -283,6 +288,7 @@ export default function AccountingSetupPage() {
           { id: 'period', label: 'Period', value: periods.length, helper: 'Periode cutover', tone: periods.length ? 'success' : 'warning' },
           { id: 'opening', label: 'Opening Balance', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Starting point Balance Sheet', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },
           { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'B3 Lite', tone: autoJournalEnabled ? 'success' : 'warning' },
+          { id: 'asset-b4', label: 'Aset B4', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Proof', helper: 'Readiness aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
           { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
@@ -305,6 +311,8 @@ export default function AccountingSetupPage() {
         <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
         <Col xl={6}><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
       </Row>
+
+      <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
 
       <Card className="content-card border-0 mb-3">
         <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
