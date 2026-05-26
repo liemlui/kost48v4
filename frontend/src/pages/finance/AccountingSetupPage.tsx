@@ -21,10 +21,12 @@ import {
   fetchAccounts,
   fetchBalanceSheetGuard,
   fetchCashAccounts,
+  fetchDepositPosition,
   fetchOpeningBalances,
   fetchPostingBoundary,
   fetchProfitLossLite,
   fetchRecentAutoJournals,
+  fetchReversalWatch,
   fetchTrialBalance,
   fetchUnmappedTransactions,
   postOpeningBalance,
@@ -77,6 +79,7 @@ function sourceLabel(sourceType?: string | null) {
     WIFI_SALE: 'WiFi',
     OPENING_BALANCE: 'Opening',
     DEPOSIT: 'Deposit',
+    ADJUSTMENT: 'Adjustment/Reversal',
   };
   return labels[String(sourceType ?? '')] ?? sourceType ?? '-';
 }
@@ -101,9 +104,12 @@ export default function AccountingSetupPage() {
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
     queryKey: ['accounting-recent-auto-journals'],
-    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'], limit: 8 }),
+    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT'], limit: 8 }),
     staleTime: 20_000,
   });
+
+  const depositPositionQuery = useQuery({ queryKey: ['accounting-deposit-position'], queryFn: fetchDepositPosition, staleTime: 30_000 });
+  const reversalWatchQuery = useQuery({ queryKey: ['accounting-reversal-watch'], queryFn: fetchReversalWatch, staleTime: 30_000 });
 
   const accounts = accountsQuery.data ?? [];
   const cashAccounts = cashAccountsQuery.data ?? [];
@@ -135,6 +141,8 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-deposit-position'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-reversal-watch'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-journal-entries'] }),
     ]);
   }
@@ -222,7 +230,7 @@ export default function AccountingSetupPage() {
       <PageHeader
         eyebrow="Finance · Accounting Setup"
         title="Accounting Command Center"
-        description="B3.2 membaca ledger POSTED untuk membuktikan auto journal, Trial Balance, Profit & Loss Lite, dan Balance Sheet Lite tanpa angka palsu."
+        description="B3.3 membaca ledger POSTED untuk membuktikan auto journal, deposit liability, reversal invoice cancel, Trial Balance, Profit & Loss Lite, dan Balance Sheet Lite tanpa angka palsu."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
       />
 
@@ -270,6 +278,8 @@ export default function AccountingSetupPage() {
         balanceSheet={balanceSheetQuery.data}
         profitLoss={profitLossQuery.data}
         unmapped={unmappedQuery.data}
+        depositPosition={depositPositionQuery.data}
+        reversalWatch={reversalWatchQuery.data}
         recentJournals={recentJournals}
         autoJournalEnabled={autoJournalEnabled}
         isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || profitLossQuery.isLoading}
@@ -286,7 +296,7 @@ export default function AccountingSetupPage() {
             <div className="small text-uppercase text-muted fw-semibold mb-1">Auto Journal Lite · B3.1</div>
             <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto-posting operasional aktif' : 'Auto-posting belum aktif'}</h3>
             <p className="text-muted mb-0">
-              Invoice issued, pembayaran invoice, expense, dan penjualan WiFi akan dicatat sebagai JournalEntry POSTED secara idempotent. Deposit dan reversal masih deferred.
+              Invoice issued, pembayaran invoice, expense, dan penjualan WiFi akan dicatat sebagai JournalEntry POSTED secara idempotent. Deposit liability dan reversal invoice cancel sudah diawasi di B3.3; depreciation/inventory/payment reversal masih deferred.
             </p>
             {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
           </div>
@@ -359,7 +369,7 @@ export default function AccountingSetupPage() {
             </div>
           ) : (
             <Alert variant="light" className="border mb-0">
-              Belum ada auto journal untuk source B3.1. Ini normal jika belum ada invoice/payment/expense/WiFi baru sejak auto journal aktif.
+              Belum ada auto journal untuk source B3.1/B3.3. Ini normal jika belum ada invoice/payment/expense/WiFi/deposit/reversal baru sejak auto journal aktif.
             </Alert>
           )}
 

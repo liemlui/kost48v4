@@ -243,6 +243,7 @@ export class InvoicesService {
     if (invoice.status === 'PARTIAL' || invoice.status === 'PAID') throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
     if (invoice.status === 'ISSUED' && invoice.payments.length > 0) throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
     const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.CANCELLED, cancelReason: dto.cancelReason } });
+    await this.accountingPosting.postInvoiceCancellationReversal(updated.id, actor.id).catch(() => undefined);
     await this.audit.log({ actorUserId: actor.id, action: 'CANCEL', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
     return updated;
   }

@@ -17,10 +17,15 @@ import {
   calculatePeriodEnd,
   calculateDueDate,
 } from './stays.helpers';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
 export class StaysService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly accountingPosting: AccountingPostingService,
+  ) {}
 
   private assertCoreLifecycleActor(actor: CurrentUserPayload, actionLabel: string) {
     if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
@@ -564,6 +569,14 @@ export class StaysService {
         data: updateData,
       });
 
+      const invoicesToReverse = await tx.invoice.findMany({
+        where: {
+          stayId: id,
+          status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
+        },
+        select: { id: true },
+      });
+
       await tx.invoice.updateMany({
         where: {
           stayId: id,
@@ -574,6 +587,10 @@ export class StaysService {
           cancelReason: dto.cancelReason,
         },
       });
+
+      for (const invoice of invoicesToReverse) {
+        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actor.id).catch(() => undefined);
+      }
 
       const stay = await tx.stay.findUnique({ where: { id } });
       if (!stay) {
@@ -639,15 +656,20 @@ export class StaysService {
       throw new ConflictException('Nilai deposit tidak konsisten');
     }
 
-    const updated = await this.prisma.stay.update({
-      where: { id },
-      data: {
-        depositStatus,
-        depositDeductionRupiah: deduction,
-        depositRefundedRupiah: refunded,
-        depositRefundedAt: refunded > 0 ? new Date() : null,
-        depositNote: dto.depositNote,
-      },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.stay.update({
+        where: { id },
+        data: {
+          depositStatus,
+          depositDeductionRupiah: deduction,
+          depositRefundedRupiah: refunded,
+          depositRefundedAt: refunded > 0 ? new Date() : null,
+          depositNote: dto.depositNote,
+        },
+      });
+
+      await this.accountingPosting.postDepositSettlementTx(tx, id, actor.id).catch(() => undefined);
+      return result;
     });
 
     await this.audit.log({ actorUserId: actor.id, action: 'PROCESS_DEPOSIT', entityType: 'Stay', entityId: String(updated.id), oldData: stay, newData: updated });

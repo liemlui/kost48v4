@@ -142,14 +142,14 @@ export class AccountingReportsService {
         depositSnapshotSampleCount: deposits.length,
       },
       samples: { invoices, payments, expenses, wifiSales, depositSnapshots: deposits },
-      note: 'Scanner ini menunjukkan transaksi operasional yang belum punya JournalEntry POSTED. B3 Auto Journal Lite memproses INVOICE, INVOICE_PAYMENT, EXPENSE, dan WIFI_SALE; deposit/reversal tetap deferred.',
+      note: 'Scanner ini menunjukkan transaksi operasional yang belum punya JournalEntry POSTED. B3.3 mulai memproses deposit received yang sudah lunas; reversal invoice cancel muncul sebagai ADJUSTMENT.',
     };
   }
 
 
   async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
     await this.schemaGuard.assertReady();
-    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'OPENING_BALANCE', 'MANUAL'];
+    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'OPENING_BALANCE', 'MANUAL'];
     const sourceTypes = String(query.sourceTypes ?? 'INVOICE,INVOICE_PAYMENT,EXPENSE,WIFI_SALE')
       .split(',')
       .map((item) => item.trim().toUpperCase())
@@ -363,6 +363,112 @@ export class AccountingReportsService {
         : balanced
           ? 'Balance Sheet Lite siap dibaca. Current profit/loss masih ditampilkan sebagai komponen ekuitas sementara sampai closing retained earnings dibuat.'
           : 'Balance Sheet Lite belum balance. Review journal dan P&L sebelum dipakai sebagai laporan formal.',
+    };
+  }
+
+
+  async depositPosition() {
+    await this.schemaGuard.assertReady();
+    const [depositAccount, operationalAgg, settledAgg] = await Promise.all([
+      (this.prisma as any).chartOfAccount.findFirst({ where: { code: '2000', isActive: true }, select: { id: true, code: true, name: true, type: true } }),
+      (this.prisma as any).stay.aggregate({
+        _sum: { depositAmountRupiah: true, depositPaidAmountRupiah: true },
+        _count: { id: true },
+        where: { depositAmountRupiah: { gt: 0 } },
+      }),
+      (this.prisma as any).stay.aggregate({
+        _sum: { depositDeductionRupiah: true, depositRefundedRupiah: true },
+        where: { depositAmountRupiah: { gt: 0 }, depositStatus: { in: ['REFUNDED', 'FORFEITED', 'PARTIALLY_REFUNDED'] as any } },
+      }),
+    ]);
+
+    let ledgerDebit = 0;
+    let ledgerCredit = 0;
+    if (depositAccount) {
+      const sum = await (this.prisma as any).journalLine.aggregate({
+        _sum: { debitRupiah: true, creditRupiah: true },
+        where: {
+          chartOfAccountId: depositAccount.id,
+          journalEntry: { status: 'POSTED' as any },
+        },
+      });
+      ledgerDebit = Number(sum._sum.debitRupiah ?? 0);
+      ledgerCredit = Number(sum._sum.creditRupiah ?? 0);
+    }
+
+    const operationalPaid = Number(operationalAgg._sum.depositPaidAmountRupiah ?? 0);
+    const refunded = Number(settledAgg._sum.depositRefundedRupiah ?? 0);
+    const deducted = Number(settledAgg._sum.depositDeductionRupiah ?? 0);
+    const operationalHeld = Math.max(operationalPaid - refunded - deducted, 0);
+    const ledgerLiability = Math.max(ledgerCredit - ledgerDebit, 0);
+
+    return {
+      basis: 'DEPOSIT_LIABILITY_POSITION_B3_3',
+      ledgerBacked: true,
+      formalStatementReady: false,
+      account: depositAccount,
+      operational: {
+        stayCount: Number(operationalAgg._count?.id ?? 0),
+        depositAmountRupiah: Number(operationalAgg._sum.depositAmountRupiah ?? 0),
+        depositPaidRupiah: operationalPaid,
+        depositRefundedRupiah: refunded,
+        depositDeductedRupiah: deducted,
+        depositHeldRupiah: operationalHeld,
+      },
+      ledger: {
+        debitRupiah: ledgerDebit,
+        creditRupiah: ledgerCredit,
+        liabilityRupiah: ledgerLiability,
+      },
+      differenceRupiah: ledgerLiability - operationalHeld,
+      note: 'Deposit adalah liability, bukan revenue. Selisih dapat terjadi jika data lama belum punya DEPOSIT journal atau partial deposit belum lunas.',
+    };
+  }
+
+  async reversalWatch() {
+    await this.schemaGuard.assertReady();
+    const cancelledInvoices = await (this.prisma as any).invoice.findMany({
+      where: { status: 'CANCELLED' as any },
+      select: { id: true, invoiceNumber: true, totalAmountRupiah: true, cancelReason: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+    });
+    const ids = cancelledInvoices.map((invoice: any) => String(invoice.id));
+    const [invoiceJournals, reversalJournals] = await Promise.all([
+      (this.prisma as any).journalEntry.findMany({
+        where: { sourceType: 'INVOICE' as any, sourceId: { in: ids }, status: 'POSTED' as any },
+        select: { id: true, sourceId: true, entryNumber: true, totalDebitRupiah: true, totalCreditRupiah: true },
+      }),
+      (this.prisma as any).journalEntry.findMany({
+        where: { sourceType: 'ADJUSTMENT' as any, sourceId: { in: ids.map((id: string) => `INVOICE_REVERSAL:${id}`) }, status: 'POSTED' as any },
+        select: { id: true, sourceId: true, entryNumber: true, totalDebitRupiah: true, totalCreditRupiah: true },
+      }),
+    ]);
+    const journalByInvoice = new Map(invoiceJournals.map((entry: any) => [String(entry.sourceId), entry]));
+    const reversalByInvoice = new Map(reversalJournals.map((entry: any) => [String(entry.sourceId).replace('INVOICE_REVERSAL:', ''), entry]));
+    const items = cancelledInvoices
+      .filter((invoice: any) => journalByInvoice.has(String(invoice.id)))
+      .map((invoice: any) => ({
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        totalAmountRupiah: Number(invoice.totalAmountRupiah ?? 0),
+        cancelReason: invoice.cancelReason,
+        originalJournal: journalByInvoice.get(String(invoice.id)),
+        reversalJournal: reversalByInvoice.get(String(invoice.id)) ?? null,
+        reversalRequired: !reversalByInvoice.has(String(invoice.id)),
+      }));
+
+    return {
+      basis: 'INVOICE_REVERSAL_WATCH_B3_3',
+      ledgerBacked: true,
+      formalStatementReady: false,
+      summary: {
+        cancelledWithOriginalJournalCount: items.length,
+        reversalMissingCount: items.filter((item: any) => item.reversalRequired).length,
+        reversalPostedCount: items.filter((item: any) => !item.reversalRequired).length,
+      },
+      items: items.slice(0, 25),
+      note: 'Invoice CANCELLED yang sudah punya INVOICE journal harus punya ADJUSTMENT reversal agar revenue/piutang tidak overstated.',
     };
   }
 

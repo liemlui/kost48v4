@@ -153,6 +153,16 @@ export class AccountingController {
     return { message: 'Guard balance sheet berhasil diambil', data: await this.reportsService.balanceSheet(query) };
   }
 
+  @Get('deposit-position')
+  async depositPosition() {
+    return { message: 'Posisi liability deposit berhasil diambil', data: await this.reportsService.depositPosition() };
+  }
+
+  @Get('reversal-watch')
+  async reversalWatch() {
+    return { message: 'Watch reversal invoice berhasil diambil', data: await this.reportsService.reversalWatch() };
+  }
+
   @Get('posting-boundary')
   async postingBoundary() {
     return { message: 'Batas auto-posting accounting berhasil diambil', data: this.postingService.explainPostingBoundary() };

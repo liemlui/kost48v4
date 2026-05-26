@@ -245,6 +245,50 @@ export type JournalBySourceResult = {
   note?: string;
 };
 
+
+export type DepositPosition = {
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  account?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type'> | null;
+  operational: {
+    stayCount: number;
+    depositAmountRupiah: number;
+    depositPaidRupiah: number;
+    depositRefundedRupiah: number;
+    depositDeductedRupiah: number;
+    depositHeldRupiah: number;
+  };
+  ledger: {
+    debitRupiah: number;
+    creditRupiah: number;
+    liabilityRupiah: number;
+  };
+  differenceRupiah: number;
+  note?: string;
+};
+
+export type ReversalWatch = {
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  summary: {
+    cancelledWithOriginalJournalCount: number;
+    reversalMissingCount: number;
+    reversalPostedCount: number;
+  };
+  items: Array<{
+    invoiceId: number;
+    invoiceNumber?: string | null;
+    totalAmountRupiah: number;
+    cancelReason?: string | null;
+    originalJournal?: Pick<AutoJournalEntry, 'id' | 'entryNumber' | 'totalDebitRupiah' | 'totalCreditRupiah'> | null;
+    reversalJournal?: Pick<AutoJournalEntry, 'id' | 'entryNumber' | 'totalDebitRupiah' | 'totalCreditRupiah'> | null;
+    reversalRequired: boolean;
+  }>;
+  note?: string;
+};
+
 export type CreateCashAccountPayload = {
   name: string;
   accountType: CashAccountType;
@@ -357,6 +401,15 @@ export async function fetchRecentAutoJournals(params?: { sourceTypes?: string[];
     sourceTypes: params?.sourceTypes?.join(','),
   };
   return unwrap<RecentAutoJournals>(client.get('/accounting/recent-journals', { params: query }));
+}
+
+
+export async function fetchDepositPosition() {
+  return unwrap<DepositPosition>(client.get('/accounting/deposit-position'));
+}
+
+export async function fetchReversalWatch() {
+  return unwrap<ReversalWatch>(client.get('/accounting/reversal-watch'));
 }
 
 export async function fetchJournalBySource(params: { sourceType: string; sourceId: string | number }) {

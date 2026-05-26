@@ -459,6 +459,20 @@ export class PaymentSubmissionsService {
             },
           });
 
+          if (depositPortion > 0) {
+            try {
+              await this.accountingPosting.postDepositReceivedForStayTx(
+                tx,
+                submission.stayId,
+                user.id,
+                submission.paymentMethod,
+                new Date(submission.paidAt),
+              );
+            } catch {
+              // Deposit liability journal is best-effort; do not block payment approval.
+            }
+          }
+
           if (nextInvoiceStatus === InvoiceStatus.PAID) {
             await tx.room.update({
               where: { id: submission.roomId },
@@ -626,6 +640,14 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     const cancelReason =
       'Kamar sudah diamankan oleh pembayaran tenant lain. Prioritas kamar mengikuti pembayaran valid pertama.';
 
+    const invoicesToReverse = await tx.invoice.findMany({
+      where: {
+        stayId: { in: competingStayIds },
+        status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
+      },
+      select: { id: true },
+    });
+
     await tx.invoice.updateMany({
       where: {
         stayId: { in: competingStayIds },
@@ -633,6 +655,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       },
       data: { status: InvoiceStatus.CANCELLED, cancelReason },
     });
+
+    for (const invoice of invoicesToReverse) {
+      await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, params.actorUserId).catch(() => undefined);
+    }
 
     await tx.paymentSubmission.updateMany({
       where: {
@@ -769,6 +795,14 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           data: { status: PaymentSubmissionStatus.EXPIRED },
         });
 
+        const invoicesToReverse = await tx.invoice.findMany({
+          where: {
+            stayId,
+            status: { in: ['ISSUED', 'PARTIAL'] as any },
+          },
+          select: { id: true },
+        });
+
         await tx.invoice.updateMany({
           where: {
             stayId,
@@ -779,6 +813,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             cancelReason: 'Booking dibatalkan. Pemesanan saja belum mengunci kamar; prioritas mengikuti pembayaran valid pertama.',
           },
         });
+
+        for (const invoice of invoicesToReverse) {
+          await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user.id).catch(() => undefined);
+        }
 
         await tx.stay.update({
           where: { id: stayId },
@@ -857,6 +895,14 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             data: { status: PaymentSubmissionStatus.EXPIRED },
           });
 
+          const invoicesToReverse = await tx.invoice.findMany({
+            where: {
+              stayId: booking.id,
+              status: { in: ['ISSUED', 'PARTIAL'] as any },
+            },
+            select: { id: true },
+          });
+
           await tx.invoice.updateMany({
             where: {
               stayId: booking.id,
@@ -867,6 +913,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
               cancelReason: 'Otomatis dibatalkan: batas 3 jam terlewati tanpa bukti pembayaran valid.',
             },
           });
+
+          for (const invoice of invoicesToReverse) {
+            await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user?.id ?? null).catch(() => undefined);
+          }
 
           await tx.stay.update({
             where: { id: booking.id },
@@ -938,6 +988,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     });
     if (!booking) return;
 
+    const invoicesToReverse = await tx.invoice.findMany({
+      where: { stayId, status: { in: ['ISSUED', 'PARTIAL'] as any } },
+      select: { id: true },
+    });
+
     await tx.invoice.updateMany({
       where: { stayId, status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] as any } },
       data: {
@@ -945,6 +1000,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         cancelReason: 'Bukti pembayaran ditolak setelah batas waktu. Pemesanan dibatalkan otomatis dan kamar dilepas.',
       },
     });
+
+    for (const invoice of invoicesToReverse) {
+      await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actorUserId).catch(() => undefined);
+    }
     await tx.stay.update({
       where: { id: stayId },
       data: {

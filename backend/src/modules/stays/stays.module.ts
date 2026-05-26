@@ -3,9 +3,10 @@ import { StaysController } from './stays.controller';
 import { StaysService } from './stays.service';
 import { StaysQueryService } from './stays-query.service';
 import { AuditLogModule } from '../../audit-log/audit-log.module';
+import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
-  imports: [AuditLogModule],
+  imports: [AuditLogModule, AccountingModule],
   controllers: [StaysController],
   providers: [StaysService, StaysQueryService],
   exports: [StaysService],
