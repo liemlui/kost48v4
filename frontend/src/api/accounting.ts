@@ -48,6 +48,11 @@ export type AccountingPeriod = {
   closingNote?: string | null;
   closeBasis?: string | null;
   closeVersion?: number;
+  reopenedAt?: string | null;
+  reopenedById?: number | null;
+  reopenJournalEntryId?: number | null;
+  reopenReason?: string | null;
+  reopenVersion?: number;
   notes?: string | null;
 };
 
@@ -131,7 +136,7 @@ export type BalanceSheetGuard = {
   readinessNote?: string;
   trialBalancePreview?: { asOf: string; totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean } | null;
   closing?: {
-    latestClosedPeriod?: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'closedAt' | 'closingJournalEntryId' | 'closingNote' | 'closeBasis'> | null;
+    latestClosedPeriod?: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'closedAt' | 'closingJournalEntryId' | 'closingNote' | 'closeBasis' | 'reopenedAt' | 'reopenJournalEntryId' | 'reopenReason'> | null;
     retainedEarningsActive?: boolean;
     note?: string;
   } | null;
@@ -191,6 +196,8 @@ export type ProfitLossLite = {
     closingEntryNumber?: string | null;
     closingPostedAt?: string | null;
     netIncomeClosedToRetainedEarnings?: number | null;
+    reopenedAt?: string | null;
+    reopenJournalEntryId?: number | null;
   };
   trialBalance: { totalDebitRupiah: number; totalCreditRupiah: number; isBalanced: boolean };
   totals: {
@@ -255,6 +262,7 @@ export type PeriodClosePreview = {
   period: Pick<AccountingPeriod, 'id' | 'year' | 'month' | 'status' | 'startDate' | 'endDate'>;
   sourceType: 'CLOSING_ENTRY';
   sourceId: string;
+  entryNumber?: string;
   entryDate: string;
   totals: {
     revenueRupiah: number;
@@ -283,10 +291,53 @@ export type PeriodClosePostResult = {
   note?: string;
 };
 
+export type PeriodReopenPreview = {
+  basis: string;
+  year: number;
+  month: number;
+  period: AccountingPeriod;
+  sourceType: 'CLOSING_REVERSAL';
+  sourceId: string;
+  entryNumber?: string;
+  entryDate: string;
+  closingJournalEntry?: {
+    id: number;
+    entryNumber: string;
+    sourceId?: string | null;
+    totalDebitRupiah: number;
+    totalCreditRupiah: number;
+    postedAt?: string | null;
+  } | null;
+  totalDebitRupiah: number;
+  totalCreditRupiah: number;
+  isBalanced: boolean;
+  lines: PeriodClosePreviewLine[];
+  blockedReasons: string[];
+  warnings: string[];
+  canReopen: boolean;
+  reason?: string;
+  note?: string;
+};
+
+export type PeriodReopenPostResult = {
+  basis: string;
+  reopened: boolean;
+  period: AccountingPeriod;
+  journalEntry: AutoJournalEntry;
+  preview: PeriodReopenPreview;
+  note?: string;
+};
+
 export type PeriodClosePayload = {
   year: number;
   month: number;
   notes?: string;
+};
+
+export type PeriodReopenPayload = {
+  year: number;
+  month: number;
+  reason: string;
 };
 
 export type PostingBoundary = {
@@ -683,6 +734,14 @@ export async function previewPeriodClose(payload: PeriodClosePayload) {
 
 export async function postPeriodClose(payload: PeriodClosePayload) {
   return unwrap<PeriodClosePostResult>(client.post('/accounting/period-close/post', payload));
+}
+
+export async function previewPeriodReopen(payload: PeriodReopenPayload) {
+  return unwrap<PeriodReopenPreview>(client.post('/accounting/period-close/reopen-preview', payload));
+}
+
+export async function postPeriodReopen(payload: PeriodReopenPayload) {
+  return unwrap<PeriodReopenPostResult>(client.post('/accounting/period-close/reopen', payload));
 }
 
 

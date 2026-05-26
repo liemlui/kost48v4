@@ -36,7 +36,9 @@ import {
   fetchUnmappedTransactions,
   postOpeningBalance,
   postPeriodClose,
+  postPeriodReopen,
   previewPeriodClose,
+  previewPeriodReopen,
   runAutoJournalBackfill,
   runDepositBackfillDryRun,
   seedDefaultCoa,
@@ -87,6 +89,7 @@ function sourceLabel(sourceType?: string | null) {
     EXPENSE: 'Expense',
     WIFI_SALE: 'WiFi',
     OPENING_BALANCE: 'Opening',
+    CLOSING_REVERSAL: 'Reopen/Reversal',
     DEPOSIT: 'Deposit',
     ADJUSTMENT: 'Adjustment/Reversal',
     DEPRECIATION: 'Depresiasi',
@@ -102,7 +105,9 @@ export default function AccountingSetupPage() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [periodCloseNotes, setPeriodCloseNotes] = useState('');
+  const [periodReopenReason, setPeriodReopenReason] = useState('');
   const [periodClosePreview, setPeriodClosePreview] = useState<Awaited<ReturnType<typeof previewPeriodClose>> | undefined>(undefined);
+  const [periodReopenPreview, setPeriodReopenPreview] = useState<Awaited<ReturnType<typeof previewPeriodReopen>> | undefined>(undefined);
   const asOf = currentAsOf();
   const asOfDate = new Date(`${asOf}T00:00:00Z`);
   const closeYear = asOfDate.getUTCFullYear();
@@ -122,7 +127,7 @@ export default function AccountingSetupPage() {
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
     queryKey: ['accounting-recent-auto-journals'],
-    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY'], limit: 8 }),
+    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'CLOSING_REVERSAL'], limit: 8 }),
     staleTime: 20_000,
   });
 
@@ -272,6 +277,31 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal posting tutup periode.')); },
   });
 
+  const previewReopenMutation = useMutation({
+    mutationFn: () => previewPeriodReopen({ year: closeYear, month: closeMonth, reason: periodReopenReason }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setPeriodReopenPreview(result);
+      setActionError(null);
+      setActionMessage(result.canReopen ? 'Preview buka ulang siap dan reversal balanced.' : 'Preview buka ulang dibuat, tetapi masih ada blocker.');
+      await queryClient.invalidateQueries({ queryKey: ['accounting-period-close-readiness'] });
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuat preview buka ulang periode.')); },
+  });
+
+  const postReopenMutation = useMutation({
+    mutationFn: () => postPeriodReopen({ year: closeYear, month: closeMonth, reason: periodReopenReason }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setPeriodReopenPreview(result.preview);
+      setPeriodClosePreview(undefined);
+      setActionMessage(`Periode berhasil dibuka ulang. Reversal journal: ${result.journalEntry.entryNumber}.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuka ulang periode.')); },
+  });
+
   const depositDryRunMutation = useMutation({
     mutationFn: () => runDepositBackfillDryRun({ limit: 25 }),
     onMutate: () => { setActionError(null); setActionMessage(null); },
@@ -288,7 +318,7 @@ export default function AccountingSetupPage() {
       <PageHeader
         eyebrow="Finance · Accounting Setup"
         title="Accounting Command Center"
-        description="B7 menambahkan tutup periode Owner-only: revenue, COGS, dan expense ditutup ke Laba Ditahan tanpa mengaburkan P&L operasional."
+        description="B8 menguatkan governance: periode CLOSED dikunci, koreksi memakai buka ulang + jurnal reversal Owner-only, bukan edit diam-diam."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
       />
 
@@ -327,7 +357,7 @@ export default function AccountingSetupPage() {
           { id: 'opening', label: 'Opening Balance', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Starting point Balance Sheet', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },
           { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'B3 Lite', tone: autoJournalEnabled ? 'success' : 'warning' },
           { id: 'asset-b4', label: 'Aset B4', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Proof', helper: 'Readiness aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
-          { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Retained Earnings B7', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
+          { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Governance B8', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
           { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
@@ -358,14 +388,21 @@ export default function AccountingSetupPage() {
         month={closeMonth}
         readiness={periodCloseReadinessQuery.data}
         preview={periodClosePreview}
+        reopenPreview={periodReopenPreview}
         isLoading={periodCloseReadinessQuery.isLoading}
         isPreviewing={previewCloseMutation.isPending}
         isPosting={postCloseMutation.isPending}
+        isReopenPreviewing={previewReopenMutation.isPending}
+        isReopening={postReopenMutation.isPending}
         canPost={user?.role === 'OWNER'}
         notes={periodCloseNotes}
+        reopenReason={periodReopenReason}
         onNotesChange={setPeriodCloseNotes}
+        onReopenReasonChange={setPeriodReopenReason}
         onPreview={() => previewCloseMutation.mutate()}
         onPost={() => postCloseMutation.mutate()}
+        onPreviewReopen={() => previewReopenMutation.mutate()}
+        onReopen={() => postReopenMutation.mutate()}
       />
 
       <Card className="content-card border-0 mb-3">

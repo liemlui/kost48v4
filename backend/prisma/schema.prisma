@@ -337,6 +337,7 @@ enum JournalSourceType {
   DEPRECIATION
   ADJUSTMENT
   CLOSING_ENTRY
+  CLOSING_REVERSAL
 }
 
 
@@ -1371,6 +1372,11 @@ model AccountingPeriod {
   closingNote           String?
   closeBasis            String?
   closeVersion          Int                    @default(0)
+  reopenedAt            DateTime?
+  reopenedById          Int?
+  reopenJournalEntryId  Int?
+  reopenReason          String?
+  reopenVersion         Int                    @default(0)
   notes                 String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
@@ -1383,6 +1389,8 @@ model AccountingPeriod {
   @@index([startDate, endDate])
   @@index([closedById])
   @@index([closingJournalEntryId])
+  @@index([reopenedById])
+  @@index([reopenJournalEntryId])
 }
 
 model OpeningBalanceBatch {

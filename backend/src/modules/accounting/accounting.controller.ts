@@ -17,7 +17,7 @@ import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/ope
 import { CreateJournalDraftDto, JournalBySourceQueryDto, JournalEntriesQueryDto, RecentJournalsQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
 import { AutoJournalBackfillDto, DepositBackfillDryRunDto } from './dto/auto-journal.dto';
 import { AccountingPeriodCloseService } from './accounting-period-close.service';
-import { PeriodClosePayloadDto, PeriodCloseQueryDto } from './dto/period-close.dto';
+import { PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } from './dto/period-close.dto';
 
 @ApiTags('accounting')
 @ApiBearerAuth()
@@ -56,6 +56,23 @@ export class AccountingController {
     return {
       message: 'Tutup periode berhasil diposting',
       data: await this.periodCloseService.post(dto, user),
+    };
+  }
+
+  @Post('period-close/reopen-preview')
+  async periodReopenPreview(@Body() dto: PeriodReopenPayloadDto) {
+    return {
+      message: 'Preview buka ulang periode berhasil dibuat',
+      data: await this.periodCloseService.reopenPreview(dto),
+    };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post('period-close/reopen')
+  async periodReopen(@Body() dto: PeriodReopenPayloadDto, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'Periode berhasil dibuka ulang',
+      data: await this.periodCloseService.reopen(dto, user),
     };
   }
 

@@ -149,7 +149,7 @@ export class AccountingReportsService {
 
   async recentJournals(query: { sourceTypes?: string; limit?: number } = {}) {
     await this.schemaGuard.assertReady();
-    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'OPENING_BALANCE', 'MANUAL'];
+    const allowedSourceTypes = ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'CLOSING_REVERSAL', 'OPENING_BALANCE', 'MANUAL'];
     const sourceTypes = String(query.sourceTypes ?? 'INVOICE,INVOICE_PAYMENT,EXPENSE,WIFI_SALE')
       .split(',')
       .map((item) => item.trim().toUpperCase())
@@ -230,7 +230,7 @@ export class AccountingReportsService {
       where: {
         journalEntry: {
           status: 'POSTED' as any,
-          sourceType: { not: 'CLOSING_ENTRY' as any },
+          sourceType: { notIn: ['CLOSING_ENTRY', 'CLOSING_REVERSAL'] as any },
           entryDate: { gte: period.startDate, lte: period.endDate },
         },
       },
@@ -282,10 +282,11 @@ export class AccountingReportsService {
       ? await (this.prisma as any).journalEntry.findFirst({
           where: {
             sourceType: 'CLOSING_ENTRY' as any,
-            sourceId: `PERIOD_CLOSE:${period.key}`,
+            sourceId: { startsWith: `PERIOD_CLOSE:${period.key}` },
             status: 'POSTED' as any,
           },
-          select: { id: true, entryNumber: true, postedAt: true, totalDebitRupiah: true, totalCreditRupiah: true },
+          select: { id: true, entryNumber: true, postedAt: true, totalDebitRupiah: true, totalCreditRupiah: true, sourceId: true },
+          orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
         })
       : null;
 
@@ -299,7 +300,7 @@ export class AccountingReportsService {
         endDate: period.endDate.toISOString().slice(0, 10),
         status: period.accountingPeriod?.status ?? 'VIRTUAL',
       },
-      basis: 'LEDGER_OPERATIONAL_PNL_EXCLUDING_CLOSING_B7',
+      basis: 'LEDGER_OPERATIONAL_PNL_EXCLUDING_CLOSING_AND_REVERSAL_B8',
       ledgerBacked: true,
       formalStatementReady: Boolean(period.accountingPeriod && period.accountingPeriod.status === 'CLOSED' ? closingJournal : true),
       closing: {
@@ -308,6 +309,8 @@ export class AccountingReportsService {
         closingEntryNumber: closingJournal?.entryNumber ?? null,
         closingPostedAt: closingJournal?.postedAt ?? period.accountingPeriod?.closedAt ?? null,
         netIncomeClosedToRetainedEarnings: period.accountingPeriod?.status === 'CLOSED' ? netProfit : null,
+        reopenedAt: period.accountingPeriod?.reopenedAt ?? null,
+        reopenJournalEntryId: period.accountingPeriod?.reopenJournalEntryId ?? null,
       },
       trialBalance: {
         totalDebitRupiah: lines.reduce((sum, line) => sum + line.debitRupiah, 0),
@@ -327,8 +330,8 @@ export class AccountingReportsService {
         expenses: expenseLines,
       },
       note: closingJournal
-        ? 'P&L operasional mengecualikan CLOSING_ENTRY agar performa periode tetap terbaca setelah ditutup ke Retained Earnings.'
-        : 'P&L Lite membaca JournalEntry POSTED periode ini dan mengecualikan CLOSING_ENTRY. Invoice payment tidak diakui sebagai revenue; revenue berasal dari invoice issued journal.',
+        ? 'P&L operasional mengecualikan CLOSING_ENTRY dan CLOSING_REVERSAL agar performa periode tetap terbaca setelah close/reopen.'
+        : 'P&L Lite membaca JournalEntry POSTED periode ini dan mengecualikan CLOSING_ENTRY/CLOSING_REVERSAL. Invoice payment tidak diakui sebagai revenue; revenue berasal dari invoice issued journal.',
     };
   }
 
@@ -442,7 +445,7 @@ export class AccountingReportsService {
         closingJournalEntryId: { not: null },
       },
       orderBy: [{ endDate: 'desc' }, { id: 'desc' }],
-      select: { id: true, year: true, month: true, closedAt: true, closingJournalEntryId: true, closingNote: true, closeBasis: true },
+      select: { id: true, year: true, month: true, closedAt: true, closingJournalEntryId: true, closingNote: true, closeBasis: true, reopenedAt: true, reopenJournalEntryId: true, reopenReason: true },
     });
 
     return {
@@ -461,7 +464,7 @@ export class AccountingReportsService {
       closing: latestClosedPeriod ? {
         latestClosedPeriod,
         retainedEarningsActive: true,
-        note: 'Periode tertutup sudah memindahkan laba/rugi ke Retained Earnings melalui CLOSING_ENTRY. Current profit/loss pada Balance Sheet hanya mewakili periode yang belum ditutup.',
+        note: 'Periode tertutup sudah memindahkan laba/rugi ke Retained Earnings melalui CLOSING_ENTRY. Jika pernah dibuka ulang, CLOSING_REVERSAL menjaga audit trail. Current profit/loss hanya mewakili periode yang belum ditutup.',
       } : {
         latestClosedPeriod: null,
         retainedEarningsActive: false,

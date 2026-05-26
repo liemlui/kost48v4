@@ -8,7 +8,7 @@ const AUTO_SOURCE_TYPES = [
   "WIFI_SALE",
 ] as const;
 type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
-type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION" | "CLOSING_ENTRY";
+type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION" | "CLOSING_ENTRY" | "CLOSING_REVERSAL";
 
 type JournalLineInput = {
   chartOfAccountId: number;
@@ -59,12 +59,12 @@ export class AccountingPostingService {
   explainPostingBoundary() {
     return {
       autoPostingEnabled: true,
-      basis: "V5.25_B3_AUTO_JOURNAL_LITE",
-      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY"],
+      basis: "V5.28_B8_CLOSED_PERIOD_GOVERNANCE",
+      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY", "CLOSING_REVERSAL"],
       behavior:
-        "Idempotent by sourceType/sourceId. Jika COA, cash account, atau accounting period belum siap, transaksi bisnis tetap aman dan journal auto-posting akan diskip dengan warning.",
+        "Idempotent by sourceType/sourceId. Jika COA/cash/period belum siap atau periode sudah CLOSED, transaksi bisnis tetap aman dan journal auto-posting diskip dengan warning; koreksi periode closed harus lewat reopen/reversal Owner-only.",
       excluded: ["INVENTORY", "PAYMENT_REVERSAL"],
-      note: "B4 menambahkan depreciation posting untuk asset register additive. Acquisition journal tetap tidak otomatis agar tidak double-count opening balance.",
+      note: "B8 menambahkan closed-period guard: tidak ada journal baru yang boleh masuk periode CLOSED kecuali workflow close/reopen yang terkontrol.",
     };
   }
 
@@ -1088,13 +1088,20 @@ export class AccountingPostingService {
       );
     }
 
-    const period = await this.findOpenAccountingPeriodTx(tx, input.entryDate);
+    const period = await this.findAccountingPeriodForPostingTx(tx, input.entryDate);
     if (!period)
       return this.skip(
         input.sourceType,
         input.sourceId,
-        "Tidak ada accounting period OPEN untuk tanggal transaksi.",
+        "Tidak ada accounting period untuk tanggal transaksi.",
       );
+    if (period.status !== "OPEN") {
+      return this.skip(
+        input.sourceType,
+        input.sourceId,
+        `Periode ${period.year}-${String(period.month).padStart(2, "0")} sudah ${period.status}; journal baru harus memakai workflow reopen/reversal Owner-only atau adjustment periode berjalan.`,
+      );
+    }
 
     const journal = await tx.journalEntry.create({
       data: {
@@ -1133,11 +1140,10 @@ export class AccountingPostingService {
     return { posted: true, skipped: false, journalEntry: journal };
   }
 
-  private async findOpenAccountingPeriodTx(tx: any, value: Date) {
+  private async findAccountingPeriodForPostingTx(tx: any, value: Date) {
     const entryDate = dateOnly(value);
     return tx.accountingPeriod.findFirst({
       where: {
-        status: "OPEN" as any,
         startDate: { lte: entryDate },
         endDate: { gte: entryDate },
       },
