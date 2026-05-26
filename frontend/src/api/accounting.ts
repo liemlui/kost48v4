@@ -246,6 +246,63 @@ export type JournalBySourceResult = {
 };
 
 
+export type DepositLedgerBreakdown = {
+  sourceType: string;
+  debitRupiah: number;
+  creditRupiah: number;
+  liabilityRupiah: number;
+  sourceCount: number;
+  sampleEntries?: Array<{
+    id?: number;
+    entryNumber?: string;
+    sourceType?: string;
+    sourceId?: string | null;
+    memo?: string | null;
+    entryDate?: string;
+    debitRupiah: number;
+    creditRupiah: number;
+  }>;
+};
+
+export type DepositOperationalStay = {
+  stayId: number;
+  tenantId: number;
+  tenantName?: string | null;
+  roomId: number;
+  roomCode?: string | null;
+  status: string;
+  depositAmountRupiah: number;
+  depositPaidRupiah: number;
+  depositRefundedRupiah: number;
+  depositDeductedRupiah: number;
+  depositHeldRupiah: number;
+  depositPaymentStatus?: string | null;
+  depositStatus?: string | null;
+  hasDepositJournal: boolean;
+  backfillCandidate: boolean;
+};
+
+export type DepositCandidateAction = {
+  key: string;
+  label: string;
+  severity: 'success' | 'info' | 'warning' | 'danger' | string;
+  action: string;
+  note: string;
+};
+
+export type DepositReconciliationSummary = {
+  operationalExpectedDepositRupiah: number;
+  operationalPaidDepositRupiah: number;
+  operationalNetLiabilityRupiah: number;
+  ledgerDepositLiabilityRupiah: number;
+  ledgerOpeningBalanceDepositRupiah: number;
+  ledgerAutoJournalDepositRupiah: number;
+  ledgerAdjustmentDepositRupiah: number;
+  differenceRupiah: number;
+  differenceDirection: string;
+  reconciliationStatus: string;
+};
+
 export type DepositPosition = {
   basis: string;
   ledgerBacked: boolean;
@@ -264,7 +321,49 @@ export type DepositPosition = {
     creditRupiah: number;
     liabilityRupiah: number;
   };
+  reconciliation?: {
+    status: string;
+    differenceDirection: string;
+  };
   differenceRupiah: number;
+  differenceDirection?: string;
+  note?: string;
+};
+
+export type DepositReconciliation = {
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  account?: Pick<ChartOfAccount, 'id' | 'code' | 'name' | 'type'> | null;
+  summary: DepositReconciliationSummary;
+  ledgerBreakdown: DepositLedgerBreakdown[];
+  operationalStays: DepositOperationalStay[];
+  candidateActions: DepositCandidateAction[];
+  warnings: string[];
+  explanation: string;
+  note?: string;
+};
+
+export type DepositBackfillDryRunResult = {
+  basis: string;
+  dryRun: boolean;
+  limit: number;
+  createdWouldBe: number;
+  skipped: number;
+  blocked: number;
+  items: Array<{
+    stayId: number;
+    tenantName?: string | null;
+    roomCode?: string | null;
+    depositAmountRupiah: number;
+    depositPaidRupiah: number;
+    depositHeldRupiah: number;
+    hasDepositJournal: boolean;
+    action: 'WOULD_CREATE' | 'SKIP' | 'BLOCKED';
+    reason: string;
+    proposedJournal?: unknown;
+  }>;
+  warnings: string[];
   note?: string;
 };
 
@@ -406,6 +505,14 @@ export async function fetchRecentAutoJournals(params?: { sourceTypes?: string[];
 
 export async function fetchDepositPosition() {
   return unwrap<DepositPosition>(client.get('/accounting/deposit-position'));
+}
+
+export async function fetchDepositReconciliation() {
+  return unwrap<DepositReconciliation>(client.get('/accounting/deposit-reconciliation'));
+}
+
+export async function runDepositBackfillDryRun(payload: { limit?: number } = {}) {
+  return unwrap<DepositBackfillDryRunResult>(client.post('/accounting/auto-journal/deposit-backfill/dry-run', payload));
 }
 
 export async function fetchReversalWatch() {

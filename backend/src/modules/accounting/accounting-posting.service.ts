@@ -605,6 +605,158 @@ export class AccountingPostingService {
     });
   }
 
+  private async mappedDepositStaySourceIds() {
+    const entries = await (this.prisma as any).journalEntry.findMany({
+      where: {
+        sourceType: "DEPOSIT" as any,
+        status: "POSTED" as any,
+      },
+      select: { sourceId: true },
+    });
+
+    const mapped = new Set<number>();
+    for (const entry of entries ?? []) {
+      const sourceId = String(entry.sourceId ?? "");
+      // Deposit received journals use numeric stay ids. Settlement journals use
+      // prefixed ids such as SETTLEMENT:<stayId>, so they must not block
+      // received-deposit backfill candidates.
+      if (/^\d+$/.test(sourceId)) mapped.add(Number(sourceId));
+    }
+    return mapped;
+  }
+
+  async dryRunDepositBackfill(dto: { limit?: number } = {}) {
+    const limit = Math.min(Math.max(Number(dto.limit ?? 25), 1), 50);
+    const mappedDepositIds = await this.mappedDepositStaySourceIds();
+    const stays = await (this.prisma as any).stay.findMany({
+      where: { depositPaidAmountRupiah: { gt: 0 } },
+      select: {
+        id: true,
+        tenantId: true,
+        roomId: true,
+        status: true,
+        checkInDate: true,
+        createdAt: true,
+        depositAmountRupiah: true,
+        depositPaidAmountRupiah: true,
+        depositPaymentStatus: true,
+        depositStatus: true,
+        depositRefundedRupiah: true,
+        depositDeductionRupiah: true,
+        tenant: { select: { fullName: true } },
+        room: { select: { code: true, name: true } },
+      },
+      orderBy: { id: "asc" },
+      take: limit,
+    });
+
+    const items: Array<{
+      stayId: number;
+      tenantName?: string | null;
+      roomCode?: string | null;
+      depositAmountRupiah: number;
+      depositPaidRupiah: number;
+      depositHeldRupiah: number;
+      hasDepositJournal: boolean;
+      action: "WOULD_CREATE" | "SKIP" | "BLOCKED";
+      reason: string;
+      proposedJournal?: any;
+    }> = [];
+    const warnings: string[] = [];
+    let createdWouldBe = 0;
+    let skipped = 0;
+    let blocked = 0;
+
+    for (const stay of stays) {
+      const paid = rupiah(stay.depositPaidAmountRupiah);
+      const amount = rupiah(stay.depositAmountRupiah);
+      const refunded = rupiah(stay.depositRefundedRupiah);
+      const deducted = rupiah(stay.depositDeductionRupiah);
+      const held = Math.max(paid - refunded - deducted, 0);
+      const hasDepositJournal = mappedDepositIds.has(stay.id);
+      if (hasDepositJournal) {
+        skipped += 1;
+        items.push({
+          stayId: stay.id,
+          tenantName: stay.tenant?.fullName ?? null,
+          roomCode: stay.room?.code ?? null,
+          depositAmountRupiah: amount,
+          depositPaidRupiah: paid,
+          depositHeldRupiah: held,
+          hasDepositJournal,
+          action: "SKIP",
+          reason: "DEPOSIT journal untuk stay ini sudah ada.",
+        });
+        continue;
+      }
+      if (paid <= 0) {
+        blocked += 1;
+        items.push({
+          stayId: stay.id,
+          tenantName: stay.tenant?.fullName ?? null,
+          roomCode: stay.room?.code ?? null,
+          depositAmountRupiah: amount,
+          depositPaidRupiah: paid,
+          depositHeldRupiah: held,
+          hasDepositJournal,
+          action: "BLOCKED",
+          reason: "Deposit paid masih 0.",
+        });
+        continue;
+      }
+      if (amount > 0 && paid < amount) {
+        blocked += 1;
+        warnings.push(`Stay #${stay.id}: deposit baru partial (${paid}/${amount}); B3.3R dry-run tidak membuat journal partial snapshot.`);
+        items.push({
+          stayId: stay.id,
+          tenantName: stay.tenant?.fullName ?? null,
+          roomCode: stay.room?.code ?? null,
+          depositAmountRupiah: amount,
+          depositPaidRupiah: paid,
+          depositHeldRupiah: held,
+          hasDepositJournal,
+          action: "BLOCKED",
+          reason: "Deposit belum lunas; hindari underpost partial snapshot.",
+        });
+        continue;
+      }
+      createdWouldBe += 1;
+      items.push({
+        stayId: stay.id,
+        tenantName: stay.tenant?.fullName ?? null,
+        roomCode: stay.room?.code ?? null,
+        depositAmountRupiah: amount,
+        depositPaidRupiah: paid,
+        depositHeldRupiah: held,
+        hasDepositJournal,
+        action: "WOULD_CREATE",
+        reason: "Aman sebagai kandidat DEPOSIT journal jika owner menjalankan execute di fase berikutnya.",
+        proposedJournal: {
+          sourceType: "DEPOSIT",
+          sourceId: String(stay.id),
+          debitCashRupiah: paid,
+          creditTenantDepositLiabilityRupiah: paid,
+        },
+      });
+    }
+
+    if (!items.length) {
+      warnings.push("Tidak ada stay dengan depositPaidAmountRupiah > 0 untuk di-backfill. Jika ledger liability tetap ada, kemungkinan berasal dari opening balance/manual journal.");
+    }
+
+    return {
+      basis: "DEPOSIT_BACKFILL_DRY_RUN_B3_3R",
+      dryRun: true,
+      limit,
+      createdWouldBe,
+      skipped,
+      blocked,
+      items,
+      warnings,
+      note: "Dry-run saja. Endpoint ini tidak membuat JournalEntry agar liability deposit tidak tergandakan tanpa review owner.",
+    };
+  }
+
   async backfillAutoJournal(
     dto: { sourceTypes?: string[]; limit?: number } = {},
     createdById?: number | null,

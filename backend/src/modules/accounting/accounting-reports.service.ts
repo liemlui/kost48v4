@@ -368,9 +368,57 @@ export class AccountingReportsService {
 
 
   async depositPosition() {
+    const snapshot = await this.buildDepositReconciliationSnapshot(25);
+    return {
+      basis: 'DEPOSIT_LIABILITY_POSITION_B3_3R',
+      ledgerBacked: true,
+      formalStatementReady: snapshot.reconciliation.status === 'MATCHED',
+      account: snapshot.account,
+      operational: snapshot.operational,
+      ledger: snapshot.ledger,
+      reconciliation: snapshot.reconciliation,
+      differenceRupiah: snapshot.differenceRupiah,
+      differenceDirection: snapshot.reconciliation.differenceDirection,
+      note: snapshot.explanation,
+    };
+  }
+
+  async depositReconciliation() {
+    const snapshot = await this.buildDepositReconciliationSnapshot(25);
+    return {
+      basis: 'DEPOSIT_RECONCILIATION_B3_3R',
+      ledgerBacked: true,
+      formalStatementReady: snapshot.reconciliation.status === 'MATCHED',
+      account: snapshot.account,
+      summary: {
+        operationalExpectedDepositRupiah: snapshot.operational.depositAmountRupiah,
+        operationalPaidDepositRupiah: snapshot.operational.depositPaidRupiah,
+        operationalNetLiabilityRupiah: snapshot.operational.depositHeldRupiah,
+        ledgerDepositLiabilityRupiah: snapshot.ledger.liabilityRupiah,
+        ledgerOpeningBalanceDepositRupiah: snapshot.ledgerBreakdownSummary.openingBalanceRupiah,
+        ledgerAutoJournalDepositRupiah: snapshot.ledgerBreakdownSummary.depositAutoJournalRupiah,
+        ledgerAdjustmentDepositRupiah: snapshot.ledgerBreakdownSummary.adjustmentRupiah,
+        differenceRupiah: snapshot.differenceRupiah,
+        differenceDirection: snapshot.reconciliation.differenceDirection,
+        reconciliationStatus: snapshot.reconciliation.status,
+      },
+      ledgerBreakdown: snapshot.ledgerBreakdown,
+      operationalStays: snapshot.operationalStays,
+      candidateActions: snapshot.candidateActions,
+      warnings: snapshot.warnings,
+      explanation: snapshot.explanation,
+      note: 'B3.3R memisahkan deposit opening balance, auto journal DEPOSIT, dan ADJUSTMENT agar owner tidak melakukan backfill yang menggandakan liability.',
+    };
+  }
+
+  private async buildDepositReconciliationSnapshot(limit = 25) {
     await this.schemaGuard.assertReady();
-    const [depositAccount, operationalAgg, settledAgg] = await Promise.all([
-      (this.prisma as any).chartOfAccount.findFirst({ where: { code: '2000', isActive: true }, select: { id: true, code: true, name: true, type: true } }),
+    const depositAccount = await (this.prisma as any).chartOfAccount.findFirst({
+      where: { code: '2000', isActive: true },
+      select: { id: true, code: true, name: true, type: true },
+    });
+
+    const [operationalAgg, settledAgg, operationalStays, mappedDepositIds] = await Promise.all([
       (this.prisma as any).stay.aggregate({
         _sum: { depositAmountRupiah: true, depositPaidAmountRupiah: true },
         _count: { id: true },
@@ -380,32 +428,119 @@ export class AccountingReportsService {
         _sum: { depositDeductionRupiah: true, depositRefundedRupiah: true },
         where: { depositAmountRupiah: { gt: 0 }, depositStatus: { in: ['REFUNDED', 'FORFEITED', 'PARTIALLY_REFUNDED'] as any } },
       }),
+      (this.prisma as any).stay.findMany({
+        where: { OR: [{ depositAmountRupiah: { gt: 0 } }, { depositPaidAmountRupiah: { gt: 0 } }] },
+        select: {
+          id: true,
+          tenantId: true,
+          roomId: true,
+          status: true,
+          depositAmountRupiah: true,
+          depositPaidAmountRupiah: true,
+          depositPaymentStatus: true,
+          depositStatus: true,
+          depositDeductionRupiah: true,
+          depositRefundedRupiah: true,
+          createdAt: true,
+          tenant: { select: { fullName: true } },
+          room: { select: { code: true, name: true } },
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: limit,
+      }),
+      this.mappedSourceIds('DEPOSIT'),
     ]);
 
-    let ledgerDebit = 0;
-    let ledgerCredit = 0;
-    if (depositAccount) {
-      const sum = await (this.prisma as any).journalLine.aggregate({
-        _sum: { debitRupiah: true, creditRupiah: true },
-        where: {
-          chartOfAccountId: depositAccount.id,
-          journalEntry: { status: 'POSTED' as any },
-        },
-      });
-      ledgerDebit = Number(sum._sum.debitRupiah ?? 0);
-      ledgerCredit = Number(sum._sum.creditRupiah ?? 0);
-    }
-
+    const mappedDepositSet = new Set(mappedDepositIds);
     const operationalPaid = Number(operationalAgg._sum.depositPaidAmountRupiah ?? 0);
     const refunded = Number(settledAgg._sum.depositRefundedRupiah ?? 0);
     const deducted = Number(settledAgg._sum.depositDeductionRupiah ?? 0);
     const operationalHeld = Math.max(operationalPaid - refunded - deducted, 0);
+
+    const ledgerBreakdown = await this.depositLedgerBreakdown(depositAccount?.id ?? null);
+    const ledgerDebit = ledgerBreakdown.reduce((sum: number, row: any) => sum + Number(row.debitRupiah ?? 0), 0);
+    const ledgerCredit = ledgerBreakdown.reduce((sum: number, row: any) => sum + Number(row.creditRupiah ?? 0), 0);
     const ledgerLiability = Math.max(ledgerCredit - ledgerDebit, 0);
+    const difference = ledgerLiability - operationalHeld;
+    const openingBalanceRupiah = ledgerBreakdown
+      .filter((row: any) => row.sourceType === 'OPENING_BALANCE' || row.sourceType === 'OPENING_BALANCE_FALLBACK')
+      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
+    const depositAutoJournalRupiah = ledgerBreakdown
+      .filter((row: any) => row.sourceType === 'DEPOSIT')
+      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
+    const adjustmentRupiah = ledgerBreakdown
+      .filter((row: any) => row.sourceType === 'ADJUSTMENT')
+      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
+
+    const differenceDirection = difference === 0
+      ? 'MATCHED'
+      : difference > 0
+        ? 'LEDGER_HIGHER_THAN_OPERATIONAL'
+        : 'OPERATIONAL_HIGHER_THAN_LEDGER';
+
+    const candidateActions: Array<{ key: string; label: string; severity: string; action: string; note: string }> = [];
+    const warnings: string[] = [];
+    let status = 'MATCHED';
+    let explanation = 'Deposit ledger dan operational deposit sudah matched.';
+
+    if (difference > 0) {
+      status = openingBalanceRupiah >= difference ? 'OPENING_BALANCE_ONLY' : 'NEEDS_REVIEW';
+      explanation = openingBalanceRupiah >= difference
+        ? 'Ledger deposit lebih tinggi karena saldo awal/opening balance. Ini belum tentu error; jangan backfill deposit operasional jika depositPaid masih 0.'
+        : 'Ledger deposit lebih tinggi daripada operational held dan tidak seluruhnya dijelaskan oleh opening balance. Perlu review manual sebelum adjustment.';
+      candidateActions.push({
+        key: 'DISCLOSE_OPENING_BALANCE_DEPOSIT',
+        label: 'Disclosure saldo awal deposit',
+        severity: openingBalanceRupiah >= difference ? 'info' : 'warning',
+        action: 'Jangan membuat DEPOSIT journal tambahan sampai sumber opening balance/divergence dipastikan.',
+        note: explanation,
+      });
+      warnings.push(`Ledger deposit lebih tinggi ${difference.toLocaleString('id-ID')} dari operational held.`);
+    } else if (difference < 0) {
+      status = 'OPERATIONAL_HIGHER_THAN_LEDGER';
+      explanation = 'Operational paid deposit lebih tinggi daripada ledger liability. Deposit backfill dry-run dapat mencari kandidat yang aman.';
+      candidateActions.push({
+        key: 'RUN_DEPOSIT_BACKFILL_DRY_RUN',
+        label: 'Dry-run backfill deposit',
+        severity: 'warning',
+        action: 'Owner boleh menjalankan dry-run. Execute journal hanya setelah candidate source jelas dan tidak double-post.',
+        note: 'Backfill hanya untuk stay dengan depositPaidAmountRupiah > 0 yang belum punya DEPOSIT journal.',
+      });
+      warnings.push(`Operational deposit lebih tinggi ${Math.abs(difference).toLocaleString('id-ID')} dari ledger liability.`);
+    } else {
+      candidateActions.push({
+        key: 'NO_ACTION_REQUIRED',
+        label: 'Tidak perlu action',
+        severity: 'success',
+        action: 'Tidak ada backfill/adjustment deposit yang diperlukan.',
+        note: explanation,
+      });
+    }
+
+    const formattedOperationalStays = operationalStays.map((stay: any) => {
+      const paid = Number(stay.depositPaidAmountRupiah ?? 0);
+      const refund = Number(stay.depositRefundedRupiah ?? 0);
+      const deduction = Number(stay.depositDeductionRupiah ?? 0);
+      return {
+        stayId: stay.id,
+        tenantId: stay.tenantId,
+        tenantName: stay.tenant?.fullName ?? null,
+        roomId: stay.roomId,
+        roomCode: stay.room?.code ?? null,
+        status: stay.status,
+        depositAmountRupiah: Number(stay.depositAmountRupiah ?? 0),
+        depositPaidRupiah: paid,
+        depositRefundedRupiah: refund,
+        depositDeductedRupiah: deduction,
+        depositHeldRupiah: Math.max(paid - refund - deduction, 0),
+        depositPaymentStatus: stay.depositPaymentStatus,
+        depositStatus: stay.depositStatus,
+        hasDepositJournal: mappedDepositSet.has(stay.id),
+        backfillCandidate: paid > 0 && !mappedDepositSet.has(stay.id),
+      };
+    });
 
     return {
-      basis: 'DEPOSIT_LIABILITY_POSITION_B3_3',
-      ledgerBacked: true,
-      formalStatementReady: false,
       account: depositAccount,
       operational: {
         stayCount: Number(operationalAgg._count?.id ?? 0),
@@ -420,9 +555,74 @@ export class AccountingReportsService {
         creditRupiah: ledgerCredit,
         liabilityRupiah: ledgerLiability,
       },
-      differenceRupiah: ledgerLiability - operationalHeld,
-      note: 'Deposit adalah liability, bukan revenue. Selisih dapat terjadi jika data lama belum punya DEPOSIT journal atau partial deposit belum lunas.',
+      ledgerBreakdownSummary: { openingBalanceRupiah, depositAutoJournalRupiah, adjustmentRupiah },
+      ledgerBreakdown,
+      operationalStays: formattedOperationalStays,
+      differenceRupiah: difference,
+      reconciliation: { status, differenceDirection },
+      candidateActions,
+      warnings,
+      explanation,
     };
+  }
+
+  private async depositLedgerBreakdown(depositAccountId: number | null) {
+    if (!depositAccountId) return [];
+    const [journalLines, openingJournalSourceIds] = await Promise.all([
+      (this.prisma as any).journalLine.findMany({
+        where: { chartOfAccountId: depositAccountId, journalEntry: { status: 'POSTED' as any } },
+        include: { journalEntry: { select: { id: true, entryNumber: true, sourceType: true, sourceId: true, memo: true, entryDate: true } } },
+        orderBy: { id: 'asc' },
+      }),
+      this.mappedSourceIds('OPENING_BALANCE'),
+    ]);
+
+    const buckets = new Map<string, any>();
+    const push = (sourceType: string, debit: number, credit: number, entry?: any) => {
+      const current = buckets.get(sourceType) ?? { sourceType, debitRupiah: 0, creditRupiah: 0, liabilityRupiah: 0, sourceCount: 0, sampleEntries: [] };
+      current.debitRupiah += debit;
+      current.creditRupiah += credit;
+      current.liabilityRupiah = Math.max(current.creditRupiah - current.debitRupiah, 0);
+      if (entry && current.sampleEntries.length < 10) current.sampleEntries.push(entry);
+      current.sourceCount += entry ? 1 : 0;
+      buckets.set(sourceType, current);
+    };
+
+    for (const line of journalLines) {
+      push(String(line.journalEntry?.sourceType ?? 'UNKNOWN'), Number(line.debitRupiah ?? 0), Number(line.creditRupiah ?? 0), {
+        id: line.journalEntry?.id,
+        entryNumber: line.journalEntry?.entryNumber,
+        sourceType: line.journalEntry?.sourceType,
+        sourceId: line.journalEntry?.sourceId,
+        memo: line.journalEntry?.memo,
+        entryDate: line.journalEntry?.entryDate,
+        debitRupiah: Number(line.debitRupiah ?? 0),
+        creditRupiah: Number(line.creditRupiah ?? 0),
+      });
+    }
+
+    const openingFallback = await (this.prisma as any).openingBalanceLine.findMany({
+      where: {
+        chartOfAccountId: depositAccountId,
+        batch: { status: 'POSTED' as any, id: { notIn: openingJournalSourceIds } },
+      },
+      include: { batch: { select: { id: true, batchNumber: true, cutoverDate: true, notes: true } } },
+      orderBy: { id: 'asc' },
+    });
+    for (const line of openingFallback) {
+      push('OPENING_BALANCE_FALLBACK', Number(line.debitRupiah ?? 0), Number(line.creditRupiah ?? 0), {
+        id: line.batch?.id,
+        entryNumber: line.batch?.batchNumber,
+        sourceType: 'OPENING_BALANCE_FALLBACK',
+        sourceId: String(line.batch?.id ?? ''),
+        memo: line.description ?? line.batch?.notes ?? 'Opening balance fallback',
+        entryDate: line.batch?.cutoverDate,
+        debitRupiah: Number(line.debitRupiah ?? 0),
+        creditRupiah: Number(line.creditRupiah ?? 0),
+      });
+    }
+
+    return Array.from(buckets.values()).sort((a: any, b: any) => String(a.sourceType).localeCompare(String(b.sourceType)));
   }
 
   async reversalWatch() {

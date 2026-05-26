@@ -15,3 +15,11 @@ export class AutoJournalBackfillDto {
   @Min(1)
   limit?: number;
 }
+
+export class DepositBackfillDryRunDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
+}

@@ -22,6 +22,7 @@ import {
   fetchBalanceSheetGuard,
   fetchCashAccounts,
   fetchDepositPosition,
+  fetchDepositReconciliation,
   fetchOpeningBalances,
   fetchPostingBoundary,
   fetchProfitLossLite,
@@ -31,6 +32,7 @@ import {
   fetchUnmappedTransactions,
   postOpeningBalance,
   runAutoJournalBackfill,
+  runDepositBackfillDryRun,
   seedDefaultCoa,
   voidOpeningBalance,
   type CreateCashAccountPayload,
@@ -109,6 +111,7 @@ export default function AccountingSetupPage() {
   });
 
   const depositPositionQuery = useQuery({ queryKey: ['accounting-deposit-position'], queryFn: fetchDepositPosition, staleTime: 30_000 });
+  const depositReconciliationQuery = useQuery({ queryKey: ['accounting-deposit-reconciliation'], queryFn: fetchDepositReconciliation, staleTime: 30_000 });
   const reversalWatchQuery = useQuery({ queryKey: ['accounting-reversal-watch'], queryFn: fetchReversalWatch, staleTime: 30_000 });
 
   const accounts = accountsQuery.data ?? [];
@@ -142,6 +145,7 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-deposit-position'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-deposit-reconciliation'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-reversal-watch'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-journal-entries'] }),
     ]);
@@ -225,12 +229,23 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan backfill auto journal.')); },
   });
 
+  const depositDryRunMutation = useMutation({
+    mutationFn: () => runDepositBackfillDryRun({ limit: 25 }),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setActionMessage(`Dry-run deposit selesai: ${result.createdWouldBe} kandidat, ${result.skipped} skip, ${result.blocked} blocked. Tidak ada journal dibuat.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan dry-run backfill deposit.')); },
+  });
+
   return (
     <div className="accounting-setup-page">
       <PageHeader
         eyebrow="Finance · Accounting Setup"
         title="Accounting Command Center"
-        description="B3.3 membaca ledger POSTED untuk membuktikan auto journal, deposit liability, reversal invoice cancel, Trial Balance, Profit & Loss Lite, dan Balance Sheet Lite tanpa angka palsu."
+        description="B3.3R membaca ledger POSTED, memisahkan saldo awal deposit dari deposit operasional, dan menyiapkan dry-run backfill agar liability tidak tergandakan."
         secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
       />
 
@@ -279,6 +294,7 @@ export default function AccountingSetupPage() {
         profitLoss={profitLossQuery.data}
         unmapped={unmappedQuery.data}
         depositPosition={depositPositionQuery.data}
+        depositReconciliation={depositReconciliationQuery.data}
         reversalWatch={reversalWatchQuery.data}
         recentJournals={recentJournals}
         autoJournalEnabled={autoJournalEnabled}
@@ -313,6 +329,33 @@ export default function AccountingSetupPage() {
               {backfillMutation.isPending ? 'Backfill...' : 'Backfill 25 Transaksi'}
             </Button>
           </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="content-card border-0 mb-3">
+        <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+          <div>
+            <div className="small text-uppercase text-muted fw-semibold mb-1">Deposit Reconciliation · B3.3R</div>
+            <h3 className="h5 mb-1">Dry-run sebelum backfill deposit</h3>
+            <p className="text-muted mb-2">
+              Selisih deposit tidak otomatis berarti harus membuat journal baru. Jika berasal dari opening balance, backfill deposit bisa menggandakan liability. Dry-run hanya membaca kandidat dan tidak membuat JournalEntry.
+            </p>
+            {depositReconciliationQuery.data?.summary ? (
+              <div className="d-flex flex-wrap gap-2 small">
+                <Badge bg={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'success' : 'warning'}>{depositReconciliationQuery.data.summary.reconciliationStatus}</Badge>
+                <span className="text-muted">Opening: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
+                <span className="text-muted">Auto deposit: {formatRupiah(depositReconciliationQuery.data.summary.ledgerAutoJournalDepositRupiah)}</span>
+                <span className="text-muted">Selisih: {formatRupiah(depositReconciliationQuery.data.summary.differenceRupiah)}</span>
+              </div>
+            ) : null}
+          </div>
+          <Button
+            variant="outline-warning"
+            disabled={!canManageOpeningBalance || depositDryRunMutation.isPending}
+            onClick={() => depositDryRunMutation.mutate()}
+          >
+            {depositDryRunMutation.isPending ? 'Dry-run...' : 'Dry-run Deposit Backfill'}
+          </Button>
         </Card.Body>
       </Card>
 

@@ -1,5 +1,5 @@
 import { Alert, Badge, Card, Col, Row } from 'react-bootstrap';
-import type { AccountingReadiness, AutoJournalEntry, BalanceSheetGuard, DepositPosition, ProfitLossLite, ReversalWatch, TrialBalance, UnmappedTransactions } from '../../api/accounting';
+import type { AccountingReadiness, AutoJournalEntry, BalanceSheetGuard, DepositPosition, DepositReconciliation, ProfitLossLite, ReversalWatch, TrialBalance, UnmappedTransactions } from '../../api/accounting';
 import { formatRupiah } from '../../utils/formatCurrency';
 
 type Props = {
@@ -9,6 +9,7 @@ type Props = {
   profitLoss?: ProfitLossLite;
   unmapped?: UnmappedTransactions;
   depositPosition?: DepositPosition;
+  depositReconciliation?: DepositReconciliation;
   reversalWatch?: ReversalWatch;
   recentJournals: AutoJournalEntry[];
   autoJournalEnabled: boolean;
@@ -21,7 +22,7 @@ function totalUnmapped(unmapped?: UnmappedTransactions) {
   return summary.invoiceSampleCount + summary.invoicePaymentSampleCount + summary.expenseSampleCount + summary.wifiSaleSampleCount;
 }
 
-export default function AccountingCommandCenterLite({ readiness, trial, balanceSheet, profitLoss, unmapped, depositPosition, reversalWatch, recentJournals, autoJournalEnabled, isLoading }: Props) {
+export default function AccountingCommandCenterLite({ readiness, trial, balanceSheet, profitLoss, unmapped, depositPosition, depositReconciliation, reversalWatch, recentJournals, autoJournalEnabled, isLoading }: Props) {
   const unmappedCount = totalUnmapped(unmapped);
   const latest = recentJournals[0];
   const statementReady = Boolean(trial?.isBalanced && balanceSheet?.statement?.balanced);
@@ -33,7 +34,7 @@ export default function AccountingCommandCenterLite({ readiness, trial, balanceS
       <Card.Body>
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-2">Accounting Command Center · B3.3</div>
+            <div className="section-kicker mb-2">Accounting Command Center · B3.3R</div>
             <h3 className="panel-title mb-1">Ledger cockpit dari transaksi operasional</h3>
             <p className="text-muted mb-0">Panel ini membaca JournalEntry POSTED, bukan angka dekoratif. Gunakan untuk membuktikan auto journal, Trial Balance, P&amp;L Lite, Balance Sheet Lite, deposit liability, dan reversal invoice cancel.</p>
           </div>
@@ -88,7 +89,7 @@ export default function AccountingCommandCenterLite({ readiness, trial, balanceS
             <div className={`accounting-proof-tile ${depositDifference === 0 ? 'success' : 'warning'}`}>
               <span>Deposit Liability Watch</span>
               <strong>{formatRupiah(depositPosition?.ledger.liabilityRupiah ?? 0)}</strong>
-              <small>Operasional held {formatRupiah(depositPosition?.operational.depositHeldRupiah ?? 0)} · selisih {formatRupiah(depositDifference)}</small>
+              <small>Held {formatRupiah(depositPosition?.operational.depositHeldRupiah ?? 0)} · opening {formatRupiah(depositReconciliation?.summary.ledgerOpeningBalanceDepositRupiah ?? 0)}</small>
             </div>
           </Col>
           <Col md={6}>
@@ -103,6 +104,17 @@ export default function AccountingCommandCenterLite({ readiness, trial, balanceS
         {depositPosition?.note ? (
           <Alert variant={depositDifference === 0 ? 'light' : 'warning'} className="border mt-3 mb-0">
             {depositPosition.note}
+          </Alert>
+        ) : null}
+        {depositReconciliation?.candidateActions?.length ? (
+          <Alert variant="light" className="border mt-3 mb-0">
+            <div className="fw-semibold mb-1">Deposit reconciliation: {depositReconciliation.summary.reconciliationStatus}</div>
+            <div className="small text-muted">{depositReconciliation.explanation}</div>
+            <ul className="small mb-0 mt-2">
+              {depositReconciliation.candidateActions.slice(0, 2).map((action) => (
+                <li key={action.key}><strong>{action.label}:</strong> {action.action}</li>
+              ))}
+            </ul>
           </Alert>
         ) : null}
         {reversalMissing ? (

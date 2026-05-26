@@ -15,7 +15,7 @@ import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from
 import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
 import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/opening-balance.dto';
 import { CreateJournalDraftDto, JournalBySourceQueryDto, JournalEntriesQueryDto, RecentJournalsQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
-import { AutoJournalBackfillDto } from './dto/auto-journal.dto';
+import { AutoJournalBackfillDto, DepositBackfillDryRunDto } from './dto/auto-journal.dto';
 
 @ApiTags('accounting')
 @ApiBearerAuth()
@@ -158,6 +158,11 @@ export class AccountingController {
     return { message: 'Posisi liability deposit berhasil diambil', data: await this.reportsService.depositPosition() };
   }
 
+  @Get('deposit-reconciliation')
+  async depositReconciliation() {
+    return { message: 'Rekonsiliasi deposit berhasil diambil', data: await this.reportsService.depositReconciliation() };
+  }
+
   @Get('reversal-watch')
   async reversalWatch() {
     return { message: 'Watch reversal invoice berhasil diambil', data: await this.reportsService.reversalWatch() };
@@ -174,6 +179,15 @@ export class AccountingController {
     return {
       message: 'Backfill auto journal berhasil diproses',
       data: await this.postingService.backfillAutoJournal(dto, user.id),
+    };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post('auto-journal/deposit-backfill/dry-run')
+  async dryRunDepositBackfill(@Body() dto: DepositBackfillDryRunDto) {
+    return {
+      message: 'Dry-run backfill deposit berhasil diproses',
+      data: await this.postingService.dryRunDepositBackfill(dto),
     };
   }
 }
