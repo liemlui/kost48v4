@@ -31,10 +31,10 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
       <Card.Body>
         <div className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-start mb-3">
           <div>
-            <div className="small text-uppercase text-muted fw-semibold mb-1">B4 Asset Register Readiness</div>
-            <h3 className="h5 mb-1">Fondasi aset & depresiasi aktif</h3>
+            <div className="small text-uppercase text-muted fw-semibold mb-1">Kesiapan Asset Register</div>
+            <h3 className="h5 mb-1">Aset tetap & depresiasi</h3>
             <p className="text-muted mb-0">
-              Panel ini membaca kesiapan akun aset, runtime proof auto journal, dan kandidat aset dari inventory/expense. Schema B4 sudah aktif; register aset tersedia di Finance → Asset Register.
+              Panel ini membaca akun aset, bukti posting ledger, kandidat CAPEX, nilai buku, dan kesiapan depresiasi. Register aset tersedia di Finance → Asset Register.
             </p>
           </div>
           <div className="text-lg-end">
@@ -47,7 +47,7 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
 
         {readiness?.noSchemaChangePatch ? (
           <Alert variant="info" className="mb-3">
-            Schema additive B4 sudah tersedia. Tambahkan aset sebagai disclosure/opening dulu agar tidak double-count acquisition journal.
+            Struktur aset sudah tersedia. Tambahkan aset sebagai disclosure atau saldo awal dulu agar nilai aset tidak dihitung ganda.
           </Alert>
         ) : null}
 
@@ -97,7 +97,7 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
           </Col>
           <Col lg={6}>
             <div className="border rounded-3 p-3 h-100">
-              <div className="fw-semibold mb-2">Runtime proof B3 sebelum B4</div>
+              <div className="fw-semibold mb-2">Bukti posting sebelum aset</div>
               <div className="d-flex flex-wrap gap-2 mb-2">
                 {proof.map((item) => (
                   <Badge key={item.sourceType} bg={item.proven ? 'success' : 'secondary'}>
@@ -107,8 +107,8 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
               </div>
               <small className="text-muted">
                 {readiness?.runtimeProof.ready
-                  ? 'Auto journal inti sudah terbukti oleh JournalEntry POSTED.'
-                  : 'Buat transaksi nyata invoice/payment/expense/WiFi sampai semua source punya journal POSTED.'}
+                  ? 'Posting ledger inti sudah terbukti oleh JournalEntry POSTED.'
+                  : 'Buat transaksi nyata tagihan/pembayaran/pengeluaran/WiFi sampai setiap source punya JournalEntry POSTED.'}
               </small>
             </div>
           </Col>

@@ -38,47 +38,47 @@ export default function BalanceSheetGuardPanel({ guard }: { guard?: BalanceSheet
   return (
     <Card className="content-card border-0 accounting-setup-card h-100">
       <Card.Body>
-        <div className="section-kicker mb-2">Balance Sheet Lite Guard</div>
+        <div className="section-kicker mb-2">Neraca</div>
         <div className="d-flex justify-content-between gap-3 align-items-start mb-3">
           <div>
             <h3 className="panel-title mb-1">Laporan posisi keuangan</h3>
             <p className="text-muted mb-0">Ledger sebagai source of truth. Kontra-aset seperti akumulasi depresiasi mengurangi aset, bukan menambah aset.</p>
           </div>
-          <span className={`status-soft-pill ${guard?.ready ? 'success' : 'warning'}`}>{guard?.ready ? 'Ready' : 'Guarded'}</span>
+          <span className={`status-soft-pill ${guard?.ready ? 'success' : 'warning'}`}>{guard?.ready ? 'Seimbang' : 'Perlu cek'}</span>
         </div>
         {guard?.closing?.note ? <Alert variant={guard.closing.retainedEarningsActive ? 'success' : 'info'} className="mb-3">{guard.closing.note}</Alert> : null}
         {statement ? (
           <>
             <div className="status-strip-v2">
-              <div className="status-strip-item info"><span className="status-strip-label">Assets</span><strong>{formatRupiah(statement.assetsRupiah)}</strong></div>
-              <div className="status-strip-item warning"><span className="status-strip-label">Liabilities</span><strong>{formatRupiah(statement.liabilitiesRupiah)}</strong></div>
-              <div className="status-strip-item success"><span className="status-strip-label">Equity / RE + Profit</span><strong>{formatRupiah(statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah)}</strong></div>
-              <div className="status-strip-item info"><span className="status-strip-label">Difference</span><strong>{formatRupiah(statement.differenceRupiah ?? 0)}</strong></div>
+              <div className="status-strip-item info"><span className="status-strip-label">Aset</span><strong>{formatRupiah(statement.assetsRupiah)}</strong></div>
+              <div className="status-strip-item warning"><span className="status-strip-label">Liabilitas</span><strong>{formatRupiah(statement.liabilitiesRupiah)}</strong></div>
+              <div className="status-strip-item success"><span className="status-strip-label">Ekuitas + Laba Ditahan</span><strong>{formatRupiah(statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah)}</strong></div>
+              <div className="status-strip-item info"><span className="status-strip-label">Selisih</span><strong>{formatRupiah(statement.differenceRupiah ?? 0)}</strong></div>
             </div>
             <Table responsive hover size="sm" className="mb-0 align-middle">
-              <thead><tr><th>Kelompok akun</th><th className="text-end">Balance</th></tr></thead>
+              <thead><tr><th>Kelompok akun</th><th className="text-end">Nilai</th></tr></thead>
               <tbody>
-                <tr className="table-light"><td colSpan={2}><strong>Current Assets</strong></td></tr>
-                <StatementLines lines={guard?.lines?.currentAssets ?? guard?.lines?.assets} emptyLabel="Belum ada current asset balance." />
-                <tr className="table-light"><td colSpan={2}><strong>Fixed Assets</strong></td></tr>
-                <StatementLines lines={guard?.lines?.fixedAssets} emptyLabel="Belum ada fixed asset ledger balance." />
+                <tr className="table-light"><td colSpan={2}><strong>Aset Lancar</strong></td></tr>
+                <StatementLines lines={guard?.lines?.currentAssets ?? guard?.lines?.assets} emptyLabel="Belum ada saldo aset lancar." />
+                <tr className="table-light"><td colSpan={2}><strong>Aset Tetap</strong></td></tr>
+                <StatementLines lines={guard?.lines?.fixedAssets} emptyLabel="Belum ada saldo aset tetap di ledger." />
                 <StatementLines lines={guard?.lines?.contraAssets} emptyLabel="Belum ada kontra-aset." />
-                <SummaryRow label="Net Fixed Assets" value={statement.netFixedAssetsRupiah ?? 0} strong />
-                <SummaryRow label="Total Assets" value={statement.assetsRupiah} strong />
-                <tr className="table-light"><td colSpan={2}><strong>Liabilities</strong></td></tr>
-                <StatementLines lines={guard?.lines?.liabilities} emptyLabel="Belum ada liability balance." />
-                <SummaryRow label="Total Liabilities" value={statement.liabilitiesRupiah} strong />
-                <tr className="table-light"><td colSpan={2}><strong>Equity</strong></td></tr>
-                <StatementLines lines={guard?.lines?.equity} emptyLabel="Belum ada equity balance." />
-                <SummaryRow label="Current Profit / Loss" value={statement.currentProfitRupiah ?? 0} />
-                <SummaryRow label="Equity + Current Profit / Loss" value={statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah} strong />
-                <SummaryRow label="Liabilities + Equity + Current Profit" value={statement.liabilitiesAndEquityRupiah} strong />
-                <SummaryRow label="Difference" value={statement.differenceRupiah ?? 0} strong />
+                <SummaryRow label="Net Aset Tetap" value={statement.netFixedAssetsRupiah ?? 0} strong />
+                <SummaryRow label="Total Aset" value={statement.assetsRupiah} strong />
+                <tr className="table-light"><td colSpan={2}><strong>Liabilitas</strong></td></tr>
+                <StatementLines lines={guard?.lines?.liabilities} emptyLabel="Belum ada saldo liabilitas." />
+                <SummaryRow label="Total Liabilitas" value={statement.liabilitiesRupiah} strong />
+                <tr className="table-light"><td colSpan={2}><strong>Ekuitas</strong></td></tr>
+                <StatementLines lines={guard?.lines?.equity} emptyLabel="Belum ada saldo ekuitas." />
+                <SummaryRow label="Laba/Rugi Berjalan" value={statement.currentProfitRupiah ?? 0} />
+                <SummaryRow label="Ekuitas + Laba/Rugi Berjalan" value={statement.equityIncludingCurrentProfitRupiah ?? statement.equityRupiah} strong />
+                <SummaryRow label="Liabilitas + Ekuitas + Laba Berjalan" value={statement.liabilitiesAndEquityRupiah} strong />
+                <SummaryRow label="Selisih" value={statement.differenceRupiah ?? 0} strong />
               </tbody>
             </Table>
             {disclosure ? (
               <Alert variant={disclosure.aligned ? 'success' : 'info'} className="mt-3 mb-0">
-                <strong>Asset register disclosure:</strong> register aset mencatat nilai buku {formatRupiah(disclosure.registerNetBookValueRupiah)} dari {disclosure.assetCount} aset. Ledger net fixed assets saat ini {formatRupiah(disclosure.ledgerNetFixedAssetsRupiah)}. {disclosure.warning}
+                <strong>Disclosure asset register:</strong> register aset mencatat nilai buku {formatRupiah(disclosure.registerNetBookValueRupiah)} dari {disclosure.assetCount} aset. Nilai aset tetap bersih di ledger saat ini {formatRupiah(disclosure.ledgerNetFixedAssetsRupiah)}. {disclosure.warning}
               </Alert>
             ) : null}
           </>

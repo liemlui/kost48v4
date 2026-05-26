@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PageHeader from '../../components/common/PageHeader';
@@ -14,6 +14,9 @@ import AccountingCommandCenterLite from '../../components/accounting/AccountingC
 import ProfitLossLitePanel from '../../components/accounting/ProfitLossLitePanel';
 import AssetReadinessPanel from '../../components/accounting/AssetReadinessPanel';
 import PeriodClosePanel from '../../components/accounting/PeriodClosePanel';
+import AccountingDataQualityPanel from '../../components/accounting/AccountingDataQualityPanel';
+import PeriodCloseTimeline from '../../components/accounting/PeriodCloseTimeline';
+import JournalAuditTrailPanel from '../../components/accounting/JournalAuditTrailPanel';
 import {
   createAccountingPeriod,
   createCashAccount,
@@ -54,7 +57,7 @@ const financeMenu = [
   { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Laundry, galon, cleaning, parkir, dan add-on lain.', to: '/ancillary-revenue', active: false },
   { id: 'expenses', icon: '💸', label: 'Pengeluaran', helper: 'Biaya operasional kos dan COGS layanan tambahan.', to: '/expenses', active: false },
   { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', active: false },
-  { id: 'accounting', icon: '📘', label: 'Setup Accounting', helper: 'Cash/bank, opening balance, readiness, dan trial balance.', to: '/finance/accounting-setup', active: true },
+  { id: 'accounting', icon: '📘', label: 'Laporan Keuangan', helper: 'Neraca, laba rugi, trial balance, aset, dan tutup periode.', to: '/finance/accounting-setup', active: true },
   { id: 'assets', icon: '🏗️', label: 'Asset Register', helper: 'Aset tetap, nilai buku, dan depresiasi bulanan.', to: '/finance/assets', active: false },
 ];
 
@@ -73,29 +76,6 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 function formatRupiah(value?: number | null) {
   return `Rp ${Number(value ?? 0).toLocaleString('id-ID')}`;
-}
-
-function formatDateTime(value?: string | null) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-function sourceLabel(sourceType?: string | null) {
-  const labels: Record<string, string> = {
-    INVOICE: 'Invoice',
-    INVOICE_PAYMENT: 'Pembayaran',
-    EXPENSE: 'Expense',
-    WIFI_SALE: 'WiFi',
-    OPENING_BALANCE: 'Opening',
-    CLOSING_REVERSAL: 'Reopen/Reversal',
-    DEPOSIT: 'Deposit',
-    ADJUSTMENT: 'Adjustment/Reversal',
-    DEPRECIATION: 'Depresiasi',
-    CLOSING_ENTRY: 'Closing',
-  };
-  return labels[String(sourceType ?? '')] ?? sourceType ?? '-';
 }
 
 export default function AccountingSetupPage() {
@@ -127,7 +107,7 @@ export default function AccountingSetupPage() {
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
     queryKey: ['accounting-recent-auto-journals'],
-    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'CLOSING_REVERSAL'], limit: 8 }),
+    queryFn: () => fetchRecentAutoJournals({ sourceTypes: ['OPENING_BALANCE', 'INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE', 'DEPOSIT', 'ADJUSTMENT', 'DEPRECIATION', 'CLOSING_ENTRY', 'CLOSING_REVERSAL'], limit: 12 }),
     staleTime: 20_000,
   });
 
@@ -146,11 +126,17 @@ export default function AccountingSetupPage() {
     ? unmappedSummary.invoiceSampleCount + unmappedSummary.invoicePaymentSampleCount + unmappedSummary.expenseSampleCount + unmappedSummary.wifiSaleSampleCount
     : 0;
   const recentJournals = recentJournalsQuery.data?.items ?? [];
-  const latestAutoJournal = recentJournals[0];
 
   const postedOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'POSTED'), [openingBalances]);
   const draftOpeningBalance = useMemo(() => openingBalances.find((batch) => batch.status === 'DRAFT'), [openingBalances]);
   const canManageOpeningBalance = user?.role === 'OWNER';
+
+
+  function focusAccountingSection(sectionId: string) {
+    window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }
 
   async function refreshAccounting() {
     await Promise.all([
@@ -316,16 +302,16 @@ export default function AccountingSetupPage() {
   return (
     <div className="accounting-setup-page">
       <PageHeader
-        eyebrow="Finance · Accounting Setup"
-        title="Accounting Command Center"
-        description="B8 menguatkan governance: periode CLOSED dikunci, koreksi memakai buka ulang + jurnal reversal Owner-only, bukan edit diam-diam."
-        secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Seed Default COA</Button>}
+        eyebrow="Finance · Laporan Keuangan"
+        title="Laporan Keuangan & Kesehatan Ledger"
+        description="Cockpit owner untuk membaca Trial Balance, Neraca, Laba Rugi, aset, kualitas data, dan status tutup periode tanpa jargon fase teknis."
+        secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Siapkan COA Default</Button>}
       />
 
       <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Finance">
         <div className="admin-area-internal-menu-head">
           <span>Menu Finance</span>
-          <small>Accounting setup masuk Finance, bukan Reports sidebar standalone.</small>
+          <small>Laporan keuangan, tutup periode, aset, dan audit ledger berada di satu pintu Finance.</small>
         </div>
         <div className="admin-area-internal-menu-scroll">
           {financeMenu.map((item) => (
@@ -341,23 +327,23 @@ export default function AccountingSetupPage() {
       {actionMessage ? <Alert variant="success" onClose={() => setActionMessage(null)} dismissible>{actionMessage}</Alert> : null}
       {!canManageOpeningBalance ? (
         <Alert variant="info" className="mb-3">
-          Setup accounting bisa dipantau oleh Admin, tetapi pembuatan draft, posting, dan pembatalan saldo awal hanya boleh dilakukan Owner karena menjadi dasar neraca.
+          Laporan keuangan bisa dipantau oleh Admin, tetapi pembuatan draft, posting saldo awal, tutup periode, dan buka ulang periode hanya boleh dilakukan Owner karena menjadi dasar neraca dan audit ledger.
         </Alert>
       ) : null}
 
       {isInitialLoading ? (
-        <Card className="content-card border-0"><Card.Body><Spinner animation="border" size="sm" className="me-2" /> Memuat setup accounting...</Card.Body></Card>
+        <Card className="content-card border-0"><Card.Body><Spinner animation="border" size="sm" className="me-2" /> Memuat laporan keuangan...</Card.Body></Card>
       ) : null}
 
       <StatusStrip
         items={[
           { id: 'coa', label: 'COA aktif', value: accounts.length, helper: 'Default COA kos', tone: accounts.length >= 30 ? 'success' : 'warning' },
           { id: 'cash', label: 'Cash/Bank', value: cashAccounts.length, helper: 'Minimal 1 akun', tone: cashAccounts.length ? 'success' : 'warning' },
-          { id: 'period', label: 'Period', value: periods.length, helper: 'Periode cutover', tone: periods.length ? 'success' : 'warning' },
-          { id: 'opening', label: 'Opening Balance', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Starting point Balance Sheet', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },
-          { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'B3 Lite', tone: autoJournalEnabled ? 'success' : 'warning' },
-          { id: 'asset-b4', label: 'Aset B4', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Proof', helper: 'Readiness aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
-          { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Governance B8', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
+          { id: 'period', label: 'Periode', value: periods.length, helper: 'Bulan accounting', tone: periods.length ? 'success' : 'warning' },
+          { id: 'opening', label: 'Saldo Awal', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Titik mulai neraca', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },
+          { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'Posting operasional', tone: autoJournalEnabled ? 'success' : 'warning' },
+          { id: 'asset-b4', label: 'Aset', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Review', helper: 'Register aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
+          { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Close/reopen audit', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
           { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
@@ -367,6 +353,8 @@ export default function AccountingSetupPage() {
         trial={trialBalanceQuery.data}
         balanceSheet={balanceSheetQuery.data}
         profitLoss={profitLossQuery.data}
+        periodClose={periodCloseReadinessQuery.data}
+        assetReadiness={assetReadinessQuery.data}
         unmapped={unmappedQuery.data}
         depositPosition={depositPositionQuery.data}
         depositReconciliation={depositReconciliationQuery.data}
@@ -374,51 +362,86 @@ export default function AccountingSetupPage() {
         recentJournals={recentJournals}
         autoJournalEnabled={autoJournalEnabled}
         isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || profitLossQuery.isLoading}
+        onFocusSection={focusAccountingSection}
       />
 
       <Row className="g-3 mb-3">
-        <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
-        <Col xl={6}><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
+        <Col xl={7}>
+          <AccountingDataQualityPanel
+            readiness={readinessQuery.data}
+            trial={trialBalanceQuery.data}
+            balanceSheet={balanceSheetQuery.data}
+            periodClose={periodCloseReadinessQuery.data}
+            unmapped={unmappedQuery.data}
+            assetReadiness={assetReadinessQuery.data}
+            depositPosition={depositPositionQuery.data}
+            depositReconciliation={depositReconciliationQuery.data}
+            reversalWatch={reversalWatchQuery.data}
+            isLoading={readinessQuery.isLoading || trialBalanceQuery.isLoading || balanceSheetQuery.isLoading}
+          />
+        </Col>
+        <Col xl={5}>
+          <PeriodCloseTimeline
+            readiness={periodCloseReadinessQuery.data}
+            profitLoss={profitLossQuery.data}
+            recentJournals={recentJournals}
+          />
+        </Col>
       </Row>
 
-      <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
+      <Row className="g-3 mb-3">
+        <Col xl={6}><AccountingReadinessCard readiness={readinessQuery.data} /></Col>
+        <Col xl={6} id="balance-sheet"><BalanceSheetGuardPanel guard={balanceSheetQuery.data} /></Col>
+      </Row>
 
-      <PeriodClosePanel
-        year={closeYear}
-        month={closeMonth}
-        readiness={periodCloseReadinessQuery.data}
-        preview={periodClosePreview}
-        reopenPreview={periodReopenPreview}
-        isLoading={periodCloseReadinessQuery.isLoading}
-        isPreviewing={previewCloseMutation.isPending}
-        isPosting={postCloseMutation.isPending}
-        isReopenPreviewing={previewReopenMutation.isPending}
-        isReopening={postReopenMutation.isPending}
-        canPost={user?.role === 'OWNER'}
-        notes={periodCloseNotes}
-        reopenReason={periodReopenReason}
-        onNotesChange={setPeriodCloseNotes}
-        onReopenReasonChange={setPeriodReopenReason}
-        onPreview={() => previewCloseMutation.mutate()}
-        onPost={() => postCloseMutation.mutate()}
-        onPreviewReopen={() => previewReopenMutation.mutate()}
-        onReopen={() => postReopenMutation.mutate()}
+      <div id="asset-readiness">
+        <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
+      </div>
+
+      <div id="period-close">
+        <PeriodClosePanel
+          year={closeYear}
+          month={closeMonth}
+          readiness={periodCloseReadinessQuery.data}
+          preview={periodClosePreview}
+          reopenPreview={periodReopenPreview}
+          isLoading={periodCloseReadinessQuery.isLoading}
+          isPreviewing={previewCloseMutation.isPending}
+          isPosting={postCloseMutation.isPending}
+          isReopenPreviewing={previewReopenMutation.isPending}
+          isReopening={postReopenMutation.isPending}
+          canPost={user?.role === 'OWNER'}
+          notes={periodCloseNotes}
+          reopenReason={periodReopenReason}
+          onNotesChange={setPeriodCloseNotes}
+          onReopenReasonChange={setPeriodReopenReason}
+          onPreview={() => previewCloseMutation.mutate()}
+          onPost={() => postCloseMutation.mutate()}
+          onPreviewReopen={() => previewReopenMutation.mutate()}
+          onReopen={() => postReopenMutation.mutate()}
+        />
+      </div>
+
+      <JournalAuditTrailPanel
+        journals={recentJournals}
+        isLoading={recentJournalsQuery.isLoading}
+        note={recentJournalsQuery.data?.note}
       />
 
       <Card className="content-card border-0 mb-3">
         <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
           <div>
-            <div className="small text-uppercase text-muted fw-semibold mb-1">Auto Journal Lite · B3.1</div>
-            <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto-posting operasional aktif' : 'Auto-posting belum aktif'}</h3>
+            <div className="section-kicker mb-2">Posting Operasional</div>
+            <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto journal operasional aktif' : 'Auto journal operasional belum aktif'}</h3>
             <p className="text-muted mb-0">
-              Invoice issued, pembayaran invoice, expense, dan penjualan WiFi akan dicatat sebagai JournalEntry POSTED secara idempotent. Deposit liability dan reversal invoice cancel sudah diawasi di B3.3; depreciation/inventory/payment reversal masih deferred.
+              Tagihan, pembayaran, pengeluaran, dan voucher WiFi dicatat sebagai JournalEntry POSTED secara idempotent. Gunakan backfill hanya untuk data operasional lama yang memang perlu dipetakan ke ledger.
             </p>
             {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
           </div>
           <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
             <div className="text-sm-end">
               <div className="fw-semibold">{unmappedQuery.isLoading ? 'Memuat...' : `${unmappedOperationalCount} sample belum terjurnal`}</div>
-              <small className="text-muted">Invoice, payment, expense, WiFi</small>
+              <small className="text-muted">Tagihan, pembayaran, pengeluaran, WiFi</small>
             </div>
             <Button
               variant="outline-primary"
@@ -434,15 +457,15 @@ export default function AccountingSetupPage() {
       <Card className="content-card border-0 mb-3">
         <Card.Body className="d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
           <div>
-            <div className="small text-uppercase text-muted fw-semibold mb-1">Deposit Reconciliation · B3.3R</div>
+            <div className="section-kicker mb-2">Review Deposit Liability</div>
             <h3 className="h5 mb-1">Dry-run sebelum backfill deposit</h3>
             <p className="text-muted mb-2">
-              Selisih deposit tidak otomatis berarti harus membuat journal baru. Jika berasal dari opening balance, backfill deposit bisa menggandakan liability. Dry-run hanya membaca kandidat dan tidak membuat JournalEntry.
+              Selisih deposit tidak otomatis berarti harus membuat jurnal baru. Jika berasal dari saldo awal, backfill deposit bisa menggandakan liability. Dry-run hanya membaca kandidat dan tidak membuat JournalEntry.
             </p>
             {depositReconciliationQuery.data?.summary ? (
               <div className="d-flex flex-wrap gap-2 small">
                 <Badge bg={depositReconciliationQuery.data.summary.reconciliationStatus === 'MATCHED' ? 'success' : 'warning'}>{depositReconciliationQuery.data.summary.reconciliationStatus}</Badge>
-                <span className="text-muted">Opening: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
+                <span className="text-muted">Saldo awal: {formatRupiah(depositReconciliationQuery.data.summary.ledgerOpeningBalanceDepositRupiah)}</span>
                 <span className="text-muted">Auto deposit: {formatRupiah(depositReconciliationQuery.data.summary.ledgerAutoJournalDepositRupiah)}</span>
                 <span className="text-muted">Selisih: {formatRupiah(depositReconciliationQuery.data.summary.differenceRupiah)}</span>
               </div>
@@ -458,72 +481,11 @@ export default function AccountingSetupPage() {
         </Card.Body>
       </Card>
 
-      <Card className="content-card border-0 mb-3">
-        <Card.Body>
-          <div className="d-flex flex-column flex-lg-row gap-2 justify-content-between align-items-lg-start mb-3">
-            <div>
-              <div className="small text-uppercase text-muted fw-semibold mb-1">Auto Journal Activity · B3.1B</div>
-              <h3 className="h5 mb-1">Jurnal otomatis terbaru</h3>
-              <p className="text-muted mb-0">Gunakan ini untuk membuktikan invoice, pembayaran, expense, dan WiFi sale baru benar-benar membuat JournalEntry POSTED.</p>
-            </div>
-            <div className="text-lg-end">
-              <Badge bg={latestAutoJournal?.isBalanced ? 'success' : recentJournals.length ? 'warning' : 'secondary'}>
-                {recentJournalsQuery.isLoading ? 'Memuat...' : `${recentJournals.length} jurnal`}
-              </Badge>
-              <div className="small text-muted mt-1">Terbaru: {latestAutoJournal ? formatDateTime(latestAutoJournal.postedAt ?? latestAutoJournal.createdAt) : '-'}</div>
-            </div>
-          </div>
-
-          {recentJournalsQuery.isLoading ? (
-            <div className="text-muted"><Spinner animation="border" size="sm" className="me-2" /> Memuat aktivitas auto journal...</div>
-          ) : recentJournals.length ? (
-            <div className="table-responsive">
-              <Table hover size="sm" className="align-middle mb-0">
-                <thead>
-                  <tr>
-                    <th>Jurnal</th>
-                    <th>Source</th>
-                    <th>Debit</th>
-                    <th>Kredit</th>
-                    <th>Status</th>
-                    <th>Waktu</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentJournals.map((journal) => (
-                    <tr key={journal.id}>
-                      <td>
-                        <div className="fw-semibold">{journal.entryNumber}</div>
-                        <small className="text-muted">{journal.memo || 'Auto journal'}</small>
-                      </td>
-                      <td>
-                        <Badge bg="light" text="dark" className="border">{sourceLabel(journal.sourceType)}</Badge>
-                        <div className="small text-muted">ID {journal.sourceId || '-'}</div>
-                      </td>
-                      <td>{formatRupiah(journal.totalDebitRupiah)}</td>
-                      <td>{formatRupiah(journal.totalCreditRupiah)}</td>
-                      <td><Badge bg={journal.isBalanced ? 'success' : 'danger'}>{journal.isBalanced ? 'Balanced' : 'Tidak balance'}</Badge></td>
-                      <td><small>{formatDateTime(journal.postedAt ?? journal.createdAt)}</small></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          ) : (
-            <Alert variant="light" className="border mb-0">
-              Belum ada auto journal untuk source B3.1/B3.3. Ini normal jika belum ada invoice/payment/expense/WiFi/deposit/reversal baru sejak auto journal aktif.
-            </Alert>
-          )}
-
-          {recentJournalsQuery.data?.note ? <small className="text-muted d-block mt-3">{recentJournalsQuery.data.note}</small> : null}
-        </Card.Body>
-      </Card>
-
       <Row className="g-3 mb-3">
-        <Col xl={6}>
+        <Col xl={6} id="profit-loss">
           <ProfitLossLitePanel profitLoss={profitLossQuery.data} />
         </Col>
-        <Col xl={6}>
+        <Col xl={6} id="trial-balance">
           <TrialBalancePreview trial={trialBalanceQuery.data} />
         </Col>
       </Row>

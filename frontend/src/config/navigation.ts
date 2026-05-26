@@ -30,7 +30,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/invoices', label: 'Tagihan & Koleksi', icon: '🧾', hint: 'Pantau tagihan, pembayaran, tunggakan, dan follow-up utama.' },
       { to: '/payment-submissions/review', label: 'Review Pembayaran', icon: '💸', hint: 'Review bukti bayar booking tenant sebelum aktivasi kamar.' },
-      { to: '/finance/accounting-setup', label: 'Setup Accounting', icon: '📘', hint: 'Cash/bank, opening balance, readiness, trial balance, dan guard Balance Sheet.', activePaths: ['/finance/accounting-setup', '/finance/assets'] },
+      { to: '/finance/accounting-setup', label: 'Laporan Keuangan', icon: '📘', hint: 'Neraca, laba rugi, trial balance, aset, dan tutup periode.', activePaths: ['/finance/accounting-setup', '/finance/assets'] },
       { to: '/finance/assets', label: 'Asset Register', icon: '🏗️', hint: 'Aset tetap, nilai buku, dan depresiasi bulanan.' },
     ],
   },

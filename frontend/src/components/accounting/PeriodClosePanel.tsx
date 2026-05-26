@@ -99,8 +99,8 @@ export default function PeriodClosePanel({
       <Card.Body>
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-2">B8 Period Governance · Closing & Reopen</div>
-            <h3 className="panel-title mb-1">Governance periode {monthName(year, month)}</h3>
+            <div className="section-kicker mb-2">Governance Periode</div>
+            <h3 className="panel-title mb-1">Tutup periode {monthName(year, month)}</h3>
             <p className="text-muted mb-0">
               Owner menutup revenue, COGS, dan expense ke Laba Ditahan. Jika ada koreksi serius, periode dibuka ulang lewat jurnal reversal, bukan edit/hapus jurnal lama.
             </p>
@@ -131,10 +131,10 @@ export default function PeriodClosePanel({
 
         {isClosed && readiness?.period ? (
           <Row className="g-2 mb-3">
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Closed at</div><div className="fw-semibold">{formatDateTime(readiness.period.closedAt)}</div></div></Col>
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Closing journal</div><div className="fw-semibold">#{readiness.period.closingJournalEntryId ?? '-'}</div></div></Col>
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Close version</div><div className="fw-semibold">V{readiness.period.closeVersion ?? 1}</div></div></Col>
-            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Last reopen</div><div className="fw-semibold">{readiness.period.reopenedAt ? formatDateTime(readiness.period.reopenedAt) : '-'}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Ditutup pada</div><div className="fw-semibold">{formatDateTime(readiness.period.closedAt)}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Jurnal closing</div><div className="fw-semibold">#{readiness.period.closingJournalEntryId ?? '-'}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Versi closing</div><div className="fw-semibold">V{readiness.period.closeVersion ?? 1}</div></div></Col>
+            <Col md={3}><div className="p-3 rounded-3 border bg-white h-100"><div className="small text-muted">Reopen terakhir</div><div className="fw-semibold">{readiness.period.reopenedAt ? formatDateTime(readiness.period.reopenedAt) : '-'}</div></div></Col>
           </Row>
         ) : null}
 

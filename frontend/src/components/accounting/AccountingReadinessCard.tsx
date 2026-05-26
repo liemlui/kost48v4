@@ -7,11 +7,11 @@ export default function AccountingReadinessCard({ readiness }: { readiness?: Acc
   return (
     <Card className="content-card border-0 h-100 accounting-setup-card">
       <Card.Body>
-        <div className="section-kicker mb-2">Readiness accounting</div>
+        <div className="section-kicker mb-2">Kesiapan ledger</div>
         <div className="d-flex justify-content-between align-items-start gap-3 mb-2">
           <div>
-            <h3 className="panel-title mb-1">Setup belum boleh overclaim</h3>
-            <p className="text-muted mb-0">Balance Sheet tetap terkunci sampai COA, cash account, periode, opening balance, dan journal pembuka siap.</p>
+            <h3 className="panel-title mb-1">Gate laporan keuangan</h3>
+            <p className="text-muted mb-0">Laporan owner aman dibaca jika COA, cash/bank, periode, saldo awal, dan jurnal pembuka sudah lengkap.</p>
           </div>
           <div className="accounting-score-pill">{score}%</div>
         </div>
@@ -22,7 +22,7 @@ export default function AccountingReadinessCard({ readiness }: { readiness?: Acc
               <span>{gate.ready ? '✓' : '!'}</span>
               <div>
                 <strong>{gate.label}</strong>
-                <small>{gate.note || (gate.count !== undefined ? `${gate.count} data` : 'Gate accounting')}</small>
+                <small>{gate.note || (gate.count !== undefined ? `${gate.count} data` : 'Gate ledger')}</small>
               </div>
             </div>
           ))}
