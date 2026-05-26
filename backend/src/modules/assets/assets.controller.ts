@@ -8,6 +8,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AssetsService } from './assets.service';
 import { CreateFixedAssetDto, RunDepreciationDto, UpdateFixedAssetDto } from './dto/asset.dto';
+import { AssetLedgerAlignmentDto } from './dto/asset-ledger-alignment.dto';
 import { DepreciationPreviewQueryDto, FixedAssetsQueryDto } from './dto/asset-query.dto';
 
 @ApiTags('assets')
@@ -27,6 +28,23 @@ export class AssetsController {
   async depreciationPreview(@Query() query: DepreciationPreviewQueryDto) {
     return { message: 'Preview depresiasi berhasil diambil', data: await this.assetsService.depreciationPreview(query) };
   }
+
+  @Get('ledger-alignment')
+  async ledgerAlignmentSummary() {
+    return { message: 'Ringkasan alignment ledger aset berhasil diambil', data: await this.assetsService.ledgerAlignmentSummary() };
+  }
+
+  @Post(':id/ledger-alignment/preview')
+  async previewLedgerAlignment(@Param('id', ParseIntPipe) id: number, @Body() dto: AssetLedgerAlignmentDto) {
+    return { message: 'Preview alignment ledger aset berhasil dibuat', data: await this.assetsService.previewLedgerAlignment(id, dto) };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post(':id/ledger-alignment/post')
+  async postLedgerAlignment(@Param('id', ParseIntPipe) id: number, @Body() dto: AssetLedgerAlignmentDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Alignment ledger aset berhasil diposting', data: await this.assetsService.postLedgerAlignment(id, dto, user) };
+  }
+
 
   @Roles(UserRole.OWNER)
   @Post('depreciation/run')

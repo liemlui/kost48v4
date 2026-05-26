@@ -127,6 +127,82 @@ export class AccountingPostingService {
     );
   }
 
+  async postFixedAssetLedgerAlignmentTx(
+    tx: any,
+    input: {
+      assetId: number;
+      assetCode?: string | null;
+      method: "RECLASSIFY_FROM_CASH" | "OWNER_CAPITAL_CONTRIBUTION";
+      amountRupiah: number;
+      creditAccountCode?: string | null;
+      entryDate?: Date | string | null;
+      notes?: string | null;
+      createdById?: number | null;
+    },
+  ) {
+    const amount = rupiah(input.amountRupiah);
+    if (amount <= 0) {
+      return this.skip(
+        "ADJUSTMENT",
+        `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
+        "Jumlah alignment aset harus lebih dari 0.",
+      );
+    }
+
+    const fixedAsset = await this.findAccountByCodeTx(tx, "1500");
+    if (!fixedAsset) {
+      return this.skip(
+        "ADJUSTMENT",
+        `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
+        "COA 1500 Fixed Assets belum tersedia.",
+      );
+    }
+
+    const creditCode =
+      input.method === "OWNER_CAPITAL_CONTRIBUTION"
+        ? "3000"
+        : input.creditAccountCode || "1010";
+    const creditAccount = await this.findAccountByCodeTx(tx, creditCode);
+    if (!creditAccount) {
+      return this.skip(
+        "ADJUSTMENT",
+        `FIXED_ASSET_ALIGNMENT:${input.assetId}`,
+        `COA kredit ${creditCode} belum tersedia.`,
+      );
+    }
+
+    const sourceId = `FIXED_ASSET_ALIGNMENT:${input.assetId}`;
+    const assetLabel = input.assetCode ? `${input.assetCode} (#${input.assetId})` : `#${input.assetId}`;
+    const methodLabel =
+      input.method === "OWNER_CAPITAL_CONTRIBUTION"
+        ? "kontribusi modal owner"
+        : `reklasifikasi dari ${creditAccount.code} ${creditAccount.name}`;
+
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(input.entryDate ?? new Date()),
+      memo: `Fixed asset ledger alignment ${assetLabel}: ${methodLabel}`,
+      createdById: input.createdById ?? null,
+      lines: [
+        {
+          chartOfAccountId: fixedAsset.id,
+          description: `Masukkan aset ${assetLabel} ke ledger Fixed Assets`,
+          debitRupiah: amount,
+          creditRupiah: 0,
+          sortOrder: 0,
+        },
+        {
+          chartOfAccountId: creditAccount.id,
+          description: `Sumber alignment aset ${assetLabel}: ${methodLabel}`,
+          debitRupiah: 0,
+          creditRupiah: amount,
+          sortOrder: 1,
+        },
+      ],
+    });
+  }
+
   async postDepreciationRunTx(
     tx: any,
     depreciationRunId: number,

@@ -5,6 +5,8 @@ export type FixedAssetCategory = 'BUILDING' | 'RENOVATION' | 'ROOM_EQUIPMENT' | 
 export type FixedAssetStatus = 'DRAFT' | 'ACTIVE' | 'FULLY_DEPRECIATED' | 'DISPOSED' | 'WRITTEN_OFF';
 export type FixedAssetLocationType = 'GENERAL' | 'ROOM' | 'WAREHOUSE';
 export type FixedAssetCapitalizationSource = 'OPENING_BALANCE' | 'PURCHASE_JOURNAL' | 'DISCLOSURE_ONLY';
+export type FixedAssetLedgerAlignmentStatus = 'NOT_REQUIRED' | 'NEEDS_REVIEW' | 'PREVIEWED' | 'ALIGNED' | 'DISCLOSURE_ONLY' | 'VOIDED';
+export type FixedAssetLedgerAlignmentMethod = 'RECLASSIFY_FROM_CASH' | 'OWNER_CAPITAL_CONTRIBUTION' | 'DISCLOSURE_ONLY' | 'MANUAL_REVIEW';
 
 export type FixedAsset = {
   id: number;
@@ -31,6 +33,23 @@ export type FixedAsset = {
   notes?: string | null;
   room?: { id: number; code: string; name?: string | null; floor?: string | null } | null;
   inventoryItem?: { id: number; sku?: string | null; name: string; category?: string | null; unit: string } | null;
+  ledgerAlignment?: {
+    status: FixedAssetLedgerAlignmentStatus;
+    method?: FixedAssetLedgerAlignmentMethod | null;
+    amountRupiah?: number | null;
+    creditAccountId?: number | null;
+    creditAccount?: { id: number; code: string; name: string; type?: string; normalBalance?: string } | null;
+    journalEntryId?: number | null;
+    journalEntry?: { id: number; entryNumber: string; status: string; sourceType?: string; sourceId?: string; totalDebitRupiah?: number; totalCreditRupiah?: number; isBalanced?: boolean } | null;
+    alignedAt?: string | null;
+    alignedById?: number | null;
+    note?: string | null;
+    reviewedAt?: string | null;
+    reviewedById?: number | null;
+    needsReview?: boolean;
+    isAligned?: boolean;
+    isDisclosureOnly?: boolean;
+  };
 };
 
 export type AssetReadinessV2 = {
@@ -42,6 +61,59 @@ export type AssetReadinessV2 = {
   totals: { acquisitionCostRupiah: number; accumulatedDepreciationRupiah: number; netBookValueRupiah: number };
   gates: Array<{ key: string; label: string; ready: boolean; note?: string }>;
   lastRun?: AssetDepreciationRun | null;
+  warnings: string[];
+};
+
+export type AssetLedgerAlignmentSummary = {
+  basis: string;
+  ledgerBacked: boolean;
+  schemaBacked: boolean;
+  register: {
+    assetCount: number;
+    alignedCount: number;
+    acquisitionCostRupiah: number;
+    accumulatedDepreciationRupiah: number;
+    netBookValueRupiah: number;
+  };
+  ledger: {
+    grossFixedAssetsRupiah: number;
+    accumulatedDepreciationRupiah: number;
+    netFixedAssetsRupiah: number;
+  };
+  gapRupiah: number;
+  absoluteGapRupiah: number;
+  aligned: boolean;
+  needsAlignment: boolean;
+  items: FixedAsset[];
+  suggestedActions: string[];
+  warnings: string[];
+};
+
+export type AssetLedgerAlignmentPayload = {
+  method: FixedAssetLedgerAlignmentMethod;
+  creditAccountCode?: string;
+  amountRupiah?: number;
+  notes?: string;
+};
+
+export type AssetLedgerAlignmentPreview = {
+  basis: string;
+  wouldPost: boolean;
+  method: FixedAssetLedgerAlignmentMethod;
+  amountRupiah: number;
+  asset: FixedAsset;
+  fixedAssetAccount?: { id: number; code: string; name: string } | null;
+  creditAccount?: { id: number; code: string; name: string; type?: string; normalBalance?: string } | null;
+  journalPreview?: {
+    sourceType: string;
+    sourceId: string;
+    memo: string;
+    debit: { accountCode: string; accountName: string; amountRupiah: number };
+    credit: { accountCode: string; accountName: string; amountRupiah: number };
+    totalDebitRupiah: number;
+    totalCreditRupiah: number;
+    isBalanced: boolean;
+  } | null;
   warnings: string[];
 };
 
@@ -112,6 +184,18 @@ export async function fetchAssetRegister(params?: { page?: number; limit?: numbe
 
 export async function fetchAssetReadinessV2() {
   return unwrap<AssetReadinessV2>(client.get('/assets/readiness'));
+}
+
+export async function fetchAssetLedgerAlignment() {
+  return unwrap<AssetLedgerAlignmentSummary>(client.get('/assets/ledger-alignment'));
+}
+
+export async function previewAssetLedgerAlignment(assetId: number, payload: AssetLedgerAlignmentPayload) {
+  return unwrap<AssetLedgerAlignmentPreview>(client.post(`/assets/${assetId}/ledger-alignment/preview`, payload));
+}
+
+export async function postAssetLedgerAlignment(assetId: number, payload: AssetLedgerAlignmentPayload) {
+  return unwrap<{ basis: string; posted: boolean; disclosureOnly: boolean; asset: FixedAsset; ledgerAlignment: FixedAsset['ledgerAlignment']; journalEntry: unknown; preview: AssetLedgerAlignmentPreview; warnings: string[] }>(client.post(`/assets/${assetId}/ledger-alignment/post`, payload));
 }
 
 export async function createFixedAsset(payload: CreateFixedAssetPayload) {

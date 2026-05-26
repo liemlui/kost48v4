@@ -4,6 +4,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { CreateFixedAssetDto, RunDepreciationDto, UpdateFixedAssetDto } from './dto/asset.dto';
+import { AssetLedgerAlignmentDto } from './dto/asset-ledger-alignment.dto';
 import { DepreciationPreviewQueryDto, FixedAssetsQueryDto } from './dto/asset-query.dto';
 
 function rupiah(value?: number | null) {
@@ -87,6 +88,166 @@ export class AssetsService {
         'Depreciation run idempotent per bulan dan hanya mem-post JournalEntry DEPRECIATION untuk aset eligible.',
       ],
     };
+  }
+
+  async ledgerAlignmentSummary() {
+    const [registerAgg, alignedCount, assets, ledger] = await Promise.all([
+      (this.prisma as any).fixedAsset.aggregate({
+        _count: { id: true },
+        _sum: { acquisitionCostRupiah: true, accumulatedDepreciationRupiah: true },
+      }),
+      (this.prisma as any).fixedAsset.count({ where: { ledgerAlignmentStatus: 'ALIGNED' as any } }),
+      (this.prisma as any).fixedAsset.findMany({
+        include: {
+          ...this.assetInclude(),
+          ledgerAlignmentCreditAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+          ledgerAlignmentJournalEntry: { select: { id: true, entryNumber: true, status: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true } },
+        },
+        orderBy: [{ ledgerAlignmentStatus: 'asc' }, { id: 'asc' }],
+      }),
+      this.fixedAssetLedgerSnapshot(),
+    ]);
+
+    const acquisitionCost = rupiah(registerAgg?._sum?.acquisitionCostRupiah);
+    const accumulated = rupiah(registerAgg?._sum?.accumulatedDepreciationRupiah);
+    const netBookValue = Math.max(acquisitionCost - accumulated, 0);
+    const gap = netBookValue - ledger.netFixedAssetsRupiah;
+    const needsAlignment = Math.abs(gap) > 0;
+    const assetCount = Number(registerAgg?._count?.id ?? assets.length ?? 0);
+
+    return {
+      basis: 'B6_FIXED_ASSET_LEDGER_ALIGNMENT_SCHEMA',
+      ledgerBacked: true,
+      schemaBacked: true,
+      register: {
+        assetCount,
+        alignedCount,
+        acquisitionCostRupiah: acquisitionCost,
+        accumulatedDepreciationRupiah: accumulated,
+        netBookValueRupiah: netBookValue,
+      },
+      ledger,
+      gapRupiah: gap,
+      absoluteGapRupiah: Math.abs(gap),
+      aligned: assetCount > 0 && !needsAlignment,
+      needsAlignment,
+      items: assets.map((asset: any) => ({
+        ...this.formatAsset(asset),
+        ledgerAlignment: this.formatLedgerAlignmentState(asset),
+      })),
+      suggestedActions: needsAlignment
+        ? [
+            'Review apakah aset register sudah termasuk opening balance Fixed Assets.',
+            'Jika nilai aset masih tercampur di kas/bank, gunakan RECLASSIFY_FROM_CASH.',
+            'Jika aset adalah tambahan modal owner, gunakan OWNER_CAPITAL_CONTRIBUTION.',
+            'Jika belum mau memengaruhi ledger, pilih DISCLOSURE_ONLY.',
+          ]
+        : ['Register net book value sudah selaras dengan ledger net fixed assets.'],
+      warnings: [
+        'Alignment tidak otomatis saat aset dibuat agar tidak double-count opening balance.',
+        'POST alignment hanya OWNER dan membuat JournalEntry ADJUSTMENT yang balanced.',
+        'DISCLOSURE_ONLY tidak membuat journal dan hanya menandai aset sebagai disclosure operasional.',
+      ],
+    };
+  }
+
+  async previewLedgerAlignment(id: number, dto: AssetLedgerAlignmentDto) {
+    const asset = await this.getAssetForAlignment(id);
+    return this.buildLedgerAlignmentPreview(asset, dto);
+  }
+
+  async postLedgerAlignment(id: number, dto: AssetLedgerAlignmentDto, actor: CurrentUserPayload) {
+    return (this.prisma as any).$transaction(async (tx: any) => {
+      const asset = await tx.fixedAsset.findUnique({
+        where: { id },
+        include: {
+          ...this.assetInclude(),
+          ledgerAlignmentCreditAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+          ledgerAlignmentJournalEntry: { select: { id: true, entryNumber: true, status: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true } },
+        },
+      });
+      if (!asset) throw new NotFoundException('Aset tidak ditemukan');
+      this.assertAssetCanBeAligned(asset);
+      const preview = await this.buildLedgerAlignmentPreview(asset, dto, tx);
+
+      if (dto.method === 'DISCLOSURE_ONLY') {
+        const updated = await tx.fixedAsset.update({
+          where: { id: asset.id },
+          data: {
+            ledgerAlignmentStatus: 'DISCLOSURE_ONLY' as any,
+            ledgerAlignmentMethod: 'DISCLOSURE_ONLY' as any,
+            ledgerAlignmentAmountRupiah: 0,
+            ledgerAlignmentCreditAccountId: null,
+            ledgerAlignmentJournalEntryId: null,
+            ledgerAlignmentReviewedAt: new Date(),
+            ledgerAlignmentReviewedById: actor.id,
+            ledgerAlignmentNote: dto.notes ?? 'Aset ditandai sebagai disclosure-only; belum diselaraskan ke ledger Fixed Assets.',
+          },
+          include: {
+            ...this.assetInclude(),
+            ledgerAlignmentCreditAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+            ledgerAlignmentJournalEntry: { select: { id: true, entryNumber: true, status: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true } },
+          },
+        });
+        return {
+          basis: 'B6_FIXED_ASSET_LEDGER_ALIGNMENT_POST',
+          posted: false,
+          disclosureOnly: true,
+          asset: this.formatAsset(updated),
+          ledgerAlignment: this.formatLedgerAlignmentState(updated),
+          journalEntry: null,
+          preview,
+          warnings: ['DISCLOSURE_ONLY tidak membuat journal. Balance Sheet tetap memakai ledger sebagai source of truth.'],
+        };
+      }
+
+      const result = await this.accountingPosting.postFixedAssetLedgerAlignmentTx(tx, {
+        assetId: asset.id,
+        assetCode: asset.assetCode,
+        method: dto.method as any,
+        amountRupiah: preview.amountRupiah,
+        creditAccountCode: preview.creditAccount?.code,
+        entryDate: new Date(),
+        notes: dto.notes,
+        createdById: actor.id,
+      });
+      const journalEntry = (result as any)?.journalEntry;
+      if (!result?.posted || !journalEntry) {
+        throw new ConflictException(result?.reason ?? 'Journal alignment aset tidak berhasil dibuat.');
+      }
+
+      const updated = await tx.fixedAsset.update({
+        where: { id: asset.id },
+        data: {
+          ledgerAlignmentStatus: 'ALIGNED' as any,
+          ledgerAlignmentMethod: dto.method as any,
+          ledgerAlignmentAmountRupiah: preview.amountRupiah,
+          ledgerAlignmentCreditAccountId: preview.creditAccount?.id ?? null,
+          ledgerAlignmentJournalEntryId: journalEntry.id,
+          ledgerAlignedAt: new Date(),
+          ledgerAlignedById: actor.id,
+          ledgerAlignmentReviewedAt: new Date(),
+          ledgerAlignmentReviewedById: actor.id,
+          ledgerAlignmentNote: dto.notes ?? null,
+        },
+        include: {
+          ...this.assetInclude(),
+          ledgerAlignmentCreditAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+          ledgerAlignmentJournalEntry: { select: { id: true, entryNumber: true, status: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true } },
+        },
+      });
+
+      return {
+        basis: 'B6_FIXED_ASSET_LEDGER_ALIGNMENT_POST',
+        posted: true,
+        disclosureOnly: false,
+        asset: this.formatAsset(updated),
+        ledgerAlignment: this.formatLedgerAlignmentState(updated),
+        journalEntry,
+        preview,
+        warnings: ['Alignment membuat JournalEntry ADJUSTMENT. Jangan ulangi untuk aset yang sama.'],
+      };
+    });
   }
 
   async findAll(query: FixedAssetsQueryDto) {
@@ -350,6 +511,121 @@ export class AssetsService {
     };
   }
 
+  private async fixedAssetLedgerSnapshot() {
+    const accounts = await (this.prisma as any).chartOfAccount.findMany({
+      where: { code: { in: ['1500', '1590'] }, isActive: true },
+      select: { id: true, code: true, name: true, type: true, normalBalance: true },
+    });
+    const accountIds = accounts.map((account: any) => account.id);
+    const lines = accountIds.length
+      ? await (this.prisma as any).journalLine.findMany({
+          where: { chartOfAccountId: { in: accountIds }, journalEntry: { status: 'POSTED' as any } },
+          include: { chartOfAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } } },
+        })
+      : [];
+
+    let grossFixedAssets = 0;
+    let accumulatedDepreciation = 0;
+    for (const line of lines) {
+      const code = line.chartOfAccount?.code;
+      const signed = rupiah(line.debitRupiah) - rupiah(line.creditRupiah);
+      if (code === '1500') grossFixedAssets += signed;
+      if (code === '1590') accumulatedDepreciation += Math.abs(signed);
+    }
+    const ledgerNetFixedAssetsRupiah = grossFixedAssets - accumulatedDepreciation;
+    return {
+      grossFixedAssetsRupiah: grossFixedAssets,
+      accumulatedDepreciationRupiah: accumulatedDepreciation,
+      netFixedAssetsRupiah: ledgerNetFixedAssetsRupiah,
+      lines: accounts.map((account: any) => ({
+        id: account.id,
+        code: account.code,
+        name: account.name,
+        normalBalance: account.normalBalance,
+      })),
+    };
+  }
+
+  private async getAssetForAlignment(id: number) {
+    const asset = await (this.prisma as any).fixedAsset.findUnique({
+      where: { id },
+      include: {
+        ...this.assetInclude(),
+        ledgerAlignmentCreditAccount: { select: { id: true, code: true, name: true, type: true, normalBalance: true } },
+        ledgerAlignmentJournalEntry: { select: { id: true, entryNumber: true, status: true, sourceType: true, sourceId: true, totalDebitRupiah: true, totalCreditRupiah: true, isBalanced: true } },
+      },
+    });
+    if (!asset) throw new NotFoundException('Aset tidak ditemukan');
+    return asset;
+  }
+
+  private assertAssetCanBeAligned(asset: any) {
+    if (asset.ledgerAlignmentStatus === 'ALIGNED' || asset.ledgerAlignmentJournalEntryId) {
+      throw new ConflictException(`Aset ${asset.assetCode} sudah aligned ke ledger.`);
+    }
+    if (['DISPOSED', 'WRITTEN_OFF'].includes(String(asset.status))) {
+      throw new ConflictException('Aset disposed/written off tidak bisa alignment baru.');
+    }
+  }
+
+  private async buildLedgerAlignmentPreview(asset: any, dto: AssetLedgerAlignmentDto, tx?: any) {
+    this.assertAssetCanBeAligned(asset);
+    const prisma = tx ?? (this.prisma as any);
+    const method = dto.method;
+    const amount = rupiah(dto.amountRupiah ?? asset.acquisitionCostRupiah);
+    if (method !== 'DISCLOSURE_ONLY' && method !== 'MANUAL_REVIEW' && amount <= 0) throw new ConflictException('Jumlah alignment harus lebih dari 0.');
+    if (amount > rupiah(asset.acquisitionCostRupiah)) throw new ConflictException('Jumlah alignment tidak boleh melebihi nilai perolehan aset.');
+
+    const fixedAssetAccount = await prisma.chartOfAccount.findFirst({ where: { code: '1500', isActive: true }, select: { id: true, code: true, name: true, type: true, normalBalance: true } });
+    if (!fixedAssetAccount && method !== 'DISCLOSURE_ONLY' && method !== 'MANUAL_REVIEW') throw new ConflictException('COA 1500 Fixed Assets belum tersedia.');
+
+    if (method === 'DISCLOSURE_ONLY' || method === 'MANUAL_REVIEW') {
+      return {
+        basis: 'B6_FIXED_ASSET_LEDGER_ALIGNMENT_PREVIEW',
+        wouldPost: false,
+        method,
+        amountRupiah: 0,
+        asset: this.formatAsset(asset),
+        fixedAssetAccount: fixedAssetAccount ?? null,
+        creditAccount: null,
+        journalPreview: null,
+        warnings: method === 'DISCLOSURE_ONLY'
+          ? ['DISCLOSURE_ONLY tidak membuat journal. Asset register tetap disclosure operasional.']
+          : ['MANUAL_REVIEW hanya untuk menandai aset perlu review; belum membuat journal.'],
+      };
+    }
+
+    const creditCode = method === 'OWNER_CAPITAL_CONTRIBUTION' ? '3000' : (dto.creditAccountCode || '1010');
+    const creditAccount = await prisma.chartOfAccount.findFirst({ where: { code: creditCode, isActive: true }, select: { id: true, code: true, name: true, type: true, normalBalance: true } });
+    if (!creditAccount) throw new ConflictException(`COA kredit ${creditCode} belum tersedia.`);
+    if (method === 'RECLASSIFY_FROM_CASH' && creditAccount.type !== 'ASSET') throw new ConflictException('Reclassify from cash harus memakai akun asset cash/bank sebagai kredit.');
+    if (method === 'OWNER_CAPITAL_CONTRIBUTION' && creditAccount.type !== 'EQUITY') throw new ConflictException('Owner capital contribution harus memakai akun equity.');
+
+    return {
+      basis: 'B6_FIXED_ASSET_LEDGER_ALIGNMENT_PREVIEW',
+      wouldPost: true,
+      method,
+      amountRupiah: amount,
+      asset: this.formatAsset(asset),
+      fixedAssetAccount,
+      creditAccount,
+      journalPreview: {
+        sourceType: 'ADJUSTMENT',
+        sourceId: `FIXED_ASSET_ALIGNMENT:${asset.id}`,
+        memo: `Fixed asset ledger alignment ${asset.assetCode}`,
+        debit: { accountCode: fixedAssetAccount.code, accountName: fixedAssetAccount.name, amountRupiah: amount },
+        credit: { accountCode: creditAccount.code, accountName: creditAccount.name, amountRupiah: amount },
+        totalDebitRupiah: amount,
+        totalCreditRupiah: amount,
+        isBalanced: true,
+      },
+      warnings: [
+        'Preview belum membuat journal. POST alignment hanya boleh owner.',
+        'Jangan post jika nilai aset sudah masuk ledger Fixed Assets di opening balance.',
+      ],
+    };
+  }
+
   private validateAssetNumbers(cost: number, salvage: number, usefulLife: number) {
     if (rupiah(cost) <= 0) throw new ConflictException('Nilai perolehan aset harus lebih dari 0.');
     if (rupiah(salvage) >= rupiah(cost)) throw new ConflictException('Nilai residu harus lebih kecil dari nilai perolehan.');
@@ -398,7 +674,28 @@ export class AssetsService {
       bookValueRupiah: Math.max(cost - accumulated, salvage),
       depreciableBaseRupiah: Math.max(cost - salvage, 0),
       monthlyDepreciationRupiah: Math.max(0, Math.round(Math.max(cost - salvage, 0) / Math.max(Number(asset.usefulLifeMonths || 1), 1))),
+      ledgerAlignment: this.formatLedgerAlignmentState(asset),
       depreciationHistory: includeHistory ? (asset.depreciationLines ?? []) : undefined,
+    };
+  }
+
+  private formatLedgerAlignmentState(asset: any) {
+    return {
+      status: asset.ledgerAlignmentStatus ?? 'NEEDS_REVIEW',
+      method: asset.ledgerAlignmentMethod ?? null,
+      amountRupiah: asset.ledgerAlignmentAmountRupiah ?? null,
+      creditAccountId: asset.ledgerAlignmentCreditAccountId ?? null,
+      creditAccount: asset.ledgerAlignmentCreditAccount ?? null,
+      journalEntryId: asset.ledgerAlignmentJournalEntryId ?? null,
+      journalEntry: asset.ledgerAlignmentJournalEntry ?? null,
+      alignedAt: asset.ledgerAlignedAt ?? null,
+      alignedById: asset.ledgerAlignedById ?? null,
+      note: asset.ledgerAlignmentNote ?? null,
+      reviewedAt: asset.ledgerAlignmentReviewedAt ?? null,
+      reviewedById: asset.ledgerAlignmentReviewedById ?? null,
+      needsReview: ['NEEDS_REVIEW', 'PREVIEWED'].includes(String(asset.ledgerAlignmentStatus ?? 'NEEDS_REVIEW')),
+      isAligned: asset.ledgerAlignmentStatus === 'ALIGNED',
+      isDisclosureOnly: asset.ledgerAlignmentStatus === 'DISCLOSURE_ONLY',
     };
   }
 

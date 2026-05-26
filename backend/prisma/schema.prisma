@@ -375,6 +375,22 @@ enum FixedAssetDepreciationMethod {
   STRAIGHT_LINE
 }
 
+enum FixedAssetLedgerAlignmentStatus {
+  NOT_REQUIRED
+  NEEDS_REVIEW
+  PREVIEWED
+  ALIGNED
+  DISCLOSURE_ONLY
+  VOIDED
+}
+
+enum FixedAssetLedgerAlignmentMethod {
+  RECLASSIFY_FROM_CASH
+  OWNER_CAPITAL_CONTRIBUTION
+  DISCLOSURE_ONLY
+  MANUAL_REVIEW
+}
+
 enum AssetDepreciationRunStatus {
   POSTED
   VOID
@@ -1168,6 +1184,16 @@ model FixedAsset {
   roomItemId                    Int?
   expenseId                     Int?
   createdById                   Int?
+  ledgerAlignmentStatus         FixedAssetLedgerAlignmentStatus @default(NEEDS_REVIEW)
+  ledgerAlignmentMethod         FixedAssetLedgerAlignmentMethod?
+  ledgerAlignmentAmountRupiah   Int?
+  ledgerAlignmentCreditAccountId Int?
+  ledgerAlignmentJournalEntryId Int?
+  ledgerAlignedAt               DateTime?
+  ledgerAlignedById             Int?
+  ledgerAlignmentNote           String?
+  ledgerAlignmentReviewedAt     DateTime?
+  ledgerAlignmentReviewedById   Int?
   notes                         String?
   disposedAt                    DateTime?                       @db.Date
   disposalNote                  String?
@@ -1179,6 +1205,8 @@ model FixedAsset {
   roomItem         RoomItem?                @relation(fields: [roomItemId], references: [id], onDelete: SetNull)
   expense          Expense?                 @relation(fields: [expenseId], references: [id], onDelete: SetNull)
   createdBy        User?                    @relation("FixedAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  ledgerAlignmentCreditAccount ChartOfAccount? @relation("FixedAssetAlignmentCreditAccount", fields: [ledgerAlignmentCreditAccountId], references: [id], onDelete: SetNull)
+  ledgerAlignmentJournalEntry  JournalEntry?   @relation("FixedAssetAlignmentJournalEntry", fields: [ledgerAlignmentJournalEntryId], references: [id], onDelete: SetNull)
   depreciationLines AssetDepreciationLine[]
 
   @@index([status])
@@ -1190,6 +1218,10 @@ model FixedAsset {
   @@index([inventoryItemId])
   @@index([roomItemId])
   @@index([expenseId])
+  @@index([ledgerAlignmentStatus])
+  @@index([ledgerAlignmentMethod])
+  @@index([ledgerAlignmentCreditAccountId])
+  @@index([ledgerAlignmentJournalEntryId])
   @@index([acquisitionDate])
 }
 
@@ -1292,6 +1324,7 @@ model ChartOfAccount {
   cashAccounts        CashAccount[]
   openingBalanceLines OpeningBalanceLine[]
   journalLines        JournalLine[]
+  fixedAssetAlignmentCredits FixedAsset[] @relation("FixedAssetAlignmentCreditAccount")
 
   @@index([type])
   @@index([normalBalance])
@@ -1406,6 +1439,7 @@ model JournalEntry {
   accountingPeriod AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
   lines            JournalLine[]
   depreciationRuns AssetDepreciationRun[]
+  fixedAssetLedgerAlignments FixedAsset[] @relation("FixedAssetAlignmentJournalEntry")
 
   @@index([entryDate])
   @@index([accountingPeriodId])
