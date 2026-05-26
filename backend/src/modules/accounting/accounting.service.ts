@@ -81,7 +81,7 @@ export class AccountingService {
     return {
       seededCount: results.length,
       accounts: results,
-      note: 'Default COA idempotent dan diproses dalam satu transaksi. Deposit liability disediakan, tetapi belum ada auto-posting.',
+      note: 'Default COA idempotent dan diproses dalam satu transaksi. Deposit liability tersedia sebagai akun liability dan ledger siap dipakai oleh posting accounting.',
     };
   }
 
@@ -471,7 +471,7 @@ export class AccountingService {
       return {
         openingBalance: updatedBatch,
         journalEntry: journal,
-        note: 'Opening balance berhasil diposting sebagai JournalEntry OPENING_BALANCE. B2 tetap belum auto-posting transaksi operasional.',
+        note: 'Opening balance berhasil diposting sebagai JournalEntry OPENING_BALANCE. Ledger pembuka siap menjadi dasar Trial Balance dan Neraca.',
       };
     });
   }

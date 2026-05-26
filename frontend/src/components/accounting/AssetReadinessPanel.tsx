@@ -146,7 +146,7 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
 
         {readiness?.warnings?.length ? (
           <Alert variant="warning" className="mt-3 mb-0">
-            <div className="fw-semibold mb-1">Guard penting</div>
+            <div className="fw-semibold mb-1">Catatan penting</div>
             <ul className="mb-0 ps-3">
               {readiness.warnings.slice(0, 3).map((warning) => <li key={warning}>{warning}</li>)}
             </ul>

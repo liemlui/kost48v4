@@ -78,7 +78,7 @@ export class AccountingReportsService {
       asOf: asOf.toISOString().slice(0, 10),
       basis: 'POSTED_JOURNAL_PLUS_POSTED_OPENING_BALANCE',
       ledgerBacked: true,
-      formalStatementReady: false,
+      formalStatementReady: totalDebit === totalCredit,
       totalDebitRupiah: totalDebit,
       totalCreditRupiah: totalCredit,
       isBalanced: totalDebit === totalCredit,

@@ -41,7 +41,7 @@ export default function CashAccountSetupPanel({
       holderName: holderName.trim() || undefined,
       isDefault: cashAccounts.length === 0,
       isActive: true,
-      notes: 'Dibuat dari Owner Accounting Setup B2.',
+      notes: 'Dibuat dari halaman Laporan Keuangan.',
     });
   }
 

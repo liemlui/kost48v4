@@ -128,7 +128,7 @@ export default function OpeningBalanceWizard({
     }
     const ym = yearMonthFromInput(cutoverDate);
     if (!ym) return;
-    onCreatePeriod({ year: ym.year, month: ym.month, notes: 'Periode cutover accounting B2.' });
+    onCreatePeriod({ year: ym.year, month: ym.month, notes: 'Periode cutover accounting.' });
   }
 
   function submit(event: FormEvent) {

@@ -97,7 +97,7 @@ export default function StatementCommandCenterPanel({ readiness, trial, balanceS
             <StatementStatusCard
               eyebrow="Neraca"
               title="Aset = Liabilitas + Ekuitas"
-              value={balanceSheetBalanced ? 'Seimbang' : isLoading ? 'Memuat...' : 'Guarded'}
+              value={balanceSheetBalanced ? 'Seimbang' : isLoading ? 'Memuat...' : 'Perlu cek'}
               helper={`${formatRupiah(statement?.assetsRupiah ?? 0)} aset · selisih ${formatRupiah(statement?.differenceRupiah ?? 0)}`}
               tone={balanceSheetBalanced ? 'success' : 'warning'}
               actionLabel="Lihat neraca"

@@ -232,7 +232,7 @@ export default function AccountingSetupPage() {
     onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async (result) => {
       setActionError(null);
-      setActionMessage(`Auto Journal Lite diproses: ${result.createdCount} dibuat, ${result.skippedCount} diskip, ${result.failedCount} gagal.`);
+      setActionMessage(`Auto journal diproses: ${result.createdCount} dibuat, ${result.skippedCount} diskip, ${result.failedCount} gagal.`);
       await refreshAccounting();
     },
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan backfill auto journal.')); },

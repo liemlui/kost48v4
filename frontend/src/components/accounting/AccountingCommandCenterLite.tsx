@@ -20,7 +20,7 @@ type Props = {
 
 /**
  * Compatibility wrapper kept so older page imports stay stable.
- * The user-facing UI is now a statement command center, not a B3/B4 proof panel.
+ * The user-facing UI is now a statement command center, not an internal proof panel.
  */
 export default function AccountingCommandCenterLite({ readiness, trial, balanceSheet, profitLoss, periodClose, assetReadiness, unmapped, autoJournalEnabled, isLoading, onFocusSection }: Props) {
   return (

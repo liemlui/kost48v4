@@ -88,7 +88,7 @@ export class AccountingReadinessService {
       { key: 'cashAccount.exists', label: 'Cash/bank account operasional tersedia', ready: cashAccountCount > 0, count: cashAccountCount, note: 'Minimal satu cash/bank account harus dibuat dan dipetakan ke COA asset.' },
       { key: 'period.exists', label: 'Accounting period tersedia', ready: periodCount > 0, count: periodCount, note: 'Buat periode bulanan untuk cutover dan laporan.' },
       { key: 'openingBalance.posted', label: 'Opening balance sudah diposting', ready: openingPostedCount > 0, count: openingPostedCount, note: 'Tanpa opening balance, Balance Sheet belum bisa formal.' },
-      { key: 'journal.exists', label: 'Journal ledger mulai tersedia', ready: postedJournalCount > 0, count: journalCount, note: 'B1 belum auto-posting; jurnal manual/draft bisa mulai disiapkan.' },
+      { key: 'journal.exists', label: 'Journal ledger mulai tersedia', ready: postedJournalCount > 0, count: journalCount, note: postedJournalCount > 0 ? 'Journal ledger sudah terisi dan menjadi dasar laporan.' : 'Mulai jurnal manual/draft untuk transaksi setelah cutover.' },
       { key: 'journal.balanced', label: 'Tidak ada posted journal yang tidak balance', ready: unbalancedPostedJournalCount === 0, count: unbalancedPostedJournalCount },
     ];
 
@@ -101,7 +101,7 @@ export class AccountingReadinessService {
       ...(periodCount === 0 ? ['Buat accounting period cutover/bulan aktif.'] : []),
       ...(openingDraftCount > 0 && openingPostedCount === 0 ? ['Review draft opening balance; posting tetap manual di batch lanjutan.'] : []),
       ...(openingPostedCount === 0 ? ['Siapkan opening balance: cash/bank, deposit liability, aset, modal owner.'] : []),
-      ...(postedJournalCount === 0 ? ['Mulai jurnal manual/draft untuk transaksi setelah cutover; auto-posting ditunda sampai batch berikutnya.'] : []),
+      ...(postedJournalCount === 0 ? ['Mulai jurnal manual/draft untuk transaksi setelah cutover.'] : []),
     ];
 
     return {
@@ -114,11 +114,16 @@ export class AccountingReadinessService {
       missing,
       nextActions,
       schemaStatus,
-      warnings: [
-        'Current finance reports masih OPERATIONAL_APPROXIMATION sampai readiness true.',
-        'Deposit tetap liability dan Stay deposit fields tetap operational snapshot; belum migrasi TenantDepositLedger.',
-        'B1/B2 foundation tidak melakukan auto-posting dan tidak menyentuh payment/stay/checkout/renew flow.',
-      ],
+      warnings: ready
+        ? [
+            'Ledger accounting sudah siap dibaca. Tetap review data quality, jurnal draft, dan status tutup periode sebelum keputusan owner.',
+            'Deposit tetap diperlakukan sebagai liability. Stay deposit fields masih menjadi snapshot operasional sampai ledger deposit detail dibuat di batch terpisah.',
+          ]
+        : [
+            'Beberapa laporan masih bersifat preview operasional sampai seluruh readiness ledger terpenuhi.',
+            'Deposit tetap diperlakukan sebagai liability. Stay deposit fields masih menjadi snapshot operasional sampai ledger deposit detail dibuat di batch terpisah.',
+            'Accounting belum siap penuh; selesaikan gate yang masih missing sebelum memakai laporan untuk keputusan owner.',
+          ],
     };
   }
 }
