@@ -88,7 +88,7 @@ const staffSections: NavigationSection[] = [
 function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSection[] {
   if (stage === 'browsing') {
     return [{
-      title: 'Portal Tenant',
+      title: 'Portal Penghuni',
       links: [
         { to: '/rooms', label: 'Pilih Kamar', icon: '🛏️', hint: 'Lihat kamar yang tersedia dan mulai pemesanan.' },
       ],
@@ -97,7 +97,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
 
   if (stage === 'booking') {
     return [{
-      title: 'Portal Tenant',
+      title: 'Portal Penghuni',
       links: [
         { to: '/portal/bookings', label: 'Status Pemesanan', icon: '🗓️', hint: 'Pantau review admin, tagihan awal, dan bukti pembayaran.' },
         { to: '/portal/invoices', label: 'Tagihan Awal', icon: '🧾', hint: 'Bayar tagihan awal setelah pemesanan disetujui.' },
@@ -106,7 +106,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
   }
 
   return [{
-    title: 'Portal Tenant',
+    title: 'Portal Penghuni',
     links: [
       { to: '/portal/stay', label: 'My Stay Guide', icon: '🏠', hint: 'Panduan kamar, masa sewa, tagihan, dan aksi berikutnya.' },
       { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },

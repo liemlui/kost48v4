@@ -13091,3 +13091,226 @@ button.status-strip-item:hover {
 @media (max-width: 992px) {
   .accounting-quality-grid { grid-template-columns: 1fr; }
 }
+
+/* M2 Tenant Priority Board */
+.tenant-priority-board {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(31, 111, 235, 0.10) !important;
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(15, 35, 65, 0.07);
+}
+
+.tenant-priority-board-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.tenant-priority-board-head h5 {
+  margin: 0 0 4px;
+  color: #12395e;
+  font-weight: 650;
+}
+
+.tenant-priority-board-head p {
+  margin: 0;
+  color: #60748a;
+  font-size: 0.92rem;
+}
+
+.tenant-priority-count {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #eef6ff;
+  color: #1f6feb;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tenant-priority-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tenant-priority-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(31, 111, 235, 0.10);
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.tenant-priority-item.danger { border-color: rgba(220, 53, 69, 0.18); background: #fff7f8; }
+.tenant-priority-item.warning { border-color: rgba(245, 159, 0, 0.22); background: #fffaf0; }
+.tenant-priority-item.info { border-color: rgba(31, 111, 235, 0.16); background: #f7fbff; }
+.tenant-priority-item.success { border-color: rgba(25, 135, 84, 0.18); background: #f3fbf7; }
+
+.tenant-priority-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(31, 111, 235, 0.08);
+  font-size: 1.05rem;
+}
+
+.tenant-priority-copy {
+  min-width: 0;
+}
+
+.tenant-priority-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.tenant-priority-meta span {
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #60748a;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.tenant-priority-copy strong {
+  display: block;
+  color: #12395e;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.tenant-priority-copy p {
+  margin: 3px 0 0;
+  color: #60748a;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 768px) {
+  .tenant-priority-board-head,
+  .tenant-priority-item {
+    grid-template-columns: 1fr;
+  }
+
+  .tenant-priority-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tenant-priority-item .btn {
+    width: 100%;
+  }
+}
+
+/* V5.30-M3 AutoOps first-paid runtime control */
+.autoops-control-panel {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98));
+}
+
+.autoops-control-panel.needs-action {
+  border-color: rgba(220, 38, 38, 0.18) !important;
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.96), rgba(255, 255, 255, 0.98));
+}
+
+.autoops-control-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.autoops-control-layout h3 {
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.autoops-control-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
+  min-width: 220px;
+}
+
+.autoops-control-actions small {
+  color: #64748b;
+  text-align: right;
+  max-width: 260px;
+}
+
+.autoops-control-grid,
+.autoops-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.autoops-control-grid > div,
+.autoops-result-grid > div {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.autoops-control-grid strong,
+.autoops-result-grid strong {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.autoops-control-grid span,
+.autoops-result-grid span {
+  display: block;
+  margin-top: 0.35rem;
+  color: #334155;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.autoops-result-grid small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.autoops-run-result {
+  border-top: 1px dashed rgba(148, 163, 184, 0.28);
+  padding-top: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .autoops-control-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .autoops-control-actions {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .autoops-control-actions small {
+    text-align: left;
+  }
+
+  .autoops-control-grid,
+  .autoops-result-grid {
+    grid-template-columns: 1fr;
+  }
+}

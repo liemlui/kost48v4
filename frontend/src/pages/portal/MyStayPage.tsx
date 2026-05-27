@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
@@ -10,10 +10,12 @@ import TenantGuidePanel from '../../components/tenant/TenantGuidePanel';
 import { BlockedReasonCard, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import { getResource, listResource } from '../../api/resources';
-import { createRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
+import { listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
+import RenewRequestModal from '../../components/tenant/RenewRequestModal';
+import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
@@ -46,6 +48,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showRenewModal, setShowRenewModal] = useState(false);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['my-renew-requests', stay.id],
@@ -93,13 +96,15 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const approvedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
-  const createRenewMutation = useMutation({
-    mutationFn: () => createRenewRequest({ stayId: stay.id, requestedTerm: 'MONTHLY' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] }),
-  });
+  const handleRenewSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] });
+    queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
+    queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+  };
 
   const handleCheckoutSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['my-checkout-requests', stay.id] });
+    queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
   };
 
   const endDays = getDaysUntilTenantDate(stay.plannedCheckOutDate);
@@ -203,7 +208,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   ];
 
   const timelineSteps: TimelineStep[] = [
-    { id: 'checkin', label: 'Masuk kamar', description: `Check-in ${formatDate(stay.checkInDate)}`, status: 'done' },
+    { id: 'checkin', label: 'Masuk kamar', description: `Masuk kamar ${formatDate(stay.checkInDate)}`, status: 'done' },
     { id: 'active', label: 'Masa sewa aktif', description: `Status: ${getStatusLabel(stay.status, undefined, { tone: 'tenant', domain: 'stay' })}`, status: 'active' },
     { id: 'billing', label: 'Tagihan', description: openInvoices.length ? `${openInvoices.length} tagihan masih perlu ditindaklanjuti.` : 'Tidak ada tagihan aktif.', status: openInvoices.length ? 'pending' : 'done' },
     { id: 'future', label: 'Perpanjang atau keluar', description: pendingRenewRequest ? 'Perpanjangan menunggu admin mencatat meter dan membuat tagihan baru.' : pendingCheckoutRequest ? 'Ada pengajuan keluar yang sedang menunggu keputusan admin.' : 'Pilih aksi sesuai rencana tinggalmu.', status: approvedCheckoutRequest ? 'active' : 'pending' },
@@ -217,7 +222,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         tone={guide.tone}
         actions={[
           { label: guide.primaryLabel, onClick: () => navigate(guide.primaryRoute), variant: guide.tone === 'danger' ? 'danger' : 'primary' },
-          { label: 'Ajukan Perpanjangan', onClick: () => createRenewMutation.mutate(), variant: 'outline-primary', disabled: !canRequestRenew || createRenewMutation.isPending, helper: !canRequestRenew && hasOpenInvoice ? 'Selesaikan tagihan dulu' : undefined },
+          { label: 'Ajukan Perpanjangan', onClick: () => setShowRenewModal(true), variant: 'outline-primary', disabled: !canRequestRenew, helper: !canRequestRenew && hasOpenInvoice ? 'Selesaikan tagihan dulu' : undefined },
           { label: 'Ajukan Keluar', onClick: () => setShowCheckoutModal(true), variant: 'outline-warning', disabled: !canRequestCheckout, helper: !canRequestCheckout && hasOpenInvoice ? 'Selesaikan tagihan dulu' : undefined },
         ]}
       />
@@ -242,7 +247,9 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         }))}
       />
 
-      {hasOpenInvoice && !reviewCount ? (
+      <TenantPriorityBoard items={assistantItems} />
+
+      {hasOpenInvoice ? (
         <BlockedReasonCard
           title={reviewCount ? 'Bukti pembayaran sedang diperiksa' : 'Ada tagihan yang perlu ditindaklanjuti'}
           reason={reviewCount ? TENANT_PAYMENT_REVIEW_MESSAGE : 'Perpanjangan dan pengajuan keluar sebaiknya dilakukan setelah tagihan selesai agar proses tidak terblokir.'}
@@ -269,8 +276,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             <span>Butuh bantuan kamar atau fasilitas?</span>
             <Button variant="outline-secondary" size="sm" onClick={() => navigate('/portal/tickets')}>Lapor Masalah</Button>
           </div>
-          {createRenewMutation.isError ? <Alert variant="danger" className="mt-3 small">{(createRenewMutation.error as any)?.response?.data?.message ?? 'Gagal mengajukan perpanjangan.'}</Alert> : null}
-        </Card.Body>
+                  </Card.Body>
       </Card>
 
       <Row className="g-4 mb-4">
@@ -297,6 +303,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         </Col>
       </Row>
 
+      <RenewRequestModal show={showRenewModal} onHide={() => setShowRenewModal(false)} onSuccess={handleRenewSuccess} stay={stay} />
       <CheckoutRequestModal show={showCheckoutModal} onHide={() => setShowCheckoutModal(false)} onSuccess={handleCheckoutSuccess} stay={stay} />
 
       <Row className="g-4 mb-4">
@@ -341,7 +348,7 @@ export default function MyStayPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Portal Tenant"
+        eyebrow="Portal Penghuni"
         title="My Stay Guide"
         description="Panduan masa sewa, tagihan, bukti pembayaran, dan pengajuan yang sedang berjalan."
       />
@@ -357,7 +364,7 @@ export default function MyStayPage() {
         return <Alert variant="danger" className="mt-4"><div className="fw-semibold">Gagal memuat data masa sewa</div><div className="small mt-1">{message || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}</div></Alert>;
       })() : null}
       {stay && !stayBelongsToUser ? <EmptyState icon="🔒" title="Kamu belum memiliki masa sewa aktif" description="Pilih kamar dari katalog publik untuk memulai proses booking." action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }} /> : null}
-      {stay && stayBelongsToUser && !roomStatusOccupied ? <EmptyState icon="📅" title="Booking kamu masih menunggu pembayaran atau verifikasi" description="Kamar masih berstatus dipesan. Selesaikan pembayaran awal dari halaman Pemesanan Saya sebelum masuk ke panduan masa sewa." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} /> : null}
+      {stay && stayBelongsToUser && !roomStatusOccupied ? <EmptyState icon="📅" title="Pemesanan kamu masih menunggu pembayaran atau verifikasi" description="Kamar masih berstatus dipesan. Selesaikan pembayaran awal dari halaman Pemesanan Saya sebelum masuk ke panduan masa sewa." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} /> : null}
       {stay && stayBelongsToUser && roomStatusOccupied ? <ActiveStayContent stay={stay} /> : null}
     </div>
   );

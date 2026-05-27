@@ -1,5 +1,6 @@
 import type { CheckoutRequest, Invoice, PaymentSubmission, RenewRequest, Stay } from '../types';
 import { isOpenInvoiceStatus, isPayableInvoiceStatus, isPendingReviewStatus } from './tenantCopy';
+import { getTenantDateDiffInDays } from './tenantDates';
 
 export function getPendingReviewInvoiceIds(submissions: PaymentSubmission[] = []) {
   const ids = new Set<number>();
@@ -13,12 +14,8 @@ export function getPendingReviewInvoiceIds(submissions: PaymentSubmission[] = []
 
 export function isTenantInvoiceOverdue(invoice: Invoice) {
   if (!invoice.dueDate || !isOpenInvoiceStatus(invoice.status)) return false;
-  const due = new Date(invoice.dueDate);
-  if (Number.isNaN(due.getTime())) return false;
-  due.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return due.getTime() < today.getTime();
+  const diffDays = getTenantDateDiffInDays(invoice.dueDate);
+  return diffDays !== null && diffDays < 0;
 }
 
 export function getOpenTenantInvoices(invoices: Invoice[] = []) {
@@ -38,13 +35,7 @@ export function getPrimaryTenantInvoice(invoices: Invoice[] = [], pendingReviewI
 }
 
 export function getDaysUntilTenantDate(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  return getTenantDateDiffInDays(value);
 }
 
 export function findStayRenewRequest(stay: Stay, requests: RenewRequest[] = [], status: string) {

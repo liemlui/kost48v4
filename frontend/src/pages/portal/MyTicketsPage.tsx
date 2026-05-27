@@ -9,6 +9,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
 import { AssistantPanel, type AssistantItem } from '../../components/command-center';
 import { tenantCategoryLabel } from '../../utils/tenantCopy';
+import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 
 type PortalTicket = {
   issueImageUrl?: string | null;
@@ -51,7 +52,7 @@ const ticketCategoryOptions = [
   { value: 'PEST', label: 'Hama' },
   { value: 'SECURITY', label: 'Keamanan' },
   { value: 'NOISE', label: 'Keributan' },
-  { value: 'CHECKIN_CHECKOUT', label: 'Bantuan Check-in / Keluar' },
+  { value: 'CHECKIN_CHECKOUT', label: 'Bantuan Masuk Kamar / Keluar' },
   { value: 'PAYMENT_ADMIN', label: 'Tagihan / Admin' },
   { value: 'EMERGENCY', label: 'Darurat' },
   { value: 'OTHER', label: 'Lainnya' },
@@ -97,10 +98,7 @@ export default function MyTicketsPage() {
       setError('');
     },
     onError: (err: unknown) => {
-      const message = err && typeof err === 'object' && 'response' in err
-        ? ((err as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Gagal membuat tiket baru.')
-        : 'Gagal membuat tiket baru.';
-      setError(Array.isArray(message) ? message.join(', ') : message);
+      setError(toTenantFriendlyError(err, 'Gagal membuat laporan baru. Coba lagi atau hubungi admin.'));
     },
   });
 
@@ -195,7 +193,7 @@ export default function MyTicketsPage() {
         <Modal.Body>
           {error ? <Alert variant="danger">{error}</Alert> : null}
           <Alert variant="light" className="small">
-            Sistem otomatis menghubungkan laporan dengan kamar aktif kamu. Kamu tidak perlu mengisi ID teknis apa pun.
+            Sistem otomatis menghubungkan laporan dengan kamar aktif kamu. Kamu cukup isi masalah yang terjadi, tanpa ID teknis.
           </Alert>
           <Form.Group className="mb-3">
             <Form.Label>Judul</Form.Label>

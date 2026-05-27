@@ -272,7 +272,7 @@ export default function BookingCard({
                       </div>
                     </div>
                     <div className="d-flex gap-2 flex-wrap align-items-start">
-                      <StatusBadge status={submission.status} />
+                      <StatusBadge status={submission.status} tone="tenant" domain="payment" />
                       {submission.fileUrl ? (
                         <Button
                           as="a"

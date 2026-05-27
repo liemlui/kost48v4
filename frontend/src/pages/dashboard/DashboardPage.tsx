@@ -7,13 +7,14 @@ import StatusBadge from '../../components/common/StatusBadge';
 import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
 import StaffMotivationDashboard from '../../components/staff/StaffMotivationDashboard';
+import AutoOpsControlPanel from '../../components/auto-ops/AutoOpsControlPanel';
 import SmartChartPanel, { type SmartChartPoint } from '../../components/charts/SmartChartPanel';
 import { listResource, postAction } from '../../api/resources';
 import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
 import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
 import { fetchBusinessHealth } from '../../api/finance';
-import { fetchAutoOpsStatus } from '../../api/autoOps';
+import { fetchAutoOpsStatus, type AutoOpsStatus } from '../../api/autoOps';
 import { fetchMyStaffRoutineKpi, fetchStaffRoutineToday } from '../../api/staffRoutines';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
 import { useAuth } from '../../context/AuthContext';
@@ -27,7 +28,7 @@ import { addHoursToDate, formatClockWib, formatDateTimeWib, getDeadlineMeta, par
 import type { CheckoutRequest, Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-type AutoOpsStatusLike = { expiredCandidates?: number; heldForPaymentReview?: number; orphanReservedRooms?: number; intervalMinutes?: number; policy?: string; deadlines?: Record<string, number> };
+type AutoOpsStatusLike = AutoOpsStatus;
 
 type DashboardListSummary<T> = {
   items: T[];
@@ -1336,7 +1337,7 @@ function OwnerDashboard() {
   const refreshDashboard = () => {
     void Promise.all([
       roomsQuery.refetch(), activeStaysQuery.refetch(), invoicesQuery.refetch(), expensesQuery.refetch(),
-      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(),
+      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), autoOpsQuery.refetch(),
     ]);
   };
 
@@ -1352,6 +1353,7 @@ function OwnerDashboard() {
         secondaryAction={<><Button variant="outline-secondary" onClick={refreshDashboard}>Refresh</Button><Button variant="outline-primary" onClick={() => navigate('/reports?tab=command')}>Buka Reports</Button></>}
       />
       <AutoOpsUrgencyCard status={autoOpsQuery.data} role="OWNER" />
+      <AutoOpsControlPanel status={autoOpsQuery.data} role="OWNER" onCompleted={refreshDashboard} />
       <OwnerContinuityStrip pendingPaymentReviewCount={pendingPaymentReviewCount} pendingRenewCount={pendingRenewCount} approvedCheckoutRequestCount={approvedCheckoutRequestCount} overdueCount={overdue.length} openInvoiceCount={cashflowForecast.openInvoiceCount} onNavigate={navigate} />
       {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan invoice dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint summary backend.</Alert> : null}
       <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di queue." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
@@ -1722,7 +1724,12 @@ function AdminDashboard() {
         hideActions
       /> : null}
 
-      {(activeArea === 'today' || activeArea === 'stays' || activeArea === 'finance') ? <AdminSlaMiniNote status={autoOpsQuery.data} /> : null}
+      {(activeArea === 'today' || activeArea === 'stays' || activeArea === 'finance') ? (
+        <div className="mt-3">
+          <AutoOpsControlPanel status={autoOpsQuery.data} role="ADMIN" onCompleted={refreshDashboard} />
+          <AdminSlaMiniNote status={autoOpsQuery.data} />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { createCheckoutRequest } from '../../api/checkoutRequests';
 import type { Stay } from '../../types';
+import { getDateInputDaysFromToday, toUtcDateOnlyIso } from '../../utils/tenantDates';
+import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 
 interface CheckoutRequestModalProps {
   show: boolean;
@@ -11,11 +13,7 @@ interface CheckoutRequestModalProps {
 }
 
 export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: CheckoutRequestModalProps) {
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().slice(0, 10);
-  };
+  const getMinDate = () => getDateInputDaysFromToday(1);
 
   const [requestedCheckOutDate, setRequestedCheckOutDate] = useState(getMinDate());
   const [checkoutReason, setCheckoutReason] = useState('');
@@ -54,7 +52,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
     try {
       await createCheckoutRequest({
         stayId: stay.id,
-        requestedCheckOutDate,
+        requestedCheckOutDate: toUtcDateOnlyIso(requestedCheckOutDate) ?? requestedCheckOutDate,
         checkoutReason: checkoutReason.trim(),
         requestNotes: requestNotes.trim() || undefined,
       });
@@ -62,7 +60,7 @@ export default function CheckoutRequestModal({ show, onHide, onSuccess, stay }: 
       handleClose();
     } catch (err: any) {
       const status = err?.response?.status;
-      const message = err?.response?.data?.message ?? 'Gagal mengajukan rencana keluar.';
+      const message = toTenantFriendlyError(err, 'Gagal mengajukan rencana keluar. Periksa tagihan aktif atau hubungi admin.');
       setError(message);
       // 409 Conflict: already has pending request; refetch to show status card
       if (status === 409) {

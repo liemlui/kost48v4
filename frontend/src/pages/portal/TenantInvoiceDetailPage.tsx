@@ -2,21 +2,22 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getResource, postAction } from '../../api/resources';
-import client from '../../api/client';
+import { getResource } from '../../api/resources';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
+import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
 import { LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import type { InvoicePrintData } from '../../components/reports/InvoicePrintLayout';
-import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
+import { listMyPaymentSubmissions, submitPaymentWithProof } from '../../api/paymentSubmissions';
 import { isPayableInvoiceStatus, isPendingReviewStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
 import { getInvoiceUtilitySummary, invoiceKindLabel } from '../../utils/invoiceUtility';
 import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
+import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 
 const lineTypeLabels: Record<string, string> = {
   RENT: 'Sewa',
@@ -41,6 +42,11 @@ const paymentMethodLabels: Record<string, string> = {
   EWALLET: 'E-Wallet',
   OTHER: 'Lainnya',
 };
+
+function toPositiveNumber(value: unknown): number | null {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
 
 export default function TenantInvoiceDetailPage() {
   const { id } = useParams();
@@ -82,6 +88,7 @@ export default function TenantInvoiceDetailPage() {
   const [payRefNumber, setPayRefNumber] = useState('');
   const [payNotes, setPayNotes] = useState('');
   const [payFile, setPayFile] = useState<File | null>(null);
+  const [payFormError, setPayFormError] = useState('');
 
   const needsPayment = !isPaid && !isCancelled;
 
@@ -90,6 +97,7 @@ export default function TenantInvoiceDetailPage() {
     setPayAmount(String(outstanding));
     setPayFile(null);
     setPayNotes('');
+    setPayFormError('');
   }, [showPayModal, outstanding]);
 
   // ── Pending review detection ──
@@ -154,51 +162,32 @@ export default function TenantInvoiceDetailPage() {
     { id: 'complete', label: 'Tagihan selesai', description: isPaid ? 'Tagihan sudah lunas.' : 'Selesai setelah status berubah menjadi lunas.', status: isPaid ? 'done' : isCancelled ? 'blocked' : 'pending' },
   ] : [];
 
-  const shouldDisablePay = hasPendingReview || !canSubmitPayment || Number(payAmount) <= 0 || Number(payAmount) > outstanding;
+  const parsedPayAmount = Number(payAmount);
+  const shouldDisablePay = hasPendingReview || !canSubmitPayment || !Number.isFinite(parsedPayAmount) || parsedPayAmount <= 0 || parsedPayAmount > outstanding || !payFile;
 
   const payMutation = useMutation({
     mutationFn: async () => {
-      const stayId = (detailQuery.data as any)?.stay?.id;
-      const invoiceId = Number(id);
-      if (!stayId || !invoiceId) throw new Error('Data tidak lengkap');
+      const detail = detailQuery.data as any;
+      const stayId = toPositiveNumber(detail?.stayId ?? detail?.stay?.id);
+      const invoiceId = toPositiveNumber(detail?.id ?? id);
+      const amountRupiah = toPositiveNumber(payAmount);
+      if (!stayId || !invoiceId) throw new Error('Data tagihan belum lengkap. Coba muat ulang halaman.');
+      if (!amountRupiah) throw new Error('Jumlah pembayaran wajib lebih dari Rp0.');
+      if (amountRupiah > outstanding) throw new Error('Jumlah pembayaran tidak boleh melebihi sisa tagihan.');
+      if (!payFile) throw new Error('Upload bukti pembayaran dulu sebelum mengirim.');
 
-      // If file is selected, upload it first
-      let fileUrl: string | undefined;
-      let fileKey: string | undefined;
-      let originalFilename: string | undefined;
-      let mimeType: string | undefined;
-      let fileSizeBytes: number | undefined;
-
-      if (payFile) {
-        const formData = new FormData();
-        formData.append('file', payFile);
-        const uploadRes = await client.post('/payment-submissions/upload-proof', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        const uploadData = uploadRes.data.data;
-        fileUrl = uploadData.fileUrl;
-        fileKey = uploadData.fileKey;
-        originalFilename = uploadData.originalFilename;
-        mimeType = uploadData.mimeType;
-        fileSizeBytes = uploadData.fileSizeBytes;
-      }
-
-      return postAction<any>('/payment-submissions', {
+      return submitPaymentWithProof({
         stayId,
         invoiceId,
-        amountRupiah: Number(payAmount),
+        targetType: 'INVOICE',
+        amountRupiah,
         paidAt: new Date().toISOString(),
         paymentMethod: payMethod,
         senderName: paySenderName || undefined,
         senderBankName: paySenderBank || undefined,
         referenceNumber: payRefNumber || undefined,
         notes: payNotes || undefined,
-        fileUrl,
-        fileKey,
-        originalFilename,
-        mimeType,
-        fileSizeBytes,
-      });
+      }, payFile);
     },
     onSuccess: () => {
       setShowPayModal(false);
@@ -237,7 +226,7 @@ export default function TenantInvoiceDetailPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Portal Tenant"
+        eyebrow="Portal Penghuni"
         title={`Tagihan #${id}`}
         description={hasRenewUtilityLines ? 'Tagihan perpanjangan ini sudah memasukkan sewa periode baru dan pemakaian listrik/air dari checkpoint meter. Tidak ada sistem hutang.' : 'Detail tagihan, status pembayaran, dan bukti yang sedang diperiksa. Bayar dan kirim bukti dalam satu langkah.'}
         actionLabel="Kembali"
@@ -273,6 +262,12 @@ export default function TenantInvoiceDetailPage() {
             helper: metric.helper,
             tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
           }))}
+        />
+        <TenantPriorityBoard
+          title="Prioritas Tagihan Ini"
+          subtitle="Satu tempat untuk melihat apakah harus bayar, menunggu pemeriksaan admin, atau sudah selesai."
+          items={assistantItems}
+          maxItems={3}
         />
         <LifecycleTimeline title="Status Pembayaran" subtitle={hasRenewUtilityLines ? 'Tagihan renew berjalan setelah admin mencatat meter dan sistem menghitung pemakaian utilitas.' : 'Urutan proses dari tagihan muncul sampai lunas.'} steps={timelineSteps} />
 
@@ -462,9 +457,10 @@ export default function TenantInvoiceDetailPage() {
           <Alert variant="info" className="small">
             Bayar dan kirim bukti pembayaran untuk tagihan <strong>{invoice.invoiceNumber || `TG-${invoice.id}`}</strong>. {dueMeta.hasDate ? `Batas bayar: ${dueMeta.absoluteLabel}. ${dueMeta.relativeLabel}. ` : ''}Admin akan memeriksa pembayaran kamu. Setelah terkirim, kamu tidak perlu upload ulang.
           </Alert>
+          {payFormError ? <Alert variant="warning" className="small">{payFormError}</Alert> : null}
           {payMutation.isError ? (
             <Alert variant="danger" className="small">
-              {(payMutation.error as any)?.response?.data?.message || (payMutation.error as Error)?.message || 'Gagal mengirim bukti pembayaran. Cek nominal dan file, lalu coba lagi.'}
+              {toTenantFriendlyError(payMutation.error, 'Gagal mengirim bukti pembayaran. Cek nominal dan file, lalu coba lagi.')}
             </Alert>
           ) : null}
           {totalInvoice <= 0 && (invoice.lines?.length ?? 0) > 0 ? (
@@ -563,7 +559,7 @@ export default function TenantInvoiceDetailPage() {
                       setPayFile(file);
                     }}
                   />
-                  <Form.Text className="text-muted">Format: JPG, PNG, atau PDF. Maks 5MB. Jika membayar tunai, isi catatan agar admin mudah memeriksa.</Form.Text>
+                  <Form.Text className="text-muted">Format: JPG, PNG, atau PDF. Maks 5MB. Bukti wajib diunggah agar admin bisa memeriksa pembayaran tanpa meminta ulang.</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -575,7 +571,14 @@ export default function TenantInvoiceDetailPage() {
           </Button>
           <Button
             variant="primary"
-            onClick={() => payMutation.mutate()}
+            onClick={() => {
+              if (!payFile) {
+                setPayFormError('Upload bukti pembayaran dulu. Setelah terkirim, kamu tidak perlu upload ulang.');
+                return;
+              }
+              setPayFormError('');
+              payMutation.mutate();
+            }}
             disabled={payMutation.isPending || shouldDisablePay}
           >
             {payMutation.isPending ? 'Mengirim...' : 'Bayar & Kirim Bukti'}

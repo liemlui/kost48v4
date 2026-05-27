@@ -59,7 +59,7 @@ export function tenantCategoryLabel(category?: string | null) {
   if (normalized === 'PEST') return 'Hama';
   if (normalized === 'SECURITY') return 'Keamanan';
   if (normalized === 'NOISE') return 'Keributan';
-  if (normalized === 'CHECKIN_CHECKOUT') return 'Bantuan Check-in / Keluar';
+  if (normalized === 'CHECKIN_CHECKOUT') return 'Bantuan Masuk Kamar / Keluar';
   if (normalized === 'PAYMENT_ADMIN') return 'Tagihan / Admin';
   if (normalized === 'EMERGENCY') return 'Darurat';
   if (normalized === 'MAINTENANCE') return 'Perbaikan kamar';

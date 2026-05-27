@@ -9,6 +9,7 @@ export type AutoOpsStatus = {
   heldForPaymentReview: number;
   orphanReservedRooms: number;
   policy: string;
+  accountingAutoClosePolicy?: unknown;
 };
 
 export type AutoOpsRunResult = {
@@ -17,6 +18,7 @@ export type AutoOpsRunResult = {
   releasedRooms: number;
   expiredStayIds: number[];
   releasedRoomIds: number[];
+  accountingAutoClose?: unknown;
 };
 
 export async function fetchAutoOpsStatus() {

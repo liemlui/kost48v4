@@ -9,6 +9,7 @@ import PageHeader from '../../components/common/PageHeader';
 import type { AssistantItem, MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import StatusBadge from '../../components/common/StatusBadge';
+import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
 import { useAuth } from '../../context/AuthContext';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import type { Invoice } from '../../types';
@@ -123,7 +124,7 @@ export default function MyInvoicesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Portal Tenant" title="Tagihan Saya" description="Pantau tagihan, bukti pembayaran yang sedang diperiksa, dan riwayat yang sudah selesai." />
+      <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Pantau tagihan, bukti pembayaran yang sedang diperiksa, dan riwayat yang sudah selesai." />
       <AssistantInsightLine
         title="Asisten Tagihan Kamu"
         tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0] ? 'info' : 'success'}
@@ -140,6 +141,11 @@ export default function MyInvoicesPage() {
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
           onClick: metric.onClick,
         }))}
+      />
+      <TenantPriorityBoard
+        title="Prioritas Tagihan"
+        subtitle="Fokus pada tagihan yang harus dibayar, bukti yang sedang diperiksa, dan status yang sudah selesai."
+        items={assistantItems}
       />
       <Card className="content-card border-0"><Card.Body>
         <div className="table-meta align-items-start">

@@ -6,14 +6,14 @@ import { getNavigationLinks, type TenantPortalStage } from '../../config/navigat
 
 function getStageTitle(stage: TenantPortalStage) {
   if (stage === 'browsing') return 'Pilih kamar yang cocok';
-  if (stage === 'booking') return 'Menunggu review admin';
+  if (stage === 'booking') return 'Pantau pemesanan';
   return 'My Stay Guide';
 }
 
 function getStageSummary(stage: TenantPortalStage) {
   if (stage === 'browsing') return 'Cari kamar, ajukan pemesanan, lalu pantau statusnya di portal.';
-  if (stage === 'booking') return 'Satu tempat untuk status pemesanan, tagihan awal, dan bukti pembayaran.';
-  return 'Satu tempat untuk masa sewa, tagihan, laporan, pengumuman, dan layanan kos.';
+  if (stage === 'booking') return 'Pantau status pemesanan, tagihan awal, dan bukti pembayaran dalam satu tempat.';
+  return 'Satu tempat untuk masa sewa, tagihan, laporan bantuan, pengumuman, dan layanan kos.';
 }
 
 export default function TenantWorkspaceTabs({
@@ -36,7 +36,7 @@ export default function TenantWorkspaceTabs({
         <button type="button" className="tenant-workspace-brand" onClick={() => navigate(stage === 'browsing' ? '/rooms' : stage === 'booking' ? '/portal/bookings' : '/portal/stay')}>
           <span className="brand-mark small" aria-hidden="true">K48</span>
           <span>
-            <strong>KOST48 Tenant Workspace</strong>
+            <strong>KOST48 Portal Penghuni</strong>
             <em>{getStageTitle(stage)}</em>
           </span>
         </button>
@@ -59,7 +59,7 @@ export default function TenantWorkspaceTabs({
 
       <section className="tenant-workspace-guide-strip">
         <div>
-          <div className="page-eyebrow">Tenant guide</div>
+          <div className="page-eyebrow">Panduan penghuni</div>
           <h2>{getStageTitle(stage)}</h2>
           <p>{getStageSummary(stage)}</p>
         </div>

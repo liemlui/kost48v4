@@ -8,6 +8,7 @@ import {
   getTenantBookingGuideState,
 } from '../../utils/tenantBookingRules';
 import { canCancelBooking } from '../portal/BookingStatusHelper';
+import { tenantPricingTermLabel } from '../../utils/tenantCopy';
 import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
 
 export default function TenantBookingWaitingRoom({
@@ -131,7 +132,7 @@ export default function TenantBookingWaitingRoom({
               </div>
               <div className="d-flex justify-content-between gap-3">
                 <span className="text-muted">Masa sewa</span>
-                <strong>{booking?.pricingTerm ? <StatusBadge status={booking.pricingTerm} /> : '-'}</strong>
+                <strong>{booking?.pricingTerm ? tenantPricingTermLabel(booking.pricingTerm) : '-'}</strong>
               </div>
               <div className="d-flex justify-content-between gap-3">
                 <span className="text-muted">Tagihan awal</span>

@@ -3,6 +3,7 @@ import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import type { TenantBooking } from '../../types';
 import { getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import { formatDateTimeWib } from '../../utils/dateTime';
+import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
 
 export function ExpiryBadge({ expiresAt }: { expiresAt?: string | null }) {
   const expiryMeta = getBookingExpiryMeta(expiresAt);
@@ -88,11 +89,9 @@ export function getPortalBookingStatus(
 
 export function getErrorMessage(error: unknown, fallback: string) {
   if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.message;
-    if (Array.isArray(message)) return message.join(', ');
-    if (typeof message === 'string' && message.trim()) return message;
+    return toTenantFriendlyError(error, fallback);
   }
-  return fallback;
+  return toTenantFriendlyError(error, fallback);
 }
 
 export function getPaymentTargetLabel(targetType?: string | null) {
