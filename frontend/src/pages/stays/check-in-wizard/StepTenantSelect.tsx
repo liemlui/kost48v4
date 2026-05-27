@@ -41,7 +41,7 @@ export default function StepTenantSelect({
     if (wasCreatingRef.current && !isCreatingTenant && !wizardError) {
       setShowInlineTenant(false);
       setInlineTenant({ fullName: '', phone: '', email: '', gender: 'OTHER', identityNumber: '' });
-      setTenantSuccess('Tenant berhasil dibuat dan dipilih.');
+      setTenantSuccess('Penghuni berhasil dibuat dan dipilih.');
       const timer = setTimeout(() => setTenantSuccess(''), 5000);
       return () => clearTimeout(timer);
     }
@@ -80,8 +80,8 @@ export default function StepTenantSelect({
     <Card className="content-card border-0 shadow-sm mb-4">
       <Card.Body>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="mb-0">Pilih Tenant</h5>
-          <Button size="sm" variant="outline-primary" onClick={() => { setTenantSuccess(''); setShowInlineTenant((prev) => !prev); }}>Tambah Tenant Baru</Button>
+          <h5 className="mb-0">Pilih Penghuni</h5>
+          <Button size="sm" variant="outline-primary" onClick={() => { setTenantSuccess(''); setShowInlineTenant((prev) => !prev); }}>Tambah Penghuni Baru</Button>
         </div>
         {tenantSuccess ? (
           <Alert variant="success" dismissible onClose={() => setTenantSuccess('')} className="py-2 mb-3">
@@ -89,17 +89,17 @@ export default function StepTenantSelect({
           </Alert>
         ) : null}
         <Form.Group className="mb-3">
-          <Form.Label>Tenant</Form.Label>
+          <Form.Label>Penghuni</Form.Label>
           {isLoading ? (
             <div className="d-flex align-items-center gap-2">
               <Spinner size="sm" />
-              <span className="text-muted">Memuat data tenant...</span>
+              <span className="text-muted">Memuat data penghuni...</span>
             </div>
           ) : (
             <Controller
               control={form.control}
               name="tenantId"
-              rules={{ required: 'Tenant wajib dipilih' }}
+              rules={{ required: 'Penghuni wajib dipilih' }}
               render={({ field }) => (
                 <>
                   <SearchableSelect<number>
@@ -109,7 +109,7 @@ export default function StepTenantSelect({
                       field.onChange(option?.value ?? null);
                     }}
                     loadOptions={loadTenantOptions}
-                    placeholder="Cari tenant..."
+                    placeholder="Cari penghuni..."
                     isDisabled={isLoading}
                     defaultOptions={defaultTenantOptions}
                   />
@@ -131,7 +131,7 @@ export default function StepTenantSelect({
                   <Form.Control 
                     value={inlineTenant.fullName} 
                     onChange={(e) => setInlineTenant((prev) => ({ ...prev, fullName: e.target.value }))} 
-                    placeholder="Nama lengkap tenant"
+                    placeholder="Nama lengkap penghuni"
                   />
                 </Form.Group>
               </Col>
@@ -177,9 +177,9 @@ export default function StepTenantSelect({
                 <Form.Group>
                   <Form.Label>Gender</Form.Label>
                   <Form.Select value={inlineTenant.gender} onChange={(e) => setInlineTenant((prev) => ({ ...prev, gender: e.target.value }))}>
-                    <option value="MALE">MALE</option>
-                    <option value="FEMALE">FEMALE</option>
-                    <option value="OTHER">OTHER</option>
+                    <option value="MALE">Laki-laki</option>
+                    <option value="FEMALE">Perempuan</option>
+                    <option value="OTHER">Lainnya</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -206,7 +206,7 @@ export default function StepTenantSelect({
                 }} 
                 disabled={isCreatingTenant}
               >
-                Simpan Tenant
+                Simpan Penghuni
               </Button>
               <Button size="sm" variant="outline-secondary" onClick={() => setShowInlineTenant(false)}>Tutup</Button>
             </div>

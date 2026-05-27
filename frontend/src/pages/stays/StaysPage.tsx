@@ -45,6 +45,16 @@ function isOperationalActiveStay(stay: Stay): boolean {
   return stay.status === 'ACTIVE' && stay.room?.status === 'OCCUPIED';
 }
 
+function getDepositSettlementLabel(stay: Stay) {
+  const hasDeductionAndRefund = Number(stay.depositDeductionRupiah ?? 0) > 0 && Number(stay.depositRefundedRupiah ?? 0) > 0;
+  if (stay.depositStatus === 'REFUNDED') {
+    return hasDeductionAndRefund ? 'Sebagian dikembalikan & sebagian dipotong' : 'Dikembalikan';
+  }
+  if (stay.depositStatus === 'PARTIALLY_REFUNDED') return 'Sebagian dikembalikan';
+  if (stay.depositStatus === 'FORFEITED') return 'Hangus';
+  return stay.depositStatus;
+}
+
 function isCheckoutDueOrOverdue(stay: Stay): boolean {
   if (stay.status !== 'ACTIVE' || stay.room?.status !== 'OCCUPIED' || !stay.plannedCheckOutDate) return false;
   const daysLeft = daysFromToday(stay.plannedCheckOutDate);
@@ -593,7 +603,7 @@ export default function StaysPage() {
                         </td>
                         <td>
                           <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
-                          <div className="small text-muted">Renew/keluar: {formatDateSafe(item.plannedCheckOutDate)}</div>
+                          <div className="small text-muted">Akhir masa sewa: {formatDateSafe(item.plannedCheckOutDate)}</div>
                         </td>
                         <td>
                           <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
@@ -706,19 +716,13 @@ export default function StaysPage() {
                       </td>
                       <td>
                         <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
-                        <div className="small text-muted">Renew/keluar: {formatDateSafe(item.plannedCheckOutDate)}</div>
+                        <div className="small text-muted">Akhir masa sewa: {formatDateSafe(item.plannedCheckOutDate)}</div>
                       </td>
                       <td>
                         <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} />
                         {item.depositStatus && item.depositStatus !== 'HELD' ? (
                           <div className="small text-muted mt-1">
-                            {item.depositStatus === 'REFUNDED'
-                              ? 'Dikembalikan'
-                              : item.depositStatus === 'PARTIALLY_REFUNDED'
-                                ? 'Sebagian dikembalikan'
-                                : item.depositStatus === 'FORFEITED'
-                                  ? 'Hangus'
-                                  : item.depositStatus}
+                            {getDepositSettlementLabel(item)}
                           </div>
                         ) : null}
                       </td>

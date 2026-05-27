@@ -1,4 +1,5 @@
-import { IsDateString, IsEnum, IsInt, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsDateString, IsEnum, IsInt, IsNumberString, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { InvoiceLineType, UtilityType } from '../../../common/enums/app.enums';
 
 export class CreateInvoiceDto {
@@ -91,6 +92,14 @@ export class UpdateInvoiceLineDto {
   @IsInt()
   @Min(0)
   sortOrder?: number;
+}
+
+
+export class CreateInvoiceWithLinesAndIssueDto extends CreateInvoiceDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateInvoiceLineDto)
+  lines!: CreateInvoiceLineDto[];
 }
 
 export class CancelInvoiceDto {

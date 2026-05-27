@@ -341,7 +341,7 @@ export default function RenewRequestsAdminPage() {
             <Col lg={7}>
               <div className="decision-section-card">
                 <div className="section-kicker">2. Meter checkpoint wajib</div>
-                <p className="small text-muted mb-3">Backend akan mencari catatan meter sebelumnya, menghitung selisih, lalu membuat line listrik dan air pada invoice renew. Angka tidak boleh turun dari catatan sebelumnya.</p>
+                <p className="small text-muted mb-3">Sistem akan mencari catatan meter sebelumnya, menghitung selisih, lalu menambahkan biaya listrik dan air ke tagihan perpanjangan. Angka meter tidak boleh lebih kecil dari catatan sebelumnya.</p>
                 <Row className="g-3">
                   <Col md={4}>
                     <Form.Group>

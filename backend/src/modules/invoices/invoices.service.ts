@@ -5,10 +5,29 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AuditLogService } from '../../audit-log/audit-log.service';
-import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
+import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, CreateInvoiceWithLinesAndIssueDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
 import { InvoicesQueryDto } from './dto/invoices-query.dto';
 import { InvoiceLineType, InvoiceStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { AccountingReadinessResult, AccountingReadinessService } from '../accounting/accounting-readiness.service';
+
+type InvoiceAccountingPostingStatus = 'POSTED' | 'ALREADY_POSTED' | 'SKIPPED_ACCOUNTING_NOT_READY';
+
+type InvoiceAccountingPostingMetadata = {
+  accountingPosted: boolean;
+  accountingJournalEntryId: number | null;
+  accountingPostingStatus: InvoiceAccountingPostingStatus;
+  accountingWarning: string | null;
+  accountingReason: string | null;
+  formalStatementReady: boolean;
+};
+
+type InvoicePostingResult = {
+  posted?: boolean;
+  skipped?: boolean;
+  reason?: string;
+  journalEntry?: { id?: number | null; entryNumber?: string | null } | null;
+};
 
 @Injectable()
 export class InvoicesService {
@@ -16,6 +35,7 @@ export class InvoicesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
     private readonly accountingPosting: AccountingPostingService,
+    private readonly accountingReadiness: AccountingReadinessService,
   ) {}
 
   private numeric(value: unknown): number {
@@ -38,10 +58,133 @@ export class InvoicesService {
     return items.map((item) => this.normalizeInvoiceTotals(item));
   }
 
+  private shouldAttemptInvoiceAccountingPosting(readiness: AccountingReadinessResult) {
+    return readiness.schemaStatus?.ready !== false;
+  }
+
+  private buildSkippedAccountingMetadata(readiness: AccountingReadinessResult, reason: string): InvoiceAccountingPostingMetadata {
+    return {
+      accountingPosted: false,
+      accountingJournalEntryId: null,
+      accountingPostingStatus: 'SKIPPED_ACCOUNTING_NOT_READY',
+      accountingWarning: `Tagihan sudah diterbitkan, tetapi jurnal accounting belum dibuat: ${reason}`,
+      accountingReason: reason,
+      formalStatementReady: Boolean(readiness.formalStatementReady),
+    };
+  }
+
+  private isAccountingSetupSkipReason(reason: string) {
+    const normalized = reason.toLowerCase();
+    return [
+      'coa ',
+      'accounts receivable',
+      'cash/bank',
+      'accounting period',
+      'tidak ada accounting period',
+      'periode ',
+      'belum tersedia',
+    ].some((term) => normalized.includes(term));
+  }
+
+  private isInvariantPostingSkipReason(reason: string) {
+    const normalized = reason.toLowerCase();
+    return [
+      'invoice tidak ditemukan',
+      'belum punya line',
+      'invoice total 0',
+      'journal line kurang',
+      'debit dan kredit sekaligus',
+      'journal tidak balance',
+      'status draft',
+      'status cancelled',
+      'sudah closed',
+      'sudah ditutup',
+      'workflow reopen',
+    ].some((term) => normalized.includes(term));
+  }
+
+  private resolveInvoiceAccountingMetadata(
+    postingResult: InvoicePostingResult | null | undefined,
+    readiness: AccountingReadinessResult,
+  ): InvoiceAccountingPostingMetadata {
+    if (postingResult?.posted) {
+      return {
+        accountingPosted: true,
+        accountingJournalEntryId: postingResult.journalEntry?.id ?? null,
+        accountingPostingStatus: 'POSTED',
+        accountingWarning: null,
+        accountingReason: null,
+        formalStatementReady: Boolean(readiness.formalStatementReady),
+      };
+    }
+
+    if (postingResult?.skipped && postingResult.journalEntry?.id) {
+      return {
+        accountingPosted: true,
+        accountingJournalEntryId: postingResult.journalEntry.id,
+        accountingPostingStatus: 'ALREADY_POSTED',
+        accountingWarning: null,
+        accountingReason: postingResult.reason ?? null,
+        formalStatementReady: Boolean(readiness.formalStatementReady),
+      };
+    }
+
+    const reason = postingResult?.reason ?? 'Accounting posting tidak mengembalikan hasil journal yang valid.';
+    const setupSkip = this.isAccountingSetupSkipReason(reason);
+    const invariantSkip = this.isInvariantPostingSkipReason(reason);
+
+    if (readiness.formalStatementReady || invariantSkip || !setupSkip) {
+      throw new ConflictException(`Tagihan gagal diterbitkan ke accounting: ${reason}`);
+    }
+
+    return this.buildSkippedAccountingMetadata(readiness, reason);
+  }
+
+  private attachAccountingMetadata<T extends Record<string, unknown>>(
+    invoice: T,
+    accounting: InvoiceAccountingPostingMetadata,
+  ): T & { accounting: InvoiceAccountingPostingMetadata } {
+    return { ...invoice, accounting };
+  }
+
   private assertFinanceMutationAllowed(actor: CurrentUserPayload) {
     if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
       throw new ForbiddenException('Hanya OWNER/ADMIN yang boleh mengubah data invoice finance');
     }
+  }
+
+  private assertValidInvoicePeriod(periodStart: string | Date, periodEnd: string | Date) {
+    const start = new Date(periodStart);
+    const end = new Date(periodEnd);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new ConflictException('Periode invoice tidak valid');
+    }
+    if (end <= start) {
+      throw new ConflictException('Tanggal akhir periode harus setelah tanggal mulai periode.');
+    }
+  }
+
+  private buildLineData(invoiceId: number, dto: CreateInvoiceLineDto, sortOrderFallback = 0): Prisma.InvoiceLineCreateInput {
+    const qtyDecimal = new Prisma.Decimal(dto.qty);
+    if (qtyDecimal.lte(0)) {
+      throw new ConflictException('Qty invoice harus lebih dari 0');
+    }
+    const unitPriceRupiah = Number(dto.unitPriceRupiah ?? 0);
+    if (!Number.isFinite(unitPriceRupiah) || unitPriceRupiah < 0) {
+      throw new ConflictException('Harga satuan invoice tidak valid');
+    }
+    const lineAmountRupiah = qtyDecimal.times(unitPriceRupiah).toNumber();
+    return {
+      invoice: { connect: { id: invoiceId } },
+      lineType: dto.lineType as InvoiceLineType,
+      utilityType: dto.utilityType as UtilityType,
+      description: dto.description,
+      qty: qtyDecimal,
+      unit: dto.unit,
+      unitPriceRupiah,
+      lineAmountRupiah,
+      sortOrder: dto.sortOrder ?? sortOrderFallback,
+    };
   }
 
 
@@ -127,12 +270,79 @@ export class InvoicesService {
     this.assertFinanceMutationAllowed(actor);
     const stay = await this.prisma.stay.findUnique({ where: { id: dto.stayId } });
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
-    if (new Date(dto.periodEnd) < new Date(dto.periodStart)) throw new ConflictException('Periode invoice salah');
+    this.assertValidInvoicePeriod(dto.periodStart, dto.periodEnd);
     const existingNumber = await this.prisma.invoice.findUnique({ where: { invoiceNumber: dto.invoiceNumber } });
     if (existingNumber) throw new ConflictException('Nomor invoice sudah digunakan');
     const created = await this.prisma.invoice.create({ data: { stayId: dto.stayId, invoiceNumber: dto.invoiceNumber, periodStart: new Date(dto.periodStart), periodEnd: new Date(dto.periodEnd), dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined, notes: dto.notes, createdById: actor.id } });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Invoice', entityId: String(created.id), newData: created });
     return created;
+  }
+
+  async createWithLinesAndIssue(dto: CreateInvoiceWithLinesAndIssueDto, actor: CurrentUserPayload) {
+    this.assertFinanceMutationAllowed(actor);
+    this.assertValidInvoicePeriod(dto.periodStart, dto.periodEnd);
+    if (!dto.lines?.length) throw new ConflictException('Tagihan wajib memiliki minimal satu rincian tagihan');
+
+    const readiness = await this.accountingReadiness.getReadiness();
+
+    const result = await (this.prisma as any).$transaction(async (tx: Prisma.TransactionClient) => {
+      const stay = await tx.stay.findUnique({ where: { id: dto.stayId } });
+      if (!stay) throw new NotFoundException('Masa sewa tidak ditemukan');
+
+      const existingNumber = await tx.invoice.findUnique({ where: { invoiceNumber: dto.invoiceNumber } });
+      if (existingNumber) throw new ConflictException('Nomor tagihan sudah digunakan');
+
+      const created = await tx.invoice.create({
+        data: {
+          stayId: dto.stayId,
+          invoiceNumber: dto.invoiceNumber,
+          status: InvoiceStatus.DRAFT,
+          periodStart: new Date(dto.periodStart),
+          periodEnd: new Date(dto.periodEnd),
+          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+          notes: dto.notes,
+          createdById: actor.id,
+        },
+      });
+
+      let totalAmountRupiah = 0;
+      for (let index = 0; index < dto.lines.length; index += 1) {
+        const lineData = this.buildLineData(created.id, dto.lines[index], index);
+        totalAmountRupiah += Number(lineData.lineAmountRupiah ?? 0);
+        await tx.invoiceLine.create({ data: lineData });
+      }
+
+      if (totalAmountRupiah <= 0) {
+        throw new ConflictException('Tagihan tidak valid: total harus lebih dari 0');
+      }
+
+      const issued = await tx.invoice.update({
+        where: { id: created.id },
+        data: {
+          totalAmountRupiah,
+          status: InvoiceStatus.ISSUED,
+          issuedAt: new Date(),
+        },
+        include: { lines: { orderBy: { sortOrder: 'asc' } }, payments: true, stay: { include: { tenant: true, room: true } } },
+      });
+
+      const accounting = this.shouldAttemptInvoiceAccountingPosting(readiness)
+        ? this.resolveInvoiceAccountingMetadata(
+            await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id),
+            readiness,
+          )
+        : this.buildSkippedAccountingMetadata(
+            readiness,
+            readiness.schemaStatus?.message ?? 'Accounting foundation schema belum siap di database.',
+          );
+
+      return { invoice: issued, accounting };
+    });
+
+    const normalized = this.normalizeInvoiceTotals(result.invoice);
+    const response = this.attachAccountingMetadata(normalized as Record<string, unknown>, result.accounting);
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE_AND_ISSUE', entityType: 'Invoice', entityId: String(result.invoice.id), newData: response });
+    return response;
   }
 
   async update(id: number, dto: UpdateInvoiceDto, actor: CurrentUserPayload) {
@@ -150,9 +360,7 @@ export class InvoicesService {
     const invoice = await this.prisma.invoice.findUnique({ where: { id } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (invoice.status !== 'DRAFT') throw new ConflictException('Invoice bukan status DRAFT');
-    const qtyDecimal = new Prisma.Decimal(dto.qty);
-    const lineAmountRupiah = qtyDecimal.times(dto.unitPriceRupiah).toNumber();
-    const line = await this.prisma.invoiceLine.create({ data: { invoiceId: id, lineType: dto.lineType as InvoiceLineType, utilityType: dto.utilityType as UtilityType, description: dto.description, qty: qtyDecimal, unit: dto.unit, unitPriceRupiah: dto.unitPriceRupiah, lineAmountRupiah, sortOrder: dto.sortOrder ?? 0 } });
+    const line = await this.prisma.invoiceLine.create({ data: this.buildLineData(id, dto, 0) });
     await this.recalculateInvoiceTotal(id);
     await this.audit.log({ actorUserId: actor.id, action: 'ADD_LINE', entityType: 'InvoiceLine', entityId: String(line.id), newData: line, meta: { invoiceId: id } });
     return line;
@@ -224,15 +432,38 @@ export class InvoicesService {
 
   async issue(id: number, actor: CurrentUserPayload) {
     this.assertFinanceMutationAllowed(actor);
-    const invoice = await this.prisma.invoice.findUnique({ where: { id }, include: { lines: true } });
-    if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
-    if (invoice.status !== 'DRAFT') throw new ConflictException('Transisi status tidak valid');
-    if (!invoice.lines.length) throw new ConflictException('Invoice draft belum valid untuk diterbitkan');
-    if ((invoice.totalAmountRupiah ?? 0) <= 0) throw new ConflictException('Invoice tidak valid: total harus lebih dari 0');
-    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.ISSUED, issuedAt: new Date() } });
-    await this.audit.log({ actorUserId: actor.id, action: 'ISSUE', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
-    await this.accountingPosting.postInvoiceIssued(updated.id, actor.id).catch(() => undefined);
-    return updated;
+    const readiness = await this.accountingReadiness.getReadiness();
+
+    const result = await (this.prisma as any).$transaction(async (tx: Prisma.TransactionClient) => {
+      const invoice = await tx.invoice.findUnique({ where: { id }, include: { lines: true } });
+      if (!invoice) throw new NotFoundException('Tagihan tidak ditemukan');
+      if (invoice.status !== InvoiceStatus.DRAFT) throw new ConflictException('Transisi status tidak valid');
+      if (!invoice.lines.length) throw new ConflictException('Draft tagihan belum valid untuk diterbitkan');
+      if ((invoice.totalAmountRupiah ?? 0) <= 0) throw new ConflictException('Tagihan tidak valid: total harus lebih dari 0');
+
+      const updated = await tx.invoice.update({
+        where: { id },
+        data: { status: InvoiceStatus.ISSUED, issuedAt: new Date() },
+        include: { lines: { orderBy: { sortOrder: 'asc' } }, payments: true, stay: { include: { tenant: true, room: true } } },
+      });
+
+      const accounting = this.shouldAttemptInvoiceAccountingPosting(readiness)
+        ? this.resolveInvoiceAccountingMetadata(
+            await this.accountingPosting.postInvoiceIssuedTx(tx, updated.id, actor.id),
+            readiness,
+          )
+        : this.buildSkippedAccountingMetadata(
+            readiness,
+            readiness.schemaStatus?.message ?? 'Accounting foundation schema belum siap di database.',
+          );
+
+      return { invoice, updated, accounting };
+    });
+
+    const normalized = this.normalizeInvoiceTotals(result.updated);
+    const response = this.attachAccountingMetadata(normalized as Record<string, unknown>, result.accounting);
+    await this.audit.log({ actorUserId: actor.id, action: 'ISSUE', entityType: 'Invoice', entityId: String(result.updated.id), oldData: result.invoice, newData: response });
+    return response;
   }
 
   async cancel(id: number, dto: CancelInvoiceDto, actor: CurrentUserPayload) {
@@ -240,10 +471,43 @@ export class InvoicesService {
     const invoice = await this.prisma.invoice.findUnique({ where: { id }, include: { payments: true } });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
     if (!dto.cancelReason) throw new ConflictException('Alasan pembatalan wajib diisi');
+    if (invoice.status === InvoiceStatus.CANCELLED) throw new ConflictException('Invoice sudah dibatalkan');
     if (invoice.status === 'PARTIAL' || invoice.status === 'PAID') throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
     if (invoice.status === 'ISSUED' && invoice.payments.length > 0) throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
-    const updated = await this.prisma.invoice.update({ where: { id }, data: { status: InvoiceStatus.CANCELLED, cancelReason: dto.cancelReason } });
-    await this.accountingPosting.postInvoiceCancellationReversal(updated.id, actor.id).catch(() => undefined);
+
+    const updated = await (this.prisma as any).$transaction(async (tx: any) => {
+      const postedInvoiceJournal = invoice.status === InvoiceStatus.DRAFT
+        ? null
+        : await tx.journalEntry.findFirst({
+            where: {
+              sourceType: 'INVOICE' as any,
+              sourceId: String(invoice.id),
+              status: 'POSTED' as any,
+            },
+            select: { id: true, entryNumber: true },
+            orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+          });
+
+      const cancelled = await tx.invoice.update({
+        where: { id },
+        data: { status: InvoiceStatus.CANCELLED, cancelReason: dto.cancelReason },
+      });
+
+      // DRAFT invoices are never journaled; cancellation is only a status change.
+      // Journaled invoices must receive a controlled reversal, and reversal failures
+      // must fail visibly instead of being swallowed after invoice status mutation.
+      if (postedInvoiceJournal) {
+        const reversalResult = await this.accountingPosting.postInvoiceCancellationReversalTx(tx, cancelled.id, actor.id);
+        if (reversalResult?.skipped) {
+          throw new ConflictException(
+            `Pembatalan invoice gagal karena reversal accounting tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
+          );
+        }
+      }
+
+      return cancelled;
+    });
+
     await this.audit.log({ actorUserId: actor.id, action: 'CANCEL', entityType: 'Invoice', entityId: String(updated.id), oldData: invoice, newData: updated });
     return updated;
   }

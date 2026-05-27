@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useStay } from '../../hooks/useStay';
 import { Stay } from '../../types';
+import { getStatusLabel } from '../../utils/statusLabels';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -79,6 +80,11 @@ function isNonNegativeNumberString(value: string) {
   return Number.isFinite(parsed) && parsed >= 0;
 }
 
+
+function pricingTermDisplay(value?: string | null) {
+  return getStatusLabel(value ?? '') || '-';
+}
+
 export default function RenewStayModal({
   show,
   onHide,
@@ -149,11 +155,11 @@ export default function RenewStayModal({
     if (plannedCheckOutDate) {
       const selectedDate = toValidDate(plannedCheckOutDate);
       if (!selectedDate) {
-        setError('Tanggal renew/keluar baru tidak valid.');
+        setError('Tanggal akhir masa sewa baru tidak valid.');
         return;
       }
       if (selectedDate <= renewalStartDate) {
-        setError('Tanggal renew/keluar baru harus setelah awal periode renewal yang baru.');
+        setError('Tanggal akhir masa sewa baru harus setelah awal periode perpanjangan yang baru.');
         return;
       }
     }
@@ -210,7 +216,7 @@ export default function RenewStayModal({
             <div className="mt-2">
               • Akhir masa sewa saat ini: <strong>{formatDisplayDate(currentEndDate)}</strong>
               <br />
-              • Term sewa: <strong>{stay.pricingTerm || '-'}</strong>
+              • Jenis masa sewa: <strong>{pricingTermDisplay(stay.pricingTerm)}</strong>
               <br />
               • Jika tanggal kosong, sistem memakai tanggal otomatis: <strong>{formatDisplayDate(autoDate)}</strong>
             </div>
@@ -220,7 +226,7 @@ export default function RenewStayModal({
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
         <Form.Group className="mb-3">
-          <Form.Label>Tanggal Renew / Keluar Baru (Opsional)</Form.Label>
+          <Form.Label>Tanggal akhir masa sewa baru (opsional)</Form.Label>
           <Form.Control
             type="date"
             value={plannedCheckOutDate}
@@ -228,7 +234,7 @@ export default function RenewStayModal({
             min={formatDateInput(minDate)}
           />
           <div className="text-muted small mt-1">
-            Kosongkan bila ingin mengikuti periode sewa otomatis sesuai term.
+            Kosongkan bila ingin mengikuti periode sewa otomatis sesuai jenis masa sewa saat ini.
             <br />
             Tanggal minimal: <strong>{formatDisplayDate(minDate)}</strong>
           </div>
@@ -290,7 +296,7 @@ export default function RenewStayModal({
             </div>
           </div>
           <div className="text-muted small mt-2">
-            Backend akan menolak angka meter yang lebih kecil dari catatan sebelumnya atau tanggal meter yang bentrok.
+            Sistem akan menjaga agar angka meter tidak lebih kecil dari catatan sebelumnya dan waktu catat tidak bentrok.
           </div>
         </div>
       </Modal.Body>

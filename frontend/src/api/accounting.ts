@@ -42,6 +42,16 @@ export type AccountingPeriod = {
   startDate: string;
   endDate: string;
   status: AccountingPeriodStatus;
+  key?: string;
+  periodKey?: string;
+  isCurrentPostingPeriod?: boolean;
+  isPostingOpen?: boolean;
+  postedJournalCount?: number;
+  draftJournalCount?: number;
+  closingJournalCount?: number;
+  reversalJournalCount?: number;
+  statusNarrative?: string;
+  ownerAction?: 'OWNER_REOPEN_REQUIRED_FOR_NEW_POSTING' | 'REVIEW_BEFORE_CLOSE' | 'READ_ONLY_HISTORY' | string;
   closedAt?: string | null;
   closedById?: number | null;
   closingJournalEntryId?: number | null;
@@ -78,6 +88,20 @@ export type OpeningBalanceBatch = {
   lines?: Array<OpeningBalanceLinePayload & { id: number; chartOfAccount?: ChartOfAccount }>;
 };
 
+export type AccountingPostingPeriodReadiness = {
+  ready: boolean;
+  postingDate: string;
+  key: string | null;
+  id: number | null;
+  year: number | null;
+  month: number | null;
+  status: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  warning: string | null;
+  nextAction: string | null;
+};
+
 export type AccountingReadiness = {
   ready: boolean;
   score: number;
@@ -88,6 +112,7 @@ export type AccountingReadiness = {
   missing: string[];
   nextActions: string[];
   warnings: string[];
+  postingPeriod?: AccountingPostingPeriodReadiness;
 };
 
 export type TrialBalanceLine = {
@@ -337,6 +362,10 @@ export type PeriodClosePayload = {
 export type PeriodReopenPayload = {
   year: number;
   month: number;
+  reason: string;
+};
+
+export type ReopenAccountingPeriodPayload = {
   reason: string;
 };
 
@@ -690,6 +719,10 @@ export async function fetchAccountingPeriods(params?: { year?: number; month?: n
 
 export async function createAccountingPeriod(payload: CreatePeriodPayload) {
   return unwrap<AccountingPeriod>(client.post('/accounting/periods', payload));
+}
+
+export async function reopenAccountingPeriod(id: number, payload: ReopenAccountingPeriodPayload) {
+  return unwrap<PeriodReopenPostResult>(client.patch(`/accounting/periods/${id}/reopen`, payload));
 }
 
 export async function fetchOpeningBalances(params?: { status?: OpeningBalanceStatus }) {

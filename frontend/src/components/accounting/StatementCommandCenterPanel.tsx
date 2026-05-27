@@ -56,8 +56,10 @@ export default function StatementCommandCenterPanel({ readiness, trial, balanceS
   const balanceSheetBalanced = Boolean(statement?.balanced);
   const assetAligned = assetReadiness?.readyForAssetSchemaAct || balanceSheet?.assetRegisterDisclosure?.aligned;
   const blockedCount = periodClose?.blockedReasons?.length ?? 0;
-  const warningsCount = (readiness?.warnings?.length ?? 0) + (periodClose?.warnings?.length ?? 0) + unmappedCount + (assetAligned ? 0 : 1);
-  const ownerTone = trialBalanced && balanceSheetBalanced && !blockedCount ? 'success' : blockedCount || !trialBalanced ? 'danger' : 'warning';
+  const postingPeriod = readiness?.postingPeriod;
+  const postingPeriodBlocked = Boolean(postingPeriod && !postingPeriod.ready);
+  const warningsCount = (readiness?.warnings?.length ?? 0) + (periodClose?.warnings?.length ?? 0) + unmappedCount + (assetAligned ? 0 : 1) + (postingPeriodBlocked ? 1 : 0);
+  const ownerTone = postingPeriodBlocked || blockedCount || !trialBalanced ? 'danger' : trialBalanced && balanceSheetBalanced ? 'success' : 'warning';
 
   return (
     <Card className="content-card border-0 accounting-setup-card accounting-command-center-lite statement-command-center mb-3">
@@ -72,6 +74,11 @@ export default function StatementCommandCenterPanel({ readiness, trial, balanceS
           </div>
           <div className="d-flex flex-wrap gap-2 align-items-start justify-content-xl-end">
             <Badge bg={readiness?.ready ? 'success' : 'warning'}>{readiness?.ready ? 'Ledger siap' : 'Setup perlu dicek'}</Badge>
+            {postingPeriod ? (
+              <Badge bg={postingPeriod.ready ? 'success' : 'danger'}>
+                Posting {postingPeriod.key ?? '-'} {postingPeriod.ready ? 'OPEN' : postingPeriod.status ?? 'belum siap'}
+              </Badge>
+            ) : null}
             <Badge bg={autoJournalEnabled ? 'primary' : 'secondary'}>{autoJournalEnabled ? 'Auto journal aktif' : 'Auto journal nonaktif'}</Badge>
             <Badge bg={ownerTone}>{isLoading ? 'Memuat...' : blockedCount ? `${blockedCount} blocker` : warningsCount ? `${warningsCount} perlu dicek` : 'Aman dibaca'}</Badge>
           </div>
@@ -80,6 +87,12 @@ export default function StatementCommandCenterPanel({ readiness, trial, balanceS
         <Alert variant={ownerTone === 'success' ? 'success' : ownerTone === 'danger' ? 'danger' : 'warning'} className="statement-owner-summary mb-3">
           <strong>Status owner:</strong> {periodNarrative(periodClose, profitLoss, balanceSheet)}
         </Alert>
+
+        {postingPeriodBlocked && postingPeriod?.warning ? (
+          <Alert variant="danger" className="mb-3">
+            <strong>Posting tagihan terblokir:</strong> {postingPeriod.warning}
+          </Alert>
+        ) : null}
 
         <Row className="g-3">
           <Col md={6} xl={2}>

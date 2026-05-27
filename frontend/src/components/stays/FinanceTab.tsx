@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Form, Modal, Spinner, Table } from 'react-bootstrap';
 import { useInvoices } from '../../hooks/useInvoices';
 import { Invoice, Stay } from '../../types';
@@ -9,6 +10,7 @@ import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import EmptyState from '../common/EmptyState';
 import { formatDateSafe, formatPeriod } from '../../pages/resources/simpleCrudHelpers';
+import { fetchAccountingReadiness } from '../../api/accounting';
 
 function isOverdue(invoice: Invoice) {
   if (!invoice.dueDate) return false;
@@ -46,14 +48,19 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'ALL' | 'OPEN' | 'OVERDUE' | 'PAID'>('ALL');
   const [actionError, setActionError] = useState('');
+  const [accountingNotice, setAccountingNotice] = useState('');
   const [cancelTarget, setCancelTarget] = useState<Invoice | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const { data, isLoading, isError, cancelMutation, issueMutation } = useInvoices(stay.id, enabled);
+  const accountingReadinessQuery = useQuery({ queryKey: ['accounting-readiness', 'stay-finance-tab'], queryFn: fetchAccountingReadiness, enabled, staleTime: 30_000 });
+  const postingPeriod = accountingReadinessQuery.data?.postingPeriod;
+  const postingPeriodBlocked = Boolean(postingPeriod && !postingPeriod.ready);
   const invoices = data?.items ?? [];
   const overdueCount = useMemo(() => invoices.filter(isOverdue).length, [invoices]);
 
   const openCancelInvoiceModal = (invoice: Invoice) => {
     setActionError('');
+    setAccountingNotice('');
     setCancelTarget(invoice);
     setCancelReason('');
   };
@@ -62,11 +69,12 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
     if (!cancelTarget) return;
     const reason = cancelReason.trim();
     if (!reason) {
-      setActionError('Alasan pembatalan invoice wajib diisi.');
+      setActionError('Alasan pembatalan tagihan wajib diisi.');
       return;
     }
 
     setActionError('');
+    setAccountingNotice('');
     try {
       await cancelMutation.mutateAsync({ invoiceId: cancelTarget.id, payload: { cancelReason: reason } });
       if (selectedInvoiceId === cancelTarget.id) {
@@ -75,16 +83,20 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
       setCancelTarget(null);
       setCancelReason('');
     } catch (error: unknown) {
-      setActionError(extractActionError(error, 'Gagal membatalkan invoice.'));
+      setActionError(extractActionError(error, 'Gagal membatalkan tagihan.'));
     }
   };
 
   const handleIssueInvoice = async (invoice: Invoice) => {
     setActionError('');
+    setAccountingNotice('');
     try {
-      await issueMutation.mutateAsync(invoice.id);
+      const result = await issueMutation.mutateAsync(invoice.id);
+      if (result.accounting?.accountingWarning) {
+        setAccountingNotice(result.accounting.accountingWarning);
+      }
     } catch (error: unknown) {
-      setActionError(extractActionError(error, 'Gagal menerbitkan invoice.'));
+      setActionError(extractActionError(error, 'Gagal menerbitkan tagihan.'));
     }
   };
 
@@ -116,12 +128,12 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
       <Card.Body>
         <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
           <div>
-            <h5 className="mb-1">Keuangan Stay</h5>
-            <div className="text-muted">Invoice, pembayaran, dan status tunggakan.</div>
+            <h5 className="mb-1">Keuangan Masa Sewa</h5>
+            <div className="text-muted">Tagihan, pembayaran, dan status tunggakan.</div>
           </div>
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {overdueCount ? <StatusBadge status="OVERDUE" customLabel={`${overdueCount} jatuh tempo`} /> : null}
-            <Button onClick={() => setShowCreateModal(true)}>➕ Buat Invoice Baru</Button>
+            <Button onClick={() => setShowCreateModal(true)}>➕ Buat Tagihan Baru</Button>
           </div>
         </div>
 
@@ -152,24 +164,30 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
             <Button size="sm" variant={view === 'PAID' ? 'success' : 'outline-success'} onClick={() => setView('PAID')}>Lunas</Button>
           </div>
           <Form.Control
-            placeholder="Cari nomor invoice / catatan"
+            placeholder="Cari nomor tagihan / catatan"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 260 }}
           />
         </div>
 
-        <div className="table-meta-count mb-3">Menampilkan {filteredInvoices.length} dari {invoices.length} invoice</div>
+        <div className="table-meta-count mb-3">Menampilkan {filteredInvoices.length} dari {invoices.length} tagihan</div>
 
+        {postingPeriodBlocked && postingPeriod?.warning ? (
+          <Alert variant="danger" className="mb-3">
+            <strong>Posting tagihan sedang terblokir.</strong> {postingPeriod.warning}
+          </Alert>
+        ) : null}
         {actionError ? <Alert variant="danger" className="mb-3">{actionError}</Alert> : null}
+        {accountingNotice ? <Alert variant="warning" className="mb-3">{accountingNotice}</Alert> : null}
         {isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
-        {isError ? <Alert variant="danger">Gagal mengambil data invoice.</Alert> : null}
+        {isError ? <Alert variant="danger">Gagal mengambil data tagihan.</Alert> : null}
         {!isLoading && !isError && !filteredInvoices.length ? (
           <EmptyState
             icon="🧾"
-            title="Belum ada invoice"
-            description="Buat invoice baru untuk memulai pencatatan tagihan stay ini."
-            action={{ label: 'Buat Invoice', onClick: () => setShowCreateModal(true) }}
+            title="Belum ada tagihan"
+            description="Buat tagihan baru untuk memulai pencatatan masa sewa ini."
+            action={{ label: 'Buat Tagihan', onClick: () => setShowCreateModal(true) }}
           />
         ) : null}
         {!isLoading && !isError && filteredInvoices.length ? (
@@ -179,7 +197,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                 <th>Periode</th>
                 <th>Total</th>
                 <th>Dibayar</th>
-                <th>Due Date</th>
+                <th>Jatuh Tempo</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
@@ -199,7 +217,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
                     <td><CurrencyDisplay amount={getInvoiceTotalAmount(invoice)} /></td>
                     <td><CurrencyDisplay amount={paidAmount(invoice)} /></td>
                     <td className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
-                    <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status)} /></td>
+                    <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status, undefined, { domain: 'invoice' })} domain="invoice" /></td>
                     <td>
                       <div className="d-flex gap-2 flex-wrap">
                         <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button>
@@ -233,7 +251,12 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
         ) : null}
       </Card.Body>
 
-      <CreateInvoiceModal show={showCreateModal} onHide={() => setShowCreateModal(false)} stay={stay} />
+      <CreateInvoiceModal
+        show={showCreateModal}
+        onHide={() => setShowCreateModal(false)}
+        stay={stay}
+        onAccountingNotice={(message) => setAccountingNotice(message)}
+      />
       <InvoiceDetailDrawer invoiceId={selectedInvoiceId} show={selectedInvoiceId !== null} onHide={() => setSelectedInvoiceId(null)} />
 
       <Modal
@@ -247,7 +270,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Batalkan Invoice</Modal.Title>
+          <Modal.Title>Batalkan Tagihan</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p className="text-muted small">
@@ -281,7 +304,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
             onClick={() => void handleConfirmCancelInvoice()}
             disabled={cancelMutation.isPending}
           >
-            {cancelMutation.isPending ? 'Membatalkan...' : 'Batalkan Invoice'}
+            {cancelMutation.isPending ? 'Membatalkan...' : 'Batalkan Tagihan'}
           </Button>
         </Modal.Footer>
       </Modal>

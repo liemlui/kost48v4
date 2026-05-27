@@ -45,21 +45,21 @@ export default function InvoiceDetailDrawer({
     <>
       <Offcanvas show={show} onHide={onHide} placement="end" style={{ width: 520 }}>
         <Offcanvas.Header closeButton closeLabel="Tutup drawer">
-          <Offcanvas.Title>Detail Invoice</Offcanvas.Title>
+          <Offcanvas.Title>Detail Tagihan</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           {detailQuery.isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
-          {detailQuery.isError ? <Alert variant="danger">Gagal mengambil detail invoice.</Alert> : null}
+          {detailQuery.isError ? <Alert variant="danger">Gagal mengambil detail tagihan.</Alert> : null}
           {invoice ? (
             <>
               <div className="mb-4">
                 <div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div>
-                <div className="text-muted small">Periode sewa {formatPeriod(invoice.periodStart, invoice.periodEnd)}</div>
+                <div className="text-muted small">Masa sewa {formatPeriod(invoice.periodStart, invoice.periodEnd)}</div>
                 <div className="mt-2"><StatusBadge status={invoice.status} /></div>
               </div>
 
-              <h6>Line Items</h6>
-              {!invoice.lines?.length ? <Alert variant="secondary">Belum ada line item.</Alert> : (
+              <h6>Rincian Tagihan</h6>
+              {!invoice.lines?.length ? <Alert variant="secondary">Belum ada rincian tagihan.</Alert> : (
                 <>
                   <Table hover responsive className="mb-4">
                     <thead>
@@ -95,7 +95,7 @@ export default function InvoiceDetailDrawer({
                 <Button size="sm" onClick={() => setShowPaymentModal(true)}>Catat Pembayaran</Button>
               </div>
               {paymentsQuery.isLoading ? <div className="py-3 text-center"><Spinner size="sm" /></div> : null}
-              {paymentsQuery.isError && invoice?.payments?.length ? <Alert variant="warning">Daftar pembayaran live gagal dimuat. Menampilkan data pembayaran yang sudah ikut di detail invoice.</Alert> : null}
+              {paymentsQuery.isError && invoice?.payments?.length ? <Alert variant="warning">Daftar pembayaran terbaru gagal dimuat. Menampilkan data pembayaran yang sudah ikut di detail tagihan.</Alert> : null}
               {paymentsQuery.isError && !invoice?.payments?.length ? <Alert variant="danger">Gagal mengambil riwayat pembayaran.</Alert> : null}
               {!paymentsQuery.isLoading && !payments.length ? <Alert variant="secondary">Belum ada pembayaran.</Alert> : null}
               {!!payments.length ? (

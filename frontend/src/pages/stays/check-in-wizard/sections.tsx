@@ -5,7 +5,7 @@ import SearchableSelect from '../../../components/common/SearchableSelect';
 import CurrencyInput from '../../../components/common/CurrencyInput';
 import type { Room } from '../../../types';
 import { formatRupiah } from '../../../utils/formatCurrency';
-import { bookingSourceOptions, CHECKIN_WIZARD_STEPS, stayPurposeOptions } from './constants';
+import { bookingSourceOptions, CHECKIN_WIZARD_STEPS, pricingTermOptions, stayPurposeOptions } from './constants';
 import type { InlineTenantState, TenantOption, WizardFormValues } from './types';
 
 export function WizardSteps({ current }: { current: number }) {
@@ -137,16 +137,16 @@ export function TenantStepSection({
                 <Form.Group>
                   <Form.Label>Gender</Form.Label>
                   <Form.Select value={inlineTenant.gender} onChange={(e) => setInlineTenant({ ...inlineTenant, gender: e.target.value })}>
-                    <option value="MALE">MALE</option>
-                    <option value="FEMALE">FEMALE</option>
-                    <option value="OTHER">OTHER</option>
+                    <option value="MALE">Laki-laki</option>
+                    <option value="FEMALE">Perempuan</option>
+                    <option value="OTHER">Lainnya</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
             </Row>
             <div className="mt-3 d-flex gap-2">
               <Button size="sm" onClick={onSaveInlineTenant} disabled={inlineTenantBusy}>
-                Simpan Tenant
+                Simpan Penghuni
               </Button>
               <Button size="sm" variant="outline-secondary" onClick={onToggleInlineTenant}>Tutup</Button>
             </div>
@@ -190,7 +190,7 @@ export function RoomStepSection({
         {roomsLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
         {roomsError ? <Alert variant="danger">Gagal mengambil daftar kamar.</Alert> : null}
         {activeStaysError ? (
-          <Alert variant="danger">Gagal memuat data stays aktif. Tidak dapat menentukan kamar yang tersedia.</Alert>
+          <Alert variant="danger">Gagal memuat data masa sewa aktif. Tidak dapat menentukan kamar yang tersedia.</Alert>
         ) : null}
         {!roomsLoading && !activeStaysLoading && !activeStaysError ? (
           <Form.Group className="mb-3">
@@ -202,7 +202,7 @@ export function RoomStepSection({
             {form.formState.errors.roomId ? <div className="text-danger small mt-2">{String(form.formState.errors.roomId.message)}</div> : null}
             {eligibleRooms.length === 0 && (
               <div className="text-muted small mt-2">
-                Tidak ada kamar yang tersedia untuk check-in. Semua kamar sudah ditempati atau memiliki stay aktif.
+                Tidak ada kamar yang tersedia untuk tanggal masuk. Semua kamar sudah ditempati atau memiliki masa sewa aktif.
               </div>
             )}
           </Form.Group>
@@ -237,38 +237,36 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
   return (
     <Card className="content-card border-0 shadow-sm mb-4">
       <Card.Body>
-        <h5 className="mb-3">Detail Stay</h5>
+        <h5 className="mb-3">Detail Masa Sewa</h5>
         <Row className="g-3">
           <Col md={6}>
             <Form.Group>
               <Form.Label>
-                Tanggal Check-in<span className="text-danger ms-1">*</span>
+                Tanggal Masuk<span className="text-danger ms-1">*</span>
               </Form.Label>
               <Form.Control type="date" {...form.register('checkInDate', { required: true })} />
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Pricing Term</Form.Label>
+              <Form.Label>Jenis Masa Sewa</Form.Label>
               <Form.Select {...form.register('pricingTerm')}>
-                <option value="MONTHLY">MONTHLY</option>
-                <option value="WEEKLY">WEEKLY</option>
-                <option value="DAILY">DAILY</option>
-                <option value="BIWEEKLY">BIWEEKLY</option>
-                <option value="SMESTERLY">SMESTERLY</option>
-                <option value="YEARLY">YEARLY</option>
+                {pricingTermOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </Form.Select>
+              <div className="text-muted small mt-1">Pilih jenis masa sewa sesuai kesepakatan.</div>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label>
-                Agreed Rent Amount<span className="text-danger ms-1">*</span>
+                Harga Sewa Disepakati<span className="text-danger ms-1">*</span>
               </Form.Label>
               <Controller
                 control={form.control}
                 name="agreedRentAmountRupiah"
-                rules={{ required: 'Agreed rent amount wajib diisi', min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
+                rules={{ required: 'Harga sewa disepakati wajib diisi', min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
                 render={({ field }) => (
                   <CurrencyInput
                     value={field.value ? Number(field.value) : undefined}
@@ -307,24 +305,24 @@ export function ConfirmationStepSection({ form, setDepositWasManuallyCleared }: 
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Stay Purpose</Form.Label>
+              <Form.Label>Tujuan Tinggal</Form.Label>
               <Form.Select {...form.register('stayPurpose')}>
                 {stayPurposeOptions.map((option) => (
                   <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
                 ))}
               </Form.Select>
-              <div className="text-muted small mt-1">Nilai harus sesuai enum backend.</div>
+              <div className="text-muted small mt-1">Pilih tujuan tinggal dari opsi yang tersedia agar data tetap rapi.</div>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Booking Source</Form.Label>
+              <Form.Label>Sumber Booking</Form.Label>
               <Form.Select {...form.register('bookingSource')}>
                 {bookingSourceOptions.map((option) => (
                   <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
                 ))}
               </Form.Select>
-              <div className="text-muted small mt-1">Input bebas dihilangkan agar tidak lagi mengirim enum liar.</div>
+              <div className="text-muted small mt-1">Pilih sumber booking dari daftar yang tersedia.</div>
             </Form.Group>
           </Col>
           <Col md={6}>

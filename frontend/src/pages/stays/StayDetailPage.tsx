@@ -34,11 +34,16 @@ function hasUnpaidInvoices(invoices: Array<{ status: string }>) {
   return invoices.some((invoice) => invoice.status === 'ISSUED' || invoice.status === 'PARTIAL');
 }
 
-function getDepositLabel(depositStatus: string | null | undefined) {
+function getDepositLabel(
+  depositStatus: string | null | undefined,
+  deductionRupiah?: number | null,
+  refundedRupiah?: number | null,
+) {
   if (!depositStatus) return 'Status Deposit Tidak Diketahui';
+  const hasDeductionAndRefund = Number(deductionRupiah ?? 0) > 0 && Number(refundedRupiah ?? 0) > 0;
   switch (depositStatus) {
     case 'HELD': return 'Ditahan';
-    case 'REFUNDED': return 'Dikembalikan';
+    case 'REFUNDED': return hasDeductionAndRefund ? 'Sebagian dikembalikan & sebagian dipotong' : 'Dikembalikan';
     case 'FORFEITED': return 'Hangus';
     case 'PARTIALLY_REFUNDED': return 'Sebagian Dikembalikan';
     default: return depositStatus;
@@ -68,7 +73,7 @@ export default function StayDetailPage() {
   const overdue = useMemo(() => hasOverdue(invoices), [invoices]);
   const hasUnpaid = useMemo(() => hasUnpaidInvoices(invoices), [invoices]);
   const openInvoiceCount = useMemo(() => stay?.openInvoiceCount ?? invoices.filter((item) => !['PAID', 'CANCELLED'].includes(item.status)).length, [stay?.openInvoiceCount, invoices]);
-  const depositLabel = getDepositLabel(stay?.depositStatus);
+  const depositLabel = getDepositLabel(stay?.depositStatus, stay?.depositDeductionRupiah, stay?.depositRefundedRupiah);
   const meterCount = metersQuery.data?.length ?? 0;
   const latestMeterReadingAt = useMemo(() => {
     const readings = metersQuery.data ?? [];
@@ -198,7 +203,7 @@ export default function StayDetailPage() {
       {openInvoiceCount > 0 && approvedCheckoutRequest ? (
         <BlockedReasonCard
           title="Checkout final terblokir tagihan"
-          reason="Backend akan menolak final checkout selama masih ada invoice dengan status selain PAID atau CANCELLED. Selesaikan tagihan dulu sebelum melepas kamar."
+          reason="Sistem akan menolak final checkout selama masih ada tagihan yang belum lunas atau belum dibatalkan. Selesaikan tagihan dulu sebelum melepas kamar."
           actionLabel="Buka Tab Keuangan"
           actionTo={`/stays/${stay.id}?tab=finance`}
         />
@@ -253,7 +258,7 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{formatRupiah(stay.depositAmountRupiah ?? 0)}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-tile-label">Tanggal Renew / Keluar</div>
+              <div className="metric-tile-label">Akhir Masa Sewa</div>
               <div className="metric-tile-value">{formatDateSafe(stay.plannedCheckOutDate)}</div>
             </div>
             <div className="metric-tile">

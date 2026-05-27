@@ -40,9 +40,9 @@ export function tenantPricingTermLabel(term?: PricingTerm | string | null) {
   const normalized = normalizeStatus(term);
   if (normalized === 'DAILY') return 'Harian';
   if (normalized === 'WEEKLY') return 'Mingguan';
-  if (normalized === 'BIWEEKLY') return 'Dua mingguan';
+  if (normalized === 'BIWEEKLY') return '2 Mingguan';
   if (normalized === 'MONTHLY') return 'Bulanan';
-  if (normalized === 'SMESTERLY') return 'Semester';
+  if (normalized === 'SMESTERLY') return 'Semesteran';
   if (normalized === 'YEARLY') return 'Tahunan';
   return term || '-';
 }

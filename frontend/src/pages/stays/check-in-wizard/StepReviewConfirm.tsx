@@ -1,6 +1,7 @@
 import { Card, Row, Col, Alert } from 'react-bootstrap';
 import type { UseFormReturn } from 'react-hook-form';
 import type { WizardFormValues } from './types';
+import { pricingTermLabel } from './checkInWizardUtils';
 
 interface StepReviewConfirmProps {
   form: UseFormReturn<WizardFormValues>;
@@ -52,7 +53,7 @@ export default function StepReviewConfirm({
             <div className="mb-2">
               <span className="text-muted">Termin Harga:</span>
               <br />
-              <strong>{values.pricingTerm === 'MONTHLY' ? 'Bulanan' : values.pricingTerm === 'WEEKLY' ? 'Mingguan' : values.pricingTerm === 'DAILY' ? 'Harian' : values.pricingTerm}</strong>
+              <strong>{pricingTermLabel(values.pricingTerm)}</strong>
             </div>
           </Col>
           <Col md={6}>

@@ -17,6 +17,20 @@ export const stayPurposeOptions = [
   { value: 'OTHER', label: 'Lainnya' },
 ];
 
+
+export const pricingTermOptions = [
+  { value: 'DAILY', label: 'Harian' },
+  { value: 'WEEKLY', label: 'Mingguan' },
+  { value: 'BIWEEKLY', label: '2 Mingguan' },
+  { value: 'MONTHLY', label: 'Bulanan' },
+  { value: 'SMESTERLY', label: 'Semesteran' },
+  { value: 'YEARLY', label: 'Tahunan' },
+];
+
+export function pricingTermLabel(value?: string | null) {
+  return pricingTermOptions.find((option) => option.value === value)?.label ?? value ?? '—';
+}
+
 export const bookingSourceOptions = [
   { value: '', label: 'Pilih sumber booking...' },
   { value: 'GOOGLE_MAPS', label: 'Google Maps' },

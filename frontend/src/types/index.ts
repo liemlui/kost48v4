@@ -148,6 +148,15 @@ export type Stay = {
 };
 
 export type InvoiceStatus = 'DRAFT' | 'ISSUED' | 'PARTIAL' | 'PAID' | 'CANCELLED' | string;
+
+export type InvoiceAccountingPostingMetadata = {
+  accountingPosted: boolean;
+  accountingJournalEntryId: number | null;
+  accountingPostingStatus: 'POSTED' | 'ALREADY_POSTED' | 'SKIPPED_ACCOUNTING_NOT_READY' | string;
+  accountingWarning?: string | null;
+  accountingReason?: string | null;
+  formalStatementReady?: boolean;
+};
 export type InvoiceLineType = 'RENT' | 'ELECTRICITY' | 'WATER' | 'PENALTY' | 'DISCOUNT' | 'WIFI' | 'OTHER' | string;
 export type PaymentMethod = 'CASH' | 'TRANSFER' | 'QRIS' | 'EWALLET' | 'OTHER' | string;
 
@@ -179,6 +188,7 @@ export type Invoice = {
   stay?: Stay | null;
   lines?: InvoiceLine[];
   payments?: InvoicePayment[];
+  accounting?: InvoiceAccountingPostingMetadata | null;
 };
 
 export type InvoicePayment = {

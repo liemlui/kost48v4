@@ -1,93 +1,143 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-26 V5.29-B9A Pushed + B9B Copy Smoke + V5.29-C/D/E Hotfix Plan
+**Versi:** 2026-05-27 V5.29-C/D Lifecycle Hotfix PASS + Pushed
 
 
-## 0.0 Latest Current State — V5.29-B9A Pushed + B9B Copy Smoke + Critical Hotfix Track
+## 0.0 Latest Current State — V5.29-C/D Lifecycle Hotfix PASS + Pushed
 
 ```text
 Current latest pushed commit:
-51eba86 feat(accounting): add statement command center finance cockpit
+f6af6fc fix(lifecycle): harden deposit renew checkout data integrity
 
-Previous accounting governance baseline:
+Previous latest pushed commits:
+46f540e fix(accounting): clean statement readiness copy
+51eba86 feat(accounting): add statement command center finance cockpit
 286e512 fix(accounting): block manual edits in closed period governance
 
-B9A status:
-- V5.29-B9A Statement Command Center Finance Cockpit has been pushed to origin/main.
-- Frontend build PASS was verified during ZIP patching.
-- Runtime accounting API smoke PASS was verified from user log.
-- Manual UI smoke PASS: Finance → Laporan Keuangan tampil dengan baik.
-- Backend unchanged in B9A.
+Release status:
+- V5.29-C Critical Lifecycle/Data Integrity Hotfix is runtime PASS and pushed.
+- V5.29-D Renew/Checkout Consistency Hotfix is runtime PASS and pushed.
+- HOTFIX2 checkout UTC/date notification PASS on fresh data.
+- HOTFIX3 renew UTC/date precision PASS on fresh data.
+- HOTFIX4 tenant blocker microcopy cleanup PASS.
+- Commit f6af6fc is at HEAD, origin/main, and origin/HEAD.
+- Generated Prisma was restored and was not committed.
 
-B9B status:
-- V5.29-B9B Copy Consistency Cleanup package was generated.
-- Runtime accounting API smoke PASS from user log:
-  - readiness warnings no longer mention stale B1/B2/no-auto-posting copy,
-  - Trial Balance formalStatementReady=true and balanced,
-  - Balance Sheet ready=true, formalStatementReady=true, balanced,
-  - Profit & Loss formalStatementReady=true and excludes closing/reversal,
-  - Period Close state CLOSED with JE-CLOSE-2026-05-V2,
-  - unmapped operational=0, draft journal=0, unbalanced posted journal=0,
-  - depreciation posted, asset alignment safe.
-- B9B build/commit/push still needs local confirmation unless user reports it completed.
+Verified during UAT:
+- Backend build PASS from user local report after HOTFIX3/HOTFIX4.
+- Frontend build PASS from user local report after HOTFIX3.
+- Owner login PASS.
+- Public rooms smoke PASS.
+- Owner notifications PASS.
+- Payment review queue PASS.
+- Checkout admin list response shape PASS: global envelope with data.items.
+- B1 invalid partial refund under-processing rejected 409.
+- B1 valid exact partial refund accepted and settles full deposit.
+- B2 agreedRentAmountRupiah=0 remains 0.
+- B3 invoiceCount total and openInvoiceCount filtered are correct.
+- B3 DRAFT invoice counts as open.
+- B5 checkout requestedCheckOutDate stores exact ISO UTC and notification uses requested date.
+- Duplicate checkout request rejected 409.
+- B4 renew requestedTerm=YEARLY is applied during approve.
+- Renew approval creates ISSUED invoice.
+- Renew plannedCheckOutDate no longer drifts H-1 after HOTFIX3.
+- Renew invoice periodStart/periodEnd no longer drift H-1 after HOTFIX3.
+- Checkout and renew open-invoice blockers reject correctly.
+- Tenant blocker message no longer leaks raw enum such as (ISSUED).
+- F2 manual UI cache invalidation PASS: approve renew updates request status/list without stale pending state.
 
-Critical audit received after B9:
-- B1 Deposit partial refund can leave untracked deposit remainder.
-- B2 agreedRentAmountRupiah uses || instead of ??, so rent 0 is ignored.
-- B3 invoiceCount equals openInvoiceCount because query count is filtered.
-- B4 requestedTerm in renew request is ignored during approve.
-- F1 Check-in wizard is missing BIWEEKLY, SEMESTERLY/SMESTERLY, YEARLY terms.
-- B5 checkout notification uses current planned checkout date instead of requested checkout date.
-- B6 DRAFT invoice cancellation calls reversal unnecessarily and swallows accounting errors.
-- B7 checkout-requests findAll response is inconsistent.
-- F2 approve renew does not invalidate admin-checkout-requests cache.
+Important date rule now locked:
+- Lifecycle and finance dates must use full ISO UTC midnight, for example 2026-06-15T00:00:00.000Z.
+- Do not use date-only payloads for lifecycle/finance UAT.
+- Do not use local setHours/setDate/setMonth for lifecycle/finance business dates.
+- Use UTC-safe date helpers for planned checkout, requested checkout, renew periods, invoice periods, meter checkpoint dates, reminder previews, and accounting posting dates.
 
-Current recommended order:
-M0   Finish B9B build/commit/push hygiene.
-M0.5 V5.29-C Critical Lifecycle/Data Integrity Hotfix: B1, B2, B3.
-M0.6 V5.29-D Renew/Checkout Consistency Hotfix: B4, B5, B7, F2.
-M0.7 V5.29-E Admin Check-In + Invoice Hygiene Fix: F1, B6.
-M1   Tenant My Stay Guide Full Audit.
-M2   Tenant Payment/Renew/Checkout UX Hardening.
-M3   AutoOps + First-Paid Runtime UAT.
-M4+  Deposit Ledger Detail, Cashflow, OPEX/COGS/CAPEX, Ancillary Revenue, Global Data Quality, Unified Command Center, Production Readiness.
-```
+Known historical-data note:
+- Old UAT notifications created before HOTFIX2/HOTFIX3 can still display 14/6/2026 or old H-1 dates.
+- Historical dev/UAT rows are not evidence of new regression.
+- Fresh data after f6af6fc must show UTC-correct dates.
 
-### Verification and release hygiene
+Remaining current code track:
+M0.7 V5.29-E Admin Check-In + Invoice Hygiene Fix:
+- F1 Admin check-in wizard must expose all backend pricing terms: BIWEEKLY, semester term according to real enum spelling, YEARLY.
+- B6 DRAFT invoice cancellation must skip accounting reversal and must not swallow real journaled reversal failures.
 
-```text
-Do not claim a new FULL PASS without:
-- backend build PASS if backend touched,
-- frontend build PASS if frontend touched,
-- runtime API smoke PASS for touched flows,
-- manual UI smoke where UI changed,
-- no unrelated changes,
-- generated Prisma restored before commit,
-- final ZIP or GitHub push confirmed depending on release type.
-```
+Next product track after V5.29-E:
+M1 Tenant My Stay Guide Full Audit.
 
-PowerShell only:
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb; git log --oneline -5
-```
-
-Generated Prisma hygiene:
-
-```powershell
-git restore --staged backend/src/generated/prisma
-git restore backend/src/generated/prisma
-git status -sb
+Release hygiene:
+- Do not claim future PASS without build + runtime/API UAT + manual UI check where UI changed.
+- Keep generated Prisma out of commits unless intentionally approved.
+- Commit docs/source-of-truth changes separately from code hotfix commits.
 ```
 
 ### Source-of-truth note
 
 ```text
-This section supersedes older V5.28-B8/B9 planning sections below.
+This section supersedes older V5.29-B9A/B9B and V5.29-C/D/E planning sections below.
 Older sections remain as historical record only.
 For coding, inspect the latest real repo/ZIP first.
 If docs and code differ, write "docs/code out of sync" and follow real code.
 ```
 
+## A0. Latest Release Checklist — V5.29-C/D Lifecycle Hotfix
+
+### Completed and pushed
+
+- [x] B1 Deposit partial refund under-processing rejected.
+- [x] B1 Valid partial refund with deduction + refund equal to full deposit accepted.
+- [x] B2 `agreedRentAmountRupiah=0` preserved.
+- [x] B3 `invoiceCount` total fixed.
+- [x] B3 `openInvoiceCount` filtered by not PAID/CANCELLED fixed.
+- [x] B3 DRAFT invoice counts as open.
+- [x] B4 Renew requestedTerm applied on approve.
+- [x] B5 Checkout notification uses requestedCheckOutDate.
+- [x] B7 Admin checkout request list returns `data.items`.
+- [x] HOTFIX2 checkout UTC date precision PASS on fresh data.
+- [x] HOTFIX3 renew UTC date precision PASS on fresh data.
+- [x] HOTFIX4 tenant blocker microcopy cleaned.
+- [x] F2 approve renew cache invalidation manual UI PASS.
+- [x] Backend build PASS from user local report.
+- [x] Frontend build PASS from user local report.
+- [x] Runtime smoke owner/public/notifications/payment-review PASS.
+- [x] No generated Prisma committed.
+- [x] Code commit pushed: `f6af6fc fix(lifecycle): harden deposit renew checkout data integrity`.
+
+### Current outstanding
+
+- [ ] Decide/commit docs sync separately from code hotfix.
+- [ ] Run `git status -sb` and ensure only intentional docs changes remain.
+
+## A1. Next Active Checklist — V5.29-E Admin Check-In + Invoice Hygiene
+
+### F1 — check-in pricing terms
+
+- [ ] Inspect actual backend pricing term enum.
+- [ ] Confirm exact semester spelling: `SEMESTERLY` or `SMESTERLY`.
+- [ ] Add BIWEEKLY to admin check-in wizard if supported.
+- [ ] Add semester term using exact backend enum value.
+- [ ] Add YEARLY to admin check-in wizard.
+- [ ] Ensure payload sends enum value, not display label.
+- [ ] Verify manual check-in with each added term.
+
+### B6 — DRAFT invoice cancellation reversal hygiene
+
+- [ ] Inspect invoice cancellation service.
+- [ ] Confirm DRAFT invoice has no posted accounting journal.
+- [ ] Skip reversal for DRAFT invoice.
+- [ ] Keep controlled reversal for journaled invoice cancellation.
+- [ ] Do not silently swallow critical accounting reversal failures for journaled cancellation.
+- [ ] Verify DRAFT cancel succeeds without reversal.
+- [ ] Verify journaled cancellation behavior.
+
+### V5.29-E release gate
+
+- [ ] Backend build PASS if backend touched.
+- [ ] Frontend build PASS if frontend touched.
+- [ ] Runtime API UAT PASS for touched flows.
+- [ ] Manual UI smoke for check-in pricing term dropdown.
+- [ ] No DB reset.
+- [ ] No generated Prisma commit.
+- [ ] No unrelated docs/code changes.
 
 ## A0. Latest Release Checklist — V5.29-B9A/B9B
 

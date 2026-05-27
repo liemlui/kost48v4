@@ -14,6 +14,7 @@ import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
 import { cancelInvoice, issueInvoice } from '../../api/invoices';
+import { fetchAccountingReadiness } from '../../api/accounting';
 import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 
@@ -56,6 +57,7 @@ export default function InvoicesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
+  const [accountingNotice, setAccountingNotice] = useState('');
   const [activeTab, setActiveTab] = useState<StatusTab>('BILLING');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
@@ -65,6 +67,7 @@ export default function InvoicesPage() {
 
   const invoicesQuery = useQuery({ queryKey: ['invoices', page], queryFn: () => listResource<any>('/invoices', { page, limit: PAGE_SIZE }) });
   const staysQuery = useQuery({ queryKey: ['stays', 'invoice-form'], queryFn: () => listResource<any>('/stays', { limit: 500 }) });
+  const accountingReadinessQuery = useQuery({ queryKey: ['accounting-readiness', 'invoice-posting'], queryFn: fetchAccountingReadiness, enabled: canManageFinance, staleTime: 30_000 });
 
   const stayOptions = useMemo(() => buildReferenceOptions(staysQuery.data?.items ?? [], '/stays'), [staysQuery.data?.items]);
   const selectedStay = stayOptions.find((option) => String(option.value) === String(formState.stayId)) ?? null;
@@ -85,14 +88,23 @@ export default function InvoicesPage() {
       setError('');
     },
     onError: (err: any) => {
-      const message = err?.response?.data?.message || 'Gagal membuat invoice';
+      const message = err?.response?.data?.message || 'Gagal membuat tagihan';
       setError(Array.isArray(message) ? message.join(', ') : message);
     },
   });
 
   const issueMutation = useMutation({
     mutationFn: (id: number) => issueInvoice(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (invoice: any) => {
+      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      if (invoice?.accounting?.accountingWarning) {
+        setAccountingNotice(invoice.accounting.accountingWarning);
+      }
+    },
+    onError: (err: any) => {
+      const message = err?.response?.data?.message || 'Gagal menerbitkan tagihan';
+      setError(Array.isArray(message) ? message.join(', ') : message);
+    },
   });
 
   const cancelMutation = useMutation({
@@ -104,6 +116,8 @@ export default function InvoicesPage() {
 
   const allItems = invoicesQuery.data?.items || [];
   const meta = invoicesQuery.data?.meta;
+  const postingPeriod = accountingReadinessQuery.data?.postingPeriod;
+  const postingPeriodBlocked = Boolean(postingPeriod && !postingPeriod.ready);
 
   const stats = {
     total: allItems.length,
@@ -153,12 +167,22 @@ export default function InvoicesPage() {
   }, [allItems, activeTab, keyword, dateFrom, dateTo]);
 
   const assistantItems: AssistantItem[] = [
+    postingPeriodBlocked ? {
+      id: 'invoice-posting-period-blocked',
+      severity: 'BLOCKER',
+      title: `Posting tagihan terblokir: periode ${postingPeriod?.key ?? '-'} ${postingPeriod?.status ?? 'belum siap'}`,
+      message: postingPeriod?.warning ?? 'Periode posting berjalan belum siap untuk journal tagihan baru.',
+      source: 'Accounting',
+      count: 1,
+      actionLabel: 'Buka Accounting',
+      onAction: () => navigate('/reports?tab=formal'),
+    } : null,
     stats.overdue ? {
       id: 'invoice-overdue',
       severity: 'BLOCKER',
       title: `${stats.overdue} tagihan melewati jatuh tempo`,
       message: 'Follow-up tenant atau catat pembayaran sebelum flow checkout ikut terblokir oleh tagihan terbuka.',
-      source: 'Invoice',
+      source: 'Tagihan',
       count: stats.overdue,
       actionLabel: 'Lihat Overdue',
       onAction: () => setActiveTab('OVERDUE'),
@@ -178,7 +202,7 @@ export default function InvoicesPage() {
       severity: 'MEDIUM',
       title: `${stats.draft} draft belum tenant-facing`,
       message: 'Draft tidak akan terlihat sebagai tagihan sampai diterbitkan. Cek rincian sebelum issue.',
-      source: 'Finance',
+      source: 'Keuangan',
       count: stats.draft,
       actionLabel: 'Lihat Draft',
       onAction: () => setActiveTab('DRAFT'),
@@ -195,7 +219,7 @@ export default function InvoicesPage() {
   const actionQueueItems: ActionQueueItem[] = filteredItems.slice(0, 8).map((item: any) => {
     const overdue = isOverdue(item);
     const dueSoonBadge = getDueSoonBadge(item);
-    const tenantName = item.stay?.tenant?.fullName || `Stay #${item.stayId}`;
+    const tenantName = item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`;
     return {
       id: item.id,
       priority: overdue ? 'BLOCKER' : item.status === 'DRAFT' ? 'MEDIUM' : dueSoonBadge ? 'WARNING' : 'INFO',
@@ -283,7 +307,7 @@ export default function InvoicesPage() {
           <div className="table-meta align-items-start">
             <div>
               <div className="panel-title">Daftar tagihan</div>
-              <div className="panel-subtitle">Gunakan tab status untuk berpindah cepat antar antrean finance.</div>
+              <div className="panel-subtitle">Gunakan tab status untuk berpindah cepat antar antrean keuangan.</div>
             </div>
             <div className="status-tab-bar compact-tabs">
               {tabs.map((tab) => (
@@ -299,8 +323,15 @@ export default function InvoicesPage() {
             </div>
           </div>
 
+          {postingPeriodBlocked && postingPeriod?.warning ? (
+            <Alert variant="danger">
+              <strong>Posting tagihan sedang terblokir.</strong> {postingPeriod.warning}
+            </Alert>
+          ) : null}
+          {error ? <Alert variant="danger">{error}</Alert> : null}
+          {accountingNotice ? <Alert variant="warning">{accountingNotice}</Alert> : null}
           {invoicesQuery.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-          {invoicesQuery.isError ? <Alert variant="danger">Gagal mengambil data invoice. Silakan coba lagi.</Alert> : null}
+          {invoicesQuery.isError ? <Alert variant="danger">Gagal mengambil data tagihan. Silakan coba lagi.</Alert> : null}
           {!invoicesQuery.isLoading && !invoicesQuery.isError && filteredItems.length === 0 ? (
             <EmptyState
               icon="🧾"
@@ -326,7 +357,7 @@ export default function InvoicesPage() {
                 {filteredItems.map((item: any) => {
                   const dueSoonBadge = getDueSoonBadge(item);
                   const overdue = isOverdue(item);
-                  const tenantName = item.stay?.tenant?.fullName || `Stay #${item.stayId}`;
+                  const tenantName = item.stay?.tenant?.fullName || `Masa sewa #${item.stayId}`;
                   const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-';
                   return (
                     <tr key={item.id} className="clickable-row" onClick={() => navigate(`/invoices/${item.id}`)}>
@@ -386,7 +417,7 @@ export default function InvoicesPage() {
           <Row className="g-3">
             <Col md={12}>
               <Form.Group>
-                <Form.Label>Stay</Form.Label>
+                <Form.Label>Masa Sewa</Form.Label>
                 <SearchableSelect<number>
                   value={selectedStay ? { value: selectedStay.value, label: selectedStay.label } : null}
                   onChange={(option) => setFormState((p) => ({ ...p, stayId: String(option?.value ?? '') }))}

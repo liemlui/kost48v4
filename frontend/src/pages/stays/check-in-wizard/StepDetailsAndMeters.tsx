@@ -2,7 +2,7 @@ import { Card, Col, Form, Row, Alert, InputGroup } from 'react-bootstrap';
 import { Controller } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import type { WizardFormValues } from './types';
-import { stayPurposeOptions, bookingSourceOptions } from './checkInWizardUtils';
+import { bookingSourceOptions, pricingTermOptions, stayPurposeOptions } from './checkInWizardUtils';
 
 function formatRupiah(value: number | string | undefined | null): string {
   const num = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
@@ -46,12 +46,13 @@ export default function StepDetailsAndMeters({
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Termin Harga</Form.Label>
+              <Form.Label>Jenis Masa Sewa</Form.Label>
               <Form.Select {...form.register('pricingTerm')}>
-                <option value="MONTHLY">Bulanan</option>
-                <option value="WEEKLY">Mingguan</option>
-                <option value="DAILY">Harian</option>
+                {pricingTermOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
               </Form.Select>
+              <div className="text-muted small mt-1">Pilih jenis masa sewa sesuai kesepakatan.</div>
             </Form.Group>
           </Col>
           <Col md={6}>
@@ -62,7 +63,7 @@ export default function StepDetailsAndMeters({
               <Controller
                 control={form.control}
                 name="agreedRentAmountRupiah"
-                rules={{ required: 'Agreed rent amount wajib diisi', min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
+                rules={{ required: 'Harga sewa disepakati wajib diisi', min: { value: 0, message: 'Nilai tidak boleh negatif' } }}
                 render={({ field }) => (
                   <>
                     <InputGroup>
@@ -127,24 +128,24 @@ export default function StepDetailsAndMeters({
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Stay Purpose</Form.Label>
+              <Form.Label>Tujuan Tinggal</Form.Label>
               <Form.Select {...form.register('stayPurpose')}>
                 {stayPurposeOptions.map((option) => (
                   <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
                 ))}
               </Form.Select>
-              <div className="text-muted small mt-1">Nilai harus sesuai enum backend.</div>
+              <div className="text-muted small mt-1">Pilih tujuan tinggal dari opsi yang tersedia agar data tetap rapi.</div>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Booking Source</Form.Label>
+              <Form.Label>Sumber Booking</Form.Label>
               <Form.Select {...form.register('bookingSource')}>
                 {bookingSourceOptions.map((option) => (
                   <option key={option.value || 'empty'} value={option.value}>{option.label}</option>
                 ))}
               </Form.Select>
-              <div className="text-muted small mt-1">Input bebas dihilangkan agar tidak lagi mengirim enum liar.</div>
+              <div className="text-muted small mt-1">Pilih sumber booking dari daftar yang tersedia.</div>
             </Form.Group>
           </Col>
           <Col md={6}>

@@ -20,6 +20,26 @@ export async function createInvoice(payload: {
   return createResource<Invoice>('/invoices', payload as unknown as Record<string, unknown>);
 }
 
+
+export async function createInvoiceWithLinesAndIssue(payload: {
+  stayId: number;
+  invoiceNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  dueDate?: string;
+  notes?: string;
+  lines: Array<{
+    lineType: string;
+    description: string;
+    qty: number | string;
+    unit?: string;
+    unitPriceRupiah: number;
+    sortOrder?: number;
+  }>;
+}) {
+  return createResource<Invoice>('/invoices/create-with-lines-and-issue', payload as unknown as Record<string, unknown>);
+}
+
 export async function addInvoiceLine(invoiceId: number | string, payload: {
   lineType: string;
   description: string;

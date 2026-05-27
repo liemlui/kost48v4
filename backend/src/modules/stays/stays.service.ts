@@ -588,7 +588,12 @@ export class StaysService {
       });
 
       for (const invoice of invoicesToReverse) {
-        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actor.id).catch(() => undefined);
+        const reversalResult = await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actor.id);
+        if (reversalResult?.skipped) {
+          throw new ConflictException(
+            `Pembatalan stay gagal karena reversal accounting invoice #${invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
+          );
+        }
       }
 
       const stay = await tx.stay.findUnique({ where: { id } });

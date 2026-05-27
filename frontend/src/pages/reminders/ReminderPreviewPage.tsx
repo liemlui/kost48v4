@@ -303,7 +303,7 @@ export default function ReminderPreviewPage() {
                       <td>{item.phone ?? '-'}</td>
                       <td>{item.roomCode ?? '-'}</td>
                       <td>Masa sewa #{item.stayId}</td>
-                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Renew/keluar {formatDate(item.plannedCheckOutDate)}</small></td>
+                      <td>{item.daysRemaining} hari lagi<br /><small className="text-muted">Akhir masa sewa {formatDate(item.plannedCheckOutDate)}</small></td>
                       <td style={{ maxWidth: 250, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{item.messagePreview}</td>
                       <td><SimulasiKirimButton type="CHECKOUT" candidateId={String(item.stayId)} phone={item.phone} message={item.messagePreview} sendingId={sendingId} onSend={handleMockSend} /></td>
                     </tr>

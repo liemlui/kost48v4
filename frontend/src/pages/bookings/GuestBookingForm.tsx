@@ -163,7 +163,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Tanggal Renew / Keluar (Opsional)</Form.Label>
+                <Form.Label>Tanggal akhir masa sewa yang diinginkan (opsional)</Form.Label>
                 <Form.Control
                   type="date"
                   min={form.checkInDate || INITIAL_FORM.checkInDate}

@@ -6,6 +6,7 @@ import {
   InvoiceSuggestionItem,
   PaginatedResponse,
   PortalResult,
+  PricingTerm,
   ProcessDepositPayload,
   Stay,
   StayCreatePayload,
@@ -87,6 +88,7 @@ export async function cancelStay(id: number | string, payload: CancelStayPayload
 }
 
 export type RenewStayPayload = {
+  pricingTerm?: PricingTerm;
   plannedCheckOutDate?: string;
   agreedRentAmountRupiah?: number;
   electricityReadingValue: string;
@@ -94,9 +96,15 @@ export type RenewStayPayload = {
   meterReadingAt: string;
 };
 
+export type RenewStayResponse = {
+  stay: Stay;
+  invoice: Invoice;
+  meterSummary?: unknown;
+};
+
 export async function renewStay(
   id: number | string,
   payload: RenewStayPayload
 ) {
-  return postAction<CreateStayResponse>(`/stays/${id}/renew`, payload as unknown as Record<string, unknown>);
+  return postAction<RenewStayResponse>(`/stays/${id}/renew`, payload as unknown as Record<string, unknown>);
 }

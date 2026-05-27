@@ -38,8 +38,8 @@ export default function InfoTab({ stay }: { stay: Stay }) {
         <Card className="content-card h-100 border-0">
           <Card.Body>
             <div className="d-flex align-items-center justify-content-between mb-3">
-              <h5 className="mb-0">Data Tenant</h5>
-              <span className="surface-pill">Read Only</span>
+              <h5 className="mb-0">Data Penghuni</h5>
+              <span className="surface-pill">Baca Saja</span>
             </div>
             <Row>
               <Col md={6}>
@@ -52,7 +52,7 @@ export default function InfoTab({ stay }: { stay: Stay }) {
                 <DataField label="Kota Asal" value={tenant?.originCity} />
                 <DataField label="Pekerjaan" value={tenant?.occupation} />
                 <DataField label="Instansi / Kampus" value={tenant?.companyOrCampus} />
-                <DataField label="Catatan Tenant" value={tenant?.notes} />
+                <DataField label="Catatan Penghuni" value={tenant?.notes} />
               </Col>
             </Row>
           </Card.Body>
@@ -89,20 +89,20 @@ export default function InfoTab({ stay }: { stay: Stay }) {
         <Card className="content-card border-0">
           <Card.Body>
             <div className="d-flex align-items-center justify-content-between mb-3">
-              <h5 className="mb-0">Detail Stay</h5>
+              <h5 className="mb-0">Detail Masa Sewa</h5>
               <StatusBadge status={stay.depositStatus ?? 'HELD'} />
             </div>
             <Row>
               <Col md={6}>
-                <DataField label="Pricing Term" value={getStatusLabel(stay.pricingTerm)} />
-                <DataField label="Booking Source" value={stay.bookingSource} />
+                <DataField label="Jenis Masa Sewa" value={getStatusLabel(stay.pricingTerm)} />
+                <DataField label="Sumber Booking" value={stay.bookingSource} />
                 <DataField label="Tujuan Tinggal" value={stay.stayPurpose} />
                 <DataField label="Sewa Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
               </Col>
               <Col md={6}>
-                <DataField label="Check-in" value={formatDate(stay.checkInDate)} />
-                <DataField label="Tanggal Renew / Keluar" value={formatDate(stay.plannedCheckOutDate)} />
-                <DataField label="Checkout Aktual" value={formatDate(stay.actualCheckOutDate)} />
+                <DataField label="Tanggal Masuk" value={formatDate(stay.checkInDate)} />
+                <DataField label="Akhir Masa Sewa" value={formatDate(stay.plannedCheckOutDate)} />
+                <DataField label="Tanggal Keluar Aktual" value={formatDate(stay.actualCheckOutDate)} />
                 <DataField label="Deposit" value={<CurrencyDisplay amount={stay.depositAmountRupiah} />} />
                 {stay.status === 'CANCELLED' ? (
                   <DataField label="Alasan Pembatalan" value={stay.cancelReason ?? stay.checkoutReason ?? '-'} />

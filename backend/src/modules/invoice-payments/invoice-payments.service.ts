@@ -79,8 +79,11 @@ export class InvoicePaymentsService {
     });
 
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
-    if (invoice.status === 'CANCELLED') {
-      throw new ConflictException('Pembayaran melebihi total invoice atau invoice berstatus CANCELLED');
+    if (invoice.status === InvoiceStatus.DRAFT) {
+      throw new ConflictException('Invoice masih draft dan belum bisa dibayar. Terbitkan invoice terlebih dahulu.');
+    }
+    if (invoice.status === InvoiceStatus.CANCELLED) {
+      throw new ConflictException('Invoice sudah dibatalkan dan tidak bisa menerima pembayaran.');
     }
 
     const totalPaid = invoice.payments.reduce((sum, item) => sum + item.amountRupiah, 0);
@@ -120,7 +123,10 @@ export class InvoicePaymentsService {
       include: { lines: true, payments: true },
     });
     if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
-    if (invoice.status === 'CANCELLED') throw new ConflictException('Update menyebabkan overpayment atau invoice CANCELLED');
+    if (invoice.status === InvoiceStatus.DRAFT) {
+      throw new ConflictException('Invoice masih draft dan pembayaran belum boleh diubah. Terbitkan invoice terlebih dahulu.');
+    }
+    if (invoice.status === InvoiceStatus.CANCELLED) throw new ConflictException('Update menyebabkan overpayment atau invoice CANCELLED');
 
     const otherPaid = invoice.payments.filter((p) => p.id !== id).reduce((sum, p) => sum + p.amountRupiah, 0);
     const nextAmount = dto.amountRupiah ?? existing.amountRupiah;

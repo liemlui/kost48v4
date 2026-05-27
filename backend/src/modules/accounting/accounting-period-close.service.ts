@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { AuditLogService } from '../../audit-log/audit-log.service';
 import { AccountingReportsService } from './accounting-reports.service';
 import { AccountingSchemaGuard } from './accounting-schema.guard';
 import { PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } from './dto/period-close.dto';
@@ -61,6 +62,7 @@ export class AccountingPeriodCloseService {
     private readonly prisma: PrismaService,
     private readonly reportsService: AccountingReportsService,
     private readonly schemaGuard: AccountingSchemaGuard,
+    private readonly audit: AuditLogService,
   ) {}
 
   async readiness(query: PeriodCloseQueryDto) {
@@ -83,7 +85,7 @@ export class AccountingPeriodCloseService {
 
   async post(dto: PeriodClosePayloadDto, user: CurrentUserPayload) {
     await this.schemaGuard.assertReady();
-    return (this.prisma as any).$transaction(async (tx: any) => {
+    const result = await (this.prisma as any).$transaction(async (tx: any) => {
       const period = await tx.accountingPeriod.findUnique({ where: { year_month: { year: dto.year, month: dto.month } } });
       if (!period) throw new NotFoundException(`Accounting period ${monthKey(dto.year, dto.month)} belum dibuat.`);
       if (period.status !== 'OPEN') throw new BadRequestException(`Accounting period ${monthKey(dto.year, dto.month)} sudah ${period.status}.`);
@@ -152,6 +154,15 @@ export class AccountingPeriodCloseService {
         note: 'Periode berhasil ditutup. P&L operasional mengecualikan CLOSING_ENTRY/CLOSING_REVERSAL agar owner tidak melihat performa periode menjadi nol atau dobel.',
       };
     });
+    await this.audit.log({
+      actorUserId: user.id,
+      action: 'PERIOD_CLOSE_POST',
+      entityType: 'AccountingPeriod',
+      entityId: String(result.period.id),
+      newData: { period: result.period, journalEntryId: result.journalEntry?.id ?? null },
+      meta: { basis: result.basis, year: dto.year, month: dto.month, notes: dto.notes ?? null },
+    });
+    return result;
   }
 
   async reopenPreview(dto: PeriodReopenPayloadDto) {
@@ -161,7 +172,7 @@ export class AccountingPeriodCloseService {
 
   async reopen(dto: PeriodReopenPayloadDto, user: CurrentUserPayload) {
     await this.schemaGuard.assertReady();
-    return (this.prisma as any).$transaction(async (tx: any) => {
+    const result = await (this.prisma as any).$transaction(async (tx: any) => {
       const preview = await this.buildReopenPreview(dto.year, dto.month, dto.reason, tx);
       if (!preview.canReopen || !preview.isBalanced || preview.blockedReasons.length) {
         throw new BadRequestException(`Buka ulang periode diblokir: ${preview.blockedReasons.join(' | ')}`);
@@ -225,6 +236,15 @@ export class AccountingPeriodCloseService {
         note: 'Periode dibuka ulang dengan jurnal reversal. Closing journal lama tidak dihapus agar audit trail tetap utuh.',
       };
     });
+    await this.audit.log({
+      actorUserId: user.id,
+      action: 'PERIOD_REOPEN_POST',
+      entityType: 'AccountingPeriod',
+      entityId: String(result.period.id),
+      newData: { period: result.period, journalEntryId: result.journalEntry?.id ?? null },
+      meta: { basis: result.basis, year: dto.year, month: dto.month, reason: dto.reason },
+    });
+    return result;
   }
 
   private async buildReadiness(year: number, month: number, txOverride?: any) {

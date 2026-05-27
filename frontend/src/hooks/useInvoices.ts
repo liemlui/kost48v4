@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addInvoiceLine, cancelInvoice, createInvoice, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
+import { addInvoiceLine, cancelInvoice, createInvoice, createInvoiceWithLinesAndIssue, getInvoiceById, issueInvoice, listInvoices } from '../api/invoices';
 
 export function useInvoices(stayId?: number | string, enabled = true) {
   const queryClient = useQueryClient();
@@ -17,6 +17,16 @@ export function useInvoices(stayId?: number | string, enabled = true) {
     mutationFn: createInvoice,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: key });
+      await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    },
+  });
+
+
+  const createAndIssueMutation = useMutation({
+    mutationFn: createInvoiceWithLinesAndIssue,
+    onSuccess: async (invoice) => {
+      await queryClient.invalidateQueries({ queryKey: key });
+      await queryClient.invalidateQueries({ queryKey: ['invoice', invoice.id] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
     },
   });
@@ -49,7 +59,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
     },
   });
 
-  return { ...query, createMutation, addLineMutation, issueMutation, cancelMutation };
+  return { ...query, createMutation, createAndIssueMutation, addLineMutation, issueMutation, cancelMutation };
 }
 
 export function useInvoice(invoiceId?: number | string, enabled = true) {

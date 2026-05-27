@@ -12,7 +12,7 @@ import { AccountingReadinessService } from './accounting-readiness.service';
 import { AccountingReportsService } from './accounting-reports.service';
 import { AccountingAccountsQueryDto, CreateChartOfAccountDto, UpdateChartOfAccountDto } from './dto/accounting-account.dto';
 import { CashAccountsQueryDto, CreateCashAccountDto, UpdateCashAccountDto } from './dto/cash-account.dto';
-import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
+import { AccountingPeriodsQueryDto, CreateAccountingPeriodDto, ReopenAccountingPeriodDto, UpdateAccountingPeriodDto } from './dto/accounting-period.dto';
 import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/opening-balance.dto';
 import { CreateJournalDraftDto, JournalBySourceQueryDto, JournalEntriesQueryDto, RecentJournalsQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
 import { AutoJournalBackfillDto, DepositBackfillDryRunDto } from './dto/auto-journal.dto';
@@ -77,8 +77,8 @@ export class AccountingController {
   }
 
   @Get('readiness')
-  async readiness() {
-    return { message: 'Kesiapan accounting berhasil diambil', data: await this.readinessService.getReadiness() };
+  async readiness(@Query('postingDate') postingDate?: string) {
+    return { message: 'Kesiapan accounting berhasil diambil', data: await this.readinessService.getReadiness(postingDate) };
   }
 
   @Post('default-coa/seed')
@@ -124,6 +124,16 @@ export class AccountingController {
   @Post('periods')
   async createPeriod(@Body() dto: CreateAccountingPeriodDto) {
     return { message: 'Accounting period berhasil dibuat', data: await this.accountingService.createPeriod(dto) };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Patch('periods/:id/reopen')
+  async reopenPeriodById(@Param('id', ParseIntPipe) id: number, @Body() dto: ReopenAccountingPeriodDto, @CurrentUser() user: CurrentUserPayload) {
+    const period = await this.accountingService.getPeriodById(id);
+    return {
+      message: 'Periode berhasil dibuka ulang',
+      data: await this.periodCloseService.reopen({ year: period.year, month: period.month, reason: dto.reason }, user),
+    };
   }
 
   @Patch('periods/:id')

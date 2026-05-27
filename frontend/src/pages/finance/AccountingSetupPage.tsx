@@ -14,6 +14,7 @@ import AccountingCommandCenterLite from '../../components/accounting/AccountingC
 import ProfitLossLitePanel from '../../components/accounting/ProfitLossLitePanel';
 import AssetReadinessPanel from '../../components/accounting/AssetReadinessPanel';
 import PeriodClosePanel from '../../components/accounting/PeriodClosePanel';
+import AccountingPeriodsPanel from '../../components/accounting/AccountingPeriodsPanel';
 import AccountingDataQualityPanel from '../../components/accounting/AccountingDataQualityPanel';
 import PeriodCloseTimeline from '../../components/accounting/PeriodCloseTimeline';
 import JournalAuditTrailPanel from '../../components/accounting/JournalAuditTrailPanel';
@@ -40,6 +41,7 @@ import {
   postOpeningBalance,
   postPeriodClose,
   postPeriodReopen,
+  reopenAccountingPeriod,
   previewPeriodClose,
   previewPeriodReopen,
   runAutoJournalBackfill,
@@ -288,6 +290,23 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuka ulang periode.')); },
   });
 
+  const reopenCurrentPostingPeriodMutation = useMutation({
+    mutationFn: () => {
+      const periodId = readinessQuery.data?.postingPeriod?.id ?? periods.find((period) => period.isCurrentPostingPeriod)?.id;
+      if (!periodId) throw new Error('Periode posting berjalan belum ditemukan.');
+      return reopenAccountingPeriod(periodId, { reason: periodReopenReason });
+    },
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setPeriodReopenPreview(result.preview);
+      setPeriodClosePreview(undefined);
+      setActionMessage(`Periode posting berhasil dibuka ulang. Reversal journal: ${result.journalEntry.entryNumber}.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal membuka ulang periode posting.')); },
+  });
+
   const depositDryRunMutation = useMutation({
     mutationFn: () => runDepositBackfillDryRun({ limit: 25 }),
     onMutate: () => { setActionError(null); setActionMessage(null); },
@@ -397,6 +416,18 @@ export default function AccountingSetupPage() {
       <div id="asset-readiness">
         <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
       </div>
+
+      <AccountingPeriodsPanel
+        periods={periods}
+        readiness={readinessQuery.data}
+        isLoading={periodsQuery.isLoading || readinessQuery.isLoading}
+        canManage={user?.role === 'OWNER'}
+        reopenReason={periodReopenReason}
+        isReopening={reopenCurrentPostingPeriodMutation.isPending}
+        onReopenReasonChange={setPeriodReopenReason}
+        onReopenCurrentPeriod={() => reopenCurrentPostingPeriodMutation.mutate()}
+        onFocusPeriodClose={() => focusAccountingSection('period-close')}
+      />
 
       <div id="period-close">
         <PeriodClosePanel

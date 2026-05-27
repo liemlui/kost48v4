@@ -272,7 +272,7 @@ export default function PublicRoomDetailPage() {
                       <Table responsive className="room-detail-rate-table mb-0">
                         <thead>
                           <tr>
-                            <th>Term sewa</th>
+                            <th>Jenis masa sewa</th>
                             <th className="text-end">Tarif</th>
                             <th>Listrik & air</th>
                           </tr>

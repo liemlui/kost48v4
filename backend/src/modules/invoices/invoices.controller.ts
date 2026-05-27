@@ -6,7 +6,7 @@ import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
+import { CancelInvoiceDto, CreateInvoiceDto, CreateInvoiceLineDto, CreateInvoiceWithLinesAndIssueDto, UpdateInvoiceDto, UpdateInvoiceLineDto } from './dto/invoice.dto';
 import { InvoicesQueryDto } from './dto/invoices-query.dto';
 import { InvoicesService } from './invoices.service';
 
@@ -39,6 +39,13 @@ export class InvoicesController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async create(@Body() dto: CreateInvoiceDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Invoice draft berhasil dibuat', data: await this.invoicesService.create(dto, user) };
+  }
+
+
+  @Post('create-with-lines-and-issue')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async createWithLinesAndIssue(@Body() dto: CreateInvoiceWithLinesAndIssueDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Invoice berhasil dibuat dan diterbitkan', data: await this.invoicesService.createWithLinesAndIssue(dto, user) };
   }
 
   @Patch(':id')

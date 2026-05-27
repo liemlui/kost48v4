@@ -213,7 +213,9 @@ export class AccountingService {
 
   async listPeriods(query: AccountingPeriodsQueryDto = {}) {
     await this.schemaGuard.assertReady();
-    return (this.prisma as any).accountingPeriod.findMany({
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const periods = await (this.prisma as any).accountingPeriod.findMany({
       where: {
         ...(query.year ? { year: query.year } : {}),
         ...(query.month ? { month: query.month } : {}),
@@ -221,6 +223,50 @@ export class AccountingService {
       },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
+
+    return Promise.all(periods.map(async (period: any) => {
+      const [postedJournalCount, draftJournalCount, closingJournalCount, reversalJournalCount] = await Promise.all([
+        (this.prisma as any).journalEntry.count({ where: { accountingPeriodId: period.id, status: 'POSTED' as any } }),
+        (this.prisma as any).journalEntry.count({ where: { accountingPeriodId: period.id, status: 'DRAFT' as any } }),
+        (this.prisma as any).journalEntry.count({ where: { accountingPeriodId: period.id, status: 'POSTED' as any, sourceType: 'CLOSING_ENTRY' as any } }),
+        (this.prisma as any).journalEntry.count({ where: { accountingPeriodId: period.id, status: 'POSTED' as any, sourceType: 'CLOSING_REVERSAL' as any } }),
+      ]);
+      const start = new Date(period.startDate);
+      const end = new Date(period.endDate);
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(23, 59, 59, 999);
+      const isCurrentPostingPeriod = start <= today && today <= end;
+      const key = `${period.year}-${String(period.month).padStart(2, '0')}`;
+      const isPostingOpen = isCurrentPostingPeriod && period.status === 'OPEN';
+      return {
+        ...period,
+        key,
+        periodKey: key,
+        isCurrentPostingPeriod,
+        isPostingOpen,
+        postedJournalCount,
+        draftJournalCount,
+        closingJournalCount,
+        reversalJournalCount,
+        statusNarrative: isCurrentPostingPeriod && period.status !== 'OPEN'
+          ? `Periode posting berjalan ${key} sudah ${period.status}. Tagihan baru akan diblokir sampai Owner membuka ulang periode atau memakai workflow adjustment yang sah.`
+          : period.status === 'OPEN'
+            ? `Periode ${key} masih OPEN untuk posting yang sah.`
+            : `Periode ${key} berstatus ${period.status}.`,
+        ownerAction: isCurrentPostingPeriod && period.status !== 'OPEN'
+          ? 'OWNER_REOPEN_REQUIRED_FOR_NEW_POSTING'
+          : period.status === 'OPEN'
+            ? 'REVIEW_BEFORE_CLOSE'
+            : 'READ_ONLY_HISTORY',
+      };
+    }));
+  }
+
+  async getPeriodById(id: number) {
+    await this.schemaGuard.assertReady();
+    const period = await (this.prisma as any).accountingPeriod.findUnique({ where: { id } });
+    if (!period) throw new NotFoundException('Accounting period tidak ditemukan.');
+    return period;
   }
 
   async createPeriod(dto: CreateAccountingPeriodDto) {
