@@ -1,83 +1,120 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-27 V5.29-C/D Lifecycle Hotfix PASS + Pushed
+**Versi:** 2026-05-27 V5.29-K Controlled Monthly Auto-Close Governance PASS + Pushed
 
 
-## 0.0 Latest Current State — V5.29-C/D Lifecycle Hotfix PASS + Pushed
+## 0.0 Latest Current State — V5.29-K Controlled Monthly Auto-Close Governance PASS + Pushed
 
 ```text
 Current latest pushed commit:
-f6af6fc fix(lifecycle): harden deposit renew checkout data integrity
+7c8c8e7 feat(accounting): add controlled monthly auto close governance
 
 Previous latest pushed commits:
-46f540e fix(accounting): clean statement readiness copy
+0285dbe feat(accounting): ship posting period governance and invoice journal lifecycle
+f6af6fc fix(lifecycle): harden deposit renew checkout data integrity
 51eba86 feat(accounting): add statement command center finance cockpit
 286e512 fix(accounting): block manual edits in closed period governance
 
 Release status:
-- V5.29-C Critical Lifecycle/Data Integrity Hotfix is runtime PASS and pushed.
-- V5.29-D Renew/Checkout Consistency Hotfix is runtime PASS and pushed.
-- HOTFIX2 checkout UTC/date notification PASS on fresh data.
-- HOTFIX3 renew UTC/date precision PASS on fresh data.
-- HOTFIX4 tenant blocker microcopy cleanup PASS.
-- Commit f6af6fc is at HEAD, origin/main, and origin/HEAD.
+- V5.29-H/I/J accounting invoice lifecycle and period governance were verified before K.
+- V5.29-K Controlled Monthly Auto-Close Governance is built, UAT-smoked, committed, and pushed.
+- Backend build PASS from user local report.
+- Frontend build PASS from user local report.
+- Auto-close policy endpoint PASS.
+- Owner manual auto-run safe-skip PASS.
+- AutoOps accountingAutoClose integration PASS.
+- ADMIN auto-run blocked with 403 PASS.
+- Owner close without reason blocked with 400 PASS.
 - Generated Prisma was restored and was not committed.
+- Commit 7c8c8e7 is pushed to origin/main.
 
-Verified during UAT:
-- Backend build PASS from user local report after HOTFIX3/HOTFIX4.
-- Frontend build PASS from user local report after HOTFIX3.
-- Owner login PASS.
-- Public rooms smoke PASS.
-- Owner notifications PASS.
-- Payment review queue PASS.
-- Checkout admin list response shape PASS: global envelope with data.items.
-- B1 invalid partial refund under-processing rejected 409.
-- B1 valid exact partial refund accepted and settles full deposit.
-- B2 agreedRentAmountRupiah=0 remains 0.
-- B3 invoiceCount total and openInvoiceCount filtered are correct.
-- B3 DRAFT invoice counts as open.
-- B5 checkout requestedCheckOutDate stores exact ISO UTC and notification uses requested date.
-- Duplicate checkout request rejected 409.
-- B4 renew requestedTerm=YEARLY is applied during approve.
-- Renew approval creates ISSUED invoice.
-- Renew plannedCheckOutDate no longer drifts H-1 after HOTFIX3.
-- Renew invoice periodStart/periodEnd no longer drift H-1 after HOTFIX3.
-- Checkout and renew open-invoice blockers reject correctly.
-- Tenant blocker message no longer leaks raw enum such as (ISSUED).
-- F2 manual UI cache invalidation PASS: approve renew updates request status/list without stale pending state.
+V5.29-K verified behavior:
+- Auto-close policy basis is PERIOD_AUTO_CLOSE_MONTHLY_V5_29_K.
+- Mode is AUTO_MONTHLY_PREVIOUS_PERIOD.
+- Auto-close targets only the previous month, not the current month.
+- Target period must already exist and must be OPEN.
+- Period close readiness must return canPost=true.
+- Closing preview must be balanced before posting.
+- If blocker exists or target period is missing, system skips safely and does not force close.
+- Owner can manually trigger auto-close through /api/accounting/period-close/auto-run.
+- AutoOps run includes accountingAutoClose result.
+- Admin cannot trigger auto-close manually.
+- Manual period close requires a closing reason of at least 8 characters.
 
-Important date rule now locked:
-- Lifecycle and finance dates must use full ISO UTC midnight, for example 2026-06-15T00:00:00.000Z.
-- Do not use date-only payloads for lifecycle/finance UAT.
-- Do not use local setHours/setDate/setMonth for lifecycle/finance business dates.
-- Use UTC-safe date helpers for planned checkout, requested checkout, renew periods, invoice periods, meter checkpoint dates, reminder previews, and accounting posting dates.
+Known honest limitation:
+- Actual auto-close closed=true scenario is deferred because target period 2026-04 did not exist in current UAT data.
+- The verified K result is controlled safe-skip + governance/role/validation PASS, not actual previous-period closing PASS.
+- Manual UI smoke remains user-side visual verification if needed.
 
-Known historical-data note:
-- Old UAT notifications created before HOTFIX2/HOTFIX3 can still display 14/6/2026 or old H-1 dates.
-- Historical dev/UAT rows are not evidence of new regression.
-- Fresh data after f6af6fc must show UTC-correct dates.
-
-Remaining current code track:
-M0.7 V5.29-E Admin Check-In + Invoice Hygiene Fix:
-- F1 Admin check-in wizard must expose all backend pricing terms: BIWEEKLY, semester term according to real enum spelling, YEARLY.
-- B6 DRAFT invoice cancellation must skip accounting reversal and must not swallow real journaled reversal failures.
-
-Next product track after V5.29-E:
-M1 Tenant My Stay Guide Full Audit.
-
-Release hygiene:
-- Do not claim future PASS without build + runtime/API UAT + manual UI check where UI changed.
-- Keep generated Prisma out of commits unless intentionally approved.
-- Commit docs/source-of-truth changes separately from code hotfix commits.
+Product decision locked:
+- KOST48 may use automatic monthly period close, but only as controlled automation.
+- Auto-close is not blind automation.
+- It must be blocker-aware, auditable, balanced, role-safe, and reversible only through official reopen workflow.
+- Reopen remains Owner-only and reason-required.
 ```
 
 ### Source-of-truth note
 
 ```text
-This section supersedes older V5.29-B9A/B9B and V5.29-C/D/E planning sections below.
+This section supersedes older V5.29-C/D/E/H/I/J planning sections below.
 Older sections remain as historical record only.
 For coding, inspect the latest real repo/ZIP first.
 If docs and code differ, write "docs/code out of sync" and follow real code.
 ```
+
+## 2026-05-27 — V5.29-K Controlled Monthly Auto-Close Governance
+
+### Type
+
+Backend accounting governance + AutoOps integration + frontend accounting UI polish.
+
+### Added / Changed
+
+- Added controlled monthly auto-close policy endpoint.
+- Added Owner manual auto-close runner.
+- Integrated accounting auto-close into AutoOps result.
+- Auto-close targets previous month only.
+- Auto-close skips safely if target period is missing, not OPEN, readiness is blocked, or preview is unbalanced.
+- Manual period close now requires a reason/note of at least 8 characters.
+- ADMIN manual auto-close is blocked.
+- Owner-facing Accounting Setup UI now explains controlled monthly auto-close.
+- Period close UI copy now clarifies manual close vs automatic monthly close.
+- Added frontend API support for auto-close policy and manual auto-run.
+
+### Verified
+
+```text
+Backend build PASS from user local report.
+Frontend build PASS from user local report.
+Runtime UAT:
+- GET /api/accounting/period-close/auto-policy PASS.
+- POST /api/accounting/period-close/auto-run as OWNER PASS safe-skip.
+- POST /api/auto-ops/run includes accountingAutoClose PASS safe-skip.
+- POST /api/accounting/period-close/auto-run as ADMIN returns 403 PASS.
+- POST /api/accounting/period-close/post without reason returns 400 PASS.
+
+Commit pushed:
+7c8c8e7 feat(accounting): add controlled monthly auto close governance
+```
+
+### Not Changed
+
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No payment/stay/renew/checkout lifecycle rewrite.
+- No generated Prisma commit.
+- No microservices/apps folder.
+- No blind auto-close.
+- No automatic creation of missing accounting periods.
+
+### Carry-forward
+
+```text
+Actual auto-close closed=true UAT remains deferred until previous OPEN period exists and readiness/preview are complete.
+Next recommended product track: M1 Tenant My Stay Guide Full Audit.
+Alternative accounting track: V5.29-L Actual Auto-Close Closed=True UAT + Year-End Close Planning.
+```
+
 
 ## 2026-05-27 — V5.29-C/D Lifecycle Data Integrity + Renew/Checkout UTC Hotfix
 
