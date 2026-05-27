@@ -353,6 +353,30 @@ export type PeriodReopenPostResult = {
   note?: string;
 };
 
+
+export type PeriodAutoClosePolicy = {
+  basis: string;
+  enabled: boolean;
+  mode: string;
+  targetYear: number;
+  targetMonth: number;
+  targetPeriodKey: string;
+  trigger: string;
+  safeguards: string[];
+  note?: string;
+  closed?: boolean;
+  skipped?: boolean;
+  skippedReason?: string;
+  source?: string;
+  blockedReasons?: string[];
+  warnings?: string[];
+  result?: PeriodClosePostResult;
+};
+
+export type PeriodAutoCloseRunPayload = {
+  monthsBack?: number;
+};
+
 export type PeriodClosePayload = {
   year: number;
   month: number;
@@ -755,6 +779,14 @@ export async function fetchAssetReadiness() {
 
 export async function fetchProfitLossLite(params?: { asOf?: string; year?: number; month?: number }) {
   return unwrap<ProfitLossLite>(client.get('/accounting/profit-loss', { params }));
+}
+
+export async function fetchPeriodAutoClosePolicy() {
+  return unwrap<PeriodAutoClosePolicy>(client.get('/accounting/period-close/auto-policy'));
+}
+
+export async function runPeriodAutoClose(payload: PeriodAutoCloseRunPayload = {}) {
+  return unwrap<PeriodAutoClosePolicy>(client.post('/accounting/period-close/auto-run', payload));
 }
 
 export async function fetchPeriodCloseReadiness(params: { year: number; month: number }) {

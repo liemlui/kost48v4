@@ -17,7 +17,7 @@ import { CreateOpeningBalanceDraftDto, OpeningBalancesQueryDto } from './dto/ope
 import { CreateJournalDraftDto, JournalBySourceQueryDto, JournalEntriesQueryDto, RecentJournalsQueryDto, TrialBalanceQueryDto } from './dto/journal-entry.dto';
 import { AutoJournalBackfillDto, DepositBackfillDryRunDto } from './dto/auto-journal.dto';
 import { AccountingPeriodCloseService } from './accounting-period-close.service';
-import { PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } from './dto/period-close.dto';
+import { PeriodAutoCloseRunDto, PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } from './dto/period-close.dto';
 
 @ApiTags('accounting')
 @ApiBearerAuth()
@@ -33,6 +33,24 @@ export class AccountingController {
     private readonly periodCloseService: AccountingPeriodCloseService,
   ) {}
 
+
+
+  @Get('period-close/auto-policy')
+  async periodAutoClosePolicy() {
+    return {
+      message: 'Kebijakan auto-close periode berhasil diambil',
+      data: await this.periodCloseService.autoClosePolicy(),
+    };
+  }
+
+  @Roles(UserRole.OWNER)
+  @Post('period-close/auto-run')
+  async periodAutoCloseRun(@Body() dto: PeriodAutoCloseRunDto = {}, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'Auto-close periode bulanan selesai diproses',
+      data: await this.periodCloseService.autoCloseMonthly({ actorUserId: user.id, source: 'OWNER_MANUAL_AUTO_CLOSE_RUN', monthsBack: dto.monthsBack }),
+    };
+  }
 
   @Get('period-close/readiness')
   async periodCloseReadiness(@Query() query: PeriodCloseQueryDto) {
@@ -121,6 +139,7 @@ export class AccountingController {
     return { message: 'Daftar accounting period berhasil diambil', data: await this.accountingService.listPeriods(query) };
   }
 
+  @Roles(UserRole.OWNER)
   @Post('periods')
   async createPeriod(@Body() dto: CreateAccountingPeriodDto) {
     return { message: 'Accounting period berhasil dibuat', data: await this.accountingService.createPeriod(dto) };
@@ -136,6 +155,7 @@ export class AccountingController {
     };
   }
 
+  @Roles(UserRole.OWNER)
   @Patch('periods/:id')
   async updatePeriod(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAccountingPeriodDto) {
     return { message: 'Accounting period berhasil diperbarui', data: await this.accountingService.updatePeriod(id, dto) };

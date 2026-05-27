@@ -296,15 +296,17 @@ export class AccountingService {
     const row = await (this.prisma as any).accountingPeriod.findUnique({ where: { id } });
     if (!row) throw new NotFoundException('Accounting period tidak ditemukan.');
     if (dto.status !== undefined && dto.status !== row.status) {
-      throw new BadRequestException('Status accounting period tidak boleh diubah manual setelah B8. Gunakan workflow Tutup Periode atau Buka Ulang agar jurnal closing/reversal tetap auditable.');
+      throw new BadRequestException('Status accounting period tidak boleh diubah manual. Gunakan workflow Tutup Periode atau Buka Ulang agar jurnal closing/reversal tetap auditable.');
+    }
+    if (dto.startDate !== undefined || dto.endDate !== undefined) {
+      throw new BadRequestException('Tanggal accounting period tidak boleh diedit manual setelah periode dibuat. Buat periode baru atau gunakan workflow koreksi yang auditable.');
+    }
+    if (dto.notes === undefined) {
+      throw new BadRequestException('Tidak ada field yang bisa diperbarui. Hanya catatan internal period yang boleh diubah manual.');
     }
     return (this.prisma as any).accountingPeriod.update({
       where: { id },
-      data: {
-        ...(dto.startDate !== undefined ? { startDate: new Date(dto.startDate) } : {}),
-        ...(dto.endDate !== undefined ? { endDate: new Date(dto.endDate) } : {}),
-        ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
-      },
+      data: { notes: dto.notes },
     });
   }
 

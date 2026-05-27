@@ -31,6 +31,7 @@ import {
   fetchDepositPosition,
   fetchDepositReconciliation,
   fetchOpeningBalances,
+  fetchPeriodAutoClosePolicy,
   fetchPeriodCloseReadiness,
   fetchPostingBoundary,
   fetchProfitLossLite,
@@ -46,6 +47,7 @@ import {
   previewPeriodReopen,
   runAutoJournalBackfill,
   runDepositBackfillDryRun,
+  runPeriodAutoClose,
   seedDefaultCoa,
   voidOpeningBalance,
   type CreateCashAccountPayload,
@@ -105,6 +107,7 @@ export default function AccountingSetupPage() {
   const assetReadinessQuery = useQuery({ queryKey: ['accounting-asset-readiness'], queryFn: fetchAssetReadiness, staleTime: 30_000 });
   const profitLossQuery = useQuery({ queryKey: ['accounting-profit-loss-lite', closeYear, closeMonth], queryFn: () => fetchProfitLossLite({ year: closeYear, month: closeMonth }), staleTime: 30_000 });
   const periodCloseReadinessQuery = useQuery({ queryKey: ['accounting-period-close-readiness', closeYear, closeMonth], queryFn: () => fetchPeriodCloseReadiness({ year: closeYear, month: closeMonth }), staleTime: 20_000 });
+  const autoClosePolicyQuery = useQuery({ queryKey: ['accounting-period-auto-close-policy'], queryFn: fetchPeriodAutoClosePolicy, staleTime: 30_000 });
   const postingBoundaryQuery = useQuery({ queryKey: ['accounting-posting-boundary'], queryFn: fetchPostingBoundary, staleTime: 30_000 });
   const unmappedQuery = useQuery({ queryKey: ['accounting-unmapped-transactions'], queryFn: fetchUnmappedTransactions, staleTime: 30_000 });
   const recentJournalsQuery = useQuery({
@@ -152,6 +155,7 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-asset-readiness'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-profit-loss-lite'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-period-close-readiness'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-period-auto-close-policy'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-posting-boundary'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-unmapped-transactions'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
@@ -240,6 +244,20 @@ export default function AccountingSetupPage() {
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan backfill auto journal.')); },
   });
 
+
+
+  const autoCloseMutation = useMutation({
+    mutationFn: () => runPeriodAutoClose(),
+    onMutate: () => { setActionError(null); setActionMessage(null); },
+    onSuccess: async (result) => {
+      setActionError(null);
+      setActionMessage(result.closed
+        ? `Auto-close berhasil menutup periode ${result.targetPeriodKey}.`
+        : `Auto-close dicek: ${result.skippedReason ?? 'periode belum memenuhi syarat close otomatis'}.`);
+      await refreshAccounting();
+    },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan auto-close periode.')); },
+  });
 
   const previewCloseMutation = useMutation({
     mutationFn: () => previewPeriodClose({ year: closeYear, month: closeMonth, notes: periodCloseNotes || undefined }),
@@ -363,6 +381,7 @@ export default function AccountingSetupPage() {
           { id: 'auto-journal', label: 'Auto Journal', value: autoJournalEnabled ? 'ON' : 'OFF', helper: 'Posting operasional', tone: autoJournalEnabled ? 'success' : 'warning' },
           { id: 'asset-b4', label: 'Aset', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Review', helper: 'Register aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
           { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Close/reopen audit', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
+          { id: 'auto-close', label: 'Auto-Close', value: autoClosePolicyQuery.isLoading ? '...' : autoClosePolicyQuery.data?.enabled ? 'ON' : 'OFF', helper: autoClosePolicyQuery.data?.targetPeriodKey ?? 'Bulan lalu', tone: autoClosePolicyQuery.data?.enabled ? 'success' : 'warning' },
           { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
@@ -416,6 +435,34 @@ export default function AccountingSetupPage() {
       <div id="asset-readiness">
         <AssetReadinessPanel readiness={assetReadinessQuery.data} isLoading={assetReadinessQuery.isLoading} />
       </div>
+
+
+      <Card className="content-card border-0 mb-3 accounting-setup-card">
+        <Card.Body className="d-flex flex-column flex-xl-row gap-3 justify-content-between align-items-xl-center">
+          <div>
+            <div className="section-kicker mb-2">Auto-Close Bulanan</div>
+            <h3 className="h5 mb-1">Tutup periode otomatis, tetapi tetap blocker-aware</h3>
+            <p className="text-muted mb-2">
+              Sistem menargetkan bulan yang sudah lewat ({autoClosePolicyQuery.data?.targetPeriodKey ?? 'bulan lalu'}), bukan bulan berjalan. Auto-close hanya berjalan jika semua readiness aman dan preview jurnal closing balanced.
+            </p>
+            <div className="d-flex flex-wrap gap-2 small">
+              <Badge bg={autoClosePolicyQuery.data?.enabled ? 'success' : 'warning'}>{autoClosePolicyQuery.data?.enabled ? 'Auto-close ON' : 'Auto-close OFF'}</Badge>
+              <Badge bg="info">Monthly controlled close</Badge>
+              <span className="text-muted">Buka ulang tetap Owner-only + alasan audit.</span>
+            </div>
+            {autoClosePolicyQuery.data?.note ? <small className="text-muted d-block mt-2">{autoClosePolicyQuery.data.note}</small> : null}
+          </div>
+          <div className="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+            <Button
+              variant="outline-primary"
+              disabled={!canManageOpeningBalance || autoCloseMutation.isPending || !autoClosePolicyQuery.data?.enabled}
+              onClick={() => autoCloseMutation.mutate()}
+            >
+              {autoCloseMutation.isPending ? 'Mengecek...' : 'Jalankan Auto-Close Sekarang'}
+            </Button>
+          </div>
+        </Card.Body>
+      </Card>
 
       <AccountingPeriodsPanel
         periods={periods}

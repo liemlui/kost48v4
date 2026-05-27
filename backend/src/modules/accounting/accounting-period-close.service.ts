@@ -9,6 +9,7 @@ import { PeriodClosePayloadDto, PeriodCloseQueryDto, PeriodReopenPayloadDto } fr
 const RETAINED_EARNINGS_CODE = '3200';
 const CLOSE_BASIS = 'PERIOD_CLOSE_RETAINED_EARNINGS_B8';
 const REOPEN_BASIS = 'PERIOD_REOPEN_REVERSAL_B8';
+const AUTO_CLOSE_BASIS = 'PERIOD_AUTO_CLOSE_MONTHLY_V5_29_K';
 const PNL_EXCLUDED_CLOSING_SOURCE_TYPES = ['CLOSING_ENTRY', 'CLOSING_REVERSAL'] as const;
 
 type ClosingLine = {
@@ -51,6 +52,12 @@ function dateOnly(value: Date | string) {
   return date;
 }
 
+function previousUtcMonth(now = new Date(), monthsBack = 1) {
+  const safeMonthsBack = Math.min(12, Math.max(1, Math.round(Number(monthsBack) || 1)));
+  const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - safeMonthsBack, 1));
+  return { year: anchor.getUTCFullYear(), month: anchor.getUTCMonth() + 1, monthsBack: safeMonthsBack };
+}
+
 function accountBalance(type: string, debit: number, credit: number) {
   if (type === 'ASSET' || type === 'EXPENSE' || type === 'COGS') return debit - credit;
   return credit - debit;
@@ -84,6 +91,74 @@ export class AccountingPeriodCloseService {
   }
 
   async post(dto: PeriodClosePayloadDto, user: CurrentUserPayload) {
+    const notes = dto.notes?.trim();
+    if (!notes || notes.length < 8) {
+      throw new BadRequestException('Alasan tutup periode wajib diisi minimal 8 karakter agar audit trail jelas.');
+    }
+    return this.postInternal({ ...dto, notes }, user.id, 'PERIOD_CLOSE_POST', CLOSE_BASIS);
+  }
+
+  async autoClosePolicy(now = new Date(), monthsBack = 1) {
+    const target = previousUtcMonth(now, monthsBack);
+    return {
+      basis: AUTO_CLOSE_BASIS,
+      enabled: String(process.env.ACCOUNTING_AUTO_CLOSE_ENABLED ?? 'true').toLowerCase() !== 'false',
+      mode: 'AUTO_MONTHLY_PREVIOUS_PERIOD',
+      targetYear: target.year,
+      targetMonth: target.month,
+      targetPeriodKey: monthKey(target.year, target.month),
+      trigger: 'AutoOps interval dan tombol Owner dapat menjalankan auto-close. Sistem hanya menutup bulan yang sudah lewat, bukan bulan berjalan.',
+      safeguards: [
+        'Periode target harus OPEN.',
+        'Semua readiness tutup periode harus canPost=true.',
+        'Preview closing journal harus balanced.',
+        'Jika ada blocker, sistem skip dan tidak memaksa close.',
+        'Buka ulang tetap Owner-only dan wajib alasan audit.',
+      ],
+      note: 'Auto-close mengikuti praktik controlled close: otomatis jika data siap, tetapi blocker-aware, auditable, dan reversible lewat workflow Buka Ulang Periode.',
+    };
+  }
+
+  async autoCloseMonthly(options: { actorUserId?: number | null; source?: string; now?: Date; monthsBack?: number } = {}) {
+    await this.schemaGuard.assertReady();
+    const enabled = String(process.env.ACCOUNTING_AUTO_CLOSE_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const target = previousUtcMonth(options.now ?? new Date(), options.monthsBack ?? 1);
+    const policy = await this.autoClosePolicy(options.now ?? new Date(), options.monthsBack ?? 1);
+    const source = options.source ?? 'AUTO_OPS_ACCOUNTING_PERIOD_CLOSE';
+    if (!enabled) {
+      return { ...policy, closed: false, skipped: true, skippedReason: 'ACCOUNTING_AUTO_CLOSE_DISABLED', source };
+    }
+
+    const period = await (this.prisma as any).accountingPeriod.findUnique({ where: { year_month: { year: target.year, month: target.month } } });
+    if (!period) {
+      return { ...policy, closed: false, skipped: true, skippedReason: `Accounting period ${monthKey(target.year, target.month)} belum dibuat.`, source };
+    }
+    if (period.status !== 'OPEN') {
+      return { ...policy, period, closed: false, skipped: true, skippedReason: `Periode ${monthKey(target.year, target.month)} sudah ${period.status}.`, source };
+    }
+
+    const readiness = await this.buildReadiness(target.year, target.month);
+    const preview = await this.buildClosingPreview(target.year, target.month);
+    const blockedReasons = [...readiness.blockedReasons, ...preview.blockedReasons];
+    if (!readiness.canPost || !preview.isBalanced || blockedReasons.length) {
+      return {
+        ...policy,
+        period,
+        closed: false,
+        skipped: true,
+        skippedReason: 'READINESS_BLOCKED',
+        blockedReasons,
+        warnings: readiness.warnings,
+        source,
+      };
+    }
+
+    const notes = `AUTO_CLOSE: Semua readiness aman untuk ${monthKey(target.year, target.month)}. Diproses otomatis oleh ${source}.`;
+    const result = await this.postInternal({ year: target.year, month: target.month, notes }, options.actorUserId ?? null, 'PERIOD_AUTO_CLOSE_POST', AUTO_CLOSE_BASIS);
+    return { ...policy, closed: true, skipped: false, source, result };
+  }
+
+  private async postInternal(dto: PeriodClosePayloadDto, actorUserId: number | null, auditAction: string, auditBasis: string) {
     await this.schemaGuard.assertReady();
     const result = await (this.prisma as any).$transaction(async (tx: any) => {
       const period = await tx.accountingPeriod.findUnique({ where: { year_month: { year: dto.year, month: dto.month } } });
@@ -116,8 +191,8 @@ export class AccountingPeriodCloseService {
         totalDebitRupiah: preview.totalDebitRupiah,
         totalCreditRupiah: preview.totalCreditRupiah,
         isBalanced: preview.isBalanced,
-        createdById: user.id,
-        postedById: user.id,
+        createdById: actorUserId,
+        postedById: actorUserId,
         postedAt: new Date(),
       };
       if (preview.lines.length) {
@@ -136,17 +211,17 @@ export class AccountingPeriodCloseService {
         data: {
           status: 'CLOSED' as any,
           closedAt: new Date(),
-          closedById: user.id,
+          closedById: actorUserId,
           closingJournalEntryId: journal.id,
           closingNote: dto.notes ?? null,
-          closeBasis: CLOSE_BASIS,
+          closeBasis: auditBasis,
           closeVersion,
         },
       });
       const freshJournal = await this.findJournalWithLines(tx, journal.id);
 
       return {
-        basis: CLOSE_BASIS,
+        basis: auditBasis,
         posted: true,
         period: closedPeriod,
         journalEntry: freshJournal,
@@ -155,12 +230,12 @@ export class AccountingPeriodCloseService {
       };
     });
     await this.audit.log({
-      actorUserId: user.id,
-      action: 'PERIOD_CLOSE_POST',
+      actorUserId,
+      action: auditAction,
       entityType: 'AccountingPeriod',
       entityId: String(result.period.id),
       newData: { period: result.period, journalEntryId: result.journalEntry?.id ?? null },
-      meta: { basis: result.basis, year: dto.year, month: dto.month, notes: dto.notes ?? null },
+      meta: { basis: result.basis, auditBasis, year: dto.year, month: dto.month, notes: dto.notes ?? null },
     });
     return result;
   }

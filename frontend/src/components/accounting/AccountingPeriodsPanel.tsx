@@ -43,14 +43,14 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
             <div className="section-kicker mb-2">Periode Accounting</div>
-            <h3 className="panel-title mb-1">Governance posting tagihan</h3>
+            <h3 className="panel-title mb-1">Governance posting & auto-close</h3>
             <p className="text-muted mb-0">
-              Daftar periode ini membantu Owner melihat bulan mana yang OPEN/CLOSED sebelum menerbitkan tagihan, posting jurnal, atau melakukan koreksi periode.
+              Daftar periode ini membantu Owner melihat bulan mana yang OPEN/CLOSED. Auto-close bulanan hanya menutup bulan lalu jika readiness aman; koreksi tetap lewat buka ulang periode.
             </p>
           </div>
           <div className="d-flex flex-wrap gap-2 align-items-start justify-content-xl-end">
             {currentPeriod ? <Badge bg={currentPeriod.status === 'OPEN' ? 'success' : 'danger'}>Posting {periodKey(currentPeriod)} {currentPeriod.status}</Badge> : <Badge bg="warning">Posting period belum ditemukan</Badge>}
-            <Badge bg={postingBlocked ? 'danger' : 'success'}>{postingBlocked ? 'Invoice issue terblokir' : 'Posting invoice siap'}</Badge>
+            <Badge bg={postingBlocked ? 'danger' : 'success'}>{postingBlocked ? 'Tagihan diblokir' : 'Posting tagihan siap'}</Badge>
           </div>
         </div>
 
@@ -108,12 +108,12 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
                       <small className="text-muted">{formatDate(period.startDate)} – {formatDate(period.endDate)}</small>
                     </td>
                     <td><Badge bg={statusVariant[period.status] ?? 'secondary'}>{period.status}</Badge></td>
-                    <td>{period.isCurrentPostingPeriod ? <Badge bg={period.isPostingOpen ? 'success' : 'danger'}>{period.isPostingOpen ? 'Current OPEN' : 'Current blocked'}</Badge> : <span className="text-muted">History</span>}</td>
+                    <td>{period.isCurrentPostingPeriod ? <Badge bg={period.isPostingOpen ? 'success' : 'danger'}>{period.isPostingOpen ? 'Periode berjalan OPEN' : 'Periode berjalan diblokir'}</Badge> : <span className="text-muted">Riwayat</span>}</td>
                     <td><span className="fw-semibold">{period.postedJournalCount ?? 0}</span> <small className="text-muted">posted</small>{period.draftJournalCount ? <small className="text-warning d-block">{period.draftJournalCount} draft</small> : null}</td>
                     <td>
                       <small className="d-block text-muted">Close V{period.closeVersion ?? 0} · Reopen V{period.reopenVersion ?? 0}</small>
-                      {period.closingJournalEntryId ? <small className="d-block">Closing #{period.closingJournalEntryId}</small> : null}
-                      {period.reopenJournalEntryId ? <small className="d-block">Reopen #{period.reopenJournalEntryId}</small> : null}
+                      {period.closingJournalEntryId ? <small className="d-block">Jurnal closing #{period.closingJournalEntryId}</small> : null}
+                      {period.reopenJournalEntryId ? <small className="d-block">Jurnal reversal #{period.reopenJournalEntryId}</small> : null}
                     </td>
                     <td className="text-muted">{period.statusNarrative ?? period.notes ?? '-'}</td>
                   </tr>

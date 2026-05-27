@@ -3,6 +3,7 @@ import { Prisma } from '../../generated/prisma';
 import { InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -10,6 +11,7 @@ type AutoOpsRunResult = {
   releasedRooms: number;
   expiredStayIds: number[];
   releasedRoomIds: number[];
+  accountingAutoClose?: unknown;
 };
 
 @Injectable()
@@ -18,7 +20,10 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   private timer: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly accountingPeriodCloseService: AccountingPeriodCloseService,
+  ) {}
 
   onModuleInit() {
     const enabled = String(process.env.AUTO_OPS_ENABLED ?? 'true').toLowerCase() !== 'false';
@@ -54,6 +59,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }),
     ]);
 
+    const accountingAutoClosePolicy = await this.accountingPeriodCloseService.autoClosePolicy(now);
+
     return {
       enabled: String(process.env.AUTO_OPS_ENABLED ?? 'true').toLowerCase() !== 'false',
       now,
@@ -62,19 +69,21 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       expiredCandidates,
       heldForPaymentReview,
       orphanReservedRooms,
-      policy: 'First paid wins. Booking saja belum mengunci kamar; pembayaran valid dan kamar siap huni yang menentukan prioritas.',
+      accountingAutoClosePolicy,
+      policy: 'First paid wins. Booking saja belum mengunci kamar; pembayaran valid dan kamar siap huni yang menentukan prioritas. Accounting auto-close menutup bulan lalu hanya jika readiness aman.',
     };
   }
 
   async runAll(options: { actorUserId?: number | null; source?: string } = {}): Promise<AutoOpsRunResult> {
     if (this.running) {
-      return { expiredBookings: 0, heldForPaymentReview: 0, releasedRooms: 0, expiredStayIds: [], releasedRoomIds: [] };
+      return { expiredBookings: 0, heldForPaymentReview: 0, releasedRooms: 0, expiredStayIds: [], releasedRoomIds: [], accountingAutoClose: { skipped: true, skippedReason: 'AUTO_OPS_ALREADY_RUNNING' } };
     }
     this.running = true;
     try {
-      const [bookingResult, roomResult] = await Promise.all([
+      const [bookingResult, roomResult, accountingAutoClose] = await Promise.all([
         this.runBookingExpiry(options),
         this.runRoomHealer(options),
+        this.runAccountingAutoClose(options),
       ]);
       return {
         expiredBookings: bookingResult.expiredStayIds.length,
@@ -82,9 +91,27 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         releasedRooms: roomResult.releasedRoomIds.length,
         expiredStayIds: bookingResult.expiredStayIds,
         releasedRoomIds: roomResult.releasedRoomIds,
+        accountingAutoClose,
       };
     } finally {
       this.running = false;
+    }
+  }
+
+
+  async runAccountingAutoClose(options: { actorUserId?: number | null; source?: string } = {}) {
+    try {
+      return await this.accountingPeriodCloseService.autoCloseMonthly({
+        actorUserId: options.actorUserId ?? null,
+        source: options.source ?? 'AUTO_OPS_INTERVAL',
+      });
+    } catch (error: any) {
+      return {
+        closed: false,
+        skipped: true,
+        skippedReason: error?.message ?? 'Accounting auto-close skipped',
+        source: options.source ?? 'AUTO_OPS_INTERVAL',
+      };
     }
   }
 

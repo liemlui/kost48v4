@@ -87,7 +87,8 @@ export default function PeriodClosePanel({
 }: Props) {
   const status = readiness?.period?.status;
   const isClosed = status === 'CLOSED';
-  const canSubmitClose = Boolean(canPost && readiness?.canPost && preview?.canPost && preview?.isBalanced && !isPosting);
+  const closeNoteReady = notes.trim().length >= 8;
+  const canSubmitClose = Boolean(canPost && readiness?.canPost && preview?.canPost && preview?.isBalanced && closeNoteReady && !isPosting);
   const canSubmitReopen = Boolean(canPost && isClosed && reopenPreview?.canReopen && reopenPreview?.isBalanced && reopenReason.trim().length >= 8 && !isReopening);
   const periodLabel = readiness?.period ? `${readiness.period.year}-${String(readiness.period.month).padStart(2, '0')}` : `${year}-${String(month).padStart(2, '0')}`;
   const checks = readiness?.checks ?? [];
@@ -100,9 +101,9 @@ export default function PeriodClosePanel({
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
             <div className="section-kicker mb-2">Governance Periode</div>
-            <h3 className="panel-title mb-1">Tutup periode {monthName(year, month)}</h3>
+            <h3 className="panel-title mb-1">Controlled close periode {monthName(year, month)}</h3>
             <p className="text-muted mb-0">
-              Owner menutup revenue, COGS, dan expense ke Laba Ditahan. Jika ada koreksi serius, periode dibuka ulang lewat jurnal reversal, bukan edit/hapus jurnal lama.
+              Auto-close bulanan akan menutup bulan yang sudah lewat saat data siap. Manual close tetap tersedia untuk Owner sebagai fallback audit, bukan edit/hapus jurnal lama.
             </p>
           </div>
           <div className="d-flex flex-wrap gap-2 align-items-start justify-content-xl-end">
@@ -114,7 +115,7 @@ export default function PeriodClosePanel({
 
         {isClosed ? (
           <Alert variant="info" className="mb-3">
-            <strong>Periode sudah ditutup.</strong> Laba/rugi sudah dipindahkan ke Retained Earnings lewat closing journal #{readiness?.period?.closingJournalEntryId ?? '-'}. Buka ulang hanya untuk koreksi serius dan akan membuat jurnal reversal.
+            <strong>Periode sudah ditutup.</strong> Laba/rugi sudah dipindahkan ke Laba Ditahan lewat jurnal closing #{readiness?.period?.closingJournalEntryId ?? '-'}. Buka ulang hanya untuk koreksi serius dan akan membuat jurnal reversal.
           </Alert>
         ) : (
           <Alert variant="warning" className="mb-3">
@@ -206,8 +207,9 @@ export default function PeriodClosePanel({
           </div>
         ) : (
           <Form.Group className="mb-3" controlId="periodCloseNotes">
-            <Form.Label>Catatan closing</Form.Label>
+            <Form.Label>Alasan tutup periode</Form.Label>
             <Form.Control as="textarea" rows={2} value={notes} onChange={(event) => onNotesChange(event.target.value)} placeholder="Contoh: Closing Mei 2026 setelah invoice, pembayaran, expense, depresiasi, dan asset alignment direview." />
+            <Form.Text>Minimal 8 karakter untuk manual close. Auto-close akan memakai catatan otomatis jika semua readiness aman.</Form.Text>
           </Form.Group>
         )}
 
@@ -227,13 +229,14 @@ export default function PeriodClosePanel({
                 {isPreviewing ? 'Preview...' : 'Preview Jurnal Closing'}
               </Button>
               <Button variant="primary" onClick={onPost} disabled={!canSubmitClose}>
-                {isPosting ? 'Menutup periode...' : 'Tutup Periode'}
+                {isPosting ? 'Menutup periode...' : 'Tutup Periode Manual'}
               </Button>
             </>
           )}
         </div>
 
-        {!canPost ? <small className="text-muted d-block mt-2">Hanya OWNER yang boleh posting tutup periode atau buka ulang. Admin dapat membaca readiness dan preview.</small> : null}
+        {!canPost ? <small className="text-muted d-block mt-2">Hanya OWNER yang boleh menjalankan manual close, auto-close run, atau buka ulang. Admin dapat membaca readiness dan preview.</small> : null}
+        {canPost && !isClosed && !closeNoteReady ? <small className="text-muted d-block mt-2">Isi alasan minimal 8 karakter sebelum posting manual. Auto-close bulanan tetap bisa berjalan otomatis jika semua readiness aman.</small> : null}
       </Card.Body>
     </Card>
   );
