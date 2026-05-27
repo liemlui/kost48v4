@@ -13314,3 +13314,62 @@ button.status-strip-item:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* V5.30-M3.1 AutoOps runtime UAT hardening */
+.autoops-uat-checklist {
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 18px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.autoops-uat-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.autoops-uat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.autoops-uat-grid > div {
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  padding: 0.65rem;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.96));
+}
+
+.autoops-uat-grid strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.autoops-uat-grid span {
+  display: block;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 1200px) {
+  .autoops-uat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .autoops-uat-header {
+    flex-direction: column;
+  }
+
+  .autoops-uat-grid {
+    grid-template-columns: 1fr;
+  }
+}
