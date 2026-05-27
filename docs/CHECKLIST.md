@@ -1,70 +1,239 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-26 V5.28-B8 Pushed + Next Plan B9
+**Versi:** 2026-05-26 V5.29-B9A Pushed + B9B Copy Smoke + V5.29-C/D/E Hotfix Plan
 
 
-## 0.0 Latest Current State — V5.28-B8 Pushed + Next Plan B9
+## 0.0 Latest Current State — V5.29-B9A Pushed + B9B Copy Smoke + Critical Hotfix Track
 
 ```text
-Current GitHub latest commit:
+Current latest pushed commit:
+51eba86 feat(accounting): add statement command center finance cockpit
+
+Previous accounting governance baseline:
 286e512 fix(accounting): block manual edits in closed period governance
 
-Recent accounting release chain:
-a72eabe fix(accounting): balance sheet contra asset presentation
-182057b feat(accounting): add fixed asset ledger alignment workflow
-ff2008f feat(accounting): add period close retained earnings workflow
-5c38672 feat(accounting): add closed period governance workflow
-286e512 fix(accounting): block manual edits in closed period governance
+B9A status:
+- V5.29-B9A Statement Command Center Finance Cockpit has been pushed to origin/main.
+- Frontend build PASS was verified during ZIP patching.
+- Runtime accounting API smoke PASS was verified from user log.
+- Manual UI smoke PASS: Finance → Laporan Keuangan tampil dengan baik.
+- Backend unchanged in B9A.
 
-Status:
-- main is pushed to origin/main through 286e512.
-- Working tree is clean: ## main...origin/main.
-- V5.27-B7 Period Close + Retained Earnings runtime UAT PASS.
-- V5.28-B8 Closed Period Governance + Reopen/Reversal runtime UAT PASS.
-- Accounting period 2026-05 was closed, reopened through CLOSING_REVERSAL, then re-closed as JE-CLOSE-2026-05-V2.
-- Duplicate close after re-close is blocked with "Accounting period 2026-05 sudah CLOSED."
-- Trial Balance after re-close: Debit 34.170.000 = Kredit 34.170.000.
-- Balance Sheet after re-close: Assets 29.915.000 = Liabilities + Equity 29.915.000; difference 0.
-- P&L remains operational/readable after close/reopen because CLOSING_ENTRY and CLOSING_REVERSAL are excluded by default.
-- Generated Prisma was restored before commit; do not commit backend/src/generated/prisma unless explicitly decided.
+B9B status:
+- V5.29-B9B Copy Consistency Cleanup package was generated.
+- Runtime accounting API smoke PASS from user log:
+  - readiness warnings no longer mention stale B1/B2/no-auto-posting copy,
+  - Trial Balance formalStatementReady=true and balanced,
+  - Balance Sheet ready=true, formalStatementReady=true, balanced,
+  - Profit & Loss formalStatementReady=true and excludes closing/reversal,
+  - Period Close state CLOSED with JE-CLOSE-2026-05-V2,
+  - unmapped operational=0, draft journal=0, unbalanced posted journal=0,
+  - depreciation posted, asset alignment safe.
+- B9B build/commit/push still needs local confirmation unless user reports it completed.
+
+Critical audit received after B9:
+- B1 Deposit partial refund can leave untracked deposit remainder.
+- B2 agreedRentAmountRupiah uses || instead of ??, so rent 0 is ignored.
+- B3 invoiceCount equals openInvoiceCount because query count is filtered.
+- B4 requestedTerm in renew request is ignored during approve.
+- F1 Check-in wizard is missing BIWEEKLY, SEMESTERLY/SMESTERLY, YEARLY terms.
+- B5 checkout notification uses current planned checkout date instead of requested checkout date.
+- B6 DRAFT invoice cancellation calls reversal unnecessarily and swallows accounting errors.
+- B7 checkout-requests findAll response is inconsistent.
+- F2 approve renew does not invalidate admin-checkout-requests cache.
+
+Current recommended order:
+M0   Finish B9B build/commit/push hygiene.
+M0.5 V5.29-C Critical Lifecycle/Data Integrity Hotfix: B1, B2, B3.
+M0.6 V5.29-D Renew/Checkout Consistency Hotfix: B4, B5, B7, F2.
+M0.7 V5.29-E Admin Check-In + Invoice Hygiene Fix: F1, B6.
+M1   Tenant My Stay Guide Full Audit.
+M2   Tenant Payment/Renew/Checkout UX Hardening.
+M3   AutoOps + First-Paid Runtime UAT.
+M4+  Deposit Ledger Detail, Cashflow, OPEX/COGS/CAPEX, Ancillary Revenue, Global Data Quality, Unified Command Center, Production Readiness.
 ```
 
-### Important local hygiene
+### Verification and release hygiene
 
 ```text
-After every npx prisma generate, backend/src/generated/prisma may be modified locally.
-Generated Prisma must be restored before commit unless explicitly decided.
-Run before commit:
+Do not claim a new FULL PASS without:
+- backend build PASS if backend touched,
+- frontend build PASS if frontend touched,
+- runtime API smoke PASS for touched flows,
+- manual UI smoke where UI changed,
+- no unrelated changes,
+- generated Prisma restored before commit,
+- final ZIP or GitHub push confirmed depending on release type.
+```
+
+PowerShell only:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb; git log --oneline -5
+```
+
+Generated Prisma hygiene:
+
+```powershell
 git restore --staged backend/src/generated/prisma
 git restore backend/src/generated/prisma
 git status -sb
 ```
 
-### Next official planning focus
-
-```text
-PLAN V5.29-B9 — Accounting Data Quality & Statement Command Center Hardening
-
-Why:
-B1-B8 moved KOST48 from operational finance into a ledger-backed accounting foundation:
-- COA, cash account, accounting period, opening balance, journal entry/line.
-- Auto journal visibility, statement lite, deposit/reversal visibility.
-- Asset register, depreciation, fixed asset ledger alignment.
-- Period close to Retained Earnings.
-- Closed period governance with reopen/reversal and re-close versioning.
-
-Remaining gap:
-Owner/finance UI now needs a stronger statement command center and audit/data-quality layer so the numbers are readable, explainable, and safe for business use. Some older UI copy/checklist wording still says "B1/B2" or "no auto-posting" and should be refreshed so docs/UI do not confuse the owner.
-
-B9 should be frontend-first with small backend read-only additions only if needed.
-```
-
 ### Source-of-truth note
 
 ```text
-This section supersedes old V5.24-C/V5.24-D top-of-file state.
-Older sections below remain as historical record, not the current release state.
-For coding, inspect the latest repo/ZIP first. If docs and code differ, write "docs/code out of sync" and follow real code.
+This section supersedes older V5.28-B8/B9 planning sections below.
+Older sections remain as historical record only.
+For coding, inspect the latest real repo/ZIP first.
+If docs and code differ, write "docs/code out of sync" and follow real code.
 ```
+
+
+## A0. Latest Release Checklist — V5.29-B9A/B9B
+
+### B9A completed
+
+- [x] Statement command center created.
+- [x] Trial Balance / Balance Sheet / P&L / Asset / Period Close visible in one owner-readable cockpit.
+- [x] Period close/reopen/re-close timeline added.
+- [x] Journal audit trail summary added.
+- [x] Data quality/readiness panel added.
+- [x] Finance navigation improved to Laporan Keuangan.
+- [x] Frontend build PASS.
+- [x] Runtime accounting API smoke PASS.
+- [x] Manual UI smoke PASS.
+- [x] Backend unchanged.
+- [x] Commit pushed: `51eba86 feat(accounting): add statement command center finance cockpit`.
+
+### B9B completed from runtime/API perspective
+
+- [x] Readiness warning no longer says stale B1/B2/no-auto-posting when ledger ready.
+- [x] Trial Balance formalStatementReady=true and balanced.
+- [x] Balance Sheet ready=true, formalStatementReady=true, balanced.
+- [x] P&L formalStatementReady=true and excludes closing/reversal.
+- [x] Period Close remains CLOSED with `JE-CLOSE-2026-05-V2`.
+- [x] Unmapped operational count = 0.
+- [x] Draft journal count = 0.
+- [x] Unbalanced posted journal count = 0.
+- [x] Depreciation posted.
+- [x] Asset alignment safe.
+
+### B9B still needs local release confirmation
+
+- [ ] Backend build PASS after B9B if backend touched.
+- [ ] Frontend build PASS after B9B if frontend touched.
+- [ ] Generated Prisma restored before commit.
+- [ ] B9B commit created.
+- [ ] B9B push completed.
+- [ ] Git status clean.
+
+## A1. Next Active Checklist — V5.29-C Critical Lifecycle/Data Integrity Hotfix
+
+### B1 — Deposit partial refund guard
+
+- [ ] Inspect `processDeposit()` implementation.
+- [ ] Identify action enum/value for PARTIAL_REFUND.
+- [ ] Add guard: deduction + refund must equal deposit amount.
+- [ ] Keep over-processing guard.
+- [ ] Add clear error message for under-processing.
+- [ ] Verify full refund valid.
+- [ ] Verify full deduction valid.
+- [ ] Verify exact partial refund valid.
+- [ ] Verify under partial refund rejected.
+- [ ] Verify over refund rejected.
+
+### B2 — agreedRentAmountRupiah zero-value fix
+
+- [ ] Inspect `create()` stay rent fallback.
+- [ ] Replace `||` with `??` where explicit zero should be preserved.
+- [ ] Compare with `renewStay` behavior.
+- [ ] Verify create stay with rent 0 remains 0.
+- [ ] Verify create stay without rent uses resolved room rent.
+- [ ] Verify create stay with normal rent uses DTO value.
+
+### B3 — invoiceCount vs openInvoiceCount
+
+- [ ] Inspect `stays-query.service.ts`.
+- [ ] Ensure `invoiceCount` returns total invoices.
+- [ ] Ensure `openInvoiceCount` filters status not PAID/CANCELLED.
+- [ ] Verify DRAFT counts as open.
+- [ ] UAT stay with PAID/ISSUED/CANCELLED invoices returns expected counts.
+
+### V5.29-C release gate
+
+- [ ] Backend build PASS.
+- [ ] Runtime API UAT PASS for B1/B2/B3.
+- [ ] No frontend build required unless frontend touched.
+- [ ] No DB reset.
+- [ ] No generated Prisma commit.
+- [ ] No unrelated docs update unless user asks.
+- [ ] Git status clean after push.
+
+## A2. Next Checklist — V5.29-D Renew/Checkout Consistency Hotfix
+
+### B4 — requestedTerm renew approve
+
+- [ ] Inspect renew request model/DTO for requestedTerm field.
+- [ ] Inspect `approveRequest()` mapping to `RenewStayDto`.
+- [ ] Pass requestedTerm into renew execution.
+- [ ] Verify renewed stay term changes when request approved with new term.
+- [ ] Verify renewal invoice uses approved term.
+
+### B5 — checkout notification date
+
+- [ ] Inspect checkout request notification creation.
+- [ ] Replace primary date with requestedCheckOutDate.
+- [ ] Keep plannedCheckOutDate only as secondary context if needed.
+- [ ] Verify owner/admin notification shows requested date.
+
+### B7 — checkout response consistency
+
+- [ ] Inspect controller return shape.
+- [ ] Check frontend API expectation.
+- [ ] Avoid double wrapper if global interceptor exists.
+- [ ] Patch frontend reader if backend shape changes.
+- [ ] Verify checkout list renders.
+
+### F2 — approve renew cache invalidation
+
+- [ ] Inspect TanStack Query keys for renew/stay/checkout.
+- [ ] Invalidate admin-checkout-requests after approve renew.
+- [ ] Invalidate stay detail/list if needed.
+- [ ] Verify StayDetail/admin request state refreshes.
+
+## A3. Next Checklist — V5.29-E Check-In + Invoice Hygiene
+
+### F1 — check-in pricing terms
+
+- [ ] Inspect backend pricing term enum spelling.
+- [ ] Confirm whether term is `SEMESTERLY` or `SMESTERLY`.
+- [ ] Add BIWEEKLY to wizard dropdown.
+- [ ] Add semester term using exact backend enum.
+- [ ] Add YEARLY.
+- [ ] Verify payload sends exact enum value.
+
+### B6 — DRAFT invoice cancellation reversal hygiene
+
+- [ ] Inspect invoice cancellation service.
+- [ ] Skip reversal for DRAFT invoice.
+- [ ] Keep controlled reversal for journaled invoice.
+- [ ] Stop silently swallowing critical accounting reversal errors for journaled cancellation.
+- [ ] Verify DRAFT cancel succeeds without reversal.
+- [ ] Verify journaled cancel reversal behavior.
+
+## A4. Product Timeline After Hotfixes
+
+- [ ] M1 Tenant My Stay Guide Full Audit.
+- [ ] M2 Tenant Payment/Renew/Checkout UX Hardening.
+- [ ] M3 AutoOps + First-Paid Runtime UAT.
+- [ ] M4 Deposit Ledger Detail.
+- [ ] M5 Cashflow Statement + Owner Finance Trend.
+- [ ] M6 OPEX/COGS/CAPEX Classification.
+- [ ] M7 Ancillary Revenue System.
+- [ ] M8 Global Data Quality Center.
+- [ ] M9 Unified Command Center.
+- [ ] M10 Production Readiness.
+
 
 ## A0. Latest Release Checklist — V5.27-B7 / V5.28-B8
 
@@ -147,8 +316,6 @@ For coding, inspect the latest repo/ZIP first. If docs and code differ, write "d
 - [ ] Do not modify payment/stay/renew/checkout lifecycle.
 - [ ] Do not hide unresolved data quality issues.
 - [ ] Do not show fake ratios if data is not ready.
-
-
 
 
 ## A0. V5.23-B Accounting & Balance Sheet Foundation Checklist
