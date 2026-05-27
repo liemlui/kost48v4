@@ -36,7 +36,9 @@ export class CheckoutRequestsService {
       orderBy: { id: 'asc' },
     });
     if (openInvoices.length > 0) {
-      const refs = openInvoices.map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`).join(', ');
+      const refs = openInvoices
+        .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
+        .join(', ');
       throw new ConflictException(`${messagePrefix}: ${refs}`);
     }
   }
@@ -73,17 +75,17 @@ export class CheckoutRequestsService {
       );
     }
 
-    // Normalize requestedCheckOutDate to Date at start of day (Jakarta time)
+    // Normalize requestedCheckOutDate to UTC start-of-day so business dates stay stable across server timezones
     const requestedDate = new Date(dto.requestedCheckOutDate);
     if (isNaN(requestedDate.getTime())) {
       throw new BadRequestException('Format tanggal checkout tidak valid');
     }
-    requestedDate.setHours(0, 0, 0, 0);
+    requestedDate.setUTCHours(0, 0, 0, 0);
 
     // Validate H+1 (at least tomorrow)
     const tomorrow = new Date();
-    tomorrow.setHours(0, 0, 0, 0);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     if (requestedDate < tomorrow) {
       throw new BadRequestException(
         'Tanggal checkout yang diajukan harus minimal H+1 dari hari ini',
@@ -202,7 +204,7 @@ export class CheckoutRequestsService {
     if (status) where.status = status;
     if (stayId) where.stayId = stayId;
 
-    return this.prisma.checkoutRequest.findMany({
+    const items = await this.prisma.checkoutRequest.findMany({
       where,
       include: {
         stay: {
@@ -216,6 +218,8 @@ export class CheckoutRequestsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return { items };
   }
 
   /** Tenant gets their own checkout requests. */
@@ -244,31 +248,40 @@ export class CheckoutRequestsService {
     stayId: number,
   ) {
     try {
-      const [ownerAdminUsers, stay] = await Promise.all([
+      const [ownerAdminUsers, checkoutRequest] = await Promise.all([
         this.prisma.user.findMany({
           where: { role: { in: [UserRole.OWNER, UserRole.ADMIN] }, isActive: true },
           select: { id: true, fullName: true },
         }),
-        this.prisma.stay.findUnique({
-          where: { id: stayId },
+        this.prisma.checkoutRequest.findUnique({
+          where: { id: requestId },
           select: {
-            tenant: { select: { fullName: true, phone: true } },
-            room: { select: { code: true, name: true } },
-            plannedCheckOutDate: true,
+            requestedCheckOutDate: true,
+            stay: {
+              select: {
+                tenant: { select: { fullName: true, phone: true } },
+                room: { select: { code: true, name: true } },
+                plannedCheckOutDate: true,
+              },
+            },
           },
         }),
       ]);
 
       if (ownerAdminUsers.length === 0) return;
 
+      const stay = checkoutRequest?.stay;
       const tenantName = stay?.tenant?.fullName || 'Tenant';
       const roomLabel = stay?.room?.code
         ? `${stay.room.code}${stay.room.name ? ` - ${stay.room.name}` : ''}`
         : 'kamar terkait';
-      const requestedDate = stay?.plannedCheckOutDate
-        ? ` Target akhir masa sewa saat ini: ${stay.plannedCheckOutDate.toLocaleDateString('id-ID')}.`
+      const requestedDate = checkoutRequest?.requestedCheckOutDate
+        ? ` Tanggal keluar yang diajukan: ${checkoutRequest.requestedCheckOutDate.toLocaleDateString('id-ID', { timeZone: 'UTC' })}.`
         : '';
-      const body = `${tenantName} mengajukan keluar dari ${roomLabel}.${requestedDate}`;
+      const currentPlannedDate = stay?.plannedCheckOutDate
+        ? ` Akhir masa sewa saat ini: ${stay.plannedCheckOutDate.toLocaleDateString('id-ID', { timeZone: 'UTC' })}.`
+        : '';
+      const body = `${tenantName} mengajukan keluar dari ${roomLabel}.${requestedDate}${currentPlannedDate}`;
 
       const notifications = ownerAdminUsers.map((user) =>
         this.appNotificationService.create({

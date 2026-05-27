@@ -128,6 +128,10 @@ export class ProcessDepositDto {
 
 export class RenewStayDto {
   @IsOptional()
+  @IsEnum(PricingTerm)
+  pricingTerm?: PricingTerm;
+
+  @IsOptional()
   @IsDateString()
   plannedCheckOutDate?: string;
 

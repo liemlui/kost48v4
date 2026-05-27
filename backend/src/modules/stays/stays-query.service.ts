@@ -41,11 +41,7 @@ export class StaysQueryService {
           tenant: true,
           room: true,
           _count: {
-            select: {
-              invoices: {
-                where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
-              },
-            },
+            select: { invoices: true },
           },
           invoices: {
             orderBy: { id: 'desc' },
@@ -62,10 +58,23 @@ export class StaysQueryService {
       this.prisma.stay.count({ where }),
     ]);
 
-    const itemsWithOpenInvoiceCount = items.map((stay) =>
+    const stayIds = items.map((stay) => stay.id);
+    const openInvoiceCounts = stayIds.length
+      ? await this.prisma.invoice.groupBy({
+          by: ['stayId'],
+          where: {
+            stayId: { in: stayIds },
+            status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
+          },
+          _count: { _all: true },
+        })
+      : [];
+    const openInvoiceCountByStayId = new Map(openInvoiceCounts.map((item) => [item.stayId, item._count._all]));
+
+    const itemsWithInvoiceCounts = items.map((stay) =>
       normalizeStayForResponse({
         ...stay,
-        openInvoiceCount: stay._count?.invoices ?? 0,
+        openInvoiceCount: openInvoiceCountByStayId.get(stay.id) ?? 0,
         invoiceCount: stay._count?.invoices ?? 0,
         latestInvoiceId: stay.invoices[0]?.id ?? null,
         latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
@@ -73,7 +82,7 @@ export class StaysQueryService {
       }),
     );
 
-    return { items: serializePrismaResult(itemsWithOpenInvoiceCount), meta: buildMeta(page, limit, totalItems) };
+    return { items: serializePrismaResult(itemsWithInvoiceCounts), meta: buildMeta(page, limit, totalItems) };
   }
 
   async findCurrentForTenant(user: CurrentUserPayload) {
@@ -97,11 +106,7 @@ export class StaysQueryService {
         tenant: true,
         room: true,
         _count: {
-          select: {
-            invoices: {
-              where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
-            },
-          },
+          select: { invoices: true },
         },
         invoices: {
           orderBy: { id: 'desc' },
@@ -118,10 +123,14 @@ export class StaysQueryService {
     if (!stay) throw new NotFoundException('Stay tidak ditemukan');
     if (user.role === 'TENANT' && user.tenantId !== stay.tenantId) throw new NotFoundException('Stay tidak ditemukan');
 
+    const openInvoiceCount = await this.prisma.invoice.count({
+      where: { stayId: id, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] } },
+    });
+
     return serializePrismaResult(
       normalizeStayForResponse({
         ...stay,
-        openInvoiceCount: stay._count?.invoices ?? 0,
+        openInvoiceCount,
         invoiceCount: stay._count?.invoices ?? 0,
         latestInvoiceId: stay.invoices[0]?.id ?? null,
         latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,

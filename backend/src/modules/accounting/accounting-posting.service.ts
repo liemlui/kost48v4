@@ -36,10 +36,8 @@ function rupiah(value?: number | null) {
 }
 
 function dateOnly(value: Date | string) {
-  const date =
-    value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date;
+  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 function sourceEntryNumber(sourceType: string, sourceId: string) {

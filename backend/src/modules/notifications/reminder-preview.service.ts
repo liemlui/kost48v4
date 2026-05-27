@@ -270,8 +270,8 @@ export class ReminderPreviewService {
   }
 
   private daysBetween(from: Date, to: Date): number {
-    const fromNorm = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
-    const toNorm = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
+    const fromNorm = Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate());
+    const toNorm = Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate());
     return Math.max(0, Math.round((toNorm - fromNorm) / (1000 * 60 * 60 * 24)));
   }
 

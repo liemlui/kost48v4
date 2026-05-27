@@ -386,7 +386,7 @@ export class TenantBookingsService {
             invoiceNumber,
             stayId,
             status: 'DRAFT' as any,
-            periodStart: new Date(booking.checkInDate),
+            periodStart: baselineDate,
             periodEnd,
             dueDate,
             issuedAt: null,
@@ -936,13 +936,12 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
   }
 
   private addCalendarMonthsClamped(value: Date, months: number): Date {
-    const day = value.getDate();
-    const result = startOfDay(value);
-    result.setDate(1);
-    result.setMonth(result.getMonth() + months);
-    const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-    result.setDate(Math.min(day, lastDayOfTargetMonth));
-    return startOfDay(result);
+    const normalized = startOfDay(value);
+    const day = normalized.getUTCDate();
+    const targetYear = normalized.getUTCFullYear();
+    const targetMonth = normalized.getUTCMonth() + months;
+    const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+    return new Date(Date.UTC(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth)));
   }
 
   private calculateDueDate(_periodEnd: Date): Date {

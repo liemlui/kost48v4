@@ -232,7 +232,7 @@ export class StaysService {
       throw new ConflictException('Tanggal renew/keluar harus setelah check-in');
     }
 
-    const agreed = dto.agreedRentAmountRupiah || resolveRent(room, dto.pricingTerm);
+    const agreed = dto.agreedRentAmountRupiah ?? resolveRent(room, dto.pricingTerm);
     const deposit = dto.depositAmountRupiah ?? room.defaultDepositRupiah;
     const electricity = dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;
@@ -364,8 +364,7 @@ export class StaysService {
           data: { status: InvoiceStatus.ISSUED, issuedAt },
         });
 
-        const baselineDate = new Date(dto.checkInDate);
-        baselineDate.setHours(0, 0, 0, 0);
+        const baselineDate = startOfDay(new Date(dto.checkInDate));
 
         const existingElectricityReading = await tx.meterReading.findFirst({
           where: {
@@ -646,10 +645,15 @@ export class StaysService {
       refunded = 0;
       depositStatus = DepositStatus.FORFEITED;
     } else {
-      if (deduction + refunded <= 0) {
-        throw new BadRequestException('Partial refund harus memiliki nilai potongan atau pengembalian lebih dari 0');
+      if (deduction <= 0 || refunded <= 0) {
+        throw new BadRequestException('Partial refund harus memiliki nilai potongan dan pengembalian lebih dari 0. Gunakan FULL_REFUND untuk refund penuh atau FORFEIT untuk potongan penuh.');
       }
-      depositStatus = DepositStatus.PARTIALLY_REFUNDED;
+      if (deduction + refunded !== stay.depositAmountRupiah) {
+        throw new ConflictException('Partial refund harus memproses seluruh deposit: potongan + pengembalian harus sama dengan jumlah deposit.');
+      }
+      // Settled partial refund: database constraint saat ini mengizinkan total settled
+      // sebagai REFUNDED, sedangkan PARTIALLY_REFUNDED berarti masih ada sisa deposit.
+      depositStatus = DepositStatus.REFUNDED;
     }
 
     if (deduction < 0 || refunded < 0 || deduction + refunded > stay.depositAmountRupiah) {
@@ -718,6 +722,8 @@ export class StaysService {
 
     await this.assertNoOpenInvoicesTx(tx, id, 'Perpanjangan masa sewa');
 
+    const effectivePricingTerm = dto.pricingTerm ?? stay.pricingTerm;
+
     const meterReadingAt = new Date(dto.meterReadingAt);
     if (Number.isNaN(meterReadingAt.getTime())) {
       throw new BadRequestException('Tanggal catat meter tidak valid');
@@ -733,7 +739,7 @@ export class StaysService {
 
     const newPlannedCheckOut = dto.plannedCheckOutDate
       ? startOfDay(new Date(dto.plannedCheckOutDate))
-      : calculatePeriodEnd(logicalPeriodStart, stay.pricingTerm);
+      : calculatePeriodEnd(logicalPeriodStart, effectivePricingTerm);
 
     if (Number.isNaN(newPlannedCheckOut.getTime())) {
       throw new BadRequestException('Tanggal perpanjangan tidak valid');
@@ -764,12 +770,12 @@ export class StaysService {
       },
     });
 
-    const unit = mapPricingTermToUnit(stay.pricingTerm);
+    const unit = mapPricingTermToUnit(effectivePricingTerm);
     await tx.invoiceLine.create({
       data: {
         invoiceId: invoice.id,
         lineType: InvoiceLineType.RENT as any,
-        description: `Perpanjangan masa sewa ${stay.pricingTerm}`,
+        description: `Perpanjangan masa sewa ${effectivePricingTerm}`,
         qty: 1,
         unit,
         unitPriceRupiah: rentAmount,
@@ -825,7 +831,11 @@ export class StaysService {
 
     const updatedStay = await tx.stay.update({
       where: { id },
-      data: { plannedCheckOutDate: newPlannedCheckOut },
+      data: {
+        plannedCheckOutDate: newPlannedCheckOut,
+        pricingTerm: effectivePricingTerm,
+        agreedRentAmountRupiah: rentAmount,
+      },
     });
 
     return {

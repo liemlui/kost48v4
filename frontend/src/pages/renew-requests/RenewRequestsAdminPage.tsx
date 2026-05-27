@@ -18,6 +18,12 @@ function formatDate(value?: string | null) {
   return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function dateInputToUtcIso(value: string): string {
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) return value;
+  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)).toISOString();
+}
+
 function asNumber(value: unknown) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -86,6 +92,7 @@ export default function RenewRequestsAdminPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-renew-requests'] });
       queryClient.invalidateQueries({ queryKey: ['stays'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setApproveTarget(null);
       setPlannedCheckOutDate('');
@@ -171,7 +178,7 @@ export default function RenewRequestsAdminPage() {
       meterReadingAt: new Date(nextMeterReadingAt).toISOString(),
     };
 
-    if (nextPlannedCheckOutDate) payload.plannedCheckOutDate = nextPlannedCheckOutDate;
+    if (nextPlannedCheckOutDate) payload.plannedCheckOutDate = dateInputToUtcIso(nextPlannedCheckOutDate);
     if (Number.isFinite(parsedRentAmount) && parsedRentAmount > 0) payload.agreedRentAmountRupiah = parsedRentAmount;
     if (nextReviewNotes) payload.reviewNotes = nextReviewNotes;
 

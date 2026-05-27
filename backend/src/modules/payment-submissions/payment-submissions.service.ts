@@ -508,7 +508,7 @@ export class PaymentSubmissionsService {
 
             if (stay && (hasElectricity || hasWater)) {
               const readingAt = new Date(stay.checkInDate);
-              readingAt.setHours(0, 0, 0, 0);
+              readingAt.setUTCHours(0, 0, 0, 0);
 
               const recordedById =
                 submission.stayInitialMetersRecordedById ?? user.id;

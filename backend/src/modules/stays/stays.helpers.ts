@@ -44,15 +44,13 @@ export function buildUtilitySuggestion(input: {
 }
 
 export function startOfDay(value: Date) {
-  const result = new Date(value);
-  result.setHours(0, 0, 0, 0);
-  return result;
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
 }
 
 export function addDays(value: Date, days: number) {
-  const result = new Date(value);
-  result.setDate(result.getDate() + days);
-  return result;
+  const result = startOfDay(value);
+  result.setUTCDate(result.getUTCDate() + days);
+  return startOfDay(result);
 }
 
 export function maxDate(a: Date, b: Date) {
@@ -85,13 +83,12 @@ export function mapPricingTermToUnit(pricingTerm: string): string {
 }
 
 export function addCalendarMonthsClamped(value: Date, months: number): Date {
-  const day = value.getDate();
-  const result = new Date(value);
-  result.setDate(1);
-  result.setMonth(result.getMonth() + months);
-  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-  result.setDate(Math.min(day, lastDayOfTargetMonth));
-  return startOfDay(result);
+  const normalized = startOfDay(value);
+  const day = normalized.getUTCDate();
+  const targetYear = normalized.getUTCFullYear();
+  const targetMonth = normalized.getUTCMonth() + months;
+  const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth)));
 }
 
 export function calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plannedCheckOutDate?: Date): Date {

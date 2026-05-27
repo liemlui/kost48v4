@@ -106,13 +106,12 @@ export function mapPricingTermToUnit(pricingTerm: string): string {
 }
 
 export function addCalendarMonthsClamped(value: Date, months: number): Date {
-  const day = value.getDate();
-  const result = startOfDay(value);
-  result.setDate(1);
-  result.setMonth(result.getMonth() + months);
-  const lastDayOfTargetMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
-  result.setDate(Math.min(day, lastDayOfTargetMonth));
-  return startOfDay(result);
+  const normalized = startOfDay(value);
+  const day = normalized.getUTCDate();
+  const targetYear = normalized.getUTCFullYear();
+  const targetMonth = normalized.getUTCMonth() + months;
+  const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth)));
 }
 
 export function calculatePeriodEnd(checkInDate: Date, pricingTerm: string, plannedCheckOutDate?: Date): Date {
@@ -148,19 +147,17 @@ export function calculateBookingExpiry(_checkInDate: Date) {
 }
 
 export function addDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
+  const next = startOfDay(date);
+  next.setUTCDate(next.getUTCDate() + days);
   return startOfDay(next);
 }
 
 export function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 export function endOfDay(date: Date) {
-  const next = new Date(date);
-  next.setHours(23, 59, 59, 999);
-  return next;
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59, 999));
 }
 
 export function parseDateOnly(value: string, message: string) {

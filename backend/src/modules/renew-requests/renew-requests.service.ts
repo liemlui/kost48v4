@@ -7,7 +7,7 @@ import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
 import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
-import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus } from '../../common/enums/app.enums';
+import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus, PricingTerm } from '../../common/enums/app.enums';
 
 @Injectable()
 export class RenewRequestsService {
@@ -47,7 +47,9 @@ export class RenewRequestsService {
       orderBy: { id: 'asc' },
     });
     if (openInvoices.length > 0) {
-      const refs = openInvoices.map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`).join(', ');
+      const refs = openInvoices
+        .map((invoice) => `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} belum dibayar`)
+        .join(', ');
       throw new ConflictException(`Selesaikan tagihan aktif sebelum mengajukan perpanjangan: ${refs}`);
     }
 
@@ -91,6 +93,7 @@ export class RenewRequestsService {
         ?? (request.requestedCheckOutDate ? request.requestedCheckOutDate.toISOString() : undefined);
 
       const renewDto: RenewStayDto = {
+        pricingTerm: request.requestedTerm as PricingTerm,
         plannedCheckOutDate: finalPlannedCheckOutDate,
         agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
         electricityReadingValue: dto.electricityReadingValue,
