@@ -34,6 +34,7 @@ import { StaffFieldReportsModule } from './modules/staff-field-reports/staff-fie
 import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { AssetsModule } from './modules/assets/assets.module';
+import { DepositLedgerModule } from './modules/deposit-ledger/deposit-ledger.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -71,6 +72,7 @@ import { AssetsModule } from './modules/assets/assets.module';
     AutoOpsModule,
     AccountingModule,
     AssetsModule,
+    DepositLedgerModule,
   ],
 })
 export class AppModule {}

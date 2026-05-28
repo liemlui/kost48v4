@@ -18,6 +18,7 @@ import {
   calculateDueDate,
 } from './stays.helpers';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 
 @Injectable()
 export class StaysService {
@@ -25,6 +26,7 @@ export class StaysService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
     private readonly accountingPosting: AccountingPostingService,
+    private readonly depositLedger: DepositLedgerService,
   ) {}
 
   private assertCoreLifecycleActor(actor: CurrentUserPayload, actionLabel: string) {
@@ -678,6 +680,12 @@ export class StaysService {
       });
 
       await this.accountingPosting.postDepositSettlementTx(tx, id, actor.id).catch(() => undefined);
+      await this.depositLedger.recordDepositSettlementTx(tx, {
+        stayId: id,
+        actorUserId: actor.id,
+        note: dto.depositNote,
+        metadata: { action: dto.action },
+      }).catch(() => undefined);
       return result;
     });
 

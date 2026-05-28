@@ -100,6 +100,24 @@ enum BookingDepositPaymentStatus {
   PAID
 }
 
+enum TenantDepositLedgerEntryType {
+  CHARGED
+  PAYMENT_RECEIVED
+  HELD
+  REFUND
+  DEDUCTION
+  FORFEIT
+  SETTLEMENT
+  ADJUSTMENT
+  MIGRATION_SNAPSHOT
+}
+
+enum TenantDepositLedgerDirection {
+  INCREASE_LIABILITY
+  DECREASE_LIABILITY
+  INFO
+}
+
 enum RenewRequestStatus {
   PENDING
   APPROVED
@@ -441,6 +459,7 @@ model User {
   staffFieldReportsReviewed   StaffFieldReport[] @relation("StaffFieldReportReviewedBy")
   fixedAssetsCreated          FixedAsset[] @relation("FixedAssetCreatedBy")
   assetDepreciationRunsCreated AssetDepreciationRun[] @relation("AssetDepreciationRunCreatedBy")
+  depositLedgerEntriesActed TenantDepositLedgerEntry[] @relation("DepositLedgerActor")
 
   @@index([role])
   @@index([isActive])
@@ -472,6 +491,7 @@ model Tenant {
   paymentSubmissions PaymentSubmission[]
   renewRequests      RenewRequest[]
   staffReviews       StaffReview[]
+  depositLedgerEntries TenantDepositLedgerEntry[]
 
   @@index([fullName])
   @@index([phone])
@@ -516,6 +536,7 @@ model Room {
   staffFieldReports  StaffFieldReport[]
   facilities         RoomFacility[]
   fixedAssets        FixedAsset[]
+  depositLedgerEntries TenantDepositLedgerEntry[]
 
   @@index([status])
   @@index([isActive])
@@ -592,6 +613,7 @@ model Stay {
   paymentSubmissions PaymentSubmission[]
   renewRequests      RenewRequest[]
   checkoutRequests   CheckoutRequest[]
+  depositLedgerEntries TenantDepositLedgerEntry[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -602,6 +624,43 @@ model Stay {
   @@index([expiresAt])
   @@index([bookingSource])
   @@index([stayPurpose])
+}
+
+model TenantDepositLedgerEntry {
+  id                        Int                            @id @default(autoincrement())
+  stayId                    Int
+  tenantId                  Int
+  roomId                    Int
+  type                      TenantDepositLedgerEntryType
+  direction                 TenantDepositLedgerDirection
+  amountRupiah              Int                            @default(0)
+  balanceAfterRupiah        Int                            @default(0)
+  depositStatusAfter        DepositStatus?
+  depositPaymentStatusAfter BookingDepositPaymentStatus?
+  sourceType                String?
+  sourceId                  String?
+  paymentSubmissionId       Int?
+  invoicePaymentId          Int?
+  journalEntryId            Int?
+  actorUserId               Int?
+  occurredAt                DateTime                       @default(now())
+  note                      String?
+  metadataJson              Json?
+  createdAt                 DateTime                       @default(now())
+
+  stay      Stay   @relation(fields: [stayId], references: [id], onDelete: Restrict)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  room      Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  actorUser User?  @relation("DepositLedgerActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([type])
+  @@index([direction])
+  @@index([occurredAt])
+  @@index([sourceType, sourceId])
+  @@index([paymentSubmissionId])
 }
 
 model MeterReading {

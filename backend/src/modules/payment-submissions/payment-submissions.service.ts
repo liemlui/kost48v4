@@ -22,6 +22,7 @@ import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
@@ -42,6 +43,7 @@ export class PaymentSubmissionsService {
     private readonly prisma: PrismaService,
     private readonly appNotificationService: AppNotificationService,
     private readonly accountingPosting: AccountingPostingService,
+    private readonly depositLedger: DepositLedgerService,
   ) {}
 
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
@@ -460,6 +462,21 @@ export class PaymentSubmissionsService {
           });
 
           if (depositPortion > 0) {
+            await this.depositLedger.recordDepositReceivedTx(tx, {
+              stayId: submission.stayId,
+              amountRupiah: depositPortion,
+              actorUserId: user.id,
+              paymentSubmissionId: submissionId,
+              invoicePaymentId,
+              occurredAt: new Date(submission.paidAt),
+              note: 'Deposit diterima dari approval pembayaran booking.',
+              metadata: {
+                paymentMethod: submission.paymentMethod,
+                referenceNumber: submission.referenceNumber,
+                rentPortion,
+                depositPortion,
+              },
+            }).catch(() => undefined);
             try {
               await this.accountingPosting.postDepositReceivedForStayTx(
                 tx,
