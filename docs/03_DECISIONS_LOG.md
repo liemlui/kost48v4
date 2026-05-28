@@ -1,139 +1,173 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-28 M3.2 FULL First-Paid Runtime UAT Sync
+**Versi:** 2026-05-28 M4A Deposit Ledger Backend Foundation FULL PASS Sync
 
 
 
-<!-- KOST48_DOCS_SYNC_20260528_M32_START -->
-## 0.0 Latest Current State — M3.2 FULL First-Paid Runtime UAT Sync
+<!-- KOST48_DOCS_SYNC_20260528_M4A_START -->
+## 0.0 Latest Current State — M4A Deposit Ledger Backend Foundation FULL PASS
 
 ```text
 Current latest pushed code commit:
-296bd8d fix(autoops): harden runtime control panel
+1b645de feat(deposit): add tenant deposit ledger foundation
 
 Previous important pushed commits:
+9d66c79 docs: sync m3.2 full first-paid runtime uat
+296bd8d fix(autoops): harden runtime control panel
 dc052a1 feat(tenant): ship my stay guide and autoops control ux
 7c8c8e7 feat(accounting): add controlled monthly auto close governance
 0285dbe feat(accounting): ship posting period governance and invoice journal lifecycle
-f6af6fc fix(lifecycle): harden deposit renew checkout data integrity
 ```
 
 ### Release status
 
 ```text
-M1 Tenant My Stay Guide = frontend-first patch pushed in dc052a1.
-M2 Tenant Payment/Renew/Checkout UX Hardening = included in dc052a1.
-M2.1 Tenant hardening hotfix = included in dc052a1.
-M3 AutoOps Control UX = included in dc052a1.
-M3.1 AutoOps Runtime Control Panel Hardening = pushed in 296bd8d.
-M3.2 Deep First-Paid Runtime UAT = FULL PASS after BR5 pure API-only runtime UAT.
-```
-
-### M3.2 runtime UAT result
-
-| Rule | Result | Evidence summary |
-|---|---|---|
-| BR1 Expired unpaid booking auto-cancel | PASS | Expired unpaid booking was auto-cancelled and room released. |
-| BR2 Pending proof must not auto-cancel | PASS | Booking with `PENDING_REVIEW` payment proof was held and not auto-cancelled. |
-| BR3 Rejected proof after deadline auto-cancel | PASS | Rejected payment proof no longer protected booking after deadline; booking was auto-cancelled. |
-| BR4 Orphan RESERVED room auto-release | PASS | Orphan RESERVED room was released to AVAILABLE. |
-| BR5 First-paid-wins pure competitor-unpaid scenario | PASS | API-only UAT proved valid approved payment wins: Stay A `18` remained `ACTIVE`, PaymentSubmission `6` became `APPROVED`, Invoice `30` became `PAID`, Room `4/G2-004` stayed assigned to winner, and unpaid competing Stay B `19` became `CANCELLED`. |
-| BR6 AutoOps must not approve payment | PASS | Payment review remained human/admin controlled; AutoOps did not approve payment. |
-| BR7 AutoOps must not approve renew | PASS | Renew requests were not auto-approved. |
-| BR8 AutoOps must not final checkout | PASS | Checkout finalization remained manual/core-controlled. |
-| BR9 AutoOps must not refund/deduct deposit | PASS / code-verified | No AutoOps deposit mutation path and deposit-sensitive flows remained manual/core-controlled. |
-
-### BR5 pure runtime UAT evidence lock
-
-```text
-Room used:
-- roomId=4 / G2-004
-
-Winner booking/payment:
-- Stay A = 18
-- Tenant A = 19
-- Invoice A = 30
-- PaymentSubmission A = 6
-- Payment A status = APPROVED
-- Invoice A status = PAID
-- Stay A status = ACTIVE
-- Room G2-004 status during winner state = OCCUPIED
-- Room activeStayId during winner state = 18
-
-Competing unpaid booking:
-- Stay B = 19
-- Tenant B = 20
-- Payment = none
-- Invoice = none
-- Stay B status after Payment A approval = CANCELLED
-- Cancel reason = Kamar sudah diamankan oleh pembayaran tenant lain. Prioritas kamar mengikuti pembayaran valid pertama.
-```
-
-### Cleanup and hygiene
-
-```text
-BR5 targeted cleanup completed successfully.
-Cleanup SQL used only known test IDs from this runtime UAT.
-Room 4 / G2-004 verified after cleanup:
-- status = AVAILABLE
-- activeStayId = null
-- currentStay = null
-
-Generated Prisma noise was restored after UAT.
-Current local working tree intentionally has docs-only changes:
-- docs/00_GROUND_STATE.md
-- docs/01_CONTRACTS.md
-- docs/02_PLAN.md
-- docs/03_DECISIONS_LOG.md
-- docs/04_JOURNAL.md
-- docs/CHANGELOG.md
-- docs/CHECKLIST.md
-```
-
-### Honest label
-
-```text
 M3.2 Deep First-Paid Runtime UAT = FULL PASS.
-BR5 partial coverage is closed.
-No code hotfix is needed from BR5 runtime findings.
-No SQL fallback was needed for BR5.
+M4A Deposit Ledger Backend Foundation = FULL PASS + pushed.
+M4A frontend = unchanged.
+Next recommended phase = PLAN M4B Frontend Deposit Timeline.
+```
+
+### M3.2 final runtime lock
+
+```text
+BR1 Expired unpaid booking auto-cancel = PASS.
+BR2 Pending proof must not auto-cancel = PASS.
+BR3 Rejected proof after deadline auto-cancel = PASS.
+BR4 Orphan RESERVED room auto-release = PASS.
+BR5 Pure first-paid-wins competitor-unpaid scenario = PASS.
+BR6 AutoOps must not approve payment = PASS.
+BR7 AutoOps must not approve renew = PASS.
+BR8 AutoOps must not final checkout = PASS.
+BR9 AutoOps must not refund/deduct deposit = PASS.
+```
+
+BR5 pure runtime evidence:
+```text
+Stay A winner id=18 remained ACTIVE.
+Payment submission A id=6 became APPROVED.
+Invoice A id=30 became PAID.
+Room G2-004 became OCCUPIED with activeStayId=18.
+Competing unpaid Stay B id=19 became CANCELLED.
+Room did not move to unpaid booking.
+Cleanup returned Room G2-004 to AVAILABLE with activeStayId=null and currentStay=null.
+```
+
+### M4A runtime UAT result
+
+| Area | Result | Evidence summary |
+|---|---|---|
+| Schema/table application | PASS | `TenantDepositLedgerEntry` table created via additive `prisma db push`, no DB reset. |
+| Backend build | PASS | User local build reported successful before commit/push. |
+| Summary endpoint | PASS | `GET /api/deposit-ledger/summary` returned basis `M4_DEPOSIT_LEDGER_SUMMARY`. |
+| Reconciliation-lite endpoint | PASS | `GET /api/deposit-ledger/reconciliation-lite` returned `ready=true`, `mismatchCount=0`. |
+| Backfill dry-run | PASS | `POST /api/deposit-ledger/backfill/dry-run` returned `dryRun=true` and did not mutate historical data. |
+| Payment approval hook | PASS | Approved booking payment created `PAYMENT_RECEIVED` ledger entry for deposit amount. |
+| Deposit settlement hook | PASS | Full refund settlement created `REFUND` ledger entry and reduced ledger held balance to zero. |
+| Cleanup | PASS | Test stay/payment/invoice/ledger entries removed; Room G2-005 returned AVAILABLE. |
+| Frontend | UNCHANGED | M4A was backend-first only. |
+
+### M4A verified behavior
+
+```text
+Created runtime UAT IDs:
+- Stay test: 20
+- Tenant test: 21
+- Room: 5 / G2-005
+- Invoice: 31
+- PaymentSubmission: 7
+- InvoicePayment: 5
+- TenantDepositLedgerEntry: 1 PAYMENT_RECEIVED, 2 REFUND
+
+Payment hook:
+- PAYMENT_RECEIVED
+- direction=INCREASE_LIABILITY
+- amountRupiah=500000
+- balanceAfterRupiah=500000
+- sourceType=PAYMENT_SUBMISSION
+- sourceId=7
+
+Settlement hook:
+- REFUND
+- direction=DECREASE_LIABILITY
+- amountRupiah=500000
+- balanceAfterRupiah=0
+- sourceType=STAY_DEPOSIT_SETTLEMENT
+- sourceId=20:REFUND
+
+After cleanup:
+- Room G2-005 status=AVAILABLE
+- activeStayId=null
+- currentStay=null
+- deposit-ledger summary increaseRupiah=0
+- deposit-ledger summary decreaseRupiah=0
+- recentEntries=[]
+```
+
+### M4A implementation summary
+
+```text
+Added backend module:
+- src/modules/deposit-ledger/deposit-ledger.module.ts
+- src/modules/deposit-ledger/deposit-ledger.controller.ts
+- src/modules/deposit-ledger/deposit-ledger.service.ts
+- src/modules/deposit-ledger/dto/deposit-ledger-query.dto.ts
+
+Modified backend:
+- prisma/schema.prisma
+- src/app.module.ts
+- src/common/enums/app.enums.ts
+- src/modules/payment-submissions/payment-submissions.module.ts
+- src/modules/payment-submissions/payment-submissions.service.ts
+- src/modules/stays/stays.module.ts
+- src/modules/stays/stays.service.ts
+```
+
+### Current honest label
+
+```text
+M4A Deposit Ledger Backend Foundation = FULL PASS + pushed.
+Do not claim M4B until frontend surfaces are implemented and manually/UI smoked.
 ```
 
 ### Next recommended step
 
 ```text
-PLAN M4 Deposit Ledger Detail.
-M4 should be additive and migration-safe:
-- keep existing Stay deposit snapshot fields,
-- add deposit history/ledger detail,
-- show tenant/admin/owner deposit audit trail,
-- support checkout refund/deduction evidence,
-- do not rewrite lifecycle,
-- do not reset DB.
+PLAN M4B Frontend Deposit Timeline.
+Focus:
+- Admin Stay Detail / Finance tab deposit summary + timeline.
+- Tenant My Stay deposit card with tenant-friendly microcopy.
+- Owner/Finance deposit ledger drilldown.
+- No backend mutation unless a missing read shape is proven.
 ```
 
 ### Source-of-truth note
 
 ```text
-This section supersedes older M3.2 partial-coverage and V5.29-K-only current-state sections below.
+This section supersedes the older M3.2-only and V5.29-K current-state sections below.
 Older sections remain as historical record.
 For coding, inspect the latest real repo/ZIP first.
 If docs and code differ, write "docs/code out of sync" and follow real code.
 ```
+<!-- KOST48_DOCS_SYNC_20260528_M4A_END -->
 
-## 2026-05-28 — M3.2 FULL First-Paid Runtime UAT Decisions
+
+
+## 2026-05-28 — M4A Deposit Ledger Backend Foundation Decisions
 
 | # | Keputusan | Dampak |
 |---:|---|---|
-| 456 | BR5 Pure API-only UAT dinyatakan PASS | Gap partial coverage M3.2 ditutup tanpa SQL fallback. |
-| 457 | First-paid-wins enforcement dikunci berada di payment approval path | Pembayaran valid yang disetujui admin membatalkan competing unpaid booking. |
-| 458 | Stay A `18` menjadi winner valid untuk room `4/G2-004` | Invoice `30` PAID, PaymentSubmission `6` APPROVED, room OCCUPIED ke activeStayId `18`. |
-| 459 | Competing unpaid Stay B `19` otomatis CANCELLED | Booking tanpa payment tidak mengunci kamar setelah pembayaran valid tenant lain menang. |
-| 460 | BR5 SQL/AutoOps artificial fallback tidak diperlukan | Jalur API-only lebih aman dan sesuai runtime code. |
-| 461 | BR5 cleanup ditargetkan hanya pada ID test dan berhasil | Room `4/G2-004` kembali AVAILABLE dengan `activeStayId=null` dan `currentStay=null`. |
-| 462 | M3.2 naik dari `PASS with BR5 partial coverage` menjadi `FULL PASS` | Semua BR1-BR9 runtime/guard coverage terpenuhi. |
-| 463 | Tidak ada code hotfix dari BR5 | Current code cukup untuk first-paid-wins pure competitor-unpaid scenario. |
-| 464 | Next official phase menjadi PLAN M4 Deposit Ledger Detail | Fokus berikutnya deposit audit/history secara additive, bukan lifecycle rewrite. |
-<!-- KOST48_DOCS_SYNC_20260528_M32_END -->
+| 456 | M3.2 BR5 pure first-paid runtime UAT dinyatakan PASS | M3.2 naik dari partial menjadi FULL runtime UAT PASS. |
+| 457 | M4A dimulai sebagai backend-first deposit ledger foundation | Frontend deposit timeline ditunda ke M4B agar schema/hook stabil dulu. |
+| 458 | `TenantDepositLedgerEntry` ditambahkan sebagai additive business-history layer | Deposit punya timeline operasional tanpa mengganti snapshot `Stay`. |
+| 459 | `Stay` deposit fields tetap source operasional saat ini | Tidak ada breaking rewrite untuk lifecycle/payment/checkout. |
+| 460 | Deposit ledger tidak menggantikan accounting journal | Deposit ledger untuk audit operasional; accounting journal tetap formal ledger. |
+| 461 | Backfill historical deposit hanya dry-run | Histori lama tidak dipalsukan tanpa review owner. |
+| 462 | Payment approval hook membuat `PAYMENT_RECEIVED` | Deposit yang dibayar tenant otomatis masuk timeline deposit. |
+| 463 | Deposit settlement hook membuat `REFUND`/deduction/forfeit entries | Refund/deduction deposit punya jejak operasional. |
+| 464 | M4A runtime UAT FULL PASS | Summary, reconciliation-lite, dry-run, payment hook, settlement hook, cleanup semua PASS. |
+| 465 | Commit M4A dipush sebagai `1b645de` | origin/main sudah membawa deposit ledger backend foundation. |
+| 466 | M4B berikutnya adalah frontend deposit timeline | Admin/tenant/owner perlu melihat deposit history dengan microcopy yang mudah. |
+
 
 ## 0.0 Latest Current State — V5.29-K Controlled Monthly Auto-Close Governance PASS + Pushed
 
