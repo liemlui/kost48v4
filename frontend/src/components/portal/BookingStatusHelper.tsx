@@ -24,12 +24,15 @@ export function getPortalBookingStatus(
   const roomStatusUpper = (booking.room?.status ?? '').toUpperCase();
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
 
-  // 6. Pemesanan dibatalkan
+  // 6. Pemesanan dibatalkan / ditolak admin
   if (statusUpper === 'CANCELLED') {
+    const reason = booking.cancelReason?.trim();
     return {
       badgeStatus: 'DANGER',
-      label: 'Pemesanan dibatalkan',
-      helper: 'Pemesanan ini telah dibatalkan. Kamar dapat dipilih kembali oleh calon tenant lain.',
+      label: reason ? 'Pemesanan ditolak/dibatalkan' : 'Pemesanan dibatalkan',
+      helper: reason
+        ? `Alasan: ${reason}`
+        : 'Pemesanan ini dibatalkan. Kamu bisa pilih kamar lain.',
     };
   }
 
@@ -38,7 +41,7 @@ export function getPortalBookingStatus(
     return {
       badgeStatus: 'WARNING',
       label: 'Pemesanan kedaluwarsa',
-      helper: `Batas waktu pemesanan sudah habis${booking.expiresAt ? ` pada ${formatDateTimeWib(booking.expiresAt)}` : ''}. Sistem akan mereset pemesanan yang melewati batas, dan tenant harus ajukan pemesanan ulang jika masih ingin kamar ini.`,
+      helper: `Batas waktu habis${booking.expiresAt ? ` pada ${formatDateTimeWib(booking.expiresAt)}` : ''}. Ajukan ulang jika masih ingin kamar ini.`,
     };
   }
 
@@ -49,7 +52,7 @@ export function getPortalBookingStatus(
     return {
       badgeStatus: 'SUCCESS',
       label: 'Kamar sudah aktif',
-      helper: 'Pemesanan kamu sudah aktif. Silakan buka My Stay Guide untuk melihat kamar, masa sewa, dan tagihan.',
+      helper: 'Masa sewa aktif. Buka My Stay Guide untuk detail kamar dan tagihan.',
     };
   }
 
@@ -62,8 +65,8 @@ export function getPortalBookingStatus(
       badgeStatus: 'INFO',
       label: 'Bukti pembayaran sedang diperiksa',
       helper: booking.latestInvoiceNumber
-        ? `Bukti pembayaran untuk tagihan ${booking.latestInvoiceNumber} telah dikirim. Tidak perlu upload ulang. Mohon tunggu pemeriksaan admin.`
-        : 'Bukti pembayaran telah dikirim. Tidak perlu upload ulang. Mohon tunggu pemeriksaan admin.',
+        ? `Bukti untuk ${booking.latestInvoiceNumber} diperiksa. Tidak perlu upload ulang.`
+        : 'Bukti diperiksa. Tidak perlu upload ulang.',
     };
   }
 
@@ -73,8 +76,8 @@ export function getPortalBookingStatus(
       badgeStatus: 'INFO',
       label: 'Pemesanan disetujui — menunggu pembayaran',
       helper: booking.latestInvoiceNumber
-        ? `Admin sudah menyetujui pemesanan ini. Tagihan awal ${booking.latestInvoiceNumber} sudah tersedia. Bayar dan kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu yang ditentukan admin'}.`
-        : `Admin sudah menyetujui pemesanan ini. Tagihan awal sudah tersedia. Bayar dan kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu yang ditentukan admin'}.`,
+        ? `Tagihan awal ${booking.latestInvoiceNumber} tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'deadline'}.`
+        : `Tagihan awal tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'deadline'}.`,
     };
   }
 
@@ -83,7 +86,7 @@ export function getPortalBookingStatus(
     badgeStatus: 'WARNING',
     label: 'Menunggu keputusan admin',
     helper:
-      'Pemesanan kamu masih menunggu keputusan admin. Kamar belum terkunci; sebelum pembayaran disetujui, kamar masih dapat diminati calon tenant lain.',
+      'Menunggu keputusan admin. Kamar belum terkunci sampai pembayaran disetujui.',
   };
 }
 

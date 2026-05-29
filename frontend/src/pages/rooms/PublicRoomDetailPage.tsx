@@ -9,6 +9,7 @@ import type { PricingTerm, PublicRoom } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
+import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
 
 type RoomFeatureKind = 'bathroom' | 'cooling' | 'size';
 
@@ -197,9 +198,11 @@ export default function PublicRoomDetailPage() {
   const defaultTerm = useMemo(() => getDefaultTerm(termRows), [termRows]);
   const effectiveTerm = termRows.some((row) => row.term === selectedTerm) ? selectedTerm : defaultTerm;
   const selectedRow = termRows.find((row) => row.term === effectiveTerm) ?? termRows[0];
+  const availability = room ? getPublicRoomAvailabilityDisplay(room) : null;
+  const initialCost = room ? getPublicRoomInitialCostEstimate(room, effectiveTerm) : { rent: 0, deposit: 0, total: 0 };
 
   const handleBook = () => {
-    if (!room?.isAvailable) return;
+    if (!room || !availability?.canBook) return;
     navigate(`/booking/${id}`, { state: { room, pricingTerm: effectiveTerm } });
   };
 
@@ -239,7 +242,7 @@ export default function PublicRoomDetailPage() {
                           <h2 className="room-detail-section-title">Spesifikasi kamar</h2>
                           <p className="room-detail-section-subtitle mb-0">Informasi utama yang biasanya paling menentukan sebelum memilih kamar.</p>
                         </div>
-                        <StatusBadge status={room.status} />
+                        <StatusBadge status={room.status} customLabel={availability?.label} />
                       </div>
 
                       <div className="room-detail-feature-grid mb-3">
@@ -264,7 +267,7 @@ export default function PublicRoomDetailPage() {
                       <div className="d-flex justify-content-between gap-3 flex-wrap mb-3">
                         <div>
                           <h2 className="room-detail-section-title">Daftar tarif lengkap</h2>
-                          <p className="room-detail-section-subtitle mb-0">Pilih term di panel kanan untuk menyorot tarif yang ingin kamu pakai.</p>
+                          <p className="room-detail-section-subtitle mb-0">Pilih masa sewa.</p>
                         </div>
                         <Badge className="room-detail-popular-badge">Bulanan biasanya paling populer</Badge>
                       </div>
@@ -300,19 +303,22 @@ export default function PublicRoomDetailPage() {
                       </Table>
 
                       <Alert variant="light" className="room-detail-disclaimer mt-3 mb-0">
-                        Deposit awal dan tarif utilitas akan mengikuti data kamar serta keputusan admin saat pemesanan disetujui.
+                        Estimasi awal: sewa pertama <strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong>.
                       </Alert>
                     </Card.Body>
                   </Card>
 
-                  <Accordion className="room-detail-booking-accordion">
+                  <Accordion className="room-detail-booking-accordion" defaultActiveKey="booking">
                     <Accordion.Item eventKey="booking">
-                      <Accordion.Header>Cara booking kamar ini</Accordion.Header>
+                      <Accordion.Header>Cara booking aman</Accordion.Header>
                       <Accordion.Body>
-                        <div className="booking-stepper-lite">
-                          <div><strong>1. Ajukan pemesanan</strong><span>Pilih term sewa, isi tanggal mulai tinggal, lalu kirim pemesanan.</span></div>
-                          <div><strong>2. Admin review</strong><span>Admin mengecek kamar dan menyiapkan tagihan awal.</span></div>
-                          <div><strong>3. Bayar & kirim bukti</strong><span>Jika admin membuka tagihan awal, pembayaran dan bukti dikirim dalam satu langkah lewat portal.</span></div>
+                        <Alert variant="info" className="small mb-3">
+                          <strong>Booking belum mengunci kamar.</strong> Kamar aman setelah pembayaran disetujui.
+                        </Alert>
+                        <div className="booking-stepper-lite booking-stepper-five">
+                          {publicBookingSafetySteps.map((step, index) => (
+                            <div key={step}><strong>{index + 1}. {step.split(' ').slice(0, 3).join(' ')}</strong><span>{step}</span></div>
+                          ))}
                         </div>
                       </Accordion.Body>
                     </Accordion.Item>
@@ -329,7 +335,7 @@ export default function PublicRoomDetailPage() {
                         <h2>{room.name || `Kamar ${room.code}`}</h2>
                         <div className="text-muted small">{room.code}</div>
                       </div>
-                      <StatusBadge status={room.status} />
+                      <StatusBadge status={room.status} customLabel={availability?.label} />
                     </div>
 
                     <div className="room-detail-term-selector" aria-label="Pilih term sewa">
@@ -351,17 +357,23 @@ export default function PublicRoomDetailPage() {
                     <div className="room-detail-selected-price">
                       <span>{selectedRow?.label ?? 'Tarif'}</span>
                       <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
-                      <small>{selectedRow?.utilitiesIncluded ? 'Listrik & air termasuk untuk term ini.' : 'Listrik & air memakai meteran terpisah.'}</small>
+                      <small>{selectedRow?.utilitiesIncluded ? 'Listrik & air termasuk.' : 'Listrik & air pakai meter.'}</small>
                     </div>
 
+                    <Alert variant={availability?.canBook ? 'info' : 'secondary'} className="small room-detail-booking-safety-alert">
+                      <strong>{availability?.label}:</strong> {availability?.detailCopy}
+                    </Alert>
+
                     <div className="room-detail-booking-summary">
-                      <div><span>Deposit</span><strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></div>
+                      <div><span>Sewa pertama</span><strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong></div>
+                      <div><span>Deposit</span><strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong></div>
+                      <div><span>Total awal</span><strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong></div>
                       <div><span>Kamar mandi</span><strong>{getBathroomType(room)}</strong></div>
                       <div><span>Pendingin</span><strong>{getCoolingType(room)}</strong></div>
                     </div>
 
                     <div className="d-grid gap-2 mt-3">
-                      <Button size="lg" onClick={handleBook} disabled={!room.isAvailable}>Pesan Sekarang</Button>
+                      <Button size="lg" onClick={handleBook} disabled={!availability?.canBook}>Ajukan Booking</Button>
                       <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
                     </div>
                   </Card.Body>
@@ -374,7 +386,7 @@ export default function PublicRoomDetailPage() {
                 <span>{selectedRow?.label ?? 'Tarif'}</span>
                 <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
               </div>
-              <Button onClick={handleBook} disabled={!room.isAvailable}>Pesan Sekarang</Button>
+              <Button onClick={handleBook} disabled={!availability?.canBook}>Ajukan Booking</Button>
             </div>
           </>
         ) : null}

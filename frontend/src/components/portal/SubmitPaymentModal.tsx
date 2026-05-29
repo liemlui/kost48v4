@@ -4,6 +4,7 @@ import CurrencyDisplay from '../common/CurrencyDisplay';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
 import { getDeadlineMeta } from '../../utils/dateTime';
+import { TENANT_PAYMENT_PROOF_ACCEPT, prepareTenantPaymentProof, tenantPaymentProofReadyLabel } from '../../utils/tenantPaymentProof';
 import type {
   CreatePaymentSubmissionPayload,
   PaymentMethod,
@@ -13,25 +14,6 @@ import type {
 
 function todayValue() {
   return new Date().toISOString().slice(0, 10);
-}
-
-async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  const nextName = file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg';
-  return new File([blob], nextName, { type: 'image/jpeg' });
 }
 
 type Props = {
@@ -102,14 +84,14 @@ export default function SubmitPaymentModal({
   const helperText = useMemo(() => {
     if (!booking) return null;
     if (isPendingBlocked) {
-      return 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang. Selama bukti masih direview, sistem tidak akan melepas kamar karena kamu sudah melakukan aksi.';
+      return 'Bukti diperiksa. Tidak perlu upload ulang.';
     }
     if (isFullyPaid) {
       return 'Pembayaran awal (sewa + deposit) sudah lunas. Tidak ada tagihan tersisa.';
     }
     return booking.expiresAt
       ? `Bayar dan kirim bukti sebelum ${paymentDeadline.absoluteLabel}. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran disetujui admin.`
-      : 'Bayar dan kirim bukti dalam satu langkah. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran disetujui admin.';
+      : 'Bayar + kirim bukti. Aman setelah admin setujui.';
   }, [booking, isPendingBlocked, isFullyPaid, paymentDeadline.absoluteLabel]);
 
   const handleClose = () => {
@@ -124,22 +106,17 @@ export default function SubmitPaymentModal({
       return;
     }
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setValidationError('Bukti bayar hanya menerima JPG, PNG, atau WebP.');
-      return;
-    }
-
     try {
-      const compressed = await compressImageFile(file);
-      setSelectedFile(compressed);
-      setSelectedFileName(`${compressed.name} (${Math.round(compressed.size / 1024)} KB)`);
-      setPreviewUrl(URL.createObjectURL(compressed));
+      const prepared = await prepareTenantPaymentProof(file);
+      setSelectedFile(prepared);
+      setSelectedFileName(tenantPaymentProofReadyLabel(prepared));
+      setPreviewUrl(URL.createObjectURL(prepared));
       setValidationError(null);
-    } catch {
-      setSelectedFile(file);
-      setSelectedFileName(`${file.name} (${Math.round(file.size / 1024)} KB)`);
-      setPreviewUrl(URL.createObjectURL(file));
-      setValidationError(null);
+    } catch (error) {
+      setSelectedFile(null);
+      setSelectedFileName('');
+      setPreviewUrl(null);
+      setValidationError(error instanceof Error ? error.message : 'Bukti pembayaran tidak valid. Gunakan JPG, PNG, atau WebP maksimal 2MB.');
     }
   };
 
@@ -199,7 +176,7 @@ export default function SubmitPaymentModal({
     <>
     <Modal show={show} onHide={handleClose} size="lg" centered backdrop="static">
       <Modal.Header closeButton={!submitting && !uploading}>
-        <Modal.Title>Bayar & Kirim Bukti Pembayaran</Modal.Title>
+        <Modal.Title>Bayar & Kirim Bukti</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {booking ? (
@@ -271,12 +248,12 @@ export default function SubmitPaymentModal({
               <Form.Label>File Bukti Pembayaran</Form.Label>
               <Form.Control
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept={TENANT_PAYMENT_PROOF_ACCEPT}
                 onChange={handleFileChange}
                 disabled={isPendingBlocked || isFullyPaid || submitting || uploading}
               />
               <Form.Text muted>
-                Gambar akan dikompres dulu di browser sebelum diunggah agar lebih hemat bandwidth dan storage server.
+                Format bukti pembayaran: JPG, PNG, atau WebP maksimal 2MB. Gambar akan dikompres dulu di browser jika memungkinkan.
               </Form.Text>
               {selectedFileName ? <div className="small mt-2">File siap unggah: <strong>{selectedFileName}</strong></div> : null}
               {previewUrl ? (

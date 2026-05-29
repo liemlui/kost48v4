@@ -1,5 +1,15 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { InventoryItemStatus, RoomItemStatus } from '../../../common/enums/app.enums';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from "class-validator";
+import {
+  InventoryItemStatus,
+  RoomItemStatus,
+} from "../../../common/enums/app.enums";
 
 export class TicketImageFieldsDto {
   @IsOptional()
@@ -37,11 +47,11 @@ export class CreateBackofficeTicketDto extends TicketImageFieldsDto {
   stayId?: number;
 
   @IsString()
-  @IsNotEmpty({ message: 'Judul tiket wajib diisi' })
+  @IsNotEmpty({ message: "Judul tiket wajib diisi" })
   title!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Deskripsi tiket wajib diisi' })
+  @IsNotEmpty({ message: "Deskripsi tiket wajib diisi" })
   description!: string;
 
   @IsOptional()
@@ -63,11 +73,11 @@ export class CreatePortalTicketDto extends TicketImageFieldsDto {
   stayId?: number;
 
   @IsString()
-  @IsNotEmpty({ message: 'Judul tiket wajib diisi' })
+  @IsNotEmpty({ message: "Judul tiket wajib diisi" })
   title!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Deskripsi tiket wajib diisi' })
+  @IsNotEmpty({ message: "Deskripsi tiket wajib diisi" })
   description!: string;
 
   @IsOptional()
@@ -107,13 +117,13 @@ export class ResolutionDto {
 }
 
 export enum CloseTicketAction {
-  CLOSE = 'CLOSE',
-  CANCEL = 'CANCEL',
+  CLOSE = "CLOSE",
+  CANCEL = "CANCEL",
 }
 
 export class CloseTicketDto {
   @IsEnum(CloseTicketAction, {
-    message: 'action harus salah satu dari: CLOSE, CANCEL',
+    message: "action harus salah satu dari: CLOSE, CANCEL",
   })
   action!: CloseTicketAction;
 
@@ -126,7 +136,9 @@ export class CloseTicketDto {
   finalRoomItemId?: number;
 
   @IsOptional()
-  @IsEnum(RoomItemStatus, { message: 'finalRoomItemStatus tidak sesuai dengan status barang kamar' })
+  @IsEnum(RoomItemStatus, {
+    message: "finalRoomItemStatus tidak sesuai dengan status barang kamar",
+  })
   finalRoomItemStatus?: RoomItemStatus;
 
   @IsOptional()
@@ -134,10 +146,16 @@ export class CloseTicketDto {
   finalInventoryItemId?: number;
 
   @IsOptional()
-  @IsEnum(InventoryItemStatus, { message: 'finalInventoryItemStatus tidak sesuai dengan status barang gudang' })
+  @IsEnum(InventoryItemStatus, {
+    message:
+      "finalInventoryItemStatus tidak sesuai dengan status barang gudang",
+  })
   finalInventoryItemStatus?: InventoryItemStatus;
 
   @IsOptional()
   @IsString()
+  @MinLength(8, {
+    message: "Catatan final admin wajib diisi minimal 8 karakter.",
+  })
   finalAdminNote?: string;
 }

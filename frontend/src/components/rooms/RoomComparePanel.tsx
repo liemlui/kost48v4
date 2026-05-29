@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import FacilityList from './FacilityList';
 import type { PublicRoom } from '../../types';
+import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate } from '../../utils/publicRoomDisplay';
 
 interface RoomComparePanelProps {
   rooms: PublicRoom[];
@@ -54,7 +55,7 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
         <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <div>
             <h5 className="mb-1">Bandingkan kamar pilihan</h5>
-            <p className="text-muted mb-0 small">Lihat perbedaan harga dan fasilitas utama sebelum memesan.</p>
+            <p className="text-muted mb-0 small">Bandingkan estimasi awal dan fasilitas utama.</p>
           </div>
           <Button variant="outline-secondary" size="sm" onClick={onClear}>
             Bersihkan pilihan
@@ -73,6 +74,13 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <td className="text-muted">Status booking</td>
+                {rooms.map((room) => {
+                  const availability = getPublicRoomAvailabilityDisplay(room);
+                  return <td key={room.id} className="text-center fw-semibold">{availability.label}</td>;
+                })}
+              </tr>
               <tr>
                 <td className="text-muted">Harga bulanan</td>
                 {rooms.map((room) => (
@@ -102,6 +110,14 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
                 {rooms.map((room) => (
                   <td key={room.id} className="text-center">
                     <CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} />
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="text-muted">Estimasi awal</td>
+                {rooms.map((room) => (
+                  <td key={room.id} className="text-center fw-semibold">
+                    <CurrencyDisplay amount={getPublicRoomInitialCostEstimate(room, 'MONTHLY').total} showZero={false} />
                   </td>
                 ))}
               </tr>
@@ -139,7 +155,7 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
                         size="sm"
                         onClick={() => navigate(`/booking/${room.id}`, { state: { room } })}
                       >
-                        Pesan
+                        Ajukan
                       </Button>
                     ) : (
                       <Button size="sm" variant="secondary" disabled>

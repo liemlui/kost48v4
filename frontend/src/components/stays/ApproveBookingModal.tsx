@@ -62,6 +62,9 @@ export default function ApproveBookingModal({
   const [initialElectricityKwh, setInitialElectricityKwh] = useState('0');
   const [initialWaterM3, setInitialWaterM3] = useState('0');
   const [error, setError] = useState('');
+  const [confirmBusinessRule, setConfirmBusinessRule] = useState(false);
+  const [confirmInvoiceAction, setConfirmInvoiceAction] = useState(false);
+  const [confirmMeterBaseline, setConfirmMeterBaseline] = useState(false);
 
   const submittingRef = useRef(false);
 
@@ -108,6 +111,9 @@ export default function ApproveBookingModal({
     );
     setInitialElectricityKwh('0');
     setInitialWaterM3('0');
+    setConfirmBusinessRule(false);
+    setConfirmInvoiceAction(false);
+    setConfirmMeterBaseline(false);
     setError('');
   }, [booking, show]);
 
@@ -117,6 +123,9 @@ export default function ApproveBookingModal({
       setDepositAmountRupiah('');
       setInitialElectricityKwh('0');
       setInitialWaterM3('0');
+      setConfirmBusinessRule(false);
+      setConfirmInvoiceAction(false);
+      setConfirmMeterBaseline(false);
       setError('');
       onHide();
     }
@@ -136,11 +145,15 @@ export default function ApproveBookingModal({
       return 'Meter awal listrik tidak boleh negatif.';
     if (!Number.isFinite(water) || water < 0)
       return 'Meter awal air tidak boleh negatif.';
+    if (!confirmBusinessRule || !confirmInvoiceAction || !confirmMeterBaseline)
+      return 'Centang 3 konfirmasi approval terlebih dahulu.';
     return '';
   };
 
   const computedTotalAwal =
     Number(agreedRentAmountRupiah || 0) + Number(depositAmountRupiah || 0);
+  const allConfirmationsChecked = confirmBusinessRule && confirmInvoiceAction && confirmMeterBaseline;
+  const paymentDeadlineLabel = booking?.expiresAt ? formatDateId(booking.expiresAt) : '-';
 
   const handleSubmit = async () => {
     if (!booking) return;
@@ -174,26 +187,20 @@ export default function ApproveBookingModal({
   return (
     <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Setujui Booking</Modal.Title>
+        <Modal.Title>Review Booking</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {booking ? (
           <Alert variant="light" className="border small">
-            <div>
-              <strong>Tenant:</strong>{' '}
-              {booking.tenant?.fullName ?? `Tenant #${booking.tenantId}`}
-            </div>
-            <div>
-              <strong>Kamar:</strong> {roomLabel}
-            </div>
-            <div>
-              <strong>Check-in:</strong> {formatDateId(booking.checkInDate)}
-            </div>
-            <div>
-              <strong>Pricing term:</strong> {booking.pricingTerm ?? '-'}
-            </div>
-            <div>
-              <strong>Expires at:</strong> {formatDateId(booking.expiresAt)}
+            <div className="d-flex justify-content-between gap-3">
+              <div>
+                <div className="fw-semibold">{booking.tenant?.fullName ?? `Tenant #${booking.tenantId}`}</div>
+                <div className="text-muted">{roomLabel} · {booking.pricingTerm ?? '-'}</div>
+              </div>
+              <div className="text-end">
+                <div className="fw-semibold">{formatDateId(booking.checkInDate)}</div>
+                <div className="text-muted">Batas: {paymentDeadlineLabel}</div>
+              </div>
             </div>
           </Alert>
         ) : null}
@@ -201,28 +208,14 @@ export default function ApproveBookingModal({
         {error ? <Alert variant="danger">{error}</Alert> : null}
 
         <Alert variant="info" className="small">
-          Pricing term tenant:{' '}
-          <strong>{booking?.pricingTerm ?? '-'}</strong> · Default sewa sesuai
-          term:{' '}
-          <strong>
-            {defaultRate
-              ? new Intl.NumberFormat('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(defaultRate)
-              : '-'}
-          </strong>{' '}
-          · Total awal:{' '}
-          <strong>
-            {new Intl.NumberFormat('id-ID', {
-              style: 'currency',
-              currency: 'IDR',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(computedTotalAwal || 0)}
-          </strong>
+          <strong>Booking belum mengunci kamar.</strong> Setelah disetujui, tenant tetap harus bayar dan bukti pembayaran harus valid.
+        </Alert>
+
+        <Alert variant="light" className="border small">
+          <div className="d-flex flex-wrap gap-3">
+            <span>Default sewa: <strong>{defaultRate ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(defaultRate) : '-'}</strong></span>
+            <span>Total awal: <strong>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(computedTotalAwal || 0)}</strong></span>
+          </div>
         </Alert>
 
         <Form.Group className="mb-3">
@@ -244,9 +237,7 @@ export default function ApproveBookingModal({
             </Form.Text>
           )}
           <Form.Text muted>
-            Default mengikuti harga kamar sesuai pricing term yang sudah dipilih
-            tenant saat booking, lalu masih boleh disesuaikan admin bila memang
-            ada negosiasi khusus.
+            Default ikut term booking; ubah hanya jika ada kesepakatan khusus.
           </Form.Text>
         </Form.Group>
 
@@ -269,8 +260,7 @@ export default function ApproveBookingModal({
             </Form.Text>
           )}
           <Form.Text muted>
-            Deposit booking ditampilkan terpisah dari sewa agar tenant melihat
-            total awal dengan jujur.
+            Deposit tetap dana titipan, bukan omzet.
           </Form.Text>
         </Form.Group>
 
@@ -299,6 +289,30 @@ export default function ApproveBookingModal({
             onChange={(e) => setInitialWaterM3(e.target.value)}
           />
         </Form.Group>
+
+        <div className="mt-3 p-3 border rounded bg-light">
+          <div className="fw-semibold mb-2">Checklist approval</div>
+          <Form.Check
+            type="checkbox"
+            className="mb-2"
+            checked={confirmBusinessRule}
+            onChange={(event) => setConfirmBusinessRule(event.target.checked)}
+            label="Saya paham booking belum mengunci kamar sampai pembayaran valid disetujui."
+          />
+          <Form.Check
+            type="checkbox"
+            className="mb-2"
+            checked={confirmInvoiceAction}
+            onChange={(event) => setConfirmInvoiceAction(event.target.checked)}
+            label="Setelah approve, invoice awal akan diterbitkan untuk tenant."
+          />
+          <Form.Check
+            type="checkbox"
+            checked={confirmMeterBaseline}
+            onChange={(event) => setConfirmMeterBaseline(event.target.checked)}
+            label="Tarif, deposit, dan meter awal sudah dicek."
+          />
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button
@@ -310,7 +324,7 @@ export default function ApproveBookingModal({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={mutation.isPending || !booking}
+          disabled={mutation.isPending || !booking || !allConfirmationsChecked}
         >
           {mutation.isPending ? (
             <>
@@ -318,7 +332,7 @@ export default function ApproveBookingModal({
               Menyetujui...
             </>
           ) : (
-            'Setujui Booking'
+            'Setujui & Buat Tagihan'
           )}
         </Button>
       </Modal.Footer>

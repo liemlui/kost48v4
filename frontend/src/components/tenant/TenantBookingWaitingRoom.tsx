@@ -72,14 +72,14 @@ export default function TenantBookingWaitingRoom({
 
             {state === 'WAITING_ADMIN' || state === 'PAY_INITIAL_INVOICE' ? (
               <Alert variant="danger" className="urgent-policy-alert mb-3">
-                <div className="urgent-policy-title">Prioritas kamar mengikuti pembayaran valid pertama</div>
-                <div>Booking saja belum mengunci kamar. Jika tagihan sudah dibuka, bayar dan kirim bukti sebelum jam deadline yang tampil agar kamar tidak dilepas untuk calon tenant lain.</div>
+                <div className="urgent-policy-title">Kamar aman setelah pembayaran disetujui</div>
+                <div>Booking belum mengunci kamar. Bayar sebelum deadline.</div>
               </Alert>
             ) : null}
 
             {state === 'PAYMENT_UNDER_REVIEW' ? (
               <Alert variant="info" className="mb-3">
-                Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.
+                Bukti diperiksa. Tidak perlu upload ulang.
               </Alert>
             ) : null}
 

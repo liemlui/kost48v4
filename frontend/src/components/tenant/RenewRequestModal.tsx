@@ -87,7 +87,7 @@ export default function RenewRequestModal({ show, onHide, onSuccess, stay }: Ren
             ))}
           </Form.Select>
           <Form.Text className="text-muted">
-            Pilihan ini menjadi rencana yang akan ditinjau admin. Tagihan final tetap mengikuti keputusan admin dan checkpoint meter.
+            Pilihan ini menjadi rencana yang akan ditinjau admin. Tagihan final tetap mengikuti keputusan admin dan catatan meter.
           </Form.Text>
         </Form.Group>
 

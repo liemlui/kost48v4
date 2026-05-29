@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
+import { rejectBooking } from '../../api/bookings';
 import { expireReservedBooking, runPaymentSubmissionExpiryCheck } from '../../api/paymentSubmissions';
 import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -14,6 +15,8 @@ import { getBookingStatusLabel } from '../../utils/statusLabels';
 import { ActionQueueTable, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
 import ApproveBookingModal from '../../components/stays/ApproveBookingModal';
+import RejectBookingModal from '../../components/stays/RejectBookingModal';
+import ApproveCheckoutModal from '../../components/checkout-requests/ApproveCheckoutModal';
 import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
 import type { CheckoutRequest, PaginatedResponse, Stay } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
@@ -133,6 +136,8 @@ export default function StaysPage() {
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<Stay | null>(null);
+  const [rejectBookingTarget, setRejectBookingTarget] = useState<Stay | null>(null);
+  const [approveTarget, setApproveTarget] = useState<CheckoutRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
   const PAGE_SIZE = 20;
 
@@ -147,6 +152,24 @@ export default function StaysPage() {
         queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
         queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
       ]);
+    },
+  });
+
+  const rejectBookingMutation = useMutation({
+    mutationFn: async ({ stayId, reviewNotes }: { stayId: number; reviewNotes: string }) =>
+      rejectBooking(stayId, { reviewNotes }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
+        queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            typeof query.queryKey?.[0] === 'string' &&
+            String(query.queryKey[0]).startsWith('dashboard-'),
+        }),
+      ]);
+      setRejectBookingTarget(null);
     },
   });
 
@@ -173,8 +196,9 @@ export default function StaysPage() {
   }, [approvedCheckoutRequestsQuery.data]);
 
   const approveCrMutation = useMutation({
-    mutationFn: async (id: number) => approveCheckoutRequest(id),
+    mutationFn: async ({ id, reviewNotes }: { id: number; reviewNotes?: string }) => approveCheckoutRequest(id, { reviewNotes }),
     onSuccess: async () => {
+      setApproveTarget(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
@@ -247,11 +271,21 @@ export default function StaysPage() {
     : `Menampilkan ${filteredItems.length} dari ${meta?.totalItems ?? items.length} data`;
 
   const assistantItems: AssistantItem[] = [
+    pendingApprovalCount ? {
+      id: 'booking-approval',
+      severity: 'HIGH',
+      title: `${pendingApprovalCount} booking menunggu keputusan`,
+      message: 'Setujui hanya jika tarif, deposit, dan meter awal sudah jelas. Booking belum mengunci kamar.',
+      source: 'Booking',
+      count: pendingApprovalCount,
+      actionLabel: 'Review booking',
+      onAction: () => handleStatusFilterChange('BOOKINGS'),
+    } : null,
     pendingCheckoutRequestCount ? {
       id: 'checkout-pending',
       severity: 'HIGH',
       title: `${pendingCheckoutRequestCount} pengajuan keluar menunggu review`,
-      message: 'Admin perlu setujui/tolak rencana keluar. Ini belum final checkout dan belum melepas kamar.',
+      message: 'Review dulu. Approval belum melepas kamar.',
       source: 'Checkout request',
       count: pendingCheckoutRequestCount,
       actionLabel: 'Lihat antrean',
@@ -261,7 +295,7 @@ export default function StaysPage() {
       id: 'checkout-approved',
       severity: 'BLOCKER',
       title: `${approvedCheckoutRequestCount} rencana keluar sudah disetujui tapi belum final`,
-      message: 'Final checkout tetap harus dilakukan dari detail masa sewa setelah tagihan terbuka diselesaikan.',
+      message: 'Buka detail, cek tagihan, lalu finalkan.',
       source: 'Lifecycle',
       count: approvedCheckoutRequestCount,
       actionLabel: 'Proses final',
@@ -302,7 +336,7 @@ export default function StaysPage() {
       priority: 'BLOCKER' as const,
       type: 'Final checkout',
       subject: cr.stay?.tenant?.fullName ?? `Stay #${cr.stayId}`,
-      issue: 'Rencana keluar sudah disetujui, tetapi kamar belum dilepas sampai final checkout dijalankan.',
+      issue: 'Disetujui, tetapi kamar belum dilepas. Final checkout masih terpisah.',
       age: cr.reviewedAt ? `Disetujui ${formatDateSafe(cr.reviewedAt)}` : undefined,
       recommendedAction: 'Buka detail',
       actionTo: `/stays/${cr.stayId}`,
@@ -439,7 +473,7 @@ export default function StaysPage() {
 
           {isBookingsMode && pendingCheckoutRequests.length > 0 ? (
             <>
-              <h6 className="fw-semibold mt-3 mb-2">🔔 Pengajuan Rencana Keluar Kamar — Menunggu Review</h6>
+              <h6 className="fw-semibold mt-3 mb-2">🔔 Pengajuan Keluar — Review Admin</h6>
               <Table hover responsive className="mb-3">
                 <thead>
                   <tr>
@@ -476,10 +510,10 @@ export default function StaysPage() {
                           <Button
                             size="sm"
                             variant="primary"
-                            onClick={() => approveCrMutation.mutate(cr.id)}
+                            onClick={() => setApproveTarget(cr)}
                             disabled={approveCrMutation.isPending}
                           >
-                            {approveCrMutation.isPending ? '...' : 'Setujui Rencana'}
+                            Review
                           </Button>
                           <Button
                             size="sm"
@@ -501,9 +535,9 @@ export default function StaysPage() {
 
           {isBookingsMode && approvedCheckoutRequests.length > 0 ? (
             <>
-              <h6 className="fw-semibold mt-4 mb-2">✅ Rencana Keluar — Rencana Disetujui</h6>
+              <h6 className="fw-semibold mt-4 mb-2">✅ Pengajuan Keluar Disetujui</h6>
               <p className="small text-muted mb-2">
-                Jadwal keluar telah disetujui. Tenant masih tercatat menghuni sampai admin menjalankan Final checkout dari halaman detail stay.
+                Belum final. Buka detail untuk cek tagihan dan lepas kamar.
               </p>
               <Table hover responsive className="mb-3">
                 <thead>
@@ -535,7 +569,7 @@ export default function StaysPage() {
                         <div>{cr.checkoutReason || cr.requestNotes || '-'}</div>
                       </td>
                       <td>
-                        <StatusBadge status="APPROVED" customLabel="Rencana Disetujui" />
+                        <StatusBadge status="APPROVED" customLabel="Disetujui, belum final" />
                       </td>
                       <td>
                         <Button
@@ -543,7 +577,7 @@ export default function StaysPage() {
                           variant="outline-primary"
                           onClick={() => navigate(`/stays/${cr.stayId}`)}
                         >
-                          Lihat Detail Masa Sewa
+                          Buka Detail
                         </Button>
                       </td>
                     </tr>
@@ -556,7 +590,7 @@ export default function StaysPage() {
 
           {isBookingsMode ? (
             <>
-              <h6 className="fw-semibold mt-3 mb-2">Booking & Checkout Due</h6>
+              <h6 className="fw-semibold mt-3 mb-2">Booking Butuh Keputusan</h6>
             </>
           ) : null}
 
@@ -570,7 +604,7 @@ export default function StaysPage() {
                     <th>Check-in</th>
                     <th>Pricing</th>
                     <th>Masa Berlaku</th>
-                    <th>Status Booking</th>
+                    <th>Status / Risiko</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -622,15 +656,23 @@ export default function StaysPage() {
                           </div>
                           <div className="small text-muted mt-2">
                             {approvalMeta.helper}
-                            {item.latestInvoiceNumber ? ` Invoice: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
+                            {item.latestInvoiceNumber ? ` Tagihan: ${item.latestInvoiceNumber}${item.latestInvoiceStatus ? ` (${getStatusLabel(item.latestInvoiceStatus)})` : ''}.` : ''}
                           </div>
+                          {approvalMeta.isPendingApproval ? (
+                            <div className="small text-warning mt-1">Belum mengunci kamar sampai pembayaran valid.</div>
+                          ) : null}
                         </td>
                         <td>
                           <div className="d-flex gap-2">
                             {canApprove ? (
-                              <Button size="sm" onClick={() => setSelectedBooking(item)}>
-                                Setujui Booking
-                              </Button>
+                              <>
+                                <Button size="sm" onClick={() => setSelectedBooking(item)}>
+                                  Review Approve
+                                </Button>
+                                <Button size="sm" variant="outline-danger" onClick={() => setRejectBookingTarget(item)}>
+                                  Tolak
+                                </Button>
+                              </>
                             ) : null}
                             {expiryMeta.isExpired ? (
                               <Button size="sm" variant="outline-danger" onClick={() => expireMutation.mutate(item.id)} disabled={expireMutation.isPending}>
@@ -728,7 +770,10 @@ export default function StaysPage() {
                       </td>
                       <td onClick={(event) => event.stopPropagation()}>
                         {isReservedBookingRow && approvalMeta.isPendingApproval ? (
-                          <Button size="sm" onClick={() => setSelectedBooking(item)}>Review</Button>
+                          <div className="d-flex flex-wrap gap-2">
+                            <Button size="sm" onClick={() => setSelectedBooking(item)}>Review</Button>
+                            <Button size="sm" variant="outline-danger" onClick={() => setRejectBookingTarget(item)}>Tolak</Button>
+                          </div>
                         ) : isReservedBookingRow ? (
                           <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/stays/${item.id}`)}>Detail</Button>
                         ) : (
@@ -758,6 +803,26 @@ export default function StaysPage() {
       </Card>
 
       <ApproveBookingModal show={Boolean(selectedBooking)} onHide={() => setSelectedBooking(null)} booking={selectedBooking} />
+
+      <RejectBookingModal
+        show={Boolean(rejectBookingTarget)}
+        onHide={() => setRejectBookingTarget(null)}
+        booking={rejectBookingTarget}
+        onSubmit={(reviewNotes) => {
+          rejectBookingMutation.mutate({ stayId: rejectBookingTarget!.id, reviewNotes });
+        }}
+        isSubmitting={rejectBookingMutation.isPending}
+      />
+
+      <ApproveCheckoutModal
+        show={Boolean(approveTarget)}
+        checkoutRequest={approveTarget}
+        onHide={() => setApproveTarget(null)}
+        onSubmit={(reviewNotes) => {
+          approveCrMutation.mutate({ id: approveTarget!.id, reviewNotes });
+        }}
+        isSubmitting={approveCrMutation.isPending}
+      />
 
       <RejectCheckoutModal
         show={Boolean(rejectTarget)}

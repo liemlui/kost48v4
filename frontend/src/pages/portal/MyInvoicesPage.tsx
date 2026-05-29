@@ -17,6 +17,8 @@ import { getOpenTenantInvoices, getPendingReviewInvoiceIds, isTenantInvoiceOverd
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
+import { compactText } from '../../utils/readabilityRules';
+import { limitRepeatedActions } from '../../utils/actionDedup';
 
 function formatPeriod(start?: string, end?: string) {
   if (!start && !end) return '-';
@@ -70,7 +72,7 @@ export default function MyInvoicesPage() {
       id: 'tenant-overdue',
       severity: 'BLOCKER',
       title: `${overdueCount} tagihan sudah melewati jatuh tempo`,
-      message: primaryUnpaidInvoice?.dueDate ? `Jatuh tempo ${formatDateTimeWib(primaryUnpaidInvoice.dueDate)}. ${getDeadlineMeta(primaryUnpaidInvoice.dueDate, 'Jatuh tempo').relativeLabel}.` : 'Selesaikan tagihan ini dulu supaya proses masa sewa, perpanjangan, dan keluar tidak terhambat.',
+      message: primaryUnpaidInvoice?.dueDate ? `Jatuh tempo ${formatDateTimeWib(primaryUnpaidInvoice.dueDate)}. ${getDeadlineMeta(primaryUnpaidInvoice.dueDate, 'Jatuh tempo').relativeLabel}.` : 'Bayar dulu agar proses lain tidak terblokir.',
       source: 'Tagihan',
       count: overdueCount,
       actionLabel: 'Lihat tagihan',
@@ -80,7 +82,7 @@ export default function MyInvoicesPage() {
       id: 'tenant-unpaid',
       severity: 'HIGH',
       title: `${unpaidCount} tagihan perlu dibayar`,
-      message: primaryUnpaidInvoice?.dueDate ? `Pilih tagihan, bayar dan kirim bukti sebelum ${formatDateTimeWib(primaryUnpaidInvoice.dueDate)}.` : 'Pilih tagihan, bayar dan kirim bukti dalam satu langkah. Kamar/masa sewa aman setelah pembayaran disetujui admin.',
+      message: primaryUnpaidInvoice?.dueDate ? `Pilih tagihan, bayar dan kirim bukti sebelum ${formatDateTimeWib(primaryUnpaidInvoice.dueDate)}.` : 'Bayar + kirim bukti dalam satu langkah.',
       source: 'Tagihan',
       count: unpaidCount,
       actionLabel: primaryUnpaidInvoice ? 'Buka & bayar' : 'Lihat tagihan',
@@ -100,7 +102,7 @@ export default function MyInvoicesPage() {
       id: 'tenant-draft',
       severity: 'INFO',
       title: `${draftCount} tagihan sedang disiapkan admin`,
-      message: 'Belum ada aksi bayar yang perlu kamu lakukan sampai tagihan siap. Hubungi admin jika ini menghambat rencana kamu.',
+      message: 'Belum perlu bayar. Tunggu admin.',
       source: 'Tagihan',
       count: draftCount,
       actionLabel: 'Lihat semua',
@@ -124,11 +126,11 @@ export default function MyInvoicesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Pantau tagihan, bukti pembayaran yang sedang diperiksa, dan riwayat yang sudah selesai." />
+      <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Bayar, cek bukti, dan lihat riwayat tagihan." />
       <AssistantInsightLine
         title="Asisten Tagihan Kamu"
         tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0] ? 'info' : 'success'}
-        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada tagihan aktif atau bukti pembayaran yang menunggu pemeriksaan.'}
+        message={assistantItems[0] ? compactText(`${assistantItems[0].title}. ${assistantItems[0].message}`, 105) : 'Tidak ada aksi tagihan.'}
         actionLabel={assistantItems[0]?.actionLabel}
         onAction={assistantItems[0]?.onAction}
       />
@@ -144,12 +146,12 @@ export default function MyInvoicesPage() {
       />
       <TenantPriorityBoard
         title="Prioritas Tagihan"
-        subtitle="Fokus pada tagihan yang harus dibayar, bukti yang sedang diperiksa, dan status yang sudah selesai."
-        items={assistantItems}
+        subtitle="Maksimal tiga prioritas tagihan."
+        items={limitRepeatedActions(assistantItems, 2)}
       />
       <Card className="content-card border-0"><Card.Body>
         <div className="table-meta align-items-start">
-          <div><div className="panel-title">Daftar tagihan</div><div className="panel-subtitle">Tab ini memisahkan aksi bayar, bukti yang sedang diperiksa, dan riwayat selesai.</div></div>
+          <div><div className="panel-title">Daftar tagihan</div><div className="panel-subtitle">Pilih tab, lalu ambil aksi.</div></div>
           <div className="status-tab-bar compact-tabs">
             {[
               { key: 'UNPAID', label: 'Belum Dibayar', count: unpaidCount, cls: 'tab-warn' },

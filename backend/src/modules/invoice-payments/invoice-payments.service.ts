@@ -7,12 +7,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInvoicePaymentDto, UpdateInvoicePaymentDto } from './dto/invoice-payment.dto';
 import { InvoicePaymentsQueryDto } from './dto/invoice-payments-query.dto';
 import { InvoiceStatus, PaymentMethod, UserRole } from '../../common/enums/app.enums';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
 export class InvoicePaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
+    private readonly accountingPosting: AccountingPostingService,
   ) {}
 
   private assertFinanceMutationAllowed(actor: CurrentUserPayload) {
@@ -25,6 +27,43 @@ export class InvoicePaymentsService {
     const storedTotal = Number(invoice.totalAmountRupiah ?? 0);
     const lineTotal = (invoice.lines ?? []).reduce((sum, line) => sum + Number(line.lineAmountRupiah ?? 0), 0);
     return storedTotal > 0 ? storedTotal : lineTotal;
+  }
+
+  private async findActivePaymentJournal(paymentId: number, db: any = this.prisma) {
+    return db.journalEntry.findFirst({
+      where: {
+        sourceType: 'INVOICE_PAYMENT' as any,
+        sourceId: String(paymentId),
+        status: { not: 'VOID' as any },
+      },
+      select: { id: true, entryNumber: true, status: true, postedAt: true },
+      orderBy: [{ postedAt: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+    });
+  }
+
+  private buildAccountingMeta(result: any) {
+    if (!result) {
+      return {
+        accountingPosted: false,
+        accountingWarning: 'Auto journal pembayaran belum memberi hasil. Cek readiness accounting.',
+      };
+    }
+    return {
+      accountingPosted: Boolean(result.posted),
+      accountingSkipped: Boolean(result.skipped),
+      accountingJournalEntryId: result.journalEntry?.id ?? null,
+      accountingJournalEntryNumber: result.journalEntry?.entryNumber ?? null,
+      accountingWarning: result.posted ? null : (result.reason ?? 'Auto journal pembayaran belum terposting. Cek readiness accounting.'),
+      accountingReason: result.reason ?? null,
+    };
+  }
+
+  private assertNoActivePaymentJournal(paymentId: number, journal: any) {
+    if (journal) {
+      throw new ConflictException(
+        `Pembayaran sudah masuk jurnal accounting (${journal.entryNumber}). Gunakan reversal/koreksi resmi, bukan edit/delete langsung.`,
+      );
+    }
   }
 
 
@@ -91,7 +130,7 @@ export class InvoicePaymentsService {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
-    const created = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const { payment: created, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const payment = await tx.invoicePayment.create({
         data: {
           invoiceId: dto.invoiceId,
@@ -104,19 +143,22 @@ export class InvoicePaymentsService {
         },
       });
       await this.syncInvoiceStatus(tx, dto.invoiceId);
-      return payment;
+      const postingResult = await this.accountingPosting.postInvoicePaymentTx(tx, payment.id, actor.id);
+      return { payment, accountingResult: postingResult };
     });
 
     const refreshed = await this.prisma.invoice.findUnique({ where: { id: dto.invoiceId }, include: { stay: true } });
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'InvoicePayment', entityId: String(created.id), newData: created });
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'InvoicePayment', entityId: String(created.id), newData: { ...created, accounting: this.buildAccountingMeta(accountingResult) } });
 
-    return { ...created, invoiceStatusAfterSync: refreshed?.status, invoicePaidAt: refreshed?.paidAt };
+    return { ...created, invoiceStatusAfterSync: refreshed?.status, invoicePaidAt: refreshed?.paidAt, ...this.buildAccountingMeta(accountingResult) };
   }
 
   async update(id: number, dto: UpdateInvoicePaymentDto, actor: CurrentUserPayload) {
     this.assertFinanceMutationAllowed(actor);
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
+
+    this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id));
 
     const invoice = await this.prisma.invoice.findUnique({
       where: { id: existing.invoiceId },
@@ -134,7 +176,7 @@ export class InvoicePaymentsService {
       throw new ConflictException('Pembayaran melebihi total invoice');
     }
 
-    const updated = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const { payment: updated, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const payment = await tx.invoicePayment.update({
         where: { id },
         data: {
@@ -146,18 +188,21 @@ export class InvoicePaymentsService {
         },
       });
       await this.syncInvoiceStatus(tx, existing.invoiceId);
-      return payment;
+      const postingResult = await this.accountingPosting.postInvoicePaymentTx(tx, payment.id, actor.id);
+      return { payment, accountingResult: postingResult };
     });
 
     const refreshed = await this.prisma.invoice.findUnique({ where: { id: existing.invoiceId } });
-    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'InvoicePayment', entityId: String(updated.id), oldData: existing, newData: updated });
-    return { ...updated, invoiceStatusAfterSync: refreshed?.status, invoicePaidAt: refreshed?.paidAt };
+    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'InvoicePayment', entityId: String(updated.id), oldData: existing, newData: { ...updated, accounting: this.buildAccountingMeta(accountingResult) } });
+    return { ...updated, invoiceStatusAfterSync: refreshed?.status, invoicePaidAt: refreshed?.paidAt, ...this.buildAccountingMeta(accountingResult) };
   }
 
   async remove(id: number, actor: CurrentUserPayload) {
     this.assertFinanceMutationAllowed(actor);
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
+
+    this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id));
 
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.invoicePayment.delete({ where: { id } });

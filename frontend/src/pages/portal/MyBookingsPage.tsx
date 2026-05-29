@@ -18,7 +18,7 @@ import {
   TENANT_PAYMENT_REVIEW_MESSAGE,
   isPendingReviewStatus,
 } from "../../utils/tenantCopy";
-import { getActionableTenantBookings, isTenantBookingOccupied, stayToTenantBooking } from "../../utils/tenantBookingRules";
+import { getActionableTenantBookings, getLatestTenantBookingUpdate, isTenantBookingOccupied, stayToTenantBooking } from "../../utils/tenantBookingRules";
 import type {
   CreatePaymentSubmissionPayload,
   PaymentSubmission,
@@ -127,6 +127,10 @@ export default function MyBookingsPage() {
   const visibleBookings = useMemo(() => {
     const active = getActionableTenantBookings(items);
     if (active.length > 0) return active;
+
+    const latestUpdate = getLatestTenantBookingUpdate(items);
+    if (latestUpdate) return [latestUpdate];
+
     const fallback = stayToTenantBooking(currentStayQuery.data);
     if (fallback && !isTenantBookingOccupied(fallback)) return [fallback];
     return [];
@@ -241,10 +245,10 @@ export default function MyBookingsPage() {
       !visibleBookings.length ? (
         <EmptyState
           icon="📅"
-          title={stage === "booking" ? "Status pemesanan belum terbaca" : "Belum ada pemesanan aktif"}
+          title={stage === "booking" ? "Status pemesanan belum terbaca" : "Belum ada pemesanan"}
           description={stage === "booking"
-            ? "Portal mendeteksi ada proses pemesanan, tetapi detailnya belum terbaca. Refresh halaman atau hubungi admin jika status tidak berubah."
-            : "Kamu bisa memilih kamar dari katalog. Jika pemesanan sebelumnya dibatalkan, katalog akan terbuka kembali."}
+            ? "Refresh halaman atau hubungi admin jika status tidak berubah."
+            : "Pilih kamar dari katalog. Kamar aman setelah pembayaran disetujui."}
           action={stage === "booking" ? undefined : {
             label: "Pilih Kamar",
             onClick: () => navigate("/rooms"),

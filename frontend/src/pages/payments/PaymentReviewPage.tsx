@@ -15,6 +15,14 @@ import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { AssistantPanel, CompactMetrics, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { addHoursToDate, formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
+import { compactText } from '../../utils/readabilityRules';
+import {
+  asPaymentNumber,
+  getPaymentAmountLabel,
+  getPaymentAmountTone,
+  getPaymentRemainingAmount,
+  getPaymentReviewSafety,
+} from '../../utils/paymentReviewSafety';
 
 function formatDate(value?: string | null) {
   return formatDateTimeWib(value);
@@ -30,42 +38,12 @@ function getReviewSlaText(item: PaymentSubmission) {
   return meta.hasDate ? `${meta.relativeLabel} · max ${meta.absoluteLabel}` : 'Deadline review belum tersedia';
 }
 
-function asNumber(value: unknown) {
-  const parsed = Number(value ?? 0);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function getTargetLabel(item: PaymentSubmission) {
   return item.targetType === 'DEPOSIT' ? 'Deposit booking' : 'Tagihan';
 }
 
-function getRemaining(item: PaymentSubmission) {
-  return item.targetType === 'DEPOSIT'
-    ? asNumber(item.deposit?.remainingAmountRupiah ?? item.deposit?.amountRupiah)
-    : asNumber(item.invoice?.remainingAmountRupiah ?? item.invoice?.totalAmountRupiah);
-}
-
-function getAmountTone(item: PaymentSubmission) {
-  const remaining = getRemaining(item);
-  const paid = asNumber(item.amountRupiah);
-  if (!remaining) return { label: 'Perlu cek', tone: 'warning' };
-  if (paid === remaining) return { label: 'Pas', tone: 'success' };
-  if (paid < remaining) return { label: 'Parsial', tone: 'warning' };
-  return { label: 'Lebih', tone: 'danger' };
-}
-
 function getPaymentImpact(item: PaymentSubmission) {
-  const amountTone = getAmountTone(item);
-  if (item.targetType === 'DEPOSIT') {
-    return 'Deposit diperbarui; aktivasi kamar tetap mengikuti tagihan awal.';
-  }
-  if (amountTone.label === 'Parsial') {
-    return 'Invoice sebagian dibayar. Renew/checkout tetap tertahan.';
-  }
-  if (amountTone.label === 'Lebih') {
-    return 'Nominal lebih besar. Perlu cek manual sebelum approve.';
-  }
-  return 'Invoice lunas; booking/renew/checkout bisa lanjut sesuai rule.';
+  return getPaymentReviewSafety(item).impactText;
 }
 
 function CommandFlowStrip() {
@@ -74,10 +52,10 @@ function CommandFlowStrip() {
       <Card.Body>
         <div className="section-kicker mb-2">Alur keputusan admin</div>
         <div className="flow-step-grid">
-          <div><span>1</span><strong>Cek bukti</strong><small>Nominal, tanggal, pengirim, referensi, dan file.</small></div>
-          <div><span>2</span><strong>Pahami dampak</strong><small>Approve bisa melunasi invoice, aktivasi booking, atau membuka blocker renew/checkout.</small></div>
-          <div><span>3</span><strong>Putuskan</strong><small>Approve hanya jika valid. Reject dengan catatan yang jelas untuk tenant.</small></div>
-          <div><span>4</span><strong>Follow-up</strong><small>Jika backend menolak, perbaiki penyebab seperti meter/open invoice dulu.</small></div>
+          <div><span>1</span><strong>Cek bukti</strong><small>Nominal, tanggal, file.</small></div>
+          <div><span>2</span><strong>Pahami dampak</strong><small>Approve bisa membuka blocker.</small></div>
+          <div><span>3</span><strong>Safety belt</strong><small>Checklist untuk risiko.</small></div>
+          <div><span>4</span><strong>Follow-up</strong><small>Perbaiki blocker dulu.</small></div>
         </div>
       </Card.Body>
     </Card>
@@ -100,26 +78,30 @@ export default function PaymentReviewPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const pendingAmount = useMemo(() => items.reduce((sum, item) => sum + asNumber(item.amountRupiah), 0), [items]);
+  const pendingAmount = useMemo(() => items.reduce((sum, item) => sum + asPaymentNumber(item.amountRupiah), 0), [items]);
   const proofCount = useMemo(() => items.filter((item) => Boolean(item.fileUrl)).length, [items]);
   const missingProofCount = useMemo(() => items.filter((item) => !item.fileUrl).length, [items]);
   const mismatchCount = useMemo(() => items.filter((item) => {
     if (item.targetType === 'DEPOSIT') return false;
-    const remaining = getRemaining(item);
-    return remaining > 0 && asNumber(item.amountRupiah) !== remaining;
+    const remaining = getPaymentRemainingAmount(item);
+    return remaining > 0 && asPaymentNumber(item.amountRupiah) !== remaining;
   }).length, [items]);
+  const highRiskCount = useMemo(() => items.filter((item) => getPaymentReviewSafety(item).riskLevel === 'HIGH').length, [items]);
+  const manualRiskCount = useMemo(() => items.filter((item) => getPaymentReviewSafety(item).riskLevel === 'MEDIUM').length, [items]);
   const depositCount = useMemo(() => items.filter((item) => item.targetType === 'DEPOSIT').length, [items]);
   const invoiceCount = items.length - depositCount;
 
   const assistantItems: AssistantItem[] = [
-    ...(status === 'PENDING_REVIEW' && items.length ? [{ id: 'pending', severity: 'HIGH' as const, title: 'Bukti pembayaran menahan flow operasional', message: `${items.length} bukti menunggu keputusan. Review maksimal 6 jam sejak bukti masuk; lihat jam masuk dan deadline di tabel sebelum approve/reject.`, count: items.length, source: 'Review pembayaran' }] : []),
+    ...(status === 'PENDING_REVIEW' && items.length ? [{ id: 'pending', severity: 'HIGH' as const, title: 'Bukti menahan flow', message: `${items.length} bukti menunggu keputusan. Review maksimal 6 jam.`, count: items.length, source: 'Review pembayaran' }] : []),
+    ...(highRiskCount ? [{ id: 'high-risk', severity: 'HIGH' as const, title: 'Ada risiko tinggi', message: `${highRiskCount} bukti perlu cek manual.`, count: highRiskCount, source: 'Safety belt' }] : []),
     ...(mismatchCount ? [{ id: 'mismatch', severity: 'WARNING' as const, title: 'Nominal tidak sama dengan sisa tagihan', message: `${mismatchCount} bukti bisa menjadi pembayaran parsial atau overpay. Jangan approve otomatis tanpa cek manual.`, count: mismatchCount, source: 'Amount check' }] : []),
-    ...(missingProofCount ? [{ id: 'missing-proof', severity: 'WARNING' as const, title: 'Ada submission tanpa file bukti', message: 'Cek referensi dan catatan manual agar audit trail tetap aman.', count: missingProofCount, source: 'Proof file' }] : []),
+    ...(missingProofCount ? [{ id: 'missing-proof', severity: 'WARNING' as const, title: 'Ada submission tanpa file bukti', message: 'Approve dinonaktifkan untuk bukti tanpa file. Tolak dan minta tenant upload ulang agar audit trail aman.', count: missingProofCount, source: 'Proof file' }] : []),
   ];
 
   const metrics: MetricChip[] = [
     { id: 'submission', label: 'Menunggu keputusan', value: items.length, helper: 'Sesuai filter status', status: status === 'PENDING_REVIEW' && items.length ? 'WARNING' : 'INFO', icon: '◈' },
     { id: 'amount', label: 'Nominal queue', value: new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(pendingAmount), helper: 'Total nominal pada filter', status: 'SUCCESS', icon: 'Rp' },
+    { id: 'risk', label: 'Risiko tinggi', value: highRiskCount, helper: manualRiskCount ? `${manualRiskCount} perlu checklist` : 'Safety check aman', status: highRiskCount ? 'DANGER' : manualRiskCount ? 'WARNING' : 'SUCCESS', icon: '!' },
     { id: 'proof', label: 'Bukti tersedia', value: proofCount, helper: missingProofCount ? `${missingProofCount} tanpa file` : 'Semua punya file', status: missingProofCount ? 'WARNING' : 'SUCCESS', icon: '▣' },
     { id: 'mix', label: 'Tagihan / Deposit', value: `${invoiceCount}/${depositCount}`, helper: 'Komposisi queue', status: 'INFO', icon: '↯' },
   ];
@@ -173,11 +155,11 @@ export default function PaymentReviewPage() {
       <PageHeader
         eyebrow="Finance command center"
         title="Review Pembayaran"
-        description="Queue verifikasi pembayaran dibuat sebagai decision cockpit: admin melihat bukti, nominal, risiko, dan dampak operasional sebelum approve/reject."
+        description="Cek bukti, nominal, risiko, lalu putuskan."
       />
 
       <CommandFlowStrip />
-      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Fokus pada bukti yang menahan cashflow, booking aktif, renew, atau checkout." items={assistantItems} emptyTitle="Queue pembayaran aman" emptyMessage="Tidak ada masalah besar pada filter aktif." />
+      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Queue pembayaran aman" emptyMessage="Filter ini aman." />
       <CompactMetrics metrics={metrics} />
 
       <Card className="content-card border-0 mb-4 command-filter-card">
@@ -232,6 +214,7 @@ export default function PaymentReviewPage() {
                   <th>Tenant & Kamar</th>
                   <th>Target</th>
                   <th>Nominal</th>
+                  <th>Risiko</th>
                   <th>Bukti</th>
                   <th>Status</th>
                   <th>Dampak</th>
@@ -240,15 +223,18 @@ export default function PaymentReviewPage() {
               </thead>
               <tbody>
                 {items.map((item) => {
-                  const tone = getAmountTone(item);
+                  const amountTone = getPaymentAmountTone(item);
+                  const safety = getPaymentReviewSafety(item);
+                  const amountToneClass = amountTone === 'EXACT' ? 'success' : amountTone === 'OVERPAY' ? 'danger' : 'warning';
+                  const reviewMeta = getDeadlineMeta(getReviewDeadline(item), 'Batas review');
                   return (
-                    <tr key={item.id}>
+                    <tr key={item.id} className={safety.riskLevel === 'HIGH' ? 'payment-row-risk-high' : undefined}>
                       <td>
                         <div className="fw-semibold">{item.tenant?.fullName ?? '-'}</div>
                         <div className="small text-muted">{item.room?.code ?? '-'} · {item.room?.name ?? 'Nama kamar belum tersedia'}</div>
                         <div className="small text-muted">Dibayar: {formatDate(item.paidAt)} · {item.paymentMethod}</div>
-                        <div className={getDeadlineMeta(getReviewDeadline(item), 'Batas review').isExpired ? 'small text-soft-danger' : 'small text-muted'}>Masuk: {formatDate(item.createdAt ?? item.paidAt)}</div>
-                        <div className={getDeadlineMeta(getReviewDeadline(item), 'Batas review').isExpired ? 'small text-soft-danger fw-semibold' : 'small text-muted'}>{getReviewSlaText(item)}</div>
+                        <div className={reviewMeta.isExpired ? 'small text-soft-danger' : 'small text-muted'}>Masuk: {formatDate(item.createdAt ?? item.paidAt)}</div>
+                        <div className={reviewMeta.isExpired ? 'small text-soft-danger fw-semibold' : 'small text-muted'}>{getReviewSlaText(item)}</div>
                       </td>
                       <td>
                         <div className="fw-semibold">{getTargetLabel(item)}</div>
@@ -260,8 +246,13 @@ export default function PaymentReviewPage() {
                       </td>
                       <td>
                         <div className="fw-semibold"><CurrencyDisplay amount={item.amountRupiah} /></div>
-                        <span className={`amount-tone-pill ${tone.tone}`}>{tone.label}</span>
-                        <div className="small text-muted mt-1">Sisa: <CurrencyDisplay amount={getRemaining(item)} /></div>
+                        <span className={`amount-tone-pill ${amountToneClass}`}>{getPaymentAmountLabel(amountTone)}</span>
+                        <div className="small text-muted mt-1">Sisa: <CurrencyDisplay amount={getPaymentRemainingAmount(item)} /></div>
+                      </td>
+                      <td>
+                        <span className={`payment-risk-pill ${safety.riskTone}`}>{safety.riskLabel}</span>
+                        {safety.blockers.length ? <div className="small text-soft-danger mt-1">{safety.blockers[0].title}</div> : null}
+                        {!safety.blockers.length && safety.warnings.length ? <div className="small text-muted mt-1">{safety.warnings[0].title}</div> : null}
                       </td>
                       <td>
                         {item.fileUrl ? (
@@ -269,7 +260,7 @@ export default function PaymentReviewPage() {
                         ) : <span className="amount-tone-pill warning">Tanpa file</span>}
                       </td>
                       <td><StatusBadge status={item.status} domain="payment" /></td>
-                      <td><div className="small text-muted payment-impact-text">{getPaymentImpact(item)}</div></td>
+                      <td><div className="small text-muted payment-impact-text">{compactText(getPaymentImpact(item), 72)}</div></td>
                       <td>
                         <div className="d-flex gap-2 flex-wrap">
                           {item.status === 'PENDING_REVIEW' ? (

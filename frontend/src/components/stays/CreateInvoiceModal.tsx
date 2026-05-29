@@ -7,6 +7,7 @@ import { getStayInvoiceSuggestion } from '../../api/stays';
 import { useInvoices } from '../../hooks/useInvoices';
 import type { InvoiceSuggestionItem, MeterReading, Stay, WifiSale } from '../../types';
 import CurrencyDisplay from '../common/CurrencyDisplay';
+import { buildCreateInvoiceSafety } from '../../utils/invoiceActionSafety';
 
 function today() {
   return new Date().toISOString().slice(0, 10);
@@ -182,6 +183,8 @@ export default function CreateInvoiceModal({
     [items],
   );
 
+  const invoiceSafety = useMemo(() => buildCreateInvoiceSafety({ periodStart, periodEnd, dueDate, items, totalAmount }), [periodStart, periodEnd, dueDate, items, totalAmount]);
+
   const handlePeriodStartChange = (value: string) => {
     setPeriodStart(value);
     if (!isPeriodEndAfterStart(value, periodEnd)) {
@@ -222,8 +225,8 @@ export default function CreateInvoiceModal({
 
   const handleSubmit = async () => {
     setError('');
-    if (!isPeriodEndAfterStart(periodStart, periodEnd)) {
-      setError('Tanggal akhir periode harus setelah tanggal mulai periode.');
+    if (!invoiceSafety.canSubmit) {
+      setError(invoiceSafety.blockers[0] ?? 'Cek periode, rincian, dan total tagihan.');
       return;
     }
     try {
@@ -265,6 +268,11 @@ export default function CreateInvoiceModal({
         {fallbackInfo ? <Alert variant="warning">{fallbackInfo}</Alert> : null}
         {suggestionQuery.isLoading ? <div className="py-4 text-center"><Spinner /></div> : null}
         {!suggestionQuery.isLoading && !items.length ? <Alert variant="secondary">Belum ada item saran otomatis. Anda tetap bisa menambah item manual di bawah.</Alert> : null}
+        <Alert variant={invoiceSafety.risk === 'HIGH' ? 'warning' : 'light'} className="small">
+          <strong>Cek 3 hal:</strong> periode, rincian, total.
+          {invoiceSafety.blockers.length ? <div className="text-danger mt-1">{invoiceSafety.blockers.join(' ')}</div> : null}
+          {!invoiceSafety.blockers.length && invoiceSafety.warnings.length ? <div className="text-warning mt-1">{invoiceSafety.warnings.join(' ')}</div> : null}
+        </Alert>
 
         <div className="row g-3 mb-4">
           <div className="col-md-4">
@@ -343,13 +351,13 @@ export default function CreateInvoiceModal({
                 <div className="col-lg-4 col-md-8">
                   <Form.Group>
                     <Form.Label className="small text-muted">Deskripsi</Form.Label>
-                    <Form.Control value={item.description} onChange={(event) => handleItemChange(index, 'description', event.target.value)} placeholder="Contoh: Sewa kamar bulan Juni" />
+                    <Form.Control value={item.description} onChange={(event) => handleItemChange(index, 'description', event.target.value)} placeholder="Contoh: Sewa kamar bulan Juni" isInvalid={!String(item.description || '').trim()} />
                   </Form.Group>
                 </div>
                 <div className="col-lg-2 col-md-4 col-6">
                   <Form.Group>
                     <Form.Label className="small text-muted">Qty</Form.Label>
-                    <Form.Control type="number" min="0" value={item.qty} onChange={(event) => handleItemChange(index, 'qty', Number(event.target.value))} />
+                    <Form.Control type="number" min="0" value={item.qty} onChange={(event) => handleItemChange(index, 'qty', Number(event.target.value))} isInvalid={Number(item.qty || 0) <= 0} />
                   </Form.Group>
                 </div>
                 <div className="col-lg-2 col-md-4 col-6">
@@ -367,6 +375,7 @@ export default function CreateInvoiceModal({
                       inputMode="numeric"
                       value={item.unitPriceRupiah}
                       onChange={(event) => handleItemChange(index, 'unitPriceRupiah', Number(event.target.value))}
+                      isInvalid={Number(item.unitPriceRupiah || 0) < 0}
                     />
                   </Form.Group>
                 </div>
@@ -387,7 +396,7 @@ export default function CreateInvoiceModal({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Batal</Button>
-        <Button onClick={handleSubmit} disabled={createAndIssueMutation.isPending || createMutation.isPending || addLineMutation.isPending || issueMutation.isPending || !items.length || !isPeriodEndAfterStart(periodStart, periodEnd)}>
+        <Button onClick={handleSubmit} disabled={createAndIssueMutation.isPending || createMutation.isPending || addLineMutation.isPending || issueMutation.isPending || !invoiceSafety.canSubmit}>
           {createAndIssueMutation.isPending || createMutation.isPending || addLineMutation.isPending || issueMutation.isPending
             ? <><Spinner size="sm" className="me-2" />Membuat dan menerbitkan tagihan...</>
             : 'Simpan & Terbitkan Tagihan'}

@@ -3,8 +3,13 @@ import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useStay } from '../../hooks/useStay';
 import { Stay } from '../../types';
 import { formatRupiah } from '../../utils/formatCurrency';
-
-type DepositAction = 'FULL_REFUND' | 'PARTIAL_REFUND' | 'FORFEIT';
+import {
+  depositActionMeta,
+  getDepositSettlementNumbers,
+  parseRupiahInput,
+  validateDepositSettlement,
+  type DepositAction,
+} from '../../utils/depositSettlementCopy';
 
 export default function ProcessDepositModal({ show, onHide, stay }: { show: boolean; onHide: () => void; stay: Stay }) {
   const { processDepositMutation } = useStay(stay.id);
@@ -14,12 +19,31 @@ export default function ProcessDepositModal({ show, onHide, stay }: { show: bool
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
 
-  const deductionNumber = Number(deduction || 0);
-  const refundAmount = useMemo(() => {
-    if (action === 'FORFEIT') return 0;
-    if (action === 'FULL_REFUND') return depositAmount;
-    return Math.max(0, depositAmount - deductionNumber);
-  }, [action, deductionNumber, depositAmount]);
+  const rawDeductionNumber = useMemo(() => parseRupiahInput(deduction), [deduction]);
+  const settlement = useMemo(
+    () => getDepositSettlementNumbers(depositAmount, action, rawDeductionNumber),
+    [action, depositAmount, rawDeductionNumber],
+  );
+  const selectedAction = depositActionMeta[action];
+  const requiresNote = action === 'PARTIAL_REFUND' || action === 'FORFEIT';
+  const validationMessage = validateDepositSettlement({
+    depositAmount,
+    action,
+    deductionAmount: rawDeductionNumber,
+    note,
+  });
+  const canSubmit = !validationMessage && !processDepositMutation.isPending;
+
+  const handleActionChange = (nextAction: DepositAction) => {
+    setAction(nextAction);
+    setError('');
+    if (nextAction === 'FULL_REFUND') {
+      setDeduction('0');
+    }
+    if (nextAction === 'FORFEIT') {
+      setDeduction(String(depositAmount));
+    }
+  };
 
   const handleClose = () => {
     setAction('FULL_REFUND');
@@ -32,65 +56,112 @@ export default function ProcessDepositModal({ show, onHide, stay }: { show: bool
   const handleSubmit = async () => {
     setError('');
 
-    if (action === 'PARTIAL_REFUND' && deductionNumber > depositAmount) {
-      setError('Potongan tidak boleh melebihi deposit.');
+    const nextError = validateDepositSettlement({
+      depositAmount,
+      action,
+      deductionAmount: rawDeductionNumber,
+      note,
+    });
+    if (nextError) {
+      setError(nextError);
       return;
     }
 
     try {
       await processDepositMutation.mutateAsync({
         action,
-        depositDeductionRupiah: action === 'FORFEIT' ? depositAmount : action === 'PARTIAL_REFUND' ? deductionNumber : 0,
-        depositRefundedRupiah: refundAmount,
-        depositNote: note || undefined,
+        depositDeductionRupiah: settlement.deductionAmount,
+        depositRefundedRupiah: settlement.refundAmount,
+        depositNote: note.trim() || undefined,
       });
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal memproses deposit');
+      setError(err?.response?.data?.message || 'Gagal memproses deposit.');
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Proses Deposit</Modal.Title>
+        <Modal.Title>Proses Deposit Tenant</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error ? <Alert variant="danger">{error}</Alert> : null}
-        <Alert variant="light" className="border">
-          <div>Deposit awal: <strong>{formatRupiah(depositAmount)}</strong></div>
-          <div>Aksi dipilih: <strong>{action}</strong></div>
-          <div>Total refund: <strong>{formatRupiah(refundAmount)}</strong></div>
+
+        <Alert variant="warning" className="small mb-3">
+          <strong>Deposit bukan omzet.</strong> Proses setelah cek kamar dan kewajiban.
         </Alert>
+
+        <Alert variant="light" className="border mb-3">
+          <div className="d-flex flex-wrap gap-3 justify-content-between">
+            <div>
+              <div className="text-muted small">Deposit awal</div>
+              <div className="fw-bold fs-5">{formatRupiah(settlement.depositAmount)}</div>
+            </div>
+            <div>
+              <div className="text-muted small">Potongan</div>
+              <div className="fw-bold fs-5">{formatRupiah(settlement.deductionAmount)}</div>
+            </div>
+            <div>
+              <div className="text-muted small">Dikembalikan</div>
+              <div className="fw-bold fs-5">{formatRupiah(settlement.refundAmount)}</div>
+            </div>
+            <div>
+              <div className="text-muted small">Total diproses</div>
+              <div className="fw-bold fs-5">{formatRupiah(settlement.processedAmount)}</div>
+            </div>
+          </div>
+        </Alert>
+
         <Form.Group className="mb-3">
-          <Form.Label>Aksi Deposit</Form.Label>
-          <Form.Select value={action} onChange={(e) => setAction(e.target.value as DepositAction)}>
-            <option value="FULL_REFUND">Refund Penuh</option>
-            <option value="PARTIAL_REFUND">Refund Sebagian</option>
-            <option value="FORFEIT">Hangus / Forfeit</option>
+          <Form.Label>Keputusan Deposit</Form.Label>
+          <Form.Select value={action} onChange={(e) => handleActionChange(e.target.value as DepositAction)}>
+            <option value="FULL_REFUND">{depositActionMeta.FULL_REFUND.label}</option>
+            <option value="PARTIAL_REFUND">{depositActionMeta.PARTIAL_REFUND.label}</option>
+            <option value="FORFEIT">{depositActionMeta.FORFEIT.label}</option>
           </Form.Select>
+          <Alert variant={selectedAction.tone} className="small mt-2 mb-0">
+            {selectedAction.helper}
+          </Alert>
         </Form.Group>
+
         <Form.Group className="mb-3">
-          <Form.Label>Potongan</Form.Label>
+          <Form.Label>Nominal Potongan</Form.Label>
           <Form.Control
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={deduction}
-            onChange={(e) => setDeduction(e.target.value)}
+            onChange={(e) => setDeduction(e.target.value.replace(/[^0-9]/g, ''))}
             disabled={action !== 'PARTIAL_REFUND'}
+            placeholder="Contoh: 150000"
           />
           <div className="text-muted small mt-1">
-            Potongan hanya dipakai untuk refund sebagian. Untuk refund penuh nilainya otomatis 0. Untuk forfeit seluruh deposit dianggap hangus.
+            Potongan hanya untuk refund sebagian.
           </div>
         </Form.Group>
+
         <Form.Group>
-          <Form.Label>Catatan</Form.Label>
-          <Form.Control as="textarea" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Alasan refund / potongan / hangus" />
+          <Form.Label>
+            Catatan Keputusan{requiresNote ? <span className="text-danger ms-1">*</span> : null}
+          </Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={requiresNote ? 'Contoh: Dipotong untuk kerusakan remote AC dan denda kunci hilang.' : 'Opsional: catatan refund penuh.'}
+          />
+          <div className="text-muted small mt-1">
+            {requiresNote ? 'Wajib minimal 8 karakter.' : 'Opsional untuk refund penuh.'}
+          </div>
         </Form.Group>
+
+        {validationMessage ? <Alert variant="warning" className="small mt-3 mb-0">{validationMessage}</Alert> : null}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Batal</Button>
-        <Button onClick={handleSubmit} disabled={processDepositMutation.isPending}>
-          {processDepositMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Proses Deposit'}
+        <Button onClick={handleSubmit} disabled={!canSubmit} variant={action === 'FORFEIT' ? 'danger' : 'primary'}>
+          {processDepositMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Simpan Keputusan Deposit'}
         </Button>
       </Modal.Footer>
     </Modal>

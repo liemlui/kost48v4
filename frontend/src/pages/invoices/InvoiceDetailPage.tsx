@@ -12,6 +12,7 @@ import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmoun
 import InvoicePrintLayout from '../../components/reports/InvoicePrintLayout';
 import { useAuth } from '../../context/AuthContext';
 import { AssistantPanel, BlockedReasonCard, CompactMetrics, LifecycleTimeline, type AssistantItem, type MetricChip, type TimelineStep } from '../../components/command-center';
+import { buildManualPaymentSafety } from '../../utils/invoiceActionSafety';
 
 const paymentMethodLabels: Record<string, string> = {
   CASH: 'Tunai',
@@ -162,6 +163,15 @@ export default function InvoiceDetailPage() {
   };
   const paymentAmount = Number(paymentForm.amountRupiah) || 0;
   const isOverpay = paymentAmount > outstanding;
+  const manualPaymentSafety = buildManualPaymentSafety({
+    amountRupiah: paymentAmount,
+    outstanding,
+    paymentDate: paymentForm.paymentDate,
+    method: paymentForm.method,
+    referenceNo: paymentForm.referenceNo,
+    note: paymentForm.note,
+  });
+
   const paymentPreview = paymentAmount > 0
     ? isOverpay
       ? { label: 'Melebihi sisa tagihan', variant: 'danger' }
@@ -472,8 +482,10 @@ export default function InvoiceDetailPage() {
         </Modal.Header>
         <Modal.Body>
           <Alert variant="secondary" className="small">
-            Simpel: isi tanggal, nominal, dan metode pembayaran. Sistem akan menyesuaikan status tagihan sesuai total pembayaran yang masuk.
+            Catatan admin, bukan upload bukti tenant. Isi referensi agar audit jelas.
           </Alert>
+          {manualPaymentSafety.blockers.length ? <Alert variant="danger" className="small">{manualPaymentSafety.blockers.join(' ')}</Alert> : null}
+          {!manualPaymentSafety.blockers.length && manualPaymentSafety.warnings.length ? <Alert variant="warning" className="small">{manualPaymentSafety.warnings.join(' ')}</Alert> : null}
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Tanggal</Form.Label>
@@ -520,11 +532,11 @@ export default function InvoiceDetailPage() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Referensi</Form.Label>
-              <Form.Control value={paymentForm.referenceNo} onChange={(e) => setPaymentForm((prev) => ({ ...prev, referenceNo: e.target.value }))} />
+              <Form.Control value={paymentForm.referenceNo} onChange={(e) => setPaymentForm((prev) => ({ ...prev, referenceNo: e.target.value }))} placeholder="No. transfer / kas / QRIS" />
             </Form.Group>
             <Form.Group>
               <Form.Label>Catatan</Form.Label>
-              <Form.Control as="textarea" rows={3} value={paymentForm.note} onChange={(e) => setPaymentForm((prev) => ({ ...prev, note: e.target.value }))} />
+              <Form.Control as="textarea" rows={3} value={paymentForm.note} onChange={(e) => setPaymentForm((prev) => ({ ...prev, note: e.target.value }))} placeholder="Wajib jika pembayaran parsial." />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -535,9 +547,9 @@ export default function InvoiceDetailPage() {
           <Button
             variant="primary"
             onClick={() => addPaymentMutation.mutate()}
-            disabled={addPaymentMutation.isPending || isOverpay || !paymentForm.amountRupiah || !paymentForm.paymentDate}
+            disabled={addPaymentMutation.isPending || !manualPaymentSafety.canSubmit}
           >
-            {addPaymentMutation.isPending ? 'Menyimpan...' : 'Simpan Pembayaran'}
+            {addPaymentMutation.isPending ? 'Menyimpan...' : 'Simpan Pembayaran Manual'}
           </Button>
         </Modal.Footer>
       </Modal>

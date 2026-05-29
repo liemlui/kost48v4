@@ -18,6 +18,8 @@ import { getInvoiceUtilitySummary, invoiceKindLabel } from '../../utils/invoiceU
 import { getInvoiceOutstandingAmount, getInvoicePaidAmount, getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
+import { TENANT_PAYMENT_PROOF_ACCEPT, prepareTenantPaymentProof, tenantPaymentProofReadyLabel } from '../../utils/tenantPaymentProof';
+import { compactText } from '../../utils/readabilityRules';
 
 const lineTypeLabels: Record<string, string> = {
   RENT: 'Sewa',
@@ -88,6 +90,8 @@ export default function TenantInvoiceDetailPage() {
   const [payRefNumber, setPayRefNumber] = useState('');
   const [payNotes, setPayNotes] = useState('');
   const [payFile, setPayFile] = useState<File | null>(null);
+  const [payFileLabel, setPayFileLabel] = useState('');
+  const [payProofPreviewUrl, setPayProofPreviewUrl] = useState<string | null>(null);
   const [payFormError, setPayFormError] = useState('');
 
   const needsPayment = !isPaid && !isCancelled;
@@ -96,6 +100,8 @@ export default function TenantInvoiceDetailPage() {
     if (!showPayModal) return;
     setPayAmount(String(outstanding));
     setPayFile(null);
+    setPayFileLabel('');
+    setPayProofPreviewUrl(null);
     setPayNotes('');
     setPayFormError('');
   }, [showPayModal, outstanding]);
@@ -127,7 +133,7 @@ export default function TenantInvoiceDetailPage() {
       id: 'needs-payment',
       severity: isOverdue ? 'BLOCKER' : 'HIGH',
       title: isOverdue ? 'Tagihan sudah melewati jatuh tempo' : 'Tagihan ini perlu dibayar',
-      message: invoice.dueDate ? `${dueMeta.actionLabel} Bayar dan kirim bukti dari halaman ini agar admin bisa memeriksa dan mencatat pembayaran kamu.` : 'Bayar dan kirim bukti dari halaman ini agar admin bisa memeriksa dan mencatat pembayaran kamu.',
+      message: invoice.dueDate ? `${dueMeta.actionLabel} Bayar + kirim bukti di sini.` : 'Bayar + kirim bukti di sini.',
       source: 'Tagihan',
       actionLabel: 'Bayar & Kirim Bukti',
       onAction: () => { setPayAmount(String(outstanding)); setShowPayModal(true); },
@@ -136,14 +142,14 @@ export default function TenantInvoiceDetailPage() {
       id: 'draft',
       severity: 'INFO',
       title: 'Tagihan sedang disiapkan admin',
-      message: 'Belum ada aksi bayar yang perlu kamu lakukan sampai tagihan siap.',
+      message: 'Belum perlu bayar. Tunggu admin.',
       source: 'Tagihan',
     } : null,
     isPaid ? {
       id: 'paid',
       severity: 'SUCCESS',
       title: 'Tagihan sudah lunas',
-      message: 'Kamu bisa mencetak kwitansi atau menyimpan halaman ini sebagai arsip.',
+      message: 'Simpan halaman ini sebagai arsip.',
       source: 'Riwayat',
     } : null,
   ].filter(Boolean) as AssistantItem[] : [];
@@ -156,14 +162,38 @@ export default function TenantInvoiceDetailPage() {
   ] : [];
 
   const timelineSteps: TimelineStep[] = invoice ? [
-    { id: 'issued', label: 'Tagihan tersedia', description: 'Tagihan sudah bisa kamu lihat di portal.', status: invoice.status === 'DRAFT' ? 'pending' : 'done' },
-    { id: 'proof', label: 'Bukti pembayaran', description: hasPendingReview ? TENANT_PAYMENT_REVIEW_MESSAGE : canSubmitPayment ? 'Bayar dan kirim bukti dalam satu langkah.' : 'Tidak ada bukti tambahan yang dibutuhkan.', status: hasPendingReview ? 'active' : canSubmitPayment ? 'pending' : 'done' },
-    { id: 'verified', label: 'Verifikasi admin', description: isPaid ? 'Pembayaran sudah diverifikasi.' : 'Menunggu admin mencocokkan bukti dan nominal.', status: isPaid ? 'done' : hasPendingReview ? 'active' : 'pending' },
-    { id: 'complete', label: 'Tagihan selesai', description: isPaid ? 'Tagihan sudah lunas.' : 'Selesai setelah status berubah menjadi lunas.', status: isPaid ? 'done' : isCancelled ? 'blocked' : 'pending' },
+    { id: 'issued', label: 'Tagihan tersedia', description: 'Tagihan tersedia.', status: invoice.status === 'DRAFT' ? 'pending' : 'done' },
+    { id: 'proof', label: 'Bukti pembayaran', description: hasPendingReview ? TENANT_PAYMENT_REVIEW_MESSAGE : canSubmitPayment ? 'Bayar + kirim bukti.' : 'Tidak perlu bukti tambahan.', status: hasPendingReview ? 'active' : canSubmitPayment ? 'pending' : 'done' },
+    { id: 'verified', label: 'Verifikasi admin', description: isPaid ? 'Pembayaran sudah diverifikasi.' : 'Menunggu admin.', status: isPaid ? 'done' : hasPendingReview ? 'active' : 'pending' },
+    { id: 'complete', label: 'Tagihan selesai', description: isPaid ? 'Tagihan sudah lunas.' : 'Selesai setelah lunas.', status: isPaid ? 'done' : isCancelled ? 'blocked' : 'pending' },
   ] : [];
 
   const parsedPayAmount = Number(payAmount);
   const shouldDisablePay = hasPendingReview || !canSubmitPayment || !Number.isFinite(parsedPayAmount) || parsedPayAmount <= 0 || parsedPayAmount > outstanding || !payFile;
+
+  const handlePayFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) {
+      setPayFile(null);
+      setPayFileLabel('');
+      setPayProofPreviewUrl(null);
+      return;
+    }
+
+    try {
+      const prepared = await prepareTenantPaymentProof(file);
+      setPayFile(prepared);
+      setPayFileLabel(tenantPaymentProofReadyLabel(prepared));
+      setPayProofPreviewUrl(URL.createObjectURL(prepared));
+      setPayFormError('');
+    } catch (error) {
+      setPayFile(null);
+      setPayFileLabel('');
+      setPayProofPreviewUrl(null);
+      setPayFormError(error instanceof Error ? error.message : 'Bukti pembayaran tidak valid. Gunakan JPG, PNG, atau WebP maksimal 2MB.');
+      event.target.value = '';
+    }
+  };
 
   const payMutation = useMutation({
     mutationFn: async () => {
@@ -228,7 +258,7 @@ export default function TenantInvoiceDetailPage() {
       <PageHeader
         eyebrow="Portal Penghuni"
         title={`Tagihan #${id}`}
-        description={hasRenewUtilityLines ? 'Tagihan perpanjangan ini sudah memasukkan sewa periode baru dan pemakaian listrik/air dari checkpoint meter. Tidak ada sistem hutang.' : 'Detail tagihan, status pembayaran, dan bukti yang sedang diperiksa. Bayar dan kirim bukti dalam satu langkah.'}
+        description={hasRenewUtilityLines ? 'Sewa baru + listrik/air dari catatan meter.' : 'Detail tagihan, status pembayaran, dan bukti yang sedang diperiksa. Bayar + kirim bukti.'}
         actionLabel="Kembali"
         onAction={() => navigate('/portal/invoices')}
       />
@@ -250,7 +280,7 @@ export default function TenantInvoiceDetailPage() {
         <AssistantInsightLine
           title="Asisten Tagihan"
           tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0]?.severity === 'SUCCESS' ? 'success' : 'info'}
-          message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tagihan aman. Tidak ada aksi tambahan yang perlu kamu lakukan sekarang.'}
+          message={assistantItems[0] ? compactText(`${assistantItems[0].title}. ${assistantItems[0].message}`, 96) : 'Tidak ada aksi tambahan.'}
           actionLabel={assistantItems[0]?.actionLabel}
           onAction={assistantItems[0]?.onAction}
         />
@@ -375,7 +405,7 @@ export default function TenantInvoiceDetailPage() {
                 <div className="panel-title mb-3">Rincian Tagihan</div>
                 {hasRenewUtilityLines ? (
                   <Alert variant="info" className="small">
-                    <div className="fw-semibold mb-1">Tagihan perpanjangan termasuk checkpoint meter dan wajib dibayar cepat.</div>
+                    <div className="fw-semibold mb-1">Tagihan perpanjangan termasuk catatan meter dan wajib dibayar cepat.</div>
                     <div>Admin sudah mencatat meter terbaru. Sistem menghitung selisih dari meter sebelumnya, lalu memasukkan biaya listrik dan air ke tagihan ini.</div>
                     <div className="d-flex flex-wrap gap-2 mt-3">
                       <span className="badge bg-primary-subtle text-primary-emphasis">Sewa: <CurrencyDisplay amount={utilitySummary.rentAmount} /></span>
@@ -451,7 +481,7 @@ export default function TenantInvoiceDetailPage() {
       {/* ── Payment Upload Modal ── */}
       <Modal show={showPayModal} onHide={() => setShowPayModal(false)} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Bayar & Kirim Bukti Pembayaran</Modal.Title>
+          <Modal.Title>Bayar & Kirim Bukti</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Alert variant="info" className="small">
@@ -553,13 +583,17 @@ export default function TenantInvoiceDetailPage() {
                   <Form.Label className="fw-semibold">Bukti pembayaran</Form.Label>
                   <Form.Control
                     type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0] ?? null;
-                      setPayFile(file);
-                    }}
+                    accept={TENANT_PAYMENT_PROOF_ACCEPT}
+                    onChange={handlePayFileChange}
                   />
-                  <Form.Text className="text-muted">Format: JPG, PNG, atau PDF. Maks 5MB. Bukti wajib diunggah agar admin bisa memeriksa pembayaran tanpa meminta ulang.</Form.Text>
+                  <Form.Text className="text-muted">JPG/PNG/WebP, maksimal 2MB.</Form.Text>
+                  {payFileLabel ? <div className="small mt-2">File siap dikirim: <strong>{payFileLabel}</strong></div> : null}
+                  {payProofPreviewUrl ? (
+                    <div className="mt-3">
+                      <img src={payProofPreviewUrl} alt="Preview bukti pembayaran" style={{ width: 180, maxWidth: '100%', height: 140, objectFit: 'cover', borderRadius: 10, border: '1px solid rgba(15, 23, 42, 0.12)' }} />
+                      <div className="small text-muted mt-2">Preview bukti pembayaran sebelum dikirim ke admin.</div>
+                    </div>
+                  ) : null}
                 </Form.Group>
               </Col>
             </Row>

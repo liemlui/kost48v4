@@ -17,6 +17,7 @@ import { cancelInvoice, issueInvoice } from '../../api/invoices';
 import { fetchAccountingReadiness } from '../../api/accounting';
 import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
+import { buildCancelInvoiceSafety, buildIssueInvoiceSafety } from '../../utils/invoiceActionSafety';
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -64,6 +65,10 @@ export default function InvoicesPage() {
   const PAGE_SIZE = 20;
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [issueTarget, setIssueTarget] = useState<any | null>(null);
+  const [issueChecks, setIssueChecks] = useState<Record<string, boolean>>({});
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
 
   const invoicesQuery = useQuery({ queryKey: ['invoices', page], queryFn: () => listResource<any>('/invoices', { page, limit: PAGE_SIZE }) });
   const staysQuery = useQuery({ queryKey: ['stays', 'invoice-form'], queryFn: () => listResource<any>('/stays', { limit: 500 }) });
@@ -97,6 +102,8 @@ export default function InvoicesPage() {
     mutationFn: (id: number) => issueInvoice(id),
     onSuccess: (invoice: any) => {
       void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      setIssueTarget(null);
+      setIssueChecks({});
       if (invoice?.accounting?.accountingWarning) {
         setAccountingNotice(invoice.accounting.accountingWarning);
       }
@@ -108,8 +115,16 @@ export default function InvoicesPage() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: (id: number) => cancelInvoice(id, { cancelReason: 'Dibatalkan dari workspace invoice' }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+    mutationFn: ({ id, reason }: { id: number; reason: string }) => cancelInvoice(id, { cancelReason: reason.trim() }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      setCancelTarget(null);
+      setCancelReason('');
+    },
+    onError: (err: any) => {
+      const message = err?.response?.data?.message || 'Gagal membatalkan tagihan';
+      setError(Array.isArray(message) ? message.join(', ') : message);
+    },
   });
 
   useEffect(() => { setPage(1); }, [activeTab, keyword, dateFrom, dateTo]);
@@ -256,6 +271,9 @@ export default function InvoicesPage() {
     { id: 'history', icon: '📚', label: 'Riwayat Bayar', helper: 'Pembayaran invoice yang sudah tercatat.', to: '/invoice-payments', count: undefined, active: false },
   ];
 
+  const issueSafety = issueTarget ? buildIssueInvoiceSafety(issueTarget, issueChecks) : null;
+  const cancelSafety = cancelTarget ? buildCancelInvoiceSafety(cancelTarget, cancelReason) : null;
+
   return (
     <div>
       <PageHeader
@@ -380,10 +398,10 @@ export default function InvoicesPage() {
                       <td onClick={(event) => event.stopPropagation()}>
                         <div className="d-flex flex-wrap gap-2 align-items-center">
                           {canManageFinance && item.status === 'DRAFT' ? (
-                            <Button size="sm" variant="outline-success" onClick={() => issueMutation.mutate(item.id)} disabled={issueMutation.isPending}>Terbitkan</Button>
+                            <Button size="sm" variant="outline-success" onClick={() => { setIssueTarget(item); setIssueChecks({}); setError(''); }} disabled={issueMutation.isPending}>Terbitkan</Button>
                           ) : null}
                           {canManageFinance && ['DRAFT', 'ISSUED'].includes(item.status) ? (
-                            <Button size="sm" variant="outline-danger" onClick={() => cancelMutation.mutate(item.id)} disabled={cancelMutation.isPending}>Batalkan</Button>
+                            <Button size="sm" variant="outline-danger" onClick={() => { setCancelTarget(item); setCancelReason(''); setError(''); }} disabled={cancelMutation.isPending}>Batalkan</Button>
                           ) : null}
                           <span className="row-arrow-cell">›</span>
                         </div>
@@ -407,6 +425,94 @@ export default function InvoicesPage() {
           </div>
         </Card.Body>
       </Card>
+
+      <Modal show={Boolean(issueTarget) && canManageFinance} onHide={() => { setIssueTarget(null); setIssueChecks({}); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Terbitkan Tagihan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {issueTarget ? (
+            <>
+              <Alert variant={issueSafety?.risk === 'HIGH' ? 'danger' : issueSafety?.risk === 'MEDIUM' ? 'warning' : 'success'} className="small">
+                <strong>Cek 3 hal:</strong> rincian, periode, tenant.
+              </Alert>
+              <div className="d-flex justify-content-between align-items-center border rounded-4 p-3 mb-3">
+                <div>
+                  <div className="fw-semibold">{issueTarget.invoiceNumber || `INV-${issueTarget.id}`}</div>
+                  <div className="small text-muted">{formatPeriod(issueTarget.periodStart, issueTarget.periodEnd)} · jatuh tempo {formatDateSafe(issueTarget.dueDate)}</div>
+                </div>
+                <CurrencyDisplay amount={getInvoiceTotalAmount(issueTarget)} />
+              </div>
+              {issueSafety?.blockers.length ? <Alert variant="danger" className="small mb-3">{issueSafety.blockers.join(' ')}</Alert> : null}
+              {issueSafety?.warnings.length ? <Alert variant="warning" className="small mb-3">{issueSafety.warnings.join(' ')}</Alert> : null}
+              <div className="d-grid gap-2">
+                {(issueSafety?.checklist ?? []).map((label, index) => (
+                  <Form.Check
+                    key={label}
+                    type="checkbox"
+                    id={`issue-check-${index}`}
+                    label={label}
+                    checked={Boolean(issueChecks[`issue-${index}`])}
+                    onChange={(event) => setIssueChecks((prev) => ({ ...prev, [`issue-${index}`]: event.target.checked }))}
+                  />
+                ))}
+              </div>
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => { setIssueTarget(null); setIssueChecks({}); }}>Batal</Button>
+          <Button
+            variant="success"
+            onClick={() => issueTarget && issueMutation.mutate(issueTarget.id)}
+            disabled={issueMutation.isPending || !issueSafety?.canSubmit}
+          >
+            {issueMutation.isPending ? 'Menerbitkan...' : 'Terbitkan Tagihan'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={Boolean(cancelTarget) && canManageFinance} onHide={() => { setCancelTarget(null); setCancelReason(''); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Batalkan Tagihan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {cancelTarget ? (
+            <>
+              <Alert variant={cancelSafety?.risk === 'HIGH' ? 'danger' : cancelSafety?.risk === 'MEDIUM' ? 'warning' : 'secondary'} className="small">
+                {cancelTarget.status === 'DRAFT' ? 'DRAFT aman dibatalkan.' : 'Tagihan terbit: cek dampaknya.'}
+              </Alert>
+              <div className="border rounded-4 p-3 mb-3">
+                <div className="fw-semibold">{cancelTarget.invoiceNumber || `INV-${cancelTarget.id}`}</div>
+                <div className="small text-muted">Status: {cancelTarget.status} · Total <CurrencyDisplay amount={getInvoiceTotalAmount(cancelTarget)} /></div>
+              </div>
+              <Form.Group>
+                <Form.Label>Alasan pembatalan</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={cancelReason}
+                  onChange={(event) => setCancelReason(event.target.value)}
+                  placeholder="Contoh: Tagihan salah input."
+                  isInvalid={Boolean(cancelReason) && cancelReason.trim().length < 8}
+                />
+                <Form.Text className="text-muted">Minimal 8 karakter. Contoh: diganti tagihan baru, periode salah.</Form.Text>
+              </Form.Group>
+              {cancelSafety?.blockers.length ? <Alert variant="danger" className="small mt-3 mb-0">{cancelSafety.blockers.join(' ')}</Alert> : null}
+            </>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => { setCancelTarget(null); setCancelReason(''); }}>Batal</Button>
+          <Button
+            variant="danger"
+            onClick={() => cancelTarget && cancelMutation.mutate({ id: cancelTarget.id, reason: cancelReason })}
+            disabled={cancelMutation.isPending || !cancelSafety?.canSubmit}
+          >
+            {cancelMutation.isPending ? 'Membatalkan...' : 'Batalkan Tagihan'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showCreate && canManageFinance} onHide={() => setShowCreate(false)}>
         <Modal.Header closeButton>

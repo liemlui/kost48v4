@@ -27,8 +27,8 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
 
   const handleSubmit = async () => {
     const trimmed = reviewNotes.trim();
-    if (trimmed.length < 3) {
-      setError('Catatan penolakan wajib diisi minimal 3 karakter.');
+    if (trimmed.length < 8) {
+      setError('Alasan penolakan wajib diisi minimal 8 karakter.');
       return;
     }
     setError('');
@@ -38,7 +38,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
   return (
     <Modal show={show} onHide={handleClose} backdrop="static">
       <Modal.Header closeButton>
-        <Modal.Title>Tolak Pengajuan</Modal.Title>
+        <Modal.Title>Tolak Pengajuan Keluar</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error ? (
@@ -51,7 +51,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
           <Form.Control
             as="textarea"
             rows={4}
-            placeholder="Tulis alasan penolakan..."
+            placeholder="Contoh: jadwal belum bisa diproses karena masih perlu konfirmasi."
             value={reviewNotes}
             onChange={(e) => {
               setReviewNotes(e.target.value);
@@ -59,7 +59,7 @@ export default function RejectCheckoutModal({ show, onHide, onSubmit, isSubmitti
             }}
           />
           <Form.Text className="text-muted">
-            Minimal 3 karakter. Catatan ini akan terlihat oleh tenant.
+            Minimal 8 karakter. Alasan ini akan terlihat oleh tenant.
           </Form.Text>
         </Form.Group>
       </Modal.Body>

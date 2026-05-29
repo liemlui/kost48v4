@@ -1,11 +1,12 @@
 import { Badge, Button, Card } from 'react-bootstrap';
 import type { PaymentSubmission, PaymentTargetType, TenantBooking } from '../../types';
 import CurrencyDisplay from '../common/CurrencyDisplay';
-import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
+import StatusBadge from '../common/StatusBadge';
 import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import { formatDateTimeWib, getCreatedToDeadlineLabel } from '../../utils/dateTime';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
+import { tenantPricingTermLabel } from '../../utils/tenantCopy';
 import {
   ExpiryBadge,
   getPortalBookingStatus,
@@ -34,6 +35,9 @@ export default function BookingCard({
   onCancelClick,
 }: BookingCardProps) {
   const expiryMeta = getBookingExpiryMeta(booking.expiresAt);
+  const statusUpper = (booking.status ?? '').toUpperCase();
+  const isCancelled = statusUpper === 'CANCELLED' || statusUpper === 'REJECTED';
+  const isClosedBooking = isCancelled || statusUpper === 'EXPIRED' || expiryMeta.isExpired;
   const hasPendingSubmission = Boolean(pendingInvoiceSubmission || pendingDepositSubmission);
   const portalStatus = getPortalBookingStatus(booking, hasPendingSubmission);
 
@@ -51,7 +55,7 @@ export default function BookingCard({
   const canPay =
     hasInitialInvoice &&
     !hasPendingSubmission &&
-    !expiryMeta.isExpired &&
+    !isClosedBooking &&
     totalRemainingAmount > 0;
 
   const createdToDeadlineLabel = getCreatedToDeadlineLabel(booking.createdAt, booking.expiresAt);
@@ -60,41 +64,48 @@ export default function BookingCard({
     : 'Batas waktu detail belum tersedia';
 
   const nextStep = (() => {
+    if (isCancelled) {
+      return booking.cancelReason?.trim()
+        ? `Pemesanan ditolak: ${booking.cancelReason.trim()}`
+        : 'Pemesanan dibatalkan. Pilih kamar lain.';
+    }
+    if (isClosedBooking) {
+      return 'Batas waktu lewat. Ajukan ulang jika masih mau.';
+    }
     if (hasPendingSubmission) {
-      return 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.';
+      return 'Bukti diperiksa. Tidak perlu upload ulang.';
     }
     if (hasInitialInvoice) {
       return booking.expiresAt
-        ? `Tagihan awal sudah tersedia. Bayar & kirim bukti sebelum ${expiryMeta.absoluteLabel}.`
-        : 'Tagihan awal sudah tersedia. Bayar & kirim bukti dalam satu langkah.';
+        ? `Bayar & kirim bukti sebelum ${expiryMeta.absoluteLabel}.`
+        : 'Bayar & kirim bukti.';
     }
-    if (expiryMeta.isExpired) {
-      return 'Pemesanan melewati batas waktu. Sistem akan mereset pemesanan ini; kamu perlu ajukan pemesanan ulang jika masih ingin kamar ini.';
-    }
-    return 'Admin sedang mengecek kesiapan kamar dan membuka tagihan awal.';
+    return 'Menunggu review admin.';
   })();
 
-  const processSteps = [
-    { label: '1. Pemesanan', state: 'done', helper: booking.createdAt ? `Diajukan ${formatDateTimeWib(booking.createdAt)}` : 'Pemesanan sudah diajukan' },
-    {
-      label: hasInitialInvoice ? '2. Tagihan awal dibuka' : '2. Review admin',
-      state: expiryMeta.isExpired ? 'blocked' : hasInitialInvoice ? 'done' : 'active',
-      helper: hasInitialInvoice
-        ? 'Admin sudah membuka tagihan awal.'
-        : booking.expiresAt
-          ? `Admin harus review sebelum ${expiryMeta.absoluteLabel}.`
-          : 'Menunggu keputusan admin.',
-    },
-    {
-      label: hasPendingSubmission ? '3. Bukti diperiksa' : '3. Bayar & kirim bukti',
-      state: hasPendingSubmission ? 'active' : hasInitialInvoice && !expiryMeta.isExpired ? 'active' : expiryMeta.isExpired ? 'blocked' : 'pending',
-      helper: hasPendingSubmission
-        ? 'Tidak perlu upload ulang.'
-        : hasInitialInvoice && booking.expiresAt
-          ? `Batas bayar ${expiryMeta.absoluteLabel}.`
-          : 'Dilakukan setelah tagihan awal tersedia.',
-    },
-  ];
+  const processSteps = isClosedBooking
+    ? [
+        { label: '1. Pemesanan', state: 'done', helper: booking.createdAt ? `Diajukan ${formatDateTimeWib(booking.createdAt)}` : 'Pemesanan diajukan' },
+        {
+          label: isCancelled ? '2. Dibatalkan' : '2. Kedaluwarsa',
+          state: 'blocked',
+          helper: isCancelled ? 'Tidak lanjut ke pembayaran.' : 'Deadline sudah lewat.',
+        },
+        { label: '3. Pilih kamar lain', state: 'pending', helper: 'Katalog bisa dibuka lagi.' },
+      ]
+    : [
+        { label: '1. Pemesanan', state: 'done', helper: booking.createdAt ? `Diajukan ${formatDateTimeWib(booking.createdAt)}` : 'Pemesanan diajukan' },
+        {
+          label: hasInitialInvoice ? '2. Tagihan awal dibuka' : '2. Review admin',
+          state: hasInitialInvoice ? 'done' : 'active',
+          helper: hasInitialInvoice ? 'Tagihan tersedia.' : 'Menunggu admin.',
+        },
+        {
+          label: hasPendingSubmission ? '3. Bukti diperiksa' : '3. Bayar & kirim bukti',
+          state: hasPendingSubmission ? 'active' : hasInitialInvoice ? 'active' : 'pending',
+          helper: hasPendingSubmission ? 'Tidak perlu upload ulang.' : hasInitialInvoice ? 'Satu langkah.' : 'Setelah tagihan tersedia.',
+        },
+      ];
 
   return (
     <Card className="content-card border-0 tenant-booking-detail-card">
@@ -120,12 +131,15 @@ export default function BookingCard({
                 Tagihan belum dibuka
               </Badge>
             ) : null}
-            {!hasPendingSubmission ? (
+            {!hasPendingSubmission && !isClosedBooking ? (
               <Badge bg="light" text="dark" className="border status-badge">
                 Kamar belum terkunci
               </Badge>
             ) : null}
-            <div className={expiryMeta.isExpired ? 'tenant-booking-deadline-line danger' : 'tenant-booking-deadline-line'}>
+            {isCancelled ? (
+              <Badge bg="danger" className="status-badge">Tidak lanjut</Badge>
+            ) : null}
+            <div className={isClosedBooking ? 'tenant-booking-deadline-line danger' : 'tenant-booking-deadline-line'}>
               {deadlineDetail}
             </div>
           </div>
@@ -145,7 +159,7 @@ export default function BookingCard({
             </div>
             <div>
               <span>Masa sewa</span>
-              <strong>{getStatusLabel(booking.pricingTerm)}</strong>
+              <strong>{tenantPricingTermLabel(booking.pricingTerm)}</strong>
             </div>
             <div>
               <span>Sewa pertama</span>
@@ -170,13 +184,13 @@ export default function BookingCard({
           <div className="tenant-booking-next-box">
             <div className="small text-muted mb-1">Langkah berikutnya</div>
             <div className="fw-semibold">{nextStep}</div>
-            <div className={expiryMeta.isExpired ? 'tenant-booking-policy-chip danger mt-3' : 'tenant-booking-policy-chip mt-3'}>
-              {expiryMeta.isExpired
-                ? 'Batas waktu terlewat. Tenant perlu request ulang jika pemesanan sudah direset.'
-                : 'Kamar baru aman setelah pembayaran valid disetujui admin.'}
+            <div className={isClosedBooking ? 'tenant-booking-policy-chip danger mt-3' : 'tenant-booking-policy-chip mt-3'}>
+              {isClosedBooking
+                ? (isCancelled ? 'Pemesanan tidak lanjut.' : 'Batas waktu lewat.')
+                : 'Aman setelah pembayaran disetujui.'}
             </div>
             {createdToDeadlineLabel ? (
-              <div className="small text-muted mt-2">Durasi batas sistem: {createdToDeadlineLabel} dari waktu pengajuan.</div>
+              <div className="small text-muted mt-2">Batas sistem: {createdToDeadlineLabel} dari waktu pengajuan.</div>
             ) : null}
           </div>
         </div>
@@ -190,7 +204,7 @@ export default function BookingCard({
           ))}
         </div>
 
-        {hasInitialInvoice ? (
+        {hasInitialInvoice && !isClosedBooking ? (
           <div className="tenant-booking-invoice-strip mt-3">
             <div>
               <div className="small text-muted">Tagihan awal</div>
@@ -214,7 +228,7 @@ export default function BookingCard({
 
         {hasPendingSubmission ? (
           <div className="tenant-booking-soft-note mt-3">
-            Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang.
+            Bukti diperiksa. Tidak perlu upload ulang.
           </div>
         ) : null}
 
@@ -231,7 +245,7 @@ export default function BookingCard({
             </Button>
           ) : null}
 
-          {cancelable ? (
+          {cancelable && !isClosedBooking ? (
             <Button
               variant="outline-danger"
               onClick={() => onCancelClick(booking)}
@@ -239,7 +253,7 @@ export default function BookingCard({
               Batalkan pemesanan
             </Button>
           ) : (
-            <Button variant="outline-secondary" onClick={onViewCatalog}>
+            <Button variant={isClosedBooking ? 'primary' : 'outline-secondary'} onClick={onViewCatalog}>
               Pilih kamar lain
             </Button>
           )}

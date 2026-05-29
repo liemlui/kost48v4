@@ -8,7 +8,9 @@ import {
   getPublicRoomBathroomSentence,
   getPublicRoomBusinessHighlight,
   getPublicRoomCoolingSentence,
+  getPublicRoomInitialCostEstimate,
   getPublicRoomUtilityCopy,
+  getPublicRoomAvailabilityDisplay,
   getPublicRoomVisibleAmenities,
 } from '../../utils/publicRoomDisplay';
 import type { GuestBookingFormState } from './guestBookingUtils';
@@ -40,6 +42,8 @@ function GuestRoomPhoto({ room }: { room: PublicRoom }) {
 
 export default function GuestBookingRoomSummary({ room, form, selectedRate, initialTotal }: GuestBookingRoomSummaryProps) {
   const utilityCopy = getPublicRoomUtilityCopy(room, form.pricingTerm);
+  const availability = getPublicRoomAvailabilityDisplay(room);
+  const initialCost = getPublicRoomInitialCostEstimate(room, form.pricingTerm);
 
   return (
     <Card className="content-card border-0 h-100 tenant-booking-room-summary">
@@ -51,7 +55,7 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
             <div className="fw-semibold fs-4">{room.code}</div>
             <div className="text-muted">{room.name || 'Kamar KOST48 Surabaya'}</div>
           </div>
-          <StatusBadge status="RESERVED" customLabel="Bisa diajukan" />
+          <StatusBadge status={room.status} customLabel={availability.label} />
         </div>
 
         <div className="booking-room-feature-grid mb-3">
@@ -67,18 +71,22 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
 
         <div className="booking-room-estimate-box mb-3">
           <div className="small text-muted mb-1">Estimasi tagihan awal</div>
-          <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal} /></div>
+          <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal || initialCost.total} /></div>
           <div className="booking-room-estimate-lines">
-            <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong></span>
+            <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate || initialCost.rent} showZero={false} /></strong></span>
             <span>Deposit awal <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
           </div>
         </div>
+
+        <Alert variant="info" className="small booking-room-safety-alert">
+          <strong>{availability.label}.</strong> Kamar aman setelah pembayaran disetujui.
+        </Alert>
 
         <div className="booking-room-utility-box mb-3">
           <div>
             <strong>{utilityCopy.title}</strong>
             <p>{utilityCopy.description}</p>
-            {isUtilitiesIncludedForPricingTerm(form.pricingTerm) ? <small>Utilitas sudah termasuk untuk masa sewa yang dipilih.</small> : null}
+            {isUtilitiesIncludedForPricingTerm(form.pricingTerm) ? <small>Utilitas termasuk.</small> : null}
           </div>
         </div>
 
@@ -87,7 +95,7 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
         </div>
 
         <Alert variant="light" className="mb-0 booking-room-note">
-          <strong>Catatan kamar:</strong> {getPublicRoomBusinessHighlight(room)}
+          {getPublicRoomBusinessHighlight(room)}
         </Alert>
       </Card.Body>
     </Card>

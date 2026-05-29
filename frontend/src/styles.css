@@ -13373,3 +13373,793 @@ button.status-strip-item:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* M4B Deposit Timeline */
+.deposit-ledger-panel {
+  scroll-margin-top: 92px;
+}
+
+.deposit-summary-card,
+.deposit-timeline-card,
+.deposit-operations-panel {
+  background: linear-gradient(180deg, rgba(239, 248, 255, 0.94), #ffffff);
+  box-shadow: 0 12px 30px rgba(15, 84, 140, 0.08);
+}
+
+.deposit-summary-grid,
+.deposit-ops-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.deposit-summary-item,
+.deposit-ops-metric {
+  border: 1px solid rgba(34, 125, 204, 0.14);
+  border-radius: 16px;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.deposit-summary-item.primary,
+.deposit-ops-metric.primary {
+  background: rgba(228, 242, 255, 0.96);
+  border-color: rgba(34, 125, 204, 0.24);
+}
+
+.deposit-summary-item span,
+.deposit-ops-metric span {
+  display: block;
+  color: #64748b;
+  font-size: 0.78rem;
+  margin-bottom: 0.25rem;
+}
+
+.deposit-summary-item strong,
+.deposit-ops-metric strong {
+  color: #0f3f68;
+  font-size: 0.98rem;
+}
+
+.deposit-status-banner {
+  border: 0;
+  border-radius: 18px;
+}
+
+.deposit-timeline-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.deposit-timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.deposit-timeline-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: #94a3b8;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
+}
+
+.deposit-timeline-item.success .deposit-timeline-dot {
+  background: #0f9f6e;
+  box-shadow: 0 0 0 4px rgba(15, 159, 110, 0.14);
+}
+
+.deposit-timeline-item.info .deposit-timeline-dot {
+  background: #227dcc;
+  box-shadow: 0 0 0 4px rgba(34, 125, 204, 0.14);
+}
+
+.deposit-timeline-item.warning .deposit-timeline-dot {
+  background: #d97706;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.14);
+}
+
+.deposit-timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.deposit-ledger-table th {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 767.98px) {
+  .deposit-summary-grid,
+  .deposit-ops-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.nav-tabs .nav-link .badge {
+  pointer-events: none;
+}
+
+
+.stay-detail-tabs-section {
+  scroll-margin-top: 96px;
+}
+
+.stay-detail-tabs-section > .nav-tabs {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 20;
+  padding: 0.45rem;
+  margin: -0.45rem -0.45rem 0.85rem;
+  border-radius: 20px;
+  background: rgba(248, 251, 255, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.stay-detail-tabs-section > .nav-tabs .nav-link {
+  min-height: 48px;
+}
+
+/* M5A Owner Financial Health Cockpit */
+.owner-financial-health-cockpit {
+  background: linear-gradient(180deg, rgba(239, 248, 255, 0.96), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 18px 44px rgba(15, 84, 140, 0.1);
+}
+
+.owner-financial-health-headline {
+  border: 0;
+  border-radius: 16px;
+}
+
+.owner-finance-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.owner-finance-side-card {
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-list.compact {
+  gap: 0.45rem;
+}
+
+.owner-deposit-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.owner-deposit-mini-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(34, 125, 204, 0.12);
+  border-radius: 14px;
+  background: rgba(248, 251, 255, 0.88);
+  padding: 0.7rem 0.8rem;
+  color: #0f172a;
+}
+
+.owner-deposit-mini-row:hover {
+  border-color: rgba(34, 125, 204, 0.32);
+  background: #ffffff;
+}
+
+.owner-deposit-mini-row span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.owner-deposit-mini-row small {
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.owner-deposit-mini-row > strong {
+  white-space: nowrap;
+  color: #0f3f68;
+}
+
+@media (max-width: 767.98px) {
+  .owner-deposit-mini-row {
+    flex-direction: column;
+  }
+}
+
+/* M5B Admin Operations Command Queue */
+.admin-operations-command-card {
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.96), rgba(255, 255, 255, 0.98));
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+  box-shadow: 0 18px 42px rgba(30, 64, 175, 0.075);
+}
+.admin-operations-command-card .admin-lane-strip,
+.admin-dashboard-simplified .admin-operations-command-card .admin-lane-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 1rem 0;
+}
+.admin-ops-command-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.admin-ops-command-hero h2 {
+  margin: 0.1rem 0 0.35rem;
+  color: #0f172a;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+.admin-ops-command-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+.admin-ops-command-summary {
+  min-width: 220px;
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.8rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.admin-ops-command-summary span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 720;
+}
+.admin-ops-command-summary strong {
+  color: #0f172a;
+  font-size: 1.02rem;
+  font-weight: 780;
+}
+.admin-ops-command-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+  gap: 1rem;
+  align-items: start;
+}
+.admin-ops-command-grid .assistant-panel {
+  margin-bottom: 0 !important;
+  box-shadow: none;
+}
+.admin-ops-command-grid .admin-health-chip-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.admin-ops-command-grid .admin-health-chip {
+  border-radius: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 0.58rem 0.66rem;
+  min-height: 74px;
+}
+.admin-ops-command-grid .admin-health-chip span,
+.admin-ops-command-grid .admin-health-chip em {
+  width: 100%;
+}
+.admin-ops-guardrails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.admin-ops-guardrails div {
+  padding: 0.62rem 0.7rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+.admin-ops-guardrails strong {
+  display: block;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  margin-bottom: 0.16rem;
+}
+.admin-ops-guardrails span {
+  display: block;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.admin-operations-command-card .admin-lane-chip {
+  min-height: 106px;
+}
+.admin-operations-command-card .admin-lane-chip.success,
+.admin-operations-command-card .admin-lane-chip.is-calm {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+  border-color: #bbf7d0;
+}
+.admin-operations-command-card .admin-lane-chip.has-work.danger .admin-lane-step,
+.admin-operations-command-card .admin-lane-chip.has-work.warning .admin-lane-step {
+  color: #b45309;
+}
+@media (max-width: 1180px) {
+  .admin-operations-command-card .admin-lane-strip,
+  .admin-dashboard-simplified .admin-operations-command-card .admin-lane-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admin-ops-command-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .admin-ops-command-hero {
+    flex-direction: column;
+  }
+  .admin-ops-command-summary {
+    width: 100%;
+  }
+  .admin-operations-command-card .admin-lane-strip,
+  .admin-dashboard-simplified .admin-operations-command-card .admin-lane-strip,
+  .admin-ops-command-grid .admin-health-chip-row,
+  .admin-ops-guardrails {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* M6A Staff Operational Task Board */
+.staff-operational-board {
+  border-radius: 26px;
+  background: linear-gradient(135deg, #f8fbff 0%, #ffffff 48%, #eef6ff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.1) !important;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.07);
+  margin-bottom: 1rem;
+}
+.staff-operational-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.staff-operational-head h2 {
+  margin: 0.25rem 0 0.35rem;
+  color: #0f172a;
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+.staff-operational-head p {
+  margin: 0;
+  color: #475569;
+  max-width: 780px;
+  line-height: 1.55;
+}
+.staff-operational-progress {
+  min-width: 168px;
+  padding: 0.78rem 0.9rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+}
+.staff-operational-progress strong {
+  display: block;
+  color: #1d4ed8;
+  font-size: 1.45rem;
+  line-height: 1;
+  font-weight: 800;
+}
+.staff-operational-progress span {
+  display: block;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0.25rem 0 0.55rem;
+}
+.staff-board-lanes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.72rem;
+  margin-bottom: 0.85rem;
+}
+.staff-board-lane {
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 0.85rem;
+  min-height: 138px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.staff-board-lane:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+  border-color: rgba(37, 99, 235, 0.24);
+}
+.staff-board-lane span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+.staff-board-lane strong {
+  color: #0f172a;
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 820;
+}
+.staff-board-lane small {
+  flex: 1;
+  color: #475569;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.staff-board-lane em {
+  color: #1d4ed8;
+  font-style: normal;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+.staff-board-lane.tone-danger {
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  border-color: #fed7aa;
+}
+.staff-board-lane.tone-warning {
+  background: linear-gradient(135deg, #fffbeb, #ffffff);
+  border-color: #fde68a;
+}
+.staff-board-lane.tone-info {
+  background: linear-gradient(135deg, #eff6ff, #ffffff);
+  border-color: #bfdbfe;
+}
+.staff-board-lane.tone-success {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+  border-color: #bbf7d0;
+}
+.staff-board-lane.tone-neutral {
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+}
+.staff-focus-panel,
+.staff-guardrail-card {
+  min-height: 100%;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 0.9rem;
+}
+.staff-focus-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+.staff-focus-title-row strong,
+.staff-guardrail-card strong {
+  display: block;
+  color: #0f172a;
+  font-weight: 800;
+}
+.staff-focus-title-row span,
+.staff-guardrail-card span {
+  display: block;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.staff-focus-list {
+  display: grid;
+  gap: 0.55rem;
+}
+.staff-focus-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  text-align: left;
+  padding: 0.68rem;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: #ffffff;
+}
+.staff-focus-row:hover {
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+}
+.staff-focus-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 820;
+  flex: 0 0 auto;
+}
+.staff-focus-main {
+  flex: 1;
+  min-width: 0;
+}
+.staff-focus-main strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+.staff-focus-main small {
+  display: block;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+.staff-focus-row em {
+  color: #1d4ed8;
+  font-style: normal;
+  font-size: 0.78rem;
+  font-weight: 780;
+  white-space: nowrap;
+}
+.staff-focus-row.tone-danger .staff-focus-rank { background: #fff7ed; color: #c2410c; }
+.staff-focus-row.tone-warning .staff-focus-rank { background: #fffbeb; color: #b45309; }
+.staff-focus-row.tone-info .staff-focus-rank { background: #eff6ff; color: #1d4ed8; }
+.staff-focus-row.tone-success .staff-focus-rank { background: #f0fdf4; color: #15803d; }
+.staff-focus-empty {
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+}
+.staff-focus-empty strong,
+.staff-focus-empty span {
+  display: block;
+}
+.staff-focus-empty strong { color: #0f172a; }
+.staff-focus-empty span { color: #64748b; font-size: 0.84rem; margin-top: 0.25rem; }
+.staff-guardrail-card ul {
+  margin: 0.75rem 0;
+  padding-left: 1.1rem;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.staff-room-hint {
+  padding: 0.7rem 0.85rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.82rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+@media (max-width: 1180px) {
+  .staff-board-lanes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .staff-operational-head,
+  .staff-focus-title-row {
+    flex-direction: column;
+  }
+  .staff-operational-progress {
+    width: 100%;
+  }
+  .staff-board-lanes {
+    grid-template-columns: 1fr;
+  }
+  .staff-focus-row {
+    align-items: flex-start;
+  }
+  .staff-focus-row em {
+    white-space: normal;
+  }
+}
+
+/* M8B Public Booking Safety Belt */
+.rooms-market-safety-alert,
+.room-detail-booking-safety-alert,
+.booking-room-safety-alert {
+  border-radius: 16px;
+  border: 1px solid rgba(13, 110, 253, 0.16);
+}
+
+.room-market-booking-safety-note {
+  display: grid;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(13, 110, 253, 0.06);
+  color: #21415f;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.room-market-booking-safety-note strong {
+  color: #0b4f91;
+  font-weight: 650;
+}
+
+.room-market-initial-cost-box {
+  margin-top: 10px;
+}
+
+.room-market-initial-cost-box small {
+  display: block;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.booking-stepper-five {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.booking-stepper-five > div {
+  min-height: 116px;
+}
+
+.room-detail-booking-safety-alert {
+  margin: 12px 0 0;
+}
+
+/* M8C Payment Review Decision Safety Belt */
+.payment-risk-pill {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.35rem;
+  border-radius:999px;
+  border:1px solid #dbeafe;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:0.75rem;
+  font-weight:700;
+  padding:0.28rem 0.62rem;
+  white-space:nowrap;
+}
+.payment-risk-pill.success { color:#166534; background:#dcfce7; border-color:#bbf7d0; }
+.payment-risk-pill.warning { color:#92400e; background:#fef3c7; border-color:#fde68a; }
+.payment-risk-pill.danger { color:#991b1b; background:#fee2e2; border-color:#fecaca; }
+.payment-risk-pill.info { color:#1d4ed8; background:#eff6ff; border-color:#bfdbfe; }
+.payment-row-risk-high td { background:linear-gradient(90deg, rgba(254,226,226,0.55), rgba(255,255,255,0)); }
+.payment-safety-card { border:1px solid #dbeafe; background:#f8fbff; }
+.payment-safety-message-list { display:grid; gap:0.65rem; }
+.payment-safety-message {
+  border:1px solid #dbeafe;
+  border-radius:16px;
+  padding:0.75rem 0.85rem;
+  display:grid;
+  gap:0.15rem;
+  background:#fff;
+}
+.payment-safety-message strong { font-size:0.9rem; }
+.payment-safety-message span { color:#64748b; font-size:0.84rem; line-height:1.4; }
+.payment-safety-message.success { border-color:#bbf7d0; background:#f0fdf4; }
+.payment-safety-message.warning { border-color:#fde68a; background:#fffbeb; }
+.payment-safety-message.danger { border-color:#fecaca; background:#fef2f2; }
+.payment-safety-message.info { border-color:#bfdbfe; background:#eff6ff; }
+.payment-safety-checklist { display:grid; gap:0.75rem; }
+.payment-safety-checklist .form-check {
+  border:1px solid #dbeafe;
+  border-radius:16px;
+  background:#fff;
+  padding:0.8rem 0.9rem 0.8rem 2.45rem;
+}
+.payment-safety-check-label { display:grid; gap:0.15rem; line-height:1.35; }
+.payment-safety-check-label strong { font-size:0.9rem; color:#0f172a; }
+.payment-safety-check-label small { color:#64748b; font-size:0.82rem; }
+.payment-safety-check-label.warning small { color:#92400e; }
+.payment-safety-check-label.danger small { color:#991b1b; }
+.payment-safety-check-label.success small { color:#166534; }
+.reject-example-list { display:flex; flex-wrap:wrap; gap:0.5rem; }
+.reject-example-list button {
+  border:1px solid #bfdbfe;
+  background:#eff6ff;
+  color:#1e40af;
+  border-radius:999px;
+  padding:0.42rem 0.7rem;
+  font-size:0.8rem;
+  text-align:left;
+}
+.reject-example-list button:hover:not(:disabled) { background:#dbeafe; }
+.reject-example-list button:disabled { opacity:0.65; }
+
+/* M8E Renew Approval Safety Belt */
+.renew-risk-pill {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid #dbeafe;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:.74rem;
+  font-weight:800;
+  padding:.28rem .62rem;
+  white-space:nowrap;
+}
+.renew-risk-pill.success { color:#166534; background:#dcfce7; border-color:#bbf7d0; }
+.renew-risk-pill.warning { color:#92400e; background:#fef3c7; border-color:#fde68a; }
+.renew-risk-pill.danger { color:#991b1b; background:#fee2e2; border-color:#fecaca; }
+.renew-risk-pill.info { color:#1d4ed8; background:#eff6ff; border-color:#bfdbfe; }
+.renew-safety-card {
+  border:1px solid #dbeafe;
+  border-radius:20px;
+  padding:1rem;
+  background:#f8fbff;
+  display:grid;
+  grid-template-columns:minmax(190px, .35fr) 1fr;
+  gap:.85rem;
+  align-items:start;
+}
+.renew-safety-card > div:first-child { display:grid; gap:.25rem; }
+.renew-safety-card > div:first-child strong { color:#0f172a; font-size:1rem; }
+.renew-safety-card > div:first-child small { color:#64748b; line-height:1.35; }
+.renew-safety-card.success { border-color:#bbf7d0; background:#f0fdf4; }
+.renew-safety-card.warning { border-color:#fde68a; background:#fffbeb; }
+.renew-safety-card.danger { border-color:#fecaca; background:#fef2f2; }
+.renew-safety-list { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:.6rem; }
+.renew-safety-item {
+  border:1px solid #dbeafe;
+  border-radius:16px;
+  padding:.65rem .75rem;
+  background:#fff;
+  display:grid;
+  gap:.12rem;
+}
+.renew-safety-item strong { color:#0f172a; font-size:.86rem; }
+.renew-safety-item span { color:#64748b; font-size:.8rem; line-height:1.3; }
+.renew-safety-item.success { background:#f0fdf4; border-color:#bbf7d0; }
+.renew-safety-item.warning { background:#fffbeb; border-color:#fde68a; }
+.renew-safety-item.danger { background:#fff1f2; border-color:#fecaca; }
+.renew-safety-item.info { background:#eff6ff; border-color:#bfdbfe; }
+.renew-ack-list {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+  gap:.45rem;
+  color:#334155;
+  font-size:.86rem;
+  font-weight:700;
+}
+.renew-reject-examples {
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+  flex-wrap:wrap;
+  font-size:.82rem;
+  color:#64748b;
+}
+.renew-reject-examples button {
+  border:1px solid #dbeafe;
+  background:#f8fafc;
+  color:#1d4ed8;
+  border-radius:999px;
+  padding:.25rem .6rem;
+  font-weight:800;
+}
+.renew-reject-examples button:hover { background:#eff6ff; }
+@media (max-width: 768px) {
+  .renew-safety-card { grid-template-columns:1fr; }
+}

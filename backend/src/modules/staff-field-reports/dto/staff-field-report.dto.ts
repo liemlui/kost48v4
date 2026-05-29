@@ -1,6 +1,21 @@
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { AdminDecision, InventoryMovementType, ReportedCondition, StaffFieldReportStatus } from '../../../common/enums/app.enums';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateNested,
+} from "class-validator";
+import { Type } from "class-transformer";
+import {
+  AdminDecision,
+  InventoryMovementType,
+  ReportedCondition,
+  StaffFieldReportStatus,
+} from "../../../common/enums/app.enums";
 
 export class CreateStaffFieldReportDto {
   @IsOptional()
@@ -23,7 +38,9 @@ export class CreateStaffFieldReportDto {
   reportedCondition!: ReportedCondition;
 
   @IsString()
-  @IsNotEmpty({ message: 'Catatan kondisi wajib diisi agar admin bisa mengambil keputusan.' })
+  @IsNotEmpty({
+    message: "Catatan kondisi wajib diisi agar admin bisa mengambil keputusan.",
+  })
   conditionNotes!: string;
 
   @IsOptional()
@@ -55,7 +72,10 @@ export class CreateStaffFieldReportDto {
   requestedInventoryItemId?: number;
 
   @IsOptional()
-  @IsNumberString({}, { message: 'requestedQty harus berupa angka desimal dalam format string' })
+  @IsNumberString(
+    {},
+    { message: "requestedQty harus berupa angka desimal dalam format string" },
+  )
   requestedQty?: string;
 }
 
@@ -92,7 +112,10 @@ export class FieldReportMovementDto {
   @IsEnum(InventoryMovementType)
   movementType!: InventoryMovementType;
 
-  @IsNumberString({}, { message: 'qty harus berupa angka desimal dalam format string' })
+  @IsNumberString(
+    {},
+    { message: "qty harus berupa angka desimal dalam format string" },
+  )
   qty!: string;
 
   @IsOptional()
@@ -114,6 +137,7 @@ export class AdminReviewStaffFieldReportDto {
 
   @IsOptional()
   @IsString()
+  @MinLength(8, { message: "Catatan admin wajib diisi minimal 8 karakter." })
   adminNotes?: string;
 
   @IsOptional()

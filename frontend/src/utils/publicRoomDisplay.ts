@@ -116,3 +116,62 @@ export function getPublicRoomUtilityCopy(room: PublicRoom, pricingTerm: PricingT
     description: `Listrik Rp ${electricity.toLocaleString("id-ID")} / kWh · Air Rp ${water.toLocaleString("id-ID")} / m³.`,
   };
 }
+
+export type PublicRoomAvailabilityDisplay = {
+  label: string;
+  tone: "is-available" | "is-limited" | "is-full";
+  shortCopy: string;
+  detailCopy: string;
+  canBook: boolean;
+};
+
+export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAvailabilityDisplay {
+  const status = String(room.status ?? "").toUpperCase();
+  const canBook = room.isAvailable !== false;
+
+  if (!canBook || status === "OCCUPIED" || status === "MAINTENANCE" || status === "INACTIVE") {
+    return {
+      label: "Penuh",
+      tone: "is-full",
+      shortCopy: "Kamar belum bisa diajukan sekarang.",
+      detailCopy: "Kamar ini belum bisa diajukan saat ini. Kamu bisa memilih kamar lain atau bertanya ke admin untuk jadwal ketersediaan berikutnya.",
+      canBook: false,
+    };
+  }
+
+  if (status === "RESERVED") {
+    return {
+      label: "Ada minat aktif",
+      tone: "is-limited",
+      shortCopy: "Masih bisa ditanyakan, tapi ada calon tenant lain yang sedang diproses.",
+      detailCopy: "Ada minat aktif. Prioritas tetap dari pembayaran disetujui.",
+      canBook: true,
+    };
+  }
+
+  return {
+    label: "Bisa diajukan",
+    tone: "is-available",
+    shortCopy: "Ajukan booking dulu, lalu tunggu review admin.",
+    detailCopy: "Bisa diajukan. Aman setelah pembayaran disetujui.",
+    canBook: true,
+  };
+}
+
+export function getPublicRoomInitialCostEstimate(room: PublicRoom, term: PricingTerm = "MONTHLY") {
+  const rent = getBestPublicRoomRate(room, term);
+  const deposit = Number(room.defaultDepositRupiah ?? 0);
+  return {
+    rent,
+    deposit,
+    total: Math.max(0, rent) + Math.max(0, deposit),
+  };
+}
+
+export const publicBookingSafetySteps = [
+  "Ajukan booking kamar yang kamu pilih.",
+  "Admin mengecek ketersediaan kamar dan data calon tenant.",
+  "Jika disetujui, tagihan awal muncul di portal.",
+  "Bayar + kirim bukti di portal.",
+  "Kamar aman setelah pembayaran disetujui.",
+];

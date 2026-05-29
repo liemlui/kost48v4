@@ -2,7 +2,8 @@ import type { PaymentSubmission, Stay, TenantBooking } from '../types';
 import { getBookingExpiryMeta } from './bookingExpiry';
 import { isPendingReviewStatus } from './tenantCopy';
 
-export function isTenantBookingInactive(booking: TenantBooking): boolean {
+export function isTenantBookingClosed(booking: TenantBooking | null | undefined): boolean {
+  if (!booking) return false;
   const status = (booking.status ?? '').toUpperCase();
   const expiry = getBookingExpiryMeta(booking.expiresAt);
 
@@ -13,6 +14,10 @@ export function isTenantBookingInactive(booking: TenantBooking): boolean {
     status === 'REJECTED' ||
     expiry.isExpired
   );
+}
+
+export function isTenantBookingInactive(booking: TenantBooking): boolean {
+  return isTenantBookingClosed(booking);
 }
 
 export function isTenantBookingOccupied(booking: TenantBooking): boolean {
@@ -47,6 +52,7 @@ export function stayToTenantBooking(stay: Stay | null | undefined): TenantBookin
     bookingSource: stay.bookingSource,
     stayPurpose: stay.stayPurpose,
     notes: stay.notes,
+    cancelReason: (stay as { cancelReason?: string | null }).cancelReason ?? null,
     createdAt: (stay as { createdAt?: string }).createdAt,
     updatedAt: (stay as { updatedAt?: string }).updatedAt,
     tenant: stay.tenant ? { id: stay.tenant.id, fullName: stay.tenant.fullName, phone: stay.tenant.phone, email: stay.tenant.email } : null,
@@ -63,6 +69,10 @@ export function stayToTenantBooking(stay: Stay | null | undefined): TenantBookin
 
 export function getActionableTenantBookings(bookings: TenantBooking[]): TenantBooking[] {
   return bookings.filter(isTenantBookingActionable);
+}
+
+export function getLatestTenantBookingUpdate(bookings: TenantBooking[]): TenantBooking | null {
+  return [...bookings].sort((a, b) => new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() - new Date(a.updatedAt ?? a.createdAt ?? 0).getTime())[0] ?? null;
 }
 
 export function getPrimaryTenantBooking(bookings: TenantBooking[]): TenantBooking | null {
@@ -97,7 +107,7 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '⏳',
         title: 'Menunggu review admin',
-        description: 'Pemesanan kamu sudah masuk, tetapi belum mengunci kamar. Admin mengecek kesiapan kamar; setelah tagihan dibuka kamu wajib bayar dan kirim bukti sebelum jam deadline yang tampil di badge.',
+        description: 'Pemesanan masuk. Kamar belum terkunci sampai pembayaran disetujui admin.',
         actionLabel: 'Lihat status pemesanan',
         tone: 'warning' as const,
       };
@@ -105,7 +115,7 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '🧾',
         title: 'Pemesanan disetujui — bayar tagihan awal',
-        description: 'Tagihan awal sewa pertama + deposit sudah tersedia. Bayar dan kirim bukti dalam satu langkah sebelum jam deadline yang tampil di badge. Kamar baru aman setelah pembayaran disetujui admin.',
+        description: 'Tagihan awal tersedia. Bayar + kirim bukti sebelum deadline.',
         actionLabel: 'Bayar tagihan awal',
         tone: 'info' as const,
       };
@@ -113,7 +123,7 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '🔎',
         title: 'Bukti pembayaran sedang diperiksa',
-        description: 'Bukti pembayaran kamu sedang diperiksa. Tidak perlu upload ulang. Selama bukti masih direview, sistem tidak melepas kamar karena kamu sudah melakukan aksi.',
+        description: 'Bukti diperiksa. Tidak perlu upload ulang.',
         actionLabel: 'Lihat status pembayaran',
         tone: 'info' as const,
       };
@@ -121,7 +131,7 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '🏠',
         title: 'Kamar sudah aktif',
-        description: 'Pemesanan sudah menjadi masa sewa aktif. Buka My Stay Guide untuk melihat kamar, tagihan, dan aksi berikutnya.',
+        description: 'Masa sewa aktif. Buka My Stay Guide untuk detail kamar dan tagihan.',
         actionLabel: 'Buka My Stay Guide',
         tone: 'success' as const,
       };
@@ -129,7 +139,7 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '🛏️',
         title: 'Belum ada pemesanan aktif',
-        description: 'Pilih kamar dari katalog. Ingat, pemesanan saja belum mengunci kamar sampai pembayaran disetujui.',
+        description: 'Pilih kamar dari katalog. Kamar aman setelah pembayaran disetujui.',
         actionLabel: 'Pilih kamar',
         tone: 'secondary' as const,
       };

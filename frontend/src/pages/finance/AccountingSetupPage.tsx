@@ -17,6 +17,7 @@ import PeriodClosePanel from '../../components/accounting/PeriodClosePanel';
 import AccountingPeriodsPanel from '../../components/accounting/AccountingPeriodsPanel';
 import AccountingDataQualityPanel from '../../components/accounting/AccountingDataQualityPanel';
 import PeriodCloseTimeline from '../../components/accounting/PeriodCloseTimeline';
+import { DepositOperationsPanel } from '../../components/deposit';
 import JournalAuditTrailPanel from '../../components/accounting/JournalAuditTrailPanel';
 import {
   createAccountingPeriod,
@@ -53,6 +54,7 @@ import {
   type CreateCashAccountPayload,
   type CreateOpeningBalanceDraftPayload,
 } from '../../api/accounting';
+import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary } from '../../api/depositLedger';
 
 const financeMenu = [
   { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: false },
@@ -118,6 +120,8 @@ export default function AccountingSetupPage() {
 
   const depositPositionQuery = useQuery({ queryKey: ['accounting-deposit-position'], queryFn: fetchDepositPosition, staleTime: 30_000 });
   const depositReconciliationQuery = useQuery({ queryKey: ['accounting-deposit-reconciliation'], queryFn: fetchDepositReconciliation, staleTime: 30_000 });
+  const depositLedgerSummaryQuery = useQuery({ queryKey: ['deposit-ledger', 'summary'], queryFn: () => fetchDepositLedgerSummary({ limit: 25 }), staleTime: 30_000, retry: false });
+  const depositLedgerReconciliationQuery = useQuery({ queryKey: ['deposit-ledger', 'reconciliation-lite'], queryFn: () => fetchDepositLedgerReconciliationLite({ limit: 200 }), staleTime: 30_000, retry: false });
   const reversalWatchQuery = useQuery({ queryKey: ['accounting-reversal-watch'], queryFn: fetchReversalWatch, staleTime: 30_000 });
 
   const accounts = accountsQuery.data ?? [];
@@ -161,6 +165,8 @@ export default function AccountingSetupPage() {
       queryClient.invalidateQueries({ queryKey: ['accounting-recent-auto-journals'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-deposit-position'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-deposit-reconciliation'] }),
+      queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'summary'] }),
+      queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'reconciliation-lite'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-reversal-watch'] }),
       queryClient.invalidateQueries({ queryKey: ['accounting-journal-entries'] }),
     ]);
@@ -382,6 +388,7 @@ export default function AccountingSetupPage() {
           { id: 'asset-b4', label: 'Aset', value: assetReadinessQuery.isLoading ? '...' : assetReadinessQuery.data?.readyForAssetSchemaAct ? 'Ready' : 'Review', helper: 'Register aset', tone: assetReadinessQuery.data?.readyForAssetSchemaAct ? 'success' : 'warning' },
           { id: 'period-close', label: 'Tutup Periode', value: periodCloseReadinessQuery.isLoading ? '...' : periodCloseReadinessQuery.data?.period?.status ?? 'Belum', helper: 'Close/reopen audit', tone: periodCloseReadinessQuery.data?.canPost || periodCloseReadinessQuery.data?.period?.status === 'CLOSED' ? 'success' : 'warning' },
           { id: 'auto-close', label: 'Auto-Close', value: autoClosePolicyQuery.isLoading ? '...' : autoClosePolicyQuery.data?.enabled ? 'ON' : 'OFF', helper: autoClosePolicyQuery.data?.targetPeriodKey ?? 'Bulan lalu', tone: autoClosePolicyQuery.data?.enabled ? 'success' : 'warning' },
+          { id: 'deposit-ledger', label: 'Deposit Ops', value: depositLedgerSummaryQuery.isLoading ? '...' : formatRupiah(depositLedgerSummaryQuery.data?.totals.ledgerHeldBalanceRupiah ?? 0), helper: `${depositLedgerReconciliationQuery.data?.mismatchCount ?? 0} perlu review`, tone: (depositLedgerReconciliationQuery.data?.mismatchCount ?? 0) ? 'warning' : 'success' },
           { id: 'unmapped', label: 'Belum Terjurnal', value: unmappedQuery.isLoading ? '...' : unmappedOperationalCount, helper: 'Sample operasional', tone: unmappedOperationalCount ? 'warning' : 'success' },
         ]}
       />
@@ -558,6 +565,17 @@ export default function AccountingSetupPage() {
           </Button>
         </Card.Body>
       </Card>
+
+      <DepositOperationsPanel
+        summary={depositLedgerSummaryQuery.data}
+        reconciliation={depositLedgerReconciliationQuery.data}
+        isLoading={depositLedgerSummaryQuery.isLoading || depositLedgerReconciliationQuery.isLoading}
+        isError={depositLedgerSummaryQuery.isError || depositLedgerReconciliationQuery.isError}
+        onRefresh={() => void Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'summary'] }),
+          queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'reconciliation-lite'] }),
+        ])}
+      />
 
       <Row className="g-3 mb-3">
         <Col xl={6} id="profit-loss">

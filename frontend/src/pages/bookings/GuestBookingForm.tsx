@@ -78,7 +78,7 @@ export default function GuestBookingForm({
                   type="email"
                 />
                 <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
-                <Form.Text muted>Email ini akan digunakan untuk login ke portal tenant.</Form.Text>
+                <Form.Text muted>Email ini akan digunakan untuk akses portal tenant jika booking disetujui.</Form.Text>
               </Form.Group>
             </Col>
             <Col md={6}>
@@ -129,7 +129,7 @@ export default function GuestBookingForm({
           <Row className="g-3">
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Tanggal Check-in <span className="text-danger">*</span></Form.Label>
+                <Form.Label>Rencana tanggal masuk <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   type="date"
                   min={INITIAL_FORM.checkInDate}
@@ -142,7 +142,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Pricing Term <span className="text-danger">*</span></Form.Label>
+                <Form.Label>Pilihan masa sewa <span className="text-danger">*</span></Form.Label>
                 <Form.Select
                   value={form.pricingTerm}
                   onChange={(e) => onChange('pricingTerm', e.target.value)}
@@ -163,7 +163,7 @@ export default function GuestBookingForm({
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Tanggal akhir masa sewa yang diinginkan (opsional)</Form.Label>
+                <Form.Label>Akhir masa sewa yang diinginkan (opsional)</Form.Label>
                 <Form.Control
                   type="date"
                   min={form.checkInDate || INITIAL_FORM.checkInDate}
@@ -194,7 +194,7 @@ export default function GuestBookingForm({
                   rows={4}
                   value={form.notes ?? ''}
                   onChange={(e) => onChange('notes', e.target.value)}
-                  placeholder="Contoh: butuh mulai masuk sore hari, atau catatan non-teknis lain yang relevan."
+                  placeholder="Contoh: masuk sore hari."
                 />
               </Form.Group>
             </Col>
@@ -215,17 +215,21 @@ export default function GuestBookingForm({
           </div>
 
           <Alert variant="info" className="small mt-4 mb-0">
-            <strong>Penting:</strong> Pemesanan ini belum mengunci kamar. Sebelum pembayaran lunas dan disetujui admin, kamar masih bisa diminati calon tenant lain. Setelah admin membuka tagihan, pembayaran dan bukti wajib dikirim dalam satu langkah sebelum jam deadline yang tampil di portal.
+            <strong>Penting:</strong> Booking belum mengunci kamar. Kamar aman setelah pembayaran disetujui.
+          </Alert>
+
+          <Alert variant="warning" className="small mt-2 mb-0">
+            Jangan transfer sebelum tagihan resmi muncul di portal.
           </Alert>
 
           <Alert variant="light" className="small mt-2 mb-0">
-            Ringkasan awal: sewa sesuai term <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong> = total awal <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong>.
+            Estimasi awal: sewa <strong><CurrencyDisplay amount={selectedRate} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialTotal} showZero={false} /></strong>.
           </Alert>
 
           <div className="d-flex gap-2 justify-content-end mt-4 flex-wrap">
             <Link to="/rooms" className="btn btn-outline-secondary">Kembali ke Katalog</Link>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Menyimpan Booking...' : 'Kirim Booking'}
+              {isSubmitting ? 'Mengajukan Booking...' : 'Ajukan Booking'}
             </Button>
           </div>
         </Form>

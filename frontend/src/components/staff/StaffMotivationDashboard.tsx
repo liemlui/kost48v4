@@ -3,15 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import StaffPerformanceCategoryCard from './StaffPerformanceCategoryCard';
 import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
 import StaffRoutineChecklist from './StaffRoutineChecklist';
+import StaffOperationalTaskBoard from './StaffOperationalTaskBoard';
 import { makeStaffWorkStats, getStaffMotivation } from '../../utils/staffWorkStats';
 import type { ActionQueueItem } from '../command-center';
-import type { AuthUser, Ticket } from '../../types';
+import type { AuthUser, InventoryItem, Room, Ticket } from '../../types';
 import type { StaffRoutineKpiResponse, StaffRoutineTodayResponse } from '../../api/staffRoutines';
 import { fetchMyStaffPerformance } from '../../api/staffPerformance';
 
 type Props = {
   user: AuthUser | null;
   tickets: Ticket[];
+  rooms?: Room[];
+  inventoryItems?: InventoryItem[];
   queueItems: ActionQueueItem[];
   onRefresh: () => void | Promise<void>;
   routineToday?: StaffRoutineTodayResponse | null;
@@ -29,7 +32,7 @@ function staffFirstName(user: AuthUser | null) {
   return user?.fullName?.trim()?.split(/\s+/)[0] || 'Staf';
 }
 
-export default function StaffMotivationDashboard({ user, tickets, queueItems, onRefresh, routineToday, routinesLoading, onRoutineUpdated }: Props) {
+export default function StaffMotivationDashboard({ user, tickets, rooms = [], inventoryItems = [], queueItems, onRefresh, routineToday, routineKpi, routinesLoading, onRoutineUpdated }: Props) {
   const performanceQuery = useQuery({ queryKey: ['staff-performance-me-dashboard'], queryFn: () => fetchMyStaffPerformance(), staleTime: 60_000 });
   const stats = makeStaffWorkStats(tickets, queueItems, safeUserCreatedAt(user));
   const motivation = getStaffMotivation(stats);
@@ -50,6 +53,16 @@ export default function StaffMotivationDashboard({ user, tickets, queueItems, on
           </div>
         </Card.Body>
       </Card>
+
+      <StaffOperationalTaskBoard
+        tickets={tickets}
+        rooms={rooms}
+        inventoryItems={inventoryItems}
+        routineToday={routineToday ?? null}
+        routineKpi={routineKpi ?? null}
+        isLoading={routinesLoading}
+        onRefresh={onRefresh}
+      />
 
       <StaffPerformanceCategoryCard performance={performanceQuery.data} compact />
 

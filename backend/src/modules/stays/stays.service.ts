@@ -658,9 +658,7 @@ export class StaysService {
       if (deduction + refunded !== stay.depositAmountRupiah) {
         throw new ConflictException('Partial refund harus memproses seluruh deposit: potongan + pengembalian harus sama dengan jumlah deposit.');
       }
-      // Settled partial refund: database constraint saat ini mengizinkan total settled
-      // sebagai REFUNDED, sedangkan PARTIALLY_REFUNDED berarti masih ada sisa deposit.
-      depositStatus = DepositStatus.REFUNDED;
+      depositStatus = DepositStatus.PARTIALLY_REFUNDED;
     }
 
     if (deduction < 0 || refunded < 0 || deduction + refunded > stay.depositAmountRupiah) {

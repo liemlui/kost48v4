@@ -9,6 +9,8 @@ import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
 import { listAdminRenewRequests, approveRenewRequest, rejectRenewRequest } from '../../api/renewRequests';
 import { formatRupiah } from '../../utils/formatCurrency';
+import { getRenewApprovalSafety, getRenewRequestRiskBadge } from '../../utils/renewApprovalSafety';
+import { getRenewTermLabel } from '../../utils/renewTermLabels';
 import type { ApproveRenewRequestPayload, PaginatedResponse, RenewRequest } from '../../types';
 
 function formatDate(value?: string | null) {
@@ -54,10 +56,10 @@ function RenewFlowStrip() {
       <Card.Body>
         <div className="section-kicker mb-2">Rule perpanjangan aktif</div>
         <div className="flow-step-grid">
-          <div><span>1</span><strong>Review request</strong><small>Cek tenant, kamar, tanggal akhir masa sewa baru.</small></div>
-          <div><span>2</span><strong>Catat meter</strong><small>Meter listrik dan air terbaru wajib diisi sebelum approve.</small></div>
-          <div><span>3</span><strong>Tagihan dibuat</strong><small>Invoice berisi sewa + listrik + air dari selisih meter.</small></div>
-          <div><span>4</span><strong>Tenant bayar</strong><small>Checkout berikutnya tetap blocked sampai invoice renew lunas.</small></div>
+          <div><span>1</span><strong>Review</strong><small>Cek tenant & tanggal.</small></div>
+          <div><span>2</span><strong>Catat meter</strong><small>Listrik & air wajib.</small></div>
+          <div><span>3</span><strong>Tagihan dibuat</strong><small>Sewa + listrik + air.</small></div>
+          <div><span>4</span><strong>Tenant bayar</strong><small>Belum lunas = tetap block.</small></div>
         </div>
       </Card.Body>
     </Card>
@@ -76,9 +78,11 @@ export default function RenewRequestsAdminPage() {
   const [waterReadingValue, setWaterReadingValue] = useState('');
   const [meterReadingAt, setMeterReadingAt] = useState('');
   const [approveFormError, setApproveFormError] = useState('');
+  const [approvalAcknowledged, setApprovalAcknowledged] = useState(false);
 
   const [rejectTarget, setRejectTarget] = useState<RenewRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
+  const [rejectFormError, setRejectFormError] = useState('');
 
   const query = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['admin-renew-requests', { status: statusFilter || undefined }],
@@ -102,6 +106,7 @@ export default function RenewRequestsAdminPage() {
       setWaterReadingValue('');
       setMeterReadingAt('');
       setApproveFormError('');
+      setApprovalAcknowledged(false);
     },
   });
 
@@ -111,6 +116,7 @@ export default function RenewRequestsAdminPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-renew-requests'] });
       setRejectTarget(null);
       setReviewNotes('');
+      setRejectFormError('');
     },
   });
 
@@ -123,8 +129,8 @@ export default function RenewRequestsAdminPage() {
     pendingCount ? {
       id: 'renew-pending',
       severity: 'HIGH',
-      title: `${pendingCount} perpanjangan menunggu meter checkpoint`,
-      message: 'Approve renew tidak boleh hanya memperpanjang tanggal. Admin wajib catat meter terbaru agar invoice renew berisi sewa + listrik + air.',
+      title: `${pendingCount} renew menunggu meter`,
+      message: 'Catat meter dulu. Sistem buat tagihan renew.',
       source: 'Renew',
       count: pendingCount,
       actionLabel: 'Lihat pending',
@@ -133,8 +139,8 @@ export default function RenewRequestsAdminPage() {
     approvedCount ? {
       id: 'renew-approved',
       severity: 'INFO',
-      title: `${approvedCount} perpanjangan sudah diproses`,
-      message: 'Pastikan invoice perpanjangan dibayar tenant. Checkout berikutnya akan tetap tertahan jika tagihan renew masih open.',
+      title: `${approvedCount} renew sudah diproses`,
+      message: 'Pastikan tagihan renew dibayar tenant.',
       source: 'Invoice renew',
       count: approvedCount,
       actionLabel: 'Lihat approved',
@@ -159,16 +165,21 @@ export default function RenewRequestsAdminPage() {
     const nextWaterReading = waterReadingValue.trim();
     const nextMeterReadingAt = meterReadingAt.trim();
 
-    if (!nextElectricityReading || !nextWaterReading || !nextMeterReadingAt) {
-      setApproveFormError('Catat meter listrik, meter air, dan waktu catat meter sebelum menyetujui perpanjangan.');
+    const safety = getRenewApprovalSafety({
+      request: approveTarget,
+      plannedCheckOutDate: nextPlannedCheckOutDate,
+      approvedRentAmount,
+      electricityReadingValue: nextElectricityReading,
+      waterReadingValue: nextWaterReading,
+      meterReadingAt: nextMeterReadingAt,
+    });
+
+    if (safety.blockers.length) {
+      setApproveFormError(safety.blockers[0]?.message ?? 'Lengkapi data renew sebelum approve.');
       return;
     }
-    if (Number(nextElectricityReading) < 0 || Number(nextWaterReading) < 0) {
-      setApproveFormError('Angka meter tidak boleh negatif.');
-      return;
-    }
-    if (Number.isNaN(new Date(nextMeterReadingAt).getTime())) {
-      setApproveFormError('Waktu catat meter belum valid.');
+    if (safety.requiresAcknowledgement && !approvalAcknowledged) {
+      setApproveFormError('Centang konfirmasi keputusan dulu.');
       return;
     }
 
@@ -188,24 +199,40 @@ export default function RenewRequestsAdminPage() {
 
   const handleReject = () => {
     if (!rejectTarget) return;
-    rejectMutation.mutate({ id: rejectTarget.id, payload: { reviewNotes: reviewNotes.trim() || 'Ditolak tanpa alasan.' } });
+    const note = reviewNotes.trim();
+    if (note.length < 8) {
+      setRejectFormError('Alasan minimal 8 karakter.');
+      return;
+    }
+    setRejectFormError('');
+    rejectMutation.mutate({ id: rejectTarget.id, payload: { reviewNotes: note } });
   };
 
   const selectedRent = approvedRentAmount ? Number(approvedRentAmount.replace(/\D/g, '')) : getCurrentRent(approveTarget);
+  const approvalSafety = getRenewApprovalSafety({
+    request: approveTarget,
+    plannedCheckOutDate,
+    approvedRentAmount,
+    electricityReadingValue,
+    waterReadingValue,
+    meterReadingAt,
+  });
+  const canSubmitApprove = approvalSafety.canApprove && (!approvalSafety.requiresAcknowledgement || approvalAcknowledged);
+  const rejectNoteValid = reviewNotes.trim().length >= 8;
 
   return (
     <div className="renew-command-page">
       <PageHeader
         eyebrow="Renew Command Center"
         title="Permintaan Perpanjangan"
-        description="Perpanjangan adalah checkpoint operasional: admin catat meter terbaru, sistem menghitung listrik/air, lalu menerbitkan tagihan masa sewa baru."
+        description="Catat meter, approve, lalu sistem membuat tagihan renew."
       />
 
       <RenewFlowStrip />
       <AssistantInsightLine
         title="Asisten Renew"
         tone={pendingCount ? 'warning' : approvedCount ? 'info' : 'success'}
-        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada perpanjangan yang menunggu. Riwayat tetap bisa dicek dari badge status.'}
+        message={assistantItems[0] ? `${assistantItems[0].title}. ${assistantItems[0].message}` : 'Tidak ada renew pending.'}
         actionLabel={assistantItems[0]?.actionLabel}
         onAction={assistantItems[0]?.onAction}
       />
@@ -225,7 +252,7 @@ export default function RenewRequestsAdminPage() {
           <div className="table-meta align-items-start">
             <div>
               <div className="panel-title">Filter perpanjangan</div>
-              <div className="panel-subtitle">Gunakan badge status. Tidak ada card besar atau select tambahan.</div>
+              <div className="panel-subtitle">Pilih status untuk fokus kerja.</div>
             </div>
             <div className="status-tab-bar compact-tabs">
               {STATUS_OPTIONS.map((opt) => (
@@ -252,12 +279,15 @@ export default function RenewRequestsAdminPage() {
                   <th>Permintaan</th>
                   <th>Masa Sewa</th>
                   <th>Status</th>
+                  <th>Risiko</th>
                   <th>Catatan</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {items.map((rr) => (
+                {items.map((rr) => {
+                  const riskBadge = getRenewRequestRiskBadge(rr);
+                  return (
                   <tr key={rr.id}>
                     <td>
                       <div className="fw-semibold">{getTenantName(rr)}</div>
@@ -265,13 +295,14 @@ export default function RenewRequestsAdminPage() {
                     </td>
                     <td>
                       <div className="fw-semibold">{formatDate(rr.requestedCheckOutDate)}</div>
-                      <div className="small text-muted">Term: {rr.requestedTerm}</div>
+                      <div className="small text-muted">{getRenewTermLabel(rr.requestedTerm)}</div>
                     </td>
                     <td>
                       <div className="small text-muted">Akhir sekarang</div>
                       <div className="fw-semibold">{formatDate((rr as any).stay?.plannedCheckOutDate)}</div>
                     </td>
                     <td><StatusBadge status={rr.status} /></td>
+                    <td><span className={`renew-risk-pill ${riskBadge.tone}`}>{riskBadge.label}</span></td>
                     <td className="small text-muted" style={{ maxWidth: 260 }}>
                       {rr.requestNotes ? <div title={rr.requestNotes}>{rr.requestNotes}</div> : 'Tidak ada catatan tenant.'}
                       {(rr as any).reviewNotes ? <div className="mt-1 text-danger"><em>{(rr as any).reviewNotes}</em></div> : null}
@@ -279,22 +310,23 @@ export default function RenewRequestsAdminPage() {
                     <td>
                       {rr.status === 'PENDING' ? (
                         <div className="d-flex gap-2 flex-wrap">
-                          <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(new Date().toISOString().slice(0, 16)); setApproveFormError(''); }}>Catat Meter & Setujui</Button>
-                          <Button variant="outline-danger" size="sm" onClick={() => { setRejectTarget(rr); setReviewNotes(''); }}>Tolak</Button>
+                          <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(new Date().toISOString().slice(0, 16)); setApproveFormError(''); setApprovalAcknowledged(false); }}>Catat & Setujui</Button>
+                          <Button variant="outline-danger" size="sm" onClick={() => { setRejectTarget(rr); setReviewNotes(''); setRejectFormError(''); }}>Tolak</Button>
                         </div>
                       ) : <span className="text-muted small">Sudah diproses</span>}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </Table>
           )}
         </Card.Body>
       </Card>
 
-      <Modal show={!!approveTarget} onHide={() => { if (!approveMutation.isPending) { setApproveTarget(null); setApproveFormError(''); } }} centered size="xl" dialogClassName="renew-approval-command-modal">
+      <Modal show={!!approveTarget} onHide={() => { if (!approveMutation.isPending) { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); } }} centered size="xl" dialogClassName="renew-approval-command-modal">
         <Modal.Header closeButton>
-          <Modal.Title>Setujui Perpanjangan + Catat Meter</Modal.Title>
+          <Modal.Title>Catat & Setujui Renew</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {approveFormError ? <Alert variant="warning" className="small">{approveFormError}</Alert> : null}
@@ -304,12 +336,31 @@ export default function RenewRequestsAdminPage() {
             <div>
               <div className="section-kicker">Approval checkpoint</div>
               <h4>{getRoomCode(approveTarget)} · {getTenantName(approveTarget)}</h4>
-              <p>Request #{approveTarget?.id} akan menjadi invoice perpanjangan setelah meter listrik dan air terbaru dicatat.</p>
+              <p>Catat meter. Sistem membuat tagihan renew.</p>
             </div>
             <div className="renew-approval-total">
-              <span>Minimal sewa renew</span>
+              <span>Sewa renew</span>
               <strong>{formatRupiah(selectedRent || null)}</strong>
-              <small>Belum termasuk listrik/air; backend menghitung dari selisih meter.</small>
+              <small>Utility dihitung dari meter.</small>
+            </div>
+          </div>
+
+          <div className={`renew-safety-card ${approvalSafety.riskTone} mb-3`}>
+            <div>
+              <span className={`renew-risk-pill ${approvalSafety.riskTone}`}>{approvalSafety.riskLabel}</span>
+              <strong>Safety renew</strong>
+              <small>{approvalSafety.blockers[0]?.title ?? approvalSafety.warnings[0]?.title ?? 'Data siap diproses.'}</small>
+            </div>
+            <div className="renew-safety-list">
+              {[...approvalSafety.blockers, ...approvalSafety.warnings].slice(0, 3).map((item) => (
+                <div key={item.id} className={`renew-safety-item ${item.tone}`}>
+                  <strong>{item.title}</strong>
+                  <span>{item.message}</span>
+                </div>
+              ))}
+              {!approvalSafety.blockers.length && !approvalSafety.warnings.length ? (
+                <div className="renew-safety-item success"><strong>Siap approve</strong><span>Meter, tanggal, dan tagihan renew jelas.</span></div>
+              ) : null}
             </div>
           </div>
 
@@ -319,7 +370,7 @@ export default function RenewRequestsAdminPage() {
                 <div className="section-kicker">1. Tanggal & tarif</div>
                 <PeriodVisualizer
                   title="Perbandingan Masa Sewa"
-                  subtitle="Cek tanggal lama, tanggal yang diajukan tenant, dan tanggal yang akan disetujui."
+                  subtitle="Pastikan tanggal tidak mundur."
                   points={[
                     { id: 'current', label: 'Akhir masa sewa sekarang', value: formatDate((approveTarget as any)?.stay?.plannedCheckOutDate), status: 'INFO', statusLabel: 'Saat ini' },
                     { id: 'requested', label: 'Diajukan tenant', value: formatDate(approveTarget?.requestedCheckOutDate), status: 'WARNING', statusLabel: 'Request' },
@@ -329,11 +380,11 @@ export default function RenewRequestsAdminPage() {
                 <Form.Group className="mb-3 mt-3">
                   <Form.Label>Tanggal akhir masa sewa baru</Form.Label>
                   <Form.Control type="date" value={plannedCheckOutDate} onChange={(e) => setPlannedCheckOutDate(e.target.value)} />
-                  <Form.Text className="text-muted">Kosongkan untuk mengikuti tanggal yang diajukan tenant.</Form.Text>
+                  <Form.Text className="text-muted">Kosongkan = ikut request tenant.</Form.Text>
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Tarif sewa renew</Form.Label>
-                  <Form.Control type="text" inputMode="numeric" placeholder="Kosongkan jika tetap memakai tarif sebelumnya" value={approvedRentAmount} onChange={(e) => setApprovedRentAmount(e.target.value.replace(/\D/g, ''))} />
+                  <Form.Control type="text" inputMode="numeric" placeholder="Kosongkan jika tetap" value={approvedRentAmount} onChange={(e) => setApprovedRentAmount(e.target.value.replace(/\D/g, ''))} />
                   <Form.Text className="text-muted">Tarif saat ini: {formatRupiah(approveTarget?.stay?.agreedRentAmountRupiah ?? null)}.</Form.Text>
                 </Form.Group>
               </div>
@@ -341,7 +392,7 @@ export default function RenewRequestsAdminPage() {
             <Col lg={7}>
               <div className="decision-section-card">
                 <div className="section-kicker">2. Meter checkpoint wajib</div>
-                <p className="small text-muted mb-3">Sistem akan mencari catatan meter sebelumnya, menghitung selisih, lalu menambahkan biaya listrik dan air ke tagihan perpanjangan. Angka meter tidak boleh lebih kecil dari catatan sebelumnya.</p>
+                <p className="small text-muted mb-3">Catat meter terbaru. Angka tidak boleh lebih kecil dari catatan lama.</p>
                 <Row className="g-3">
                   <Col md={4}>
                     <Form.Group>
@@ -363,39 +414,54 @@ export default function RenewRequestsAdminPage() {
                   </Col>
                 </Row>
                 <div className="renew-invoice-preview mt-3">
-                  <div><span>Line 1</span><strong>Sewa masa sewa baru</strong><small>{formatRupiah(selectedRent || null)}</small></div>
-                  <div><span>Line 2</span><strong>Listrik dari selisih meter</strong><small>Dihitung backend</small></div>
-                  <div><span>Line 3</span><strong>Air dari selisih meter</strong><small>Dihitung backend</small></div>
+                  <div><span>1</span><strong>Sewa baru</strong><small>{formatRupiah(selectedRent || null)}</small></div>
+                  <div><span>2</span><strong>Listrik</strong><small>Dihitung sistem</small></div>
+                  <div><span>3</span><strong>Air</strong><small>Dihitung sistem</small></div>
                 </div>
               </div>
+              {approvalSafety.requiresAcknowledgement ? (
+                <div className="decision-section-card mt-3">
+                  <div className="section-kicker">3. Konfirmasi singkat</div>
+                  <div className="renew-ack-list">
+                    {approvalSafety.checklist.map((item) => <div key={item}>✓ {item}</div>)}
+                  </div>
+                  <Form.Check className="mt-3" type="checkbox" checked={approvalAcknowledged} onChange={(e) => { setApprovalAcknowledged(e.target.checked); if (e.target.checked) setApproveFormError(''); }} label="Saya sudah cek dan siap approve." />
+                </div>
+              ) : null}
               <div className="decision-section-card mt-3">
                 <Form.Group>
                   <Form.Label>Catatan persetujuan</Form.Label>
-                  <Form.Control as="textarea" rows={3} value={approveReviewNotes} onChange={(e) => setApproveReviewNotes(e.target.value)} placeholder="Contoh: Disetujui, meter sudah dicatat dan tagihan perpanjangan akan diterbitkan." />
+                  <Form.Control as="textarea" rows={3} value={approveReviewNotes} onChange={(e) => setApproveReviewNotes(e.target.value)} placeholder="Contoh: Meter sudah dicatat." />
                 </Form.Group>
               </div>
             </Col>
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => { setApproveTarget(null); setApproveFormError(''); }} disabled={approveMutation.isPending}>Batal</Button>
-          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menyetujui...</> : 'Setujui & Buat Tagihan Renew'}</Button>
+          <Button variant="outline-secondary" onClick={() => { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); }} disabled={approveMutation.isPending}>Batal</Button>
+          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending || !canSubmitApprove}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menyetujui...</> : approvalSafety.blockers.length ? 'Lengkapi Data Renew' : 'Approve & Buat Tagihan'}</Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={!!rejectTarget} onHide={() => { if (!rejectMutation.isPending) { setRejectTarget(null); setReviewNotes(''); } }} centered>
+      <Modal show={!!rejectTarget} onHide={() => { if (!rejectMutation.isPending) { setRejectTarget(null); setReviewNotes(''); setRejectFormError(''); } }} centered>
         <Modal.Header closeButton><Modal.Title>Tolak Perpanjangan</Modal.Title></Modal.Header>
         <Modal.Body>
+          {rejectFormError ? <Alert variant="warning" className="small">{rejectFormError}</Alert> : null}
           {rejectMutation.isError ? <Alert variant="danger" className="small">{(rejectMutation.error as any)?.response?.data?.message ?? 'Gagal menolak permintaan.'}</Alert> : null}
-          <p className="text-muted small">Anda akan menolak permintaan perpanjangan <strong>#{rejectTarget?.id}</strong> dari <strong>{getTenantName(rejectTarget)}</strong>.</p>
+          <p className="text-muted small">Tolak renew <strong>#{rejectTarget?.id}</strong> dari <strong>{getTenantName(rejectTarget)}</strong>. Alasan wajib jelas.</p>
           <Form.Group className="mb-3">
             <Form.Label>Alasan Penolakan</Form.Label>
-            <Form.Control as="textarea" rows={3} value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Tulis alasan penolakan yang jelas untuk admin/tenant..." />
+            <Form.Control as="textarea" rows={3} value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Contoh: Tagihan lama belum selesai." />
           </Form.Group>
+          <div className="renew-reject-examples">
+            <span>Contoh:</span>
+            <button type="button" onClick={() => setReviewNotes('Tagihan lama belum selesai.')}>Tagihan lama belum selesai.</button>
+            <button type="button" onClick={() => setReviewNotes('Data perpanjangan belum sesuai.')}>Data belum sesuai.</button>
+          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => { setRejectTarget(null); setReviewNotes(''); }} disabled={rejectMutation.isPending}>Batal</Button>
-          <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}>{rejectMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menolak...</> : 'Tolak'}</Button>
+          <Button variant="secondary" onClick={() => { setRejectTarget(null); setReviewNotes(''); setRejectFormError(''); }} disabled={rejectMutation.isPending}>Batal</Button>
+          <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending || !rejectNoteValid}>{rejectMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menolak...</> : 'Tolak Renew'}</Button>
         </Modal.Footer>
       </Modal>
     </div>

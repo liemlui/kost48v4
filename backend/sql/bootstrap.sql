@@ -143,16 +143,17 @@ CHECK (
   OR
   (
     "depositStatus" = 'PARTIALLY_REFUNDED'
+    AND "depositDeductionRupiah" > 0
     AND "depositRefundedRupiah" > 0
     AND "depositRefundedAt" IS NOT NULL
-    AND "depositDeductionRupiah" + "depositRefundedRupiah" < "depositAmountRupiah"
+    AND "depositDeductionRupiah" + "depositRefundedRupiah" = "depositAmountRupiah"
   )
   OR
   (
     "depositStatus" = 'REFUNDED'
-    AND "depositRefundedRupiah" > 0
+    AND "depositDeductionRupiah" = 0
+    AND "depositRefundedRupiah" = "depositAmountRupiah"
     AND "depositRefundedAt" IS NOT NULL
-    AND "depositDeductionRupiah" + "depositRefundedRupiah" = "depositAmountRupiah"
   )
   OR
   (

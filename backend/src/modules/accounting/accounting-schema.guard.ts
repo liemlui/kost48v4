@@ -43,7 +43,7 @@ export class AccountingSchemaGuard {
         ? []
         : [
             'Jalankan migration additive sebelum smoke endpoint accounting.',
-            'PowerShell: Set-Location "C:\\Users\\lieml\\Desktop\\Big Personal Web App\\kost48surabaya-v3\\kost48_full_frontend_backend_upgrade_bundle\\final_bundle\\backend"; npx prisma migrate deploy; npx prisma generate; npm run build:local',
+            'PowerShell: Set-Location "<project-root>\\backend"; npx prisma migrate deploy; npx prisma generate; npm run build:local',
             'Jika local dev belum memakai Prisma migrations dengan rapi, alternatif additive-only: npx prisma db push lalu restart backend.',
             'Setelah migration berhasil, jalankan POST /api/accounting/default-coa/seed.',
           ],

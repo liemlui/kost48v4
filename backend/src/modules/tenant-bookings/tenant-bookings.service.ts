@@ -24,6 +24,7 @@ import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schem
 import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
+import { RejectBookingDto } from './dto/reject-booking.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
@@ -63,6 +64,7 @@ interface BookingRow {
   bookingSource: string | null;
   stayPurpose: string | null;
   notes: string | null;
+  cancelReason?: string | null;
   createdById: number | null;
   createdAt: Date;
   updatedAt: Date;
@@ -525,6 +527,162 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
     }
   }
 
+
+  // -------------------------------------------------------------------------
+  // REJECT BOOKING (admin)
+  // -------------------------------------------------------------------------
+
+  async rejectBooking(stayId: number, dto: RejectBookingDto, actor: CurrentUserPayload) {
+    const reviewNotes = dto.reviewNotes?.trim();
+    if (!reviewNotes || reviewNotes.length < 8) {
+      throw new BadRequestException('Alasan penolakan booking wajib diisi minimal 8 karakter');
+    }
+
+    try {
+      const rejected = await this.prisma.$transaction(async (tx) => {
+        const rows = await tx.$queryRaw<Array<{
+          stayId: number;
+          tenantId: number;
+          roomId: number;
+          stayStatus: string;
+          expiresAt: Date | null;
+          bookingSource: string | null;
+          roomStatus: string;
+          tenantIsActive: boolean;
+        }>>(Prisma.sql`
+          SELECT
+            s.id AS "stayId",
+            s."tenantId",
+            s."roomId",
+            s.status AS "stayStatus",
+            s."expiresAt",
+            s."bookingSource",
+            r.status AS "roomStatus",
+            t."isActive" AS "tenantIsActive"
+          FROM "Stay" s
+          INNER JOIN "Room" r ON r.id = s."roomId"
+          INNER JOIN "Tenant" t ON t.id = s."tenantId"
+          WHERE s.id = ${stayId}
+          FOR UPDATE OF s, r
+        `);
+
+        const row = rows[0];
+        if (!row) throw new NotFoundException('Booking tidak ditemukan');
+
+        if (row.stayStatus !== StayStatus.ACTIVE) {
+          if (row.stayStatus === StayStatus.CANCELLED) {
+            throw new ConflictException('Booking sudah dibatalkan');
+          }
+          throw new ConflictException('Booking tidak lagi aktif dan tidak dapat ditolak lewat flow ini');
+        }
+
+        if (row.roomStatus !== RoomStatus.RESERVED) {
+          throw new ConflictException('Booking sudah masuk flow hunian/pembayaran. Gunakan flow lifecycle yang sesuai.');
+        }
+
+        if (row.bookingSource !== LeadSource.WEBSITE) {
+          throw new ConflictException('Hanya booking website yang dapat ditolak lewat review booking');
+        }
+
+        const existingInvoice = await tx.invoice.findFirst({
+          where: { stayId },
+          select: { id: true, status: true },
+        });
+        if (existingInvoice) {
+          throw new ConflictException('Booking sudah memiliki tagihan awal. Gunakan flow pembatalan tagihan/stay yang sesuai.');
+        }
+
+        const existingSubmission = await tx.paymentSubmission.findFirst({
+          where: { stayId },
+          select: { id: true, status: true },
+        });
+        if (existingSubmission) {
+          throw new ConflictException('Booking sudah memiliki bukti pembayaran. Review pembayaran harus diselesaikan dari flow pembayaran.');
+        }
+
+        const otherActiveReservedBooking = await tx.stay.findFirst({
+          where: {
+            roomId: row.roomId,
+            status: StayStatus.ACTIVE as any,
+            NOT: { id: stayId },
+            room: { status: RoomStatus.RESERVED as any },
+          },
+          select: { id: true },
+        });
+        const nextRoomStatus = otherActiveReservedBooking
+          ? RoomStatus.RESERVED
+          : RoomStatus.AVAILABLE;
+
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE "Room"
+          SET "status" = CAST(${nextRoomStatus} AS "RoomStatus"), "updatedAt" = NOW()
+          WHERE id = ${row.roomId}
+        `);
+
+        await tx.$executeRaw(Prisma.sql`
+          UPDATE "Stay"
+          SET
+            "status" = CAST(${StayStatus.CANCELLED} AS "StayStatus"),
+            "cancelReason" = ${reviewNotes},
+            "updatedAt" = NOW()
+          WHERE id = ${stayId}
+        `);
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: actor.id,
+            action: 'REJECT_BOOKING',
+            entityType: 'Stay',
+            entityId: String(stayId),
+            oldData: {
+              stayStatus: row.stayStatus,
+              roomStatus: row.roomStatus,
+            } as any,
+            newData: {
+              stayStatus: StayStatus.CANCELLED,
+              roomStatus: nextRoomStatus,
+              cancelReason: reviewNotes,
+            } as any,
+            meta: {
+              tenantId: row.tenantId,
+              roomId: row.roomId,
+              rejectedBy: actor.role,
+              source: 'ADMIN_BOOKING_REVIEW',
+            } as any,
+          },
+        });
+
+        return {
+          id: stayId,
+          status: StayStatus.CANCELLED,
+          cancelReason: reviewNotes,
+          roomStatusAfterSync: nextRoomStatus,
+          tenantId: row.tenantId,
+        };
+      });
+
+      const tenantUserId = await this.resolveTenantPortalUser(rejected.tenantId);
+      await this.notifyBookingRejected(tenantUserId, rejected.id, rejected.cancelReason);
+
+      return serializePrismaResult(rejected);
+    } catch (error: any) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+
+      const databaseCode = error?.code ?? error?.meta?.code;
+      if (databaseCode === '23505') {
+        throw new ConflictException('Penolakan booking bentrok dengan data aktif lain');
+      }
+
+      throw error;
+    }
+  }
+
   // -------------------------------------------------------------------------
   // FIND MY BOOKINGS (tenant portal)
   // -------------------------------------------------------------------------
@@ -627,9 +785,22 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           dto.cancelReason?.trim() ||
           'Dibatalkan oleh tenant sebelum review admin';
 
+        const otherActiveReservedBooking = await tx.stay.findFirst({
+          where: {
+            roomId: row.roomId,
+            status: StayStatus.ACTIVE as any,
+            NOT: { id: stayId },
+            room: { status: RoomStatus.RESERVED as any },
+          },
+          select: { id: true },
+        });
+        const nextRoomStatus = otherActiveReservedBooking
+          ? RoomStatus.RESERVED
+          : RoomStatus.AVAILABLE;
+
         await tx.$executeRaw(Prisma.sql`
           UPDATE "Room"
-          SET "status" = CAST(${RoomStatus.AVAILABLE} AS "RoomStatus"), "updatedAt" = NOW()
+          SET "status" = CAST(${nextRoomStatus} AS "RoomStatus"), "updatedAt" = NOW()
           WHERE id = ${row.roomId}
         `);
 
@@ -718,7 +889,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
           COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
           s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
-          s."bookingSource", s."stayPurpose", s.notes,
+          s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
           s."createdById", s."createdAt", s."updatedAt",
           t."fullName" AS "tenantFullName",
           t.phone AS "tenantPhone",
@@ -751,10 +922,12 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         INNER JOIN "Tenant" t ON t.id = s."tenantId"
         INNER JOIN "Room" r ON r.id = s."roomId"
         WHERE s."tenantId" = ${tenantId}
-          AND s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-          AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
+          AND (
+            (s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus") AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus"))
+            OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
+          )
         ${searchFilter}
-        ORDER BY s."createdAt" DESC, s.id DESC
+        ORDER BY s."updatedAt" DESC, s."createdAt" DESC, s.id DESC
         LIMIT ${take} OFFSET ${skip}
       `);
 
@@ -763,8 +936,10 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         FROM "Stay" s
         INNER JOIN "Room" r ON r.id = s."roomId"
         WHERE s."tenantId" = ${tenantId}
-          AND s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus")
-          AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus")
+          AND (
+            (s.status = CAST(${StayStatus.ACTIVE} AS "StayStatus") AND r.status = CAST(${RoomStatus.RESERVED} AS "RoomStatus"))
+            OR (s.status = CAST(${StayStatus.CANCELLED} AS "StayStatus") AND s."bookingSource" = CAST(${LeadSource.WEBSITE} AS "LeadSource"))
+          )
         ${searchFilter}
       `);
 
@@ -818,7 +993,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
         COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
         s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
-        s."bookingSource", s."stayPurpose", s.notes,
+        s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
         s."createdById", s."createdAt", s."updatedAt",
         t."fullName" AS "tenantFullName",
         t.phone AS "tenantPhone",
@@ -856,6 +1031,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       bookingSource: row.bookingSource,
       stayPurpose: row.stayPurpose,
       notes: row.notes,
+      cancelReason: row.cancelReason ?? null,
       createdById: row.createdById,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -993,4 +1169,42 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Never throw — notification is non-critical side effect
     }
   }
+
+  private async notifyBookingRejected(
+    recipientUserId: number | null,
+    stayId: number,
+    reason: string,
+  ) {
+    if (!recipientUserId) return;
+
+    try {
+      const title = 'Booking ditolak';
+      const entityTypeVal = 'BOOKING';
+      const entityIdVal = String(stayId);
+
+      const existing = await this.prisma.appNotification.findFirst({
+        where: {
+          recipientUserId,
+          entityType: entityTypeVal,
+          entityId: entityIdVal,
+          title,
+        },
+        select: { id: true },
+      });
+
+      if (existing) return;
+
+      await this.appNotification.create({
+        recipientUserId,
+        title,
+        body: `Booking Anda belum dapat disetujui. Alasan: ${reason}`,
+        linkTo: '/portal/bookings',
+        entityType: entityTypeVal,
+        entityId: entityIdVal,
+      });
+    } catch {
+      // Never throw — notification is non-critical side effect
+    }
+  }
+
 }

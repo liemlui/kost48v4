@@ -23,6 +23,9 @@ export function useStay(id?: number | string) {
     await queryClient.invalidateQueries({ queryKey: ['tenants'] });
     await queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
     await queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+    await queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'stay', id] });
+    await queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'summary'] });
+    await queryClient.invalidateQueries({ queryKey: ['deposit-ledger', 'reconciliation-lite'] });
     await queryClient.invalidateQueries({
       predicate: (query) => {
         const firstKey = Array.isArray(query.queryKey) ? query.queryKey[0] : undefined;

@@ -32,6 +32,7 @@ function normalizeTenantBooking(raw: TenantBooking): TenantBooking {
     expiresAt: readAlias<string | null>(raw, 'expiresAt', 'expires_at') ?? raw.expiresAt ?? null,
     bookingSource: readAlias<string | null>(raw, 'bookingSource', 'booking_source') ?? raw.bookingSource ?? null,
     stayPurpose: readAlias<string | null>(raw, 'stayPurpose', 'stay_purpose') ?? raw.stayPurpose ?? null,
+    cancelReason: readAlias<string | null>(raw, 'cancelReason', 'cancel_reason') ?? (raw as any).cancelReason ?? null,
     invoiceCount: Number(readAlias<number | string>(raw, 'invoiceCount', 'invoice_count') ?? raw.invoiceCount ?? 0),
     latestInvoiceId: readAlias<number | null>(raw, 'latestInvoiceId', 'latest_invoice_id') ?? raw.latestInvoiceId ?? null,
     latestInvoiceNumber: readAlias<string | null>(raw, 'latestInvoiceNumber', 'latest_invoice_number') ?? raw.latestInvoiceNumber ?? null,
@@ -65,6 +66,23 @@ export async function listMyTenantBookings(params?: Record<string, unknown>) {
 
 export async function approveBooking(stayId: number | string, payload: ApproveBookingPayload) {
   return updateResource<ApproveBookingResult>(`/admin/bookings/${stayId}/approve`, payload as unknown as Record<string, unknown>);
+}
+
+export interface RejectBookingPayload {
+  reviewNotes: string;
+}
+
+export interface RejectBookingResult {
+  id: number;
+  status: string;
+  cancelReason?: string | null;
+}
+
+export async function rejectBooking(stayId: number | string, payload: RejectBookingPayload) {
+  return updateResource<RejectBookingResult>(
+    `/admin/bookings/${stayId}/reject`,
+    payload as unknown as Record<string, unknown>,
+  );
 }
 
 export async function getPublicRoomDetail(roomId: number | string) {

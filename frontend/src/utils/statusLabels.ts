@@ -57,6 +57,13 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     REFUNDED: 'Dikembalikan',
     PARTIALLY_REFUNDED: 'Sebagian Dikembalikan',
     FORFEITED: 'Hangus',
+    PAYMENT_RECEIVED: 'Deposit Diterima',
+    REFUND: 'Deposit Dikembalikan',
+    DEDUCTION: 'Deposit Dipotong',
+    FORFEIT: 'Deposit Hangus',
+    MIGRATION_SNAPSHOT: 'Snapshot Migrasi',
+    INCREASE_LIABILITY: 'Deposit Masuk',
+    DECREASE_LIABILITY: 'Deposit Keluar',
     SUCCESS: 'Aman',
     WARNING: 'Perhatian',
     DANGER: 'Bahaya',
@@ -124,10 +131,10 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
 export function getStatusVariant(status?: string): 'success' | 'warning' | 'danger' | 'info' | 'secondary' | 'primary' | 'dark' {
   const normalized = String(status ?? '').toUpperCase();
 
-  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY'].includes(normalized)) return 'success';
-  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR'].includes(normalized)) return 'warning';
+  if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY', 'PAYMENT_RECEIVED', 'INCREASE_LIABILITY'].includes(normalized)) return 'success';
+  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR', 'DEDUCTION', 'FORFEIT'].includes(normalized)) return 'warning';
   if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER', 'OUT_OF_STOCK', 'DAMAGED'].includes(normalized)) return 'danger';
-  if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS'].includes(normalized)) return 'info';
+  if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS', 'REFUND', 'DECREASE_LIABILITY'].includes(normalized)) return 'info';
   if (['CLOSED', 'DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';
   return 'secondary';

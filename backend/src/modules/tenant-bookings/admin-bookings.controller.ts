@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
+import { RejectBookingDto } from './dto/reject-booking.dto';
 import { TenantBookingsService } from './tenant-bookings.service';
 
 @ApiTags('admin-bookings')
@@ -26,6 +27,18 @@ export class AdminBookingsController {
     return {
       message: 'Booking berhasil disetujui',
       data: await this.tenantBookingsService.approveBooking(stayId, dto, user),
+    };
+  }
+
+  @Patch(':stayId/reject')
+  async reject(
+    @Param('stayId', ParseIntPipe) stayId: number,
+    @Body() dto: RejectBookingDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return {
+      message: 'Booking berhasil ditolak',
+      data: await this.tenantBookingsService.rejectBooking(stayId, dto, user),
     };
   }
 }

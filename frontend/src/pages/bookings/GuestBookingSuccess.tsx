@@ -20,7 +20,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
           <Card.Body>
             <div className="text-center mb-4">
               <div className="fs-1 mb-2">&#x2705;</div>
-              <h4>Booking berhasil dibuat</h4>
+              <h4>Booking dikirim, menunggu review admin</h4>
               <p className="text-muted">{result.message}</p>
             </div>
 
@@ -32,7 +32,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                 </div>
                 <div className="col-6">
                   <div className="small text-muted">Status</div>
-                  <StatusBadge status={result.booking.status} customLabel="Menunggu Approval" />
+                  <StatusBadge status={result.booking.status} customLabel="Menunggu Review Admin" />
                 </div>
                 <div className="col-6">
                   <div className="small text-muted">Check-in</div>
@@ -44,7 +44,7 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
                 </div>
                 {result.booking.expiresAt ? (
                   <div className="col-12">
-                    <div className="small text-muted">Booking berlaku hingga</div>
+                    <div className="small text-muted">Batas tindak lanjut booking</div>
                     <div className="fw-semibold">{formatDate(result.booking.expiresAt)}</div>
                   </div>
                 ) : null}
@@ -77,31 +77,19 @@ export default function GuestBookingSuccess({ result }: GuestBookingSuccessProps
             <div className="mt-4">
               <h6 className="fw-semibold mb-3">Apa yang terjadi selanjutnya?</h6>
               <ol className="small text-muted mb-0" style={{ paddingLeft: '1.25rem' }}>
-                <li className="mb-1">
-                  <strong>Booking berhasil dikirim.</strong> Data Anda sudah tercatat di sistem kami.
-                </li>
-                <li className="mb-1">
-                  <strong>Admin akan review data booking.</strong> Tim kami akan memverifikasi informasi yang Anda berikan.
-                </li>
-                <li className="mb-1">
-                  <strong>Jika disetujui, tagihan awal akan dibuat.</strong> Invoice untuk sewa pertama dan deposit akan muncul di portal Anda.
-                </li>
-                <li className="mb-1">
-                  <strong>Bayar dan unggah bukti pembayaran.</strong> Anda bisa mengunggah bukti transfer dari halaman portal setelah login.
-                </li>
-                <li className="mb-1">
-                  <strong>Kamar aktif setelah pembayaran disetujui.</strong> Admin akan memverifikasi bukti pembayaran Anda sebelum kamar diaktifkan.
-                </li>
+                <li className="mb-1"><strong>Admin review booking.</strong></li>
+                <li className="mb-1"><strong>Jika disetujui, tagihan muncul di portal.</strong></li>
+                <li className="mb-1"><strong>Kamar aman setelah pembayaran disetujui.</strong></li>
               </ol>
             </div>
 
-            <Alert variant="light" className="small mb-0 mt-3">
-              {result.portalAccess.instructions}
+            <Alert variant="warning" className="small mb-0 mt-3">
+              <strong>Jangan transfer sebelum tagihan resmi.</strong>
             </Alert>
 
             <div className="d-flex gap-2 justify-content-center mt-4 flex-wrap">
               <Link to="/rooms" className="btn btn-outline-secondary">Lihat Kamar Lain</Link>
-              <Link to="/login" className="btn btn-primary">Pantau Booking Saya</Link>
+              <Link to="/login" className="btn btn-primary">Pantau Booking di Portal</Link>
             </div>
           </Card.Body>
         </Card>

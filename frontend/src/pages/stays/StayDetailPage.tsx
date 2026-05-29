@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Badge, Breadcrumb, Button, Card, Form, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import CompleteStayModal from '../../components/stays/CompleteStayModal';
 import ProcessDepositModal from '../../components/stays/ProcessDepositModal';
 import CancelStayModal from '../../components/stays/CancelStayModal';
 import RenewStayModal from '../../components/stays/RenewStayModal';
+import ApproveCheckoutModal from '../../components/checkout-requests/ApproveCheckoutModal';
 import RejectCheckoutModal from '../../components/checkout-requests/RejectCheckoutModal';
 import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutRequest } from '../../api/checkoutRequests';
 import { useStay } from '../../hooks/useStay';
@@ -20,7 +21,15 @@ import { useInvoices } from '../../hooks/useInvoices';
 import { useMeterReadings } from '../../hooks/useMeterReadings';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { formatDateTimeWib } from '../../utils/dateTime';
+import { buildCheckoutReadinessItems, getCheckoutReadinessSummary } from '../../utils/checkoutReadiness';
 import type { CheckoutRequest } from '../../types';
+
+
+const STAY_DETAIL_TABS = new Set(['info', 'meter', 'finance', 'notes']);
+
+function normalizeStayDetailTab(value: string | null | undefined) {
+  return value && STAY_DETAIL_TABS.has(value) ? value : 'info';
+}
 
 function formatDateSafe(dateValue: string | Date | null | undefined): string {
   return formatDateTimeWib(dateValue);
@@ -55,16 +64,23 @@ export default function StayDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'info';
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState(() => normalizeStayDetailTab(searchParams.get('tab')));
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRenewModal, setShowRenewModal] = useState(false);
+  const [approveTarget, setApproveTarget] = useState<CheckoutRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
   const [notes, setNotes] = useState('');
   const [notesError, setNotesError] = useState('');
   const [approveCheckoutError, setApproveCheckoutError] = useState('');
+  const tabsSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToTabsSection = useCallback(() => {
+    window.setTimeout(() => {
+      tabsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }, []);
 
   const { data: stay, isLoading, isError, updateMutation } = useStay(id);
   const invoicesQuery = useInvoices(id, true);
@@ -110,9 +126,10 @@ export default function StayDetailPage() {
   }, [approvedCheckoutRequestsQuery.data]);
 
   const approveCrMutation = useMutation({
-    mutationFn: async (crId: number) => approveCheckoutRequest(crId),
+    mutationFn: async ({ id: crId, reviewNotes }: { id: number; reviewNotes?: string }) => approveCheckoutRequest(crId, { reviewNotes }),
     onSuccess: async () => {
       setApproveCheckoutError('');
+      setApproveTarget(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
@@ -140,12 +157,32 @@ export default function StayDetailPage() {
     setNotes(stay?.notes ?? '');
   }, [stay?.id, stay?.notes]);
 
-  const handleTabSelect = (key: string | null) => {
-    const nextKey = key || 'info';
+  useEffect(() => {
+    const nextTab = normalizeStayDetailTab(searchParams.get('tab'));
+    setActiveTab((currentTab) => currentTab === nextTab ? currentTab : nextTab);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    const normalizedTabFromUrl = normalizeStayDetailTab(tabFromUrl);
+    if (stay?.id && tabFromUrl && normalizedTabFromUrl !== 'info') {
+      scrollToTabsSection();
+    }
+  }, [searchParams, scrollToTabsSection, stay?.id]);
+
+  const selectTab = useCallback((key: string | null, options?: { scroll?: boolean }) => {
+    const nextKey = normalizeStayDetailTab(key);
     setActiveTab(nextKey);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('tab', nextKey);
     setSearchParams(nextParams);
+    if (options?.scroll) {
+      scrollToTabsSection();
+    }
+  }, [searchParams, setSearchParams, scrollToTabsSection]);
+
+  const handleTabSelect = (key: string | null) => {
+    selectTab(key, { scroll: true });
   };
 
   const handleSaveNotes = async () => {
@@ -162,58 +199,65 @@ export default function StayDetailPage() {
   if (isError || !stay) return <Alert variant="danger">Gagal mengambil detail stay.</Alert>;
 
   const assistantItems: AssistantItem[] = [
-    ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Checkout sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Final checkout masih terblokir karena ada invoice open. Selesaikan / bayar / cancel invoice dulu.' : 'Tagihan terlihat clear. Admin dapat finalkan checkout setelah cek kamar dan deposit.', source: 'Checkout readiness', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Checkout', onAction: () => openInvoiceCount > 0 ? setActiveTab('finance') : setShowCompleteModal(true) }] : []),
-    ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Tenant mengajukan keluar', message: 'Setujui hanya jika jadwalnya benar. Approval request belum melepas kamar.', source: 'Checkout request' }] : []),
-    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Tagihan aktif memblokir checkout final', message: `${openInvoiceCount} tagihan masih belum lunas/dibatalkan. DRAFT juga ikut memblokir final checkout sesuai guard backend.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => setActiveTab('finance') }] : []),
-    ...(!meterCount ? [{ id: 'meter-missing', severity: 'WARNING' as const, title: 'Belum ada catatan meter untuk kamar ini', message: 'Renew wajib mencatat meter. Pastikan meter awal dan checkpoint berikutnya tersedia agar biaya listrik/air tidak salah.', source: 'Meter' }] : []),
-    ...(stay.depositStatus === 'HELD' && ['COMPLETED', 'CANCELLED'].includes(stay.status) ? [{ id: 'deposit-held', severity: 'HIGH' as const, title: 'Deposit masih ditahan', message: 'Deposit adalah liability; proses refund/forfeit/partial refund agar status tidak menggantung.', source: 'Deposit', actionLabel: 'Proses Deposit', onAction: () => setShowDepositModal(true) }] : []),
+    ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Checkout sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Tagihan aktif masih memblokir.' : 'Tagihan clear. Cek kamar lalu finalkan.', source: 'Checkout readiness', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Checkout', onAction: () => openInvoiceCount > 0 ? selectTab('finance', { scroll: true }) : setShowCompleteModal(true) }] : []),
+    ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Tenant mengajukan keluar', message: 'Approval belum melepas kamar.', source: 'Checkout request' }] : []),
+    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Tagihan aktif memblokir checkout final', message: `${openInvoiceCount} tagihan aktif. DRAFT ikut memblokir.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => selectTab('finance', { scroll: true }) }] : []),
+    ...(!meterCount ? [{ id: 'meter-missing', severity: 'WARNING' as const, title: 'Belum ada catatan meter untuk kamar ini', message: 'Pastikan catatan meter tersedia.', source: 'Meter' }] : []),
+    ...(stay.depositStatus === 'HELD' && ['COMPLETED', 'CANCELLED'].includes(stay.status) ? [{ id: 'deposit-held', severity: 'HIGH' as const, title: 'Deposit masih ditahan', message: 'Proses refund/potongan deposit.', source: 'Deposit', actionLabel: 'Proses Deposit', onAction: () => setShowDepositModal(true) }] : []),
   ];
 
-  const readinessItems: ReadinessItem[] = [
-    { id: 'request', label: 'Pengajuan keluar', description: approvedCheckoutRequest ? 'Sudah disetujui admin.' : pendingCheckoutRequest ? 'Masih menunggu review admin.' : 'Belum ada pengajuan keluar aktif.', state: approvedCheckoutRequest ? 'pass' : pendingCheckoutRequest ? 'warn' : 'info' },
-    { id: 'invoice', label: 'Tagihan open', description: openInvoiceCount > 0 ? `${openInvoiceCount} invoice masih belum PAID/CANCELLED.` : 'Tidak ada invoice open dari data yang dimuat.', state: openInvoiceCount > 0 ? 'block' : 'pass' },
-    { id: 'deposit', label: 'Deposit', description: `Status deposit: ${depositLabel}.`, state: stay.depositStatus === 'HELD' ? 'warn' : 'pass' },
-    { id: 'meter', label: 'Checkpoint meter', description: meterCount ? `Catatan terakhir: ${formatDateSafe(latestMeterReadingAt)}. Renew akan menghitung selisih meter dari catatan ini.` : 'Belum ada catatan meter. Renew dan final billing rawan salah jika meter belum dicatat.', state: meterCount ? 'pass' : 'warn' },
-    { id: 'room', label: 'Status kamar', description: `Kamar sekarang ${stay.room?.status ?? '-'}.`, state: stay.room?.status === 'OCCUPIED' ? 'pass' : 'info' },
-  ];
+  const readinessItems: ReadinessItem[] = buildCheckoutReadinessItems({
+    stay,
+    invoices,
+    hasApprovedCheckoutRequest: Boolean(approvedCheckoutRequest),
+    hasPendingCheckoutRequest: Boolean(pendingCheckoutRequest),
+    meterCount,
+    latestMeterReadingAt,
+  });
+  const checkoutReadinessSummary = getCheckoutReadinessSummary(invoices, Boolean(approvedCheckoutRequest));
 
   const timelineSteps: TimelineStep[] = [
     { id: 'checkin', label: 'Check-in', description: formatDateSafe(stay.checkInDate), status: 'done' },
     { id: 'active', label: 'Masa sewa aktif', description: `Akhir masa sewa: ${formatDateSafe(stay.plannedCheckOutDate)}`, status: stay.status === 'ACTIVE' ? 'active' : 'done' },
     { id: 'checkout-request', label: 'Ajukan keluar', description: approvedCheckoutRequest ? 'Request disetujui.' : pendingCheckoutRequest ? 'Menunggu review.' : 'Belum ada request aktif.', status: approvedCheckoutRequest ? 'done' : pendingCheckoutRequest ? 'active' : 'pending' },
-    { id: 'final', label: 'Final checkout', description: openInvoiceCount > 0 ? 'Terblokir invoice open.' : 'Bisa diproses jika cek kamar/deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
+    { id: 'final', label: 'Final checkout', description: openInvoiceCount > 0 ? 'Terblokir tagihan aktif.' : 'Bisa diproses jika cek kamar, meter akhir, dan deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
   ];
 
   return (
     <div>
       <Breadcrumb className="mb-3">
         <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/dashboard' }}>Dashboard</Breadcrumb.Item>
-        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/stays' }}>Stays</Breadcrumb.Item>
+        <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/stays' }}>Masa Sewa</Breadcrumb.Item>
         <Breadcrumb.Item active>{stay.tenant?.fullName ?? `Stay #${stay.id}`}</Breadcrumb.Item>
       </Breadcrumb>
 
       <PageHeader
-        eyebrow="Stay detail"
-        title={stay.tenant?.fullName ?? `Stay #${stay.id}`}
+        eyebrow="Detail Masa Sewa"
+        title={stay.tenant?.fullName ?? `Masa Sewa #${stay.id}`}
         description={`Kamar ${stay.room?.code ?? stay.roomId} · Status ${stay.status} · Deposit ${stay.depositStatus ?? 'HELD'}`}
       />
 
-      <AssistantPanel title="Asisten Checkout & Masa Sewa" subtitle="Ringkasan blocker, request keluar, invoice, dan deposit untuk stay ini." items={assistantItems} emptyTitle="Tidak ada blocker besar" emptyMessage="Stay ini tidak memiliki blocker checkout utama dari data yang dimuat." />
+      <AssistantPanel title="Asisten Checkout & Masa Sewa" subtitle="Blocker utama masa sewa ini." items={assistantItems} emptyTitle="Tidak ada blocker besar" emptyMessage="Tidak ada blocker utama." />
 
       {openInvoiceCount > 0 && approvedCheckoutRequest ? (
         <BlockedReasonCard
           title="Checkout final terblokir tagihan"
-          reason="Sistem akan menolak final checkout selama masih ada tagihan yang belum lunas atau belum dibatalkan. Selesaikan tagihan dulu sebelum melepas kamar."
+          reason="Final checkout ditolak jika tagihan masih aktif."
           actionLabel="Buka Tab Keuangan"
           actionTo={`/stays/${stay.id}?tab=finance`}
         />
       ) : null}
 
-      <ReadinessChecklist title="Checkout Readiness" subtitle="Checklist operasional sebelum tombol Checkout Final dipakai. Renew juga wajib memakai checkpoint meter agar tagihan utilitas akurat." items={readinessItems} />
-      <LifecycleTimeline title="Lifecycle Stay" subtitle="Alur dari check-in sampai final checkout." steps={timelineSteps} />
+      <ReadinessChecklist title="Safety Belt Checkout" subtitle="Cek tagihan, meter, kamar, deposit." items={readinessItems} />
+      <LifecycleTimeline title="Alur Masa Sewa" subtitle="Alur dari check-in sampai final checkout." steps={timelineSteps} />
 
       <Card className="detail-hero border-0 mb-4">
         <Card.Body>
+          <Alert variant={checkoutReadinessSummary.tone} className="mb-3">
+            <strong>{checkoutReadinessSummary.title}</strong>
+            <div className="small mt-1">{checkoutReadinessSummary.message}</div>
+          </Alert>
+
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
             <div className="d-flex flex-wrap gap-2 align-items-center">
               <StatusBadge status={stay.status} />
@@ -262,25 +306,25 @@ export default function StayDetailPage() {
               <div className="metric-tile-value">{formatDateSafe(stay.plannedCheckOutDate)}</div>
             </div>
             <div className="metric-tile">
-              <div className="metric-tile-label">Invoice terbuka</div>
+              <div className="metric-tile-label">Tagihan aktif</div>
               <div className="metric-tile-value">{openInvoiceCount}</div>
             </div>
           </div>
 
           <Alert variant="info" className="mb-3">
-            <strong>Rule renew terbaru:</strong> perpanjangan wajib mencatat meter terbaru. Selisih listrik dan air akan otomatis masuk ke tagihan perpanjangan.
+            <strong>Aturan perpanjangan:</strong> perpanjangan wajib catat meter.
           </Alert>
 
           {hasUnpaid ? (
             <Alert variant="warning" className="mb-3">
               <strong>Ada tagihan yang belum dibayar.</strong>
-              <div className="small mt-1">Periksa tab Keuangan untuk melihat tagihan dengan status Diterbitkan atau Sebagian Dibayar.</div>
+              <div className="small mt-1">Cek tab Keuangan.</div>
             </Alert>
           ) : null}
 
           {overdue ? (
             <Alert variant="warning" className="mb-0">
-              Ada tagihan overdue untuk masa sewa ini. Cek tab Keuangan untuk tindak lanjut pembayaran atau negosiasi tenant.
+              Tagihan overdue. Cek Keuangan.
             </Alert>
           ) : null}
 
@@ -294,17 +338,17 @@ export default function StayDetailPage() {
                   · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                  Setujui rencana hanya menyetujui jadwal keluar. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Final Checkout.
+                  Approval belum final checkout. Tagihan aktif tetap memblokir pelepasan kamar.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
                 <Button
                   size="sm"
                   variant="primary"
-                  onClick={() => approveCrMutation.mutate(pendingCheckoutRequest.id)}
+                  onClick={() => setApproveTarget(pendingCheckoutRequest)}
                   disabled={approveCrMutation.isPending}
                 >
-                  {approveCrMutation.isPending ? '...' : 'Setujui Rencana'}
+                  Review
                 </Button>
                 <Button
                   size="sm"
@@ -334,7 +378,7 @@ export default function StayDetailPage() {
                   · Alasan: {approvedCheckoutRequest.checkoutReason || approvedCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                   Rencana keluar kamar telah disetujui. Tenant masih tercatat sebagai penghuni sampai admin menjalankan Final Checkout.
+                  Disetujui, tapi kamar belum dilepas. Final checkout tetap terpisah.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
@@ -343,14 +387,9 @@ export default function StayDetailPage() {
                   <Button
                     size="sm"
                     variant="outline-primary"
-                    onClick={() => {
-                      const nextParams = new URLSearchParams(searchParams);
-                      nextParams.set('tab', 'finance');
-                      setSearchParams(nextParams);
-                      setActiveTab('finance');
-                    }}
+                    onClick={() => selectTab('finance', { scroll: true })}
                   >
-                    Lihat & Kelola Tagihan
+                    Kelola Tagihan
                   </Button>
                 ) : (
                   <Button
@@ -360,7 +399,7 @@ export default function StayDetailPage() {
                     disabled={openInvoiceCount > 0}
                     title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum final checkout' : undefined}
                   >
-                    Checkout Final
+                    Finalkan Checkout
                   </Button>
                 )}
               </div>
@@ -369,14 +408,15 @@ export default function StayDetailPage() {
         </Card.Body>
       </Card>
 
-      <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3">
+      <div ref={tabsSectionRef} className="stay-detail-tabs-section">
+        <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-3">
         <Tab eventKey="info" title="Informasi">
           <div className="pt-3"><InfoTab stay={stay} /></div>
         </Tab>
         <Tab eventKey="meter" title="Meteran">
           <div className="pt-3"><MeterTab stay={stay} readings={metersQuery.data} isLoading={metersQuery.isLoading} isError={metersQuery.isError} /></div>
         </Tab>
-        <Tab eventKey="finance" title={<span>Keuangan {overdue ? <Badge bg="danger">!</Badge> : null}</span>}>
+        <Tab eventKey="finance" title={<span className="d-inline-flex align-items-center gap-2">Keuangan {overdue ? <Badge bg="danger">!</Badge> : null}</span>}>
           <div className="pt-3"><FinanceTab stay={stay} enabled={activeTab === 'finance'} /></div>
         </Tab>
         <Tab eventKey="notes" title="Catatan">
@@ -395,12 +435,33 @@ export default function StayDetailPage() {
             </Card>
           </div>
         </Tab>
-      </Tabs>
+        </Tabs>
+      </div>
 
-      <CompleteStayModal show={showCompleteModal} onHide={() => setShowCompleteModal(false)} onSuccess={() => navigate('/stays?status=ALL')} stay={stay} invoices={invoices} />
+      <CompleteStayModal
+        show={showCompleteModal}
+        onHide={() => setShowCompleteModal(false)}
+        onSuccess={() => navigate('/stays?status=ALL')}
+        stay={stay}
+        invoices={invoices}
+        hasApprovedCheckoutRequest={Boolean(approvedCheckoutRequest)}
+        hasPendingCheckoutRequest={Boolean(pendingCheckoutRequest)}
+        meterCount={meterCount}
+        latestMeterReadingAt={latestMeterReadingAt}
+      />
       <ProcessDepositModal show={showDepositModal} onHide={() => setShowDepositModal(false)} stay={stay} />
       <CancelStayModal show={showCancelModal} onHide={() => setShowCancelModal(false)} stay={stay} invoices={invoices} />
       <RenewStayModal show={showRenewModal} onHide={() => setShowRenewModal(false)} stay={stay} onSuccess={() => {}} />
+      <ApproveCheckoutModal
+        show={Boolean(approveTarget)}
+        checkoutRequest={approveTarget}
+        onHide={() => setApproveTarget(null)}
+        onSubmit={(reviewNotes) => {
+          approveCrMutation.mutate({ id: approveTarget!.id, reviewNotes });
+        }}
+        isSubmitting={approveCrMutation.isPending}
+        openInvoiceCount={openInvoiceCount}
+      />
       <RejectCheckoutModal
         show={Boolean(rejectTarget)}
         onHide={() => setRejectTarget(null)}

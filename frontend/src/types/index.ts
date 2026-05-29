@@ -404,6 +404,7 @@ export type TenantBooking = {
   bookingSource?: string | null;
   stayPurpose?: string | null;
   notes?: string | null;
+  cancelReason?: string | null;
   createdById?: number | null;
   createdAt?: string;
   updatedAt?: string;

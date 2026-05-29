@@ -95,8 +95,8 @@ export default function TenantBookingGate({ mode = 'rooms' }: { mode?: 'rooms' |
       <Alert variant="warning" className="mt-3 border-0 tenant-booking-lock-alert">
         <strong>{mode === 'booking-route' ? 'Kamu masih punya proses pemesanan.' : 'Katalog disembunyikan agar tidak bingung.'}</strong>{' '}
         {mode === 'booking-route'
-          ? 'Pemesanan ini belum mengunci kamar sampai pembayaran disetujui. Batalkan proses ini jika ingin memilih kamar lain.'
-          : 'Pemesanan belum mengunci kamar sampai pembayaran disetujui, tetapi katalog disembunyikan supaya kamu fokus menyelesaikan satu proses dulu.'}
+          ? 'Selesaikan atau batalkan proses ini dulu.'
+          : 'Selesaikan satu proses dulu agar tidak bingung.'}
       </Alert>
 
       <Modal show={Boolean(cancelTarget)} onHide={() => !cancelMutation.isPending && setCancelTarget(null)} centered backdrop="static">
@@ -108,7 +108,7 @@ export default function TenantBookingGate({ mode = 'rooms' }: { mode?: 'rooms' |
             Kamu akan membatalkan pemesanan kamar <strong>{cancelTarget?.room?.code ?? (cancelTarget ? `#${cancelTarget.roomId}` : '')}</strong>.
           </p>
           <p className="small text-muted mb-0">
-            Setelah dibatalkan, kamu bisa kembali memilih kamar lain di katalog.
+            Setelah batal, kamu bisa pilih kamar lain.
           </p>
           {cancelError ? <Alert variant="danger" className="mt-3 mb-0">{cancelError}</Alert> : null}
         </Modal.Body>

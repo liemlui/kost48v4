@@ -11,6 +11,7 @@ import StatusBadge, { getStatusLabel } from '../common/StatusBadge';
 import EmptyState from '../common/EmptyState';
 import { formatDateSafe, formatPeriod } from '../../pages/resources/simpleCrudHelpers';
 import { fetchAccountingReadiness } from '../../api/accounting';
+import { DepositLedgerPanel } from '../deposit';
 
 function isOverdue(invoice: Invoice) {
   if (!invoice.dueDate) return false;
@@ -155,6 +156,8 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
             <span className="summary-chip-value">{invoices.filter((invoice) => invoice.status === 'PAID').length}</span>
           </div>
         </div>
+
+        <DepositLedgerPanel stay={stay} enabled={enabled} />
 
         <div className="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
           <div className="d-flex flex-wrap gap-2">

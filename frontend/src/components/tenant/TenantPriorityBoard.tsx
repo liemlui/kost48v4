@@ -1,6 +1,8 @@
 import { Button, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import type { AssistantItem } from '../command-center';
+import { compactText, compactTitle } from '../../utils/readabilityRules';
+import { limitRepeatedActions } from '../../utils/actionDedup';
 
 const severityMeta: Record<string, { tone: string; icon: string; label: string }> = {
   BLOCKER: { tone: 'danger', icon: '🚫', label: 'Harus diselesaikan' },
@@ -18,9 +20,9 @@ function getMeta(severity?: string) {
 
 export default function TenantPriorityBoard({
   title = 'Prioritas Kamu Sekarang',
-  subtitle = 'Urutan ini membantu kamu tahu aksi mana yang perlu didahulukan.',
+  subtitle = 'Tiga hal paling penting hari ini.',
   items,
-  maxItems = 4,
+  maxItems = 3,
 }: {
   title?: string;
   subtitle?: string;
@@ -28,7 +30,7 @@ export default function TenantPriorityBoard({
   maxItems?: number;
 }) {
   const navigate = useNavigate();
-  const visibleItems = items.slice(0, maxItems);
+  const visibleItems = limitRepeatedActions(items.slice(0, maxItems), 2);
 
   if (!visibleItems.length) return null;
 
@@ -37,11 +39,11 @@ export default function TenantPriorityBoard({
       <Card.Body>
         <div className="tenant-priority-board-head">
           <div>
-            <div className="command-eyebrow">Action-first assistant</div>
+            <div className="command-eyebrow">Asisten prioritas penghuni</div>
             <h5>{title}</h5>
             <p>{subtitle}</p>
           </div>
-          <span className="tenant-priority-count">{visibleItems.length} item</span>
+          <span className="tenant-priority-count">Top {visibleItems.length}</span>
         </div>
         <div className="tenant-priority-list">
           {visibleItems.map((item) => {
@@ -62,8 +64,8 @@ export default function TenantPriorityBoard({
                     {item.source ? <span>{item.source}</span> : null}
                     {item.count ? <span>{item.count} item</span> : null}
                   </div>
-                  <strong>{item.title}</strong>
-                  <p>{item.message}</p>
+                  <strong>{compactTitle(item.title)}</strong>
+                  <p>{compactText(item.message, 96)}</p>
                 </div>
                 {item.actionLabel && (item.onAction || item.actionTo) ? (
                   <Button

@@ -14,6 +14,7 @@ import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
 import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
 import { fetchBusinessHealth } from '../../api/finance';
+import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary, type DepositLedgerReconciliationLite, type DepositLedgerSummary } from '../../api/depositLedger';
 import { fetchAutoOpsStatus, type AutoOpsStatus } from '../../api/autoOps';
 import { fetchMyStaffRoutineKpi, fetchStaffRoutineToday } from '../../api/staffRoutines';
 import { fetchAdminStaffPerformance } from '../../api/staffPerformance';
@@ -25,7 +26,7 @@ import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { addHoursToDate, formatClockWib, formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
-import type { CheckoutRequest, Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
+import type { CheckoutRequest, InventoryItem, Invoice, PaymentSubmission, RenewRequest, Room, Stay, Ticket } from '../../types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type AutoOpsStatusLike = AutoOpsStatus;
@@ -76,6 +77,67 @@ function formatNumber(value: number) {
 
 function formatCurrencyCompact(value: number) {
   return new Intl.NumberFormat('id-ID', { notation: 'compact', maximumFractionDigits: 1 }).format(Math.round(value));
+}
+
+
+function formatCurrencyFull(value: number) {
+  return `Rp ${formatNumber(value)}`;
+}
+
+function getCurrentMonthWindow() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return { start, end, label: now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) };
+}
+
+function isDateInsideWindow(value: string | Date | null | undefined, start: Date, end: Date) {
+  if (!value) return false;
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return false;
+  return date >= start && date < end;
+}
+
+function getRecordDate(record: unknown, keys: string[]): string | Date | null {
+  if (!record || typeof record !== 'object') return null;
+  const obj = record as Record<string, unknown>;
+  for (const key of keys) {
+    const value = obj[key];
+    if (typeof value === 'string' || value instanceof Date) return value;
+  }
+  return null;
+}
+
+function getInvoiceOutstandingAmount(invoice: Invoice) {
+  const total = Number(getInvoiceTotalAmount(invoice) ?? invoice.totalAmountRupiah ?? 0);
+  const paid = Number(invoice.paidAmountRupiah ?? 0);
+  return Math.max(0, total - paid);
+}
+
+function getInvoicePaidThisMonthAmount(invoice: Invoice, start: Date, end: Date) {
+  const paymentTotal = (invoice.payments ?? [])
+    .filter((payment) => isDateInsideWindow(payment.paymentDate, start, end))
+    .reduce((sum, payment) => sum + Number(payment.amountRupiah ?? 0), 0);
+
+  if (paymentTotal > 0) return paymentTotal;
+  if (invoice.status === 'PAID' && isDateInsideWindow(invoice.paidAt ?? invoice.issuedAt, start, end)) {
+    return Number(invoice.paidAmountRupiah ?? getInvoiceTotalAmount(invoice) ?? invoice.totalAmountRupiah ?? 0);
+  }
+  return 0;
+}
+
+function getExpenseAmount(expense: unknown) {
+  if (!expense || typeof expense !== 'object') return 0;
+  const obj = expense as Record<string, unknown>;
+  return Number(obj.amountRupiah ?? obj.amount ?? obj.totalAmountRupiah ?? 0);
+}
+
+function getExpenseDate(expense: unknown) {
+  return getRecordDate(expense, ['expenseDate', 'spentAt', 'paymentDate', 'createdAt', 'date']);
+}
+
+function getPaymentReviewSubject(submission: PaymentSubmission) {
+  return submission.tenant?.fullName || submission.submittedBy?.fullName || `Tenant #${submission.tenantId}`;
 }
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
@@ -354,7 +416,7 @@ function AutoOpsUrgencyCard({ status, role }: { status?: AutoOpsStatusLike | nul
         <Alert variant={hasUrgent ? 'danger' : 'info'} className="mt-3 mb-0 small">
           {hasUrgent
             ? 'Ada flow melewati SLA. Booking yang tidak direview/dibayar tepat waktu dapat direset agar kamar tidak tertahan.'
-            : 'Rule first paid tetap aktif: kamar aman setelah pembayaran valid disetujui, bukan hanya karena booking.'}
+            : 'First-paid aktif: kamar aman setelah pembayaran disetujui.'}
         </Alert>
       </Card.Body>
     </Card>
@@ -1262,6 +1324,77 @@ function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendi
   );
 }
 
+
+function countExpiredDates(dates: Array<string | Date | null | undefined>) {
+  return dates
+    .map((value) => parseDateTimeSafe(value))
+    .filter((date): date is Date => Boolean(date))
+    .filter((date) => date.getTime() < Date.now()).length;
+}
+
+type AdminOperationsCommandQueueProps = {
+  lanes: AdminWorkLane[];
+  assistantItems: AssistantItem[];
+  metrics: MetricChip[];
+  topQueueItem?: ActionQueueItem;
+  queueItems: ActionQueueItem[];
+  onNavigate: (to: string) => void;
+};
+
+function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueItem, queueItems, onNavigate }: AdminOperationsCommandQueueProps) {
+  const blockerCount = queueItems.filter((item) => item.priority === 'BLOCKER' || item.timeStatusTone === 'danger').length;
+  const decisionCount = lanes.reduce((sum, lane) => sum + lane.value, 0);
+  const primaryAction = topQueueItem?.actionTo ?? lanes.find((lane) => lane.value > 0)?.to ?? '/dashboard';
+  const primaryLabel = topQueueItem?.recommendedAction ?? lanes.find((lane) => lane.value > 0)?.action ?? 'Cek dashboard';
+
+  return (
+    <Card className="content-card border-0 admin-operations-command-card mb-3">
+      <Card.Body>
+        <div className="admin-ops-command-hero">
+          <div>
+            <div className="admin-section-label">M5B Admin Operations Command Queue</div>
+            <h2>Kerjakan yang mengunci flow dulu.</h2>
+            <p>
+              Dashboard ini menggabungkan booking, pembayaran, renew, checkout, tagihan, tiket, dan stok menjadi antrean aksi harian.
+              Admin tidak perlu menebak menu mana yang harus dibuka dulu.
+            </p>
+          </div>
+          <div className="admin-ops-command-summary">
+            <span>{decisionCount} pekerjaan aktif</span>
+            <strong>{blockerCount ? `${blockerCount} blocker` : 'Tidak ada blocker merah'}</strong>
+            <Button variant={blockerCount ? 'primary' : 'outline-primary'} size="sm" onClick={() => onNavigate(primaryAction)}>{primaryLabel}</Button>
+          </div>
+        </div>
+
+        <AdminContinuityStrip lanes={lanes} onNavigate={onNavigate} />
+
+        <div className="admin-ops-command-grid">
+          <div>
+            <AssistantPanel
+              title="Daily Assistant Admin"
+              subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant. Tidak ada aksi sensitif yang dijalankan otomatis."
+              items={assistantItems}
+              emptyTitle="Operasional hari ini aman"
+              emptyMessage="Tidak ada bukti bayar pending, checkout macet, renew pending, tagihan overdue, atau tiket penting dari data yang dimuat."
+              maxItems={4}
+              collapsible={false}
+            />
+          </div>
+          <div>
+            <AdminHealthChips metrics={metrics} />
+            <div className="admin-ops-guardrails mt-3">
+              <div><strong>Payment</strong><span>Admin hanya verifikasi/reject bukti; AutoOps tidak approve pembayaran.</span></div>
+              <div><strong>Renew</strong><span>Perpanjangan wajib melewati meter checkpoint dan invoice renew.</span></div>
+              <div><strong>Checkout</strong><span>Final checkout tetap manual dan harus bebas tagihan open.</span></div>
+              <div><strong>Deposit</strong><span>Refund/deduction/forfeit tetap keputusan admin/owner, bukan otomatis.</span></div>
+            </div>
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+}
+
 function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaymentReviewCount, pendingApprovalCount, waitingInitialPaymentCount, pendingRenewCount, checkoutCount }: {
   activeArea: AdminQueueArea;
   rooms: Room[];
@@ -1306,6 +1439,260 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
   );
 }
 
+
+type OwnerFinancialHealthCockpitProps = {
+  invoices: Invoice[];
+  expenses: unknown[];
+  paymentReviewItems: PaymentSubmission[];
+  pendingRenewCount: number;
+  approvedCheckoutRequestCount: number;
+  depositSummary?: DepositLedgerSummary;
+  depositReconciliation?: DepositLedgerReconciliationLite;
+  depositLoading?: boolean;
+  depositError?: boolean;
+  onNavigate: (to: string) => void;
+};
+
+function OwnerFinancialHealthCockpit({
+  invoices,
+  expenses,
+  paymentReviewItems,
+  pendingRenewCount,
+  approvedCheckoutRequestCount,
+  depositSummary,
+  depositReconciliation,
+  depositLoading,
+  depositError,
+  onNavigate,
+}: OwnerFinancialHealthCockpitProps) {
+  const month = getCurrentMonthWindow();
+  const paidInThisMonthRupiah = invoices.reduce((sum, invoice) => sum + getInvoicePaidThisMonthAmount(invoice, month.start, month.end), 0);
+  const openInvoiceRupiah = invoices.filter(isOpenInvoice).reduce((sum, invoice) => sum + getInvoiceOutstandingAmount(invoice), 0);
+  const overdueInvoiceRupiah = invoices.filter(isOverdue).reduce((sum, invoice) => sum + getInvoiceOutstandingAmount(invoice), 0);
+  const expenseThisMonthRupiah = expenses
+    .filter((expense) => isDateInsideWindow(getExpenseDate(expense), month.start, month.end))
+    .reduce<number>((sum, expense) => sum + getExpenseAmount(expense), 0);
+  const pendingReviewRupiah = paymentReviewItems.reduce((sum, submission) => sum + Number(submission.amountRupiah ?? 0), 0);
+  const depositHeldRupiah = Number(depositSummary?.totals?.ledgerHeldBalanceRupiah ?? 0);
+  const depositReceivedRupiah = Number(depositSummary?.totals?.increaseRupiah ?? 0);
+  const depositReleasedRupiah = Number(depositSummary?.totals?.decreaseRupiah ?? 0);
+  const netOperatingCashRupiah = paidInThisMonthRupiah - expenseThisMonthRupiah;
+  const mismatchCount = Number(depositReconciliation?.mismatchCount ?? 0);
+  const historicalLedgerEmptyCount = (depositReconciliation?.items ?? []).filter((item) => Number(item.depositAmountRupiah ?? 0) > 0 && Number(item.ledgerEntryCount ?? 0) === 0).length;
+  const overdueInvoices = invoices.filter(isOverdue).slice(0, 4);
+  const draftInvoices = invoices.filter((invoice) => invoice.status === 'DRAFT').slice(0, 3);
+
+  const metrics: MetricChip[] = [
+    {
+      id: 'paid-in-month',
+      label: `Uang masuk ${month.label}`,
+      value: formatCurrencyFull(paidInThisMonthRupiah),
+      helper: 'Dihitung dari pembayaran invoice bulan ini. Deposit tidak dihitung sebagai omzet.',
+      status: paidInThisMonthRupiah > 0 ? 'SUCCESS' : 'INFO',
+      icon: '💰',
+      to: '/invoice-payments',
+    },
+    {
+      id: 'open-receivable',
+      label: 'Tagihan terbuka',
+      value: formatCurrencyFull(openInvoiceRupiah),
+      helper: `${invoices.filter(isOpenInvoice).length} tagihan belum PAID/CANCELLED`,
+      status: openInvoiceRupiah > 0 ? 'WARNING' : 'SUCCESS',
+      icon: '🧾',
+      to: '/invoices',
+    },
+    {
+      id: 'pending-review-money',
+      label: 'Bukti bayar pending',
+      value: formatCurrencyFull(pendingReviewRupiah),
+      helper: `${paymentReviewItems.length} bukti menunggu admin/owner`,
+      status: pendingReviewRupiah > 0 ? 'WARNING' : 'SUCCESS',
+      icon: '✅',
+      to: '/payment-submissions/review',
+    },
+    {
+      id: 'deposit-held',
+      label: 'Deposit ditahan',
+      value: formatCurrencyFull(depositHeldRupiah),
+      helper: 'Liability operasional tenant, bukan pendapatan kos.',
+      status: mismatchCount > 0 ? 'DANGER' : depositHeldRupiah > 0 ? 'INFO' : 'SUCCESS',
+      icon: '🛡️',
+      to: '/finance/accounting-setup',
+    },
+    {
+      id: 'expense-month',
+      label: `Pengeluaran ${month.label}`,
+      value: formatCurrencyFull(expenseThisMonthRupiah),
+      helper: 'Dari expense yang punya tanggal bulan ini.',
+      status: expenseThisMonthRupiah > 0 ? 'INFO' : 'SUCCESS',
+      icon: '💸',
+      to: '/expenses',
+    },
+    {
+      id: 'net-cash-month',
+      label: 'Estimasi net cash',
+      value: formatCurrencyFull(netOperatingCashRupiah),
+      helper: 'Uang masuk invoice bulan ini dikurangi expense bulan ini.',
+      status: netOperatingCashRupiah >= 0 ? 'SUCCESS' : 'DANGER',
+      icon: '📊',
+      to: '/reports?tab=finance',
+    },
+  ];
+
+  const queueItems: ActionQueueItem[] = dedupeCommandItems([
+    ...paymentReviewItems.slice(0, 5).map((submission) => {
+      const receivedAt = submission.createdAt ?? submission.paidAt;
+      const deadline = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.paymentReviewMax);
+      const time = makeQueueTime(deadline);
+      return {
+        id: `owner-fin-payment-${submission.id}`,
+        priority: time.timeStatusTone === 'danger' ? 'BLOCKER' : 'HIGH',
+        type: 'Review pembayaran',
+        subject: getPaymentReviewSubject(submission),
+        issue: `${formatCurrencyFull(Number(submission.amountRupiah ?? 0))} menunggu verifikasi. Status kamar/tagihan bisa tertahan sampai bukti diputuskan.`,
+        receivedAtLabel: receivedAt ? makeClock(receivedAt) : undefined,
+        ...time,
+        recommendedAction: 'Verifikasi Pembayaran',
+        actionTo: '/payment-submissions/review',
+        dedupKey: `payment-review-${submission.id}`,
+      } satisfies ActionQueueItem;
+    }),
+    ...overdueInvoices.map((invoice) => ({
+      id: `owner-fin-overdue-${invoice.id}`,
+      priority: 'HIGH' as const,
+      type: 'Tagihan overdue',
+      subject: invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`,
+      issue: `${invoice.invoiceNumber ?? `Tagihan #${invoice.id}`} masih terbuka sebesar ${formatCurrencyFull(getInvoiceOutstandingAmount(invoice))}.`,
+      deadlineLabel: invoice.dueDate ? formatDateSafe(invoice.dueDate) : undefined,
+      timeStatusLabel: 'Lewat jatuh tempo',
+      timeStatusTone: 'danger' as const,
+      recommendedAction: 'Lihat Tagihan',
+      actionTo: `/invoices/${invoice.id}`,
+      dedupKey: `overdue-invoice-${invoice.id}`,
+    })),
+    ...draftInvoices.map((invoice) => ({
+      id: `owner-fin-draft-${invoice.id}`,
+      priority: 'MEDIUM' as const,
+      type: 'Draft invoice',
+      subject: invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`,
+      issue: `${invoice.invoiceNumber ?? `Tagihan #${invoice.id}`} masih draft. Pastikan memang belum perlu diterbitkan ke tenant.`,
+      recommendedAction: 'Cek Draft',
+      actionTo: `/invoices/${invoice.id}`,
+      dedupKey: `draft-invoice-${invoice.id}`,
+    })),
+    mismatchCount > 0 ? {
+      id: 'owner-fin-deposit-mismatch',
+      priority: 'BLOCKER' as const,
+      type: 'Rekonsiliasi deposit',
+      subject: `${mismatchCount} stay perlu review`,
+      issue: 'Saldo deposit snapshot dan ledger berbeda. Jangan proses refund/forfeit sebelum dicek.',
+      recommendedAction: 'Buka Deposit',
+      actionTo: '/finance/accounting-setup',
+      dedupKey: 'deposit-mismatch',
+    } : null,
+    approvedCheckoutRequestCount > 0 && depositHeldRupiah > 0 ? {
+      id: 'owner-fin-checkout-deposit-followup',
+      priority: 'WARNING' as const,
+      type: 'Checkout + deposit',
+      subject: `${approvedCheckoutRequestCount} checkout approved`,
+      issue: 'Ada checkout approved dan deposit masih ditahan. Pastikan final checkout dan settlement deposit tidak tertunda.',
+      recommendedAction: 'Cek Checkout',
+      actionTo: '/stays?status=BOOKINGS',
+      dedupKey: 'checkout-deposit-followup',
+    } : null,
+    pendingRenewCount > 0 ? {
+      id: 'owner-fin-renew-meter',
+      priority: 'WARNING' as const,
+      type: 'Perpanjangan',
+      subject: `${pendingRenewCount} renew pending`,
+      issue: 'Renew harus melewati meter checkpoint dan invoice perpanjangan sebelum tenant lanjut masa sewa.',
+      recommendedAction: 'Review Renew',
+      actionTo: '/renew-requests',
+      dedupKey: 'renew-pending-owner-finance',
+    } : null,
+  ].filter(Boolean) as ActionQueueItem[]);
+
+  const recentDepositEntries = depositSummary?.recentEntries ?? [];
+
+  return (
+    <Card className="content-card border-0 mb-4 owner-financial-health-cockpit">
+      <Card.Body>
+        <div className="table-meta align-items-start">
+          <div>
+            <div className="panel-title">Financial Health Cockpit</div>
+            <div className="panel-subtitle">Ringkasan bisnis owner: cash masuk, tagihan tertahan, deposit liability, dan aksi finance paling penting.</div>
+          </div>
+          <div className="d-flex gap-2 flex-wrap justify-content-end">
+            <Button variant="outline-primary" size="sm" onClick={() => onNavigate('/invoices')}>Tagihan</Button>
+            <Button variant="outline-primary" size="sm" onClick={() => onNavigate('/payment-submissions/review')}>Review Bayar</Button>
+            <Button variant="outline-secondary" size="sm" onClick={() => onNavigate('/finance/accounting-setup')}>Laporan Keuangan</Button>
+          </div>
+        </div>
+
+        <Alert variant={mismatchCount > 0 ? 'danger' : openInvoiceRupiah > 0 || pendingReviewRupiah > 0 ? 'warning' : 'success'} className="owner-financial-health-headline py-2">
+          <strong>{mismatchCount > 0 ? 'Deposit perlu review sebelum settlement.' : pendingReviewRupiah > 0 ? 'Uang sudah dikirim tenant, tetapi belum boleh dianggap selesai sampai diverifikasi.' : openInvoiceRupiah > 0 ? 'Masih ada tagihan aktif yang perlu ditagih.' : 'Finance operasional terlihat aman.'}</strong>
+          <span>{' '}Deposit ditahan {formatCurrencyFull(depositHeldRupiah)} tidak dihitung sebagai omzet.</span>
+        </Alert>
+
+        <CompactMetrics metrics={metrics} />
+
+        <Row className="g-4">
+          <Col xl={8}>
+            <ActionQueueTable
+              title="Finance Action Queue"
+              subtitle="Urutan follow-up finance yang langsung berdampak ke kamar, tenant, dan cashflow."
+              items={queueItems}
+              emptyTitle="Tidak ada follow-up finance besar"
+              emptyDescription="Bukti bayar, overdue, draft, renew, checkout, dan rekonsiliasi deposit sedang aman dari data yang dimuat."
+              maxItems={8}
+            />
+          </Col>
+          <Col xl={4}>
+            <div className="owner-finance-side-stack">
+              <Card className="border-0 owner-finance-side-card">
+                <Card.Body>
+                  <div className="panel-title mb-1">Deposit liability</div>
+                  <div className="panel-subtitle mb-3">Deposit adalah kewajiban ke tenant, bukan revenue.</div>
+                  <div className="kpi-list compact">
+                    <div className="kpi-item"><span>Diterima</span><strong>{formatCurrencyFull(depositReceivedRupiah)}</strong></div>
+                    <div className="kpi-item"><span>Dikembalikan/dipotong</span><strong>{formatCurrencyFull(depositReleasedRupiah)}</strong></div>
+                    <div className="kpi-item"><span>Saldo ditahan</span><strong>{formatCurrencyFull(depositHeldRupiah)}</strong></div>
+                    <div className="kpi-item"><span>Mismatch</span><strong>{mismatchCount}</strong></div>
+                  </div>
+                  {depositLoading ? <p className="small text-muted mt-3 mb-0">Memuat ringkasan deposit...</p> : null}
+                  {depositError ? <Alert variant="warning" className="py-2 small mt-3 mb-0">Deposit ledger belum bisa dimuat. Cockpit tetap memakai invoice/expense.</Alert> : null}
+                  {!depositError && historicalLedgerEmptyCount > 0 ? (
+                    <Alert variant="light" className="py-2 small mt-3 mb-0">{historicalLedgerEmptyCount} stay punya data deposit lama tanpa event ledger. Ini normal untuk data sebelum M4A.</Alert>
+                  ) : null}
+                </Card.Body>
+              </Card>
+
+              <Card className="border-0 owner-finance-side-card">
+                <Card.Body>
+                  <div className="panel-title mb-1">Recent deposit events</div>
+                  <div className="panel-subtitle mb-3">Aktivitas deposit terbaru dari M4A.</div>
+                  {!recentDepositEntries.length ? (
+                    <EmptyState icon="🛡️" title="Belum ada event baru" description="Data historical lama bisa match walau ledger event kosong. Event baru muncul setelah payment/refund/deduction fresh." />
+                  ) : (
+                    <div className="owner-deposit-mini-list">
+                      {recentDepositEntries.slice(0, 5).map((entry) => (
+                        <button type="button" key={entry.id} className="owner-deposit-mini-row" onClick={() => onNavigate(`/stays/${entry.stayId}?tab=finance`)}>
+                          <span><strong>{entry.tenantName || `Tenant #${entry.tenantId}`}</strong><small>{entry.roomCode || `Kamar #${entry.roomId}`} · {formatDateSafe(entry.occurredAt)}</small></span>
+                          <strong>{formatCurrencyFull(Number(entry.amountRupiah ?? 0))}</strong>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </div>
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
+  );
+}
+
 function OwnerDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('priorities');
@@ -1319,6 +1706,8 @@ function OwnerDashboard() {
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-owner', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 25 }), ...ACTION_QUERY_OPTIONS });
   const backendBusinessHealthQuery = useQuery({ queryKey: ['dashboard-owner', 'finance-business-health'], queryFn: () => fetchBusinessHealth(), staleTime: 60_000, retry: 1 });
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-owner', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, ...ACTION_QUERY_OPTIONS });
+  const depositSummaryQuery = useQuery({ queryKey: ['dashboard-owner', 'deposit-ledger-summary'], queryFn: () => fetchDepositLedgerSummary({ limit: 8 }), ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
+  const depositReconciliationQuery = useQuery({ queryKey: ['dashboard-owner', 'deposit-ledger-reconciliation-lite'], queryFn: () => fetchDepositLedgerReconciliationLite({ limit: 50 }), ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = activeStaysQuery.data?.items ?? [];
@@ -1328,7 +1717,8 @@ function OwnerDashboard() {
   const pendingRenewCount = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) => rr.status === 'PENDING').length ?? 0;
   const pendingCheckoutRequestCount = checkoutRequestsPendingQuery.data?.items?.length ?? 0;
   const approvedCheckoutRequestCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
-  const pendingPaymentReviewCount = makePaymentCount(paymentReviewQuery.data?.items ?? [], paymentReviewQuery.data?.meta?.totalItems);
+  const paymentReviewItems = (paymentReviewQuery.data?.items ?? []).filter((submission: PaymentSubmission) => submission.status === 'PENDING_REVIEW');
+  const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, paymentReviewQuery.data?.meta?.totalItems);
   const overdue = invoices.filter(isOverdue);
   const cashflowForecast = useCashflowForecast(invoices);
   const businessHealth = useBusinessHealthScore({ invoices, rooms, pendingPaymentReviewCount, pendingRenewCount, pendingCheckoutRequestCount, approvedCheckoutRequestCount, totalExpenseRupiah: totalExpense });
@@ -1338,6 +1728,7 @@ function OwnerDashboard() {
     void Promise.all([
       roomsQuery.refetch(), activeStaysQuery.refetch(), invoicesQuery.refetch(), expensesQuery.refetch(),
       renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), autoOpsQuery.refetch(),
+      depositSummaryQuery.refetch(), depositReconciliationQuery.refetch(),
     ]);
   };
 
@@ -1358,6 +1749,18 @@ function OwnerDashboard() {
       {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan invoice dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint summary backend.</Alert> : null}
       <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di queue." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
       <CompactMetrics metrics={businessHealth.metrics} />
+      <OwnerFinancialHealthCockpit
+        invoices={invoices}
+        expenses={expenses}
+        paymentReviewItems={paymentReviewItems}
+        pendingRenewCount={pendingRenewCount}
+        approvedCheckoutRequestCount={approvedCheckoutRequestCount}
+        depositSummary={depositSummaryQuery.data}
+        depositReconciliation={depositReconciliationQuery.data}
+        depositLoading={depositSummaryQuery.isLoading || depositReconciliationQuery.isLoading}
+        depositError={depositSummaryQuery.isError || depositReconciliationQuery.isError}
+        onNavigate={navigate}
+      />
       {backendBusinessHealth ? (
         <Alert variant="info" className="py-2 small">
           Backend Finance Core aktif: score {Math.round(backendBusinessHealth.score)} ({backendBusinessHealth.grade}) · {backendBusinessHealth.headline} · generated {formatDateSafe(backendBusinessHealth.generatedAt)}.
@@ -1430,7 +1833,7 @@ function AdminDashboard() {
   const pendingRenewCount = renewRequests.length;
   const pendingCheckoutRequestCount = checkoutPendingRequests.length;
   const approvedCheckoutRequestCount = checkoutApprovedRequests.length;
-  const pendingPaymentReviewCount = makePaymentCount(paymentReviewQuery.data?.items ?? [], paymentReviewQuery.data?.meta?.totalItems);
+  const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, paymentReviewQuery.data?.meta?.totalItems);
   const overdueInvoices = invoices.filter(isOverdue);
   const dueSoonInvoices = invoices.filter(isDueSoon);
   const periodEndingSoon = stays.filter((stay) => {
@@ -1449,6 +1852,173 @@ function AdminDashboard() {
   const renewReviewDeadlines = renewRequests.map((request) => addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview));
   const checkoutReviewDeadlines = checkoutPendingRequests.map((request) => addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.checkoutReview));
   const checkoutFinalDeadlines = checkoutApprovedRequests.map((request) => addHoursToDate(request.reviewedAt ?? request.updatedAt ?? request.createdAt, ADMIN_SLA_HOURS.checkoutFinal));
+  const lowStockCount = inventoryItems.filter(isLowStockItem).length;
+  const activeTicketCount = tickets.filter((ticket) => ['OPEN', 'IN_PROGRESS', 'DONE'].includes(ticket.status)).length;
+  const ticketWaitingAdminCount = tickets.filter((ticket) => ticket.status === 'DONE').length;
+  const unassignedTicketCount = tickets.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length;
+  const openInvoiceCount = invoices.filter(isOpenInvoice).length;
+  const overdueInvoiceCount = overdueInvoices.length;
+  const checkoutWorkCount = pendingCheckoutRequestCount + approvedCheckoutRequestCount;
+  const expiredBookingReviewCount = countExpiredDates(bookingReviewDeadlines);
+  const expiredTenantPaymentCount = countExpiredDates(tenantPaymentDeadlines);
+  const expiredPaymentReviewCount = countExpiredDates(paymentMaxDeadlines);
+  const expiredRenewCount = countExpiredDates(renewReviewDeadlines);
+  const expiredCheckoutCount = countExpiredDates([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]);
+
+  const adminWorkLanes: AdminWorkLane[] = [
+    {
+      id: 'booking-review',
+      step: '1',
+      title: 'Review booking',
+      value: pendingApprovalCount,
+      helper: pendingApprovalCount ? 'Putuskan booking sebelum kamar tertahan terlalu lama.' : 'Tidak ada booking baru yang menunggu admin.',
+      sla: `${ADMIN_SLA_HOURS.bookingReview} jam`,
+      nextDeadline: earliestDeadlineLabel(bookingReviewDeadlines),
+      action: 'Review Booking',
+      to: '/stays?status=BOOKINGS',
+      tone: expiredBookingReviewCount ? 'danger' : pendingApprovalCount ? 'warning' : 'success',
+    },
+    {
+      id: 'payment-review',
+      step: '2',
+      title: 'Verifikasi pembayaran',
+      value: pendingPaymentReviewCount,
+      helper: pendingPaymentReviewCount ? 'Bukti pending tidak boleh auto-cancel; admin harus putuskan.' : 'Tidak ada bukti bayar pending review.',
+      sla: `${ADMIN_SLA_HOURS.paymentReviewUrgent}/${ADMIN_SLA_HOURS.paymentReviewMax} jam`,
+      nextDeadline: earliestDeadlineLabel(paymentMaxDeadlines),
+      action: 'Verifikasi Pembayaran',
+      to: '/payment-submissions/review',
+      tone: expiredPaymentReviewCount ? 'danger' : pendingPaymentReviewCount ? 'warning' : 'success',
+    },
+    {
+      id: 'renew-checkpoint',
+      step: '3',
+      title: 'Review renew',
+      value: pendingRenewCount,
+      helper: pendingRenewCount ? 'Catat meter sebelum approve dan invoice renew.' : 'Tidak ada perpanjangan menunggu approval.',
+      sla: `${ADMIN_SLA_HOURS.renewReview} jam`,
+      nextDeadline: earliestDeadlineLabel(renewReviewDeadlines),
+      action: 'Review Perpanjangan',
+      to: '/renew-requests',
+      tone: expiredRenewCount ? 'danger' : pendingRenewCount ? 'warning' : 'success',
+    },
+    {
+      id: 'checkout-flow',
+      step: '4',
+      title: 'Checkout',
+      value: checkoutWorkCount,
+      helper: checkoutWorkCount ? 'Review keluar dan finalkan hanya jika tagihan clear.' : 'Tidak ada checkout yang menunggu admin.',
+      sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`,
+      nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]),
+      action: 'Cek Checkout',
+      to: '/stays?status=BOOKINGS',
+      tone: expiredCheckoutCount ? 'danger' : checkoutWorkCount ? 'warning' : 'success',
+    },
+    {
+      id: 'finance-ticket-blockers',
+      step: '5',
+      title: 'Blocker operasional',
+      value: overdueInvoiceCount + ticketWaitingAdminCount + unassignedTicketCount + lowStockCount,
+      helper: 'Tagihan overdue, tiket menunggu admin, dan stok menipis masuk blocker harian.',
+      sla: 'harian',
+      nextDeadline: earliestDeadlineLabel(overdueInvoices.map((invoice) => invoice.dueDate)),
+      action: overdueInvoiceCount ? 'Lihat Tagihan' : ticketWaitingAdminCount || unassignedTicketCount ? 'Lihat Tiket' : 'Cek Stok',
+      to: overdueInvoiceCount ? '/invoices' : ticketWaitingAdminCount || unassignedTicketCount ? '/tickets' : '/dashboard?area=rooms',
+      tone: overdueInvoiceCount ? 'danger' : ticketWaitingAdminCount || unassignedTicketCount || lowStockCount ? 'warning' : 'success',
+    },
+  ];
+
+  const adminAssistantItems: AssistantItem[] = dedupeCommandItems([
+    expiredPaymentReviewCount > 0 ? {
+      id: 'admin-assistant-payment-expired',
+      severity: 'HIGH' as const,
+      title: 'Bukti pembayaran melewati SLA',
+      message: `${expiredPaymentReviewCount} bukti bayar sudah lewat batas maksimal review. Putuskan agar status tagihan/kamar tidak menggantung.`,
+      count: expiredPaymentReviewCount,
+      actionLabel: 'Verifikasi Pembayaran',
+      actionTo: '/payment-submissions/review',
+      dedupKey: 'admin-payment-expired',
+    } : null,
+    pendingPaymentReviewCount > 0 ? {
+      id: 'admin-assistant-payment-pending',
+      severity: 'MEDIUM' as const,
+      title: 'Pembayaran perlu keputusan admin',
+      message: `${pendingPaymentReviewCount} bukti bayar sedang menunggu review. Pending proof tidak dibatalkan otomatis.`,
+      count: pendingPaymentReviewCount,
+      actionLabel: 'Review Bayar',
+      actionTo: '/payment-submissions/review',
+      dedupKey: 'admin-payment-pending',
+    } : null,
+    pendingApprovalCount > 0 ? {
+      id: 'admin-assistant-booking-review',
+      severity: expiredBookingReviewCount ? 'HIGH' as const : 'MEDIUM' as const,
+      title: 'Booking baru butuh review',
+      message: `${pendingApprovalCount} booking perlu diputuskan. Booking belum mengunci kamar.`,
+      count: pendingApprovalCount,
+      actionLabel: 'Review Booking',
+      actionTo: '/stays?status=BOOKINGS',
+      dedupKey: 'admin-booking-review',
+    } : null,
+    pendingRenewCount > 0 ? {
+      id: 'admin-assistant-renew',
+      severity: expiredRenewCount ? 'HIGH' as const : 'MEDIUM' as const,
+      title: 'Renew menunggu meter checkpoint',
+      message: `${pendingRenewCount} perpanjangan menunggu keputusan. Catat meter dan pastikan invoice renew benar.`,
+      count: pendingRenewCount,
+      actionLabel: 'Review Renew',
+      actionTo: '/renew-requests',
+      dedupKey: 'admin-renew-pending',
+    } : null,
+    checkoutWorkCount > 0 ? {
+      id: 'admin-assistant-checkout',
+      severity: expiredCheckoutCount ? 'HIGH' as const : 'MEDIUM' as const,
+      title: 'Checkout belum selesai',
+      message: `${pendingCheckoutRequestCount} request keluar perlu review dan ${approvedCheckoutRequestCount} checkout approved perlu final jika tagihan sudah clear.`,
+      count: checkoutWorkCount,
+      actionLabel: 'Cek Checkout',
+      actionTo: '/stays?status=BOOKINGS',
+      dedupKey: 'admin-checkout-work',
+    } : null,
+    overdueInvoiceCount > 0 ? {
+      id: 'admin-assistant-overdue',
+      severity: 'HIGH' as const,
+      title: 'Tagihan overdue mengunci flow tenant',
+      message: `${overdueInvoiceCount} tagihan overdue dapat menahan renew/checkout. Follow-up pembayaran sebelum proses lifecycle lanjut.`,
+      count: overdueInvoiceCount,
+      actionLabel: 'Lihat Tagihan',
+      actionTo: '/invoices',
+      dedupKey: 'admin-overdue-invoice',
+    } : null,
+    activeTicketCount > 0 ? {
+      id: 'admin-assistant-ticket',
+      severity: ticketWaitingAdminCount || unassignedTicketCount ? 'WARNING' as const : 'INFO' as const,
+      title: 'Tiket operasional perlu dipantau',
+      message: `${activeTicketCount} tiket aktif. ${unassignedTicketCount} belum assign dan ${ticketWaitingAdminCount} menunggu konfirmasi admin.`,
+      count: activeTicketCount,
+      actionLabel: 'Buka Tiket',
+      actionTo: '/tickets',
+      dedupKey: 'admin-active-ticket',
+    } : null,
+    waitingInitialPaymentCount > 0 ? {
+      id: 'admin-assistant-waiting-payment',
+      severity: expiredTenantPaymentCount ? 'WARNING' as const : 'INFO' as const,
+      title: 'Booking menunggu bayar tenant',
+      message: `${waitingInitialPaymentCount} booking punya tagihan awal. Pantau agar kamar tidak tertahan.`,
+      count: waitingInitialPaymentCount,
+      actionLabel: 'Pantau Booking',
+      actionTo: '/stays?status=BOOKINGS',
+      dedupKey: 'admin-waiting-payment',
+    } : null,
+  ].filter(Boolean) as AssistantItem[]);
+
+  const adminHealthMetrics: MetricChip[] = [
+    { id: 'admin-metric-payment', label: 'Bukti pending', value: pendingPaymentReviewCount, helper: expiredPaymentReviewCount ? `${expiredPaymentReviewCount} lewat SLA` : 'Perlu verifikasi manual', status: expiredPaymentReviewCount ? 'DANGER' : pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '✅', to: '/payment-submissions/review' },
+    { id: 'admin-metric-booking', label: 'Booking review', value: pendingApprovalCount, helper: expiredBookingReviewCount ? `${expiredBookingReviewCount} lewat deadline` : 'Sebelum invoice awal', status: expiredBookingReviewCount ? 'DANGER' : pendingApprovalCount ? 'WARNING' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
+    { id: 'admin-metric-renew', label: 'Renew pending', value: pendingRenewCount, helper: 'Butuh meter checkpoint', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
+    { id: 'admin-metric-checkout', label: 'Checkout work', value: checkoutWorkCount, helper: `${pendingCheckoutRequestCount} review · ${approvedCheckoutRequestCount} final`, status: checkoutWorkCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
+    { id: 'admin-metric-invoice', label: 'Tagihan open', value: openInvoiceCount, helper: overdueInvoiceCount ? `${overdueInvoiceCount} overdue` : 'Belum PAID/CANCELLED', status: overdueInvoiceCount ? 'DANGER' : openInvoiceCount ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
+    { id: 'admin-metric-ticket', label: 'Tiket aktif', value: activeTicketCount, helper: `${unassignedTicketCount} belum assign · ${ticketWaitingAdminCount} perlu cek`, status: ticketWaitingAdminCount || unassignedTicketCount ? 'WARNING' : activeTicketCount ? 'INFO' : 'SUCCESS', icon: '🎫', to: '/tickets' },
+  ];
 
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
     ...pendingApprovalBookings.slice(0, 4).map((stay) => {
@@ -1465,7 +2035,7 @@ function AdminDashboard() {
         subject: stay.tenant?.fullName || stay.room?.code || `Booking #${stay.id}`,
         issue: meta.isExpired
           ? 'Melewati batas review. AutoOps dapat reset pemesanan; tenant harus ajukan ulang jika kamar masih tersedia.'
-          : 'Putuskan booking sebelum deadline. Booking belum mengunci kamar sampai pembayaran valid disetujui.',
+          : 'Putuskan booking sebelum deadline.',
         receivedAtLabel: createdAt ? makeClock(createdAt) : undefined,
         ...makeQueueTime(deadline),
         recommendedAction: 'Review Booking',
@@ -1669,6 +2239,17 @@ function AdminDashboard() {
         </Alert>
       ) : null}
 
+      {activeArea === 'today' ? (
+        <AdminOperationsCommandQueue
+          lanes={adminWorkLanes}
+          assistantItems={adminAssistantItems}
+          metrics={adminHealthMetrics}
+          topQueueItem={topQueueItem}
+          queueItems={queueItems}
+          onNavigate={navigate}
+        />
+      ) : null}
+
       {activeArea !== 'today' ? (
         <AdminAreaInternalMenu
           title={`Menu ${activeAreaConfig.label}`}
@@ -1714,14 +2295,13 @@ function AdminDashboard() {
       ) : null}
 
       {activeArea === 'today' ? <ActionQueueTable
-        title="Pekerjaan hari ini yang butuh keputusan"
-        subtitle="Hanya antrean operasional utama. Menu Stays & Tenant, Finance, Staff & Tiket, dan Kamar & Stok punya table data masing-masing."
+        title="Admin Operations Action Queue"
+        subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok. Klik aksi untuk langsung membuka flow terkait."
         items={filteredQueueItems}
         emptyTitle="Tidak ada item mendesak hari ini"
         emptyDescription="Semua area operasional sedang aman. Cek menu sidebar jika ingin membuka data lengkap."
         maxItems={12}
         collapsible={false}
-        hideActions
       /> : null}
 
       {(activeArea === 'today' || activeArea === 'stays' || activeArea === 'finance') ? (
@@ -1739,18 +2319,20 @@ function StaffDashboard() {
   const { user } = useAuth();
   const ticketsQuery = useQuery({ queryKey: ['dashboard-staff', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }), ...ACTION_QUERY_OPTIONS });
   const roomsQuery = useQuery({ queryKey: ['dashboard-staff', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-staff', 'inventory-items'], queryFn: () => listResource<InventoryItem>('/inventory-items', { limit: 200, isActive: 'true' }), ...MEDIUM_FRESH_QUERY_OPTIONS });
   const routineTodayQuery = useQuery({ queryKey: ['dashboard-staff', 'routines-today'], queryFn: fetchStaffRoutineToday, ...ACTION_QUERY_OPTIONS });
   const routineKpiQuery = useQuery({ queryKey: ['dashboard-staff', 'routine-kpi'], queryFn: fetchMyStaffRoutineKpi, ...MEDIUM_FRESH_QUERY_OPTIONS });
 
   const tickets = ticketsQuery.data?.items ?? [];
   const rooms = roomsQuery.data?.items ?? [];
+  const inventoryItems = inventoryItemsQuery.data?.items ?? [];
   const opsStress = useOperationalStressIndex({ tickets, rooms });
   const queueItems: ActionQueueItem[] = dedupeCommandItems([
     ...opsStress.queueItems,
   ]);
 
   const refreshDashboard = () => {
-    void Promise.all([ticketsQuery.refetch(), roomsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
+    void Promise.all([ticketsQuery.refetch(), roomsQuery.refetch(), inventoryItemsQuery.refetch(), routineTodayQuery.refetch(), routineKpiQuery.refetch()]);
   };
 
   if (ticketsQuery.isLoading || roomsQuery.isLoading) return <LoadingDashboard />;
@@ -1761,6 +2343,8 @@ function StaffDashboard() {
       <StaffMotivationDashboard
         user={user}
         tickets={tickets}
+        rooms={rooms}
+        inventoryItems={inventoryItems}
         queueItems={queueItems}
         onRefresh={refreshDashboard}
         routineToday={routineTodayQuery.data}
