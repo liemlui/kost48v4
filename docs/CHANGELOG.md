@@ -1,6 +1,383 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-29 M8G–M8K Command Center Safety Belts Sync
+**Versi:** 2026-05-30 M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
 
+<!-- KOST48_DOCS_SYNC_20260530_M8O_M8T_START -->
+## 0.0 Latest Current State — M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
+
+```text
+Latest generated working packages:
+- backend_20260530_M8O_GLOBAL_UI_ACTION_RESPONSIVE_AND_INTEGRITY_FULL.zip
+- frontend_20260530_M8O_GLOBAL_UI_ACTION_RESPONSIVE_AND_INTEGRITY_FULL.zip
+- backend_20260530_M8P1_UI_SMOKE_HOTFIX_UNCHANGED.zip
+- frontend_20260530_M8P1_UI_SMOKE_HOTFIX_FULL.zip
+- backend_20260530_M8P2_RESPONSIVE_COPY_ACTION_HOTFIX_UNCHANGED.zip
+- frontend_20260530_M8P2_RESPONSIVE_COPY_ACTION_HOTFIX_FULL.zip
+- backend_20260530_M8Q_BUSINESS_FLOW_HARDENING_FULL.zip
+- frontend_20260530_M8Q_BUSINESS_FLOW_HARDENING_FULL.zip
+- backend_20260530_M8R_RENEW_CHECKOUT_DEPOSIT_DEEP_UAT_FULL.zip
+- frontend_20260530_M8R_RENEW_CHECKOUT_DEPOSIT_DEEP_UAT_FULL.zip
+- backend_20260530_M8S_INVENTORY_STAFF_OPS_FULL_UAT_FULL.zip
+- frontend_20260530_M8S_INVENTORY_STAFF_OPS_FULL_UAT_FULL.zip
+- backend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_UNCHANGED.zip
+- frontend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_FULL.zip
+
+Docs sync status:
+- This docs sync supersedes older M8L–M8N active sections.
+- Older M8L–M8N/M8G–M8K/M8F/M4A/V5.29 sections remain historical record below.
+- For coding, inspect latest real repo/ZIP first.
+- If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+### Completed batch sequence after M8N
+
+| Batch | Focus | Backend | Verification label |
+|---|---|---|---|
+| M8O | Global UI action/responsive + backend integrity cleanup | FULL | Frontend build PASS, backend build PASS, base API smoke PASS from user local logs |
+| M8P.1 | UI smoke hotfix: responsive table auto-label + tenant copy cleanup | UNCHANGED | Frontend-only package; included in later cumulative frontend build PASS |
+| M8P.2 | Responsive/copy/action cleanup with safer labels and enum mapping | UNCHANGED | Frontend-only package; included in later cumulative frontend build PASS |
+| M8Q | Business-flow hardening for checkout request, invoice/payment refresh | FULL | Build covered by later cumulative builds; checkout/invoice/payment read smoke covered in M8R/M8T gates |
+| M8R | Renew + checkout + deposit deep UAT hardening | FULL | Build PASS and renew/checkout/invoice/deposit read smoke PASS |
+| M8S | Inventory + staff ops full UAT hardening | FULL | Inventory lifecycle API UAT PASS; staff official movement blocked 403 PASS; staff warehouse UI direction PASS from screenshot |
+| M8T | Owner Finance Cockpit + production readiness gate | Backend UNCHANGED | Finance read smoke PASS; accounting readiness PASS; frontend build PASS; backend build PASS after cumulative backend patches |
+
+### Latest verified UAT evidence
+
+```text
+M8O base smoke:
+- GET /api/public/rooms PASS.
+- Admin login PASS.
+- GET /api/payment-submissions/review-queue PASS.
+- GET /api/inventory-items, /inventory-movements, /room-items PASS.
+
+M8R read smoke:
+- GET /api/stays?limit=20 PASS.
+- GET /api/invoices?limit=20 PASS.
+- GET /api/admin/checkout-requests?status=APPROVED PASS.
+- GET /api/admin/renew-requests?status=PENDING PASS.
+- GET /api/deposit-ledger/summary PASS.
+- GET /api/deposit-ledger/reconciliation-lite PASS with ready=True and mismatchCount=0.
+
+M8S inventory lifecycle API UAT:
+- InventoryItem id=4 / UAT-M8S-KURSI-045732 created with qtyOnHand 10.
+- Opening stock created official IN movement qty 10.
+- ASSIGN_TO_ROOM qty 2 to roomId=1 reduced qtyOnHand to 8 and created RoomItem qty 2.
+- positionSummary returned: Gudang (8) · G2-001 (2).
+- RETURN_FROM_ROOM qty 1 increased qtyOnHand to 9 and reduced RoomItem qty to 1.
+- positionSummary returned: Gudang (9) · G2-001 (1).
+- RETURN_FROM_ROOM qty 999 blocked with HTTP 409.
+- OUT qty 1 reduced qtyOnHand to 8.
+- Final positionSummary returned: Gudang (8) · G2-001 (1).
+- Staff POST /api/inventory-movements returned 403.
+
+M8T finance/production gate:
+- GET /api/invoices?limit=20 PASS.
+- GET /api/payment-submissions/review-queue PASS.
+- GET /api/deposit-ledger/summary PASS.
+- GET /api/deposit-ledger/reconciliation-lite PASS with ready=True and mismatchCount=0.
+- GET /api/accounting/readiness PASS with ready=True and score=100.
+- GET /api/assets?limit=20 PASS.
+- GET /api/expenses?limit=20 PASS.
+- Frontend build PASS: 727 modules transformed.
+- Backend build:local PASS and final read smoke PASS.
+```
+
+### Current honest label
+
+```text
+M8O–M8T = build-confirmed and read/API-smoked for the tested surfaces.
+M8S inventory stock lifecycle API UAT = PASS.
+M8T owner finance production gate = frontend build PASS + backend build PASS + finance/read smoke PASS.
+Manual browser smoke for every role/page is still not a complete FULL regression.
+Generated Prisma noise appears after backend build and must be restored before code commit.
+No DB reset was used.
+No schema change was introduced in M8O–M8T.
+```
+
+### Immediate pre-commit gate
+
+```text
+1. Restore generated Prisma noise:
+   git restore backend/src/generated/prisma
+2. Confirm git status no generated Prisma files.
+3. Commit code changes first.
+4. Commit docs changes separately.
+5. Push only after clean git status and no accidental generated Prisma commit.
+```
+
+### Next recommended phase
+
+```text
+PLAN M9 Full Regression UAT + Production Readiness.
+Goal:
+- smoke all main role surfaces after M8O–M8T,
+- verify public booking, tenant portal, admin payment, renew, checkout, deposit, inventory, staff, owner finance,
+- manually check responsive and action integrity,
+- then commit/push after code/docs split.
+```
+<!-- KOST48_DOCS_SYNC_20260530_M8O_M8T_END -->
+
+## 2026-05-30 — M8O–M8T Command Center Verification, Lifecycle, Inventory, Staff Ops, and Owner Finance Gate
+
+### Type
+
+Backend + frontend command-center hardening across global action integrity, responsive tables, tenant copy, checkout/renew/deposit lifecycle, inventory/staff ops, and owner finance readiness.
+
+### Added / Changed
+
+#### M8O Global UI Action/Responsive + Integrity
+- Fixed frontend build blocker in ResourceTable.
+- Hardened proof link behavior so missing proof is not clickable as `#`.
+- Added/expanded responsive table labels across command-center surfaces.
+- Improved query invalidation after check-in, booking approval, renew, invoices, and payment review.
+- Added Jakarta date helpers and safer meter date normalization.
+- Added invoice issue journal consistency attempts in key lifecycle paths.
+
+#### M8P.1 / M8P.2 UI Smoke Hotfixes
+- Added global `responsiveTables` utility.
+- Added safer table auto-enhancement / mobile labels.
+- Cleaned tenant copy to `Panduan Kos Saya` and `status pemesanan`.
+- Added human labels for booking sources and status labels.
+- Improved StatusBadge accessibility.
+
+#### M8Q Business Flow Hardening
+- Added service-level OWNER/ADMIN guard for checkout request decisions.
+- Added conditional update for checkout request approve/reject.
+- Synced planned checkout date from approved checkout request.
+- Prefilled final checkout modal from approved checkout request.
+- Strengthened invoice/payment/dashboard/portal query invalidations.
+
+#### M8R Renew + Checkout + Deposit
+- Normalized final checkout date as Jakarta business date.
+- Blocked checkout before check-in date.
+- Added conditional ACTIVE stay update for final checkout.
+- Made deposit settlement transactional and conditional from HELD.
+- Required notes for partial deduction/forfeit.
+- Added admin confirmation checklists for final checkout and deposit processing.
+
+#### M8S Inventory + Staff Ops
+- Blocked PATCH edits to InventoryMovement history.
+- Added row lock/validation for RETURN_FROM_ROOM.
+- Inventory item create/update returns position/location summary.
+- Frontend movement form validates qty, room context, and movement date.
+- Frontend invalidates inventory items/movements/room-items/rooms after movement.
+- Staff warehouse UI clarifies staff reports issues; stock status is computed automatically.
+
+#### M8T Owner Finance Production Gate
+- Added owner dashboard production finance gate.
+- Dashboard reads accounting readiness and asset readiness.
+- Deposit copy reinforces dana titipan/liability.
+- Gate cards link to real finance actions/pages.
+- Added responsive styling for owner finance gate.
+
+### Verified
+
+```text
+Frontend build PASS after M8T:
+- 727 modules transformed.
+
+Backend build:local PASS after cumulative backend patches.
+
+Base/read smokes PASS:
+- public rooms,
+- invoices,
+- payment review queue,
+- inventory items,
+- inventory movements,
+- room items,
+- rooms,
+- deposit ledger summary,
+- deposit ledger reconciliation-lite ready=True mismatchCount=0,
+- accounting readiness ready=True score=100,
+- assets,
+- expenses.
+
+M8S inventory lifecycle API UAT PASS:
+- Item id=4 moved through IN 10, ASSIGN_TO_ROOM 2, RETURN_FROM_ROOM 1, OUT 1.
+- Final position: Gudang (8) · G2-001 (1).
+- Return qty 999 blocked HTTP 409.
+- Staff official movement blocked HTTP 403.
+```
+
+### Not fully verified yet
+
+```text
+Full manual browser regression across every role/page remains recommended.
+M9 should validate public booking, tenant payment proof, admin payment approval, renew, checkout, deposit, inventory/staff, owner finance, and responsive UI together.
+```
+
+### Not changed
+
+- No apps folder.
+- No microservices split.
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No lifecycle rewrite.
+- No payment approval extraction.
+- No dark mode.
+- No new dependency.
+- Generated Prisma must be restored before commit after backend build.
+
+<!-- KOST48_DOCS_SYNC_20260529_M8L_M8N_START -->
+## 0.0 Latest Current State — M8L–M8N Critical Integrity, Inventory Automation, and Action Integrity Sync
+
+```text
+Latest generated working packages:
+- backend_20260529_M8L_CRITICAL_AND_INVENTORY_SAFETY_FULL.zip
+- frontend_20260529_M8L_CRITICAL_AND_INVENTORY_SAFETY_FULL.zip
+- backend_20260529_M8L_HOTFIX_STOCK_REFERENCE_AND_OPENING_MOVEMENT_FULL.zip
+- frontend_20260529_M8L_HOTFIX_STOCK_REFERENCE_AND_OPENING_MOVEMENT_FULL.zip
+- backend_20260529_M8L_HOTFIX_STOCK_POSITION_AND_ROOM_FLOW_FULL.zip
+- frontend_20260529_M8L_HOTFIX_STOCK_POSITION_AND_ROOM_FLOW_FULL.zip
+- backend_20260529_M8L_AUTO_INVENTORY_FLOW_FULL.zip
+- frontend_20260529_M8L_AUTO_INVENTORY_FLOW_FULL.zip
+- backend_20260529_M8L_RESPONSIVE_TABLES_ALL_SURFACES_UNCHANGED.zip
+- frontend_20260529_M8L_RESPONSIVE_TABLES_ALL_SURFACES_FULL.zip
+- backend_20260529_M8M_GLOBAL_IA_SIMPLIFICATION_UNCHANGED.zip
+- frontend_20260529_M8M_GLOBAL_IA_SIMPLIFICATION_FULL.zip
+- backend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_UNCHANGED.zip
+- frontend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_FULL.zip
+
+Docs sync status:
+- This docs sync supersedes older M8G–M8K active sections.
+- Older M8G–M8K/M8F/M4A/V5.29 sections remain historical record below.
+- For coding, inspect latest real repo/ZIP first.
+- If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+### Completed batch sequence after M8K
+
+| Batch | Focus | Backend | Verification label |
+|---|---|---|---|
+| M8L-Critical | Payment/invoice/accounting integrity hotfix + inventory safety belt | FULL | ZIP generated; backend/frontend patch package created; local build still must be confirmed after apply |
+| M8L-Stock Hotfix 1 | Stock reference refresh + opening stock movement | FULL | Corrected dropdown/reference refresh and opening IN movement behavior; superseded by Stock Hotfix 2 |
+| M8L-Stock Hotfix 2 | Stock position, fallback qty sync, and room flow | FULL | Targeted backend smoke PASS; manual inventory UI smoke PASS from user screenshots/logs |
+| M8L-Auto Inventory | Automate stock movement flows and reduce manual room item entry | FULL | RETURN_FROM_ROOM API smoke PASS; manual UI smoke PASS from user screenshots/logs |
+| M8L-Responsive | Responsive tables/lists across command center | Backend UNCHANGED | Frontend package generated; local frontend build/manual PC-tablet-mobile smoke still required |
+| M8M | Global IA simplification: remove global search, separate menu/filter | Backend UNCHANGED | Frontend package generated; local frontend build/manual smoke still required |
+| M8N | Global Action Integrity: no misleading/no-op buttons | Backend UNCHANGED | Frontend package generated; local frontend build/manual smoke still required |
+
+### Latest verified UAT evidence
+
+```text
+M8L Stock Position + Room Flow:
+- InventoryItem id=3 / UAT-M8L-MEJA-03 created with qtyOnHand 10.
+- Opening stock created official InventoryMovement IN qty 10.
+- ASSIGN_TO_ROOM qty 2 to roomId=1 reduced qtyOnHand to 8 and created/updated RoomItem qty 2.
+- positionSummary returned: Gudang (8) · G2-001 (2).
+- RETURN_FROM_ROOM qty 1 from roomId=1 increased qtyOnHand to 9 and reduced RoomItem qty to 1.
+- positionSummary returned: Gudang (9) · G2-001 (1).
+- Staff POST /api/inventory-movements returned 403.
+- Short movement note returned 400.
+
+M8L manual UI smoke from user screenshots:
+- Stock Gudang shows quick actions Pasang / Keluar / Edit.
+- Mutasi Stok quick-action prefill works for Pasang ke Kamar and Kembali dari Kamar.
+- Confirmation modal shows official stock mutation warning and effect.
+- Barang di Kamar is read/condition oriented and links to room detail.
+- Room detail shows inventory tab with assigned item.
+
+M8N user feedback:
+- Any visible button/menu must have a real purpose.
+- Menu, filter, CTA, and status badge must be visually and functionally separated.
+- No global search in header unless a page-specific search is genuinely needed.
+```
+
+### Current honest label
+
+```text
+M8L inventory backend targeted smoke + manual UI smoke = PASS for tested stock sync/position/room flows.
+M8L critical payment/invoice/accounting hotfix package = generated, but full local build/runtime smoke still required before PASS label.
+M8L responsive, M8M IA simplification, and M8N action-integrity packages = generated, but final local frontend build + manual UI smoke still required.
+No DB reset was used.
+No schema change was introduced in these packages.
+Generated Prisma noise must be restored before commit if build regenerates it.
+```
+
+### Next recommended phase
+
+```text
+PLAN M8O Verification Gate + UI Action Sweep.
+Goal:
+- run local frontend build after M8N,
+- run backend build if latest backend M8L patches are applied,
+- smoke critical API paths,
+- manually check owner/admin/staff/tenant/public pages for misleading buttons, mobile table behavior, and menu/filter separation,
+- then commit/push M8L–M8N only after clean git status.
+```
+<!-- KOST48_DOCS_SYNC_20260529_M8L_M8N_END -->
+
+## 2026-05-29 — M8L–M8N Critical Integrity, Inventory Automation, Responsive Tables, IA Simplification, and Action Integrity
+
+### Type
+
+Backend + frontend integrity/safety patch for M8L, then frontend IA/UX simplification packages for responsive tables, global menu/filter separation, and action integrity.
+
+### Added / Changed
+
+#### M8L Critical Integrity
+- Enriched current tenant stay response with invoice metadata used by tenant payment flow.
+- Hardened payment approval locking around related payment/stay/room/invoice state.
+- Ensured direct check-in invoice stores total amount.
+- Hardened AutoOps invoice cancellation path toward accounting-safe behavior.
+- Blocked zero-deposit forfeiture edge case.
+- Improved invoice query invalidation and DRAFT/open invoice UI consistency.
+
+#### M8L Inventory Automation
+- Official stock movement requires meaningful note and confirmation.
+- Initial stock on item creation creates an official IN movement.
+- Backend explicitly syncs qtyOnHand after movement if DB trigger does not.
+- ASSIGN_TO_ROOM automatically reduces gudang stock and creates/updates room item.
+- RETURN_FROM_ROOM automatically validates/decreases room item and increases gudang stock.
+- Direct stock quantity editing is blocked; use Mutasi Stok.
+- Inventory item list exposes position summary across gudang and rooms.
+- Barang di Kamar is treated as read/condition surface; assignment/return flows through Mutasi Stok.
+
+#### M8L Responsive Tables
+- Added global responsive table/list behavior for PC/tablet/mobile.
+- Resource tables are intended to collapse into readable row cards on small screens.
+
+#### M8M Global IA Simplification
+- Removed global header search.
+- Separated navigation menu from filter controls.
+- Reduced non-useful helper copy and decorative badge behavior.
+
+#### M8N Global Action Integrity
+- Removed/reworked misleading no-op CTAs such as fake queue buttons.
+- Filter-only controls are now treated as filters.
+- Navigation controls are reserved for real work-area movement.
+- Empty states are more section-specific.
+- Inventory movement enums are shown as human-readable labels.
+
+### Verified
+
+```text
+M8L stock sync targeted API/manual UI PASS:
+- UAT-M8L-MEJA-03 qtyOnHand moved 10 → 8 → 9 through IN, ASSIGN_TO_ROOM, RETURN_FROM_ROOM.
+- RoomItem qty moved 2 → 1 after return.
+- positionSummary matched Gudang and room quantities.
+- Staff official movement remained forbidden.
+- Short movement note was blocked.
+```
+
+### Not fully verified yet
+
+```text
+M8L critical payment/invoice/accounting hotfix still needs local full build and targeted runtime smoke.
+M8L responsive tables still need PC/tablet/mobile manual UI smoke.
+M8M/M8N frontend packages still need local frontend build and manual UI smoke after apply.
+M8H/M8I booking/waiting-room targeted smoke remains carry-forward.
+```
+
+### Not changed
+
+- No apps folder.
+- No microservices split.
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No dark mode.
+- No new dependency.
 
 <!-- KOST48_DOCS_SYNC_20260529_M8G_M8K_START -->
 ## 0.0 Latest Current State — M8G–M8K Command Center Safety Belts Sync

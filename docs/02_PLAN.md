@@ -1,6 +1,359 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-29 M8G–M8K Command Center Safety Belts Sync
+**Versi:** 2026-05-30 M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
 
+<!-- KOST48_DOCS_SYNC_20260530_M8O_M8T_START -->
+## 0.0 Latest Current State — M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
+
+```text
+Latest generated working packages:
+- backend_20260530_M8O_GLOBAL_UI_ACTION_RESPONSIVE_AND_INTEGRITY_FULL.zip
+- frontend_20260530_M8O_GLOBAL_UI_ACTION_RESPONSIVE_AND_INTEGRITY_FULL.zip
+- backend_20260530_M8P1_UI_SMOKE_HOTFIX_UNCHANGED.zip
+- frontend_20260530_M8P1_UI_SMOKE_HOTFIX_FULL.zip
+- backend_20260530_M8P2_RESPONSIVE_COPY_ACTION_HOTFIX_UNCHANGED.zip
+- frontend_20260530_M8P2_RESPONSIVE_COPY_ACTION_HOTFIX_FULL.zip
+- backend_20260530_M8Q_BUSINESS_FLOW_HARDENING_FULL.zip
+- frontend_20260530_M8Q_BUSINESS_FLOW_HARDENING_FULL.zip
+- backend_20260530_M8R_RENEW_CHECKOUT_DEPOSIT_DEEP_UAT_FULL.zip
+- frontend_20260530_M8R_RENEW_CHECKOUT_DEPOSIT_DEEP_UAT_FULL.zip
+- backend_20260530_M8S_INVENTORY_STAFF_OPS_FULL_UAT_FULL.zip
+- frontend_20260530_M8S_INVENTORY_STAFF_OPS_FULL_UAT_FULL.zip
+- backend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_UNCHANGED.zip
+- frontend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_FULL.zip
+
+Docs sync status:
+- This docs sync supersedes older M8L–M8N active sections.
+- Older M8L–M8N/M8G–M8K/M8F/M4A/V5.29 sections remain historical record below.
+- For coding, inspect latest real repo/ZIP first.
+- If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+### Completed batch sequence after M8N
+
+| Batch | Focus | Backend | Verification label |
+|---|---|---|---|
+| M8O | Global UI action/responsive + backend integrity cleanup | FULL | Frontend build PASS, backend build PASS, base API smoke PASS from user local logs |
+| M8P.1 | UI smoke hotfix: responsive table auto-label + tenant copy cleanup | UNCHANGED | Frontend-only package; included in later cumulative frontend build PASS |
+| M8P.2 | Responsive/copy/action cleanup with safer labels and enum mapping | UNCHANGED | Frontend-only package; included in later cumulative frontend build PASS |
+| M8Q | Business-flow hardening for checkout request, invoice/payment refresh | FULL | Build covered by later cumulative builds; checkout/invoice/payment read smoke covered in M8R/M8T gates |
+| M8R | Renew + checkout + deposit deep UAT hardening | FULL | Build PASS and renew/checkout/invoice/deposit read smoke PASS |
+| M8S | Inventory + staff ops full UAT hardening | FULL | Inventory lifecycle API UAT PASS; staff official movement blocked 403 PASS; staff warehouse UI direction PASS from screenshot |
+| M8T | Owner Finance Cockpit + production readiness gate | Backend UNCHANGED | Finance read smoke PASS; accounting readiness PASS; frontend build PASS; backend build PASS after cumulative backend patches |
+
+### Latest verified UAT evidence
+
+```text
+M8O base smoke:
+- GET /api/public/rooms PASS.
+- Admin login PASS.
+- GET /api/payment-submissions/review-queue PASS.
+- GET /api/inventory-items, /inventory-movements, /room-items PASS.
+
+M8R read smoke:
+- GET /api/stays?limit=20 PASS.
+- GET /api/invoices?limit=20 PASS.
+- GET /api/admin/checkout-requests?status=APPROVED PASS.
+- GET /api/admin/renew-requests?status=PENDING PASS.
+- GET /api/deposit-ledger/summary PASS.
+- GET /api/deposit-ledger/reconciliation-lite PASS with ready=True and mismatchCount=0.
+
+M8S inventory lifecycle API UAT:
+- InventoryItem id=4 / UAT-M8S-KURSI-045732 created with qtyOnHand 10.
+- Opening stock created official IN movement qty 10.
+- ASSIGN_TO_ROOM qty 2 to roomId=1 reduced qtyOnHand to 8 and created RoomItem qty 2.
+- positionSummary returned: Gudang (8) · G2-001 (2).
+- RETURN_FROM_ROOM qty 1 increased qtyOnHand to 9 and reduced RoomItem qty to 1.
+- positionSummary returned: Gudang (9) · G2-001 (1).
+- RETURN_FROM_ROOM qty 999 blocked with HTTP 409.
+- OUT qty 1 reduced qtyOnHand to 8.
+- Final positionSummary returned: Gudang (8) · G2-001 (1).
+- Staff POST /api/inventory-movements returned 403.
+
+M8T finance/production gate:
+- GET /api/invoices?limit=20 PASS.
+- GET /api/payment-submissions/review-queue PASS.
+- GET /api/deposit-ledger/summary PASS.
+- GET /api/deposit-ledger/reconciliation-lite PASS with ready=True and mismatchCount=0.
+- GET /api/accounting/readiness PASS with ready=True and score=100.
+- GET /api/assets?limit=20 PASS.
+- GET /api/expenses?limit=20 PASS.
+- Frontend build PASS: 727 modules transformed.
+- Backend build:local PASS and final read smoke PASS.
+```
+
+### Current honest label
+
+```text
+M8O–M8T = build-confirmed and read/API-smoked for the tested surfaces.
+M8S inventory stock lifecycle API UAT = PASS.
+M8T owner finance production gate = frontend build PASS + backend build PASS + finance/read smoke PASS.
+Manual browser smoke for every role/page is still not a complete FULL regression.
+Generated Prisma noise appears after backend build and must be restored before code commit.
+No DB reset was used.
+No schema change was introduced in M8O–M8T.
+```
+
+### Immediate pre-commit gate
+
+```text
+1. Restore generated Prisma noise:
+   git restore backend/src/generated/prisma
+2. Confirm git status no generated Prisma files.
+3. Commit code changes first.
+4. Commit docs changes separately.
+5. Push only after clean git status and no accidental generated Prisma commit.
+```
+
+### Next recommended phase
+
+```text
+PLAN M9 Full Regression UAT + Production Readiness.
+Goal:
+- smoke all main role surfaces after M8O–M8T,
+- verify public booking, tenant portal, admin payment, renew, checkout, deposit, inventory, staff, owner finance,
+- manually check responsive and action integrity,
+- then commit/push after code/docs split.
+```
+<!-- KOST48_DOCS_SYNC_20260530_M8O_M8T_END -->
+
+## A0. Current Execution Override — After M8T
+
+```text
+Current working package baseline:
+frontend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_FULL.zip
+backend_20260530_M8T_OWNER_FINANCE_PRODUCTION_GATE_UNCHANGED.zip
+
+M8O–M8T cumulative code has:
+- frontend build PASS,
+- backend build:local PASS,
+- finance/read smoke PASS,
+- M8S inventory lifecycle API UAT PASS,
+- staff official inventory movement blocked 403 PASS.
+```
+
+### Immediate pre-commit gate
+
+Goal:
+```text
+Freeze feature work, clean build artifacts, update docs, then commit code and docs separately.
+```
+
+Required:
+- Restore generated Prisma noise after backend build.
+- Confirm `git status -sb` no longer lists `backend/src/generated/prisma/*`.
+- Commit code changes first.
+- Commit docs changes second.
+- Push only after both commits are clean.
+
+PowerShell one-line cleanup:
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git restore backend/src/generated/prisma; git status -sb
+```
+
+### Suggested commit commands
+
+Code commit:
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git restore backend/src/generated/prisma; git add backend/src/common/utils/date.util.ts backend/src/modules/auto-ops/auto-ops.service.ts backend/src/modules/checkout-requests/checkout-requests.service.ts backend/src/modules/inventory-items/inventory-items.service.ts backend/src/modules/inventory-movements/dto/inventory-movement.dto.ts backend/src/modules/inventory-movements/inventory-movements.service.ts backend/src/modules/meter-readings/meter-readings.service.ts backend/src/modules/payment-submissions/payment-submissions.service.ts backend/src/modules/room-items/room-items.service.ts backend/src/modules/stays/stays-query.service.ts backend/src/modules/stays/stays.service.ts backend/src/modules/tenant-bookings/tenant-bookings.module.ts backend/src/modules/tenant-bookings/tenant-bookings.service.ts frontend/src/components/command-center/ActionQueueTable.tsx frontend/src/components/common/StatusBadge.tsx frontend/src/components/layout/AppLayout.tsx frontend/src/components/payments/ReviewPaymentModal.tsx frontend/src/components/portal/BookingCard.tsx frontend/src/components/portal/BookingStatusHelper.tsx frontend/src/components/portal/SubmitPaymentModal.tsx frontend/src/components/resources/ResourceFormModal.tsx frontend/src/components/resources/ResourceTable.tsx frontend/src/components/staff/AdminStaffFieldReportQueue.tsx frontend/src/components/staff/StaffGeneralInventorySection.tsx frontend/src/components/stays/ApproveBookingModal.tsx frontend/src/components/stays/CancelStayModal.tsx frontend/src/components/stays/CompleteStayModal.tsx frontend/src/components/stays/FinanceTab.tsx frontend/src/components/stays/InfoTab.tsx frontend/src/components/stays/MeterTab.tsx frontend/src/components/stays/ProcessDepositModal.tsx frontend/src/components/stays/RenewStayModal.tsx frontend/src/components/tenant/TenantBookingWaitingRoom.tsx frontend/src/components/tenant/TenantGuidePanel.tsx frontend/src/components/tenant/TenantWorkspaceTabs.tsx frontend/src/components/workspace/EntityBadgeFilterBar.tsx frontend/src/components/workspace/RoleWorkspaceTabs.tsx frontend/src/config/navigation.ts frontend/src/config/resources.ts frontend/src/config/resources/operationsResourceConfigs.ts frontend/src/hooks/useInvoices.ts frontend/src/hooks/useStay.ts frontend/src/main.tsx frontend/src/pages/dashboard/DashboardPage.tsx frontend/src/pages/invoices/InvoiceDetailPage.tsx frontend/src/pages/invoices/InvoicesPage.tsx frontend/src/pages/payments/PaymentReviewPage.tsx frontend/src/pages/portal/MyInvoicesPage.tsx frontend/src/pages/portal/MyStayPage.tsx frontend/src/pages/portal/TenantInvoiceDetailPage.tsx frontend/src/pages/renew-requests/RenewRequestsAdminPage.tsx frontend/src/pages/resources/SimpleCrudPage.tsx frontend/src/pages/resources/resourceRelations.ts frontend/src/pages/stays/CheckInWizard.tsx frontend/src/pages/stays/StayDetailPage.tsx frontend/src/pages/stays/StaysPage.tsx frontend/src/pages/stays/check-in-wizard/StepReviewConfirm.tsx frontend/src/styles.css frontend/src/utils/statusLabels.ts frontend/src/utils/tenantBookingRules.ts frontend/src/utils/responsiveTables.ts; git commit -m "feat(command-center): harden ui actions finance inventory and lifecycle flows"; git status -sb
+```
+
+Docs commit:
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git add docs/00_GROUND_STATE.md docs/01_CONTRACTS.md docs/02_PLAN.md docs/03_DECISIONS_LOG.md docs/04_JOURNAL.md docs/CHANGELOG.md docs/CHECKLIST.md; git commit -m "docs: sync m8o to m8t command center verification"; git status -sb
+```
+
+## A1. Next Active Plan — M9 Full Regression UAT + Production Readiness
+
+### Goal
+
+```text
+Validate the full KOST48 Command Center MVP after M8O–M8T.
+```
+
+### Scope
+
+- Public room discovery and booking.
+- Tenant My Stay Guide, invoices, payment proof, renew, checkout, ticket.
+- Admin dashboard, payment review, booking review, renew, checkout, invoices.
+- Staff warehouse, reports, tickets, rooms.
+- Owner finance cockpit, reports, assets, expenses, accounting readiness.
+- Responsive/manual smoke for desktop/tablet/mobile.
+- Confirm no no-op buttons, no raw tenant backend terms, no generated Prisma commit.
+
+### M9 result labels
+
+```text
+M9 PARTIAL PASS = build + read smoke only.
+M9 FLOW PASS = critical flows succeed by API/browser.
+M9 FULL PASS = build + runtime/API + manual browser smoke + no generated Prisma noise + code/docs committed cleanly.
+```
+
+<!-- KOST48_DOCS_SYNC_20260529_M8L_M8N_START -->
+## 0.0 Latest Current State — M8L–M8N Critical Integrity, Inventory Automation, and Action Integrity Sync
+
+```text
+Latest generated working packages:
+- backend_20260529_M8L_CRITICAL_AND_INVENTORY_SAFETY_FULL.zip
+- frontend_20260529_M8L_CRITICAL_AND_INVENTORY_SAFETY_FULL.zip
+- backend_20260529_M8L_HOTFIX_STOCK_REFERENCE_AND_OPENING_MOVEMENT_FULL.zip
+- frontend_20260529_M8L_HOTFIX_STOCK_REFERENCE_AND_OPENING_MOVEMENT_FULL.zip
+- backend_20260529_M8L_HOTFIX_STOCK_POSITION_AND_ROOM_FLOW_FULL.zip
+- frontend_20260529_M8L_HOTFIX_STOCK_POSITION_AND_ROOM_FLOW_FULL.zip
+- backend_20260529_M8L_AUTO_INVENTORY_FLOW_FULL.zip
+- frontend_20260529_M8L_AUTO_INVENTORY_FLOW_FULL.zip
+- backend_20260529_M8L_RESPONSIVE_TABLES_ALL_SURFACES_UNCHANGED.zip
+- frontend_20260529_M8L_RESPONSIVE_TABLES_ALL_SURFACES_FULL.zip
+- backend_20260529_M8M_GLOBAL_IA_SIMPLIFICATION_UNCHANGED.zip
+- frontend_20260529_M8M_GLOBAL_IA_SIMPLIFICATION_FULL.zip
+- backend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_UNCHANGED.zip
+- frontend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_FULL.zip
+
+Docs sync status:
+- This docs sync supersedes older M8G–M8K active sections.
+- Older M8G–M8K/M8F/M4A/V5.29 sections remain historical record below.
+- For coding, inspect latest real repo/ZIP first.
+- If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+### Completed batch sequence after M8K
+
+| Batch | Focus | Backend | Verification label |
+|---|---|---|---|
+| M8L-Critical | Payment/invoice/accounting integrity hotfix + inventory safety belt | FULL | ZIP generated; backend/frontend patch package created; local build still must be confirmed after apply |
+| M8L-Stock Hotfix 1 | Stock reference refresh + opening stock movement | FULL | Corrected dropdown/reference refresh and opening IN movement behavior; superseded by Stock Hotfix 2 |
+| M8L-Stock Hotfix 2 | Stock position, fallback qty sync, and room flow | FULL | Targeted backend smoke PASS; manual inventory UI smoke PASS from user screenshots/logs |
+| M8L-Auto Inventory | Automate stock movement flows and reduce manual room item entry | FULL | RETURN_FROM_ROOM API smoke PASS; manual UI smoke PASS from user screenshots/logs |
+| M8L-Responsive | Responsive tables/lists across command center | Backend UNCHANGED | Frontend package generated; local frontend build/manual PC-tablet-mobile smoke still required |
+| M8M | Global IA simplification: remove global search, separate menu/filter | Backend UNCHANGED | Frontend package generated; local frontend build/manual smoke still required |
+| M8N | Global Action Integrity: no misleading/no-op buttons | Backend UNCHANGED | Frontend package generated; local frontend build/manual smoke still required |
+
+### Latest verified UAT evidence
+
+```text
+M8L Stock Position + Room Flow:
+- InventoryItem id=3 / UAT-M8L-MEJA-03 created with qtyOnHand 10.
+- Opening stock created official InventoryMovement IN qty 10.
+- ASSIGN_TO_ROOM qty 2 to roomId=1 reduced qtyOnHand to 8 and created/updated RoomItem qty 2.
+- positionSummary returned: Gudang (8) · G2-001 (2).
+- RETURN_FROM_ROOM qty 1 from roomId=1 increased qtyOnHand to 9 and reduced RoomItem qty to 1.
+- positionSummary returned: Gudang (9) · G2-001 (1).
+- Staff POST /api/inventory-movements returned 403.
+- Short movement note returned 400.
+
+M8L manual UI smoke from user screenshots:
+- Stock Gudang shows quick actions Pasang / Keluar / Edit.
+- Mutasi Stok quick-action prefill works for Pasang ke Kamar and Kembali dari Kamar.
+- Confirmation modal shows official stock mutation warning and effect.
+- Barang di Kamar is read/condition oriented and links to room detail.
+- Room detail shows inventory tab with assigned item.
+
+M8N user feedback:
+- Any visible button/menu must have a real purpose.
+- Menu, filter, CTA, and status badge must be visually and functionally separated.
+- No global search in header unless a page-specific search is genuinely needed.
+```
+
+### Current honest label
+
+```text
+M8L inventory backend targeted smoke + manual UI smoke = PASS for tested stock sync/position/room flows.
+M8L critical payment/invoice/accounting hotfix package = generated, but full local build/runtime smoke still required before PASS label.
+M8L responsive, M8M IA simplification, and M8N action-integrity packages = generated, but final local frontend build + manual UI smoke still required.
+No DB reset was used.
+No schema change was introduced in these packages.
+Generated Prisma noise must be restored before commit if build regenerates it.
+```
+
+### Next recommended phase
+
+```text
+PLAN M8O Verification Gate + UI Action Sweep.
+Goal:
+- run local frontend build after M8N,
+- run backend build if latest backend M8L patches are applied,
+- smoke critical API paths,
+- manually check owner/admin/staff/tenant/public pages for misleading buttons, mobile table behavior, and menu/filter separation,
+- then commit/push M8L–M8N only after clean git status.
+```
+<!-- KOST48_DOCS_SYNC_20260529_M8L_M8N_END -->
+
+## A0. Current Execution Override — After M8N
+
+```text
+Current working package baseline:
+frontend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_FULL.zip
+backend_20260529_M8N_GLOBAL_ACTION_INTEGRITY_UNCHANGED.zip
+
+M8L inventory stock sync has targeted API/manual UI PASS.
+M8M/M8N are frontend package outputs and still need local build + manual UI smoke after apply.
+Mode remains PLAN first unless user says YOLO/ACT/patch.
+```
+
+### Immediate verification gate — M8O
+
+Goal:
+```text
+Stop feature stacking briefly and verify the latest applied M8L–M8N package set.
+```
+
+Required checks:
+- `npm run build` frontend PASS after M8N.
+- `npm run build:local` backend PASS if latest M8L backend patches are present.
+- Restore generated Prisma noise after backend build.
+- Manual UI smoke for PC/tablet/mobile responsive tables.
+- Manual UI smoke for action integrity: every visible button has a real purpose.
+- Manual UI smoke for menu/filter separation across owner/admin/staff/tenant/public.
+- API smoke for inventory item/movement/room-item flow after latest backend patch.
+- Carry-forward smoke for payment-submissions review queue and public rooms.
+
+### M8O PowerShell verification commands
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+```
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\backend"; npm run build:local
+```
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git restore backend/src/generated/prisma; git status -sb
+```
+
+```powershell
+$baseUrl="http://localhost:3000/api"; Invoke-RestMethod -Method Get -Uri "$baseUrl/public/rooms"
+```
+
+```powershell
+$baseUrl="http://localhost:3000/api"; $body=@{identifier="admin@kost48.com";password="admin123"} | ConvertTo-Json; $login=Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/login" -ContentType "application/json" -Body $body; $token=$login.data.accessToken; $h=@{Authorization="Bearer $token"}; Invoke-RestMethod -Method Get -Uri "$baseUrl/payment-submissions/review-queue" -Headers $h
+```
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "$baseUrl/inventory-items?limit=20" -Headers $h
+```
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "$baseUrl/inventory-movements?limit=20" -Headers $h
+```
+
+### Next development candidates after M8O
+
+1. M9 Targeted Runtime/UI Smoke for booking/payment/renew/checkout first-paid flows.
+2. M8O.1 UI action-integrity follow-up if manual smoke finds more no-op buttons.
+3. Tenant My Stay Guide full audit only after M8L critical and M8N UI baseline are verified.
+4. Production readiness checklist only after repeated runtime + manual smoke passes.
+
+### ACT plan if user says YOLO after this docs sync
+
+```text
+1. Apply latest M8N ZIP if not applied.
+2. Run frontend build.
+3. Run backend build if M8L backend patches are applied.
+4. Restore generated Prisma noise.
+5. Run targeted smoke commands.
+6. Patch any remaining no-op clickable/button/filter issue found during manual smoke.
+7. Commit code and docs separately.
+```
 
 <!-- KOST48_DOCS_SYNC_20260529_M8G_M8K_START -->
 ## 0.0 Latest Current State — M8G–M8K Command Center Safety Belts Sync
