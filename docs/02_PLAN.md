@@ -1,6 +1,305 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-28 M4A Deposit Ledger Backend Foundation FULL PASS Sync
+**Versi:** 2026-05-29 M8G–M8K Command Center Safety Belts Sync
 
+
+<!-- KOST48_DOCS_SYNC_20260529_M8G_M8K_START -->
+## 0.0 Latest Current State — M8G–M8K Command Center Safety Belts Sync
+
+```text
+Latest local code commit:
+5c4526f feat(command-center): harden accounting booking checkout and staff safety belts
+
+Docs sync status:
+- Code commit 5c4526f sudah dibuat lokal.
+- Docs sync ini harus dicommit terpisah sebelum push GitHub.
+- Older M4A/M8F/V5.29 sections below remain historical record.
+- For coding, inspect latest real repo/ZIP first.
+- If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+
+### Completed batch sequence
+
+| Batch | Focus | Backend | Verification label |
+|---|---|---|---|
+| M8G | Accounting Manual Payment Posting + Deposit Status Fix | FULL | Backend build PASS; manual payment journal smoke PASS; update/delete journaled payment blocked; deposit PARTIAL_REFUND status code patched but targeted runtime smoke still recommended |
+| M8H | Admin Booking Review Safety Belt | FULL | Frontend build PASS; backend build covered by later local build; reject endpoint added; targeted booking runtime smoke still recommended before FULL label |
+| M8I | Tenant Booking / Waiting Room Safety Belt | FULL | Frontend build PASS; backend build covered by later local build; cancelled booking visibility patched; tenant booking runtime smoke still recommended |
+| M8J | Admin Checkout Request Review Safety Belt | FULL | Backend build PASS; pending list PASS; short reject note blocked; valid reject PASS; valid approve PASS; already-processed approve blocked |
+| M8K | Staff Report / Admin Confirmation Safety Belt | FULL | Backend build PASS; ticket list PASS; field report queue PASS; short final note blocked; valid ticket close PASS |
+
+### Current honest label
+
+```text
+M8G–M8K = build-confirmed and core runtime-smoked for accounting, checkout, and ticket close paths.
+M8H/M8I booking/waiting-room still need targeted runtime/manual UI smoke before FULL business-flow PASS.
+Manual browser UI smoke for M8J/M8K is still not confirmed.
+Generated Prisma noise was restored before code commit.
+No DB reset was used.
+```
+
+### Latest important UAT evidence
+
+```text
+M8G:
+- Manual InvoicePayment id=6 created JournalEntry JE-AUTO-INVOICE-PAYMENT-6.
+- PATCH/DELETE of journaled payment id=6 returned 409 and blocked silent accounting divergence.
+
+M8J:
+- Checkout request id=3 short reject note returned 400.
+- Checkout request id=3 valid reject returned REJECTED.
+- Checkout request id=2 valid approve returned APPROVED.
+- Approving already processed request returned 409.
+
+M8K:
+- Ticket id=3 short finalAdminNote returned 400.
+- Ticket id=3 valid finalAdminNote closed ticket TIC-UAT-0003.
+- Backend build: npm run build:local PASS.
+```
+
+### Next recommended phase
+
+```text
+PLAN M8L Inventory Movement Safety Belt.
+Goal:
+- official stock movement must not be direct-click or staff-owned,
+- staff may report need/condition only,
+- admin/owner confirms official InventoryMovement,
+- no schema change unless real guard/data gap is proven.
+```
+<!-- KOST48_DOCS_SYNC_20260529_M8G_M8K_END -->
+
+## A1. Next Active Plan — M8L Inventory Movement Safety Belt
+
+### Goal
+
+```text
+Make official inventory movement safe, reviewable, and clearly admin/owner-owned.
+Staff may report needs/condition, but official stock movement must remain admin/owner confirmation.
+```
+
+### Why M8L next
+
+M8G–M8K strengthened accounting, booking, checkout, and staff/ticket final decision flows. The next sensitive operational surface is inventory movement because it changes stock truth and can affect cost, room readiness, and asset/inventory data quality.
+
+### Target scope
+
+Frontend-first:
+```text
+frontend/src/pages/inventory/*
+frontend/src/components/inventory/*
+frontend/src/components/staff/StaffInventoryStatusModal.tsx
+frontend/src/api/inventory.ts
+frontend/src/utils/*
+```
+
+Backend inspect:
+```text
+backend/src/modules/inventory/*
+backend/src/modules/room-items/*
+backend/src/modules/staff-field-reports/*
+backend/src/modules/tickets/*
+```
+
+### Expected safety belts
+
+- Official movement create/update/delete should not be direct-click.
+- Admin sees short checklist before stock movement is posted.
+- Movement reason/note should be meaningful where it affects official stock truth.
+- Staff copy must say `laporkan kebutuhan barang`, not `mutasi stok`.
+- System should compute stock health from quantity thresholds.
+- No manual staff input for `stok habis/menipis/aman`.
+- Copy remains short and action-first.
+
+### Backend decision
+
+```text
+Target backend unchanged.
+Touch backend only if real code allows staff to create official InventoryMovement or allows official movement without meaningful guard.
+No schema change unless explicitly approved.
+```
+
+### Verification
+
+- Frontend build PASS.
+- Backend build PASS if backend touched.
+- Runtime smoke inventory list/movement endpoint if available.
+- Manual UI smoke admin inventory movement modal.
+- Manual UI smoke staff inventory report flow.
+- No generated Prisma commit.
+
+### Carry-forward verification before/alongside M8L
+
+- M8H admin booking reject/approve targeted smoke.
+- M8I tenant booking/waiting-room API + manual UI smoke.
+- M8J/M8K manual browser UI smoke.
+
+<!-- KOST48_DOCS_SYNC_20260528_M8F_START -->
+## 0.0 Latest Current State — M8F Frontend Command Center Safety Belt Sync
+
+```text
+Latest generated working package:
+- frontend_20260528_M8F_INVOICE_ACTION_SAFETY_BELT_FULL.zip
+- backend_20260528_M8F_INVOICE_ACTION_SAFETY_BELT_UNCHANGED.zip
+
+Latest pushed backend/source-of-truth commit still referenced by prior docs:
+- 1b645de feat(deposit): add tenant deposit ledger foundation
+
+Important status label:
+- M7A–M8F are frontend-first package builds, not FULL runtime PASS.
+- Frontend build PASS was verified for each batch in container.
+- Backend was unchanged for M7A–M8F.
+- Runtime/API smoke and manual browser UI smoke are deferred.
+- Do not claim FULL PASS until local runtime/API smoke + manual UI smoke pass.
+```
+
+### Completed package sequence after M4A
+
+| Batch | Focus | Backend | Verification |
+|---|---|---|---|
+| M7A | Tenant Portal Action Center Hardening | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8A | Checkout Closure + Deposit Settlement Safety Belt | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8B | Public Room Discovery + Booking Safety Belt | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8C | Payment Review Decision Safety Belt | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8D | Indonesian Readability + CTA Dedup Sweep | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8E | Renew Approval Safety Belt + Ringkas Copy | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+| M8F | Invoice Issue/Cancel + Manual Payment Safety Belt | UNCHANGED | Frontend build PASS; runtime/manual smoke deferred |
+
+### Latest product position
+
+```text
+KOST48 V5 Command Center now has safety-belt UI coverage across the main business flows:
+- Tenant action center and payment proof UX.
+- Public booking discovery with first-paid-room-priority copy.
+- Admin payment review decision safety.
+- Renew approval safety.
+- Checkout/deposit settlement safety.
+- Invoice issue/cancel/manual payment safety.
+- Indonesian readability and CTA dedup rules.
+```
+
+### New UX rule locked from user feedback
+
+```text
+Orang Indonesia sangat tidak suka baca.
+UI KOST48 must be concise, action-first, and not repeat the same explanation.
+Repeated links/CTAs in one page should be limited to 1–2 maximum for the same destination/action.
+```
+
+Practical rule:
+- Card/alert title: 3–7 words.
+- Body: 1–2 short lines maximum.
+- One primary CTA per block.
+- Assistant/priority board should show the top 3 priorities by default.
+- Avoid repeating the same warning across banner, card, modal, and footer.
+- Use badges, numbers, and clear action labels instead of paragraphs.
+
+### Current honest label
+
+```text
+M8F Frontend Command Center Safety Belt Sync = build-verified frontend package set.
+Backend = unchanged after M4A for these M7A–M8F frontend safety batches.
+Runtime/API smoke = deferred.
+Manual UI smoke = deferred.
+FULL PASS = not claimed.
+```
+
+### Next recommended phase
+
+```text
+PLAN M8G Admin Booking Review Safety Belt.
+Focus:
+- Admin booking review queue safety.
+- Booking approval/reject confirmation.
+- First-paid room priority explanation for admin.
+- Avoid over-reserving rooms from booking-only interest.
+- Keep backend unchanged unless missing data is proven.
+
+After M8G, start M9 Targeted Runtime/UI Smoke to validate M7A–M8G locally.
+```
+
+### Source-of-truth note
+
+```text
+This M8F docs sync supersedes the older M4A-only current-state sections above/below.
+Older M4A/V5.29 sections remain as historical record.
+For coding, inspect the latest real ZIP/repo first.
+If docs and code differ, write "docs/code out of sync" and follow real code.
+```
+<!-- KOST48_DOCS_SYNC_20260528_M8F_END -->
+
+## A0. Current Execution Override — After M8F
+
+```text
+Current baseline package:
+frontend_20260528_M8F_INVOICE_ACTION_SAFETY_BELT_FULL.zip
+backend_20260528_M8F_INVOICE_ACTION_SAFETY_BELT_UNCHANGED.zip
+
+Mode:
+PLAN first unless user says YOLO/ACT/patch.
+```
+
+### Current verified package state
+
+- M7A–M8F are frontend-only safety/readability packages.
+- Frontend build PASS for each package.
+- Backend unchanged for each package.
+- Runtime/API smoke and manual UI smoke are deferred.
+- FULL PASS is not claimed.
+
+### Next recommended phase — M8G Admin Booking Review Safety Belt
+
+Goal:
+```text
+Make admin booking approval/rejection safer and aligned with first-paid room priority.
+```
+
+Likely scope:
+- Admin booking review queue risk labels.
+- Approval modal that explains booking approval does not equal final room lock.
+- Reject modal with reason minimum 8 characters.
+- Clear action after approval: tenant must pay and submit proof.
+- Prevent copy that implies booking alone secures the room.
+- Keep CTA/link repetition minimal.
+
+Likely frontend files:
+```text
+frontend/src/pages/bookings/*
+frontend/src/pages/admin/*booking*
+frontend/src/components/bookings/*
+frontend/src/api/tenantBookings.ts
+frontend/src/utils/bookingSafety.ts
+frontend/src/styles.css
+```
+
+Backend decision target:
+```text
+Backend unchanged unless real missing data is proven during source inspection.
+```
+
+### M9 after M8G — Targeted Runtime/UI Smoke
+
+Purpose:
+```text
+Validate M7A–M8G locally before calling any package FULL PASS.
+```
+
+Smoke should cover:
+- public rooms and booking detail,
+- tenant stay/invoices/payment proof,
+- payment review queue,
+- renew request queue,
+- checkout/stay detail,
+- invoice issue/cancel/manual payment,
+- booking review queue.
+
+PowerShell-only smoke pattern:
+```powershell
+$baseUrl="http://localhost:3000/api"; Invoke-RestMethod -Method Get -Uri "$baseUrl/public/rooms"
+```
+
+```powershell
+$baseUrl="http://localhost:3000/api"; $body=@{identifier="admin@kost48.com";password="admin123"} | ConvertTo-Json; $login=Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/login" -ContentType "application/json" -Body $body; $token=$login.data.accessToken; $h=@{Authorization="Bearer $token"}; Invoke-RestMethod -Method Get -Uri "$baseUrl/payment-submissions/review-queue" -Headers $h
+```
 
 
 <!-- KOST48_DOCS_SYNC_20260528_M4A_START -->
