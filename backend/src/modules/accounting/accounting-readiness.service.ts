@@ -52,9 +52,48 @@ export class AccountingReadinessService {
     return `${period.year}-${String(period.month).padStart(2, '0')}`;
   }
 
+  private getModelDelegate(modelName: string) {
+    return (this.prisma as any)[modelName];
+  }
+
+  private hasCountDelegate(modelName: string) {
+    const delegate = this.getModelDelegate(modelName);
+    return Boolean(delegate && typeof delegate.count === 'function');
+  }
+
+  private async safeCount(modelName: string, args?: any): Promise<{ ok: boolean; count: number; reason?: string }> {
+    const delegate = this.getModelDelegate(modelName);
+    if (!delegate || typeof delegate.count !== 'function') {
+      return { ok: false, count: 0, reason: `Prisma delegate ${modelName} belum tersedia di runtime.` };
+    }
+
+    try {
+      return { ok: true, count: await delegate.count(args) };
+    } catch (error: any) {
+      return { ok: false, count: 0, reason: error?.message ?? `Gagal membaca ${modelName}.` };
+    }
+  }
+
   private async getPostingPeriodReadiness(postingDateInput?: Date | string): Promise<AccountingPostingPeriodReadiness> {
     const postingDate = this.dateOnly(postingDateInput ?? new Date());
-    const period = await (this.prisma as any).accountingPeriod.findFirst({
+    const accountingPeriodDelegate = this.getModelDelegate('accountingPeriod');
+    if (!accountingPeriodDelegate || typeof accountingPeriodDelegate.findFirst !== 'function') {
+      return {
+        ready: false,
+        postingDate: this.isoDate(postingDate),
+        key: null,
+        id: null,
+        year: null,
+        month: null,
+        status: null,
+        startDate: null,
+        endDate: null,
+        warning: 'Prisma client belum memiliki delegate accountingPeriod. Accounting readiness tidak boleh crash; regenerate Prisma client dan restart backend.',
+        nextAction: 'Jalankan npm run build:local di backend, restore generated Prisma noise jika schema tidak berubah, lalu restart backend.',
+      };
+    }
+
+    const period = await accountingPeriodDelegate.findFirst({
       where: { startDate: { lte: postingDate }, endDate: { gte: postingDate } },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
@@ -120,39 +159,130 @@ export class AccountingReadinessService {
         schemaStatus,
       };
     }
+    const requiredDelegates = ['chartOfAccount', 'cashAccount', 'accountingPeriod', 'openingBalanceBatch', 'journalEntry'];
+    const missingDelegates = requiredDelegates.filter((modelName) => !this.hasCountDelegate(modelName));
+    if (missingDelegates.length > 0) {
+      return {
+        ready: false,
+        score: 0,
+        basis: 'ACCOUNTING_LEDGER_READINESS',
+        ledgerBacked: false,
+        formalStatementReady: false,
+        gates: [
+          {
+            key: 'prisma.generatedClient',
+            label: 'Prisma client runtime sinkron dengan schema accounting',
+            ready: false,
+            count: requiredDelegates.length - missingDelegates.length,
+            note: `Delegate Prisma belum tersedia: ${missingDelegates.join(', ')}.`,
+          },
+        ],
+        missing: ['Prisma generated client runtime belum sinkron dengan schema accounting.'],
+        nextActions: [
+          'Jalankan build backend agar Prisma client digenerate ulang sesuai schema.',
+          'Restart backend setelah build karena endpoint runtime membaca dist/generated/prisma.',
+          'Jangan reset database dan jangan commit generated Prisma jika schema tidak berubah.',
+        ],
+        warnings: [
+          'Tabel database bisa sudah ada, tetapi Prisma client runtime yang sedang dipakai belum memiliki model delegate yang dibutuhkan.',
+          'Accounting readiness dikembalikan sebagai ready=false, bukan 500, agar owner dashboard tetap aman dibuka.',
+        ],
+        schemaStatus,
+      };
+    }
+
     const [
-      coaCount,
-      assetCount,
-      liabilityCount,
-      equityCount,
-      revenueCount,
-      expenseCount,
-      cogsCount,
-      cashAccountCount,
-      periodCount,
-      openingDraftCount,
-      openingPostedCount,
-      journalCount,
-      postedJournalCount,
-      unbalancedPostedJournalCount,
+      coaCountResult,
+      assetCountResult,
+      liabilityCountResult,
+      equityCountResult,
+      revenueCountResult,
+      expenseCountResult,
+      cogsCountResult,
+      cashAccountCountResult,
+      periodCountResult,
+      openingDraftCountResult,
+      openingPostedCountResult,
+      journalCountResult,
+      postedJournalCountResult,
+      unbalancedPostedJournalCountResult,
       postingPeriod,
     ] = await Promise.all([
-      (this.prisma as any).chartOfAccount.count(),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'ASSET' as any } }),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'LIABILITY' as any } }),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'EQUITY' as any } }),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'REVENUE' as any } }),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'EXPENSE' as any } }),
-      (this.prisma as any).chartOfAccount.count({ where: { type: 'COGS' as any } }),
-      (this.prisma as any).cashAccount.count({ where: { isActive: true } }),
-      (this.prisma as any).accountingPeriod.count(),
-      (this.prisma as any).openingBalanceBatch.count({ where: { status: 'DRAFT' as any } }),
-      (this.prisma as any).openingBalanceBatch.count({ where: { status: 'POSTED' as any } }),
-      (this.prisma as any).journalEntry.count(),
-      (this.prisma as any).journalEntry.count({ where: { status: 'POSTED' as any } }),
-      (this.prisma as any).journalEntry.count({ where: { status: 'POSTED' as any, isBalanced: false } }),
+      this.safeCount('chartOfAccount'),
+      this.safeCount('chartOfAccount', { where: { type: 'ASSET' as any } }),
+      this.safeCount('chartOfAccount', { where: { type: 'LIABILITY' as any } }),
+      this.safeCount('chartOfAccount', { where: { type: 'EQUITY' as any } }),
+      this.safeCount('chartOfAccount', { where: { type: 'REVENUE' as any } }),
+      this.safeCount('chartOfAccount', { where: { type: 'EXPENSE' as any } }),
+      this.safeCount('chartOfAccount', { where: { type: 'COGS' as any } }),
+      this.safeCount('cashAccount', { where: { isActive: true } }),
+      this.safeCount('accountingPeriod'),
+      this.safeCount('openingBalanceBatch', { where: { status: 'DRAFT' as any } }),
+      this.safeCount('openingBalanceBatch', { where: { status: 'POSTED' as any } }),
+      this.safeCount('journalEntry'),
+      this.safeCount('journalEntry', { where: { status: 'POSTED' as any } }),
+      this.safeCount('journalEntry', { where: { status: 'POSTED' as any, isBalanced: false } }),
       this.getPostingPeriodReadiness(postingDateInput),
     ]);
+
+    const countResults = [
+      coaCountResult,
+      assetCountResult,
+      liabilityCountResult,
+      equityCountResult,
+      revenueCountResult,
+      expenseCountResult,
+      cogsCountResult,
+      cashAccountCountResult,
+      periodCountResult,
+      openingDraftCountResult,
+      openingPostedCountResult,
+      journalCountResult,
+      postedJournalCountResult,
+      unbalancedPostedJournalCountResult,
+    ];
+    const failedCount = countResults.find((result) => !result.ok);
+    if (failedCount) {
+      return {
+        ready: false,
+        score: 0,
+        basis: 'ACCOUNTING_LEDGER_READINESS',
+        ledgerBacked: false,
+        formalStatementReady: false,
+        gates: [
+          {
+            key: 'accounting.counts.readable',
+            label: 'Accounting readiness dapat membaca model accounting',
+            ready: false,
+            count: 0,
+            note: failedCount.reason ?? 'Gagal membaca salah satu model accounting.',
+          },
+        ],
+        missing: ['Accounting readiness belum bisa membaca semua model accounting.'],
+        nextActions: [
+          'Jalankan npm run build:local di backend dan restart backend.',
+          'Cek apakah Prisma client runtime sudah sinkron dengan schema.',
+          'Jangan reset database untuk masalah readiness read guard ini.',
+        ],
+        warnings: [failedCount.reason ?? 'Accounting readiness read guard menangkap error count.'],
+        schemaStatus,
+      };
+    }
+
+    const coaCount = coaCountResult.count;
+    const assetCount = assetCountResult.count;
+    const liabilityCount = liabilityCountResult.count;
+    const equityCount = equityCountResult.count;
+    const revenueCount = revenueCountResult.count;
+    const expenseCount = expenseCountResult.count;
+    const cogsCount = cogsCountResult.count;
+    const cashAccountCount = cashAccountCountResult.count;
+    const periodCount = periodCountResult.count;
+    const openingDraftCount = openingDraftCountResult.count;
+    const openingPostedCount = openingPostedCountResult.count;
+    const journalCount = journalCountResult.count;
+    const postedJournalCount = postedJournalCountResult.count;
+    const unbalancedPostedJournalCount = unbalancedPostedJournalCountResult.count;
 
     const gates = [
       { key: 'coa.seeded', label: 'Chart of Accounts minimal tersedia', ready: coaCount >= 30, count: coaCount, note: 'Seed default COA minimal kos harus dijalankan.' },

@@ -362,14 +362,29 @@ export class DepositLedgerService {
       include: {
         tenant: true,
         room: true,
-        depositLedgerEntries: true,
       },
       orderBy: { id: 'desc' },
       take: limit,
     });
 
+    const stayIds = stays.map((stay) => stay.id);
+    const ledgerEntries = stayIds.length
+      ? await this.prisma.tenantDepositLedgerEntry.findMany({
+          where: { stayId: { in: stayIds } },
+          orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+        })
+      : [];
+
+    const ledgerEntriesByStayId = ledgerEntries.reduce((map, entry) => {
+      const existing = map.get(entry.stayId) ?? [];
+      existing.push(entry);
+      map.set(entry.stayId, existing);
+      return map;
+    }, new Map<number, typeof ledgerEntries>());
+
     const items = stays.map((stay: any) => {
-      const ledgerHeldBalanceRupiah = (stay.depositLedgerEntries ?? []).reduce((sum: number, entry: any) => {
+      const stayLedgerEntries = ledgerEntriesByStayId.get(stay.id) ?? [];
+      const ledgerHeldBalanceRupiah = stayLedgerEntries.reduce((sum: number, entry: any) => {
         const amount = Number(entry.amountRupiah ?? 0);
         if (entry.direction === TenantDepositLedgerDirection.INCREASE_LIABILITY) return sum + amount;
         if (entry.direction === TenantDepositLedgerDirection.DECREASE_LIABILITY) return sum - amount;
@@ -388,7 +403,7 @@ export class DepositLedgerService {
         ledgerHeldBalanceRupiah: Math.max(ledgerHeldBalanceRupiah, 0),
         gapRupiah,
         status: gapRupiah === 0 ? 'MATCH' : 'NEEDS_BACKFILL_OR_REVIEW',
-        ledgerEntryCount: stay.depositLedgerEntries?.length ?? 0,
+        ledgerEntryCount: stayLedgerEntries.length,
       };
     });
 
@@ -404,19 +419,28 @@ export class DepositLedgerService {
 
   async backfillDryRun(dto: DepositLedgerDryRunDto = {}) {
     const limit = this.normalizeLimit(dto.limit, 25, 500);
-    const candidates = await this.prisma.stay.findMany({
+    const rawCandidates = await this.prisma.stay.findMany({
       where: {
         OR: [
           { depositPaidAmountRupiah: { gt: 0 } },
           { depositDeductionRupiah: { gt: 0 } },
           { depositRefundedRupiah: { gt: 0 } },
         ],
-        depositLedgerEntries: { none: {} },
       },
       include: { tenant: true, room: true },
       orderBy: { id: 'asc' },
       take: limit,
     });
+
+    const stayIds = rawCandidates.map((stay) => stay.id);
+    const existingEntries = stayIds.length
+      ? await this.prisma.tenantDepositLedgerEntry.findMany({
+          where: { stayId: { in: stayIds } },
+          select: { stayId: true },
+        })
+      : [];
+    const stayIdsWithLedger = new Set(existingEntries.map((entry) => entry.stayId));
+    const candidates = rawCandidates.filter((stay) => !stayIdsWithLedger.has(stay.id));
 
     return {
       basis: 'M4_DEPOSIT_LEDGER_BACKFILL_DRY_RUN',
