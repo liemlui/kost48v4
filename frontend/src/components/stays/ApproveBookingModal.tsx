@@ -79,6 +79,8 @@ export default function ApproveBookingModal({
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
         queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] }),
         queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
         queryClient.invalidateQueries({
           predicate: (query) =>
             typeof query.queryKey?.[0] === 'string' &&

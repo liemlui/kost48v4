@@ -1159,7 +1159,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       INNER JOIN "Invoice" i ON i.id = ps."invoiceId"
       INNER JOIN "Tenant" t ON t.id = ps."tenantId"
       WHERE ps.id = ${submissionId}
-      FOR UPDATE OF ps
+      FOR UPDATE OF ps, s, r, i
     `);
 
     return rows[0] ?? null;

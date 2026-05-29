@@ -11,6 +11,17 @@ import {
 import { formatDateSafe, formatPeriod, formatValue, getCountdownStatus } from '../../pages/resources/simpleCrudHelpers';
 import { getReferenceLabel, ReferenceOption } from '../../pages/resources/resourceRelations';
 
+
+function movementTypeLabel(value: unknown) {
+  switch (String(value ?? '')) {
+    case 'IN': return 'Barang Masuk';
+    case 'OUT': return 'Barang Keluar';
+    case 'ASSIGN_TO_ROOM': return 'Pasang ke Kamar';
+    case 'RETURN_FROM_ROOM': return 'Kembali dari Kamar';
+    default: return formatValue(value);
+  }
+}
+
 interface ResourceTableProps {
   items: Array<Record<string, unknown>>;
   filteredItems: Array<Record<string, unknown>>;
@@ -169,6 +180,24 @@ export default function ResourceTable({
       }
     }
 
+
+    if (config.path === '/inventory-items') {
+      if (column.key === 'positionSummary') {
+        const text = formatValue(value);
+        return <span className="small fw-semibold">{text === '-' ? 'Tidak ada stok aktif' : text}</span>;
+      }
+      if (column.key === 'qtyOnHand') {
+        const qty = Number(value ?? 0);
+        const min = Number(item.minQty ?? 0);
+        return (
+          <div>
+            <div className="fw-semibold">{formatValue(value)}</div>
+            {min > 0 && qty <= min ? <div className="small text-warning">Stok perlu dicek</div> : null}
+          </div>
+        );
+      }
+    }
+
     if (config.path === '/stays') {
       if (column.key === 'id') {
         const tenantName = (item.tenant as { fullName?: string } | undefined)?.fullName;
@@ -237,6 +266,42 @@ export default function ResourceTable({
       }
     }
 
+
+    if (config.path === '/inventory-items') {
+      const qty = Number(item.qtyOnHand ?? 0);
+      return (
+        <>
+          {qty > 0 ? (
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory-movements?movementType=ASSIGN_TO_ROOM&itemId=${item.id}&qty=1`)}>
+              Pasang ke Kamar
+            </Button>
+          ) : null}
+          {qty > 0 ? (
+            <Button size="sm" variant="outline-danger" onClick={() => navigate(`/inventory-movements?movementType=OUT&itemId=${item.id}&qty=1`)}>
+              Catat Keluar
+            </Button>
+          ) : null}
+        </>
+      );
+    }
+
+    if (config.path === '/room-items') {
+      return (
+        <>
+          {item.roomId ? (
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/rooms/${item.roomId}`)}>
+              Detail kamar
+            </Button>
+          ) : null}
+          {item.itemId && item.roomId ? (
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(`/inventory-movements?movementType=RETURN_FROM_ROOM&itemId=${item.itemId}&roomId=${item.roomId}&qty=${item.qty ?? 1}`)}>
+              Kembalikan ke Gudang
+            </Button>
+          ) : null}
+        </>
+      );
+    }
+
     return null;
   };
 
@@ -249,9 +314,9 @@ export default function ResourceTable({
       {isLoading ? <div className="py-5 text-center"><Spinner /></div> : null}
       {isError ? <Alert variant="danger">Gagal mengambil data.</Alert> : null}
       {!isLoading && !items.length ? <Alert variant="secondary">Belum ada data.</Alert> : null}
-      {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data yang sesuai dengan badge filter aktif.</Alert> : null}
+      {!isLoading && items.length > 0 && !filteredItems.length ? <Alert variant="warning">Tidak ada data untuk filter ini.</Alert> : null}
       {!!filteredItems.length ? (
-        <Table hover responsive className="compact-data-table">
+        <Table hover responsive className="compact-data-table responsive-data-table">
           <thead>
             <tr>
               {visibleColumns.map((column) => <th key={column.key}>{column.label}</th>)}
@@ -279,9 +344,9 @@ export default function ResourceTable({
                   } : undefined}
                 >
                   {visibleColumns.map((column) => (
-                    <td key={column.key}>{renderCell(item, column)}</td>
+                    <td key={column.key} data-label={column.label}>{renderCell(item, column)}</td>
                   ))}
-                  <td onClick={(event) => event.stopPropagation()}>
+                  <td data-label="Aksi" onClick={(event) => event.stopPropagation()}>
                     <div className="d-flex gap-2 flex-wrap align-items-center">
                       {quickAction}
                       {editGuard.allowed ? (

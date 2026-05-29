@@ -21,21 +21,6 @@ function formatDateInput(input?: string | Date | null): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateTimeLocalInput(input?: string | Date | null): string {
-  const date = toValidDate(input) ?? new Date();
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  const hours = `${date.getHours()}`.padStart(2, '0');
-  const minutes = `${date.getMinutes()}`.padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function toIsoFromDateTimeLocal(input: string): string {
-  const date = new Date(input);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString();
-}
 
 function formatDisplayDate(input?: string | Date | null): string {
   const date = toValidDate(input);
@@ -101,7 +86,7 @@ export default function RenewStayModal({
   const [agreedRentAmountRupiah, setAgreedRentAmountRupiah] = useState('');
   const [electricityReadingValue, setElectricityReadingValue] = useState('');
   const [waterReadingValue, setWaterReadingValue] = useState('');
-  const [meterReadingAt, setMeterReadingAt] = useState(formatDateTimeLocalInput());
+  const [meterReadingAt, setMeterReadingAt] = useState(formatDateInput(new Date()));
   const [error, setError] = useState('');
 
   const currentEndDate = useMemo(() => toValidDate(stay.plannedCheckOutDate) ?? toValidDate(stay.checkInDate), [stay.plannedCheckOutDate, stay.checkInDate]);
@@ -122,7 +107,7 @@ export default function RenewStayModal({
       setAgreedRentAmountRupiah(stay.agreedRentAmountRupiah ? String(stay.agreedRentAmountRupiah) : '');
       setElectricityReadingValue('');
       setWaterReadingValue('');
-      setMeterReadingAt(formatDateTimeLocalInput());
+      setMeterReadingAt(formatDateInput(new Date()));
       setError('');
       return;
     }
@@ -130,7 +115,7 @@ export default function RenewStayModal({
     setAgreedRentAmountRupiah('');
     setElectricityReadingValue('');
     setWaterReadingValue('');
-    setMeterReadingAt(formatDateTimeLocalInput());
+    setMeterReadingAt(formatDateInput(new Date()));
     setError('');
   }, [show, stay.agreedRentAmountRupiah]);
 
@@ -139,7 +124,7 @@ export default function RenewStayModal({
     setAgreedRentAmountRupiah('');
     setElectricityReadingValue('');
     setWaterReadingValue('');
-    setMeterReadingAt(formatDateTimeLocalInput());
+    setMeterReadingAt(formatDateInput(new Date()));
     setError('');
     onHide();
   };
@@ -174,8 +159,8 @@ export default function RenewStayModal({
       return;
     }
 
-    const meterReadingAtIso = toIsoFromDateTimeLocal(meterReadingAt);
-    if (!meterReadingAtIso) {
+    const meterReadingDate = formatDateInput(meterReadingAt);
+    if (!meterReadingDate) {
       setError('Tanggal catat meter tidak valid.');
       return;
     }
@@ -192,7 +177,7 @@ export default function RenewStayModal({
         agreedRentAmountRupiah: rentAmount,
         electricityReadingValue,
         waterReadingValue,
-        meterReadingAt: meterReadingAtIso,
+        meterReadingAt: meterReadingDate,
       });
       onSuccess?.();
       handleClose();
@@ -286,9 +271,9 @@ export default function RenewStayModal({
             </div>
             <div className="col-md-6">
               <Form.Group>
-                <Form.Label>Waktu Catat Meter</Form.Label>
+                <Form.Label>Tanggal Catat Meter</Form.Label>
                 <Form.Control
-                  type="datetime-local"
+                  type="date"
                   value={meterReadingAt}
                   onChange={(e) => setMeterReadingAt(e.target.value)}
                 />
@@ -296,7 +281,7 @@ export default function RenewStayModal({
             </div>
           </div>
           <div className="text-muted small mt-2">
-            Sistem akan menjaga agar angka meter tidak lebih kecil dari catatan sebelumnya dan waktu catat tidak bentrok.
+            Sistem menyimpan checkpoint per tanggal agar tidak bentrok dan mudah diaudit.
           </div>
         </div>
       </Modal.Body>

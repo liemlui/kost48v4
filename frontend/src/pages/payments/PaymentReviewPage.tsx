@@ -113,6 +113,9 @@ export default function PaymentReviewPage() {
       queryClient.invalidateQueries({ queryKey: ['stays'] }),
       queryClient.invalidateQueries({ queryKey: ['rooms'] }),
       queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-owner'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-admin'] }),
+      queryClient.invalidateQueries({ queryKey: ['payment-urgency'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-stay'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
@@ -208,7 +211,7 @@ export default function PaymentReviewPage() {
           ) : null}
 
           {!query.isLoading && !query.isError && items.length > 0 ? (
-            <Table responsive hover className="align-middle">
+            <Table responsive hover className="align-middle responsive-data-table">
               <thead>
                 <tr>
                   <th>Tenant & Kamar</th>
@@ -229,14 +232,14 @@ export default function PaymentReviewPage() {
                   const reviewMeta = getDeadlineMeta(getReviewDeadline(item), 'Batas review');
                   return (
                     <tr key={item.id} className={safety.riskLevel === 'HIGH' ? 'payment-row-risk-high' : undefined}>
-                      <td>
+                      <td data-label="Tenant & Kamar">
                         <div className="fw-semibold">{item.tenant?.fullName ?? '-'}</div>
                         <div className="small text-muted">{item.room?.code ?? '-'} · {item.room?.name ?? 'Nama kamar belum tersedia'}</div>
                         <div className="small text-muted">Dibayar: {formatDate(item.paidAt)} · {item.paymentMethod}</div>
                         <div className={reviewMeta.isExpired ? 'small text-soft-danger' : 'small text-muted'}>Masuk: {formatDate(item.createdAt ?? item.paidAt)}</div>
                         <div className={reviewMeta.isExpired ? 'small text-soft-danger fw-semibold' : 'small text-muted'}>{getReviewSlaText(item)}</div>
                       </td>
-                      <td>
+                      <td data-label="Target">
                         <div className="fw-semibold">{getTargetLabel(item)}</div>
                         <div className="small text-muted">
                           {item.targetType === 'DEPOSIT'
@@ -244,24 +247,24 @@ export default function PaymentReviewPage() {
                             : (item.invoice?.invoiceNumber ?? `INV-${item.invoiceId}`)}
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Nominal">
                         <div className="fw-semibold"><CurrencyDisplay amount={item.amountRupiah} /></div>
                         <span className={`amount-tone-pill ${amountToneClass}`}>{getPaymentAmountLabel(amountTone)}</span>
                         <div className="small text-muted mt-1">Sisa: <CurrencyDisplay amount={getPaymentRemainingAmount(item)} /></div>
                       </td>
-                      <td>
+                      <td data-label="Risiko">
                         <span className={`payment-risk-pill ${safety.riskTone}`}>{safety.riskLabel}</span>
                         {safety.blockers.length ? <div className="small text-soft-danger mt-1">{safety.blockers[0].title}</div> : null}
                         {!safety.blockers.length && safety.warnings.length ? <div className="small text-muted mt-1">{safety.warnings[0].title}</div> : null}
                       </td>
-                      <td>
-                        {item.fileUrl ? (
-                          <Button as="a" href={resolveAbsoluteFileUrl(item.fileUrl) ?? '#'} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">Buka Bukti</Button>
+                      <td data-label="Bukti">
+                        {resolveAbsoluteFileUrl(item.fileUrl) ? (
+                          <Button as="a" href={resolveAbsoluteFileUrl(item.fileUrl) as string} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">Buka Bukti</Button>
                         ) : <span className="amount-tone-pill warning">Tanpa file</span>}
                       </td>
-                      <td><StatusBadge status={item.status} domain="payment" /></td>
-                      <td><div className="small text-muted payment-impact-text">{compactText(getPaymentImpact(item), 72)}</div></td>
-                      <td>
+                      <td data-label="Status"><StatusBadge status={item.status} domain="payment" /></td>
+                      <td data-label="Dampak"><div className="small text-muted payment-impact-text">{compactText(getPaymentImpact(item), 72)}</div></td>
+                      <td data-label="Aksi">
                         <div className="d-flex gap-2 flex-wrap">
                           {item.status === 'PENDING_REVIEW' ? (
                             <>

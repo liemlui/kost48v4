@@ -14,6 +14,8 @@ import { listAdminRenewRequests } from '../../api/renewRequests';
 import { listAdminCheckoutRequests } from '../../api/checkoutRequests';
 import { listPaymentReviewQueue } from '../../api/paymentSubmissions';
 import { fetchBusinessHealth } from '../../api/finance';
+import { fetchAccountingReadiness, type AccountingReadiness } from '../../api/accounting';
+import { fetchAssetReadinessV2, type AssetReadinessV2 } from '../../api/assets';
 import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary, type DepositLedgerReconciliationLite, type DepositLedgerSummary } from '../../api/depositLedger';
 import { fetchAutoOpsStatus, type AutoOpsStatus } from '../../api/autoOps';
 import { fetchMyStaffRoutineKpi, fetchStaffRoutineToday } from '../../api/staffRoutines';
@@ -526,7 +528,7 @@ function AdminAreaInternalMenu({ title, items, onNavigate }: { title: string; it
     <div className="admin-area-internal-menu" aria-label={`Sub-menu ${title}`}>
       <div className="admin-area-internal-menu-head">
         <span>{title}</span>
-        <small>Pilih data area ini tanpa keluar dari command center.</small>
+        <small>Navigasi</small>
       </div>
       <div className="admin-area-internal-menu-scroll">
         {items.map((item) => (
@@ -540,7 +542,7 @@ function AdminAreaInternalMenu({ title, items, onNavigate }: { title: string; it
             <span className="admin-area-internal-chip-main">
               <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
               <span className="admin-area-internal-label">{item.label}</span>
-              {typeof item.count === 'number' ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
+              {typeof item.count === 'number' && item.count > 0 && ['warning', 'danger'].includes(item.tone ?? '') ? <strong className="admin-area-internal-count">{item.count}</strong> : null}
             </span>
             <small>{item.helper}</small>
           </button>
@@ -1450,6 +1452,12 @@ type OwnerFinancialHealthCockpitProps = {
   depositReconciliation?: DepositLedgerReconciliationLite;
   depositLoading?: boolean;
   depositError?: boolean;
+  accountingReadiness?: AccountingReadiness;
+  accountingReadinessLoading?: boolean;
+  accountingReadinessError?: boolean;
+  assetReadiness?: AssetReadinessV2;
+  assetReadinessLoading?: boolean;
+  assetReadinessError?: boolean;
   onNavigate: (to: string) => void;
 };
 
@@ -1463,6 +1471,12 @@ function OwnerFinancialHealthCockpit({
   depositReconciliation,
   depositLoading,
   depositError,
+  accountingReadiness,
+  accountingReadinessLoading,
+  accountingReadinessError,
+  assetReadiness,
+  assetReadinessLoading,
+  assetReadinessError,
   onNavigate,
 }: OwnerFinancialHealthCockpitProps) {
   const month = getCurrentMonthWindow();
@@ -1612,6 +1626,44 @@ function OwnerFinancialHealthCockpit({
     } : null,
   ].filter(Boolean) as ActionQueueItem[]);
 
+
+  const productionGateItems = [
+    {
+      id: 'finance-readiness',
+      label: 'Accounting readiness',
+      ready: Boolean(accountingReadiness?.ready && accountingReadiness?.formalStatementReady),
+      value: accountingReadinessLoading ? 'Memuat' : accountingReadinessError ? 'Tidak terbaca' : `${Math.round(Number(accountingReadiness?.score ?? 0))}%`,
+      note: accountingReadinessError ? 'Cek koneksi endpoint accounting readiness.' : accountingReadiness?.formalStatementReady ? 'Laporan formal siap dibaca owner.' : 'Masih ada setup accounting yang perlu dicek.',
+      to: '/finance/accounting-setup',
+    },
+    {
+      id: 'deposit-reconcile',
+      label: 'Deposit ledger',
+      ready: !depositError && mismatchCount === 0,
+      value: depositLoading ? 'Memuat' : depositError ? 'Tidak terbaca' : mismatchCount === 0 ? 'Match' : `${mismatchCount} mismatch`,
+      note: depositError ? 'Deposit ledger belum bisa dimuat.' : mismatchCount === 0 ? 'Saldo ledger dan snapshot tidak beda dari data yang dimuat.' : 'Tahan refund/forfeit sampai mismatch dibereskan.',
+      to: '/finance/accounting-setup',
+    },
+    {
+      id: 'asset-readiness',
+      label: 'Asset register',
+      ready: Boolean(assetReadiness?.formalStatementReady || assetReadiness?.ledgerBacked),
+      value: assetReadinessLoading ? 'Memuat' : assetReadinessError ? 'Tidak terbaca' : `${Number(assetReadiness?.counts?.activeCount ?? 0)} aktif`,
+      note: assetReadinessError ? 'Cek endpoint asset readiness.' : assetReadiness?.warnings?.length ? assetReadiness.warnings[0] : 'Asset register siap sebagai sinyal neraca owner.',
+      to: '/finance/assets',
+    },
+    {
+      id: 'cash-decision',
+      label: 'Cash decision',
+      ready: pendingReviewRupiah === 0 && overdueInvoiceRupiah === 0,
+      value: pendingReviewRupiah > 0 ? 'Review bayar' : overdueInvoiceRupiah > 0 ? 'Tagih dulu' : 'Aman',
+      note: pendingReviewRupiah > 0 ? 'Bukti bayar perlu diputuskan sebelum dianggap cash selesai.' : overdueInvoiceRupiah > 0 ? 'Open/overdue invoice harus jadi follow-up owner/admin.' : 'Tidak ada blocker cash besar dari data yang dimuat.',
+      to: pendingReviewRupiah > 0 ? '/payment-submissions/review' : '/invoices',
+    },
+  ];
+  const productionReadyCount = productionGateItems.filter((item) => item.ready).length;
+  const productionGateTone = productionReadyCount === productionGateItems.length ? 'success' : productionReadyCount >= 2 ? 'warning' : 'danger';
+
   const recentDepositEntries = depositSummary?.recentEntries ?? [];
 
   return (
@@ -1635,6 +1687,30 @@ function OwnerFinancialHealthCockpit({
         </Alert>
 
         <CompactMetrics metrics={metrics} />
+
+        <Card className="owner-production-gate-card border-0 mb-4">
+          <Card.Body>
+            <div className="table-meta align-items-start mb-3">
+              <div>
+                <div className="panel-title">Production Finance Gate</div>
+                <div className="panel-subtitle">Cek cepat sebelum owner mengambil keputusan uang: accounting, deposit, aset, dan cash blocker.</div>
+              </div>
+              <StatusBadge status={productionGateTone === 'success' ? 'SUCCESS' : productionGateTone === 'warning' ? 'WARNING' : 'DANGER'} customLabel={`${productionReadyCount}/${productionGateItems.length} siap`} />
+            </div>
+            <div className="owner-production-gate-grid">
+              {productionGateItems.map((item) => (
+                <button type="button" key={item.id} className={`owner-production-gate-item ${item.ready ? 'is-ready' : 'needs-review'}`} onClick={() => onNavigate(item.to)}>
+                  <span className="owner-production-gate-icon">{item.ready ? '✓' : '!'}</span>
+                  <span className="owner-production-gate-content">
+                    <strong>{item.label}</strong>
+                    <small>{item.note}</small>
+                  </span>
+                  <span className="owner-production-gate-value">{item.value}</span>
+                </button>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
 
         <Row className="g-4">
           <Col xl={8}>
@@ -1708,6 +1784,8 @@ function OwnerDashboard() {
   const autoOpsQuery = useQuery({ queryKey: ['dashboard-owner', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, ...ACTION_QUERY_OPTIONS });
   const depositSummaryQuery = useQuery({ queryKey: ['dashboard-owner', 'deposit-ledger-summary'], queryFn: () => fetchDepositLedgerSummary({ limit: 8 }), ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
   const depositReconciliationQuery = useQuery({ queryKey: ['dashboard-owner', 'deposit-ledger-reconciliation-lite'], queryFn: () => fetchDepositLedgerReconciliationLite({ limit: 50 }), ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
+  const accountingReadinessQuery = useQuery({ queryKey: ['dashboard-owner', 'accounting-readiness'], queryFn: fetchAccountingReadiness, ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
+  const assetReadinessQuery = useQuery({ queryKey: ['dashboard-owner', 'asset-readiness'], queryFn: fetchAssetReadinessV2, ...MEDIUM_FRESH_QUERY_OPTIONS, retry: 1 });
 
   const rooms = roomsQuery.data?.items ?? [];
   const activeStays = activeStaysQuery.data?.items ?? [];
@@ -1728,7 +1806,7 @@ function OwnerDashboard() {
     void Promise.all([
       roomsQuery.refetch(), activeStaysQuery.refetch(), invoicesQuery.refetch(), expensesQuery.refetch(),
       renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), autoOpsQuery.refetch(),
-      depositSummaryQuery.refetch(), depositReconciliationQuery.refetch(),
+      depositSummaryQuery.refetch(), depositReconciliationQuery.refetch(), accountingReadinessQuery.refetch(), assetReadinessQuery.refetch(),
     ]);
   };
 
@@ -1759,6 +1837,12 @@ function OwnerDashboard() {
         depositReconciliation={depositReconciliationQuery.data}
         depositLoading={depositSummaryQuery.isLoading || depositReconciliationQuery.isLoading}
         depositError={depositSummaryQuery.isError || depositReconciliationQuery.isError}
+        accountingReadiness={accountingReadinessQuery.data}
+        accountingReadinessLoading={accountingReadinessQuery.isLoading}
+        accountingReadinessError={accountingReadinessQuery.isError}
+        assetReadiness={assetReadinessQuery.data}
+        assetReadinessLoading={assetReadinessQuery.isLoading}
+        assetReadinessError={assetReadinessQuery.isError}
         onNavigate={navigate}
       />
       {backendBusinessHealth ? (

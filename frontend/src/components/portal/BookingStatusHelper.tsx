@@ -52,7 +52,7 @@ export function getPortalBookingStatus(
     return {
       badgeStatus: 'SUCCESS',
       label: 'Kamar sudah aktif',
-      helper: 'Masa sewa aktif. Buka My Stay Guide untuk detail kamar dan tagihan.',
+      helper: 'Masa sewa aktif. Buka Panduan Kos Saya untuk detail kamar dan tagihan.',
     };
   }
 

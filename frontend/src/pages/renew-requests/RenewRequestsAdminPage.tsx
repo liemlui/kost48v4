@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import { PeriodVisualizer, type AssistantItem, type MetricChip } from '../../components/command-center';
-import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
+import { AssistantInsightLine, EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -24,6 +24,14 @@ function dateInputToUtcIso(value: string): string {
   const [year, month, day] = value.split('-').map(Number);
   if (!year || !month || !day) return value;
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)).toISOString();
+}
+
+
+function todayDateInput(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 function asNumber(value: unknown) {
@@ -133,8 +141,7 @@ export default function RenewRequestsAdminPage() {
       message: 'Catat meter dulu. Sistem buat tagihan renew.',
       source: 'Renew',
       count: pendingCount,
-      actionLabel: 'Lihat pending',
-      onAction: () => setStatusFilter('PENDING'),
+
     } : null,
     approvedCount ? {
       id: 'renew-approved',
@@ -143,16 +150,15 @@ export default function RenewRequestsAdminPage() {
       message: 'Pastikan tagihan renew dibayar tenant.',
       source: 'Invoice renew',
       count: approvedCount,
-      actionLabel: 'Lihat approved',
-      onAction: () => setStatusFilter('APPROVED'),
+
     } : null,
   ].filter(Boolean) as AssistantItem[];
 
   const metrics: MetricChip[] = [
-    { id: 'pending', label: 'Menunggu', value: pendingCount, helper: 'Butuh meter + keputusan', icon: '⏳', status: pendingCount ? 'WARNING' : 'SUCCESS', onClick: () => setStatusFilter('PENDING') },
-    { id: 'approved', label: 'Disetujui', value: approvedCount, helper: 'Invoice renew sudah dibuat', icon: '✅', status: 'SUCCESS', onClick: () => setStatusFilter('APPROVED') },
-    { id: 'rejected', label: 'Ditolak', value: rejectedCount, helper: 'Ada catatan review', icon: '✕', status: rejectedCount ? 'DANGER' : 'SUCCESS', onClick: () => setStatusFilter('REJECTED') },
-    { id: 'total', label: 'Total Request', value: items.length, helper: statusFilter ? 'Sesuai filter aktif' : 'Semua status', icon: '📋', status: 'INFO', onClick: () => setStatusFilter('') },
+    { id: 'pending', label: 'Menunggu', value: pendingCount, helper: 'Butuh meter + keputusan', icon: '⏳', status: pendingCount ? 'WARNING' : 'SUCCESS' },
+    { id: 'approved', label: 'Disetujui', value: approvedCount, helper: 'Invoice renew sudah dibuat', icon: '✅', status: 'SUCCESS' },
+    { id: 'rejected', label: 'Ditolak', value: rejectedCount, helper: 'Ada catatan review', icon: '✕', status: rejectedCount ? 'DANGER' : 'SUCCESS' },
+    { id: 'total', label: 'Total Request', value: items.length, helper: statusFilter ? 'Sesuai filter aktif' : 'Semua status', icon: '📋', status: 'INFO' },
   ];
 
   const handleApprove = () => {
@@ -186,7 +192,7 @@ export default function RenewRequestsAdminPage() {
     const payload: ApproveRenewRequestPayload = {
       electricityReadingValue: nextElectricityReading,
       waterReadingValue: nextWaterReading,
-      meterReadingAt: new Date(nextMeterReadingAt).toISOString(),
+      meterReadingAt: nextMeterReadingAt,
     };
 
     if (nextPlannedCheckOutDate) payload.plannedCheckOutDate = dateInputToUtcIso(nextPlannedCheckOutDate);
@@ -243,7 +249,6 @@ export default function RenewRequestsAdminPage() {
           value: metric.value,
           helper: metric.helper,
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
-          onClick: metric.onClick,
         }))}
       />
 
@@ -254,13 +259,17 @@ export default function RenewRequestsAdminPage() {
               <div className="panel-title">Filter perpanjangan</div>
               <div className="panel-subtitle">Pilih status untuk fokus kerja.</div>
             </div>
-            <div className="status-tab-bar compact-tabs">
-              {STATUS_OPTIONS.map((opt) => (
-                <button key={opt.value || 'ALL'} className={`status-tab${statusFilter === opt.value ? ' active' : ''}`} onClick={() => setStatusFilter(opt.value)}>
-                  {opt.label}<span className="tab-badge">{opt.value === 'PENDING' ? pendingCount : opt.value === 'APPROVED' ? approvedCount : opt.value === 'REJECTED' ? rejectedCount : items.length}</span>
-                </button>
-              ))}
-            </div>
+            <EntityBadgeFilterBar
+              ariaLabel="Filter daftar perpanjangan"
+              activeId={statusFilter || 'ALL'}
+              onChange={(id) => setStatusFilter(id === 'ALL' ? '' : id)}
+              filters={STATUS_OPTIONS.map((opt) => ({
+                id: opt.value || 'ALL',
+                label: opt.label.replace(' Status', ''),
+                count: opt.value === 'PENDING' ? pendingCount : opt.value === 'APPROVED' ? approvedCount : opt.value === 'REJECTED' ? rejectedCount : items.length,
+                tone: opt.value === 'PENDING' ? 'warning' : opt.value === 'APPROVED' ? 'success' : opt.value === 'REJECTED' ? 'danger' : 'info',
+              }))}
+            />
           </div>
         </Card.Body>
       </Card>
@@ -272,7 +281,7 @@ export default function RenewRequestsAdminPage() {
           ) : items.length === 0 ? (
             <EmptyState icon="📋" title="Belum ada permintaan perpanjangan" description={statusFilter ? `Tidak ada permintaan dengan status ${STATUS_OPTIONS.find((o) => o.value === statusFilter)?.label ?? statusFilter}.` : 'Belum ada tenant yang mengajukan perpanjangan masa sewa.'} />
           ) : (
-            <Table hover responsive className="align-middle mb-0">
+            <Table hover responsive className="align-middle mb-0 responsive-data-table">
               <thead>
                 <tr>
                   <th>Tenant & Kamar</th>
@@ -289,28 +298,28 @@ export default function RenewRequestsAdminPage() {
                   const riskBadge = getRenewRequestRiskBadge(rr);
                   return (
                   <tr key={rr.id}>
-                    <td>
+                    <td data-label="Tenant & Kamar">
                       <div className="fw-semibold">{getTenantName(rr)}</div>
                       <div className="small text-muted">{getRoomCode(rr)} · Request #{rr.id}</div>
                     </td>
-                    <td>
+                    <td data-label="Permintaan">
                       <div className="fw-semibold">{formatDate(rr.requestedCheckOutDate)}</div>
                       <div className="small text-muted">{getRenewTermLabel(rr.requestedTerm)}</div>
                     </td>
-                    <td>
+                    <td data-label="Masa Sewa">
                       <div className="small text-muted">Akhir sekarang</div>
                       <div className="fw-semibold">{formatDate((rr as any).stay?.plannedCheckOutDate)}</div>
                     </td>
-                    <td><StatusBadge status={rr.status} /></td>
-                    <td><span className={`renew-risk-pill ${riskBadge.tone}`}>{riskBadge.label}</span></td>
-                    <td className="small text-muted" style={{ maxWidth: 260 }}>
+                    <td data-label="Status"><StatusBadge status={rr.status} /></td>
+                    <td data-label="Risiko"><span className={`renew-risk-pill ${riskBadge.tone}`}>{riskBadge.label}</span></td>
+                    <td data-label="Catatan" className="small text-muted" style={{ maxWidth: 260 }}>
                       {rr.requestNotes ? <div title={rr.requestNotes}>{rr.requestNotes}</div> : 'Tidak ada catatan tenant.'}
                       {(rr as any).reviewNotes ? <div className="mt-1 text-danger"><em>{(rr as any).reviewNotes}</em></div> : null}
                     </td>
-                    <td>
+                    <td data-label="Aksi">
                       {rr.status === 'PENDING' ? (
                         <div className="d-flex gap-2 flex-wrap">
-                          <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(new Date().toISOString().slice(0, 16)); setApproveFormError(''); setApprovalAcknowledged(false); }}>Catat & Setujui</Button>
+                          <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(todayDateInput()); setApproveFormError(''); setApprovalAcknowledged(false); }}>Catat & Setujui</Button>
                           <Button variant="outline-danger" size="sm" onClick={() => { setRejectTarget(rr); setReviewNotes(''); setRejectFormError(''); }}>Tolak</Button>
                         </div>
                       ) : <span className="text-muted small">Sudah diproses</span>}
@@ -408,8 +417,8 @@ export default function RenewRequestsAdminPage() {
                   </Col>
                   <Col md={4}>
                     <Form.Group>
-                      <Form.Label>Waktu catat meter</Form.Label>
-                      <Form.Control type="datetime-local" value={meterReadingAt} onChange={(e) => setMeterReadingAt(e.target.value)} />
+                      <Form.Label>Tanggal catat meter</Form.Label>
+                      <Form.Control type="date" value={meterReadingAt} onChange={(e) => setMeterReadingAt(e.target.value)} />
                     </Form.Group>
                   </Col>
                 </Row>

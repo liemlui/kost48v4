@@ -92,11 +92,42 @@ export class StaysQueryService {
 
     const stay = await this.prisma.stay.findFirst({
       where: { tenantId: user.tenantId, status: StayStatus.ACTIVE },
-      include: { room: true },
+      include: {
+        room: true,
+        _count: {
+          select: { invoices: true },
+        },
+        invoices: {
+          orderBy: { id: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            invoiceNumber: true,
+            status: true,
+          },
+        },
+      },
     });
 
     if (!stay) throw new NotFoundException('Stay aktif tidak ditemukan');
-    return normalizeStayForResponse(stay);
+
+    const openInvoiceCount = await this.prisma.invoice.count({
+      where: {
+        stayId: stay.id,
+        status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
+      },
+    });
+
+    return serializePrismaResult(
+      normalizeStayForResponse({
+        ...stay,
+        openInvoiceCount,
+        invoiceCount: stay._count?.invoices ?? 0,
+        latestInvoiceId: stay.invoices[0]?.id ?? null,
+        latestInvoiceNumber: stay.invoices[0]?.invoiceNumber ?? null,
+        latestInvoiceStatus: stay.invoices[0]?.status ?? null,
+      }),
+    );
   }
 
   async findOne(id: number, user: CurrentUserPayload) {

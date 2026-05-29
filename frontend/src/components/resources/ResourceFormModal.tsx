@@ -122,6 +122,16 @@ export default function ResourceFormModal({
   const hasPortalUser = Boolean(portalSummary?.portalUserId);
 
   const updateField = (name: string, value: unknown) => {
+    if (config.path === '/inventory-movements' && name === 'movementType') {
+      const nextType = String(value ?? '');
+      const shouldClearRoom = ['IN', 'OUT'].includes(nextType);
+      setFormState({
+        ...formState,
+        [name]: value,
+        ...(shouldClearRoom ? { roomId: '' } : {}),
+      });
+      return;
+    }
     if (config.path === '/announcements' && name === 'startsAt') {
       const newStartsAt = value as string;
       const currentExpiresAt = formState.expiresAt as string | undefined;
@@ -331,9 +341,18 @@ export default function ResourceFormModal({
           </div>
         ) : null}
 
+        {config.path === '/inventory-movements' ? (
+          <div className="resource-flow-guide mb-4">
+            <div><span>1</span><strong>Mutasi resmi</strong><small>Owner/Admin saja. Staff cukup lapor kebutuhan.</small></div>
+            <div><span>2</span><strong>Cek jumlah</strong><small>Pasang/kembali wajib pilih kamar.</small></div>
+            <div><span>3</span><strong>Konfirmasi</strong><small>Gudang dan barang kamar tersinkron otomatis.</small></div>
+          </div>
+        ) : null}
+
         <Row className="g-3">
           {config.fields.map((field) => {
             const relationSpec = getRelationSpec(config.path, field.name);
+            const relationSourceOptions = relationSpec ? (referenceOptions[relationSpec.sourcePath] ?? []) : [];
             const relationValue = getReferenceLabel(config.path, field.name, formState[field.name], referenceMaps);
             const currentValue = formState[field.name];
             const isTenantIdDisabled = config.path === '/users' && field.name === 'tenantId' && formState.role !== 'TENANT';
@@ -342,6 +361,10 @@ export default function ResourceFormModal({
               || (config.path === '/rooms' && Boolean(editingItem?.activeStayId || editingItem?.currentStay)));
 
             if (config.path === '/users' && field.name === 'tenantId' && formState.role !== 'TENANT') {
+              return null;
+            }
+
+            if (config.path === '/inventory-movements' && field.name === 'roomId' && ['IN', 'OUT'].includes(String(formState.movementType ?? ''))) {
               return null;
             }
 
@@ -407,12 +430,13 @@ export default function ResourceFormModal({
 
                   {relationSpec && relationFieldNames.has(field.name) ? (
                     <SearchableSelect<number>
+                      key={`${config.path}-${field.name}-${relationSourceOptions.map((option) => option.value).join('-')}`}
                       value={relationValue ? { value: relationValue.value, label: relationValue.label } : null}
                       onChange={(option) => updateField(field.name, option?.value ?? '')}
-                      defaultOptions={(referenceOptions[relationSpec.sourcePath] ?? []).map((option) => ({ value: option.value, label: option.label }))}
+                      defaultOptions={relationSourceOptions.map((option) => ({ value: option.value, label: option.label }))}
                       loadOptions={async (inputValue) => {
                         const normalized = inputValue.trim().toLowerCase();
-                        const sourceOptions = referenceOptions[relationSpec.sourcePath] ?? [];
+                        const sourceOptions = relationSourceOptions;
                         return sourceOptions
                           .filter((option) => {
                             if (!normalized) return true;

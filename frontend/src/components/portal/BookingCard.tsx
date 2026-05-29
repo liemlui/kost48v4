@@ -287,10 +287,10 @@ export default function BookingCard({
                     </div>
                     <div className="d-flex gap-2 flex-wrap align-items-start">
                       <StatusBadge status={submission.status} tone="tenant" domain="payment" />
-                      {submission.fileUrl ? (
+                      {resolveAbsoluteFileUrl(submission.fileUrl) ? (
                         <Button
                           as="a"
-                          href={resolveAbsoluteFileUrl(submission.fileUrl) ?? '#'}
+                          href={resolveAbsoluteFileUrl(submission.fileUrl) as string}
                           target="_blank"
                           rel="noreferrer"
                           size="sm"

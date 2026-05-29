@@ -49,7 +49,7 @@ export default function TenantBookingWaitingRoom({
       return { label: 'Lihat status pembayaran', onClick: onPayInvoice, variant: 'primary' as const };
     }
     if (state === 'READY_TO_STAY' && onViewBooking) {
-      return { label: 'Buka My Stay Guide', onClick: onViewBooking, variant: 'primary' as const };
+      return { label: 'Buka Panduan Kos Saya', onClick: onViewBooking, variant: 'primary' as const };
     }
     if (booking && onViewBooking) {
       return { label: 'Lihat status pemesanan', onClick: onViewBooking, variant: 'outline-primary' as const };

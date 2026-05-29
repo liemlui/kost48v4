@@ -417,7 +417,7 @@ export default function TenantInvoiceDetailPage() {
                 {!invoice.lines?.length ? (
                   <EmptyState icon="🧾" title="Belum ada rincian tagihan" />
                 ) : (
-                  <Table hover responsive>
+                  <Table hover responsive className="responsive-data-table">
                     <thead>
                       <tr>
                         <th>Tipe</th>
@@ -430,11 +430,11 @@ export default function TenantInvoiceDetailPage() {
                     <tbody>
                       {invoice.lines.map((line: any, idx: number) => (
                         <tr key={line.id ?? idx}>
-                          <td>{lineTypeLabels[line.lineType] ?? line.lineType}</td>
-                          <td>{line.description || '-'}</td>
-                          <td>{line.qty}{line.unit ? ` ${line.unit}` : ''}</td>
-                          <td><CurrencyDisplay amount={line.unitPriceRupiah} /></td>
-                          <td><CurrencyDisplay amount={line.lineAmountRupiah} /></td>
+                          <td data-label="Tipe">{lineTypeLabels[line.lineType] ?? line.lineType}</td>
+                          <td data-label="Deskripsi">{line.description || '-'}</td>
+                          <td data-label="Qty">{line.qty}{line.unit ? ` ${line.unit}` : ''}</td>
+                          <td data-label="Harga Satuan"><CurrencyDisplay amount={line.unitPriceRupiah} /></td>
+                          <td data-label="Jumlah"><CurrencyDisplay amount={line.lineAmountRupiah} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -451,7 +451,7 @@ export default function TenantInvoiceDetailPage() {
                 {!invoice.payments?.length ? (
                   <EmptyState icon="💳" title="Belum ada pembayaran tercatat" />
                 ) : (
-                  <Table hover responsive size="sm">
+                  <Table hover responsive size="sm" className="responsive-data-table">
                     <thead>
                       <tr>
                         <th>Tanggal</th>
@@ -463,10 +463,10 @@ export default function TenantInvoiceDetailPage() {
                     <tbody>
                       {invoice.payments.map((payment: any) => (
                         <tr key={payment.id}>
-                          <td>{formatDateTimeWib(payment.paymentDate)}</td>
-                          <td>{paymentMethodLabels[payment.method] ?? payment.method}</td>
-                          <td>{payment.referenceNo || '-'}</td>
-                          <td><CurrencyDisplay amount={payment.amountRupiah} /></td>
+                          <td data-label="Tanggal">{formatDateTimeWib(payment.paymentDate)}</td>
+                          <td data-label="Metode">{paymentMethodLabels[payment.method] ?? payment.method}</td>
+                          <td data-label="Referensi">{payment.referenceNo || '-'}</td>
+                          <td data-label="Nominal"><CurrencyDisplay amount={payment.amountRupiah} /></td>
                         </tr>
                       ))}
                     </tbody>

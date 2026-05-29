@@ -103,6 +103,15 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
       queryClient.invalidateQueries({ queryKey: ['tenants'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['stays'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['meter-readings'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-stage'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const firstKey = Array.isArray(query.queryKey) ? query.queryKey[0] : undefined;
+          return typeof firstKey === 'string' && firstKey.startsWith('dashboard');
+        },
+      });
       queryClient.invalidateQueries({ queryKey: ['resources', 'tenants'] });
       queryClient.invalidateQueries({ queryKey: ['resources', 'rooms'] });
       setCreateResult(data);

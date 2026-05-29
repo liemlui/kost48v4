@@ -27,6 +27,7 @@ import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { RejectBookingDto } from './dto/reject-booking.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
 
 interface RoomPricingSnapshot {
@@ -106,6 +107,7 @@ export class TenantBookingsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly appNotification: AppNotificationService,
+    private readonly accountingPosting: AccountingPostingService,
   ) {}
 
   // -------------------------------------------------------------------------
@@ -412,7 +414,7 @@ export class TenantBookingsService {
           ],
         });
 
-        await tx.invoice.update({
+        const issuedInvoice = await tx.invoice.update({
           where: { id: invoice.id },
           data: {
             totalAmountRupiah: dto.agreedRentAmountRupiah,
@@ -420,6 +422,7 @@ export class TenantBookingsService {
             issuedAt: new Date(),
           },
         });
+        await this.accountingPosting.postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id).catch(() => undefined);
 
         await tx.stay.update({
           where: { id: updatedStay.id },
@@ -465,7 +468,7 @@ export class TenantBookingsService {
             action: 'CREATE',
             entityType: 'Invoice',
             entityId: String(invoice.id),
-            newData: invoice as any,
+            newData: issuedInvoice as any,
             meta: { source: 'BOOKING_APPROVAL', stayId } as any,
           },
         });
@@ -484,12 +487,12 @@ export class TenantBookingsService {
             expiresAt: booking.expiresAt,
           },
           invoice: {
-            id: invoice.id,
-            invoiceNumber: invoice.invoiceNumber,
-            status: 'ISSUED' as any,
-            periodStart: invoice.periodStart,
-            periodEnd: invoice.periodEnd,
-            dueDate: invoice.dueDate,
+            id: issuedInvoice.id,
+            invoiceNumber: issuedInvoice.invoiceNumber,
+            status: issuedInvoice.status,
+            periodStart: issuedInvoice.periodStart,
+            periodEnd: issuedInvoice.periodEnd,
+            dueDate: issuedInvoice.dueDate,
           },
           pendingBaselineMeters: {
             electricityKwh: Number(initialElectricity),

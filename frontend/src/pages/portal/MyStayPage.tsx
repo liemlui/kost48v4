@@ -249,7 +249,7 @@ actions={guideActions}
       />
 
       <AssistantInsightLine
-        title="My Stay Guide"
+        title="Panduan Kos Saya"
         tone={assistantItems[0]?.severity === 'BLOCKER' || assistantItems[0]?.severity === 'HIGH' ? 'warning' : assistantItems[0]?.severity === 'SUCCESS' ? 'success' : 'info'}
         message={assistantItems[0] ? compactText(`${assistantItems[0].title}. ${assistantItems[0].message}`, 110) : 'Tidak ada aksi mendesak.'}
         actionLabel={assistantItems[0]?.actionLabel}
@@ -334,7 +334,7 @@ actions={guideActions}
           <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Informasi Kamar</h5><Row><Col md={6}><DataField label="Kode Kamar" value={stay.room?.code ?? stay.roomId} /><DataField label="Nama Kamar" value={stay.room?.name ?? '-'} /><DataField label="Lantai" value={stay.room?.floor ?? '-'} /></Col><Col md={6}><DataField label="Status Kamar" value={stay.room?.status ? <StatusBadge status={stay.room.status} /> : '-'} /><DataField label="Tarif Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} /><DataField label="Tarif Listrik / kWh" value={<CurrencyDisplay amount={stay.room?.electricityTariffPerKwhRupiah ?? stay.electricityTariffPerKwhRupiah} />} /><DataField label="Tarif Air / m³" value={<CurrencyDisplay amount={stay.room?.waterTariffPerM3Rupiah ?? stay.waterTariffPerM3Rupiah} />} /></Col></Row></Card.Body></Card>
         </Col>
         <Col lg={6}>
-          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Detail Masa Sewa</h5><Row><Col md={6}><DataField label="Jenis masa sewa" value={tenantPricingTermLabel(stay.pricingTerm)} /><DataField label="Sumber pemesanan" value={stay.bookingSource ?? '-'} /></Col><Col md={6}><DataField label="Tujuan tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} /><DataField label="Catatan" value={stay.notes ?? '-'} /></Col></Row></Card.Body></Card>
+          <Card className="content-card border-0 h-100"><Card.Body><h5 className="mb-3">Detail Masa Sewa</h5><Row><Col md={6}><DataField label="Jenis masa sewa" value={tenantPricingTermLabel(stay.pricingTerm)} /><DataField label="Sumber pemesanan" value={stay.bookingSource ? getStatusLabel(stay.bookingSource, undefined, { tone: 'tenant' }) : '-'} /></Col><Col md={6}><DataField label="Tujuan tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} /><DataField label="Catatan" value={stay.notes ?? '-'} /></Col></Row></Card.Body></Card>
         </Col>
       </Row>
     </>
@@ -372,7 +372,7 @@ export default function MyStayPage() {
     <div>
       <PageHeader
         eyebrow="Portal Penghuni"
-        title="My Stay Guide"
+        title="Panduan Kos Saya"
         description="Panduan masa sewa, tagihan, bukti pembayaran, dan pengajuan yang sedang berjalan."
       />
       {stage !== 'occupied' ? <EmptyState icon="🏠" title="Kamu belum memiliki masa sewa aktif" description="Pilih kamar atau lanjutkan pemesanan yang sedang berjalan sebelum masuk ke panduan masa sewa." action={{ label: stage === 'booking' ? 'Buka Pemesanan Saya' : 'Lihat Kamar', onClick: () => navigate(stage === 'booking' ? '/portal/bookings' : '/rooms') }} /> : null}

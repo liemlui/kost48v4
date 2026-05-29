@@ -190,10 +190,10 @@ export default function ReviewPaymentModal({
                       <div><span>Urgent / Eskalasi</span><strong>{urgentSince.clockLabel} / {escalateSince.clockLabel}</strong></div>
                       <div><span>Batas review</span><strong>{reviewDeadline.hasDate ? reviewDeadline.absoluteLabel : '-'}</strong></div>
                     </div>
-                    {submission.fileUrl ? (
+                    {absoluteFileUrl ? (
                       <div className="mt-3 small">
                         Bukti bayar:{' '}
-                        <a href={absoluteFileUrl ?? '#'} target="_blank" rel="noreferrer">
+                        <a href={absoluteFileUrl} target="_blank" rel="noreferrer">
                           {submission.originalFilename ?? 'Buka file'}
                         </a>
                         {submission.mimeType ? <span className="text-muted ms-1">({submission.mimeType}{submission.fileSizeBytes ? ` · ${Math.round(submission.fileSizeBytes / 1024)} KB` : ''})</span> : null}

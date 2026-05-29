@@ -130,6 +130,12 @@ export class CheckoutRequestsService {
     dto: ApproveCheckoutRequestDto,
     actor: CurrentUserPayload,
   ) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException(
+        'Hanya OWNER/ADMIN yang dapat menyetujui pengajuan keluar',
+      );
+    }
+
     const request = await this.prisma.checkoutRequest.findUnique({
       where: { id },
     });
@@ -148,8 +154,8 @@ export class CheckoutRequestsService {
         tx,
       );
 
-      return tx.checkoutRequest.update({
-        where: { id },
+      const approveResult = await tx.checkoutRequest.updateMany({
+        where: { id, status: CheckoutRequestStatus.PENDING },
         data: {
           status: CheckoutRequestStatus.APPROVED,
           reviewNotes: dto.reviewNotes ?? null,
@@ -157,6 +163,19 @@ export class CheckoutRequestsService {
           reviewedAt: new Date(),
         },
       });
+
+      if (approveResult.count !== 1) {
+        throw new ConflictException(
+          'Permintaan checkout sudah diproses sebelumnya',
+        );
+      }
+
+      await tx.stay.updateMany({
+        where: { id: request.stayId, status: StayStatus.ACTIVE },
+        data: { plannedCheckOutDate: request.requestedCheckOutDate },
+      });
+
+      return tx.checkoutRequest.findUniqueOrThrow({ where: { id } });
     });
 
     // Notify tenant — non-blocking
@@ -171,6 +190,12 @@ export class CheckoutRequestsService {
     dto: RejectCheckoutRequestDto,
     actor: CurrentUserPayload,
   ) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
+      throw new ForbiddenException(
+        'Hanya OWNER/ADMIN yang dapat menolak pengajuan keluar',
+      );
+    }
+
     const request = await this.prisma.checkoutRequest.findUnique({
       where: { id },
     });
@@ -182,14 +207,24 @@ export class CheckoutRequestsService {
       );
     }
 
-    const updated = await this.prisma.checkoutRequest.update({
-      where: { id },
-      data: {
-        status: CheckoutRequestStatus.REJECTED,
-        reviewNotes: dto.reviewNotes,
-        reviewedById: actor.id,
-        reviewedAt: new Date(),
-      },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const rejectResult = await tx.checkoutRequest.updateMany({
+        where: { id, status: CheckoutRequestStatus.PENDING },
+        data: {
+          status: CheckoutRequestStatus.REJECTED,
+          reviewNotes: dto.reviewNotes,
+          reviewedById: actor.id,
+          reviewedAt: new Date(),
+        },
+      });
+
+      if (rejectResult.count !== 1) {
+        throw new ConflictException(
+          'Permintaan checkout sudah diproses sebelumnya',
+        );
+      }
+
+      return tx.checkoutRequest.findUniqueOrThrow({ where: { id } });
     });
 
     // Notify tenant — non-blocking

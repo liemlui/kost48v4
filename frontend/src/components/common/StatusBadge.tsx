@@ -28,7 +28,7 @@ export default function StatusBadge({ status, className = '', showLabel = true, 
   const variant = getStatusVariant(normalizedStatus);
 
   return (
-    <Badge bg={variant} className={`status-badge ${className}`.trim()}>
+    <Badge bg={variant} className={`status-badge ${className}`.trim()} title={label} aria-label={label}>
       {showLabel ? label : null}
     </Badge>
   );

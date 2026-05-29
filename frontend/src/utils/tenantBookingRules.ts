@@ -131,8 +131,8 @@ export function getTenantBookingGuideCopy(state: TenantBookingGuideState) {
       return {
         icon: '🏠',
         title: 'Kamar sudah aktif',
-        description: 'Masa sewa aktif. Buka My Stay Guide untuk detail kamar dan tagihan.',
-        actionLabel: 'Buka My Stay Guide',
+        description: 'Masa sewa aktif. Buka Panduan Kos Saya untuk detail kamar dan tagihan.',
+        actionLabel: 'Buka Panduan Kos Saya',
         tone: 'success' as const,
       };
     default:

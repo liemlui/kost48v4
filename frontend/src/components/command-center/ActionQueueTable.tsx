@@ -109,7 +109,7 @@ export default function ActionQueueTable({
             {!sortedItems.length ? (
               <EmptyState icon="✅" title={emptyTitle} description={emptyDescription} />
             ) : (
-              <Table responsive hover className="mt-3 align-middle action-queue-table">
+              <Table responsive hover className="mt-3 align-middle action-queue-table responsive-data-table">
                 <thead>
                   <tr>
                     <th>Prioritas</th>
@@ -130,14 +130,14 @@ export default function ActionQueueTable({
                         className={item.actionTo || item.onAction ? 'clickable-row' : undefined}
                         onClick={() => item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined}
                       >
-                        <td><StatusBadge status={meta.status} customLabel={meta.label} /></td>
-                        <td><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
-                        <td className="action-queue-subject-cell"><strong>{item.subject}</strong><small>{item.issue}</small></td>
-                        <td className="small action-queue-time-mini">{item.receivedAtLabel ? <strong>{item.receivedAtLabel}</strong> : <span className="text-muted">-</span>}</td>
-                        <td className="small action-queue-deadline-mini">{item.deadlineLabel ? <strong>{item.deadlineLabel}</strong> : <span className="text-muted">-</span>}</td>
-                        <td className="small">{item.timeStatusLabel ? <span className={`queue-time-status ${item.timeStatusTone ?? 'info'}`}>{item.timeStatusLabel}</span> : <span className="text-muted">-</span>}</td>
+                        <td data-label="Prioritas"><StatusBadge status={meta.status} customLabel={meta.label} /></td>
+                        <td data-label="Flow"><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
+                        <td data-label="Subjek" className="action-queue-subject-cell"><strong>{item.subject}</strong><small>{item.issue}</small></td>
+                        <td data-label="Masuk" className="small action-queue-time-mini">{item.receivedAtLabel ? <strong>{item.receivedAtLabel}</strong> : <span className="text-muted">-</span>}</td>
+                        <td data-label="Deadline" className="small action-queue-deadline-mini">{item.deadlineLabel ? <strong>{item.deadlineLabel}</strong> : <span className="text-muted">-</span>}</td>
+                        <td data-label="Status waktu" className="small">{item.timeStatusLabel ? <span className={`queue-time-status ${item.timeStatusTone ?? 'info'}`}>{item.timeStatusLabel}</span> : <span className="text-muted">-</span>}</td>
                         {!hideActions ? (
-                          <td>
+                          <td data-label="Aksi">
                             {(item.actionTo || item.onAction) ? (
                               <div className="queue-action-stack">
                                 <Button variant="outline-primary" size="sm" onClick={(event) => {

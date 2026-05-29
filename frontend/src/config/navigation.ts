@@ -108,7 +108,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
   return [{
     title: 'Portal Penghuni',
     links: [
-      { to: '/portal/stay', label: 'My Stay Guide', icon: '🏠', hint: 'Panduan kamar, masa sewa, tagihan, dan aksi berikutnya.' },
+      { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
       { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Laporan Saya', icon: '🎫', hint: 'Buat laporan bantuan dan pantau progresnya.' },
       { to: '/portal/announcements', label: 'Pengumuman', icon: '📢', hint: 'Info terbaru dari pengelola kos.' },

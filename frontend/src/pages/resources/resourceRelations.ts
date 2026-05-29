@@ -91,11 +91,12 @@ export function buildReferenceOption(sourcePath: string, item: Record<string, an
     case '/inventory-items': {
       const sku = item.sku ? `${item.sku}` : `Item #${item.id}`;
       const category = item.category ? `${item.category}` : 'Tanpa kategori';
-      const qty = item.qtyOnHand !== undefined && item.qtyOnHand !== null ? `Stok ${item.qtyOnHand}` : null;
+      const qty = item.qtyOnHand !== undefined && item.qtyOnHand !== null ? `Gudang ${item.qtyOnHand}` : null;
+      const position = item.positionSummary ? String(item.positionSummary) : null;
       return {
         value: Number(item.id),
         label: `${sku} · ${safeText(item.name)}`,
-        caption: [category, qty].filter(Boolean).join(' · '),
+        caption: [category, qty, position].filter(Boolean).join(' · '),
       };
     }
     case '/stays': {
@@ -156,27 +157,27 @@ export function getFlowNote(configPath: string) {
       };
     case '/inventory-items':
       return {
-        title: 'Flow inventaris yang disarankan',
+        title: 'Stok dihitung otomatis',
         description:
-          'Daftar ini berisi barang yang tersedia. Jika barang dipasang ke kamar, catat di halaman Barang di Kamar. Jika barang masuk atau keluar, catat di Catatan Stok.',
+          'Tambah barang akan membuat mutasi masuk. Pasang/keluar barang lewat Mutasi Stok agar posisi tetap sinkron.',
         backendNote:
-          'Gunakan halaman ini untuk mengecek stok dan barang yang hampir habis.',
+          'Sistem menghitung posisi Gudang/Kamar dan stok menipis dari qty serta min stok.',
       };
     case '/inventory-movements':
       return {
-        title: 'Flow pergerakan stok',
+        title: 'Mutasi jadi sumber stok',
         description:
-          'Catat barang masuk, barang keluar, barang dipasang ke kamar, atau barang kembali dari kamar.',
+          'Pilih jenis mutasi. Sistem otomatis mengubah stok gudang dan barang kamar sesuai aksi.',
         backendNote:
-          'Pastikan jumlah barang dan kamar ditulis benar agar catatan stok tidak membingungkan.',
+          'Admin cukup konfirmasi jumlah, kamar, dan alasan. Stok/posisi dihitung sistem.',
       };
     case '/room-items':
       return {
-        title: 'Flow aset per kamar',
+        title: 'Inventaris kamar otomatis',
         description:
-          'Daftar ini menunjukkan barang yang ada di setiap kamar. Jika barang dipindah, catat juga di Catatan Stok.',
+          'Barang kamar berasal dari Mutasi Stok. Klik baris untuk buka detail kamar atau kembalikan barang ke gudang.',
         backendNote:
-          'Gunakan catatan ini saat cek kamar atau saat ada barang rusak/hilang.',
+          'Halaman ini untuk cek posisi/kondisi, bukan input stok manual.',
       };
     case '/expenses':
       return {

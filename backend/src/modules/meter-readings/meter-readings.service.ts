@@ -7,6 +7,7 @@ import { MeterReadingsQueryDto } from './dto/meter-readings-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { UtilityType } from '../../common/enums/app.enums';
+import { endOfDay, parseJakartaDateOnly } from '../../common/utils/date.util';
 
 @Injectable()
 export class MeterReadingsService {
@@ -40,7 +41,7 @@ export class MeterReadingsService {
       where: {
         roomId: params.roomId,
         utilityType: params.utilityType,
-        readingAt: params.readingAt,
+        readingAt: { gte: params.readingAt, lte: endOfDay(params.readingAt) },
         ...(params.excludeId ? { id: { not: params.excludeId } } : {}),
       },
       select: { id: true },
@@ -89,7 +90,12 @@ export class MeterReadingsService {
         query.roomId ? { roomId: Number(query.roomId) } : undefined,
         query.utilityType ? { utilityType: query.utilityType } : undefined,
         query.from || query.to
-          ? { readingAt: { gte: query.from ? new Date(query.from) : undefined, lte: query.to ? new Date(query.to) : undefined } }
+          ? {
+              readingAt: {
+                gte: query.from ? parseJakartaDateOnly(query.from, 'Tanggal mulai tidak valid') : undefined,
+                lte: query.to ? endOfDay(parseJakartaDateOnly(query.to, 'Tanggal akhir tidak valid')) : undefined,
+              },
+            }
           : undefined,
       ].filter(Boolean) as Prisma.MeterReadingWhereInput[],
     };
@@ -117,7 +123,7 @@ export class MeterReadingsService {
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
 
-    const readingAt = new Date(dto.readingAt);
+    const readingAt = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
     const readingValue = this.parseReadingValue(dto.readingValue, 'meter');
     const utilityType = dto.utilityType as UtilityType;
 
@@ -148,7 +154,7 @@ export class MeterReadingsService {
     const existing = await this.prisma.meterReading.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Meter reading tidak ditemukan');
 
-    const readingAt = dto.readingAt ? new Date(dto.readingAt) : existing.readingAt;
+    const readingAt = dto.readingAt ? parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid') : existing.readingAt;
     const readingValue = dto.readingValue ? this.parseReadingValue(dto.readingValue, 'meter') : existing.readingValue;
 
     await this.assertReadingIsChronological({

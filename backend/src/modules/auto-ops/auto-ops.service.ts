@@ -1,9 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { InvoiceStatus, PaymentSubmissionStatus, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -23,6 +24,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly accountingPeriodCloseService: AccountingPeriodCloseService,
+    private readonly accountingPosting: AccountingPostingService,
   ) {}
 
   onModuleInit() {
@@ -181,6 +183,14 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
   private async expireBookingTx(stayId: number, roomId: number, actorUserId: number | null, source: string) {
     await this.prisma.$transaction(async (tx) => {
+      const invoicesToReverse = await tx.invoice.findMany({
+        where: {
+          stayId,
+          status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] as any },
+        },
+        select: { id: true, invoiceNumber: true },
+      });
+
       await tx.invoice.updateMany({
         where: {
           stayId,
@@ -191,6 +201,26 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           cancelReason: 'Otomatis dibatalkan: batas pembayaran/booking 3 jam terlewati tanpa bukti pembayaran valid.',
         },
       });
+
+      for (const invoice of invoicesToReverse) {
+        const postedInvoiceJournal = await tx.journalEntry.findFirst({
+          where: {
+            sourceType: 'INVOICE' as any,
+            sourceId: String(invoice.id),
+            status: 'POSTED' as any,
+          },
+          select: { id: true },
+          orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+        });
+        if (!postedInvoiceJournal) continue;
+
+        const reversalResult = await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actorUserId);
+        if (reversalResult?.skipped) {
+          throw new ConflictException(
+            `AutoOps gagal membatalkan booking karena reversal accounting tagihan ${invoice.invoiceNumber ?? invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
+          );
+        }
+      }
 
       await tx.paymentSubmission.updateMany({
         where: { stayId, status: PaymentSubmissionStatus.PENDING_REVIEW },

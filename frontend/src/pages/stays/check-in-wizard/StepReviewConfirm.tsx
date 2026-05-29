@@ -2,6 +2,7 @@ import { Card, Row, Col, Alert } from 'react-bootstrap';
 import type { UseFormReturn } from 'react-hook-form';
 import type { WizardFormValues } from './types';
 import { pricingTermLabel } from './checkInWizardUtils';
+import { getStatusLabel } from '../../../utils/statusLabels';
 
 interface StepReviewConfirmProps {
   form: UseFormReturn<WizardFormValues>;
@@ -88,14 +89,14 @@ export default function StepReviewConfirm({
             <div className="mb-2">
               <span className="text-muted">Tujuan Tinggal:</span>
               <br />
-              <strong>{values.stayPurpose || '—'}</strong>
+              <strong>{values.stayPurpose ? getStatusLabel(values.stayPurpose) : '—'}</strong>
             </div>
           </Col>
           <Col md={6}>
             <div className="mb-2">
               <span className="text-muted">Sumber Booking:</span>
               <br />
-              <strong>{values.bookingSource || '—'}</strong>
+              <strong>{values.bookingSource ? getStatusLabel(values.bookingSource) : '—'}</strong>
             </div>
           </Col>
           {values.notes ? (

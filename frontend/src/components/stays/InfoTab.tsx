@@ -95,8 +95,8 @@ export default function InfoTab({ stay }: { stay: Stay }) {
             <Row>
               <Col md={6}>
                 <DataField label="Jenis Masa Sewa" value={getStatusLabel(stay.pricingTerm)} />
-                <DataField label="Sumber Booking" value={stay.bookingSource} />
-                <DataField label="Tujuan Tinggal" value={stay.stayPurpose} />
+                <DataField label="Sumber Booking" value={stay.bookingSource ? getStatusLabel(stay.bookingSource) : '-'} />
+                <DataField label="Tujuan Tinggal" value={stay.stayPurpose ? getStatusLabel(stay.stayPurpose) : '-'} />
                 <DataField label="Sewa Disepakati" value={<CurrencyDisplay amount={stay.agreedRentAmountRupiah} />} />
               </Col>
               <Col md={6}>

@@ -2,7 +2,6 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { Button, Offcanvas } from 'react-bootstrap';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import GlobalSearch from './GlobalSearch';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
@@ -303,7 +302,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
 
         <main className="app-main">
           <section className="app-topbar">
-            <div className="app-topbar-row gap-3 flex-wrap">
+            <div className="app-topbar-row app-topbar-row--simple">
               <div className="d-flex align-items-center gap-3">
                 <Button variant="link" className="d-xl-none app-mobile-menu-button" onClick={() => setSidebarOpen(true)} aria-label="Buka navigasi">
                   ☰
@@ -318,8 +317,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </nav>
               </div>
 
-              <div className="d-flex align-items-center gap-3 flex-grow-1 justify-content-end flex-wrap">
-                <GlobalSearch role={user?.role} />
+              <div className="topbar-actions-simple">
                 <NotificationBell />
                 {isAdmin ? (
                   <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman">

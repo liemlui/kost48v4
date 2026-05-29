@@ -58,6 +58,7 @@ export default function AdminStaffFieldReportQueue() {
   );
   const [evidenceChecked, setEvidenceChecked] = useState(false);
   const [finalDecisionChecked, setFinalDecisionChecked] = useState(false);
+  const [stockMovementChecked, setStockMovementChecked] = useState(false);
 
   const queueQuery = useQuery({
     queryKey: ["staff-field-report-review-queue"],
@@ -71,6 +72,8 @@ export default function AdminStaffFieldReportQueue() {
         throw new Error("Catatan admin minimal 8 karakter.");
       if (!evidenceChecked || !finalDecisionChecked)
         throw new Error("Checklist konfirmasi admin wajib dicentang.");
+      if (decision === "APPROVE" && createMovement && !stockMovementChecked)
+        throw new Error("Konfirmasi mutasi stok resmi wajib dicentang.");
       return reviewStaffFieldReport(selected.id, {
         adminDecision: decision,
         adminNotes: adminNotes.trim() || undefined,
@@ -96,6 +99,8 @@ export default function AdminStaffFieldReportQueue() {
         }),
         queryClient.invalidateQueries({ queryKey: ["tickets"] }),
         queryClient.invalidateQueries({ queryKey: ["inventory-items"] }),
+        queryClient.invalidateQueries({ queryKey: ["/inventory-items", "list"] }),
+        queryClient.invalidateQueries({ queryKey: ["/inventory-movements", "list"] }),
         queryClient.invalidateQueries({ queryKey: ["room"] }),
       ]);
       setSelected(null);
@@ -105,6 +110,7 @@ export default function AdminStaffFieldReportQueue() {
       setMovementType("ASSIGN_TO_ROOM");
       setEvidenceChecked(false);
       setFinalDecisionChecked(false);
+      setStockMovementChecked(false);
     },
   });
 
@@ -124,6 +130,7 @@ export default function AdminStaffFieldReportQueue() {
     setCreateMovement(nextCreateMovement);
     setEvidenceChecked(false);
     setFinalDecisionChecked(false);
+    setStockMovementChecked(false);
     setAdminNotes("");
   };
 
@@ -245,6 +252,7 @@ export default function AdminStaffFieldReportQueue() {
           setSelected(null);
           setEvidenceChecked(false);
           setFinalDecisionChecked(false);
+          setStockMovementChecked(false);
           setAdminNotes("");
         }}
         centered
@@ -384,6 +392,15 @@ export default function AdminStaffFieldReportQueue() {
                           movementType,
                         )}
                       </Form.Text>
+                      <Alert variant="warning" className="small mt-2 mb-2">
+                        Ini mengubah stok resmi. Pastikan bukti staff sudah dicek.
+                      </Alert>
+                      <Form.Check
+                        type="checkbox"
+                        label="Saya paham ini mengubah stok resmi."
+                        checked={stockMovementChecked}
+                        onChange={(event) => setStockMovementChecked(event.currentTarget.checked)}
+                      />
                     </Form.Group>
                   ) : null}
                 </div>
@@ -417,6 +434,7 @@ export default function AdminStaffFieldReportQueue() {
               setSelected(null);
               setEvidenceChecked(false);
               setFinalDecisionChecked(false);
+              setStockMovementChecked(false);
               setAdminNotes("");
             }}
           >
@@ -428,7 +446,8 @@ export default function AdminStaffFieldReportQueue() {
               reviewMutation.isPending ||
               adminNotes.trim().length < 8 ||
               !evidenceChecked ||
-              !finalDecisionChecked
+              !finalDecisionChecked ||
+              (decision === "APPROVE" && createMovement && !stockMovementChecked)
             }
           >
             {reviewMutation.isPending ? "Menyimpan..." : "Konfirmasi Admin"}

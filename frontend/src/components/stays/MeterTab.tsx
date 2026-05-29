@@ -268,7 +268,7 @@ export default function MeterTab({
             </div>
             
             <div className="table-responsive mb-4">
-              <Table hover className="mb-0">
+              <Table hover className="mb-0 responsive-data-table">
                 <thead className="table-light">
                   <tr>
                     <th>Tanggal</th>
@@ -281,17 +281,17 @@ export default function MeterTab({
                 <tbody>
                   {visibleSinceRows.map((row) => (
                     <tr key={row.dateKey}>
-                      <td className="fw-semibold">{row.dateKey}</td>
-                      <td>{row.electricityKwh?.toFixed(3) ?? '-'}</td>
-                      <td>{row.waterM3?.toFixed(3) ?? '-'}</td>
-                      <td>
+                      <td data-label="Tanggal" className="fw-semibold">{row.dateKey}</td>
+                      <td data-label="Listrik (kWh)">{row.electricityKwh?.toFixed(3) ?? '-'}</td>
+                      <td data-label="Air (m³)">{row.waterM3?.toFixed(3) ?? '-'}</td>
+                      <td data-label="Pemakaian Listrik">
                         {row.usageElectricityKwh !== undefined ? (
                           <Badge bg={row.usageElectricityKwh > 0 ? 'info' : 'light'} text={row.usageElectricityKwh > 0 ? 'white' : 'dark'}>
                             {row.usageElectricityKwh.toFixed(3)} kWh
                           </Badge>
                         ) : '-'}
                       </td>
-                      <td>
+                      <td data-label="Pemakaian Air">
                         {row.usageWaterM3 !== undefined ? (
                           <Badge bg={row.usageWaterM3 > 0 ? 'success' : 'light'} text={row.usageWaterM3 > 0 ? 'white' : 'dark'}>
                             {row.usageWaterM3.toFixed(3)} m³
@@ -322,7 +322,7 @@ export default function MeterTab({
             </div>
             
             <div className="table-responsive">
-              <Table hover className="mb-0" size="sm">
+              <Table hover className="mb-0 responsive-data-table" size="sm">
                 <thead className="table-light">
                   <tr>
                     <th>Tanggal</th>
@@ -335,17 +335,17 @@ export default function MeterTab({
                 <tbody>
                   {beforeCheckInRows.map((row) => (
                     <tr key={row.dateKey}>
-                      <td className="fw-semibold">{row.dateKey}</td>
-                      <td>{row.electricityKwh?.toFixed(3) ?? '-'}</td>
-                      <td>{row.waterM3?.toFixed(3) ?? '-'}</td>
-                      <td>
+                      <td data-label="Tanggal" className="fw-semibold">{row.dateKey}</td>
+                      <td data-label="Listrik (kWh)">{row.electricityKwh?.toFixed(3) ?? '-'}</td>
+                      <td data-label="Air (m³)">{row.waterM3?.toFixed(3) ?? '-'}</td>
+                      <td data-label="Pemakaian Listrik">
                         {row.usageElectricityKwh !== undefined ? (
                           <Badge bg="light" text="dark">
                             {row.usageElectricityKwh.toFixed(3)} kWh
                           </Badge>
                         ) : '-'}
                       </td>
-                      <td>
+                      <td data-label="Pemakaian Air">
                         {row.usageWaterM3 !== undefined ? (
                           <Badge bg="light" text="dark">
                             {row.usageWaterM3.toFixed(3)} m³

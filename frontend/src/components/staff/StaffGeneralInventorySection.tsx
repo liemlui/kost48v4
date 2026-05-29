@@ -73,23 +73,23 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
                 const physicalIssue = getInventoryPhysicalIssueLabel(item.status);
                 return (
                   <tr key={item.id} className={health.status !== 'GOOD' || physicalIssue ? 'staff-inventory-row-attention' : undefined}>
-                    <td>
+                    <td data-label="Barang">
                       <div className="fw-semibold">{item.name}</div>
                       <div className="small text-muted">{item.sku ?? `ID ${item.id}`}</div>
                     </td>
-                    <td>{item.category ?? 'Gudang / umum'}</td>
-                    <td>
+                    <td data-label="Area">{item.category ?? 'Gudang / umum'}</td>
+                    <td data-label="Stok sistem">
                       <div className="staff-stock-number">{health.qty} {health.unit}</div>
                       <small>Minimal {health.minQty || '-'} {health.minQty ? health.unit : ''}</small>
                     </td>
-                    <td>
+                    <td data-label="Status otomatis">
                       <StatusBadge status={health.status} />
                       <div className="small text-muted mt-1">{health.status === 'GOOD' ? 'otomatis aman' : 'otomatis dari qty'}</div>
                     </td>
-                    <td>
+                    <td data-label="Kondisi fisik">
                       {physicalIssue ? <span className="staff-badge staff-badge-warning">{physicalIssue}</span> : <span className="text-muted small">Tidak ada laporan fisik</span>}
                     </td>
-                    <td><Button size="sm" variant="outline-primary" onClick={() => setSelected(item)}>Laporkan masalah</Button></td>
+                    <td data-label="Aksi"><Button size="sm" variant="outline-primary" onClick={() => setSelected(item)}>Laporkan masalah</Button></td>
                   </tr>
                 );
               })}

@@ -493,9 +493,10 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       { key: 'sku', label: 'SKU' },
       { key: 'name', label: 'Nama' },
       { key: 'category', label: 'Kategori' },
-      { key: 'qtyOnHand', label: 'Stok' },
+      { key: 'qtyOnHand', label: 'Stok Gudang' },
+      { key: 'positionSummary', label: 'Posisi' },
       { key: 'minQty', label: 'Min Stok' },
-      { key: 'status', label: 'Status' },
+      { key: 'status', label: 'Kondisi' },
     ],
     fields: [
       {
@@ -528,9 +529,9 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'qtyOnHand',
-        label: 'Stok Saat Ini',
+        label: 'Stok Awal / Saat Ini',
         type: 'text',
-        placeholder: 'Jumlah stok saat ini',
+        placeholder: 'Isi saat tambah barang. Edit stok lewat Mutasi Stok.',
         required: true,
       },
       {
@@ -545,12 +546,9 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         type: 'select',
         options: [
           { value: 'GOOD', label: 'Baik' },
-          { value: 'LOW_STOCK', label: 'Stok Menipis' },
-          { value: 'OUT_OF_STOCK', label: 'Stok Habis' },
           { value: 'DAMAGED', label: 'Rusak' },
           { value: 'MISSING', label: 'Hilang' },
           { value: 'NEEDS_REPAIR', label: 'Perlu Diperbaiki' },
-          { value: 'PENDING_CHECK', label: 'Menunggu Cek Admin' },
         ],
       },
       {
@@ -566,12 +564,12 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   'room-items': {
     title: 'Barang di Kamar',
     path: '/room-items',
-    createLabel: 'Catat Inventaris Kamar',
+    createLabel: 'Lewat Mutasi Stok',
     columns: [
       { key: 'roomId', label: 'Kamar' },
       { key: 'itemId', label: 'Barang' },
       { key: 'qty', label: 'Jumlah' },
-      { key: 'status', label: 'Status' },
+      { key: 'status', label: 'Kondisi' },
     ],
     fields: [
       {
@@ -590,7 +588,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'qty',
-        label: 'Qty',
+        label: 'Jumlah',
         type: 'text',
         placeholder: 'Jumlah barang',
         required: true,
@@ -678,9 +676,9 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
   },
 
   'inventory-movements': {
-    title: 'Catatan Stok',
+    title: 'Mutasi Stok Resmi',
     path: '/inventory-movements',
-    createLabel: 'Catat Pergerakan Stok',
+    createLabel: 'Catat Mutasi',
     columns: [
       { key: 'itemId', label: 'Barang' },
       { key: 'movementType', label: 'Jenis' },
@@ -698,7 +696,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'movementType',
-        label: 'Tipe Pergerakan',
+        label: 'Jenis Mutasi',
         type: 'select',
         options: [
           { value: 'IN', label: 'Barang Masuk' },
@@ -732,7 +730,8 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         name: 'note',
         label: 'Catatan',
         type: 'textarea',
-        placeholder: 'Catatan pergerakan barang',
+        placeholder: 'Alasan mutasi, contoh: lampu rusak diganti / stok galon masuk',
+        required: true,
       },
     ],
   },
@@ -920,6 +919,13 @@ export function canCreateResourceItem(
   config: ResourceConfig,
   currentUserRole: string | undefined,
 ): ManageGuardResult {
+  if (config.path === '/room-items') {
+    return {
+      allowed: false,
+      reason: 'Tambah/pindah barang kamar lewat Mutasi Stok agar stok gudang ikut sinkron.',
+    };
+  }
+
   if (currentUserRole === 'STAFF') {
     const reason = getStaffReadOnlyReason(config.path);
     if (reason) {
@@ -935,6 +941,13 @@ export function canEditResourceItem(
   currentUserRole: string | undefined,
   item: Record<string, unknown>,
 ): ManageGuardResult {
+  if (config.path === '/inventory-movements') {
+    return {
+      allowed: false,
+      reason: 'Mutasi stok resmi tidak diedit langsung. Buat mutasi koreksi agar audit tetap jelas.',
+    };
+  }
+
   if (config.path === '/users' && currentUserRole === 'ADMIN' && item.role === 'OWNER') {
     return {
       allowed: false,

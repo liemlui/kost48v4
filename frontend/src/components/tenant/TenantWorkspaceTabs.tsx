@@ -7,13 +7,13 @@ import { getNavigationLinks, type TenantPortalStage } from '../../config/navigat
 function getStageTitle(stage: TenantPortalStage) {
   if (stage === 'browsing') return 'Pilih kamar yang cocok';
   if (stage === 'booking') return 'Pantau pemesanan';
-  return 'My Stay Guide';
+  return 'Panduan Kos Saya';
 }
 
 function getStageSummary(stage: TenantPortalStage) {
-  if (stage === 'browsing') return 'Cari kamar, ajukan pemesanan, lalu pantau statusnya di portal.';
-  if (stage === 'booking') return 'Pantau status pemesanan, tagihan awal, dan bukti pembayaran dalam satu tempat.';
-  return 'Satu tempat untuk masa sewa, tagihan, laporan bantuan, pengumuman, dan layanan kos.';
+  if (stage === 'browsing') return 'Pilih kamar, lalu pantau status pemesanan.';
+  if (stage === 'booking') return 'Lihat status pemesanan, tagihan, dan bukti bayar.';
+  return 'Kamar, tagihan, laporan, dan aksi penting.';
 }
 
 export default function TenantWorkspaceTabs({
@@ -70,7 +70,6 @@ export default function TenantWorkspaceTabs({
           <NavLink key={link.to} to={link.to} className={({ isActive }) => `tenant-workspace-tab ${isActive ? 'active' : ''}`} title={link.hint ?? link.label}>
             <span aria-hidden="true">{link.icon}</span>
             <strong>{link.label}</strong>
-            {link.hint ? <em>{link.hint}</em> : null}
           </NavLink>
         ))}
       </nav>

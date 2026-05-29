@@ -24,3 +24,18 @@ export function parseDateOnly(value: string, message: string): Date {
   }
   return startOfDay(parsed);
 }
+
+const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+export function startOfJakartaBusinessDay(date: Date): Date {
+  const shifted = new Date(date.getTime() + JAKARTA_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));
+}
+
+export function parseJakartaDateOnly(value: string | Date, message: string): Date {
+  const parsed = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new BadRequestException(message);
+  }
+  return startOfJakartaBusinessDay(parsed);
+}

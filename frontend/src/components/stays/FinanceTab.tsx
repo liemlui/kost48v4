@@ -118,7 +118,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
             ? isOverdue(invoice)
             : view === 'PAID'
               ? invoice.status === 'PAID'
-              : ['ISSUED', 'PARTIAL'].includes(invoice.status) || isOverdue(invoice);
+              : ['DRAFT', 'ISSUED', 'PARTIAL'].includes(invoice.status) || isOverdue(invoice);
 
       return matchesKeyword && matchesView;
     });
@@ -145,7 +145,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
           </div>
           <div className="summary-chip">
             <span className="summary-chip-label">Terbuka</span>
-            <span className="summary-chip-value">{invoices.filter((invoice) => ['ISSUED', 'PARTIAL'].includes(invoice.status)).length}</span>
+            <span className="summary-chip-value">{invoices.filter((invoice) => ['DRAFT', 'ISSUED', 'PARTIAL'].includes(invoice.status)).length}</span>
           </div>
           <div className="summary-chip">
             <span className="summary-chip-label">Overdue</span>
@@ -194,7 +194,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
           />
         ) : null}
         {!isLoading && !isError && filteredInvoices.length ? (
-          <Table hover responsive>
+          <Table hover responsive className="responsive-data-table">
             <thead>
               <tr>
                 <th>Periode</th>
@@ -213,15 +213,15 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
 
                 return (
                   <tr key={invoice.id}>
-                    <td>
+                    <td data-label="Periode">
                       <div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div>
                       <div className="small text-muted">{periodDisplay}</div>
                     </td>
-                    <td><CurrencyDisplay amount={getInvoiceTotalAmount(invoice)} /></td>
-                    <td><CurrencyDisplay amount={paidAmount(invoice)} /></td>
-                    <td className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
-                    <td><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status, undefined, { domain: 'invoice' })} domain="invoice" /></td>
-                    <td>
+                    <td data-label="Total"><CurrencyDisplay amount={getInvoiceTotalAmount(invoice)} /></td>
+                    <td data-label="Dibayar"><CurrencyDisplay amount={paidAmount(invoice)} /></td>
+                    <td data-label="Jatuh Tempo" className={overdue ? 'text-danger fw-semibold' : ''}>{dueDateDisplay}</td>
+                    <td data-label="Status"><StatusBadge status={overdue ? 'OVERDUE' : invoice.status} customLabel={overdue ? 'Jatuh Tempo' : getStatusLabel(invoice.status, undefined, { domain: 'invoice' })} domain="invoice" /></td>
+                    <td data-label="Aksi">
                       <div className="d-flex gap-2 flex-wrap">
                         <Button size="sm" variant="outline-primary" onClick={() => setSelectedInvoiceId(invoice.id)}>Detail</Button>
                         {invoice.status === 'DRAFT' ? (

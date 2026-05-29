@@ -5,7 +5,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateInventoryItemDto, StaffUpdateInventoryItemStatusDto, UpdateInventoryItemDto } from './dto/inventory-item.dto';
 import { InventoryItemsQueryDto } from './dto/inventory-items-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
-import { InventoryItemStatus, UserRole } from '../../common/enums/app.enums';
+import { InventoryItemStatus, InventoryMovementType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 
 const STAFF_ALLOWED_INVENTORY_STATUSES = new Set<InventoryItemStatus>([
@@ -68,6 +68,43 @@ function buildStaffInventoryReportBlock(input: {
 export class InventoryItemsService {
   constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
 
+
+  private formatQty(value: unknown) {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric)) return '0';
+    return Number.isInteger(numeric) ? String(numeric) : String(numeric).replace(/\.?0+$/, '');
+  }
+
+  private decorateInventoryItem(item: any) {
+    const roomItems = Array.isArray(item.roomItems) ? item.roomItems : [];
+    const warehouseQty = Number(item.qtyOnHand ?? 0);
+    const roomSummaries = roomItems
+      .filter((roomItem: any) => Number(roomItem.qty ?? 0) > 0)
+      .map((roomItem: any) => {
+        const roomCode = roomItem.room?.code ?? roomItem.room?.name ?? `Kamar #${roomItem.roomId}`;
+        return `${roomCode} (${this.formatQty(roomItem.qty)})`;
+      });
+    const positionParts = [
+      warehouseQty > 0 ? `Gudang (${this.formatQty(item.qtyOnHand)})` : null,
+      ...roomSummaries,
+    ].filter(Boolean);
+
+    return {
+      ...item,
+      positionSummary: positionParts.length ? positionParts.join(' · ') : 'Tidak ada stok aktif',
+      locationSummary: positionParts.length ? positionParts.join(' · ') : 'Tidak ada stok aktif',
+    };
+  }
+
+  private async ensureOpeningStockSyncedTx(tx: any, itemId: number, expectedQty: number) {
+    const item = await tx.inventoryItem.findUnique({ where: { id: itemId }, select: { qtyOnHand: true } });
+    if (!item) throw new NotFoundException('Item inventory tidak ditemukan');
+    const currentQty = Number(item.qtyOnHand ?? 0);
+    if (Math.abs(currentQty - expectedQty) > 0.0001) {
+      await tx.inventoryItem.update({ where: { id: itemId }, data: { qtyOnHand: String(expectedQty) as any } });
+    }
+  }
+
   private assertOwnerOrAdmin(actor: CurrentUserPayload) {
     if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
       throw new ForbiddenException('Staff hanya boleh melihat data stok. Perubahan stok hanya boleh dilakukan Owner/Admin.');
@@ -84,19 +121,26 @@ export class InventoryItemsService {
       ],
     };
     const [rawItems, totalItems] = await this.prisma.$transaction([
-      this.prisma.inventoryItem.findMany({ where, skip, take, orderBy: { id: 'desc' } }),
+      this.prisma.inventoryItem.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { id: 'desc' },
+        include: { roomItems: { include: { room: true }, orderBy: { roomId: 'asc' } } },
+      }),
       this.prisma.inventoryItem.count({ where }),
     ]);
-    const items = query.lowStockOnly === 'true'
+    const filteredItems = query.lowStockOnly === 'true'
       ? rawItems.filter((item) => Number(item.qtyOnHand) <= Number(item.minQty))
       : rawItems;
+    const items = filteredItems.map((item) => this.decorateInventoryItem(item));
     return { items, meta: buildMeta(page, limit, totalItems) };
   }
 
   async findOne(id: number) {
-    const item = await this.prisma.inventoryItem.findUnique({ where: { id } });
+    const item = await this.prisma.inventoryItem.findUnique({ where: { id }, include: { roomItems: { include: { room: true }, orderBy: { roomId: 'asc' } } } });
     if (!item) throw new NotFoundException('Item inventory tidak ditemukan');
-    return item;
+    return this.decorateInventoryItem(item);
   }
 
   async create(dto: CreateInventoryItemDto, actor: CurrentUserPayload) {
@@ -105,9 +149,50 @@ export class InventoryItemsService {
       const exists = await this.prisma.inventoryItem.findUnique({ where: { sku: dto.sku } });
       if (exists) throw new ConflictException('SKU sudah digunakan');
     }
-    const created = await this.prisma.inventoryItem.create({ data: { ...dto, qtyOnHand: dto.qtyOnHand as any, minQty: dto.minQty as any, status: dto.status as any } });
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'InventoryItem', entityId: String(created.id), newData: created });
-    return created;
+
+    const initialQty = dto.qtyOnHand ?? '0';
+    const numericInitialQty = Number(initialQty);
+    if (!Number.isFinite(numericInitialQty) || numericInitialQty < 0) {
+      throw new ConflictException('Stok awal tidak boleh negatif.');
+    }
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const item = await tx.inventoryItem.create({
+        data: {
+          ...dto,
+          qtyOnHand: '0' as any,
+          minQty: dto.minQty as any,
+          status: dto.status as any,
+        },
+      });
+
+      if (numericInitialQty > 0) {
+        await tx.inventoryMovement.create({
+          data: {
+            itemId: item.id,
+            movementType: InventoryMovementType.IN as any,
+            qty: initialQty as any,
+            roomId: null,
+            movementDate: new Date(),
+            note: dto.notes?.trim()
+              ? `Stok awal saat tambah barang. ${dto.notes.trim()}`
+              : 'Stok awal saat tambah barang.',
+            createdById: actor.id,
+          },
+        });
+
+        await this.ensureOpeningStockSyncedTx(tx, item.id, numericInitialQty);
+      }
+
+      return tx.inventoryItem.findUniqueOrThrow({
+        where: { id: item.id },
+        include: { roomItems: { include: { room: true }, orderBy: { roomId: 'asc' } } },
+      });
+    });
+
+    const decorated = this.decorateInventoryItem(created);
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'InventoryItem', entityId: String(created.id), newData: decorated });
+    return decorated;
   }
 
   async update(id: number, dto: UpdateInventoryItemDto, actor: CurrentUserPayload) {
@@ -118,9 +203,14 @@ export class InventoryItemsService {
       const exists = await this.prisma.inventoryItem.findUnique({ where: { sku: dto.sku } });
       if (exists) throw new ConflictException('SKU sudah digunakan');
     }
-    const updated = await this.prisma.inventoryItem.update({ where: { id }, data: { ...dto, qtyOnHand: dto.qtyOnHand as any, minQty: dto.minQty as any, status: dto.status as any } });
-    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'InventoryItem', entityId: String(updated.id), oldData: existing, newData: updated });
-    return updated;
+    if (dto.qtyOnHand !== undefined && String(dto.qtyOnHand) !== String(existing.qtyOnHand)) {
+      throw new ConflictException('Gunakan Mutasi Stok untuk mengubah stok resmi. Edit master barang tidak boleh langsung mengubah jumlah stok.');
+    }
+    await this.prisma.inventoryItem.update({ where: { id }, data: { ...dto, qtyOnHand: undefined, minQty: dto.minQty as any, status: dto.status as any } });
+    const updated = await this.prisma.inventoryItem.findUniqueOrThrow({ where: { id }, include: { roomItems: { include: { room: true }, orderBy: { roomId: 'asc' } } } });
+    const decorated = this.decorateInventoryItem(updated);
+    await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'InventoryItem', entityId: String(updated.id), oldData: existing, newData: decorated });
+    return decorated;
   }
 
   async updateStatusFromField(id: number, dto: StaffUpdateInventoryItemStatusDto, actor: CurrentUserPayload) {

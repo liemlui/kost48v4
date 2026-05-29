@@ -18,6 +18,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: key });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['stays'] });
     },
   });
 
@@ -28,6 +29,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
       await queryClient.invalidateQueries({ queryKey: key });
       await queryClient.invalidateQueries({ queryKey: ['invoice', invoice.id] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['stays'] });
     },
   });
 
@@ -37,6 +39,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
       await queryClient.invalidateQueries({ queryKey: key });
       await queryClient.invalidateQueries({ queryKey: ['invoice', variables.invoiceId] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['stays'] });
     },
   });
 
@@ -46,6 +49,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
       await queryClient.invalidateQueries({ queryKey: key });
       await queryClient.invalidateQueries({ queryKey: ['invoice', invoiceId] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['stays'] });
     },
   });
 
@@ -56,6 +60,7 @@ export function useInvoices(stayId?: number | string, enabled = true) {
       await queryClient.invalidateQueries({ queryKey: key });
       await queryClient.invalidateQueries({ queryKey: ['invoice', variables.invoiceId] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['stays'] });
     },
   });
 

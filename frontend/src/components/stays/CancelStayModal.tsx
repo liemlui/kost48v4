@@ -39,24 +39,24 @@ export default function CancelStayModal({
       await cancelMutation.mutateAsync({ cancelReason: trimmedReason });
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal membatalkan stay');
+      setError(err?.response?.data?.message || 'Gagal membatalkan masa sewa');
     }
   };
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Batalkan Stay</Modal.Title>
+        <Modal.Title>Batalkan Masa Sewa</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {unpaidCount ? (
           <Alert variant="warning">
-            Ada {unpaidCount} invoice belum lunas. Stay tetap bisa dibatalkan, tetapi pastikan penagihan sudah diurus.
+            Ada {unpaidCount} tagihan terbuka. Tagihan akan otomatis dibatalkan saat masa sewa ini dibatalkan.
           </Alert>
         ) : null}
         <Alert variant="warning" className="mb-3">
           <div className="small">
-            <strong>Stay akan dibatalkan dan status berubah menjadi CANCELLED.</strong> Aksi ini tidak dapat dibatalkan.
+            <strong>Masa sewa akan dibatalkan dan status berubah menjadi dibatalkan.</strong> Aksi ini tidak dapat dibatalkan.
             {stay.depositAmountRupiah && Number(stay.depositAmountRupiah) > 0 && (
               <div className="mt-1">
                 Deposit sebesar <strong>{formatRupiah(stay.depositAmountRupiah)}</strong> akan tetap tercatat dan dapat diproses melalui menu Proses Deposit setelah stay dibatalkan.
@@ -72,7 +72,7 @@ export default function CancelStayModal({
             rows={3}
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
-            placeholder="Jelaskan alasan pembatalan stay"
+            placeholder="Jelaskan alasan pembatalan masa sewa"
           />
           <div className="text-muted small mt-1">Alasan ini tersimpan untuk catatan internal dan membantu audit operasional.</div>
         </Form.Group>

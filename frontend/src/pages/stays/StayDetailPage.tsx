@@ -133,6 +133,8 @@ export default function StayDetailPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['stay', id] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
       ]);
     },
     onError: (error: any) => {
@@ -148,6 +150,8 @@ export default function StayDetailPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
+        queryClient.invalidateQueries({ queryKey: ['stay', id] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
       ]);
       setRejectTarget(null);
     },
@@ -444,6 +448,7 @@ export default function StayDetailPage() {
         onSuccess={() => navigate('/stays?status=ALL')}
         stay={stay}
         invoices={invoices}
+        approvedCheckOutDate={approvedCheckoutRequest?.requestedCheckOutDate ?? null}
         hasApprovedCheckoutRequest={Boolean(approvedCheckoutRequest)}
         hasPendingCheckoutRequest={Boolean(pendingCheckoutRequest)}
         meterCount={meterCount}

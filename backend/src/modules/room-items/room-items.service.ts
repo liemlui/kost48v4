@@ -70,24 +70,19 @@ export class RoomItemsService {
     return { items: await this.prisma.roomItem.findMany({ where: roomId ? { roomId } : undefined, include: { room: true, item: true }, orderBy: { id: 'desc' } }) };
   }
 
-  async create(dto: CreateRoomItemDto, actor: CurrentUserPayload) {
+  async create(_dto: CreateRoomItemDto, actor: CurrentUserPayload) {
     this.assertOwnerOrAdmin(actor);
-    const room = await this.prisma.room.findUnique({ where: { id: dto.roomId } });
-    if (!room) throw new NotFoundException('Room tidak ditemukan');
-    const item = await this.prisma.inventoryItem.findUnique({ where: { id: dto.itemId } });
-    if (!item) throw new NotFoundException('Item inventory tidak ditemukan');
-    const existing = await this.prisma.roomItem.findFirst({ where: { roomId: dto.roomId, itemId: dto.itemId } });
-    if (existing) throw new ConflictException('Room item sudah ada');
-    const created = await this.prisma.roomItem.create({ data: { roomId: dto.roomId, itemId: dto.itemId, qty: dto.qty as any, status: dto.status as any, note: dto.note } });
-    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'RoomItem', entityId: String(created.id), newData: created });
-    return created;
+    throw new ConflictException('Gunakan Mutasi Stok tipe Pasang ke Kamar untuk menambah barang kamar. Ini menjaga stok gudang dan inventaris kamar tetap sinkron.');
   }
 
   async update(id: number, dto: UpdateRoomItemDto, actor: CurrentUserPayload) {
     this.assertOwnerOrAdmin(actor);
     const existing = await this.prisma.roomItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Room item tidak ditemukan');
-    const updated = await this.prisma.roomItem.update({ where: { id }, data: { qty: dto.qty as any, status: dto.status as any, note: dto.note } });
+    if (dto.qty !== undefined && String(dto.qty) !== String(existing.qty)) {
+      throw new ConflictException('Jumlah barang kamar harus diubah lewat Mutasi Stok agar stok gudang ikut sinkron.');
+    }
+    const updated = await this.prisma.roomItem.update({ where: { id }, data: { status: dto.status as any, note: dto.note } });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'RoomItem', entityId: String(updated.id), oldData: existing, newData: updated });
     return updated;
   }

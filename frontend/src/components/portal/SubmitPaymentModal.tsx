@@ -37,10 +37,12 @@ export default function SubmitPaymentModal({
   onSubmit,
 }: Props) {
   const invoiceRemaining = getBookingInvoiceRemaining(booking);
-  const depositRemaining = Math.max(
-    Number(booking?.depositAmountRupiah ?? 0) - Number(booking?.depositPaidAmountRupiah ?? 0),
-    0,
-  );
+  const depositAmount = Number(booking?.depositAmountRupiah ?? 0);
+  const recordedDepositPaid = Number(booking?.depositPaidAmountRupiah ?? 0);
+  const depositPaid = booking?.depositPaymentStatus === 'PAID' && recordedDepositPaid <= 0
+    ? depositAmount
+    : recordedDepositPaid;
+  const depositRemaining = Math.max(depositAmount - depositPaid, 0);
   const combinedTotal = invoiceRemaining + depositRemaining;
 
   const [paidAt, setPaidAt] = useState<string>(todayValue());

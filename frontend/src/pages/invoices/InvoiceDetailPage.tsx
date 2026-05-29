@@ -396,7 +396,7 @@ export default function InvoiceDetailPage() {
                   {!invoice.lines?.length ? (
                     <EmptyState icon="🧾" title="Belum ada rincian tagihan" description="Tambahkan setidaknya satu rincian sebelum tagihan diterbitkan." />
                   ) : (
-                    <Table hover responsive>
+                    <Table hover responsive className="responsive-data-table">
                       <thead>
                         <tr>
                           <th>Tipe</th>
@@ -409,11 +409,11 @@ export default function InvoiceDetailPage() {
                       <tbody>
                         {invoice.lines.map((line: any) => (
                           <tr key={line.id}>
-                            <td>{lineTypeLabels[line.lineType] ?? line.lineType}</td>
-                            <td>{line.description || '-'}</td>
-                            <td>{line.qty}{line.unit ? ` ${line.unit}` : ''}</td>
-                            <td><CurrencyDisplay amount={line.unitPriceRupiah} /></td>
-                            <td><CurrencyDisplay amount={line.lineAmountRupiah} /></td>
+                            <td data-label="Tipe">{lineTypeLabels[line.lineType] ?? line.lineType}</td>
+                            <td data-label="Deskripsi">{line.description || '-'}</td>
+                            <td data-label="Qty">{line.qty}{line.unit ? ` ${line.unit}` : ''}</td>
+                            <td data-label="Harga Satuan"><CurrencyDisplay amount={line.unitPriceRupiah} /></td>
+                            <td data-label="Jumlah"><CurrencyDisplay amount={line.lineAmountRupiah} /></td>
                           </tr>
                         ))}
                       </tbody>
@@ -441,7 +441,7 @@ export default function InvoiceDetailPage() {
                   {!invoice.payments?.length ? (
                     <EmptyState icon="💳" title="Belum ada pembayaran tercatat" description="Saat tenant membayar, catat nominal dan metode pembayaran dari panel ini." />
                   ) : (
-                    <Table hover responsive size="sm">
+                    <Table hover responsive size="sm" className="responsive-data-table">
                       <thead>
                         <tr>
                           <th>Tanggal</th>
@@ -453,10 +453,10 @@ export default function InvoiceDetailPage() {
                       <tbody>
                         {invoice.payments.map((payment: any) => (
                           <tr key={payment.id}>
-                            <td>{formatDateSafe(payment.paymentDate)}</td>
-                            <td>{paymentMethodLabels[payment.method] ?? payment.method}</td>
-                            <td>{payment.referenceNo || '-'}</td>
-                            <td><CurrencyDisplay amount={payment.amountRupiah} /></td>
+                            <td data-label="Tanggal">{formatDateSafe(payment.paymentDate)}</td>
+                            <td data-label="Metode">{paymentMethodLabels[payment.method] ?? payment.method}</td>
+                            <td data-label="Referensi">{payment.referenceNo || '-'}</td>
+                            <td data-label="Nominal"><CurrencyDisplay amount={payment.amountRupiah} /></td>
                           </tr>
                         ))}
                       </tbody>

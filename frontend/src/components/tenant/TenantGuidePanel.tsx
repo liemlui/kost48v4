@@ -19,7 +19,7 @@ const toneIcon: Record<TenantGuideTone, string> = {
 };
 
 export default function TenantGuidePanel({
-  eyebrow = 'My Stay Guide',
+  eyebrow = 'Panduan Kos Saya',
   title,
   message,
   tone = 'info',

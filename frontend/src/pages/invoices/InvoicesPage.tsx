@@ -9,7 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import PaginationControls from '../../components/common/PaginationControls';
 import SearchableSelect from '../../components/common/SearchableSelect';
 import { type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
-import { StatusStrip } from '../../components/workspace';
+import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
 import { createResource, listResource } from '../../api/resources';
 import { formatDateSafe, formatPeriod } from '../resources/simpleCrudHelpers';
 import { buildReferenceOptions } from '../resources/resourceRelations';
@@ -74,6 +74,21 @@ export default function InvoicesPage() {
   const staysQuery = useQuery({ queryKey: ['stays', 'invoice-form'], queryFn: () => listResource<any>('/stays', { limit: 500 }) });
   const accountingReadinessQuery = useQuery({ queryKey: ['accounting-readiness', 'invoice-posting'], queryFn: fetchAccountingReadiness, enabled: canManageFinance, staleTime: 30_000 });
 
+  const refreshInvoiceRelated = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+      queryClient.invalidateQueries({ queryKey: ['stays'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-stay'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
+      queryClient.invalidateQueries({ queryKey: ['payment-urgency'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-owner'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-admin'] }),
+      queryClient.invalidateQueries({ queryKey: ['accounting-readiness'] }),
+    ]);
+  };
+
   const stayOptions = useMemo(() => buildReferenceOptions(staysQuery.data?.items ?? [], '/stays'), [staysQuery.data?.items]);
   const selectedStay = stayOptions.find((option) => String(option.value) === String(formState.stayId)) ?? null;
 
@@ -86,8 +101,8 @@ export default function InvoicesPage() {
       dueDate: formState.dueDate || undefined,
       notes: formState.notes || undefined,
     }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    onSuccess: async () => {
+      await refreshInvoiceRelated();
       setShowCreate(false);
       setFormState(initialForm);
       setError('');
@@ -100,8 +115,8 @@ export default function InvoicesPage() {
 
   const issueMutation = useMutation({
     mutationFn: (id: number) => issueInvoice(id),
-    onSuccess: (invoice: any) => {
-      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    onSuccess: async (invoice: any) => {
+      await refreshInvoiceRelated();
       setIssueTarget(null);
       setIssueChecks({});
       if (invoice?.accounting?.accountingWarning) {
@@ -116,8 +131,8 @@ export default function InvoicesPage() {
 
   const cancelMutation = useMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) => cancelInvoice(id, { cancelReason: reason.trim() }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    onSuccess: async () => {
+      await refreshInvoiceRelated();
       setCancelTarget(null);
       setCancelReason('');
     },
@@ -190,7 +205,7 @@ export default function InvoicesPage() {
       source: 'Accounting',
       count: 1,
       actionLabel: 'Buka Accounting',
-      onAction: () => navigate('/reports?tab=formal'),
+      actionTo: '/reports?tab=formal',
     } : null,
     stats.overdue ? {
       id: 'invoice-overdue',
@@ -199,8 +214,7 @@ export default function InvoicesPage() {
       message: 'Follow-up tenant atau catat pembayaran sebelum flow checkout ikut terblokir oleh tagihan terbuka.',
       source: 'Tagihan',
       count: stats.overdue,
-      actionLabel: 'Lihat Overdue',
-      onAction: () => setActiveTab('OVERDUE'),
+
     } : null,
     stats.dueSoon ? {
       id: 'invoice-due-soon',
@@ -209,8 +223,7 @@ export default function InvoicesPage() {
       message: 'Follow-up cepat. Tenant wajib bayar dan kirim bukti dalam satu langkah; tidak ada sistem hutang.',
       source: 'Reminder',
       count: stats.dueSoon,
-      actionLabel: 'Lihat Tagihan Aktif',
-      onAction: () => setActiveTab('BILLING'),
+
     } : null,
     stats.draft ? {
       id: 'invoice-draft',
@@ -219,16 +232,15 @@ export default function InvoicesPage() {
       message: 'Draft tidak akan terlihat sebagai tagihan sampai diterbitkan. Cek rincian sebelum issue.',
       source: 'Keuangan',
       count: stats.draft,
-      actionLabel: 'Lihat Draft',
-      onAction: () => setActiveTab('DRAFT'),
+
     } : null,
   ].filter(Boolean) as AssistantItem[];
 
   const metrics: MetricChip[] = [
-    { id: 'billing', label: 'Tagihan aktif', value: stats.billing, helper: stats.dueSoon ? `${stats.dueSoon} perlu cek ≤24 jam` : 'belum lunas', icon: '🧾', status: stats.dueSoon ? 'WARNING' : 'INFO', to: undefined, onClick: () => setActiveTab('BILLING') },
-    { id: 'overdue', label: 'Overdue', value: stats.overdue, helper: 'Perlu follow-up cepat', icon: '⏰', status: stats.overdue ? 'DANGER' : 'SUCCESS', onClick: () => setActiveTab('OVERDUE') },
-    { id: 'draft', label: 'Draft', value: stats.draft, helper: 'Belum tenant-facing', icon: '📝', status: stats.draft ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('DRAFT') },
-    { id: 'paid', label: 'Lunas', value: stats.paid, helper: `${stats.cancelled} dibatalkan`, icon: '✅', status: 'SUCCESS', onClick: () => setActiveTab('PAID') },
+    { id: 'billing', label: 'Tagihan aktif', value: stats.billing, helper: stats.dueSoon ? `${stats.dueSoon} perlu cek ≤24 jam` : 'belum lunas', icon: '🧾', status: stats.dueSoon ? 'WARNING' : 'INFO' },
+    { id: 'overdue', label: 'Overdue', value: stats.overdue, helper: 'Perlu follow-up cepat', icon: '⏰', status: stats.overdue ? 'DANGER' : 'SUCCESS' },
+    { id: 'draft', label: 'Draft', value: stats.draft, helper: 'Belum tenant-facing', icon: '📝', status: stats.draft ? 'WARNING' : 'SUCCESS' },
+    { id: 'paid', label: 'Lunas', value: stats.paid, helper: `${stats.cancelled} dibatalkan`, icon: '✅', status: 'SUCCESS' },
   ];
 
   const actionQueueItems: ActionQueueItem[] = filteredItems.slice(0, 8).map((item: any) => {
@@ -263,7 +275,7 @@ export default function InvoicesPage() {
   ];
 
   const financeMenu = [
-    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', count: stats.total, active: true },
+    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: true },
     { id: 'review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar yang perlu diverifikasi.', to: '/payment-submissions/review', count: undefined, active: false },
     { id: 'wifi', icon: '📶', label: 'Voucher WiFi', helper: 'Pendapatan tambahan dari penjualan voucher WiFi.', to: '/wifi-sales', count: undefined, active: false },
     { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Laundry, galon, cleaning, parkir, dan add-on lain.', to: '/ancillary-revenue', count: undefined, active: false },
@@ -316,7 +328,6 @@ export default function InvoicesPage() {
           value: metric.value,
           helper: metric.helper,
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
-          onClick: metric.onClick,
         }))}
       />
 
@@ -327,18 +338,17 @@ export default function InvoicesPage() {
               <div className="panel-title">Daftar tagihan</div>
               <div className="panel-subtitle">Gunakan tab status untuk berpindah cepat antar antrean keuangan.</div>
             </div>
-            <div className="status-tab-bar compact-tabs">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  className={`status-tab${tab.cls ? ` ${tab.cls}` : ''}${activeTab === tab.key ? ' active' : ''}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  {tab.label}
-                  <span className="tab-badge">{tab.count}</span>
-                </button>
-              ))}
-            </div>
+            <EntityBadgeFilterBar
+              ariaLabel="Filter daftar tagihan"
+              activeId={activeTab}
+              onChange={(id) => setActiveTab(id as StatusTab)}
+              filters={tabs.map((tab) => ({
+                id: tab.key,
+                label: tab.label,
+                count: tab.count,
+                tone: tab.cls === 'tab-danger' ? 'danger' : tab.cls === 'tab-warn' ? 'warning' : tab.cls === 'tab-success' ? 'success' : 'info',
+              }))}
+            />
           </div>
 
           {postingPeriodBlocked && postingPeriod?.warning ? (
@@ -354,12 +364,12 @@ export default function InvoicesPage() {
             <EmptyState
               icon="🧾"
               title={allItems.length === 0 ? 'Belum ada data tagihan' : 'Tidak ada tagihan yang cocok'}
-              description={allItems.length === 0 ? 'Buat draft tagihan pertama untuk mulai mengelola penagihan.' : 'Coba ubah badge status.'}
+              description={allItems.length === 0 ? 'Buat draft tagihan pertama untuk mulai mengelola penagihan.' : 'Coba ubah filter status.'}
             />
           ) : null}
 
           {filteredItems.length > 0 ? (
-            <Table hover responsive>
+            <Table hover responsive className="responsive-data-table">
               <thead>
                 <tr>
                   <th>Tagihan</th>
@@ -379,23 +389,23 @@ export default function InvoicesPage() {
                   const roomLabel = item.stay?.room ? `${item.stay.room.code}${item.stay.room.name ? ` · ${item.stay.room.name}` : ''}` : '-';
                   return (
                     <tr key={item.id} className="clickable-row" onClick={() => navigate(`/invoices/${item.id}`)}>
-                      <td>
+                      <td data-label="Tagihan">
                         <div className="fw-semibold">{item.invoiceNumber || `INV-${item.id}`}</div>
                         <div className="small text-muted">Masa sewa #{item.stayId}</div>
                       </td>
-                      <td>
+                      <td data-label="Tenant / Kamar">
                         <div className="fw-semibold">{tenantName}</div>
                         <div className="small text-muted">{roomLabel}</div>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <StatusBadge status={item.status} />
                         {overdue ? <div className="small text-danger mt-1">Melewati jatuh tempo</div> : null}
                         {!overdue && dueSoonBadge ? <StatusBadge status={dueSoonBadge.status} customLabel={dueSoonBadge.label} className="mt-1" /> : null}
                       </td>
-                      <td>{formatPeriod(item.periodStart, item.periodEnd)}</td>
-                      <td>{formatDateSafe(item.dueDate)}</td>
-                      <td><CurrencyDisplay amount={getInvoiceTotalAmount(item as any)} /></td>
-                      <td onClick={(event) => event.stopPropagation()}>
+                      <td data-label="Periode">{formatPeriod(item.periodStart, item.periodEnd)}</td>
+                      <td data-label="Jatuh Tempo">{formatDateSafe(item.dueDate)}</td>
+                      <td data-label="Total"><CurrencyDisplay amount={getInvoiceTotalAmount(item as any)} /></td>
+                      <td data-label="Aksi" onClick={(event) => event.stopPropagation()}>
                         <div className="d-flex flex-wrap gap-2 align-items-center">
                           {canManageFinance && item.status === 'DRAFT' ? (
                             <Button size="sm" variant="outline-success" onClick={() => { setIssueTarget(item); setIssueChecks({}); setError(''); }} disabled={issueMutation.isPending}>Terbitkan</Button>

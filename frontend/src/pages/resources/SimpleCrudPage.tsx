@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Alert, Button, Card, Modal } from 'react-bootstrap';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createResource, deleteResource, listResource, updateResource } from '../../api/resources';
 import PageHeader from '../../components/common/PageHeader';
 import { EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
@@ -56,6 +56,46 @@ function isLowStock(item: Record<string, unknown>) {
   return min > 0 && qty <= min;
 }
 
+function movementTypeLabel(value: unknown) {
+  switch (String(value ?? '')) {
+    case 'IN': return 'Barang Masuk';
+    case 'OUT': return 'Barang Keluar';
+    case 'ASSIGN_TO_ROOM': return 'Pasang ke Kamar';
+    case 'RETURN_FROM_ROOM': return 'Kembali dari Kamar';
+    default: return String(value ?? '-');
+  }
+}
+
+function movementEffectLabel(value: unknown) {
+  switch (String(value ?? '')) {
+    case 'IN':
+    case 'RETURN_FROM_ROOM':
+      return 'Stok gudang bertambah otomatis';
+    case 'OUT':
+      return 'Stok gudang berkurang otomatis';
+    case 'ASSIGN_TO_ROOM':
+      return 'Stok gudang berkurang dan barang kamar bertambah otomatis';
+    default:
+      return 'Stok resmi berubah otomatis';
+  }
+}
+
+function todayInputDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60_000).toISOString().slice(0, 10);
+}
+
+function automatedMovementNote(type: string) {
+  switch (type) {
+    case 'ASSIGN_TO_ROOM': return 'Pasang barang ke kamar dari stok gudang';
+    case 'RETURN_FROM_ROOM': return 'Kembalikan barang dari kamar ke gudang';
+    case 'OUT': return 'Barang keluar dari stok gudang';
+    case 'IN': return 'Barang masuk ke stok gudang';
+    default: return 'Mutasi stok otomatis dari konteks halaman';
+  }
+}
+
 function getResourceFilterDefinitions(configPath: string, items: Array<Record<string, unknown>>) {
   const count = (predicate: (item: Record<string, unknown>) => boolean) => items.filter(predicate).length;
   const statusCount = (status: string) => count((item) => asString(item.status) === status);
@@ -87,7 +127,6 @@ function getResourceFilterDefinitions(configPath: string, items: Array<Record<st
     return [
       { id: 'ALL', label: 'Semua Barang', count: items.length, tone: 'info' as const },
       { id: 'GOOD', label: 'Baik', count: statusCount('GOOD'), tone: 'success' as const },
-      { id: 'PENDING_CHECK', label: 'Perlu Cek', count: statusCount('PENDING_CHECK'), tone: 'warning' as const },
       { id: 'MAINTENANCE', label: 'Maintenance', count: statusCount('MAINTENANCE'), tone: 'warning' as const },
       { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
       { id: 'MISSING', label: 'Hilang', count: statusCount('MISSING'), tone: 'danger' as const },
@@ -98,7 +137,7 @@ function getResourceFilterDefinitions(configPath: string, items: Array<Record<st
     return [
       { id: 'ALL', label: 'Semua Stok', count: items.length, tone: 'info' as const },
       { id: 'LOW_AUTO', label: 'Stok Menipis', count: count(isLowStock), tone: 'warning' as const },
-      { id: 'OUT_OF_STOCK', label: 'Habis', count: statusCount('OUT_OF_STOCK'), tone: 'danger' as const },
+      { id: 'OUT_OF_STOCK', label: 'Habis', count: count((item) => Number(item.qtyOnHand ?? 0) <= 0), tone: 'danger' as const },
       { id: 'GOOD', label: 'Aman', count: count((item) => asString(item.status) === 'GOOD' && !isLowStock(item)), tone: 'success' as const },
       { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
     ];
@@ -162,6 +201,7 @@ function applyResourceFilter(configPath: string, item: Record<string, unknown>, 
   if (configPath === '/inventory-items') {
     if (filter === 'LOW_AUTO') return isLowStock(item);
     if (filter === 'GOOD') return asString(item.status) === 'GOOD' && !isLowStock(item);
+    if (filter === 'OUT_OF_STOCK') return Number(item.qtyOnHand ?? 0) <= 0;
     return asString(item.status) === filter;
   }
   if (configPath === '/inventory-movements') return asString(item.movementType) === filter;
@@ -197,6 +237,7 @@ function mapReferenceData(items: Array<Record<string, unknown>> = [], sourcePath
 export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Record<string, unknown> | null>(null);
@@ -206,8 +247,10 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   const [showActiveOnly, setShowActiveOnly] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [resourceFilter, setResourceFilter] = useState<ResourceFilterId>('ALL');
+  const [stockMovementConfirm, setStockMovementConfirm] = useState<{ payload: Record<string, unknown>; isEdit: boolean } | null>(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
+  const movementContext = searchParams.toString();
 
 
   useEffect(() => {
@@ -311,9 +354,10 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       return createResource(config.path, payload);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [config.path, 'list'] });
+      await refreshResourceCaches(config.path);
       setShowModal(false);
       setEditingItem(null);
+      setStockMovementConfirm(null);
       setFormState(buildInitialState(config));
       setError('');
     },
@@ -331,6 +375,56 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       await queryClient.invalidateQueries({ queryKey: [config.path, 'list'] });
     },
   });
+
+  const refreshResourceCaches = async (savedPath: string) => {
+    const impactedPathByResource: Record<string, string[]> = {
+      '/inventory-items': ['/inventory-items', '/inventory-movements'],
+      '/rooms': ['/rooms', '/room-items'],
+      '/tenants': ['/tenants'],
+      '/invoices': ['/invoices', '/stays'],
+      '/stays': ['/stays', '/rooms', '/invoices'],
+      '/room-items': ['/room-items', '/inventory-items', '/rooms'],
+      '/inventory-movements': ['/inventory-movements', '/inventory-items', '/room-items', '/rooms'],
+    };
+    const impactedPaths = Array.from(new Set([savedPath, ...(impactedPathByResource[savedPath] ?? [])]));
+
+    await Promise.all([
+      ...impactedPaths.map((path) => queryClient.invalidateQueries({ queryKey: [path, 'list'] })),
+      ...impactedPaths.map((path) => queryClient.invalidateQueries({ queryKey: ['resource-ref', path] })),
+    ]);
+  };
+
+  const refetchRequiredReferences = () => {
+    requiredReferencePaths.forEach((path) => {
+      void queryClient.invalidateQueries({ queryKey: ['resource-ref', path] });
+      void queryClient.refetchQueries({ queryKey: ['resource-ref', path] });
+    });
+  };
+
+  useEffect(() => {
+    if (config.path !== '/inventory-movements' || !movementContext) return;
+    const params = new URLSearchParams(movementContext);
+    const itemId = params.get('itemId');
+    const roomId = params.get('roomId');
+    const qty = params.get('qty');
+    const movementType = params.get('movementType') || params.get('type') || (params.get('action') === 'return' ? 'RETURN_FROM_ROOM' : params.get('action') === 'out' ? 'OUT' : params.get('action') === 'in' ? 'IN' : 'ASSIGN_TO_ROOM');
+    const nextState = {
+      ...buildInitialState(config),
+      itemId: itemId ? Number(itemId) : '',
+      roomId: roomId ? Number(roomId) : '',
+      qty: qty || '1',
+      movementType,
+      movementDate: todayInputDate(),
+      note: automatedMovementNote(movementType),
+    };
+    setEditingItem(null);
+    setFormState(nextState);
+    setError('');
+    refetchRequiredReferences();
+    setShowModal(true);
+    setSearchParams({}, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.path, movementContext]);
 
   const tenantPortalUsers = useMemo(
     () => (tenantUsersQuery.data?.items ?? []).filter((item) => item.role === 'TENANT' && item.tenantId),
@@ -364,12 +458,57 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   const resourceFilters = useMemo(() => getResourceFilterDefinitions(config.path, items), [config.path, items]);
   const hasResourceFilters = resourceFilters.length > 0;
 
+  const summaryItems = useMemo(() => {
+    const total = query.data?.meta?.totalItems ?? items.length;
+    if (config.path === '/inventory-items') {
+      const lowOrEmpty = items.filter((item) => isLowStock(item) || Number(item.qtyOnHand ?? 0) <= 0).length;
+      return [
+        { id: 'inventory-total', label: 'Stok gudang', value: total, helper: 'Barang terdaftar', tone: 'info' as const },
+        { id: 'inventory-action', label: 'Perlu aksi', value: lowOrEmpty, helper: 'Habis/menipis', tone: lowOrEmpty ? 'warning' as const : 'success' as const },
+      ];
+    }
+    if (config.path === '/inventory-movements') {
+      return [
+        { id: 'movement-total', label: 'Mutasi stok', value: total, helper: 'Riwayat resmi', tone: 'info' as const },
+        { id: 'movement-auto', label: 'Efek stok', value: 'Otomatis', helper: 'Gudang & kamar sinkron', tone: 'success' as const },
+      ];
+    }
+    if (config.path === '/room-items') {
+      return [
+        { id: 'room-item-total', label: 'Barang kamar', value: total, helper: 'Dari mutasi stok', tone: 'info' as const },
+        { id: 'room-item-mode', label: 'Mode', value: 'Lihat', helper: 'Ubah via mutasi', tone: 'warning' as const },
+      ];
+    }
+    if (config.path === '/rooms') {
+      const available = items.filter((item) => asString(item.status) === 'AVAILABLE').length;
+      return [
+        { id: 'room-total', label: 'Kamar', value: total, helper: 'Total aktif', tone: 'info' as const },
+        { id: 'room-available', label: 'Tersedia', value: available, helper: 'Siap ditawarkan', tone: available ? 'success' as const : 'warning' as const },
+      ];
+    }
+    if (config.path === '/tenants') {
+      const activePortal = tenantPortalUsers.filter((item) => item.isActive).length;
+      return [
+        { id: 'tenant-total', label: 'Tenant', value: total, helper: 'Data penghuni', tone: 'info' as const },
+        { id: 'tenant-portal', label: 'Portal aktif', value: activePortal, helper: 'Akun terhubung', tone: 'success' as const },
+      ];
+    }
+    return [
+      { id: 'resource-total', label: config.title, value: total, helper: 'Total data', tone: 'info' as const },
+      { id: 'resource-mode', label: 'Mode', value: 'Ringkas', helper: 'Menu dan filter dipisah', tone: 'success' as const },
+    ];
+  }, [config.path, config.title, items, query.data?.meta?.totalItems, tenantPortalUsers]);
+
   const filteredItems = useMemo(() => {
     if (!hasResourceFilters) return items;
     return items.filter((item) => applyResourceFilter(config.path, item, resourceFilter));
   }, [config.path, hasResourceFilters, items, resourceFilter]);
 
   const openCreate = () => {
+    if (config.path === '/room-items') {
+      navigate('/inventory-movements?movementType=ASSIGN_TO_ROOM&qty=1');
+      return;
+    }
     const createGuard = canCreateResourceItem(config, user?.role);
     if (!createGuard.allowed) {
       setError(createGuard.reason ?? 'Anda tidak memiliki izin untuk membuat data baru.');
@@ -379,6 +518,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
     setEditingItem(null);
     setFormState(buildInitialState(config));
     setError('');
+    refetchRequiredReferences();
     setShowModal(true);
   };
 
@@ -402,6 +542,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
     setEditingItem(item);
     setFormState({ ...buildInitialState(config), ...formattedItem });
     setError('');
+    refetchRequiredReferences();
     setShowModal(true);
   };
 
@@ -468,7 +609,60 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       delete payload.tenantId;
     }
 
+    if (config.path === '/inventory-items' && editingItem) {
+      const currentQty = String(editingItem.qtyOnHand ?? '').trim();
+      const submittedQty = String(payload.qtyOnHand ?? '').trim();
+      if (submittedQty && submittedQty !== currentQty) {
+        setError('Stok resmi tidak bisa diedit dari master barang. Gunakan menu Mutasi Stok.');
+        return;
+      }
+      delete payload.qtyOnHand;
+    }
+
+    if (config.path === '/room-items' && editingItem) {
+      const currentQty = String(editingItem.qty ?? '').trim();
+      const submittedQty = String(payload.qty ?? '').trim();
+      if (submittedQty && submittedQty !== currentQty) {
+        setError('Jumlah barang kamar harus diubah lewat Mutasi Stok agar stok gudang ikut sinkron.');
+        return;
+      }
+      delete payload.qty;
+      delete payload.roomId;
+      delete payload.itemId;
+    }
+
+    if (config.path === '/inventory-movements') {
+      const movementType = String(payload.movementType ?? '');
+      const note = String(payload.note ?? '').trim();
+      const qty = Number(payload.qty ?? 0);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        setError('Jumlah mutasi stok harus lebih dari 0.');
+        return;
+      }
+      if (note.length < 8) {
+        setError('Catatan mutasi stok minimal 8 karakter.');
+        return;
+      }
+      if (['ASSIGN_TO_ROOM', 'RETURN_FROM_ROOM'].includes(movementType) && !payload.roomId) {
+        setError('Pilih kamar untuk mutasi Pasang ke Kamar atau Kembali dari Kamar.');
+        return;
+      }
+      if (['IN', 'OUT'].includes(movementType)) {
+        delete payload.roomId;
+      }
+      if (!payload.movementDate) {
+        payload.movementDate = todayInputDate();
+      }
+      setStockMovementConfirm({ payload, isEdit: Boolean(editingItem) });
+      return;
+    }
+
     saveMutation.mutate(payload);
+  };
+
+  const confirmStockMovement = () => {
+    if (!stockMovementConfirm) return;
+    saveMutation.mutate(stockMovementConfirm.payload);
   };
 
   useEffect(() => {
@@ -509,24 +703,38 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   const isReferenceLoading = [tenantsRefQuery, roomsRefQuery, inventoryItemsRefQuery, invoicesRefQuery, staysRefQuery]
     .filter((item) => item.isFetching && item.fetchStatus !== 'idle')
     .length > 0;
+  const pageDescription = config.path === '/room-items'
+    ? 'Inventaris kamar otomatis dari Mutasi Stok. Klik baris untuk buka detail kamar.'
+    : config.path === '/inventory-items'
+      ? 'Stok dan posisi dihitung otomatis. Tambah barang akan membuat mutasi masuk.'
+      : config.path === '/inventory-movements'
+        ? 'Catat stok masuk, keluar, pasang ke kamar, atau kembali dari kamar. Efek stok dihitung otomatis.'
+        : isStaffView
+          ? `Cek data ${config.title.toLowerCase()} yang perlu tindakan.`
+          : `Data ${config.title.toLowerCase()} dengan menu dan filter terpisah.`;
 
   return (
     <div className={isStaffView ? 'staff-simple-mode' : undefined}>
       <PageHeader
         eyebrow={isStaffView ? 'Daftar Cek' : 'Master data'}
         title={config.title}
-        description={isStaffView ? `Lihat data ${config.title.toLowerCase()} yang perlu dicek. Buka detail bila perlu.` : `Kelola data ${config.title.toLowerCase()} dengan tampilan yang lebih rapi, relasi yang lebih jelas, dan input yang lebih aman.`}
+        description={pageDescription}
         actionLabel={createGuard.allowed ? (config.createLabel || 'Tambah Data') : undefined}
         onAction={createGuard.allowed ? openCreate : undefined}
       />
 
       {error ? <Alert variant="danger">{error}</Alert> : null}
+      {config.path === '/room-items' && user?.role !== 'STAFF' ? (
+        <Alert variant="info" className="mb-3">
+          Barang kamar dibuat otomatis dari <strong>Mutasi Stok</strong>. Gunakan halaman ini untuk cek posisi dan kondisi.
+        </Alert>
+      ) : null}
 
       {areaMenuItems.length ? (
         <div className="admin-area-internal-menu finance-inline-menu" aria-label={`Sub-menu ${config.title}`}>
           <div className="admin-area-internal-menu-head">
             <span>{config.path === '/tenants' ? 'Menu Stays & Tenant' : config.path === '/wifi-sales' || config.path === '/expenses' || config.path === '/invoice-payments' ? 'Menu Finance' : 'Menu Kamar & Stok'}</span>
-            <small>{config.path === '/tenants' ? 'Tenant digabung dengan lifecycle masa sewa.' : config.path === '/wifi-sales' || config.path === '/expenses' || config.path === '/invoice-payments' ? 'Voucher, pendapatan tambahan, pengeluaran, dan riwayat tetap di Finance.' : 'Kamar, inventaris, stok, dan mutasi tetap satu area.'}</small>
+            <small>Menu area</small>
           </div>
           <div className="admin-area-internal-menu-scroll">
             {areaMenuItems.map((item) => (
@@ -535,7 +743,6 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
                   <span className="admin-area-internal-icon" aria-hidden="true">{item.icon}</span>
                   <span className="admin-area-internal-label">{item.label}</span>
                 </span>
-                <small>{item.helper}</small>
               </button>
             ))}
           </div>
@@ -544,18 +751,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
 
       {!isStaffView ? (
         <>
-          <StatusStrip
-            items={[
-              { id: 'total-records', label: isTenantResource ? 'Tenant' : config.title, value: meta?.totalItems ?? filteredItems.length, helper: 'Record pada badge aktif', tone: 'info' },
-              { id: 'shown-records', label: 'Ditampilkan', value: filteredItems.length, helper: 'Baris tabel saat ini', tone: 'neutral' },
-              ...(isTenantResource ? [
-                { id: 'portal-active', label: 'Portal aktif', value: tenantPortalUsers.filter((item) => item.isActive).length, helper: 'Akun tenant terhubung', tone: 'success' as const },
-                { id: 'without-portal', label: 'Belum portal', value: Math.max(0, filteredItems.length - tenantPortalUsers.length), helper: 'Butuh follow-up bila perlu', tone: 'warning' as const },
-              ] : [
-                { id: 'mode', label: 'Mode', value: createGuard.allowed ? 'Kelola' : 'Lihat', helper: createGuard.allowed ? 'Aksi tersedia sesuai status' : 'Read-only', tone: createGuard.allowed ? 'success' as const : 'warning' as const },
-              ]),
-            ]}
-          />
+          <StatusStrip items={summaryItems} />
           {hasResourceFilters ? (
             <EntityBadgeFilterBar
               ariaLabel={`Filter ${config.title}`}
@@ -596,7 +792,17 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
             meta={meta}
             currentPage={page}
             onPageChange={setPage}
-            onRowOpen={setDetailItem}
+            onRowOpen={(item) => {
+              if (config.path === '/rooms') {
+                navigate(`/rooms/${item.id}`);
+                return;
+              }
+              if (config.path === '/room-items' && item.roomId) {
+                navigate(`/rooms/${item.roomId}`);
+                return;
+              }
+              setDetailItem(item);
+            }}
           />
         </Card.Body>
       </Card>
@@ -619,6 +825,38 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
           }
         }}
       />
+
+      <Modal show={Boolean(stockMovementConfirm)} onHide={() => setStockMovementConfirm(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Konfirmasi Mutasi</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Alert variant="warning" className="mb-3">
+            <strong>Ini mengubah stok resmi.</strong> Pastikan bukti atau laporan staff sudah dicek.
+          </Alert>
+          {stockMovementConfirm ? (
+            <div className="small">
+              <div className="d-flex justify-content-between border-bottom py-2"><span>Jenis</span><strong>{movementTypeLabel(stockMovementConfirm.payload.movementType)}</strong></div>
+              <div className="d-flex justify-content-between border-bottom py-2"><span>Jumlah</span><strong>{String(stockMovementConfirm.payload.qty ?? '-')}</strong></div>
+              <div className="d-flex justify-content-between border-bottom py-2"><span>Efek</span><strong>{movementEffectLabel(stockMovementConfirm.payload.movementType)}</strong></div>
+              <div className="mt-3">
+                <div className="fw-semibold mb-1">Checklist</div>
+                <ul className="mb-0 ps-3">
+                  <li>Cek barang dan jumlah.</li>
+                  <li>Cek alasan mutasi.</li>
+                  <li>Bukti/laporan sudah dicek.</li>
+                </ul>
+              </div>
+            </div>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setStockMovementConfirm(null)}>Batal</Button>
+          <Button onClick={confirmStockMovement} disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? 'Menyimpan...' : 'Simpan Mutasi'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <ResourceDetailModal
         show={Boolean(detailItem)}

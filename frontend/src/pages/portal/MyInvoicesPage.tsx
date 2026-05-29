@@ -165,7 +165,7 @@ export default function MyInvoicesPage() {
         {query.isError ? <Alert variant="danger">Gagal memuat tagihan kamu. Silakan coba lagi.</Alert> : null}
         {!query.isLoading && !query.isError && !visibleItems.length ? <EmptyState icon="🧾" title="Belum ada tagihan di tab ini" description="Tagihan akan muncul sesuai statusnya saat dibuat atau diperbarui admin." /> : null}
         {!query.isLoading && !query.isError && sortedItems.length > 0 ? (
-          <Table hover responsive>
+          <Table hover responsive className="responsive-data-table">
             <thead><tr><th>No. Tagihan</th><th>Masa Sewa</th><th>Jatuh Tempo</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody>
               {visibleItems.map((item) => {
@@ -174,15 +174,15 @@ export default function MyInvoicesPage() {
                 const pendingReview = pendingReviewByInvoiceId.has(item.id);
                 return (
                   <tr key={item.id}>
-                    <td className="fw-semibold"><Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `TG-${item.id}`}</Button></td>
-                    <td>{formatPeriod(item.periodStart, item.periodEnd)}</td>
-                    <td className={overdue ? 'text-soft-danger fw-semibold' : ''}>
+                    <td data-label="No. Tagihan" className="fw-semibold"><Button variant="link" className="p-0 text-decoration-none fw-semibold" onClick={() => navigate(`/portal/invoices/${item.id}`)}>{item.invoiceNumber || `TG-${item.id}`}</Button></td>
+                    <td data-label="Masa Sewa">{formatPeriod(item.periodStart, item.periodEnd)}</td>
+                    <td data-label="Jatuh Tempo" className={overdue ? 'text-soft-danger fw-semibold' : ''}>
                       <div className="fw-semibold">{item.dueDate ? formatDateTimeWib(item.dueDate) : '-'}</div>
                       {item.dueDate ? <div className={overdue ? 'small text-soft-danger' : 'small text-muted'}>{getDeadlineMeta(item.dueDate, 'Jatuh tempo').relativeLabel}</div> : null}
                     </td>
-                    <td><CurrencyDisplay amount={getInvoiceTotalAmount(item)} /></td>
-                    <td><StatusBadge status={pendingReview ? 'INFO' : overdue ? 'OVERDUE' : item.status} tone="tenant" domain="invoice" customLabel={pendingReview ? 'Sedang Diperiksa' : tenantInvoiceStatusLabel(item.status, overdue)} /></td>
-                    <td>{pendingReview ? <Button size="sm" variant="outline-secondary" disabled>🔎 Sedang Diperiksa</Button> : payable ? <Button size="sm" variant={overdue ? 'danger' : 'primary'} onClick={() => navigate(`/portal/invoices/${item.id}`)}>Bayar & Kirim Bukti</Button> : <Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button>}</td>
+                    <td data-label="Total"><CurrencyDisplay amount={getInvoiceTotalAmount(item)} /></td>
+                    <td data-label="Status"><StatusBadge status={pendingReview ? 'INFO' : overdue ? 'OVERDUE' : item.status} tone="tenant" domain="invoice" customLabel={pendingReview ? 'Sedang Diperiksa' : tenantInvoiceStatusLabel(item.status, overdue)} /></td>
+                    <td data-label="Aksi">{pendingReview ? <Button size="sm" variant="outline-secondary" disabled>🔎 Sedang Diperiksa</Button> : payable ? <Button size="sm" variant={overdue ? 'danger' : 'primary'} onClick={() => navigate(`/portal/invoices/${item.id}`)}>Bayar & Kirim Bukti</Button> : <Button size="sm" variant="outline-primary" onClick={() => navigate(`/portal/invoices/${item.id}`)}>Lihat</Button>}</td>
                   </tr>
                 );
               })}
