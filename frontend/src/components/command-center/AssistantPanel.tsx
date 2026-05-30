@@ -50,7 +50,7 @@ export default function AssistantPanel({
   subtitle = 'Prioritas otomatis dari data yang tersedia sekarang.',
   items,
   emptyTitle = 'Tidak ada blocker besar',
-  emptyMessage = 'Flow utama sedang aman. Lanjutkan monitoring dari queue dan tabel di bawah.',
+  emptyMessage = 'Flow utama sedang aman. Lanjutkan monitoring dari antrean dan tabel di bawah.',
   maxItems = 4,
   compact = true,
   collapsible = true,

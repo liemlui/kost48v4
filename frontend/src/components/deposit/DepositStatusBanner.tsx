@@ -32,7 +32,7 @@ export default function DepositStatusBanner({ snapshot, entries = [], mismatch, 
         <strong>{tenantView ? 'Deposit kamu sudah tercatat.' : 'Deposit tercatat di data masa sewa.'}</strong>{' '}
         {tenantView
           ? 'Riwayat detail deposit lama belum tersedia, tetapi status deposit tetap mengikuti data masa sewa.'
-          : 'Belum ada riwayat deposit detail untuk masa sewa ini. Ini kemungkinan data lama sebelum M4A; gunakan rekonsiliasi sebelum mengambil keputusan.'}
+          : 'Belum ada riwayat deposit detail untuk masa sewa ini. Ini kemungkinan data lama sebelum ledger deposit aktif; gunakan rekonsiliasi sebelum mengambil keputusan.'}
       </Alert>
     );
   }

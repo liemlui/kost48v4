@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
     <div className="login-shell">
       <div className="login-wrap">
         <section className="login-aside">
-          <div className="login-chip">✦ Kost48 Surabaya V3</div>
+          <div className="login-chip">✦ Kost48 Surabaya</div>
           <div className="login-title">Atur password baru tanpa harus meminta reset manual ke operator.</div>
           <div className="login-copy">
             Masukkan token reset yang Anda terima, lalu buat password baru yang aman dan mudah Anda ingat.

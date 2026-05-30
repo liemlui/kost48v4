@@ -22,7 +22,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
       <Card.Body>
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-2">Deposit Operasional M4A</div>
+            <div className="section-kicker mb-2">Deposit Operasional</div>
             <h3 className="h5 mb-1">Timeline deposit tenant</h3>
             <p className="text-muted mb-0">
               Panel ini membaca TenantDepositLedgerEntry untuk audit operasional deposit. Ini berbeda dari JournalEntry accounting formal; jangan gunakan backfill tulis sebelum review owner.
@@ -35,7 +35,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
         </div>
 
         {isLoading ? <Alert variant="light" className="border"><Spinner size="sm" className="me-2" />Memuat deposit operasional...</Alert> : null}
-        {isError ? <Alert variant="warning">Deposit operasional belum bisa dimuat. Pastikan endpoint M4A aktif sebelum audit UI.</Alert> : null}
+            {isError ? <Alert variant="warning">Deposit operasional belum bisa dimuat. Pastikan endpoint deposit aktif sebelum audit UI.</Alert> : null}
         {reconciliation?.note ? <Alert variant="info" className="small">{reconciliation.note}</Alert> : null}
 
         <div className="deposit-ops-metrics mb-3">

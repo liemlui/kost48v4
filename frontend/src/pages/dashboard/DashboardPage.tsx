@@ -1354,7 +1354,7 @@ function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueI
       <Card.Body>
         <div className="admin-ops-command-hero">
           <div>
-            <div className="admin-section-label">M5B Admin Operations Command Queue</div>
+            <div className="admin-section-label">Antrean Operasional Admin</div>
             <h2>Kerjakan yang mengunci flow dulu.</h2>
             <p>
               Dashboard ini menggabungkan pemesanan, pembayaran, perpanjangan, keluar, tagihan, tiket, dan stok menjadi antrean aksi harian.
@@ -1738,7 +1738,7 @@ function OwnerFinancialHealthCockpit({
                   {depositLoading ? <p className="small text-muted mt-3 mb-0">Memuat ringkasan deposit...</p> : null}
                   {depositError ? <Alert variant="warning" className="py-2 small mt-3 mb-0">Ledger deposit belum bisa dimuat. Cockpit tetap memakai tagihan/pengeluaran.</Alert> : null}
                   {!depositError && historicalLedgerEmptyCount > 0 ? (
-                    <Alert variant="light" className="py-2 small mt-3 mb-0">{historicalLedgerEmptyCount} stay punya data deposit lama tanpa event ledger. Ini normal untuk data sebelum M4A.</Alert>
+                    <Alert variant="light" className="py-2 small mt-3 mb-0">{historicalLedgerEmptyCount} stay punya data deposit lama tanpa event ledger. Ini normal untuk data lama sebelum ledger deposit aktif.</Alert>
                   ) : null}
                 </Card.Body>
               </Card>
@@ -1746,7 +1746,7 @@ function OwnerFinancialHealthCockpit({
               <Card className="border-0 owner-finance-side-card">
                 <Card.Body>
                   <div className="panel-title mb-1">Recent deposit events</div>
-                  <div className="panel-subtitle mb-3">Aktivitas deposit terbaru dari M4A.</div>
+                  <div className="panel-subtitle mb-3">Aktivitas deposit terbaru.</div>
                   {!recentDepositEntries.length ? (
                     <EmptyState icon="🛡️" title="Belum ada event baru" description="Data historical lama bisa match walau ledger event kosong. Event baru muncul setelah payment/refund/deduction fresh." />
                   ) : (
@@ -1825,7 +1825,7 @@ function OwnerDashboard() {
       <AutoOpsControlPanel status={autoOpsQuery.data} role="OWNER" onCompleted={refreshDashboard} />
       <OwnerContinuityStrip pendingPaymentReviewCount={pendingPaymentReviewCount} pendingRenewCount={pendingRenewCount} approvedCheckoutRequestCount={approvedCheckoutRequestCount} overdueCount={overdue.length} openInvoiceCount={cashflowForecast.openInvoiceCount} onNavigate={navigate} />
       {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan tagihan dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint ringkasan backend.</Alert> : null}
-      <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di queue." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
+      <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di antrean." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
       <CompactMetrics metrics={businessHealth.metrics} />
       <OwnerFinancialHealthCockpit
         invoices={invoices}

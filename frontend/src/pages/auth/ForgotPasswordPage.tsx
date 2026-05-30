@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
     <div className="login-shell">
       <div className="login-wrap">
         <section className="login-aside">
-          <div className="login-chip">✦ Kost48 Surabaya V3</div>
+          <div className="login-chip">✦ Kost48 Surabaya</div>
           <div className="login-title">Pulihkan akses akun Anda dengan cara yang aman dan sederhana.</div>
           <div className="login-copy">
             Masukkan email atau nomor HP yang terhubung ke akun Anda. Sistem akan memberi instruksi reset password jika akun ditemukan.
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
           {success ? <Alert variant="success">{success}</Alert> : null}
           {previewToken ? (
             <Alert variant="warning" className="small">
-              <div className="fw-semibold">Mode dev lokal</div>
+              <div className="fw-semibold">Token Reset</div>
               <div>Token reset preview: <code>{previewToken}</code></div>
               <div className="mt-2">Gunakan token ini di halaman reset password bila gateway pesan belum dipasang.</div>
             </Alert>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
             </Form.Group>
 
             <div className="form-helper mb-4">
-              Response sistem akan tetap generik demi keamanan. Di mode dev lokal, token preview bisa ditampilkan agar mudah dites.
+              Response sistem akan tetap generik demi keamanan. Token reset preview akan ditampilkan jika tersedia.
             </div>
 
             <Button type="submit" disabled={submitting} className="w-100">
