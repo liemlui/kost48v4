@@ -1,5 +1,268 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-30 M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
+**Versi:** 2026-05-30 M9 Read Smoke, Critical API Flow, and Build Gate PASS
+
+<!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_START -->
+## 0.0 Latest Current State — M9 Read Smoke, Critical API Flow, and Build Gate PASS
+
+```text
+Latest verified local gate before commit:
+- M9 read smoke PASS: 25 passed, 0 failed.
+- Frontend build PASS: 727 modules transformed.
+- Backend build:local PASS: clean + Prisma generate + TypeScript build completed.
+- Generated Prisma restored after build; git status no longer lists backend/src/generated/prisma.
+- M9 critical API flow PASS across public booking, payment, renew, checkout, deposit, inventory, and staff report.
+- M9 FULL PASS is still not claimed because manual browser smoke across owner/admin/staff/tenant/public is still pending.
+```
+
+### M9 critical API flow evidence summary
+
+| Flow | Result | Evidence |
+|---|---|---|
+| Public booking | PASS | Website booking created stay `21`, tenant `22`, room `4 / G2-004`, and portal account. |
+| Admin booking approve | PASS | Approval created initial invoice `32` as `ISSUED`, room became `RESERVED`, and open invoice count became `1`. |
+| Tenant payment proof | PASS | Tenant submitted payment proof `8` for rent + deposit amount `2,200,000`; review queue showed `PENDING_REVIEW`. |
+| Admin payment approval | PASS | Payment proof `8` approved; invoice `32` became `PAID`, room became `OCCUPIED`, deposit became `PAID / HELD`. |
+| Renew request | PASS | Renew request `4` created and approved with meter checkpoint. |
+| Renewal invoice | PASS | Renewal invoice `34` created as `ISSUED` with rent, electricity, and water lines totaling `1,741,950`. |
+| Open invoice checkout blocker | PASS | Tenant checkout request and direct final checkout were blocked while invoice `34` was open. |
+| Renewal invoice payment | PASS | Payment proof `9` approved; invoice `34` became `PAID`, stay open invoice count returned to `0`. |
+| Checkout request approval | PASS | Checkout request `4` approved; stay remained `ACTIVE`, proving approval is not final checkout. |
+| Final checkout | PASS | Final checkout completed stay `21`, set room `4` to `AVAILABLE`, and kept deposit `HELD`. |
+| Deposit settlement | PASS | Full refund processed; deposit became `REFUNDED`, ledger matched, accounting journal `JE-AUTO-DEPOSIT-SETTLEMENT-21` posted and balanced. |
+| Inventory lifecycle | PASS | Item `4` moved through IN, ASSIGN_TO_ROOM, RETURN_FROM_ROOM; staff official movement was blocked with 403. |
+| Staff field report | PASS | Staff field report `1` created ticket `5`, admin reviewed as `APPROVE`, no official stock movement was auto-created. |
+
+### M9 read smoke and build gate
+
+```text
+Read smoke:
+- backend reachable at localhost:3000.
+- public rooms PASS.
+- admin login PASS.
+- main admin read surfaces PASS.
+- staff login/read smoke PASS.
+- owner/tenant default role smoke only warned because seed credentials were not present; warnings did not fail read-smoke.
+- final label: M9_READ_SMOKE_PASS, Passed 25, Failed 0.
+
+Build:
+- frontend npm run build PASS.
+- backend npm run build:local PASS.
+- generated Prisma restored after build.
+```
+
+### Current honest label
+
+```text
+M9 READ SMOKE = PASS.
+M9 CRITICAL API FLOW = PASS.
+M9 BUILD GATE = PASS.
+M9 FULL PASS = pending manual browser smoke.
+No DB reset was used.
+No schema change was introduced.
+No production DB mutation was performed.
+Generated smoke reports and generated command packs are local UAT artifacts and must not be committed.
+```
+
+### Immediate pre-commit cleanup
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; Remove-Item ".\m9-uat-read-smoke-report-*.json" -Force -ErrorAction SilentlyContinue; Remove-Item ".\m9c-critical-flow-command-pack-*.ps1" -Force -ErrorAction SilentlyContinue; Remove-Item ".\m9c-critical-flow-command-pack-report-*.json" -Force -ErrorAction SilentlyContinue; git restore backend/src/generated/prisma; git status -sb
+```
+
+### Next required gate before FULL PASS
+
+```text
+Manual browser smoke owner/admin/staff/tenant/public:
+- no no-op CTA or link #,
+- filters visually distinct from primary action,
+- tenant copy avoids raw backend terms,
+- deposit copy remains dana titipan/liability,
+- tables readable on desktop/tablet/mobile,
+- checkout request approval not final checkout,
+- final checkout blocked by every open invoice including DRAFT,
+- staff reports issues/restock needs, not official stock mutation.
+```
+<!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_END -->
+
+## 2026-05-30 — M9 Read Smoke, Critical API Flow, and Build Gate
+
+### Type
+
+UAT tooling hardening + full critical API flow verification + build gate verification.
+
+### Added / Changed
+
+- Added reusable critical-flow command-pack tooling:
+  - `backend/scripts/m9-critical-flow-uat-command-pack.ps1`
+- Hardened M9 read-smoke behavior:
+  - backend-not-running is environment readiness,
+  - optional owner/tenant seed credential mismatch is warning by default,
+  - strict role login can be required explicitly.
+- Hardened command pack generation:
+  - uses discovered candidate IDs,
+  - no hardcoded `1` for room/stay/invoice/item IDs,
+  - public booking no longer fills the `website` honeypot field,
+  - generated mutation pack remains disabled by default.
+
+### Verified
+
+```text
+M9 read smoke PASS:
+- 25 passed,
+- 0 failed.
+
+M9 critical API flow PASS:
+- public booking,
+- admin booking approval,
+- tenant payment proof,
+- admin payment review,
+- renew with meter checkpoint,
+- checkout blockers,
+- final checkout,
+- deposit settlement,
+- inventory lifecycle,
+- staff field report/admin review.
+
+Build gate PASS:
+- frontend npm run build PASS,
+- backend npm run build:local PASS,
+- generated Prisma restored after build.
+```
+
+### Not fully verified yet
+
+```text
+Manual browser smoke across owner/admin/staff/tenant/public remains pending.
+M9 FULL PASS is not claimed yet.
+```
+
+### Not changed
+
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No microservice split.
+- No apps folder.
+- No generated Prisma commit.
+- No generated UAT report/command-pack output should be committed.
+
+<!-- KOST48_DOCS_SYNC_20260530_M9_0_START -->
+## 0.0 Latest Current State — M9-0 Runtime Hotfix, Base Smoke Recovery, and Full Regression UAT Gate
+
+```text
+Latest pushed commits:
+- ed85fb6 fix(runtime): guard deposit ledger and accounting readiness smoke
+- 618ab15 docs: sync m8o to m8t command center verification
+- fe72fba feat(command-center): harden ui actions finance inventory and lifecycle flows
+
+Latest generated / applied tooling package:
+- backend_20260530_M9_FULL_REGRESSION_UAT_TOOLING_FULL.zip
+- frontend_20260530_M9_FULL_REGRESSION_UAT_TOOLING_UNCHANGED.zip
+
+Current baseline:
+- M8O–M8T code and docs are pushed.
+- M9-0 runtime hotfix is pushed.
+- M9 full regression UAT is not FULL PASS yet.
+- M9 base smoke inline PASS after backend server was running.
+```
+
+### M9-0 runtime hotfix summary
+
+| Area | Result | Evidence |
+|---|---|---|
+| Deposit ledger reconciliation-lite | PASS | `/api/deposit-ledger/reconciliation-lite` returned `success=True`, `ready=True`, `mismatchCount=0`. |
+| Accounting readiness | PASS | `/api/accounting/readiness` returned `success=True`, `ready=True`, `score=100`. |
+| Public rooms | PASS | `/api/public/rooms` returned `success=True`. |
+| Payment review queue | PASS | `/api/payment-submissions/review-queue` returned `success=True`. |
+| Backend build | PASS before smoke | `npm run build:local` completed with Prisma generate + TypeScript compile. |
+| Git push | PASS | `ed85fb6` was pushed to `main`. |
+
+### Important operational discovery
+
+```text
+Do not restore backend/src/generated/prisma before running local dev server if the dev server needs freshly generated Prisma types.
+For local runtime/UAT:
+1. npm run prisma:generate or npm run build:local may generate local Prisma client.
+2. Start/restart backend.
+3. Run smoke/UAT.
+4. Only after UAT/build, restore generated Prisma before commit/push if schema/generator change is not approved.
+```
+
+### M9 UAT tooling note
+
+```text
+backend/scripts/m9-full-regression-read-smoke.ps1 was added as optional read-smoke tooling.
+PowerShell execution policy may block unsigned scripts; use process-scope Bypass + Unblock-File if needed.
+Failed JSON reports caused only by backend not reachable should be deleted and not committed.
+Commit the script only if the team wants reusable M9 smoke tooling.
+```
+
+### Current honest label
+
+```text
+M8O–M8T = pushed.
+M9-0 runtime hotfix = build/smoke PASS + pushed.
+M9 base smoke inline = PASS for public rooms, payment review queue, deposit reconciliation, and accounting readiness.
+M9 full regression = pending.
+Manual browser smoke across all roles/pages = pending.
+No DB reset was used.
+No schema change was introduced.
+Generated Prisma remains build/runtime artifact and must not be committed unless schema/generator scope is explicitly approved.
+```
+
+### Next recommended phase
+
+```text
+PLAN M9 Full Regression UAT + Production Readiness.
+Goal:
+- run read-smoke for all main role surfaces with backend actively running,
+- run critical flow UAT: public booking, tenant payment proof, admin payment approval, renew, checkout, deposit, inventory/staff, owner finance,
+- run manual browser smoke for owner/admin/staff/tenant/public,
+- patch only bugs proven by M9 evidence,
+- keep code/docs commits clean and exclude generated Prisma/report noise.
+```
+<!-- KOST48_DOCS_SYNC_20260530_M9_0_END -->
+
+
+## 2026-05-30 — M9-0 Runtime Hotfix and Base Smoke Recovery
+
+### Type
+
+Backend runtime guard hotfix + optional UAT tooling.
+
+### Added / Changed
+
+- Patched deposit ledger reconciliation so it no longer depends on a fragile `Stay.depositLedgerEntries` Prisma include.
+- Patched accounting readiness to guard missing/undefined Prisma delegates instead of throwing 500.
+- Added optional M9 read-smoke PowerShell tooling package:
+  - `backend/scripts/m9-full-regression-read-smoke.ps1`
+
+### Verified
+
+```text
+Backend build:local PASS.
+GET /api/public/rooms PASS.
+GET /api/payment-submissions/review-queue PASS.
+GET /api/deposit-ledger/reconciliation-lite PASS with ready=True and mismatchCount=0.
+GET /api/accounting/readiness PASS with ready=True and score=100.
+Hotfix commit ed85fb6 pushed to main.
+```
+
+### Not fully verified yet
+
+```text
+M9 full regression UAT is still pending.
+Manual browser smoke across owner/admin/staff/tenant/public remains pending.
+Optional UAT script should be committed only if desired; failed reports caused by backend not reachable should not be committed.
+```
+
+### Not changed
+
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No generated Prisma commit.
+- No frontend change for M9-0 runtime hotfix.
 
 <!-- KOST48_DOCS_SYNC_20260530_M8O_M8T_START -->
 ## 0.0 Latest Current State — M8O–M8T Command Center Verification, Flow Hardening, Inventory UAT, and Owner Finance Gate Sync
