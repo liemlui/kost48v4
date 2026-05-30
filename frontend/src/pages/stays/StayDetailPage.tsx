@@ -19,6 +19,7 @@ import { approveCheckoutRequest, listAdminCheckoutRequests, rejectCheckoutReques
 import { useStay } from '../../hooks/useStay';
 import { useInvoices } from '../../hooks/useInvoices';
 import { useMeterReadings } from '../../hooks/useMeterReadings';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { formatDateTimeWib } from '../../utils/dateTime';
 import { buildCheckoutReadinessItems, getCheckoutReadinessSummary } from '../../utils/checkoutReadiness';
@@ -135,10 +136,13 @@ export default function StayDetailPage() {
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
         queryClient.invalidateQueries({ queryKey: ['stay', id] }),
         queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-checkout-requests'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-stay'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
       ]);
     },
     onError: (error: any) => {
-      setApproveCheckoutError(error?.response?.data?.message ?? 'Gagal menyetujui permintaan checkout. Silakan coba lagi.');
+      setApproveCheckoutError(getApiErrorMessage(error, 'Gagal menyetujui permintaan checkout. Silakan coba lagi.'));
     },
   });
 
@@ -152,6 +156,7 @@ export default function StayDetailPage() {
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
         queryClient.invalidateQueries({ queryKey: ['stay', id] }),
         queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
+        queryClient.invalidateQueries({ queryKey: ['portal-checkout-requests'] }),
       ]);
       setRejectTarget(null);
     },

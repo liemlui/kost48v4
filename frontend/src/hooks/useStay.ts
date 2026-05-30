@@ -38,6 +38,8 @@ export function useStay(id?: number | string) {
     await queryClient.invalidateQueries({ queryKey: ["portal-stay"] });
     await queryClient.invalidateQueries({ queryKey: ["portal-invoices"] });
     await queryClient.invalidateQueries({ queryKey: ["portal-stage"] });
+    await queryClient.invalidateQueries({ queryKey: ["portal-payment-submissions"] });
+    await queryClient.invalidateQueries({ queryKey: ["portal-renew-requests"] });
     await queryClient.invalidateQueries({ queryKey: ["payment-urgency"] });
     await queryClient.invalidateQueries({ queryKey: ["checkout-requests"] });
     await queryClient.invalidateQueries({ queryKey: ["renew-requests"] });
