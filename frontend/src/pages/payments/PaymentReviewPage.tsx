@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
@@ -100,10 +101,10 @@ export default function PaymentReviewPage() {
 
   const metrics: MetricChip[] = [
     { id: 'submission', label: 'Menunggu keputusan', value: items.length, helper: 'Sesuai filter status', status: status === 'PENDING_REVIEW' && items.length ? 'WARNING' : 'INFO', icon: '◈' },
-    { id: 'amount', label: 'Nominal queue', value: new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(pendingAmount), helper: 'Total nominal pada filter', status: 'SUCCESS', icon: 'Rp' },
+    { id: 'amount', label: 'Nominal antrean', value: new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(pendingAmount), helper: 'Total nominal pada filter', status: 'SUCCESS', icon: 'Rp' },
     { id: 'risk', label: 'Risiko tinggi', value: highRiskCount, helper: manualRiskCount ? `${manualRiskCount} perlu checklist` : 'Safety check aman', status: highRiskCount ? 'DANGER' : manualRiskCount ? 'WARNING' : 'SUCCESS', icon: '!' },
     { id: 'proof', label: 'Bukti tersedia', value: proofCount, helper: missingProofCount ? `${missingProofCount} tanpa file` : 'Semua punya file', status: missingProofCount ? 'WARNING' : 'SUCCESS', icon: '▣' },
-    { id: 'mix', label: 'Tagihan / Deposit', value: `${invoiceCount}/${depositCount}`, helper: 'Komposisi queue', status: 'INFO', icon: '↯' },
+    { id: 'mix', label: 'Tagihan / Deposit', value: `${invoiceCount}/${depositCount}`, helper: 'Komposisi antrean', status: 'INFO', icon: '↯' },
   ];
 
   const refreshRelated = async () => {
@@ -119,6 +120,9 @@ export default function PaymentReviewPage() {
       queryClient.invalidateQueries({ queryKey: ['portal-invoices'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-stay'] }),
       queryClient.invalidateQueries({ queryKey: ['portal-stage'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-payment-submissions'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-renew-requests'] }),
+      queryClient.invalidateQueries({ queryKey: ['portal-checkout-requests'] }),
       queryClient.invalidateQueries({ queryKey: ['payment-submissions'] }),
       queryClient.invalidateQueries({ queryKey: ['invoices'] }),
       queryClient.invalidateQueries({ queryKey: ['invoice-payments'] }),
@@ -136,7 +140,7 @@ export default function PaymentReviewPage() {
       await refreshRelated();
     },
     onError: (error: any) => {
-      setActionError(error?.response?.data?.message ?? 'Gagal menyetujui bukti pembayaran.');
+      setActionError(getApiErrorMessage(error, 'Gagal menyetujui bukti pembayaran.'));
     },
   });
 
@@ -149,7 +153,7 @@ export default function PaymentReviewPage() {
       await refreshRelated();
     },
     onError: (error: any) => {
-      setActionError(error?.response?.data?.message ?? 'Gagal menolak bukti pembayaran.');
+      setActionError(getApiErrorMessage(error, 'Gagal menolak bukti pembayaran.'));
     },
   });
 
@@ -162,7 +166,7 @@ export default function PaymentReviewPage() {
       />
 
       <CommandFlowStrip />
-      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Queue pembayaran aman" emptyMessage="Filter ini aman." />
+      <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Antrean pembayaran aman" emptyMessage="Filter ini aman." />
       <CompactMetrics metrics={metrics} />
 
       <Card className="content-card border-0 mb-4 command-filter-card">
@@ -205,9 +209,9 @@ export default function PaymentReviewPage() {
       <Card className="content-card border-0 payment-review-table-card">
         <Card.Body>
           {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-          {query.isError ? <Alert variant="danger">Gagal memuat queue review pembayaran.</Alert> : null}
+          {query.isError ? <Alert variant="danger">Gagal memuat antrean review pembayaran.</Alert> : null}
           {!query.isLoading && !query.isError && !items.length ? (
-            <EmptyState icon="💸" title="Belum ada bukti yang perlu direview" description="Queue review pembayaran akan muncul saat tenant mengirim bukti bayar." />
+            <EmptyState icon="💸" title="Belum ada bukti yang perlu direview" description="Antrean review pembayaran akan muncul saat tenant mengirim bukti bayar." />
           ) : null}
 
           {!query.isLoading && !query.isError && items.length > 0 ? (
