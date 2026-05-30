@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -39,6 +40,8 @@ import {
 
 @Injectable()
 export class PaymentSubmissionsService {
+  private readonly logger = new Logger(PaymentSubmissionsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly appNotificationService: AppNotificationService,
@@ -427,8 +430,11 @@ export class PaymentSubmissionsService {
           if (invoicePaymentId) {
             await this.accountingPosting.postInvoicePaymentTx(tx, invoicePaymentId, user.id);
           }
-        } catch {
+        } catch (err) {
           // Auto Journal Lite must not block payment approval. Readiness/backfill can repair skipped journal later.
+          this.logger.warn(
+            `Auto Journal Lite gagal saat approval pembayaran (submission #${submissionId}, invoice #${submission.invoiceId}): ${err instanceof Error ? err.message : String(err)}`,
+          );
         }
 
         await tx.paymentSubmission.update({
@@ -485,8 +491,11 @@ export class PaymentSubmissionsService {
                 submission.paymentMethod,
                 new Date(submission.paidAt),
               );
-            } catch {
+            } catch (err) {
               // Deposit liability journal is best-effort; do not block payment approval.
+              this.logger.warn(
+                `Jurnal deposit (liability) gagal saat approval pembayaran (submission #${submissionId}, stay #${submission.stayId}): ${err instanceof Error ? err.message : String(err)}`,
+              );
             }
           }
 

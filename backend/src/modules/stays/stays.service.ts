@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import { createHash, randomBytes } from "crypto";
@@ -43,10 +44,16 @@ import {
 } from "./stays.helpers";
 import { AccountingPostingService } from "../accounting/accounting-posting.service";
 import { DepositLedgerService } from "../deposit-ledger/deposit-ledger.service";
-import { endOfDay, parseJakartaDateOnly } from "../../common/utils/date.util";
+import {
+  endOfDay,
+  parseJakartaDateOnly,
+  startOfJakartaBusinessDay,
+} from "../../common/utils/date.util";
 
 @Injectable()
 export class StaysService {
+  private readonly logger = new Logger(StaysService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
@@ -466,7 +473,12 @@ export class StaysService {
         });
         await this.accountingPosting
           .postInvoiceIssuedTx(tx, issuedInvoice.id, actor.id)
-          .catch(() => undefined);
+          .catch((err) => {
+            this.logger.warn(
+              `Auto Journal Lite gagal untuk invoice awal #${issuedInvoice.id} (stay create): ${err instanceof Error ? err.message : String(err)}`,
+            );
+            return undefined;
+          });
 
         const baselineDate = startOfDay(new Date(dto.checkInDate));
 
@@ -634,7 +646,10 @@ export class StaysService {
     if (!existing) throw new NotFoundException("Stay tidak ditemukan");
     if (existing.status !== StayStatus.ACTIVE)
       throw new ConflictException("Stay bukan status ACTIVE");
-    if (actualCheckOutDate < startOfDay(existing.checkInDate)) {
+    // Compare both sides in the same Jakarta business-day convention as
+    // actualCheckOutDate to avoid an off-by-one-day mismatch when checkInDate
+    // carries a time component near UTC midnight.
+    if (actualCheckOutDate < startOfJakartaBusinessDay(existing.checkInDate)) {
       throw new ConflictException(
         "Tanggal checkout final tidak boleh sebelum tanggal check-in",
       );
@@ -1160,7 +1175,12 @@ export class StaysService {
     });
     await this.accountingPosting
       .postInvoiceIssuedTx(tx, invoice.id, actor.id)
-      .catch(() => undefined);
+      .catch((err) => {
+        this.logger.warn(
+          `Auto Journal Lite gagal untuk invoice perpanjangan #${invoice.id} (renew): ${err instanceof Error ? err.message : String(err)}`,
+        );
+        return undefined;
+      });
 
     const issuedInvoice = await tx.invoice.findUnique({
       where: { id: invoice.id },
