@@ -26,12 +26,12 @@ export default function StepReviewConfirm({
       <Card.Body>
         <h5 className="mb-3">Konfirmasi Check-In</h5>
         <Alert variant="warning" className="mb-3">
-          <strong>Konfirmasi Akhir:</strong> Pastikan semua data di bawah sudah benar sebelum submit. Check-in akan membuat room OCCUPIED.
+          <strong>Konfirmasi Akhir:</strong> Pastikan semua data di bawah sudah benar sebelum submit. Check-in akan mengubah kamar menjadi Terisi.
         </Alert>
         <Row className="g-3">
           <Col md={6}>
             <div className="mb-2">
-              <span className="text-muted">Tenant:</span>
+              <span className="text-muted">Penghuni:</span>
               <br />
               <strong>{selectedTenantName || '—'}</strong>
             </div>

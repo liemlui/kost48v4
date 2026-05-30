@@ -40,6 +40,7 @@ export default function BookingCard({
   const isClosedBooking = isCancelled || statusUpper === 'EXPIRED' || expiryMeta.isExpired;
   const hasPendingSubmission = Boolean(pendingInvoiceSubmission || pendingDepositSubmission);
   const portalStatus = getPortalBookingStatus(booking, hasPendingSubmission);
+  const followUpUrl = buildWhatsAppFollowUpUrl(booking);
 
   const hasInitialInvoice = Number(booking.invoiceCount ?? 0) > 0 || Boolean(booking.latestInvoiceId);
   const invoiceTotalAmount =
@@ -209,7 +210,7 @@ export default function BookingCard({
             <div>
               <div className="small text-muted">Tagihan awal</div>
               <div className="fw-semibold">
-                {booking.latestInvoiceNumber ?? `INV-${booking.latestInvoiceId ?? '-'}`}
+                {booking.latestInvoiceNumber ?? `TG-${booking.latestInvoiceId ?? '-'}`}
               </div>
               <div className="small text-muted">
                 Sewa <CurrencyDisplay amount={invoiceTotalAmount} /> + deposit{' '}
@@ -258,15 +259,21 @@ export default function BookingCard({
             </Button>
           )}
 
-          <Button
-            as="a"
-            href={buildWhatsAppFollowUpUrl(booking)}
-            target="_blank"
-            rel="noreferrer"
-            variant="outline-success"
-          >
-            Hubungi Admin
-          </Button>
+          {followUpUrl ? (
+            <Button
+              as="a"
+              href={followUpUrl}
+              target="_blank"
+              rel="noreferrer"
+              variant="outline-success"
+            >
+              Hubungi Admin
+            </Button>
+          ) : (
+            <Button variant="outline-secondary" disabled>
+              Kontak admin belum tersedia
+            </Button>
+          )}
         </div>
 
         {submissions.length ? (

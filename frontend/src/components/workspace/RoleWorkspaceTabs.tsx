@@ -20,10 +20,11 @@ export default function RoleWorkspaceTabs({ role }: { role?: string }) {
 
   return (
     <nav className="role-workspace-tabs" aria-label="Navigasi workspace admin">
+      <span className="role-workspace-tabs-label">Menu area</span>
       {tabs.map((tab) => {
         const active = tab.match(location.pathname, searchParams);
         return (
-          <button type="button" key={tab.id} className={active ? 'active' : ''} onClick={() => navigate(tab.to)}>
+          <button type="button" key={tab.id} className={active ? 'active' : ''} aria-current={active ? 'page' : undefined} onClick={() => navigate(tab.to)}>
             {tab.label}
           </button>
         );

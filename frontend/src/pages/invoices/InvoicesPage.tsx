@@ -250,7 +250,7 @@ export default function InvoicesPage() {
     return {
       id: item.id,
       priority: overdue ? 'BLOCKER' : item.status === 'DRAFT' ? 'MEDIUM' : dueSoonBadge ? 'WARNING' : 'INFO',
-      type: item.status === 'DRAFT' ? 'Draft Invoice' : 'Tagihan',
+      type: item.status === 'DRAFT' ? 'Draft tagihan' : 'Tagihan',
       subject: item.invoiceNumber || `INV-${item.id}`,
       issue: overdue
         ? `${tenantName} melewati jatuh tempo ${formatDateSafe(item.dueDate)}.`
@@ -260,14 +260,14 @@ export default function InvoicesPage() {
             ? `${tenantName} jatuh tempo ${dueSoonBadge.label.toLowerCase()}.`
             : `${tenantName} perlu monitoring pembayaran.`,
       age: item.dueDate ? `Due ${formatDateSafe(item.dueDate)}` : undefined,
-      recommendedAction: item.status === 'DRAFT' ? 'Review draft' : 'Buka tagihan',
+      recommendedAction: item.status === 'DRAFT' ? 'Review draft tagihan' : 'Buka tagihan',
       actionTo: `/invoices/${item.id}`,
     };
   });
 
   const tabs: { key: StatusTab; label: string; count: number; cls?: string }[] = [
     { key: 'ALL', label: 'Semua', count: stats.total },
-    { key: 'DRAFT', label: 'Draft', count: stats.draft },
+    { key: 'DRAFT', label: 'Belum Terbit', count: stats.draft },
     { key: 'BILLING', label: 'Perlu Dibayar', count: stats.billing, cls: 'tab-warn' },
     { key: 'OVERDUE', label: 'Overdue', count: stats.overdue, cls: 'tab-danger' },
     { key: 'PAID', label: 'Lunas', count: stats.paid, cls: 'tab-success' },
@@ -490,7 +490,7 @@ export default function InvoicesPage() {
           {cancelTarget ? (
             <>
               <Alert variant={cancelSafety?.risk === 'HIGH' ? 'danger' : cancelSafety?.risk === 'MEDIUM' ? 'warning' : 'secondary'} className="small">
-                {cancelTarget.status === 'DRAFT' ? 'DRAFT aman dibatalkan.' : 'Tagihan terbit: cek dampaknya.'}
+                {cancelTarget.status === 'DRAFT' ? 'Draft aman dibatalkan.' : 'Tagihan terbit: cek dampaknya.'}
               </Alert>
               <div className="border rounded-4 p-3 mb-3">
                 <div className="fw-semibold">{cancelTarget.invoiceNumber || `INV-${cancelTarget.id}`}</div>

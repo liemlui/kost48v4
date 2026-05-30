@@ -180,14 +180,14 @@ export default function ReminderPreviewPage() {
     { id: 'overdue', label: 'Tagihan terlambat', value: invoiceOverdue.length, helper: 'Prioritas follow-up', icon: '🔴', status: invoiceOverdue.length ? 'DANGER' : 'SUCCESS', onClick: () => setActiveTab('INVOICE_OVERDUE') },
     { id: 'due', label: 'Jatuh tempo dekat', value: invoiceDue.length, helper: 'Dalam 24 jam', icon: '🟡', status: invoiceDue.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('INVOICE_DUE') },
     { id: 'booking', label: 'Booking expiry', value: bookingExpiry.length, helper: 'Ikuti jam deadline per booking', icon: '⏳', status: bookingExpiry.length ? 'WARNING' : 'SUCCESS', onClick: () => setActiveTab('BOOKING_EXPIRY') },
-    { id: 'checkout', label: 'Renew/Keluar', value: checkout.length, helper: 'H-3/H-1', icon: '📅', status: checkout.length ? 'INFO' : 'SUCCESS', onClick: () => setActiveTab('CHECKOUT') },
+    { id: 'checkout', label: 'Perpanjangan/Keluar', value: checkout.length, helper: 'H-3/H-1', icon: '📅', status: checkout.length ? 'INFO' : 'SUCCESS', onClick: () => setActiveTab('CHECKOUT') },
   ];
 
   const tabs: { key: ReminderTab; label: string; count: number; cls?: string }[] = [
     { key: 'INVOICE_OVERDUE', label: '🔴 Terlambat', count: invoiceOverdue.length, cls: 'tab-danger' },
     { key: 'INVOICE_DUE', label: '🟡 Jatuh Tempo', count: invoiceDue.length, cls: 'tab-warn' },
     { key: 'BOOKING_EXPIRY', label: '⏳ Booking Expiry', count: bookingExpiry.length },
-    { key: 'CHECKOUT', label: '📅 Renew/Keluar', count: checkout.length },
+    { key: 'CHECKOUT', label: '📅 Perpanjangan/Keluar', count: checkout.length },
   ];
 
   return (

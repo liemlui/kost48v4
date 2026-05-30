@@ -139,7 +139,7 @@ export default function RenewRequestsAdminPage() {
       severity: 'HIGH',
       title: `${pendingCount} renew menunggu meter`,
       message: 'Catat meter dulu. Sistem buat tagihan renew.',
-      source: 'Renew',
+      source: 'Perpanjangan',
       count: pendingCount,
 
     } : null,
@@ -148,7 +148,7 @@ export default function RenewRequestsAdminPage() {
       severity: 'INFO',
       title: `${approvedCount} renew sudah diproses`,
       message: 'Pastikan tagihan renew dibayar tenant.',
-      source: 'Invoice renew',
+      source: 'Tagihan perpanjangan',
       count: approvedCount,
 
     } : null,
@@ -156,7 +156,7 @@ export default function RenewRequestsAdminPage() {
 
   const metrics: MetricChip[] = [
     { id: 'pending', label: 'Menunggu', value: pendingCount, helper: 'Butuh meter + keputusan', icon: '⏳', status: pendingCount ? 'WARNING' : 'SUCCESS' },
-    { id: 'approved', label: 'Disetujui', value: approvedCount, helper: 'Invoice renew sudah dibuat', icon: '✅', status: 'SUCCESS' },
+    { id: 'approved', label: 'Disetujui', value: approvedCount, helper: 'Tagihan perpanjangan sudah dibuat', icon: '✅', status: 'SUCCESS' },
     { id: 'rejected', label: 'Ditolak', value: rejectedCount, helper: 'Ada catatan review', icon: '✕', status: rejectedCount ? 'DANGER' : 'SUCCESS' },
     { id: 'total', label: 'Total Request', value: items.length, helper: statusFilter ? 'Sesuai filter aktif' : 'Semua status', icon: '📋', status: 'INFO' },
   ];
@@ -229,7 +229,7 @@ export default function RenewRequestsAdminPage() {
   return (
     <div className="renew-command-page">
       <PageHeader
-        eyebrow="Renew Command Center"
+        eyebrow="Pusat Perpanjangan"
         title="Permintaan Perpanjangan"
         description="Catat meter, approve, lalu sistem membuat tagihan renew."
       />
@@ -335,7 +335,7 @@ export default function RenewRequestsAdminPage() {
 
       <Modal show={!!approveTarget} onHide={() => { if (!approveMutation.isPending) { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); } }} centered size="xl" dialogClassName="renew-approval-command-modal">
         <Modal.Header closeButton>
-          <Modal.Title>Catat & Setujui Renew</Modal.Title>
+          <Modal.Title>Catat & Setujui Perpanjangan</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {approveFormError ? <Alert variant="warning" className="small">{approveFormError}</Alert> : null}
@@ -448,7 +448,7 @@ export default function RenewRequestsAdminPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); }} disabled={approveMutation.isPending}>Batal</Button>
-          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending || !canSubmitApprove}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menyetujui...</> : approvalSafety.blockers.length ? 'Lengkapi Data Renew' : 'Approve & Buat Tagihan'}</Button>
+          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending || !canSubmitApprove}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menyetujui...</> : approvalSafety.blockers.length ? 'Lengkapi Data Perpanjangan' : 'Approve & Buat Tagihan'}</Button>
         </Modal.Footer>
       </Modal>
 
@@ -470,7 +470,7 @@ export default function RenewRequestsAdminPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => { setRejectTarget(null); setReviewNotes(''); setRejectFormError(''); }} disabled={rejectMutation.isPending}>Batal</Button>
-          <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending || !rejectNoteValid}>{rejectMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menolak...</> : 'Tolak Renew'}</Button>
+          <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending || !rejectNoteValid}>{rejectMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menolak...</> : 'Tolak Perpanjangan'}</Button>
         </Modal.Footer>
       </Modal>
     </div>

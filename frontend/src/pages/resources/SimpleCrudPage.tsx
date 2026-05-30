@@ -684,7 +684,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       { id: 'checkin', icon: '➕', label: 'Check-in', helper: 'Masukkan tenant ke kamar.', to: '/stays/check-in', active: false },
     ];
     if (['/wifi-sales', '/expenses', '/invoice-payments'].includes(config.path)) return [
-      { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice dan tagihan tenant.', to: '/invoices', active: false },
+      { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Tagihan dan pembayaran penghuni.', to: '/invoices', active: false },
       { id: 'review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar pending review.', to: '/payment-submissions/review', active: false },
       { id: 'wifi', icon: '📶', label: 'Voucher WiFi', helper: 'Rekap penjualan voucher WiFi.', to: '/wifi-sales', active: config.path === '/wifi-sales' },
       { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Katalog layanan add-on future: laundry, galon, cleaning, parkir.', to: '/ancillary-revenue', active: false },
@@ -733,7 +733,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       {areaMenuItems.length ? (
         <div className="admin-area-internal-menu finance-inline-menu" aria-label={`Sub-menu ${config.title}`}>
           <div className="admin-area-internal-menu-head">
-            <span>{config.path === '/tenants' ? 'Menu Stays & Tenant' : config.path === '/wifi-sales' || config.path === '/expenses' || config.path === '/invoice-payments' ? 'Menu Finance' : 'Menu Kamar & Stok'}</span>
+            <span>{config.path === '/tenants' ? 'Menu Masa Sewa & Penghuni' : config.path === '/wifi-sales' || config.path === '/expenses' || config.path === '/invoice-payments' ? 'Menu Keuangan' : 'Menu Kamar & Stok'}</span>
             <small>Menu area</small>
           </div>
           <div className="admin-area-internal-menu-scroll">

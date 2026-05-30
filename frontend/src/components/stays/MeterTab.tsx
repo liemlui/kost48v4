@@ -160,7 +160,7 @@ export default function MeterTab({
         </div>
 
         <Alert variant={hasNegativeUsage ? 'danger' : 'info'} className="small">
-          <div className="fw-semibold mb-1">Renew meter checkpoint</div>
+          <div className="fw-semibold mb-1">Cek meter perpanjangan</div>
           <div>Setiap perpanjangan wajib mencatat meter terbaru. Sistem akan menghitung selisih dari catatan sebelumnya dan memasukkan biaya listrik/air ke tagihan perpanjangan.</div>
           {sinceCheckInRows.length ? (
             <div className="mt-2">Estimasi pemakaian sejak masuk: listrik {totalUsageSinceCheckIn.electricity.toFixed(3)} kWh × {rupiah(estimatedUtilityAmount.electricityRate)} = <strong>{rupiah(estimatedUtilityAmount.electricity)}</strong>; air {totalUsageSinceCheckIn.water.toFixed(3)} m³ × {rupiah(estimatedUtilityAmount.waterRate)} = <strong>{rupiah(estimatedUtilityAmount.water)}</strong>.</div>

@@ -142,12 +142,14 @@ export default function MyInvoicesPage() {
           helper: metric.helper,
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
           onClick: metric.onClick,
+          interactionLabel: 'Filter daftar',
+          isActive: activeTab.toLowerCase() === String(metric.id),
         }))}
       />
       <TenantPriorityBoard
         title="Prioritas Tagihan"
-        subtitle="Maksimal tiga prioritas tagihan."
-        items={limitRepeatedActions(assistantItems, 2)}
+        subtitle="Satu prioritas utama. Detail aksi ada di daftar tagihan."
+        items={limitRepeatedActions(assistantItems, 1)}
       />
       <Card className="content-card border-0"><Card.Body>
         <div className="table-meta align-items-start">

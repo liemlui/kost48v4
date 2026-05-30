@@ -147,13 +147,13 @@ export default function InvoiceDetailPage() {
   const metrics: MetricChip[] = invoice ? [
     { id: 'total', label: 'Total Tagihan', value: <CurrencyDisplay amount={totalInvoice} /> as any, helper: invoice.invoiceNumber || `INV-${invoice.id}`, icon: '🧾', status: invoice.status },
     { id: 'paid', label: 'Sudah Dibayar', value: <CurrencyDisplay amount={totalPaid} /> as any, helper: `${invoice.payments?.length ?? 0} pembayaran tercatat`, icon: '💳', status: totalPaid > 0 ? 'SUCCESS' : 'INFO' },
-    { id: 'remaining', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: isOpenInvoice ? 'Harus selesai sebelum checkout final' : 'Tidak ada sisa', icon: '⚖️', status: outstanding > 0 ? 'WARNING' : 'SUCCESS' },
+    { id: 'remaining', label: 'Sisa Tagihan', value: <CurrencyDisplay amount={outstanding} /> as any, helper: isOpenInvoice ? 'Harus selesai sebelum final keluar' : 'Tidak ada sisa', icon: '⚖️', status: outstanding > 0 ? 'WARNING' : 'SUCCESS' },
     { id: 'due', label: 'Jatuh Tempo', value: formatDateSafe(invoice.dueDate), helper: isOverdue ? 'Sudah overdue' : 'Tanggal follow-up', icon: '⏰', status: isOverdue ? 'DANGER' : 'INFO' },
   ] : [];
 
   const timelineSteps: TimelineStep[] = invoice ? [
-    { id: 'draft', label: 'Draft tagihan', description: 'Rincian dibuat dan belum tenant-facing.', status: invoice.status === 'DRAFT' ? 'active' : 'done' },
-    { id: 'issued', label: 'Tagihan diterbitkan', description: 'Tenant dapat melihat dan membayar tagihan.', status: invoice.status === 'DRAFT' ? 'pending' : ['CANCELLED'].includes(invoice.status) ? 'blocked' : 'done' },
+    { id: 'draft', label: 'Draft tagihan', description: 'Rincian dibuat dan belum tampil ke penghuni.', status: invoice.status === 'DRAFT' ? 'active' : 'done' },
+    { id: 'issued', label: 'Tagihan diterbitkan', description: 'Penghuni dapat melihat dan membayar tagihan.', status: invoice.status === 'DRAFT' ? 'pending' : ['CANCELLED'].includes(invoice.status) ? 'blocked' : 'done' },
     { id: 'payment', label: 'Pembayaran berjalan', description: 'Pembayaran bisa penuh atau sebagian.', status: invoice.status === 'PARTIAL' ? 'active' : invoice.status === 'PAID' ? 'done' : invoice.status === 'CANCELLED' ? 'blocked' : 'pending' },
     { id: 'closed', label: invoice.status === 'CANCELLED' ? 'Dibatalkan' : 'Selesai', description: invoice.status === 'PAID' ? 'Tagihan lunas dan tidak memblokir checkout.' : 'Menunggu pelunasan atau pembatalan.', status: invoice.status === 'PAID' ? 'done' : invoice.status === 'CANCELLED' ? 'blocked' : 'pending' },
   ] : [];
@@ -216,7 +216,7 @@ export default function InvoiceDetailPage() {
           {isOpenInvoice ? (
             <BlockedReasonCard
               title="Tagihan ini masih bisa memblokir final checkout"
-              reason="Business rule aktif: checkout final hanya boleh dilakukan jika semua tagihan masa sewa sudah PAID atau CANCELLED. DRAFT juga dihitung sebagai tagihan terbuka."
+              reason="Business rule aktif: final keluar hanya boleh dilakukan jika semua tagihan masa sewa sudah PAID atau CANCELLED. Tagihan belum terbit juga dihitung sebagai tagihan terbuka."
               actionLabel={canTakePayment && !isDraft ? 'Catat Pembayaran' : undefined}
               actionTo={undefined}
               variant={isOverdue ? 'DANGER' : 'WARNING'}
@@ -237,7 +237,7 @@ export default function InvoiceDetailPage() {
                       <div className="page-eyebrow">Ringkasan tagihan</div>
                       <h4 className="mb-1">{invoice.invoiceNumber || `INV-${invoice.id}`}</h4>
                       <div className="text-muted small">
-                        {tenantName || `Stay #${invoice.stayId}`}
+                        {tenantName || `Masa sewa #${invoice.stayId}`}
                         {roomInfo ? ` · ${roomInfo}` : ''}
                       </div>
                     </div>

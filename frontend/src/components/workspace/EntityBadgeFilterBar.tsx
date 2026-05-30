@@ -16,12 +16,12 @@ export default function EntityBadgeFilterBar({
   onChange: (id: string) => void;
   ariaLabel?: string;
 }) {
-  const title = ariaLabel.toLowerCase().includes('filter') ? 'Filter' : ariaLabel;
+  const title = ariaLabel.toLowerCase().includes('filter') ? 'Filter tampilan' : ariaLabel;
   return (
     <section className="entity-filter-shell" aria-label={ariaLabel}>
       <div className="entity-filter-head">
         <span>{title}</span>
-        <small>{filters.length} pilihan</small>
+        <small>Hanya menyaring daftar, bukan aksi utama</small>
       </div>
       <div className="entity-badge-filter-bar">
       {filters.map((filter) => (
@@ -29,6 +29,8 @@ export default function EntityBadgeFilterBar({
           type="button"
           key={filter.id}
           className={`entity-badge-filter ${filter.tone ?? 'neutral'}${activeId === filter.id ? ' active' : ''}`}
+          aria-pressed={activeId === filter.id}
+          title={`Filter: ${filter.label}`}
           onClick={() => onChange(filter.id)}
         >
           <span>{filter.label}</span>

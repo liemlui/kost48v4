@@ -14792,3 +14792,46 @@ button.status-strip-item:hover {
     text-align: left;
   }
 }
+
+
+/* M9B action-integrity polish: distinguish filters/navigation from primary actions */
+.status-strip-interaction-label {
+  margin-top: .28rem;
+  color: #2563eb;
+  font-size: .68rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.status-strip-item.is-active {
+  border-color: rgba(37, 99, 235, .48) !important;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .14), 0 10px 24px rgba(37, 99, 235, .08) !important;
+}
+.status-strip-v2 button.status-strip-item:not(.is-active) .status-strip-interaction-label {
+  color: #64748b;
+}
+.role-workspace-tabs-label {
+  align-self: center;
+  color: #64748b;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.entity-filter-head small {
+  font-weight: 800;
+}
+.clickable-row[role="button"]:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, .25);
+  outline-offset: -3px;
+}
+@media (max-width: 520px) {
+  .role-workspace-tabs-label {
+    width: 100%;
+  }
+  .status-strip-interaction-label {
+    font-size: .66rem;
+  }
+}

@@ -42,7 +42,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
           <div className="deposit-ops-metric primary"><span>Deposit diterima</span><strong>{formatRupiah(totals?.increaseRupiah ?? 0)}</strong></div>
           <div className="deposit-ops-metric"><span>Refund / potongan</span><strong>{formatRupiah(totals?.decreaseRupiah ?? 0)}</strong></div>
           <div className="deposit-ops-metric"><span>Saldo ditahan</span><strong>{formatRupiah(totals?.ledgerHeldBalanceRupiah ?? 0)}</strong></div>
-          <div className="deposit-ops-metric"><span>Stay direview</span><strong>{reconciliation?.totalItems ?? 0}</strong></div>
+          <div className="deposit-ops-metric"><span>Masa sewa direview</span><strong>{reconciliation?.totalItems ?? 0}</strong></div>
         </div>
 
         {recentEntries.length ? (
@@ -68,7 +68,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
                   <td>{getDepositLedgerTypeLabel(entry.type)}</td>
                   <td className="fw-semibold">{formatRupiah(entry.amountRupiah)}</td>
                   <td>{formatRupiah(entry.balanceAfterRupiah)}</td>
-                  <td><Button as={Link as any} to={`/stays/${entry.stayId}?tab=finance`} size="sm" variant="outline-primary">Buka Stay</Button></td>
+                  <td><Button as={Link as any} to={`/stays/${entry.stayId}?tab=finance`} size="sm" variant="outline-primary">Buka Masa Sewa</Button></td>
                 </tr>
               ))}
             </tbody>

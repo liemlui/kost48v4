@@ -209,7 +209,7 @@ export default function ResourceTable({
 
         return (
           <div>
-            <div className="fw-semibold">Stay #{formatValue(value)}</div>
+            <div className="fw-semibold">Masa sewa #{formatValue(value)}</div>
             <div className="small">
               <StatusBadge status={status} className="me-2" />
               {countdown && countdown.status !== 'COUNTDOWN_NODATE' ? (

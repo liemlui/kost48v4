@@ -25,6 +25,16 @@ export function isPayableInvoiceStatus(status?: InvoiceStatus | string | null) {
   return normalized === 'ISSUED' || normalized === 'PARTIAL';
 }
 
+function humanizeFallback(value?: string | null, fallback = '-') {
+  const normalized = normalizeStatus(value);
+  if (!normalized) return fallback;
+  return normalized
+    .split('_')
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0)}${part.slice(1).toLowerCase()}`)
+    .join(' ');
+}
+
 export function tenantInvoiceStatusLabel(status?: InvoiceStatus | string | null, overdue = false) {
   if (overdue) return 'Terlambat';
   const normalized = normalizeStatus(status);
@@ -33,7 +43,7 @@ export function tenantInvoiceStatusLabel(status?: InvoiceStatus | string | null,
   if (normalized === 'PARTIAL') return 'Dibayar sebagian';
   if (normalized === 'PAID') return 'Lunas';
   if (normalized === 'CANCELLED') return 'Dibatalkan';
-  return status || '-';
+  return humanizeFallback(status);
 }
 
 export function tenantPricingTermLabel(term?: PricingTerm | string | null) {
@@ -44,7 +54,7 @@ export function tenantPricingTermLabel(term?: PricingTerm | string | null) {
   if (normalized === 'MONTHLY') return 'Bulanan';
   if (normalized === 'SMESTERLY') return 'Semesteran';
   if (normalized === 'YEARLY') return 'Tahunan';
-  return term || '-';
+  return humanizeFallback(term);
 }
 
 export function tenantCategoryLabel(category?: string | null) {
@@ -66,5 +76,5 @@ export function tenantCategoryLabel(category?: string | null) {
   if (normalized === 'BILLING') return 'Tagihan';
   if (normalized === 'GENERAL') return 'Bantuan umum';
   if (normalized === 'OTHER') return 'Lainnya';
-  return category || 'Bantuan umum';
+  return humanizeFallback(category, 'Bantuan umum');
 }

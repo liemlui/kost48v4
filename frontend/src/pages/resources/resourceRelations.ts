@@ -105,12 +105,12 @@ export function buildReferenceOption(sourcePath: string, item: Record<string, an
       const status = item.status ? String(item.status) : 'UNKNOWN';
       return {
         value: Number(item.id),
-        label: `Stay #${item.id} · ${tenantName}`,
+        label: `Masa sewa #${item.id} · ${tenantName}`,
         caption: `${roomCode} · ${status}`,
       };
     }
     case '/invoices': {
-      const tenantName = item.stay?.tenant?.fullName || item.tenantName || (item.stayId ? `Stay #${item.stayId}` : `Invoice #${item.id}`);
+      const tenantName = item.stay?.tenant?.fullName || item.tenantName || (item.stayId ? `Masa sewa #${item.stayId}` : `Tagihan #${item.id}`);
       const roomCode = item.stay?.room?.code || item.roomCode;
       const invoiceNumber = item.invoiceNumber || `INV-${item.id}`;
       const status = item.status ? String(item.status) : 'UNKNOWN';

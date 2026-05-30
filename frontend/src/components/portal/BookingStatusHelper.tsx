@@ -76,8 +76,8 @@ export function getPortalBookingStatus(
       badgeStatus: 'INFO',
       label: 'Pemesanan disetujui — menunggu pembayaran',
       helper: booking.latestInvoiceNumber
-        ? `Tagihan awal ${booking.latestInvoiceNumber} tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'deadline'}.`
-        : `Tagihan awal tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'deadline'}.`,
+        ? `Tagihan awal ${booking.latestInvoiceNumber} tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu'}.`
+        : `Tagihan awal tersedia. Bayar & kirim bukti sebelum ${booking.expiresAt ? formatDateTimeWib(booking.expiresAt) : 'batas waktu'}.`,
     };
   }
 
@@ -132,9 +132,9 @@ export function getAdminWhatsAppNumber(): string {
   return import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '6285648887628';
 }
 
-export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string {
+export function buildWhatsAppFollowUpUrl(booking: TenantBooking): string | null {
   const waNumber = getAdminWhatsAppNumber().replace(/\D/g, '');
-  if (!waNumber) return '#';
+  if (!waNumber) return null;
 
   const roomCode = booking.room?.code ?? `Kamar #${booking.roomId}`;
   const message = `Halo Admin KOST48, saya ingin follow up pemesanan kamar ${roomCode}. Mohon info statusnya. Terima kasih.`;

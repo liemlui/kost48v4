@@ -108,12 +108,12 @@ export default function CompleteStayModal({
     setError("");
 
     if (!actualCheckOutDate) {
-      setError("Tanggal checkout final wajib diisi.");
+      setError("Tanggal final keluar wajib diisi.");
       return;
     }
     if (!checkoutReason.trim()) {
       setError(
-        "Alasan checkout final wajib diisi agar audit operasional jelas.",
+        "Alasan final keluar wajib diisi agar audit operasional jelas.",
       );
       return;
     }
@@ -135,7 +135,7 @@ export default function CompleteStayModal({
       handleClose();
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "Gagal menjalankan checkout final.",
+        err?.response?.data?.message || "Gagal menjalankan final keluar.",
       );
     }
   };
@@ -147,7 +147,7 @@ export default function CompleteStayModal({
       </Modal.Header>
       <Modal.Body>
         <Alert variant="warning" className="small mb-3">
-          <strong>Final checkout adalah aksi sensitif.</strong> Aksi ini
+          <strong>Final keluar adalah aksi sensitif.</strong> Aksi ini
           menyelesaikan masa sewa dan melepas kamar. Deposit tetap diproses
           terpisah setelah cek kondisi kamar dan barang.
         </Alert>
@@ -167,7 +167,7 @@ export default function CompleteStayModal({
           <Alert variant="danger" className="small">
             <strong>Checkout belum bisa.</strong> Ada {openInvoices.length}{" "}
             tagihan aktif.{" "}
-            {draftInvoices.length ? `${draftInvoices.length} DRAFT. ` : ""}
+            {draftInvoices.length ? `${draftInvoices.length} belum terbit. ` : ""}
             {overdueOpenInvoices.length
               ? `${overdueOpenInvoices.length} terlambat. `
               : ""}

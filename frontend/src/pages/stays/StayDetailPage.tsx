@@ -203,9 +203,9 @@ export default function StayDetailPage() {
   if (isError || !stay) return <Alert variant="danger">Gagal mengambil detail stay.</Alert>;
 
   const assistantItems: AssistantItem[] = [
-    ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Checkout sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Tagihan aktif masih memblokir.' : 'Tagihan clear. Cek kamar lalu finalkan.', source: 'Checkout readiness', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Checkout', onAction: () => openInvoiceCount > 0 ? selectTab('finance', { scroll: true }) : setShowCompleteModal(true) }] : []),
-    ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Tenant mengajukan keluar', message: 'Approval belum melepas kamar.', source: 'Checkout request' }] : []),
-    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Tagihan aktif memblokir checkout final', message: `${openInvoiceCount} tagihan aktif. DRAFT ikut memblokir.`, source: 'Finance guard', actionLabel: 'Buka Tab Keuangan', onAction: () => selectTab('finance', { scroll: true }) }] : []),
+    ...(approvedCheckoutRequest ? [{ id: 'approved-checkout', severity: 'HIGH' as const, title: 'Keluar sudah disetujui, belum final', message: openInvoiceCount > 0 ? 'Tagihan aktif masih memblokir.' : 'Tagihan clear. Cek kamar lalu finalkan keluar.', source: 'Kesiapan keluar', actionLabel: openInvoiceCount > 0 ? 'Buka Keuangan' : 'Finalkan Keluar', onAction: () => openInvoiceCount > 0 ? selectTab('finance', { scroll: true }) : setShowCompleteModal(true) }] : []),
+    ...(pendingCheckoutRequest ? [{ id: 'pending-checkout', severity: 'MEDIUM' as const, title: 'Penghuni mengajukan keluar', message: 'Persetujuan belum melepas kamar.', source: 'Pengajuan keluar' }] : []),
+    ...(openInvoiceCount > 0 ? [{ id: 'open-invoice', severity: 'BLOCKER' as const, title: 'Tagihan aktif memblokir final keluar', message: `${openInvoiceCount} tagihan aktif. Tagihan belum terbit juga memblokir.`, source: 'Guard keuangan', actionLabel: 'Buka Tab Keuangan', onAction: () => selectTab('finance', { scroll: true }) }] : []),
     ...(!meterCount ? [{ id: 'meter-missing', severity: 'WARNING' as const, title: 'Belum ada catatan meter untuk kamar ini', message: 'Pastikan catatan meter tersedia.', source: 'Meter' }] : []),
     ...(stay.depositStatus === 'HELD' && ['COMPLETED', 'CANCELLED'].includes(stay.status) ? [{ id: 'deposit-held', severity: 'HIGH' as const, title: 'Deposit masih ditahan', message: 'Proses refund/potongan deposit.', source: 'Deposit', actionLabel: 'Proses Deposit', onAction: () => setShowDepositModal(true) }] : []),
   ];
@@ -224,7 +224,7 @@ export default function StayDetailPage() {
     { id: 'checkin', label: 'Check-in', description: formatDateSafe(stay.checkInDate), status: 'done' },
     { id: 'active', label: 'Masa sewa aktif', description: `Akhir masa sewa: ${formatDateSafe(stay.plannedCheckOutDate)}`, status: stay.status === 'ACTIVE' ? 'active' : 'done' },
     { id: 'checkout-request', label: 'Ajukan keluar', description: approvedCheckoutRequest ? 'Request disetujui.' : pendingCheckoutRequest ? 'Menunggu review.' : 'Belum ada request aktif.', status: approvedCheckoutRequest ? 'done' : pendingCheckoutRequest ? 'active' : 'pending' },
-    { id: 'final', label: 'Final checkout', description: openInvoiceCount > 0 ? 'Terblokir tagihan aktif.' : 'Bisa diproses jika cek kamar, meter akhir, dan deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
+    { id: 'final', label: 'Final keluar', description: openInvoiceCount > 0 ? 'Terblokir tagihan aktif.' : 'Bisa diproses jika cek kamar, meter akhir, dan deposit sudah siap.', status: openInvoiceCount > 0 ? 'blocked' : approvedCheckoutRequest ? 'active' : 'pending' },
   ];
 
   return (
@@ -232,7 +232,7 @@ export default function StayDetailPage() {
       <Breadcrumb className="mb-3">
         <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/dashboard' }}>Dashboard</Breadcrumb.Item>
         <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/stays' }}>Masa Sewa</Breadcrumb.Item>
-        <Breadcrumb.Item active>{stay.tenant?.fullName ?? `Stay #${stay.id}`}</Breadcrumb.Item>
+        <Breadcrumb.Item active>{stay.tenant?.fullName ?? `Masa sewa #${stay.id}`}</Breadcrumb.Item>
       </Breadcrumb>
 
       <PageHeader
@@ -246,7 +246,7 @@ export default function StayDetailPage() {
       {openInvoiceCount > 0 && approvedCheckoutRequest ? (
         <BlockedReasonCard
           title="Checkout final terblokir tagihan"
-          reason="Final checkout ditolak jika tagihan masih aktif."
+          reason="Final keluar ditolak jika tagihan masih aktif."
           actionLabel="Buka Tab Keuangan"
           actionTo={`/stays/${stay.id}?tab=finance`}
         />
@@ -382,7 +382,7 @@ export default function StayDetailPage() {
                   · Alasan: {approvedCheckoutRequest.checkoutReason || approvedCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                  Disetujui, tapi kamar belum dilepas. Final checkout tetap terpisah.
+                  Disetujui, tapi kamar belum dilepas. Final keluar tetap terpisah.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">

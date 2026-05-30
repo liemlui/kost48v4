@@ -64,7 +64,7 @@ function buildStaffUnavailableUrl(item: ActionQueueItem) {
 }
 
 export default function ActionQueueTable({
-  title = 'Action Queue',
+  title = 'Antrean Aksi',
   subtitle = 'Urutan kerja harian berdasarkan prioritas bisnis.',
   items,
   emptyTitle = 'Tidak ada antrean mendesak',
@@ -113,7 +113,7 @@ export default function ActionQueueTable({
                 <thead>
                   <tr>
                     <th>Prioritas</th>
-                    <th>Flow</th>
+                    <th>Alur</th>
                     <th>Subjek & masalah</th>
                     <th>Masuk</th>
                     <th>Deadline</th>
@@ -124,14 +124,26 @@ export default function ActionQueueTable({
                 <tbody>
                   {sortedItems.map((item) => {
                     const meta = priorityLabel[item.priority];
+                    const isActionable = Boolean(item.actionTo || item.onAction);
+                    const runPrimaryAction = () => item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined;
                     return (
                       <tr
                         key={item.id}
-                        className={item.actionTo || item.onAction ? 'clickable-row' : undefined}
-                        onClick={() => item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined}
+                        className={isActionable ? 'clickable-row' : undefined}
+                        role={isActionable ? 'button' : undefined}
+                        tabIndex={isActionable ? 0 : undefined}
+                        aria-label={isActionable ? `${item.recommendedAction}: ${item.subject}` : undefined}
+                        onKeyDown={(event) => {
+                          if (!isActionable) return;
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            runPrimaryAction();
+                          }
+                        }}
+                        onClick={isActionable ? runPrimaryAction : undefined}
                       >
                         <td data-label="Prioritas"><StatusBadge status={meta.status} customLabel={meta.label} /></td>
-                        <td data-label="Flow"><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
+                        <td data-label="Alur"><span className="fw-semibold">{item.type}</span>{item.age ? <div className="small text-muted">{item.age}</div> : null}</td>
                         <td data-label="Subjek" className="action-queue-subject-cell"><strong>{item.subject}</strong><small>{item.issue}</small></td>
                         <td data-label="Masuk" className="small action-queue-time-mini">{item.receivedAtLabel ? <strong>{item.receivedAtLabel}</strong> : <span className="text-muted">-</span>}</td>
                         <td data-label="Deadline" className="small action-queue-deadline-mini">{item.deadlineLabel ? <strong>{item.deadlineLabel}</strong> : <span className="text-muted">-</span>}</td>
@@ -142,7 +154,7 @@ export default function ActionQueueTable({
                               <div className="queue-action-stack">
                                 <Button variant="outline-primary" size="sm" onClick={(event) => {
                                   event.stopPropagation();
-                                  item.onAction ? item.onAction() : item.actionTo ? openActionTarget(item.actionTo, navigate) : undefined;
+                                  runPrimaryAction();
                                 }}>
                                   {item.recommendedAction}
                                 </Button>

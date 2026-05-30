@@ -263,7 +263,7 @@ function priorityActionFromQueue(items: ActionQueueItem[]) {
   return first;
 }
 
-function isOverdue(invoice: Invoice) {
+function isTerlambat(invoice: Invoice) {
   if (!invoice.dueDate || ['PAID', 'CANCELLED'].includes(invoice.status)) return false;
   const dueDate = new Date(invoice.dueDate);
   if (Number.isNaN(dueDate.getTime())) return false;
@@ -318,7 +318,7 @@ function CompactDisclosure({ title, subtitle, children, defaultOpen = false }: {
   );
 }
 
-function RecentOverdueTable({ overdue }: { overdue: Invoice[] }) {
+function RecentTerlambatTable({ overdue }: { overdue: Invoice[] }) {
   const navigate = useNavigate();
   return (
     <Card className="content-card border-0 h-100">
@@ -339,7 +339,7 @@ function RecentOverdueTable({ overdue }: { overdue: Invoice[] }) {
               {overdue.slice(0, 6).map((invoice) => (
                 <tr key={invoice.id} className="clickable-row" onClick={() => navigate(`/invoices/${invoice.id}`)}>
                   <td><div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div><div className="small text-muted">Rp {formatNumber(getInvoiceTotalAmount(invoice))}</div></td>
-                  <td>{invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`}</td>
+                  <td>{invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`}</td>
                   <td>{formatDateSafe(invoice.dueDate)}</td>
                   <td><StatusBadge status={invoice.status} domain="invoice" /></td>
                 </tr>
@@ -432,7 +432,7 @@ function FinanceReadinessCard() {
         <div className="panel-title mb-1">Balance Sheet Readiness</div>
         <div className="panel-subtitle mb-3">Formal ratio dikunci sampai data akuntansi dasar reliable.</div>
         <div className="readiness-mini-list">
-          <div><span>✅</span><strong>Accounts receivable</strong><small>Open invoice bisa menjadi kandidat AR.</small></div>
+          <div><span>✅</span><strong>Piutang tagihan</strong><small>Tagihan aktif bisa menjadi kandidat piutang.</small></div>
           <div><span>✅</span><strong>Deposit liability</strong><small>Deposit held harus dibaca sebagai kewajiban.</small></div>
           <div><span>🔒</span><strong>Kas / bank aktual</strong><small>Belum ada account model formal.</small></div>
           <div><span>🔒</span><strong>Equity & capital employed</strong><small>Belum ada balance sheet-grade source.</small></div>
@@ -446,9 +446,9 @@ function FinanceReadinessCard() {
 function OwnerContinuityStrip({ pendingPaymentReviewCount, pendingRenewCount, approvedCheckoutRequestCount, overdueCount, openInvoiceCount, onNavigate }: { pendingPaymentReviewCount: number; pendingRenewCount: number; approvedCheckoutRequestCount: number; overdueCount: number; openInvoiceCount: number; onNavigate: (to: string) => void }) {
   const cards = [
     { title: 'Cashflow tertahan', value: pendingPaymentReviewCount, helper: 'Bukti bayar yang perlu keputusan owner/admin.', action: 'Review pembayaran', to: '/payment-submissions/review', tone: pendingPaymentReviewCount ? 'warning' : 'success' },
-    { title: 'Renew meter checkpoint', value: pendingRenewCount, helper: 'Perpanjangan wajib catat meter sebelum invoice renew.', action: 'Review renew', to: '/renew-requests', tone: pendingRenewCount ? 'warning' : 'success' },
-    { title: 'Checkout siap final', value: approvedCheckoutRequestCount, helper: 'Approved request yang butuh final checkout jika invoice clear.', action: 'Cek checkout', to: '/stays?status=BOOKINGS', tone: approvedCheckoutRequestCount ? 'info' : 'success' },
-    { title: 'Open invoice', value: openInvoiceCount, helper: overdueCount ? `${overdueCount} overdue perlu follow-up.` : 'Tagihan open bisa menahan checkout/renew.', action: 'Lihat tagihan', to: '/invoices', tone: overdueCount ? 'danger' : openInvoiceCount ? 'warning' : 'success' },
+    { title: 'Cek meter perpanjangan', value: pendingRenewCount, helper: 'Perpanjangan wajib catat meter sebelum tagihan perpanjangan.', action: 'Review Perpanjangan', to: '/renew-requests', tone: pendingRenewCount ? 'warning' : 'success' },
+    { title: 'Keluar siap final', value: approvedCheckoutRequestCount, helper: 'Pengajuan keluar yang sudah disetujui tetap perlu proses final setelah semua tagihan selesai.', action: 'Cek keluar', to: '/stays?status=BOOKINGS', tone: approvedCheckoutRequestCount ? 'info' : 'success' },
+    { title: 'Tagihan aktif', value: openInvoiceCount, helper: overdueCount ? `${overdueCount} terlambat perlu follow-up.` : 'Tagihan aktif bisa menahan perpanjangan/keluar.', action: 'Lihat tagihan', to: '/invoices', tone: overdueCount ? 'danger' : openInvoiceCount ? 'warning' : 'success' },
   ];
   return (
     <Row className="g-3 mb-4 command-continuity-grid">
@@ -679,7 +679,7 @@ function AdminStaysUnifiedList({
         statusLabel: needsReview ? 'Booking baru' : 'Menunggu bayar',
         tone: meta.isExpired ? 'danger' : needsReview ? 'warning' : 'info',
         deadline: meta.hasDate ? `${meta.clockLabel} · ${meta.relativeLabel}` : undefined,
-        helper: needsReview ? 'Perlu review admin sebelum invoice awal.' : 'Tenant wajib bayar dan kirim bukti dalam satu langkah.',
+        helper: needsReview ? 'Perlu review admin sebelum tagihan awal.' : 'Penghuni wajib bayar dan kirim bukti dalam satu langkah.',
         to: `/stays/${stay.id}`,
         actionLabel: needsReview ? 'Review' : 'Detail',
       };
@@ -698,7 +698,7 @@ function AdminStaysUnifiedList({
         statusLabel: followUp ? 'Akhir masa dekat' : 'Aktif',
         tone: followUp ? 'warning' : 'success',
         deadline: stay.plannedCheckOutDate ? formatDateTimeWib(stay.plannedCheckOutDate) : undefined,
-        helper: followUp ? 'Follow-up renew/keluar sebelum akhir masa sewa.' : 'Tenant sedang menempati kamar.',
+        helper: followUp ? 'Follow-up perpanjangan/keluar sebelum akhir masa sewa.' : 'Penghuni sedang menempati kamar.',
         to: `/stays/${stay.id}`,
         actionLabel: 'Detail',
       };
@@ -706,7 +706,7 @@ function AdminStaysUnifiedList({
 
   const renewRows: AdminStayFlowRow[] = renewRequests.map((request) => {
     const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview);
-    const meta = getDeadlineMeta(deadline, 'Batas review renew');
+    const meta = getDeadlineMeta(deadline, 'Batas review perpanjangan');
     return {
       id: `renew-${request.id}`,
       group: 'RENEW',
@@ -715,7 +715,7 @@ function AdminStaysUnifiedList({
       statusLabel: 'Perpanjangan',
       tone: meta.isExpired ? 'danger' : 'warning',
       deadline: meta.hasDate ? `${meta.clockLabel} · ${meta.relativeLabel}` : undefined,
-      helper: 'Catat meter sebelum approve renew dan invoice utility.',
+      helper: 'Catat meter sebelum setujui perpanjangan dan buat tagihan utilitas.',
       to: '/renew-requests',
       actionLabel: 'Review',
     };
@@ -725,16 +725,16 @@ function AdminStaysUnifiedList({
     const approved = request.status === 'APPROVED';
     const baseTime = approved ? request.reviewedAt ?? request.updatedAt ?? request.createdAt : request.createdAt;
     const deadline = addHoursToDate(baseTime, approved ? ADMIN_SLA_HOURS.checkoutFinal : ADMIN_SLA_HOURS.checkoutReview);
-    const meta = getDeadlineMeta(deadline, approved ? 'Batas final checkout' : 'Batas review checkout');
+    const meta = getDeadlineMeta(deadline, approved ? 'Batas final keluar' : 'Batas review keluar');
     return {
       id: `checkout-${request.id}`,
       group: 'CHECKOUT',
-      tenant: request.stay?.tenant?.fullName || `Stay #${request.stayId}`,
+      tenant: request.stay?.tenant?.fullName || `Masa sewa #${request.stayId}`,
       room: request.stay?.room?.code || '-',
-      statusLabel: approved ? 'Checkout approved' : 'Review keluar',
+      statusLabel: approved ? 'Keluar disetujui' : 'Review keluar',
       tone: meta.isExpired ? 'danger' : approved ? 'info' : 'warning',
       deadline: meta.hasDate ? `${meta.clockLabel} · ${meta.relativeLabel}` : undefined,
-      helper: approved ? 'Final checkout tetap lewat detail masa sewa.' : 'Setujui/tolak rencana keluar tenant.',
+      helper: approved ? 'Final keluar tetap lewat detail masa sewa.' : 'Setujui/tolak rencana keluar penghuni.',
       to: `/stays/${request.stayId}`,
       actionLabel: approved ? 'Finalkan' : 'Review',
     };
@@ -771,7 +771,7 @@ function AdminStaysUnifiedList({
             { id: 'BOOKING', label: 'Booking Baru', count: countBy('BOOKING'), tone: 'warning' },
             { id: 'ACTIVE', label: 'Aktif', count: countBy('ACTIVE'), tone: 'success' },
             { id: 'RENEW', label: 'Perpanjangan', count: countBy('RENEW'), tone: 'warning' },
-            { id: 'CHECKOUT', label: 'Checkout', count: countBy('CHECKOUT'), tone: 'info' },
+            { id: 'CHECKOUT', label: 'Keluar', count: countBy('CHECKOUT'), tone: 'info' },
             { id: 'FOLLOWUP', label: 'Perlu Follow-up', count: countBy('FOLLOWUP'), tone: 'danger' },
           ]}
         />
@@ -850,10 +850,10 @@ function AdminFinanceWorkspace({
   const invoiceRows: AdminFinanceRow[] = invoices
     .filter((invoice) => invoice.status !== 'CANCELLED')
     .map((invoice) => {
-      const overdue = isOverdue(invoice);
+      const overdue = isTerlambat(invoice);
       const open = isOpenInvoice(invoice);
       const dueMeta = getDeadlineMeta(invoice.dueDate ?? getInvoiceTime(invoice, ADMIN_SLA_HOURS.tenantPayment), 'Jatuh tempo');
-      const tenantName = invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`;
+      const tenantName = invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`;
       const roomCode = invoice.stay?.room?.code ? ` · ${invoice.stay.room.code}` : '';
       const group: AdminFinanceRow['group'] = overdue
         ? 'OVERDUE'
@@ -867,11 +867,11 @@ function AdminFinanceWorkspace({
         group,
         subject: `${tenantName}${roomCode}`,
         flow: invoice.invoiceNumber || `Tagihan #${invoice.id}`,
-        statusLabel: overdue ? 'Overdue' : invoice.status === 'DRAFT' ? 'Draft' : invoice.status === 'PAID' ? 'Lunas' : 'Tagihan aktif',
+        statusLabel: overdue ? 'Terlambat' : invoice.status === 'DRAFT' ? 'Belum Terbit' : invoice.status === 'PAID' ? 'Lunas' : 'Tagihan aktif',
         tone: overdue ? 'danger' : invoice.status === 'DRAFT' ? 'warning' : invoice.status === 'PAID' ? 'success' : open ? 'info' : 'success',
         amount: Number(getInvoiceTotalAmount(invoice) ?? invoice.totalAmountRupiah ?? 0),
         deadline: dueMeta.hasDate ? `${dueMeta.clockLabel} · ${dueMeta.relativeLabel}` : undefined,
-        helper: overdue ? 'Perlu follow-up cepat.' : invoice.status === 'DRAFT' ? 'Belum tenant-facing.' : invoice.status === 'PAID' ? 'Sudah selesai.' : 'Pantau pembayaran dan bukti bayar.',
+        helper: overdue ? 'Perlu follow-up cepat.' : invoice.status === 'DRAFT' ? 'Belum tampil ke penghuni.' : invoice.status === 'PAID' ? 'Sudah selesai.' : 'Pantau pembayaran dan bukti bayar.',
         to: `/invoices/${invoice.id}`,
       };
     });
@@ -904,8 +904,8 @@ function AdminFinanceWorkspace({
             { id: 'ALL', label: 'Semua Finance', count: countBy('ALL'), tone: 'info' },
             { id: 'PAYMENT_REVIEW', label: 'Bukti Bayar', count: countBy('PAYMENT_REVIEW'), tone: 'warning' },
             { id: 'OPEN', label: 'Tagihan Aktif', count: countBy('OPEN'), tone: 'info' },
-            { id: 'OVERDUE', label: 'Overdue', count: countBy('OVERDUE'), tone: 'danger' },
-            { id: 'DRAFT', label: 'Draft', count: countBy('DRAFT'), tone: 'warning' },
+            { id: 'OVERDUE', label: 'Terlambat', count: countBy('OVERDUE'), tone: 'danger' },
+            { id: 'DRAFT', label: 'Belum Terbit', count: countBy('DRAFT'), tone: 'warning' },
             { id: 'PAID', label: 'Lunas', count: countBy('PAID'), tone: 'success' },
           ]}
         />
@@ -913,7 +913,7 @@ function AdminFinanceWorkspace({
           <EmptyState icon="✅" title="Finance aman pada filter ini" description="Tidak ada tagihan atau bukti pembayaran yang perlu ditampilkan di badge ini." />
         ) : (
           <Table responsive hover className="compact-data-table mb-0">
-            <thead><tr><th>Tenant / Stay</th><th>Flow</th><th>Status</th><th>Nominal</th><th>Deadline</th><th>Catatan</th><th>Detail</th></tr></thead>
+            <thead><tr><th>Penghuni / Masa Sewa</th><th>Alur</th><th>Status</th><th>Nominal</th><th>Batas Waktu</th><th>Catatan</th><th>Detail</th></tr></thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="clickable-row" onClick={() => onNavigate(row.to)}>
@@ -1165,7 +1165,7 @@ function AdminDiagnosisStrip({ items, topQueueItem }: { items: AssistantItem[]; 
   const first = items[0];
   const title = topQueueItem ? 'Diagnosis antrean utama' : (first?.title ?? 'Operasional aman');
   const message = topQueueItem
-    ? `Prioritas sekarang: ${topQueueItem.type} — ${topQueueItem.subject}. ${topQueueItem.timeStatusLabel ?? 'Cek detail waktu di Action Queue.'}`
+    ? `Prioritas sekarang: ${topQueueItem.type} — ${topQueueItem.subject}. ${topQueueItem.timeStatusLabel ?? 'Cek detail waktu di Antrean Aksi.'}`
     : (first?.message ?? 'Tidak ada flow utama yang macet dari data yang dimuat.');
   return (
     <Card className="content-card border-0 admin-diagnosis-strip">
@@ -1174,7 +1174,7 @@ function AdminDiagnosisStrip({ items, topQueueItem }: { items: AssistantItem[]; 
         <div className="admin-diagnosis-main">
           <div>
             <strong>{title}</strong>
-            <span>{message} Aksi utama tetap hanya di Action Queue agar tidak dobel.</span>
+            <span>{message} Aksi utama tetap hanya di Antrean Aksi agar tidak dobel.</span>
           </div>
         </div>
       </Card.Body>
@@ -1206,7 +1206,7 @@ type AdminQueueArea = 'today' | 'stays' | 'finance' | 'tickets' | 'staff' | 'roo
 
 const ADMIN_QUEUE_AREAS: Array<{ id: AdminQueueArea; label: string; helper: string }> = [
   { id: 'today', label: 'Hari Ini', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
-  { id: 'stays', label: 'Stays', helper: 'Booking, tenant aktif, renew, checkout, dan lifecycle masa sewa.' },
+  { id: 'stays', label: 'Masa Sewa', helper: 'Pemesanan, penghuni aktif, perpanjangan, keluar, dan lifecycle masa sewa.' },
   { id: 'finance', label: 'Finance', helper: 'Tagihan, bukti pembayaran, overdue, manual payment, dan pengeluaran.' },
   { id: 'tickets', label: 'Tiket', helper: 'Tiket tenant, kamar rusak, follow-up, dan target penanganan.' },
   { id: 'staff', label: 'Staff', helper: 'Checklist, ketersediaan staff, laporan lapangan, dan kinerja.' },
@@ -1243,14 +1243,14 @@ function AdminSlaMiniNote({ status }: { status?: AutoOpsStatusLike | null }) {
 
 function makeAdminFinancePoints(invoices: Invoice[], pendingPaymentReviewCount: number): SmartChartPoint[] {
   const open = invoices.filter(isOpenInvoice).length;
-  const overdue = invoices.filter(isOverdue).length;
+  const overdue = invoices.filter(isTerlambat).length;
   const draft = invoices.filter((invoice) => invoice.status === 'DRAFT').length;
   const paid = invoices.filter((invoice) => invoice.status === 'PAID').length;
   return [
     { label: 'Open', value: open, detail: 'Tagihan belum lunas/cancel', to: '/invoices' },
     { label: 'Bukti review', value: pendingPaymentReviewCount, detail: 'Perlu keputusan admin', to: '/payment-submissions/review' },
-    { label: 'Overdue', value: overdue, detail: 'Tagihan terlambat', to: '/invoices' },
-    { label: 'Draft', value: draft, detail: 'Belum diterbitkan', to: '/invoices' },
+    { label: 'Terlambat', value: overdue, detail: 'Tagihan terlambat', to: '/invoices' },
+    { label: 'Belum Terbit', value: draft, detail: 'Belum diterbitkan', to: '/invoices' },
     { label: 'Paid', value: paid, detail: 'Sudah lunas', to: '/invoices' },
   ];
 }
@@ -1301,13 +1301,13 @@ function AdminTodayStatusStrip({ rooms, inventoryItems, invoices, tickets, pendi
   const waitingAdminTickets = tickets.filter((ticket) => ticket.status === 'DONE').length;
   const lowStock = inventoryItems.filter(isLowStockItem).length;
   const openInvoices = invoices.filter(isOpenInvoice).length;
-  const overdueInvoices = invoices.filter(isOverdue).length;
+  const overdueInvoices = invoices.filter(isTerlambat).length;
   const occupancyPercent = makePercent(occupied, rooms.length);
   const financeRisk = overdueInvoices + pendingPaymentReviewCount;
   const stayWork = pendingApprovalCount + pendingRenewCount + checkoutCount;
   const strips: Array<{ label: string; value: string; helper: string; detail: string; tone: string; percent?: number }> = [
     { label: 'Hunian', value: `${occupied}/${rooms.length || 0}`, helper: `${available} kamar kosong`, detail: `${occupancyPercent}% terisi`, percent: occupancyPercent, tone: occupancyPercent >= 80 ? 'success' : 'info' },
-    { label: 'Stays', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'lifecycle aman', detail: `${pendingApprovalCount} booking · ${pendingRenewCount} renew · ${checkoutCount} checkout`, tone: stayWork ? 'warning' : 'success' },
+    { label: 'Masa sewa', value: String(stayWork), helper: stayWork ? 'butuh keputusan' : 'alur aman', detail: `${pendingApprovalCount} booking · ${pendingRenewCount} perpanjangan · ${checkoutCount} keluar`, tone: stayWork ? 'warning' : 'success' },
     { label: 'Finance', value: String(openInvoices), helper: financeRisk ? `${financeRisk} risiko bayar` : 'tidak ada risiko urgent', detail: `${overdueInvoices} overdue · ${pendingPaymentReviewCount} bukti review`, tone: financeRisk ? 'danger' : 'success' },
     { label: 'Staff & Tiket', value: String(activeTickets), helper: activeTickets ? 'tiket aktif/perlu cek' : 'staff & tiket aman', detail: `${waitingAdminTickets} menunggu cek admin`, tone: waitingAdminTickets ? 'warning' : activeTickets ? 'info' : 'success' },
     { label: 'Kamar & Stok', value: String(lowStock), helper: lowStock ? 'stok menipis' : 'stok aman', detail: `${inventoryItems.length} item dipantau`, tone: lowStock ? 'warning' : 'success' },
@@ -1357,7 +1357,7 @@ function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueI
             <div className="admin-section-label">M5B Admin Operations Command Queue</div>
             <h2>Kerjakan yang mengunci flow dulu.</h2>
             <p>
-              Dashboard ini menggabungkan booking, pembayaran, renew, checkout, tagihan, tiket, dan stok menjadi antrean aksi harian.
+              Dashboard ini menggabungkan pemesanan, pembayaran, perpanjangan, keluar, tagihan, tiket, dan stok menjadi antrean aksi harian.
               Admin tidak perlu menebak menu mana yang harus dibuka dulu.
             </p>
           </div>
@@ -1377,7 +1377,7 @@ function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueI
               subtitle="Ringkasan pekerjaan yang paling berdampak ke kamar, uang masuk, dan tenant. Tidak ada aksi sensitif yang dijalankan otomatis."
               items={assistantItems}
               emptyTitle="Operasional hari ini aman"
-              emptyMessage="Tidak ada bukti bayar pending, checkout macet, renew pending, tagihan overdue, atau tiket penting dari data yang dimuat."
+              emptyMessage="Tidak ada bukti bayar pending, checkout macet, perpanjangan pending, tagihan overdue, atau tiket penting dari data yang dimuat."
               maxItems={4}
               collapsible={false}
             />
@@ -1386,8 +1386,8 @@ function AdminOperationsCommandQueue({ lanes, assistantItems, metrics, topQueueI
             <AdminHealthChips metrics={metrics} />
             <div className="admin-ops-guardrails mt-3">
               <div><strong>Payment</strong><span>Admin hanya verifikasi/reject bukti; AutoOps tidak approve pembayaran.</span></div>
-              <div><strong>Renew</strong><span>Perpanjangan wajib melewati meter checkpoint dan invoice renew.</span></div>
-              <div><strong>Checkout</strong><span>Final checkout tetap manual dan harus bebas tagihan open.</span></div>
+              <div><strong>Perpanjangan</strong><span>Wajib melewati cek meter dan tagihan perpanjangan.</span></div>
+              <div><strong>Keluar</strong><span>Final keluar tetap manual dan harus bebas tagihan aktif.</span></div>
               <div><strong>Deposit</strong><span>Refund/deduction/forfeit tetap keputusan admin/owner, bukan otomatis.</span></div>
             </div>
           </div>
@@ -1411,12 +1411,12 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
   const stayPoints: SmartChartPoint[] = [
     { label: 'Booking review', value: pendingApprovalCount, detail: 'Menunggu keputusan admin', to: '/stays?status=BOOKINGS' },
     { label: 'Menunggu bayar', value: waitingInitialPaymentCount, detail: 'Tenant punya deadline bayar', to: '/stays?status=BOOKINGS' },
-    { label: 'Renew meter', value: pendingRenewCount, detail: 'Butuh meter checkpoint', to: '/renew-requests' },
-    { label: 'Checkout', value: checkoutCount, detail: 'Review/final checkout', to: '/stays?status=BOOKINGS' },
+    { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests' },
+    { label: 'Keluar', value: checkoutCount, detail: 'Review/final keluar', to: '/stays?status=BOOKINGS' },
   ];
   if (activeArea === 'today') return null;
   const panels: Array<{ id: AdminQueueArea | 'stays-overview'; area: AdminQueueArea[]; node: ReactNode }> = [
-    { id: 'stays-overview', area: ['stays'], node: <SmartChartPanel title="Stays & Tenant" subtitle="Booking, bayar awal, renew, dan checkout dalam satu lifecycle." points={stayPoints} defaultMode="bar" ctaLabel="Buka stay" ctaTo="/stays" totalLabel="Flow" /> },
+    { id: 'stays-overview', area: ['stays'], node: <SmartChartPanel title="Masa Sewa & Penghuni" subtitle="Booking, bayar awal, perpanjangan, dan keluar dalam satu alur." points={stayPoints} defaultMode="bar" ctaLabel="Buka masa sewa" ctaTo="/stays" totalLabel="Alur" /> },
     { id: 'finance', area: ['finance'], node: <SmartChartPanel title="Finance Ops" subtitle="Tagihan, bukti pembayaran, draft, dan overdue tetap bisa dibuka dari sini." points={makeAdminFinancePoints(invoices, pendingPaymentReviewCount)} defaultMode="bar" ctaLabel="Semua tagihan" ctaTo="/invoices" totalLabel="Finance" /> },
     { id: 'tickets', area: ['tickets'], node: <SmartChartPanel title="Tiket Operasional" subtitle="Tiket baru, pekerjaan aktif, dan konfirmasi final admin." points={makeAdminTicketPoints(tickets)} defaultMode="bar" ctaLabel="Buka tiket" ctaTo="/tickets" totalLabel="Tiket" /> },
     { id: 'rooms', area: ['rooms'], node: <SmartChartPanel title="Kamar & Inventaris" subtitle="Admin melihat kesiapan kamar dan barang; harga/tambah kamar tetap owner." points={makeRoomPoints(rooms)} defaultMode="bar" ctaLabel="Status kamar" ctaTo="/rooms" totalLabel="Kamar" /> },
@@ -1482,7 +1482,7 @@ function OwnerFinancialHealthCockpit({
   const month = getCurrentMonthWindow();
   const paidInThisMonthRupiah = invoices.reduce((sum, invoice) => sum + getInvoicePaidThisMonthAmount(invoice, month.start, month.end), 0);
   const openInvoiceRupiah = invoices.filter(isOpenInvoice).reduce((sum, invoice) => sum + getInvoiceOutstandingAmount(invoice), 0);
-  const overdueInvoiceRupiah = invoices.filter(isOverdue).reduce((sum, invoice) => sum + getInvoiceOutstandingAmount(invoice), 0);
+  const overdueInvoiceRupiah = invoices.filter(isTerlambat).reduce((sum, invoice) => sum + getInvoiceOutstandingAmount(invoice), 0);
   const expenseThisMonthRupiah = expenses
     .filter((expense) => isDateInsideWindow(getExpenseDate(expense), month.start, month.end))
     .reduce<number>((sum, expense) => sum + getExpenseAmount(expense), 0);
@@ -1493,7 +1493,7 @@ function OwnerFinancialHealthCockpit({
   const netOperatingCashRupiah = paidInThisMonthRupiah - expenseThisMonthRupiah;
   const mismatchCount = Number(depositReconciliation?.mismatchCount ?? 0);
   const historicalLedgerEmptyCount = (depositReconciliation?.items ?? []).filter((item) => Number(item.depositAmountRupiah ?? 0) > 0 && Number(item.ledgerEntryCount ?? 0) === 0).length;
-  const overdueInvoices = invoices.filter(isOverdue).slice(0, 4);
+  const overdueInvoices = invoices.filter(isTerlambat).slice(0, 4);
   const draftInvoices = invoices.filter((invoice) => invoice.status === 'DRAFT').slice(0, 3);
 
   const metrics: MetricChip[] = [
@@ -1510,7 +1510,7 @@ function OwnerFinancialHealthCockpit({
       id: 'open-receivable',
       label: 'Tagihan terbuka',
       value: formatCurrencyFull(openInvoiceRupiah),
-      helper: `${invoices.filter(isOpenInvoice).length} tagihan belum PAID/CANCELLED`,
+      helper: `${invoices.filter(isOpenInvoice).length} tagihan belum lunas/dibatalkan`,
       status: openInvoiceRupiah > 0 ? 'WARNING' : 'SUCCESS',
       icon: '🧾',
       to: '/invoices',
@@ -1575,7 +1575,7 @@ function OwnerFinancialHealthCockpit({
       id: `owner-fin-overdue-${invoice.id}`,
       priority: 'HIGH' as const,
       type: 'Tagihan overdue',
-      subject: invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`,
+      subject: invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`,
       issue: `${invoice.invoiceNumber ?? `Tagihan #${invoice.id}`} masih terbuka sebesar ${formatCurrencyFull(getInvoiceOutstandingAmount(invoice))}.`,
       deadlineLabel: invoice.dueDate ? formatDateSafe(invoice.dueDate) : undefined,
       timeStatusLabel: 'Lewat jatuh tempo',
@@ -1587,10 +1587,10 @@ function OwnerFinancialHealthCockpit({
     ...draftInvoices.map((invoice) => ({
       id: `owner-fin-draft-${invoice.id}`,
       priority: 'MEDIUM' as const,
-      type: 'Draft invoice',
-      subject: invoice.stay?.tenant?.fullName || `Stay #${invoice.stayId}`,
+      type: 'Belum Terbit invoice',
+      subject: invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`,
       issue: `${invoice.invoiceNumber ?? `Tagihan #${invoice.id}`} masih draft. Pastikan memang belum perlu diterbitkan ke tenant.`,
-      recommendedAction: 'Cek Draft',
+      recommendedAction: 'Cek Belum Terbit',
       actionTo: `/invoices/${invoice.id}`,
       dedupKey: `draft-invoice-${invoice.id}`,
     })),
@@ -1607,9 +1607,9 @@ function OwnerFinancialHealthCockpit({
     approvedCheckoutRequestCount > 0 && depositHeldRupiah > 0 ? {
       id: 'owner-fin-checkout-deposit-followup',
       priority: 'WARNING' as const,
-      type: 'Checkout + deposit',
-      subject: `${approvedCheckoutRequestCount} checkout approved`,
-      issue: 'Ada checkout approved dan deposit masih ditahan. Pastikan final checkout dan settlement deposit tidak tertunda.',
+      type: 'Keluar + deposit',
+      subject: `${approvedCheckoutRequestCount} pengajuan keluar disetujui`,
+      issue: 'Ada pengajuan keluar disetujui dan deposit masih ditahan. Pastikan final checkout dan settlement deposit tidak tertunda.',
       recommendedAction: 'Cek Checkout',
       actionTo: '/stays?status=BOOKINGS',
       dedupKey: 'checkout-deposit-followup',
@@ -1618,8 +1618,8 @@ function OwnerFinancialHealthCockpit({
       id: 'owner-fin-renew-meter',
       priority: 'WARNING' as const,
       type: 'Perpanjangan',
-      subject: `${pendingRenewCount} renew pending`,
-      issue: 'Renew harus melewati meter checkpoint dan invoice perpanjangan sebelum tenant lanjut masa sewa.',
+      subject: `${pendingRenewCount} perpanjangan pending`,
+      issue: 'Perpanjangan harus melewati cek meter dan tagihan perpanjangan sebelum penghuni lanjut masa sewa.',
       recommendedAction: 'Review Renew',
       actionTo: '/renew-requests',
       dedupKey: 'renew-pending-owner-finance',
@@ -1657,7 +1657,7 @@ function OwnerFinancialHealthCockpit({
       label: 'Cash decision',
       ready: pendingReviewRupiah === 0 && overdueInvoiceRupiah === 0,
       value: pendingReviewRupiah > 0 ? 'Review bayar' : overdueInvoiceRupiah > 0 ? 'Tagih dulu' : 'Aman',
-      note: pendingReviewRupiah > 0 ? 'Bukti bayar perlu diputuskan sebelum dianggap cash selesai.' : overdueInvoiceRupiah > 0 ? 'Open/overdue invoice harus jadi follow-up owner/admin.' : 'Tidak ada blocker cash besar dari data yang dimuat.',
+      note: pendingReviewRupiah > 0 ? 'Bukti bayar perlu diputuskan sebelum dianggap cash selesai.' : overdueInvoiceRupiah > 0 ? 'Tagihan aktif/terlambat harus jadi follow-up owner/admin.' : 'Tidak ada blocker cash besar dari data yang dimuat.',
       to: pendingReviewRupiah > 0 ? '/payment-submissions/review' : '/invoices',
     },
   ];
@@ -1715,11 +1715,11 @@ function OwnerFinancialHealthCockpit({
         <Row className="g-4">
           <Col xl={8}>
             <ActionQueueTable
-              title="Finance Action Queue"
+              title="Finance Antrean Aksi"
               subtitle="Urutan follow-up finance yang langsung berdampak ke kamar, tenant, dan cashflow."
               items={queueItems}
               emptyTitle="Tidak ada follow-up finance besar"
-              emptyDescription="Bukti bayar, overdue, draft, renew, checkout, dan rekonsiliasi deposit sedang aman dari data yang dimuat."
+              emptyDescription="Bukti bayar, tagihan terlambat, draft, perpanjangan, keluar, dan rekonsiliasi deposit sedang aman dari data yang dimuat."
               maxItems={8}
             />
           </Col>
@@ -1736,7 +1736,7 @@ function OwnerFinancialHealthCockpit({
                     <div className="kpi-item"><span>Mismatch</span><strong>{mismatchCount}</strong></div>
                   </div>
                   {depositLoading ? <p className="small text-muted mt-3 mb-0">Memuat ringkasan deposit...</p> : null}
-                  {depositError ? <Alert variant="warning" className="py-2 small mt-3 mb-0">Deposit ledger belum bisa dimuat. Cockpit tetap memakai invoice/expense.</Alert> : null}
+                  {depositError ? <Alert variant="warning" className="py-2 small mt-3 mb-0">Ledger deposit belum bisa dimuat. Cockpit tetap memakai tagihan/pengeluaran.</Alert> : null}
                   {!depositError && historicalLedgerEmptyCount > 0 ? (
                     <Alert variant="light" className="py-2 small mt-3 mb-0">{historicalLedgerEmptyCount} stay punya data deposit lama tanpa event ledger. Ini normal untuk data sebelum M4A.</Alert>
                   ) : null}
@@ -1797,7 +1797,7 @@ function OwnerDashboard() {
   const approvedCheckoutRequestCount = checkoutRequestsApprovedQuery.data?.items?.length ?? 0;
   const paymentReviewItems = (paymentReviewQuery.data?.items ?? []).filter((submission: PaymentSubmission) => submission.status === 'PENDING_REVIEW');
   const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, paymentReviewQuery.data?.meta?.totalItems);
-  const overdue = invoices.filter(isOverdue);
+  const overdue = invoices.filter(isTerlambat);
   const cashflowForecast = useCashflowForecast(invoices);
   const businessHealth = useBusinessHealthScore({ invoices, rooms, pendingPaymentReviewCount, pendingRenewCount, pendingCheckoutRequestCount, approvedCheckoutRequestCount, totalExpenseRupiah: totalExpense });
   const backendBusinessHealth = backendBusinessHealthQuery.data;
@@ -1818,13 +1818,13 @@ function OwnerDashboard() {
       <PageHeader
         eyebrow="Owner Command Center"
         title="Business Health Cockpit"
-        description="Owner melihat kesehatan bisnis sebagai rangkaian flow: cashflow tertahan, renew meter checkpoint, checkout, open invoice, dan readiness finance."
+        description="Owner melihat kesehatan bisnis sebagai rangkaian flow: cashflow tertahan, cek meter perpanjangan, keluar, tagihan aktif, dan readiness finance."
         secondaryAction={<><Button variant="outline-secondary" onClick={refreshDashboard}>Refresh</Button><Button variant="outline-primary" onClick={() => navigate('/reports?tab=command')}>Buka Reports</Button></>}
       />
       <AutoOpsUrgencyCard status={autoOpsQuery.data} role="OWNER" />
       <AutoOpsControlPanel status={autoOpsQuery.data} role="OWNER" onCompleted={refreshDashboard} />
       <OwnerContinuityStrip pendingPaymentReviewCount={pendingPaymentReviewCount} pendingRenewCount={pendingRenewCount} approvedCheckoutRequestCount={approvedCheckoutRequestCount} overdueCount={overdue.length} openInvoiceCount={cashflowForecast.openInvoiceCount} onNavigate={navigate} />
-      {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan invoice dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint summary backend.</Alert> : null}
+      {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan tagihan dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint ringkasan backend.</Alert> : null}
       <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di queue." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
       <CompactMetrics metrics={businessHealth.metrics} />
       <OwnerFinancialHealthCockpit
@@ -1856,7 +1856,7 @@ function OwnerDashboard() {
       <Tabs activeKey={activeTab} onSelect={(key) => setActiveTab(key ?? 'priorities')} className="command-tabs mb-3">
         <Tab eventKey="priorities" title="Prioritas">
           <Row className="g-4">
-            <Col xl={8}><ActionQueueTable title="Owner Priority Queue" subtitle="Hanya pekerjaan konkret; tidak mengulang semua isi assistant." items={businessHealth.queueItems} maxItems={8} /></Col>
+            <Col xl={8}><ActionQueueTable title="Prioritas Owner" subtitle="Hanya pekerjaan konkret; tidak mengulang semua isi assistant." items={businessHealth.queueItems} maxItems={8} /></Col>
             <Col xl={4}>
               <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Business health score</div><div className="business-health-score"><strong>{Math.round(backendBusinessHealth?.score ?? businessHealth.score)}</strong><span>{backendBusinessHealth?.grade ?? businessHealth.grade}</span></div><div className="panel-subtitle mt-2">{backendBusinessHealth?.headline ?? businessHealth.headline}</div><div className="mt-3 d-flex gap-2 flex-wrap">{businessHealth.drivers.map((driver) => <span className="surface-pill" key={driver}>{driver}</span>)}</div></Card.Body></Card>
             </Col>
@@ -1868,16 +1868,16 @@ function OwnerDashboard() {
         <Tab eventKey="finance" title="Keuangan">
           <Row className="g-4">
             <Col xl={6}>
-              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Cashflow Forecast Ringan</div><div className="panel-subtitle mb-3">Deterministic rule engine dari tagihan open; bukan LLM.</div><div className="kpi-list"><div className="kpi-item"><span>Expected inflow</span><strong>Rp {formatCurrencyCompact(cashflowForecast.expectedInflowRupiah)}</strong></div><div className="kpi-item"><span>Overdue</span><strong>Rp {formatCurrencyCompact(cashflowForecast.overdueRupiah)}</strong></div><div className="kpi-item"><span>Due ≤7 hari</span><strong>Rp {formatCurrencyCompact(cashflowForecast.dueSoonRupiah)}</strong></div></div><p className="small text-muted mt-3 mb-0">{cashflowForecast.assumption}</p></Card.Body></Card>
+              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Cashflow Forecast Ringan</div><div className="panel-subtitle mb-3">Deterministic rule engine dari tagihan open; bukan LLM.</div><div className="kpi-list"><div className="kpi-item"><span>Expected inflow</span><strong>Rp {formatCurrencyCompact(cashflowForecast.expectedInflowRupiah)}</strong></div><div className="kpi-item"><span>Terlambat</span><strong>Rp {formatCurrencyCompact(cashflowForecast.overdueRupiah)}</strong></div><div className="kpi-item"><span>Due ≤7 hari</span><strong>Rp {formatCurrencyCompact(cashflowForecast.dueSoonRupiah)}</strong></div></div><p className="small text-muted mt-3 mb-0">{cashflowForecast.assumption}</p></Card.Body></Card>
             </Col>
             <Col xl={6}><FinanceReadinessCard /></Col>
           </Row>
-          <div className="mt-4"><CompactDisclosure title="Detail tagihan bermasalah" subtitle="Dibuka hanya saat owner/admin perlu follow-up." defaultOpen={false}><RecentOverdueTable overdue={overdue} /></CompactDisclosure></div>
+          <div className="mt-4"><CompactDisclosure title="Detail tagihan bermasalah" subtitle="Dibuka hanya saat owner/admin perlu follow-up." defaultOpen={false}><RecentTerlambatTable overdue={overdue} /></CompactDisclosure></div>
         </Tab>
         <Tab eventKey="activity" title="Aktivitas">
           <Row className="g-3">
-            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Stay aktif</span><h3 className="mt-3 mb-0">{activeStays.length}</h3><p className="text-muted small mb-0">Tenant yang sedang berjalan.</p></Card.Body></Card></Col>
-            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Open invoice</span><h3 className="mt-3 mb-0">{cashflowForecast.openInvoiceCount}</h3><p className="text-muted small mb-0">Tagihan belum PAID/CANCELLED.</p></Card.Body></Card></Col>
+            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Masa sewa aktif</span><h3 className="mt-3 mb-0">{activeStays.length}</h3><p className="text-muted small mb-0">Penghuni dengan masa sewa berjalan.</p></Card.Body></Card></Col>
+            <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Tagihan aktif</span><h3 className="mt-3 mb-0">{cashflowForecast.openInvoiceCount}</h3><p className="text-muted small mb-0">Tagihan belum lunas/dibatalkan.</p></Card.Body></Card></Col>
             <Col md={4}><Card className="content-card border-0"><Card.Body><span className="surface-pill">Reports</span><h3 className="mt-3 mb-0">Drill-down</h3><p className="text-muted small mb-0">Laporan tetap ada, tetapi tidak memenuhi sidebar.</p></Card.Body></Card></Col>
           </Row>
         </Tab>
@@ -1918,7 +1918,7 @@ function AdminDashboard() {
   const pendingCheckoutRequestCount = checkoutPendingRequests.length;
   const approvedCheckoutRequestCount = checkoutApprovedRequests.length;
   const pendingPaymentReviewCount = makePaymentCount(paymentReviewItems, paymentReviewQuery.data?.meta?.totalItems);
-  const overdueInvoices = invoices.filter(isOverdue);
+  const overdueInvoices = invoices.filter(isTerlambat);
   const dueSoonInvoices = invoices.filter(isDueSoon);
   const periodEndingSoon = stays.filter((stay) => {
     const days = daysFromToday(stay.plannedCheckOutDate);
@@ -1977,9 +1977,9 @@ function AdminDashboard() {
     {
       id: 'renew-checkpoint',
       step: '3',
-      title: 'Review renew',
+      title: 'Review Perpanjangan',
       value: pendingRenewCount,
-      helper: pendingRenewCount ? 'Catat meter sebelum approve dan invoice renew.' : 'Tidak ada perpanjangan menunggu approval.',
+      helper: pendingRenewCount ? 'Catat meter sebelum approve dan tagihan perpanjangan.' : 'Tidak ada perpanjangan menunggu approval.',
       sla: `${ADMIN_SLA_HOURS.renewReview} jam`,
       nextDeadline: earliestDeadlineLabel(renewReviewDeadlines),
       action: 'Review Perpanjangan',
@@ -1989,9 +1989,9 @@ function AdminDashboard() {
     {
       id: 'checkout-flow',
       step: '4',
-      title: 'Checkout',
+      title: 'Keluar',
       value: checkoutWorkCount,
-      helper: checkoutWorkCount ? 'Review keluar dan finalkan hanya jika tagihan clear.' : 'Tidak ada checkout yang menunggu admin.',
+      helper: checkoutWorkCount ? 'Review pengajuan keluar dan finalkan hanya jika tagihan beres.' : 'Tidak ada pengajuan keluar yang menunggu admin.',
       sla: `${ADMIN_SLA_HOURS.checkoutReview}/${ADMIN_SLA_HOURS.checkoutFinal} jam`,
       nextDeadline: earliestDeadlineLabel([...checkoutReviewDeadlines, ...checkoutFinalDeadlines]),
       action: 'Cek Checkout',
@@ -2046,8 +2046,8 @@ function AdminDashboard() {
     pendingRenewCount > 0 ? {
       id: 'admin-assistant-renew',
       severity: expiredRenewCount ? 'HIGH' as const : 'MEDIUM' as const,
-      title: 'Renew menunggu meter checkpoint',
-      message: `${pendingRenewCount} perpanjangan menunggu keputusan. Catat meter dan pastikan invoice renew benar.`,
+      title: 'Perpanjangan menunggu cek meter',
+      message: `${pendingRenewCount} perpanjangan menunggu keputusan. Catat meter dan pastikan tagihan perpanjangan benar.`,
       count: pendingRenewCount,
       actionLabel: 'Review Renew',
       actionTo: '/renew-requests',
@@ -2056,8 +2056,8 @@ function AdminDashboard() {
     checkoutWorkCount > 0 ? {
       id: 'admin-assistant-checkout',
       severity: expiredCheckoutCount ? 'HIGH' as const : 'MEDIUM' as const,
-      title: 'Checkout belum selesai',
-      message: `${pendingCheckoutRequestCount} request keluar perlu review dan ${approvedCheckoutRequestCount} checkout approved perlu final jika tagihan sudah clear.`,
+      title: 'Keluar belum selesai',
+      message: `${pendingCheckoutRequestCount} request keluar perlu review dan ${approvedCheckoutRequestCount} pengajuan keluar disetujui perlu final jika tagihan sudah clear.`,
       count: checkoutWorkCount,
       actionLabel: 'Cek Checkout',
       actionTo: '/stays?status=BOOKINGS',
@@ -2098,9 +2098,9 @@ function AdminDashboard() {
   const adminHealthMetrics: MetricChip[] = [
     { id: 'admin-metric-payment', label: 'Bukti pending', value: pendingPaymentReviewCount, helper: expiredPaymentReviewCount ? `${expiredPaymentReviewCount} lewat SLA` : 'Perlu verifikasi manual', status: expiredPaymentReviewCount ? 'DANGER' : pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '✅', to: '/payment-submissions/review' },
     { id: 'admin-metric-booking', label: 'Booking review', value: pendingApprovalCount, helper: expiredBookingReviewCount ? `${expiredBookingReviewCount} lewat deadline` : 'Sebelum invoice awal', status: expiredBookingReviewCount ? 'DANGER' : pendingApprovalCount ? 'WARNING' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
-    { id: 'admin-metric-renew', label: 'Renew pending', value: pendingRenewCount, helper: 'Butuh meter checkpoint', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
-    { id: 'admin-metric-checkout', label: 'Checkout work', value: checkoutWorkCount, helper: `${pendingCheckoutRequestCount} review · ${approvedCheckoutRequestCount} final`, status: checkoutWorkCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
-    { id: 'admin-metric-invoice', label: 'Tagihan open', value: openInvoiceCount, helper: overdueInvoiceCount ? `${overdueInvoiceCount} overdue` : 'Belum PAID/CANCELLED', status: overdueInvoiceCount ? 'DANGER' : openInvoiceCount ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
+    { id: 'admin-metric-renew', label: 'Perpanjangan pending', value: pendingRenewCount, helper: 'Butuh cek meter', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
+    { id: 'admin-metric-checkout', label: 'Pekerjaan keluar', value: checkoutWorkCount, helper: `${pendingCheckoutRequestCount} review · ${approvedCheckoutRequestCount} final`, status: checkoutWorkCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
+    { id: 'admin-metric-invoice', label: 'Tagihan open', value: openInvoiceCount, helper: overdueInvoiceCount ? `${overdueInvoiceCount} overdue` : 'Belum lunas/dibatalkan', status: overdueInvoiceCount ? 'DANGER' : openInvoiceCount ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
     { id: 'admin-metric-ticket', label: 'Tiket aktif', value: activeTicketCount, helper: `${unassignedTicketCount} belum assign · ${ticketWaitingAdminCount} perlu cek`, status: ticketWaitingAdminCount || unassignedTicketCount ? 'WARNING' : activeTicketCount ? 'INFO' : 'SUCCESS', icon: '🎫', to: '/tickets' },
   ];
 
@@ -2152,7 +2152,7 @@ function AdminDashboard() {
     }),
     ...renewRequests.slice(0, 3).map((request) => {
       const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.renewReview);
-      const meta = getDeadlineMeta(deadline, 'Batas review renew');
+      const meta = getDeadlineMeta(deadline, 'Batas review perpanjangan');
       return {
         id: `renew-${request.id}`,
         ruleId: 'renew-meter-sla',
@@ -2161,7 +2161,7 @@ function AdminDashboard() {
         priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const,
         type: '3. Renew meter',
         subject: request.tenant?.fullName || request.stay?.room?.code || `Renew #${request.id}`,
-        issue: 'Catat meter listrik/air sebelum approve. Invoice renew harus berisi sewa + utilitas.',
+        issue: 'Catat meter listrik/air sebelum setujui. Tagihan perpanjangan harus berisi sewa + utilitas.',
         receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined,
         ...makeQueueTime(deadline),
         recommendedAction: 'Review Renew',
@@ -2170,7 +2170,7 @@ function AdminDashboard() {
     }),
     ...checkoutPendingRequests.slice(0, 3).map((request) => {
       const deadline = addHoursToDate(request.createdAt, ADMIN_SLA_HOURS.checkoutReview);
-      const meta = getDeadlineMeta(deadline, 'Batas review checkout');
+      const meta = getDeadlineMeta(deadline, 'Batas review keluar');
       return {
         id: `checkout-request-${request.id}`,
         ruleId: 'checkout-review-sla',
@@ -2179,7 +2179,7 @@ function AdminDashboard() {
         priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const,
         type: '4. Review checkout',
         subject: request.stay?.tenant?.fullName || request.stay?.room?.code || `Checkout #${request.id}`,
-        issue: 'Review request keluar. Final checkout tetap aksi terpisah setelah invoice clear.',
+        issue: 'Review pengajuan keluar. Final keluar tetap aksi terpisah setelah tagihan clear.',
         receivedAtLabel: request.createdAt ? makeClock(request.createdAt) : undefined,
         ...makeQueueTime(deadline),
         recommendedAction: 'Cek Checkout',
@@ -2189,14 +2189,14 @@ function AdminDashboard() {
     ...checkoutApprovedRequests.slice(0, 3).map((request) => {
       const receivedAt = request.reviewedAt ?? request.updatedAt ?? request.createdAt;
       const deadline = addHoursToDate(receivedAt, ADMIN_SLA_HOURS.checkoutFinal);
-      const meta = getDeadlineMeta(deadline, 'Batas final checkout');
+      const meta = getDeadlineMeta(deadline, 'Batas final keluar');
       return {
         id: `checkout-final-${request.id}`,
         ruleId: 'checkout-final-sla',
         entityType: 'checkout',
         entityId: request.id,
         priority: meta.isExpired ? 'HIGH' as const : 'MEDIUM' as const,
-        type: '4. Final checkout',
+        type: '4. Final keluar',
         subject: request.stay?.tenant?.fullName || request.stay?.room?.code || `Checkout #${request.id}`,
         issue: 'Request sudah approved. Finalkan checkout jika semua tagihan lunas dan deposit jelas.',
         receivedAtLabel: receivedAt ? makeClock(receivedAt) : undefined,
@@ -2254,16 +2254,16 @@ function AdminDashboard() {
   const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays' ? [
     { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Table utama proses sewa aktif', to: '/dashboard?area=stays', count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
     { id: 'stays-bookings', icon: '📝', label: 'Booking Baru', helper: 'Review booking dan bayar awal', to: '/stays?status=BOOKINGS', count: pendingApprovalCount + waitingInitialPaymentCount, tone: pendingApprovalCount ? 'warning' : 'info' },
-    { id: 'stays-active', icon: '🛏️', label: 'Stay Aktif', helper: 'Masa sewa sedang berjalan', to: '/stays', count: stays.length, tone: 'success' },
-    { id: 'stays-renew', icon: '🔁', label: 'Perpanjangan', helper: 'Renew request dan meter checkpoint', to: '/renew-requests', count: pendingRenewCount, tone: pendingRenewCount ? 'warning' : 'info' },
-    { id: 'stays-checkout', icon: '🚪', label: 'Checkout', helper: 'Review keluar dan final checkout', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
+    { id: 'stays-active', icon: '🛏️', label: 'Masa sewa aktif', helper: 'Masa sewa sedang berjalan', to: '/stays', count: stays.length, tone: 'success' },
+    { id: 'stays-renew', icon: '🔁', label: 'Perpanjangan', helper: 'Pengajuan perpanjangan dan cek meter', to: '/renew-requests', count: pendingRenewCount, tone: pendingRenewCount ? 'warning' : 'info' },
+    { id: 'stays-checkout', icon: '🚪', label: 'Keluar', helper: 'Review keluar dan final keluar', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
     { id: 'stays-tenant', icon: '👤', label: 'Tenant', helper: 'Data tenant dan portal access', to: '/tenants', count: undefined, tone: 'info' },
   ] : activeArea === 'finance' ? [
     { id: 'finance-all', icon: '💳', label: 'Semua Finance', helper: 'Table utama finance di tab ini', to: '/dashboard?area=finance', count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
     { id: 'finance-invoices', icon: '🧾', label: 'Tagihan', helper: 'Semua tagihan tenant', to: '/invoices', count: invoices.length, tone: 'info' },
     { id: 'finance-review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar pending review', to: '/payment-submissions/review', count: pendingPaymentReviewCount, tone: pendingPaymentReviewCount ? 'warning' : 'success' },
-    { id: 'finance-overdue', icon: '⚠️', label: 'Overdue', helper: 'Tagihan lewat jatuh tempo', to: '/invoices', count: overdueInvoices.length, tone: overdueInvoices.length ? 'danger' : 'success' },
-    { id: 'finance-draft', icon: '📝', label: 'Draft', helper: 'Tagihan belum diterbitkan', to: '/invoices', count: invoices.filter((invoice) => invoice.status === 'DRAFT').length, tone: 'info' },
+    { id: 'finance-overdue', icon: '⚠️', label: 'Terlambat', helper: 'Tagihan lewat jatuh tempo', to: '/invoices', count: overdueInvoices.length, tone: overdueInvoices.length ? 'danger' : 'success' },
+    { id: 'finance-draft', icon: '📝', label: 'Belum Terbit', helper: 'Tagihan belum diterbitkan', to: '/invoices', count: invoices.filter((invoice) => invoice.status === 'DRAFT').length, tone: 'info' },
     { id: 'finance-expenses', icon: '💸', label: 'Expenses', helper: 'Catatan pengeluaran operasional', to: '/expenses', count: undefined, tone: 'info' },
     { id: 'finance-history', icon: '📚', label: 'Riwayat Pembayaran', helper: 'Pembayaran invoice yang sudah tercatat', to: '/invoice-payments', count: undefined, tone: 'info' },
   ] : activeArea === 'tickets' ? [
@@ -2379,7 +2379,7 @@ function AdminDashboard() {
       ) : null}
 
       {activeArea === 'today' ? <ActionQueueTable
-        title="Admin Operations Action Queue"
+        title="Admin Operations Antrean Aksi"
         subtitle="Antrean keputusan lintas booking, pembayaran, renew, checkout, tagihan, tiket, dan stok. Klik aksi untuk langsung membuka flow terkait."
         items={filteredQueueItems}
         emptyTitle="Tidak ada item mendesak hari ini"

@@ -295,9 +295,9 @@ export default function TenantInvoiceDetailPage() {
         />
         <TenantPriorityBoard
           title="Prioritas Tagihan Ini"
-          subtitle="Satu tempat untuk melihat apakah harus bayar, menunggu pemeriksaan admin, atau sudah selesai."
+          subtitle="Satu prioritas utama; detail pembayaran ada di bawah."
           items={assistantItems}
-          maxItems={3}
+          maxItems={1}
         />
         <LifecycleTimeline title="Status Pembayaran" subtitle={hasRenewUtilityLines ? 'Tagihan renew berjalan setelah admin mencatat meter dan sistem menghitung pemakaian utilitas.' : 'Urutan proses dari tagihan muncul sampai lunas.'} steps={timelineSteps} />
 
@@ -308,7 +308,7 @@ export default function TenantInvoiceDetailPage() {
                 <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
                   <div>
                     <div className="page-eyebrow">Ringkasan tagihan</div>
-                    <h4 className="mb-1">{invoice.invoiceNumber || `INV-${invoice.id}`}</h4>
+                    <h4 className="mb-1">{invoice.invoiceNumber || `TG-${invoice.id}`}</h4>
                     <div className="small text-primary fw-semibold mb-1">{invoiceKind}</div>
                     <div className="text-muted small">
                       {tenantName || '-'}

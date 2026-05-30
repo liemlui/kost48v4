@@ -31,7 +31,7 @@ export function getInvoiceBlockerCopy(invoices: Invoice[]) {
   const parts = [`${openInvoices.length} tagihan masih aktif`];
   if (draftInvoices.length) parts.push(`${draftInvoices.length} masih draft`);
   if (overdueInvoices.length) parts.push(`${overdueInvoices.length} terlambat`);
-  return `${parts.join(', ')}. Final checkout tetap terblokir sampai statusnya lunas atau dibatalkan.`;
+  return `${parts.join(', ')}. Final keluar tetap terblokir sampai statusnya lunas atau dibatalkan.`;
 }
 
 export function getCheckoutReadinessSummary(invoices: Invoice[], hasApprovedCheckoutRequest?: boolean) {
@@ -86,7 +86,7 @@ export function buildCheckoutReadinessItems({
       label: openInvoices.length ? 'Tagihan belum clear' : 'Tagihan sudah clear',
       description: openInvoices.length
         ? getInvoiceBlockerCopy(invoices)
-        : 'Tidak ada tagihan aktif. Final checkout tidak terblokir oleh tagihan.',
+        : 'Tidak ada tagihan aktif. Final keluar tidak terblokir oleh tagihan.',
       state: openInvoices.length ? 'block' : 'pass',
     },
     {
@@ -126,7 +126,7 @@ export function buildCheckoutReadinessItems({
     {
       id: 'room-check',
       label: 'Cek kondisi kamar dan barang',
-      description: 'Final checkout melepas kamar. Keputusan refund/potong deposit sebaiknya mengikuti hasil cek kondisi kamar.',
+      description: 'Final keluar melepas kamar. Keputusan refund/potong deposit sebaiknya mengikuti hasil cek kondisi kamar.',
       state: 'warn',
     },
     {

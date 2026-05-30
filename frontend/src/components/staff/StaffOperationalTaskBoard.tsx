@@ -207,7 +207,7 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
 
   const assistantTitle = focusItems.length ? 'Fokus kerja hari ini' : 'Tidak ada tugas mendesak';
   const assistantBody = focusItems.length
-    ? `Mulai dari ${focusItems[0].title}. Jangan menyentuh approval pembayaran, renew, checkout final, atau deposit; itu tetap tugas admin/owner.`
+    ? `Mulai dari ${focusItems[0].title}. Jangan menyentuh approval pembayaran, perpanjangan, final keluar, atau deposit; itu tetap tugas admin/owner.`
     : 'Operasional lapangan sedang aman. Tetap cek kebersihan area umum, stok harian, dan laporan tenant yang baru masuk.';
 
   return (

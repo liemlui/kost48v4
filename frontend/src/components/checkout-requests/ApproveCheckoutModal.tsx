@@ -46,7 +46,7 @@ export default function ApproveCheckoutModal({
   const hasKnownOpenInvoice = typeof openInvoiceCount === 'number' && openInvoiceCount > 0;
 
   const tenantLabel = useMemo(() => {
-    return checkoutRequest?.stay?.tenant?.fullName || `Stay #${checkoutRequest?.stayId ?? '-'}`;
+    return checkoutRequest?.stay?.tenant?.fullName || `Masa sewa #${checkoutRequest?.stayId ?? '-'}`;
   }, [checkoutRequest]);
 
   const roomLabel = checkoutRequest?.stay?.room?.code || '-';
@@ -82,7 +82,7 @@ export default function ApproveCheckoutModal({
           </Alert>
         ) : (
           <Alert variant="info" className="small">
-            Setujui pengajuan saja. Final checkout tetap aksi terpisah.
+            Setujui pengajuan saja. Final keluar tetap aksi terpisah.
           </Alert>
         )}
 

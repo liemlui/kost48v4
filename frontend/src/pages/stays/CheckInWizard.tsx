@@ -371,17 +371,17 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
         <Offcanvas.Body>
           <Card className="mb-3 border-success">
             <Card.Body>
-              <h6 className="text-success">Stay #{stay.id} — {stay.room?.code ?? 'Kamar'}</h6>
-              <p className="mb-1"><strong>Tenant:</strong> {stay.tenant?.fullName ?? selectedTenant?.fullName ?? '-'}</p>
-              <p className="mb-1"><strong>Invoice:</strong> {invoice.invoiceNumber} — <span className="badge bg-success">ISSUED</span></p>
-              <p className="mb-1"><strong>Status Kamar:</strong> <span className="badge bg-primary">OCCUPIED</span></p>
+              <h6 className="text-success">Masa sewa #{stay.id} — {stay.room?.code ?? 'Kamar'}</h6>
+              <p className="mb-1"><strong>Penghuni:</strong> {stay.tenant?.fullName ?? selectedTenant?.fullName ?? '-'}</p>
+              <p className="mb-1"><strong>Tagihan:</strong> {invoice.invoiceNumber} — <span className="badge bg-success">Terbit / Perlu Dibayar</span></p>
+              <p className="mb-1"><strong>Status Kamar:</strong> <span className="badge bg-primary">Terisi</span></p>
             </Card.Body>
           </Card>
 
           {/* Portal result card */}
           <Card className={`mb-3 border-${portal?.status === 'CREATED' ? 'primary' : portal?.status === 'ALREADY_ACTIVE' ? 'info' : 'secondary'}`}>
             <Card.Body>
-              <h6>🔑 Akses Portal Tenant</h6>
+              <h6>🔑 Akses Portal Penghuni</h6>
               {portal?.status === 'CREATED' ? (
                 <>
                   <Alert variant="primary" className="mb-2">
@@ -429,7 +429,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
               Kembali ke Daftar Stay
             </Button>
             <Button variant="primary" onClick={() => handleCloseSuccess(`/stays/${stay.id}`)}>
-              Lihat Detail Stay #{stay.id}
+              Lihat Detail Masa Sewa #{stay.id}
             </Button>
           </div>
         </Offcanvas.Body>
