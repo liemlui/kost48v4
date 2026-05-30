@@ -18,6 +18,7 @@ import {
   type FixedAssetCapitalizationSource,
   type FixedAssetLedgerAlignmentMethod,
 } from '../../api/assets';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 function formatRupiah(value?: number | null) {
   const parsed = Number(value ?? 0);
@@ -30,14 +31,6 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
   return date.toLocaleDateString('id-ID', { dateStyle: 'medium' });
-}
-
-function getApiErrorMessage(error: unknown, fallback: string) {
-  const maybe = error as { response?: { data?: { message?: string | string[] } }; message?: string };
-  const message = maybe.response?.data?.message ?? maybe.message;
-  if (Array.isArray(message)) return message.join(' ');
-  if (typeof message === 'string' && message.trim()) return message;
-  return fallback;
 }
 
 const categoryOptions: FixedAssetCategory[] = ['BUILDING', 'RENOVATION', 'ROOM_EQUIPMENT', 'FURNITURE', 'ELECTRONIC', 'UTILITY_EQUIPMENT', 'VEHICLE', 'SOFTWARE', 'OTHER'];

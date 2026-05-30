@@ -4,6 +4,7 @@ import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { approveBooking } from '../../api/bookings';
 import type { ApproveBookingPayload, Stay } from '../../types';
 import { formatDateId } from '../../utils/bookingExpiry';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 function formatMoneyRaw(value: string) {
   return value.replace(/\D/g, '');
@@ -174,13 +175,8 @@ export default function ApproveBookingModal({
           initialWaterM3,
         },
       });
-    } catch (err: any) {
-      const message = err?.response?.data?.message;
-      setError(
-        Array.isArray(message)
-          ? message.join(', ')
-          : message || 'Gagal menyetujui booking.',
-      );
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Gagal menyetujui booking.'));
     }
   };
 

@@ -22,6 +22,7 @@ import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
 import type { CheckoutRequest, Invoice, RenewRequest, Stay, Ticket } from '../../types';
 import { getStatusLabel } from '../../components/common/StatusBadge';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { getDaysUntilTenantDate, getOpenTenantInvoices, getPendingReviewInvoiceIds, getPrimaryTenantInvoice, isTenantInvoiceOverdue } from '../../utils/tenantRules';
 import { isPayableInvoiceStatus, TENANT_PAYMENT_REVIEW_MESSAGE, tenantPricingTermLabel } from '../../utils/tenantCopy';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
@@ -54,13 +55,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const [showRenewModal, setShowRenewModal] = useState(false);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
-    queryKey: ['my-renew-requests', stay.id],
+    queryKey: ['portal-renew-requests', stay.id],
     queryFn: () => listMyRenewRequests(),
     refetchOnWindowFocus: true,
   });
 
   const invoicesQuery = useQuery<PaginatedResponse<Invoice>>({
-    queryKey: ['my-invoices', stay.id],
+    queryKey: ['portal-invoices', stay.id],
     queryFn: () => listResource<Invoice>('/invoices/my'),
     staleTime: 60_000,
     refetchOnWindowFocus: true,
@@ -68,14 +69,14 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   });
 
   const submissionsQuery = useQuery({
-    queryKey: ['my-payment-submissions'],
+    queryKey: ['portal-payment-submissions'],
     queryFn: () => listMyPaymentSubmissions(),
     staleTime: 30_000,
     refetchOnWindowFocus: true,
   });
 
   const checkoutRequestsQuery = useQuery<PaginatedResponse<CheckoutRequest>>({
-    queryKey: ['my-checkout-requests', stay.id],
+    queryKey: ['portal-checkout-requests', stay.id],
     queryFn: () => listMyCheckoutRequests(),
     refetchOnWindowFocus: true,
   });
@@ -112,13 +113,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
 
   const handleRenewSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['my-renew-requests', stay.id] });
+    queryClient.invalidateQueries({ queryKey: ['portal-renew-requests', stay.id] });
     queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
     queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
   };
 
   const handleCheckoutSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['my-checkout-requests', stay.id] });
+    queryClient.invalidateQueries({ queryKey: ['portal-checkout-requests', stay.id] });
     queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
   };
 
@@ -380,11 +381,10 @@ export default function MyStayPage() {
       {stage === 'occupied' && query.isError ? (() => {
         const err = query.error as any;
         const status = err?.response?.status ?? err?.response?.data?.statusCode;
-        const message = err?.response?.data?.message;
         if (status === 404) {
           return <EmptyState icon="🏠" title="Kamu belum memiliki masa sewa aktif" description="Kalau kamu sedang booking, buka halaman Pemesanan Saya. Kalau belum booking, pilih kamar dari katalog." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} />;
         }
-        return <Alert variant="danger" className="mt-4"><div className="fw-semibold">Gagal memuat data masa sewa</div><div className="small mt-1">{message || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}</div></Alert>;
+        return <Alert variant="danger" className="mt-4"><div className="fw-semibold">Gagal memuat data masa sewa</div><div className="small mt-1">{getApiErrorMessage(err, 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.')}</div></Alert>;
       })() : null}
       {stay && !stayBelongsToUser ? <EmptyState icon="🔒" title="Kamu belum memiliki masa sewa aktif" description="Pilih kamar dari katalog publik untuk memulai proses booking." action={{ label: 'Lihat Kamar', onClick: () => navigate('/rooms') }} /> : null}
       {stay && stayBelongsToUser && !roomStatusOccupied ? <EmptyState icon="📅" title="Pemesanan kamu masih menunggu pembayaran atau verifikasi" description="Kamar masih berstatus dipesan. Selesaikan pembayaran awal dari halaman Pemesanan Saya sebelum masuk ke panduan masa sewa." action={{ label: 'Buka Pemesanan Saya', onClick: () => navigate('/portal/bookings') }} /> : null}

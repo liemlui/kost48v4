@@ -55,6 +55,7 @@ import {
   type CreateOpeningBalanceDraftPayload,
 } from '../../api/accounting';
 import { fetchDepositLedgerReconciliationLite, fetchDepositLedgerSummary } from '../../api/depositLedger';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 const financeMenu = [
   { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: false },
@@ -70,15 +71,6 @@ const financeMenu = [
 function currentAsOf() {
   return new Date().toISOString().slice(0, 10);
 }
-
-function getApiErrorMessage(error: unknown, fallback: string) {
-  const maybe = error as { response?: { data?: { message?: string | string[] } }; message?: string };
-  const message = maybe.response?.data?.message ?? maybe.message;
-  if (Array.isArray(message)) return message.join(' ');
-  if (typeof message === 'string' && message.trim()) return message;
-  return fallback;
-}
-
 
 function formatRupiah(value?: number | null) {
   return `Rp ${Number(value ?? 0).toLocaleString('id-ID')}`;

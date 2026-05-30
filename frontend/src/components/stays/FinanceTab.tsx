@@ -12,19 +12,13 @@ import EmptyState from '../common/EmptyState';
 import { formatDateSafe, formatPeriod } from '../../pages/resources/simpleCrudHelpers';
 import { fetchAccountingReadiness } from '../../api/accounting';
 import { DepositLedgerPanel } from '../deposit';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 function isOverdue(invoice: Invoice) {
   if (!invoice.dueDate) return false;
   const status = invoice.status;
   if (status === 'PAID' || status === 'CANCELLED') return false;
   return new Date(invoice.dueDate).getTime() < new Date(new Date().toISOString().slice(0, 10)).getTime();
-}
-
-function extractActionError(error: unknown, fallback: string) {
-  const message = error && typeof error === 'object' && 'response' in error
-    ? ((error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? fallback)
-    : fallback;
-  return Array.isArray(message) ? message.join(', ') : message;
 }
 
 function paidAmount(invoice: Invoice): number | null {
@@ -84,7 +78,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
       setCancelTarget(null);
       setCancelReason('');
     } catch (error: unknown) {
-      setActionError(extractActionError(error, 'Gagal membatalkan tagihan.'));
+      setActionError(getApiErrorMessage(error,'Gagal membatalkan tagihan.'));
     }
   };
 
@@ -97,7 +91,7 @@ export default function FinanceTab({ stay, enabled = true }: { stay: Stay; enabl
         setAccountingNotice(result.accounting.accountingWarning);
       }
     } catch (error: unknown) {
-      setActionError(extractActionError(error, 'Gagal menerbitkan tagihan.'));
+      setActionError(getApiErrorMessage(error,'Gagal menerbitkan tagihan.'));
     }
   };
 

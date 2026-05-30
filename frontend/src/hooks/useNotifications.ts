@@ -9,7 +9,7 @@ import {
 
 export function useNotifications() {
   const queryClient = useQueryClient();
-  const key = ['my-notifications', 'list'];
+  const key = ['portal-notifications', 'list'];
 
   const query = useQuery({
     queryKey: key,

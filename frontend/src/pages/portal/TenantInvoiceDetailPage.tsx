@@ -55,7 +55,7 @@ export default function TenantInvoiceDetailPage() {
   const navigate = useNavigate();
 
   const detailQuery = useQuery({
-    queryKey: ['tenant-invoice', id],
+    queryKey: ['portal-invoice', id],
     queryFn: () => getResource<any>(`/invoices/${id}`),
     enabled: !!id,
     retry: false,
@@ -108,7 +108,7 @@ export default function TenantInvoiceDetailPage() {
 
   // ── Pending review detection ──
   const submissionsQuery = useQuery({
-    queryKey: ['my-payment-submissions'],
+    queryKey: ['portal-payment-submissions'],
     queryFn: () => listMyPaymentSubmissions(),
     enabled: needsPayment,
     staleTime: 30_000,
@@ -221,8 +221,8 @@ export default function TenantInvoiceDetailPage() {
     },
     onSuccess: () => {
       setShowPayModal(false);
-      queryClient.invalidateQueries({ queryKey: ['tenant-invoice', id] });
-      queryClient.invalidateQueries({ queryKey: ['my-payment-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-invoice', id] });
+      queryClient.invalidateQueries({ queryKey: ['portal-payment-submissions'] });
       queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
     },
   });
