@@ -217,7 +217,7 @@ export default function ReminderPreviewPage() {
         <Card.Body className="py-3">
           <div className="table-meta mb-3">
             <div>
-              <div className="panel-title">Queue pengingat</div>
+              <div className="panel-title">Antrean pengingat</div>
               <div className="panel-subtitle">Satu tab dan satu tabel aktif; tidak ada accordion panjang.</div>
             </div>
             <Button variant="outline-secondary" size="sm" onClick={() => refetch()}>Refresh</Button>
