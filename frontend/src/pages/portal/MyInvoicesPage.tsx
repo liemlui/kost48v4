@@ -44,7 +44,7 @@ export default function MyInvoicesPage() {
   });
 
   const submissionsQuery = useQuery({
-    queryKey: ['my-payment-submissions'],
+    queryKey: ['portal-payment-submissions'],
     queryFn: () => listMyPaymentSubmissions(),
     enabled: Boolean(userId),
     staleTime: 30_000,

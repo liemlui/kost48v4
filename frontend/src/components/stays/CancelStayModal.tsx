@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useStay } from '../../hooks/useStay';
 import { Invoice, Stay } from '../../types';
@@ -39,7 +40,7 @@ export default function CancelStayModal({
       await cancelMutation.mutateAsync({ cancelReason: trimmedReason });
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal membatalkan masa sewa');
+      setError(getApiErrorMessage(err, 'Gagal membatalkan masa sewa'));
     }
   };
 

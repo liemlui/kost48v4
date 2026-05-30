@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { ReadinessChecklist } from "../command-center";
 import { useStay } from "../../hooks/useStay";
@@ -135,7 +136,7 @@ export default function CompleteStayModal({
       handleClose();
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "Gagal menjalankan final keluar.",
+        getApiErrorMessage(err, "Gagal menjalankan final keluar."),
       );
     }
   };

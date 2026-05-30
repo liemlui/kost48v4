@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { useStay } from "../../hooks/useStay";
 import { Stay } from "../../types";
@@ -100,7 +101,7 @@ export default function ProcessDepositModal({
       });
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Gagal memproses deposit.");
+      setError(getApiErrorMessage(err, "Gagal memproses deposit."));
     }
   };
 

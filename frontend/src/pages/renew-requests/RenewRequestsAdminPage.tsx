@@ -106,6 +106,11 @@ export default function RenewRequestsAdminPage() {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['admin-checkout-requests'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Keep tenant portal views in sync after admin acts on a renew request.
+      queryClient.invalidateQueries({ queryKey: ['portal-renew-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-stage'] });
       setApproveTarget(null);
       setPlannedCheckOutDate('');
       setApproveReviewNotes('');
@@ -122,6 +127,8 @@ export default function RenewRequestsAdminPage() {
     mutationFn: ({ id, payload }: { id: number; payload: { reviewNotes: string } }) => rejectRenewRequest(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-renew-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-renew-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-stage'] });
       setRejectTarget(null);
       setReviewNotes('');
       setRejectFormError('');

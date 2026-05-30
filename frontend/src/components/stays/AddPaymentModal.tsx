@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { usePayments } from '../../hooks/usePayments';
 import { Invoice, PaymentMethod } from '../../types';
@@ -47,7 +48,7 @@ export default function AddPaymentModal({ show, onHide, invoice }: { show: boole
       });
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal menambah pembayaran');
+      setError(getApiErrorMessage(err, 'Gagal menambah pembayaran'));
     }
   };
 

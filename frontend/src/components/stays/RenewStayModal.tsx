@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { useStay } from '../../hooks/useStay';
 import { Stay } from '../../types';
@@ -182,7 +183,7 @@ export default function RenewStayModal({
       onSuccess?.();
       handleClose();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal memperpanjang masa sewa');
+      setError(getApiErrorMessage(err, 'Gagal memperpanjang masa sewa'));
     }
   };
 
