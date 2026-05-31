@@ -75,13 +75,20 @@ export class MarketingPublicRoomsService {
       where: {
         id,
         isActive: true,
-        status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.RESERVED as any] },
+        status: {
+          in: [
+            RoomStatus.AVAILABLE as any,
+            RoomStatus.RESERVED as any,
+            RoomStatus.OCCUPIED as any,
+            RoomStatus.MAINTENANCE as any,
+          ],
+        },
       },
       select: PUBLIC_ROOM_SELECT,
     });
 
     if (!room) {
-      throw new NotFoundException('Kamar tidak ditemukan atau sedang tidak tersedia untuk booking publik');
+      throw new NotFoundException('Kamar tidak ditemukan atau tidak tersedia untuk dilihat');
     }
 
     const facilitiesByRoomId = await this.getPublicFacilitiesByRoomId([room.id]);
@@ -98,7 +105,16 @@ export class MarketingPublicRoomsService {
     return {
       AND: [
         { isActive: true },
-        { status: { in: [RoomStatus.AVAILABLE as any, RoomStatus.RESERVED as any] } },
+        {
+          status: {
+            in: [
+              RoomStatus.AVAILABLE as any,
+              RoomStatus.RESERVED as any,
+              RoomStatus.OCCUPIED as any,
+              RoomStatus.MAINTENANCE as any,
+            ],
+          },
+        },
         query.search
           ? {
               OR: [
@@ -168,6 +184,7 @@ export class MarketingPublicRoomsService {
       highlightedRateRupiah: this.resolveRent(room, highlightedPricingTerm),
       availablePricingTerms: this.getAvailablePricingTerms(room),
       isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
+      canBook: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
       availabilityNote: room.status === RoomStatus.RESERVED ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.' : null,
       facilities,
     };

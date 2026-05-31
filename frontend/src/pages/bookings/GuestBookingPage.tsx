@@ -11,6 +11,13 @@ import { INITIAL_FORM, validate } from './guestBookingUtils';
 import GuestBookingForm from './GuestBookingForm';
 import GuestBookingRoomSummary from './GuestBookingRoomSummary';
 import GuestBookingSuccess from './GuestBookingSuccess';
+import { getPublicRoomAvailabilityDisplay } from '../../utils/publicRoomDisplay';
+
+function buildWaAvailabilityUrl(roomCode: string) {
+  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
+  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia? Boleh tanya estimasi ketersediaannya?`;
+  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
 
 export default function GuestBookingPage() {
   const { roomId } = useParams();
@@ -112,15 +119,34 @@ export default function GuestBookingPage() {
     );
   }
   if (!room.isAvailable) {
+    const availability = getPublicRoomAvailabilityDisplay(room);
+    const roomCode = room.code || `Kamar #${room.id}`;
+    const waUrl = buildWaAvailabilityUrl(roomCode);
+
     return (
       <div className="public-page-shell">
         <div className="container py-5" style={{ maxWidth: 640 }}>
           <div className="content-card border-0 card">
-            <div className="card-body text-center">
-              <div className="fs-1 mb-3">&#x1f6aa;</div>
-              <h5>Kamar ini sudah tidak tersedia untuk booking</h5>
-              <p className="text-muted">Kamar mungkin sudah dibooking oleh tamu lain. Silakan pilih kamar lain dari katalog.</p>
-              <a href="/rooms" className="btn btn-primary">Lihat Katalog Kamar</a>
+            <div className="card-body">
+              <div className="text-center mb-4">
+                <div className="fs-1 mb-2">🚪</div>
+                <h5 className="mb-1">Kamar ini belum bisa diajukan sekarang</h5>
+                <div className="mb-2">
+                  <span className={`room-market-status-badge ${availability.tone}`}>{availability.label}</span>
+                </div>
+                <p className="text-muted small mb-0">{availability.detailCopy}</p>
+              </div>
+
+              <Alert variant="info" className="small">
+                Anda masih bisa tanya ketersediaan berikutnya via WhatsApp. Admin akan membantu menginformasikan estimasi ketersediaan kamar ini.
+              </Alert>
+
+              <div className="d-grid gap-2">
+                <a href={waUrl} target="_blank" rel="noreferrer" className="btn btn-primary">
+                  💬 Tanya Ketersediaan via WhatsApp
+                </a>
+                <a href="/rooms" className="btn btn-outline-secondary">Lihat Kamar Lain</a>
+              </div>
             </div>
           </div>
         </div>

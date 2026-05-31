@@ -119,7 +119,7 @@ export function getPublicRoomUtilityCopy(room: PublicRoom, pricingTerm: PricingT
 
 export type PublicRoomAvailabilityDisplay = {
   label: string;
-  tone: "is-available" | "is-limited" | "is-full";
+  tone: "is-available" | "is-limited" | "is-full" | "is-occupied" | "is-maintenance";
   shortCopy: string;
   detailCopy: string;
   canBook: boolean;
@@ -127,24 +127,44 @@ export type PublicRoomAvailabilityDisplay = {
 
 export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAvailabilityDisplay {
   const status = String(room.status ?? "").toUpperCase();
-  const canBook = room.isAvailable !== false;
+  const isBookable = room.isAvailable !== false;
 
-  if (!canBook || status === "OCCUPIED" || status === "MAINTENANCE" || status === "INACTIVE") {
+  if (status === "OCCUPIED") {
     return {
-      label: "Penuh",
+      label: "Sedang ditempati",
+      tone: "is-occupied",
+      shortCopy: "Kamar sedang ditempati. Anda masih bisa cek detail dan tanya estimasi ketersediaan.",
+      detailCopy: "Kamar ini sedang ditempati. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa tersedia lagi.",
+      canBook: false,
+    };
+  }
+
+  if (status === "MAINTENANCE") {
+    return {
+      label: "Perawatan",
+      tone: "is-maintenance",
+      shortCopy: "Kamar sedang dalam perawatan.",
+      detailCopy: "Kamar ini sedang dalam perawatan dan belum bisa diajukan. Hubungi admin untuk informasi ketersediaan.",
+      canBook: false,
+    };
+  }
+
+  if (!isBookable) {
+    return {
+      label: "Belum tersedia",
       tone: "is-full",
       shortCopy: "Kamar belum bisa diajukan sekarang.",
-      detailCopy: "Kamar ini belum bisa diajukan saat ini. Kamu bisa memilih kamar lain atau bertanya ke admin untuk jadwal ketersediaan berikutnya.",
+      detailCopy: "Kamar ini belum bisa diajukan saat ini. Pilih kamar lain atau tanya ke admin untuk jadwal ketersediaan berikutnya.",
       canBook: false,
     };
   }
 
   if (status === "RESERVED") {
     return {
-      label: "Ada minat aktif",
+      label: "Sedang diproses",
       tone: "is-limited",
-      shortCopy: "Masih bisa ditanyakan, tapi ada calon tenant lain yang sedang diproses.",
-      detailCopy: "Ada minat aktif. Prioritas tetap dari pembayaran disetujui.",
+      shortCopy: "Ada calon tenant yang sedang diproses. Booking tetap bisa diajukan.",
+      detailCopy: "Sedang diproses, belum terkunci. Prioritas diberikan kepada yang pembayarannya disetujui lebih dulu.",
       canBook: true,
     };
   }
@@ -153,7 +173,7 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
     label: "Bisa diajukan",
     tone: "is-available",
     shortCopy: "Ajukan booking dulu, lalu tunggu review admin.",
-    detailCopy: "Bisa diajukan. Aman setelah pembayaran disetujui.",
+    detailCopy: "Bisa diajukan. Kamar aman setelah pembayaran disetujui.",
     canBook: true,
   };
 }

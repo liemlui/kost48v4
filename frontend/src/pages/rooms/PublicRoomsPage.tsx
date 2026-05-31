@@ -61,6 +61,13 @@ function buildWhatsAppUrl(room: PublicRoom) {
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
+function buildWhatsAppAvailabilityUrl(room: PublicRoom) {
+  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
+  const roomCode = room.code || `Kamar #${room.id}`;
+  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia? Boleh tanya estimasi ketersediaannya?`;
+  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
 function getFeatureIcon(title: string, value: string) {
   if (/kamar mandi/i.test(title)) return "🚿";
   if (/pendingin/i.test(title)) return /ac/i.test(value) ? "❄️" : "🌬️";
@@ -215,20 +222,24 @@ function RoomMarketCard({
 
         <div className="room-market-booking-safety-note">
           <strong>{availability.shortCopy}</strong>
-          <span> Aman setelah pembayaran disetujui.</span>
+          {isAvailable ? <span> Aman setelah pembayaran disetujui.</span> : null}
         </div>
 
-        <div className="room-market-price-box room-market-initial-cost-box">
-          <PriceRow label="Estimasi awal" amount={initialCost.total} unit="" />
-          <small>Sewa pertama + deposit.</small>
-        </div>
-
-        <div className="room-market-detail-hint">Klik card untuk detail</div>
+        {isAvailable ? (
+          <div className="room-market-price-box room-market-initial-cost-box">
+            <PriceRow label="Estimasi awal" amount={initialCost.total} unit="" />
+            <small>Sewa pertama + deposit.</small>
+          </div>
+        ) : null}
 
         <div className="room-market-actions">
-          <Button className="w-100" disabled={!isAvailable} onClick={handleBook}>
-            {isAvailable ? "Ajukan Booking" : "Tidak Tersedia"}
-          </Button>
+          {isAvailable ? (
+            <Button className="w-100" onClick={handleBook}>Ajukan Booking</Button>
+          ) : (
+            <a className="btn btn-secondary w-100" href={buildWhatsAppAvailabilityUrl(room)} target="_blank" rel="noreferrer">
+              Tanya Ketersediaan
+            </a>
+          )}
           <a className="btn btn-outline-secondary w-100" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
             💬 Tanya via WhatsApp
           </a>
@@ -337,7 +348,8 @@ export default function PublicRoomsPage() {
     return list;
   }, [roomsFromApi, bathroom, cooling, sort]);
 
-  const availableCount = rooms.filter((room) => room.isAvailable !== false).length;
+  const bookableCount = rooms.filter((room) => room.isAvailable !== false).length;
+  const totalCount = rooms.length;
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
   const comparedRooms = useMemo(
     () => comparedRoomIds
@@ -378,8 +390,14 @@ export default function PublicRoomsPage() {
           <>
             <section className="rooms-market-hero">
               <div className="rooms-market-breadcrumb"><button type="button">Beranda</button><span>›</span><strong>Katalog Kamar</strong></div>
-              <h1>Pilih kamar sesuai kebutuhan Anda</h1>
-              <p>Pilih kamar, cek estimasi awal, lalu ajukan booking.</p>
+              <h1>Kamar kos yang jelas biayanya, jujur statusnya</h1>
+              <p>Lihat semua kamar — termasuk yang sedang ditempati. Status transparan, booking dibantu admin, kamar aman setelah pembayaran disetujui.</p>
+              <div className="rooms-market-trust-chips">
+                <span>✓ Biaya awal jelas</span>
+                <span>✓ Booking direview admin</span>
+                <span>✓ Kamar aman setelah pembayaran disetujui</span>
+                <span>✓ Listrik &amp; air sesuai aturan kamar</span>
+              </div>
             </section>
 
             <Card className="rooms-market-filter-card border-0">
@@ -411,7 +429,12 @@ export default function PublicRoomsPage() {
               <strong>Aturan booking:</strong> Booking belum mengunci kamar. Kamar aman setelah pembayaran disetujui.
             </Alert>
 
-            <div className="rooms-market-count"><strong>{availableCount} kamar</strong> bisa diajukan</div>
+            <div className="rooms-market-count">
+              <strong>{totalCount} kamar</strong> tersedia di katalog
+              {bookableCount < totalCount ? (
+                <span className="rooms-market-count-bookable"> · <strong>{bookableCount}</strong> bisa diajukan sekarang</span>
+              ) : null}
+            </div>
 
             {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
             {query.isError ? <Alert variant="danger" className="mt-4">Gagal memuat katalog kamar. Silakan coba lagi.</Alert> : null}

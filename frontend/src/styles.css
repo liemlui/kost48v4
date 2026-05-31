@@ -9428,6 +9428,34 @@ p, small, span, label, .form-text, .text-muted,
   line-height: 1.6;
 }
 
+.rooms-market-trust-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: 1.1rem;
+}
+
+.rooms-market-trust-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .28rem .75rem;
+  border: 1px solid rgba(4, 120, 87, 0.22);
+  border-radius: 99px;
+  background: rgba(4, 120, 87, 0.06);
+  color: #065f46;
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.rooms-market-count-bookable {
+  color: #334155;
+  font-weight: 400;
+}
+
 .rooms-market-filter-card {
   margin-bottom: 2rem;
   border-radius: 1.1rem !important;
@@ -9902,6 +9930,14 @@ p, small, span, label, .form-text, .text-muted,
 
 .room-market-status-badge.is-full {
   background: #64748b;
+}
+
+.room-market-status-badge.is-occupied {
+  background: #7c3aed;
+}
+
+.room-market-status-badge.is-maintenance {
+  background: #b45309;
 }
 
 .room-market-feature-tile {
