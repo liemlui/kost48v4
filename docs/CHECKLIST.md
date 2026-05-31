@@ -1,5 +1,244 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-30 M9 Read Smoke, Critical API Flow, and Build Gate PASS
+**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
+## A-1. Latest Release Checklist — V5.9.4 Tenant Profile One-Time Fill
+
+### Code and Git
+
+- [x] Code commit pushed locally: `2597709 feat(tenant): add one-time profile completion`.
+- [x] Main is ahead 1 of origin/main.
+- [x] No generated Prisma commit included in V5.9.4.
+- [x] No schema change.
+- [x] No DB reset.
+- [x] No production DB mutation.
+- [x] No new npm dependency added.
+
+### Backend Endpoints
+
+- [x] `GET /api/tenant/profile` added — role TENANT.
+- [x] `PATCH /api/tenant/profile/onboarding` added — role TENANT.
+- [x] Both endpoints require `actor.tenantId`; missing tenantId returns ConflictException.
+- [x] Only 7 supplemental fields allowed for one-time fill.
+- [x] Filled fields are locked; PATCH on locked field returns HTTP 400 with clear message.
+- [x] `notes` field excluded via explicit Prisma select (not runtime filter).
+- [x] Successful PATCH audited as `TENANT_PROFILE_ONBOARDING_UPDATE`.
+- [x] Admin/Owner can still edit all tenant fields via `PATCH /tenants/:id`.
+
+### Frontend ProfilePage
+
+- [x] "Data Penghuni Tambahan" card added for TENANT role only.
+- [x] Completion badge shows X/7 data terisi.
+- [x] Locked fields displayed readonly with "Sudah tersimpan" helper text.
+- [x] Missing fields rendered as editable inputs.
+- [x] Save button disabled until at least one field has user input.
+- [x] Gender displayed with Indonesian labels: Laki-laki / Perempuan / Lainnya.
+- [x] Save mutation invalidates profile query on success.
+- [x] Non-tenant users see no profile onboarding card.
+
+### Build and Verification
+
+- [x] Backend tsc: 0 errors.
+- [x] `dist/modules/tenants/tenant-profile.controller.js` confirmed compiled.
+- [x] Frontend `tsc -b` PASS.
+- [x] Frontend Vite build PASS: 22.03s, 733 modules, 0 errors.
+- [x] API smoke `GET /tenant/profile` PASS: 6/7 completedFields, missingFields: birthDate.
+- [x] API smoke `PATCH /tenant/profile/onboarding` PASS: isComplete=True, 7/7.
+- [x] API smoke locked field retry PASS: HTTP 400 with clear message.
+- [x] API smoke notes not in response PASS.
+- [x] API smoke completionPercent=100 PASS.
+
+### Still required before M9 FULL PASS
+
+- [ ] Browser visual smoke for `/portal/profile` tenant view.
+- [ ] Full manual browser smoke owner dashboard/finance.
+- [ ] Full manual browser smoke admin dashboard/stays/invoices/payment/renew/checkout.
+- [ ] Full manual browser smoke staff warehouse/report/tickets.
+- [ ] Full manual browser smoke tenant portal stay/invoices/bookings/tickets/profile.
+- [ ] Full manual browser smoke public rooms/detail/booking.
+- [ ] Confirm no no-op CTA or link `#` across all roles.
+- [ ] Confirm no raw tenant backend terms across tenant portal.
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
+## A-1. Latest Release Checklist — V5.9.3-B Tenant Room Dossier Compact
+
+### Code and Git
+
+- [x] Frontend room dossier commit pushed to main: `e2d7d58`.
+- [x] Backend room dossier endpoint commit pushed to main: `7b89df6`.
+- [x] Main is clean and up to date with origin/main after push.
+- [x] Broad leftover WIP saved in stash: `stash@{0}`.
+- [x] No generated Prisma commit included in V5.9.3-B.
+- [x] No schema change.
+- [x] No DB reset.
+- [x] No production DB mutation.
+
+### Tenant `/portal/stay` Room Dossier
+
+- [x] `Kamar Saya` compact header added.
+- [x] Small room thumbnail used.
+- [x] Mini fact chips added for important room/stay facts.
+- [x] Separate large `Detail lainnya` card removed.
+- [x] `Info kamar` dossier section added.
+- [x] `Fasilitas` dossier section added.
+- [x] `Inventaris kamar` dossier section added.
+- [x] `Tarif & dana titipan` dossier section added.
+- [x] Dossier sections collapsed by default on mobile.
+- [x] All room inventory items can be checked through expanded inventory section.
+- [x] Inventory list uses internal scroll to avoid giant card height.
+- [x] Friendly inventory statuses used.
+- [x] `Laporkan masalah` remains a separate CTA.
+- [x] Deposit shown as neutral `dana titipan`.
+
+### Backend Support
+
+- [x] Added tenant-only `GET /api/room-items/my-room`.
+- [x] Endpoint scopes inventory to authenticated tenant active stay.
+- [x] Endpoint returns empty items/meta if tenant has no active stay.
+- [x] `GET /api/stays/me/current` includes tenant and public-visible room facilities.
+- [x] Endpoint smoke PASS: `/api/room-items/my-room` returned success=True.
+
+### Verification
+
+- [x] Frontend `tsc -b` PASS.
+- [x] Frontend Vite build PASS.
+- [x] Tenant screenshot smoke PASS: 24/24 PNG captured.
+- [x] Desktop `/portal/stay` rendered.
+- [x] Mobile `/portal/stay` rendered.
+- [x] Backend room inventory endpoint smoke PASS.
+
+### Still required before M9 FULL PASS
+
+- [ ] Full manual browser smoke owner dashboard/finance.
+- [ ] Full manual browser smoke admin dashboard/stays/invoices/payment/renew/checkout.
+- [ ] Full manual browser smoke staff warehouse/report/tickets.
+- [ ] Full manual browser smoke tenant portal stay/invoices/bookings/tickets.
+- [ ] Full manual browser smoke public rooms/detail/booking.
+- [ ] Confirm no no-op CTA or link `#` across all roles.
+- [ ] Confirm no raw tenant backend terms across tenant portal.
+- [ ] Confirm generated artifacts are not committed.
+
+### Future tenant roadmap checklist
+
+- [ ] Tenant Profile One-Time Fill plan.
+- [ ] Tenant self-profile endpoint using existing tenant fields.
+- [ ] Lock filled tenant profile fields from tenant self-edit.
+- [ ] Decide whether tenant photo requires schema change.
+- [ ] Plan tenant-to-tenant interaction/community privacy rules before implementation.
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V592_START -->
+## A-1. Latest Release Checklist — V5.8.6 to V5.9.2 Frontend UI Finalization
+
+### Package sequence
+
+- [x] V5.8.6 UI stabilization package generated.
+- [x] V5.8.7 browser smoke UI fixes package generated.
+- [x] V5.8.8 UI simplification + pagination package generated.
+- [x] V5.8.9 finance reports + tenant intelligence package generated.
+- [x] V5.9.0 tenant UI final + announcements package generated.
+- [x] V5.9.1 compact UI density package generated.
+- [x] V5.9.2 tenant engagement + room transparency package generated.
+- [x] Backend packages for V5.8.6–V5.9.2 marked UNCHANGED.
+- [x] Frontend build PASS reported for generated packages.
+- [x] Final V5.9.2 build reported PASS with 729 modules transformed.
+
+### UI/UX rules now active
+
+- [x] Owner sidebar simplified and no longer treated like admin operations menu.
+- [x] Notification/menu duplication reduced.
+- [x] Compact density pass applied globally.
+- [x] Finance reports consolidated under Reports → Keuangan.
+- [x] Deposit remains dana titipan/liability in UI direction.
+- [x] Tenant portal direction changed from finance-only to My Stay Guide + engagement.
+- [x] Tenant announcements moved toward header strip/notification-style visibility.
+- [x] Tenant room transparency UI added.
+- [x] Tenant service interest/feedback placeholder UI added.
+- [x] Profile photo/upload explicitly deferred.
+
+### Still required after applying V5.9.2
+
+- [ ] Rerun tenant browser screenshots desktop/mobile.
+- [ ] Confirm tenant `Kamar Saya` is compact and not too tall.
+- [ ] Confirm invoice Rp0/problem detail opens specific invoice detail where ID exists.
+- [ ] Confirm service interest CTA does not imply saved survey data.
+- [ ] Confirm announcements are not duplicated as menu + strip + notification all at once.
+- [ ] Confirm room item/facility transparency copy is clear.
+- [ ] Continue Staff visual audit.
+- [ ] Continue Admin visual audit.
+- [ ] Continue Owner visual audit.
+- [ ] Continue Public/booking visual audit.
+- [ ] Run API smoke after UI final candidate.
+- [ ] Do not claim FULL PASS until browser smoke + runtime/API verification + clean git status are complete.
+
+## A2. Next Active Checklist — UI Final Candidate Before Official Backend
+
+- [ ] Tenant accepted after V5.9.2 screenshots.
+- [ ] Staff dashboard/warehouse/report/tickets audited and patched.
+- [ ] Admin dashboard/payment/stays/invoices/renew/checkout audited and patched.
+- [ ] Owner dashboard/reports/finance audited and patched.
+- [ ] Public rooms/detail/booking audited and patched.
+- [ ] Then start official backend feature phases only after UI final candidate.
+<!-- KOST48_DOCS_SYNC_20260531_V592_END -->
+
+<!-- KOST48_DOCS_SYNC_20260530_M10C_START -->
+## A-1. Latest Release Checklist — M10 Cleanup, Safety Flow Hardening, and Push Gate
+
+### M10-A / M10-A.1 cleanup
+
+- [x] Dead resource config split files removed.
+- [x] `resources.ts` kept as active resource config source of truth.
+- [x] `Kost48 Surabaya V3` label removed from auth pages.
+- [x] `M4A`/`M5B` visible batch labels removed from command-center/deposit surfaces.
+- [x] Visible `Queue` copy changed to Indonesian `Antrean` where user-facing.
+- [x] Package handoff excludes `.env`, nested ZIPs, uploaded payment proofs, and build artifacts.
+- [x] Cleanup commits pushed to main.
+
+### M10-B safety flow hardening
+
+- [x] Public booking rate limit bucket added through explicit decorator metadata.
+- [x] Public booking smoke still PASS.
+- [x] Payment review queue smoke still PASS.
+- [x] Best-effort accounting/deposit journal failures now log warnings.
+- [x] Final checkout date guard uses Jakarta business-day convention.
+- [x] Frontend lifecycle modals use shared API error extraction.
+- [x] Tenant portal payment/renew/stay invalidations aligned after admin decisions.
+- [x] Backend and frontend M10-B commits pushed.
+
+### M10-C reminder label cleanup
+
+- [x] `Queue pengingat` changed to `Antrean pengingat`.
+- [x] Frontend build PASS after M10-C: 728 modules transformed.
+- [x] M10-C commit pushed to main as latest baseline.
+- [x] Repo reported `## main...origin/main` after push.
+
+### Still required before M9 FULL PASS
+
+- [ ] Manual browser smoke owner dashboard/finance.
+- [ ] Manual browser smoke admin dashboard/stays/invoices/payment/renew/checkout.
+- [ ] Manual browser smoke staff warehouse/report/tickets.
+- [ ] Manual browser smoke tenant portal stay/invoices/bookings/tickets.
+- [ ] Manual browser smoke public rooms/detail/booking.
+- [ ] Desktop/tablet/mobile readability check.
+- [ ] No no-op CTA/link `#` verified in browser.
+- [ ] No raw tenant backend terms verified in browser.
+- [ ] No generated Prisma/report/ZIP artifact in git status.
+
+## A2. Next Active Checklist — V5.8 Public and Tenant Browser Smoke Gate
+
+- [ ] Public rooms list/detail browser smoke.
+- [ ] Public booking form browser smoke.
+- [ ] Tenant booking waiting room smoke.
+- [ ] Tenant current stay smoke.
+- [ ] Tenant invoices and payment proof smoke.
+- [ ] Tenant renew request smoke.
+- [ ] Tenant checkout request smoke.
+- [ ] PaymentUrgencyChip visibility/link smoke.
+- [ ] Admin payment/renew decision refresh reflected in tenant portal.
+- [ ] Mobile/tablet layout smoke for public and tenant pages.
+<!-- KOST48_DOCS_SYNC_20260530_M10C_END -->
+
 
 <!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_START -->
 ## 0.0 Latest Current State — M9 Read Smoke, Critical API Flow, and Build Gate PASS

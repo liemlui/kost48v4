@@ -1,5 +1,102 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-30 M9 Read Smoke, Critical API Flow, and Build Gate PASS
+**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
+## 2026-05-31 — V5.9.4 Tenant Profile One-Time Fill Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 611 | Tenant profile self-service diizinkan hanya untuk field supplemental yang sudah ada di schema | Tidak membutuhkan schema change; tenant dapat melengkapi data tanpa menunggu implementasi baru. |
+| 612 | One-time fill enforced di backend, bukan hanya readonly frontend | Jika tenant mencoba overwrite field yang sudah terisi, backend menolak dengan HTTP 400. |
+| 613 | Field yang sudah terisi dikunci dari tenant self-edit dan memerlukan bantuan pengelola/admin | Admin/Owner tetap bisa koreksi via `PATCH /tenants/:id` yang sudah ada. |
+| 614 | `notes` dikecualikan dari semua tenant self-profile response | Catatan internal admin tidak boleh bocor ke tenant; eksklusif via explicit Prisma select, bukan runtime filter. |
+| 615 | Profile photo tetap deferred sebagai keputusan skema/API tersendiri | Belum ada storage backend, upload flow, atau permission model; tidak boleh diimplementasikan tanpa design approval. |
+| 616 | `kost48Assets.ts` stub adalah build-contract placeholder, bukan sumber aset final | Stub mengembalikan null sehingga UI fallback ke placeholder "K48"; implementasi asli memerlukan keputusan storage/CDN tersendiri. |
+| 617 | M9 FULL PASS masih memerlukan browser smoke manual lintas role | Build + API smoke bukan pengganti manual browser smoke; claim FULL PASS baru valid setelah smoke semua role selesai. |
+
+Verification:
+```text
+- 2597709 committed locally (ahead 1): feat(tenant): add one-time profile completion.
+- Backend tsc: 0 errors.
+- dist/modules/tenants/tenant-profile.controller.js confirmed compiled.
+- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
+- API smoke PASS:
+  - GET /tenant/profile: completedFields 6/7.
+  - PATCH /tenant/profile/onboarding fill birthDate: isComplete=True.
+  - PATCH retry locked field: HTTP 400 with clear message.
+  - notes not present in response.
+  - completionPercent=100 after fill.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
+## 2026-05-31 — V5.9.3-B Tenant Room Dossier Compact Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 584 | `/portal/stay` menjadi compact Room Dossier untuk `Kamar Saya` | Tenant dapat melihat ringkasan kamar dengan cepat tanpa kehilangan detail data kamar. |
+| 585 | Semua data kamar tetap harus bermanfaat, tetapi disajikan melalui disclosure/sections | Info kamar, fasilitas, inventaris, tarif, dan dana titipan tidak menjadi card raksasa. |
+| 586 | Semua inventory kamar yang tersedia dari API harus bisa dicek | Preview terbatas tidak boleh menyembunyikan barang; expanded section menampilkan semua item dengan scroll internal. |
+| 587 | Count inventory dan CTA laporan harus dipisahkan | `+N barang lain` tidak boleh menjadi tombol yang menyesatkan ke laporan. |
+| 588 | Deposit tenant aktif harus netral sebagai `dana titipan` | Menghindari alarm seperti `Deposit Ditahan` untuk kondisi normal. |
+| 589 | Tenant inventory status harus human-readable | Raw enum seperti `GOOD` tidak boleh bocor ke tenant UI. |
+| 590 | Added tenant read endpoint `GET /api/room-items/my-room` | Tenant dapat mengambil inventaris kamar miliknya berdasarkan active stay, tanpa melihat kamar tenant lain. |
+| 591 | Current stay read includes public-visible room facilities | Room transparency memanfaatkan data fasilitas existing tanpa schema change. |
+| 592 | V5.9.3-B tidak memakai schema change atau DB reset | Patch tetap aman sebagai frontend/backend read-shape improvement. |
+| 593 | Tenant profile one-time fill, tenant photo, and tenant interaction are future slices | Tidak digabung ke room dossier agar scope tetap coherent. |
+| 594 | Remaining broad WIP is stashed, not committed wholesale | Main tetap bersih; batch berikutnya harus dipilah berdasarkan scope. |
+
+Verification:
+```text
+- e2d7d58 pushed: compact room dossier on my stay page.
+- 7b89df6 pushed: expose room dossier inventory data.
+- Frontend build PASS: tsc -b 0 errors, Vite build 8.17s.
+- Tenant screenshot smoke PASS: 24/24 PNG, all status 200.
+- Backend endpoint smoke PASS: GET /api/room-items/my-room returned success=True.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V592_START -->
+## 2026-05-31 — V5.8.6 to V5.9.2 UI Finalization, Tenant Engagement, and Officialization Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 594 | V5.8.6–V5.9.2 are frontend-first UI/UX packages | Backend remains unchanged unless build/runtime proves an actual contract gap. |
+| 595 | UI cleanup should reduce, not add, visual clutter | Duplicate hero blocks, repeated warnings, duplicate links, and oversized spacing are removed or compacted. |
+| 596 | Owner sidebar should not mirror admin complexity | Owner navigation focuses on business health, finance, rooms/penghuni, reports, settings, and profile. |
+| 597 | Notifications should not be duplicated as major owner/tenant menu clutter | Header notification/urgent strip is preferred over redundant sidebar/menu items. |
+| 598 | Tables/lists should show max 10 visible rows where feasible | Pagination or compact queues reduce long-scroll pages. |
+| 599 | Row click and `Detail` button should not duplicate each other | If a row opens detail, redundant detail buttons are removed unless a distinct action is needed. |
+| 600 | Reports finance should consolidate official finance views into one area | Profit/Loss, Cashflow, Balance Sheet, Piutang Aging, and Deposit Titipan belong under Reports → Keuangan. |
+| 601 | Deposit must remain dana titipan/liability everywhere | Deposit is never treated as omzet, revenue, or profit in owner or finance report UI. |
+| 602 | Tenant portal is `My Stay Guide`, not only a payment portal | Tenant UI must build trust, engagement, service awareness, and feedback loops. |
+| 603 | Tenant `Kamar Saya` must build room transparency | Room photo/placeholder, booking-like room info, facilities, and installed room items should be visible when data exists. |
+| 604 | Tenant can report damaged/missing/problematic room items through the app | Room item transparency must connect to a clear report/laporan path. |
+| 605 | Tenant service interest UI is allowed before backend only if honest | Buttons may route to laporan/saran/contact but must not claim stored survey data before API exists. |
+| 606 | Announcements are rare and should be lightweight | Announcements may appear under the header or notification flow, not as a heavy dedicated menu. |
+| 607 | Profile photo/upload is deferred | Current UI may use placeholders; official upload/storage/permission will be a later backend-backed patch. |
+| 608 | Rp0/problem invoices must not push payment actions | They should be framed as `perlu dicek admin` and link to specific detail when invoice ID exists. |
+| 609 | Official backend features are deferred until UI final candidate | Finance reports, server pagination, decision queue, tenant/staff/owner intelligence, exports, and audit trail come after UI final. |
+| 610 | No schema change is approved by this UI docs sync | Future schema changes require explicit approval. |
+<!-- KOST48_DOCS_SYNC_20260531_V592_END -->
+
+<!-- KOST48_DOCS_SYNC_20260530_M10C_START -->
+## 2026-05-30 — M10 Cleanup, Safety Flow Hardening, and Push Gate Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 584 | M10 cleanup remains inside the current frontend monolith | No apps folder, workspace migration, or shared package extraction is introduced. |
+| 585 | Dead `frontend/src/config/resources/*` split attempt is removed | `frontend/src/config/resources.ts` remains the active resource config source of truth. |
+| 586 | Legacy/batch UI labels are not acceptable user-facing copy | `V3`, `M4A`, `M5B`, and visible English `Queue` are replaced with product/user-friendly labels. |
+| 587 | Package handoff must exclude secrets and local artifacts | `.env`, nested ZIPs, `tsconfig.tsbuildinfo`, generated reports, and uploaded payment proofs must not ship in final ZIPs. |
+| 588 | Public booking rate limit uses explicit metadata | `@RateLimit('publicBooking')` avoids relying on fragile handler method names. |
+| 589 | Best-effort accounting journal failures must warn in logs | Payment approval remains unblocked, but operational debugging becomes traceable. |
+| 590 | Final checkout date comparison uses Jakarta business-day convention | Reduces timezone/off-by-one checkout rejection risk. |
+| 591 | Tenant portal query keys must match invalidation keys | Admin payment/renew decisions refresh tenant portal state instead of leaving stale UI. |
+| 592 | M10-C reminder label cleanup is a micro polish gate | `Queue pengingat` is localized to `Antrean pengingat` and pushed after frontend build PASS. |
+| 593 | M9 FULL PASS remains blocked by manual browser smoke | API/build/read smoke PASS is not enough for full production UI label. |
+<!-- KOST48_DOCS_SYNC_20260530_M10C_END -->
+
 
 <!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_START -->
 ## 0.0 Latest Current State — M9 Read Smoke, Critical API Flow, and Build Gate PASS

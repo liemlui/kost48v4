@@ -1,5 +1,237 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-30 M9 Read Smoke, Critical API Flow, and Build Gate PASS
+**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
+## 0.0 Latest Contract Addendum — V5.9.4 Tenant Profile One-Time Fill
+
+```text
+Latest local commit (ahead 1):
+- 2597709 feat(tenant): add one-time profile completion
+
+Current verification evidence:
+- Backend tsc: 0 errors.
+- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
+- API smoke PASS: GET profile, PATCH fill, PATCH lock enforcement, notes exclusion verified.
+```
+
+### Tenant Profile One-Time Fill contract
+
+Purpose:
+- Tenant can view and supplement their own profile data through a dedicated self-service endpoint.
+- Supplemental fields can be filled only once by the tenant; once a field has a value it is locked from tenant self-edit.
+- Core identity fields (fullName, phone, email, identityNumber) remain admin-managed and are not editable by tenant.
+- Admin/Owner can still correct all tenant data via the existing admin tenant management endpoint `PATCH /tenants/:id`.
+
+Rules:
+- `GET /api/tenant/profile` returns tenant safe fields and a completion summary.
+  - Response must use explicit Prisma `select`; `notes` must never appear in the response.
+  - Completion summary includes: `requiredFields`, `completedFields`, `missingFields`, `lockedFields`, `completionPercent`, `isComplete`, `isLocked`.
+- `PATCH /api/tenant/profile/onboarding` fills only fields that are currently null or empty.
+  - Backend enforces lock: if any field in the payload is already filled, that field is rejected.
+  - If all payload fields are locked, return HTTP 400 with a clear human-readable message.
+  - If payload is empty or contains no recognized fields, return HTTP 400.
+  - Successful update is audited with action `TENANT_PROFILE_ONBOARDING_UPDATE`.
+- Both endpoints require `actor.tenantId`; if missing, return controlled `ConflictException`.
+
+### Tenant-fillable fields (one-time only)
+
+```text
+- gender
+- birthDate
+- originCity
+- occupation
+- companyOrCampus
+- emergencyContactName
+- emergencyContactPhone
+```
+
+### Notes exclusion contract
+
+```text
+- notes is an admin-internal field and must never appear in any tenant self-profile response.
+- Exclusion is enforced by explicit Prisma select, not runtime filtering.
+- Any future endpoint reading tenant data for the tenant must apply the same exclusion.
+```
+
+### Not approved in V5.9.4
+
+```text
+- No profile photo upload or avatar storage.
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No generated Prisma commit.
+- No new npm dependency.
+- No tenant-to-tenant interaction.
+- notes exclusion is mandatory and cannot be waived without an explicit approval decision.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
+## 0.0 Latest Contract Addendum — V5.9.3-B Tenant Room Dossier Compact
+
+```text
+Latest pushed main baseline:
+- e2d7d58 fix(tenant): compact room dossier on my stay page
+- 7b89df6 fix(tenant): expose room dossier inventory data
+
+Current verification evidence:
+- Frontend build PASS: tsc -b 0 errors and Vite build completed in 8.17s.
+- Tenant screenshot smoke PASS: 24/24 PNG captured, all status 200.
+- Desktop/mobile `/portal/stay` rendered with compact Room Dossier architecture.
+- Backend tenant endpoint smoke PASS: GET /api/room-items/my-room returned success=True.
+- Main is clean and up to date with origin/main after push.
+- Remaining broad WIP changes were stashed as `stash@{0}: On main: wip leftover before backend room dossier cherry-pick`.
+```
+
+### Tenant Room Dossier contract
+
+Rules:
+- `/portal/stay` is the active `My Stay Guide` / `Kamar Saya` room dossier surface.
+- `Kamar Saya` must remain compact while preserving useful database-backed room data.
+- Room identity, lease status, payment/tagihan status, room photo/thumbnail, facilities, inventory, tariffs, deposit/dana titipan, and issue reporting should be visible or checkable from this route.
+- Facilities and inventory should use compact disclosure/details patterns rather than giant always-open sections.
+- All room inventory items available from the API should be checkable; do not permanently hide items behind a misleading `+N` CTA.
+- Inventory problem reporting must remain a clear separate CTA, not mixed with item count text.
+- Tenant-facing inventory statuses must be human-readable: `GOOD` => `Baik`, `DAMAGED` => `Rusak`, `MISSING` => `Hilang`, `NEEDS_REPAIR`/`MAINTENANCE` => `Perlu dicek`.
+- Deposit copy must use `dana titipan` / `deposit titipan` and stay neutral during active tenancy.
+- Tenant UI must avoid raw backend terms such as `stay`, `periodEnd`, `checkout request`, `ISSUED`, `PENDING_REVIEW`, and raw enum item statuses.
+
+### API contract
+
+Added/active endpoint:
+
+```text
+GET /api/room-items/my-room
+Role: TENANT
+Purpose: return room inventory for the authenticated tenant's active stay.
+Response shape: { items, meta: { page, limit, totalItems, totalPages } }
+```
+
+Rules:
+- The endpoint must use `actor.tenantId`.
+- If the tenant account is not linked to a tenant record, return a controlled error.
+- If no active stay exists, return an empty items list with pagination metadata.
+- Tenant must only see inventory for the room attached to their own active stay.
+- This endpoint is read-only and must not mutate room, stock, inventory, stay, payment, or lifecycle state.
+
+Updated current-stay read shape:
+- `GET /api/stays/me/current` may include `tenant`.
+- `GET /api/stays/me/current` may include `room.facilities` filtered to `publicVisible: true`.
+
+### Not approved in V5.9.3-B
+
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No generated Prisma commit.
+- No tenant profile photo upload yet.
+- No tenant one-time profile completion endpoint yet.
+- No tenant-to-tenant chat/community implementation yet.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V592_START -->
+## 0.0 Latest Contract Addendum — V5.8.6 to V5.9.2 UI Finalization and Tenant Engagement
+
+### UI finalization contract
+
+Rules:
+- These packages are frontend-first UI/UX stabilization packages; backend stays unchanged unless runtime/build proves a real contract gap.
+- Compact mode is now a product rule: avoid oversized cards, excessive hero blocks, repeated explanatory copy, and long pages where the same decision can fit in a compact section.
+- One destination should not appear as multiple duplicate CTAs in the same section.
+- If a table/list row is clickable for detail, do not also show a redundant `Detail/Lihat` button in the same row unless it performs a distinct action.
+- Tables/lists should default to 10 visible rows where feasible; filter changes should reset pagination to page 1.
+- Filters must remain visually lighter than primary actions.
+- Visible UI copy should use Indonesian business/tenant language, not backend jargon.
+
+### Tenant engagement contract
+
+Rules:
+- Tenant portal is not only a finance/payment surface; it is `My Stay Guide` and should build trust, engagement, service awareness, and feedback.
+- Tenant home should show `Kamar Saya` clearly, including room identity, booking-like room information, room photo/placeholder, and installed room item visibility if available.
+- Tenant should be told that damaged, missing, or problematic room items can be reported through the app.
+- Tenant payment/tagihan cards must not push payment actions for Rp0 invoices; Rp0/problem invoices should be framed as `perlu dicek admin` and link to the specific invoice detail if an invoice ID exists.
+- Announcements are rare and should not be a major tenant sidebar/menu item. They may appear as a small strip under the header or through notifications, with detail route kept only when useful.
+- Service interest buttons are allowed as lightweight engagement UI only if they do not falsely claim persistence before a backend exists. Until backend support exists, route to laporan/saran/contact flow.
+- Profile photo/upload is intentionally deferred to a later patch; current scope may show profile/room placeholders only.
+
+### Finance report UI contract
+
+Rules:
+- Profit/Loss, Cashflow, Balance Sheet, Piutang Aging, and Deposit Titipan should live together in Reports → Keuangan rather than adding sidebar clutter.
+- Deposit must remain dana titipan/liability, not revenue/omzet/profit.
+- Frontend charts may be used for decision support, but official accounting numbers must later move to backend-backed report endpoints before production finance labeling.
+
+### Officialization carry-forward
+
+Future backend officialization may add endpoints such as:
+
+```text
+GET /api/reports/finance/summary
+GET /api/reports/finance/profit-loss
+GET /api/reports/finance/cashflow
+GET /api/reports/finance/balance-sheet
+GET /api/reports/finance/receivables-aging
+GET /api/reports/finance/deposit-liability
+GET /api/admin/decision-queue
+GET /api/tenant/my-stay/summary
+GET /api/staff/work-board
+GET /api/owner/business-health
+```
+
+No schema change is approved by this docs sync.
+<!-- KOST48_DOCS_SYNC_20260531_V592_END -->
+
+<!-- KOST48_DOCS_SYNC_20260530_M10C_START -->
+## 0.0 Latest Contract Addendum — M10 Cleanup and Safety Flow Hardening
+
+```text
+Latest pushed baseline after M10-C:
+- 3fa294c fix(frontend): localize reminder queue label
+- feb086b fix(frontend): refresh tenant portal after lifecycle decisions
+- 8a43ac2 fix(backend): harden public booking rate limit and journal logging
+- 8fc5f7f fix(payments): refresh portal state after review decisions
+- b456064 fix(frontend): remove legacy labels from command center
+- cd3d7f0 fix(frontend): clean legacy labels and package noise
+
+Current verification evidence from local run:
+- main is up to date with origin/main after push.
+- M10-C frontend build PASS: 728 modules transformed, built successfully.
+- M10-B smoke PASS: GET /api/public/rooms returned success=True.
+- M10-B smoke PASS: admin login + GET /api/payment-submissions/review-queue returned success=True.
+- M10 cleanup removed remaining user-facing legacy labels such as V3, M4A/M5B, and Queue pengingat.
+- Backend generated Prisma remains a local build artifact and must be restored before commit if it appears.
+- M9 FULL PASS is still not claimed until manual browser smoke across owner/admin/staff/tenant/public is completed.
+```
+
+### M10 cleanup contract
+
+Rules:
+- `frontend/src/config/resources.ts` remains the active resource config source of truth after deleting the unused `frontend/src/config/resources/*` split attempt.
+- User-facing legacy/batch labels must not appear in UI copy: avoid `Kost48 Surabaya V3`, `M4A`, `M5B`, and English `Queue` when the user sees Indonesian UI.
+- Use `Antrean` for visible queue/work-list copy where appropriate.
+- Package handoff ZIPs must exclude `.env`, nested ZIPs, TypeScript build info, generated reports, and uploaded payment proof files.
+- Frontend cleanup must not change lifecycle, payment, invoice, deposit, or inventory business rules.
+
+### M10-B safety contract
+
+Rules:
+- Public booking spam protection uses explicit `@RateLimit('publicBooking')` metadata and `RateLimitGuard` bucket resolution.
+- Auto Journal Lite and deposit liability journal failures remain best-effort; they must warn in logs instead of silently disappearing or blocking payment approval.
+- Final checkout date comparison uses the Jakarta business-day convention to avoid timezone off-by-one errors.
+- Tenant portal payment/renew/stay query keys must be invalidated consistently after admin payment or renew decisions.
+- Frontend mutation modals should use shared API error extraction so backend messages are not lost.
+
+### Carry-forward contract
+
+Rules:
+- M9 FULL PASS cannot be claimed until manual browser smoke across owner/admin/staff/tenant/public is completed.
+- Generated Prisma files are build/runtime artifacts and must be restored before commit unless schema/generator change is explicitly approved.
+- No apps folder, workspace migration, microservice shell, schema change, DB reset, dark mode, or production DB mutation is allowed for the next browser-smoke phase.
+<!-- KOST48_DOCS_SYNC_20260530_M10C_END -->
+
 
 <!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_START -->
 ## 0.0 Latest Current State — M9 Read Smoke, Critical API Flow, and Build Gate PASS

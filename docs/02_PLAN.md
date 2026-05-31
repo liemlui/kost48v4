@@ -1,5 +1,297 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-30 M9 Read Smoke, Critical API Flow, and Build Gate PASS
+**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
+## 0.0 Latest Execution Plan — After V5.9.4 Tenant Profile One-Time Fill
+
+```text
+Latest local commit (ahead 1):
+- 2597709 feat(tenant): add one-time profile completion
+
+Current verification evidence:
+- Backend tsc: 0 errors.
+- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
+- API smoke PASS: GET, PATCH fill, lock enforcement, notes exclusion verified.
+```
+
+## A-1. Current Execution Override — After V5.9.4
+
+```text
+V5.9.4 tenant profile one-time fill is committed locally (ahead 1).
+Do not reopen profile onboarding scope unless browser smoke reveals a regression.
+Docs sync commit is the immediate next step.
+Next product work must be selected intentionally from the options below.
+```
+
+### Completed in V5.9.4
+
+- Added backend `GET /api/tenant/profile`: returns tenant safe profile fields + completion summary.
+- Added backend `PATCH /api/tenant/profile/onboarding`: one-time fill for 7 supplemental fields.
+- Backend enforces lock: filled fields cannot be overwritten by tenant.
+- `notes` excluded from all tenant self-profile responses via explicit Prisma select.
+- Added `TenantProfileController` to `TenantsModule`.
+- Added `TenantProfileOnboardingDto` with class-validator decorators.
+- Added `getTenantProfile` and `fillTenantProfileOnboarding` service methods with audit logging.
+- Added frontend `getTenantProfile()` and `fillTenantProfileOnboarding()` API functions.
+- Added `TenantProfileCompletionSummary`, `TenantSelfProfile`, `TenantProfileResponse` to frontend types.
+- Added "Data Penghuni Tambahan" card to `ProfilePage` for TENANT role.
+- Card shows completion badge, locked field readonly display, editable missing fields, and save button.
+- Added `frontend/src/data/kost48Assets.ts` stub to fix pre-existing `tsc` module resolution error.
+
+### Immediate local-state rule
+
+```text
+Docs sync commit is pending immediately.
+kost48Assets.ts stub is a build-contract placeholder; do not remove it without adding the actual asset source.
+Stash@{0} (broad WIP) must still not be popped/committed wholesale.
+```
+
+### Recommended next sequence
+
+1. Commit docs sync for V5.9.4 (this step).
+2. Decide next product slice:
+   - A. Quick `/portal/profile` browser smoke to confirm visual rendering.
+   - B. V5.9.5 Tenant Remaining Production Readiness: WiFi phone tap link, invoice tab URL state, announcements click-through, ticket form modal improvements.
+   - C. Staff UI/UX audit and remaining admin/owner browser smoke.
+   - D. Tenant photo: schema/API design decision before implementation.
+3. Keep tenant interaction/community/chat as roadmap planning only until profile/photo/privacy rules are defined.
+4. Keep M9 FULL PASS gated until full manual browser smoke across owner/admin/staff/tenant/public is complete.
+<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
+## 0.0 Latest Execution Plan — After V5.9.3-B Tenant Room Dossier Compact
+
+```text
+Latest pushed main baseline:
+- e2d7d58 fix(tenant): compact room dossier on my stay page
+- 7b89df6 fix(tenant): expose room dossier inventory data
+
+Current verification evidence:
+- Frontend build PASS: tsc -b 0 errors and Vite build completed in 8.17s.
+- Tenant screenshot smoke PASS: 24/24 PNG captured, all status 200.
+- Desktop/mobile `/portal/stay` rendered with compact Room Dossier architecture.
+- Backend tenant endpoint smoke PASS: GET /api/room-items/my-room returned success=True.
+- Main is clean and up to date with origin/main after push.
+- Remaining broad WIP changes were stashed as `stash@{0}: On main: wip leftover before backend room dossier cherry-pick`.
+```
+
+## A-1. Current Execution Override — After V5.9.3-B
+
+```text
+V5.9.3-B tenant room dossier is now pushed to main.
+Do not reopen `/portal/stay` for broad redesign unless screenshot/manual evidence shows a real regression.
+Next work should be selected intentionally: docs sync, tenant profile one-time fill, or remaining tenant production-readiness issues.
+```
+
+### Completed in V5.9.3-B
+
+- Compact `Kamar Saya` room dossier on `/portal/stay`.
+- Removed oversized always-open detail card behavior.
+- Added compact room header, thumbnail, fact chips, and dossier sections.
+- Moved room detail into expandable sections:
+  - Info kamar,
+  - Fasilitas,
+  - Inventaris kamar,
+  - Tarif & dana titipan.
+- All room inventory items are checkable through the expanded inventory section.
+- Added backend tenant inventory endpoint `GET /api/room-items/my-room`.
+- Enriched current stay response with tenant and public-visible room facilities.
+- Tenant screenshot smoke and backend endpoint smoke passed.
+
+### Immediate local-state rule
+
+```text
+Main is clean after V5.9.3-B.
+Remaining broad WIP is in stash@{0} and must not be popped/committed wholesale.
+If continuing WIP, pop/audit in a branch and split into coherent batches.
+```
+
+### Recommended next sequence
+
+1. Commit docs sync for V5.9.3-B only.
+2. Decide next product slice:
+   - Tenant Profile One-Time Fill using existing backend tenant fields, or
+   - Tenant Remaining Production Readiness: WiFi phone tap, invoices tab state, announcements, ticket modal, etc.
+3. Keep tenant photo as a separate schema/API decision.
+4. Keep tenant interaction/community/chat as roadmap planning only until profile/photo/privacy rules are defined.
+
+### Tenant Profile One-Time Fill future plan
+
+```text
+Goal:
+- Tenant can fill useful marketing/operations fields one time.
+- Use existing Tenant fields first where possible: gender, birthDate, originCity, occupation, companyOrCampus, emergencyContactName, emergencyContactPhone, notes.
+- Filled fields should be locked for tenant self-edit; admin can still correct.
+- No schema change unless profile completion timestamp/photo is approved.
+```
+
+### Tenant photo future plan
+
+```text
+Profile photo likely needs approved schema/API/storage support.
+Do not hack photo into notes or unrelated fields.
+Recommended later: profilePhotoUrl/profilePhotoKey fields and tenant self-upload endpoint with one-time or admin-reset rule.
+```
+
+### Tenant interaction future plan
+
+```text
+Start with lightweight community/profile visibility planning before private chat.
+Do not expose sensitive tenant data such as phone, email, DOB, emergency contact, billing, or exact room details to other tenants.
+Private chat should wait for moderation/report/block/audit rules.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_END -->
+
+<!-- KOST48_DOCS_SYNC_20260531_V592_START -->
+## A-1. Current Execution Override — After V5.9.2 Tenant Engagement + Room Transparency UI
+
+```text
+Current generated package baseline:
+frontend_20260531_V592_TENANT_ENGAGEMENT_ROOM_TRANSPARENCY_FULL.zip
+backend_20260531_V592_TENANT_ENGAGEMENT_ROOM_TRANSPARENCY_UNCHANGED.zip
+
+V5.8.6–V5.9.2 were UI/UX frontend packages on top of M10-C.
+Backend was intentionally unchanged across these frontend UI packages.
+Manual/browser smoke is still required after applying V5.9.2.
+Do not claim FULL PASS yet.
+```
+
+### Immediate local apply and verify order
+
+1. Apply the V5.9.2 frontend package and unchanged backend package.
+2. Confirm git status and no accidental artifact files.
+3. Run frontend build.
+4. Run tenant browser screenshots first.
+5. Patch only proven visual/UX bugs before moving to staff.
+
+PowerShell build gate:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+```
+
+Cleanup after any local build:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git restore backend/src/generated/prisma; Remove-Item "frontend\tsconfig.tsbuildinfo" -Force -ErrorAction SilentlyContinue; git status -sb
+```
+
+### Current UI audit sequence
+
+```text
+1. Tenant — active focus after V5.9.2.
+2. Staff — next role after tenant is visually accepted.
+3. Admin — after staff.
+4. Owner — after admin.
+5. Public — final polish and booking smoke.
+```
+
+### Next active patch candidates
+
+#### V5.9.3 — Tenant smoke residual cleanup, if screenshots show issues
+- Verify `Kamar Saya` room transparency does not become too tall on mobile.
+- Verify invoice Rp0/problem detail CTA opens the specific detail, not a broad filter/list.
+- Verify service interest CTAs do not imply backend persistence yet.
+- Verify announcements are not repeated or promoted as a main menu item.
+- Verify `Laporan Saya` remains the route for item damage/lost/problem reports.
+
+#### V5.9.4 — Staff UI/UX total audit
+- Staff work board density.
+- Staff warehouse/list pagination and computed stock health.
+- Staff report flow clarity.
+- No official finance/lifecycle mutation from staff.
+
+#### V5.9.5 — Admin UI/UX total audit
+- Decision Queue clarity.
+- Payment review, stay lifecycle, checkout, renew, invoices.
+- No duplicated detail buttons if row click exists.
+- No UAT/dev copy in user-facing UI.
+
+#### V5.9.6 — Owner UI/UX total audit
+- Business/finance cockpit only.
+- Sidebar remains compact.
+- Deposit shown as dana titipan/liability.
+- Finance report tabs readable and not over-charted.
+
+### Official backend phase after UI final
+
+```text
+Do not start official backend feature work until UI final candidate is accepted.
+After UI final, officialize: finance reports, server pagination, admin decision queue, tenant stay summary, staff work board, owner business health, export/print, and audit trail.
+No schema change without explicit approval.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V592_END -->
+
+<!-- KOST48_DOCS_SYNC_20260530_M10C_START -->
+## A-1. Current Execution Override — After M10-C Cleanup Push
+
+```text
+Latest pushed baseline after M10-C:
+- 3fa294c fix(frontend): localize reminder queue label
+- feb086b fix(frontend): refresh tenant portal after lifecycle decisions
+- 8a43ac2 fix(backend): harden public booking rate limit and journal logging
+- 8fc5f7f fix(payments): refresh portal state after review decisions
+- b456064 fix(frontend): remove legacy labels from command center
+- cd3d7f0 fix(frontend): clean legacy labels and package noise
+
+Current verification evidence from local run:
+- main is up to date with origin/main after push.
+- M10-C frontend build PASS: 728 modules transformed, built successfully.
+- M10-B smoke PASS: GET /api/public/rooms returned success=True.
+- M10-B smoke PASS: admin login + GET /api/payment-submissions/review-queue returned success=True.
+- M10 cleanup removed remaining user-facing legacy labels such as V3, M4A/M5B, and Queue pengingat.
+- Backend generated Prisma remains a local build artifact and must be restored before commit if it appears.
+- M9 FULL PASS is still not claimed until manual browser smoke across owner/admin/staff/tenant/public is completed.
+```
+
+### Immediate clean gate
+
+1. Confirm repo is clean:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb
+```
+
+2. If generated Prisma appears after backend build, restore it before commit:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git restore backend/src/generated/prisma; Remove-Item "frontend\tsconfig.tsbuildinfo" -Force -ErrorAction SilentlyContinue; git status -sb
+```
+
+### Next active plan — V5.8 Public and Tenant Browser Smoke Gate
+
+Scope:
+- Public rooms list/detail/booking.
+- Tenant booking waiting room.
+- Tenant My Stay / invoices / payment proof / renew / checkout.
+- PaymentUrgencyChip visibility and links.
+- No raw tenant backend terms.
+- No misleading/no-op CTA or `href="#"`.
+- Desktop/tablet/mobile readability.
+
+PASS criteria:
+- Public booking explains room is not secured until payment/admin approval where relevant.
+- Tenant sees `masa sewa`, `tagihan`, `bukti pembayaran sedang diperiksa`, `ajukan perpanjangan`, and `ajukan keluar` copy.
+- Payment proof upload is hidden/disabled when an active proof is already under review.
+- Admin payment/renew decisions refresh tenant portal state.
+- No schema/backend change is introduced unless a proven UI smoke issue cannot be solved using existing API.
+
+### Forbidden in next phase
+
+```text
+No apps/ folder.
+No marketing-api shell.
+No npm workspace migration.
+No shared package extraction.
+No service-to-service HTTP.
+No schema change without explicit approval.
+No DB reset.
+No lifecycle rewrite.
+No payment approval extraction.
+No dark mode.
+```
+<!-- KOST48_DOCS_SYNC_20260530_M10C_END -->
+
 
 <!-- KOST48_DOCS_SYNC_20260530_M9_API_FLOW_BUILD_START -->
 ## 0.0 Latest Current State — M9 Read Smoke, Critical API Flow, and Build Gate PASS
