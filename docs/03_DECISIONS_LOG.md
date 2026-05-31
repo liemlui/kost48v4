@@ -1,5 +1,34 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 629 | Final checkout tidak langsung membuat kamar siap dipasarkan | Stay dapat selesai, tetapi kamar masuk gate operasional terlebih dahulu. |
+| 630 | `MAINTENANCE` dipakai sementara sebagai room-readiness gate tanpa schema change | Kamar setelah checkout tampil sebagai `Perlu dicek` / `Sedang dicek`, bukan langsung `Kosong siap booking`. |
+| 631 | Checkout final otomatis membuat atau memakai ticket `CHECKOUT_INSPECTION` | Staff mendapat pekerjaan cek kamar setelah penghuni keluar. |
+| 632 | Duplicate checkout-inspection ticket untuk stay/room/category harus dicegah | Retry/double flow tidak membuat antrean staff ganda. |
+| 633 | Admin close ticket cek kamar dapat membuat room `AVAILABLE` hanya jika aman | Room tidak dipasarkan jika masih ada active stay, status bukan maintenance, atau kondisi akhir bermasalah. |
+| 634 | Public room `MAINTENANCE` tidak bookable dan memakai label `Sedang dicek` | Prospek tetap mendapat transparansi tanpa bisa booking kamar yang belum siap. |
+| 635 | Public rooms boleh memiliki filter `Sedang Dicek` | Kamar baru keluar dapat dilihat sebagai minat/ketersediaan, bukan booking langsung. |
+| 636 | Staff UX harus menampilkan `Cek kamar keluar` sebagai pekerjaan operasional | Staff fokus cek kebersihan, kunci, inventaris, kerusakan, dan foto kondisi akhir. |
+| 637 | Staff UI tidak boleh memakai copy developer/internal permission | Istilah seperti lifecycle, official movement, approval finance, dan final checkout tidak ditampilkan sebagai instruksi staff. |
+| 638 | Main list/table surfaces diarahkan ke max 10 rows dengan pagination | Mengurangi long-scroll dan menjaga command center tetap operasional. |
+| 639 | Client-side fallback pagination boleh dipakai jika server meta tidak tersedia | UI tidak lagi memotong 10 item diam-diam tanpa akses halaman berikutnya. |
+| 640 | V5.9.6–V5.9.8 work dipush dalam commit `2abf4c9` | Repo main sekarang membawa pagination, staff UX cleanup, dan room readiness flow. |
+| 641 | V5.9.8-A tetap no schema change/no DB reset/no new dependency | Flow memakai struktur existing dan `MAINTENANCE` sebagai readiness gate sementara. |
+| 642 | Build PASS dikonfirmasi user setelah push | Backend dan frontend build lokal sukses, tetapi M9 FULL PASS tetap menunggu manual browser smoke semua role. |
+
+Verification:
+```text
+- Commit pushed: 2abf4c9 feat(rooms): gate checkout room readiness.
+- Backend build PASS confirmed by user.
+- Frontend build PASS confirmed by user.
+- Generated Prisma restored before commit.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 2026-05-31 — V5.9.5-A Public Room Assets & Slideshow Decisions

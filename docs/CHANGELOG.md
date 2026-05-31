@@ -1,5 +1,66 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening
+
+### Type
+
+Backend + frontend business-flow hardening for room readiness after final checkout, plus accumulated staff UX/list pagination cleanup pushed in the same commit.
+
+### Added
+
+- Added room-readiness gate after final checkout using existing `MAINTENANCE` room status.
+- Added automatic/reused `CHECKOUT_INSPECTION` ticket creation after final checkout.
+- Added duplicate-prevention logic for checkout inspection tickets by stay/room/category.
+- Added safe room-ready transition when closing checkout-inspection tickets.
+- Added public `Sedang Dicek` filter for rooms that are empty but not ready for booking.
+- Added `useClientPagination` frontend hook for client-side fallback pagination.
+- Added/expanded pagination on major table/list surfaces where server metadata is not available.
+- Added staff queue visibility for completed work and clearer checkout-inspection task labels.
+
+### Changed
+
+- Final checkout no longer directly makes a room available/bookable.
+- Room after checkout is shown as `Perlu dicek` / `Sedang dicek` until inspection is completed.
+- Public `MAINTENANCE` rooms are non-bookable and use inquiry copy instead of booking CTA.
+- Admin ticket close behavior is guarded so unsafe checkout-inspection tickets do not automatically release the room.
+- Staff workspace copy was cleaned to remove developer/internal permission language.
+- Staff layout/card rhythm was stabilized after screenshot feedback.
+- ResourceTable fallback behavior now paginates instead of silently clipping lists.
+- Dashboard/accounting/deposit/staff/admin list previews were moved toward max 10 visible rows.
+
+### Verified
+
+```text
+- Commit pushed to main: 2abf4c9 feat(rooms): gate checkout room readiness.
+- Git push PASS to origin/main.
+- Backend build PASS confirmed by user.
+- Frontend build PASS confirmed by user.
+- Generated Prisma restored before commit.
+```
+
+### Not changed
+
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No generated Prisma commit.
+- No new npm dependency.
+- No apps folder, workspace migration, or service split.
+- No separate RoomInspection model yet.
+```
+
+### Still pending
+
+```text
+- Targeted runtime smoke for room readiness flow.
+- Public browser smoke for Sedang Dicek / non-bookable room state.
+- Staff dashboard browser smoke after layout stabilization.
+- Full manual browser smoke owner/admin/staff/tenant/public before M9 FULL PASS.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 2026-05-31 — V5.9.5-A Public Room Assets & Slideshow

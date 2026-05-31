@@ -1,6 +1,73 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
-**Status:** Source of truth utama setelah V5.9.5-A Public Room Assets & Slideshow. Public rooms/detail/booking scope build, API smoke, dan browser smoke dilaporkan PASS; katalog public menampilkan kamar kosong dan terisi dengan aset foto/logo asli. M9 FULL PASS tetap hanya boleh diklaim setelah manual browser smoke owner/admin/staff/tenant/public lengkap.
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Status:** Source of truth utama setelah V5.9.8-A Room Readiness Flow Hardening. Commit `2abf4c9` sudah pushed ke origin/main, backend build PASS dan frontend build PASS dikonfirmasi user. Final checkout sekarang masuk room-readiness gate (`MAINTENANCE` / Sedang dicek) dan M9 FULL PASS tetap hanya boleh diklaim setelah manual browser smoke owner/admin/staff/tenant/public lengkap.
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 0.0 Latest Current State — V5.9.8-A Room Readiness Flow Hardening
+
+```text
+Latest pushed main baseline:
+- 2abf4c9 feat(rooms): gate checkout room readiness
+
+This commit also includes the accumulated V5.9.6–V5.9.7 frontend cleanup work that was intentionally staged together before push:
+- global table/list pagination and duplicate CTA cleanup,
+- staff workspace UX final candidate fixes,
+- staff layout stabilization hotfix,
+- room readiness after checkout flow and hardening.
+
+Verification evidence reported by local run:
+- Git push PASS to origin/main.
+- Backend build PASS confirmed by user local run.
+- Frontend build PASS confirmed by user local run.
+- Generated Prisma was restored before commit and was not included in the pushed commit.
+- No schema change.
+- No DB reset.
+- No new dependency.
+```
+
+### V5.9.8-A active baseline
+
+```text
+Final checkout no longer means the room is immediately ready to sell or occupy.
+After final checkout, the room enters a readiness gate using MAINTENANCE as the current no-schema-change status.
+Staff must check the room after the tenant leaves, and admin closes the checkout inspection ticket before the room can become AVAILABLE again.
+```
+
+### Implemented and pushed
+
+| Area | Result |
+|---|---|
+| Final checkout readiness gate | Final checkout sets the room to `MAINTENANCE` / `Perlu dicek`, not directly to `AVAILABLE`. |
+| Staff inspection task | Backend creates a `CHECKOUT_INSPECTION` ticket for staff after checkout final. |
+| Duplicate inspection prevention | Checkout inspection ticket creation checks existing stay/room/category ticket history before creating a new one. |
+| Room ready transition | Closing a safe checkout-inspection ticket can move room from `MAINTENANCE` to `AVAILABLE`. |
+| Safety blockers | Room is not marked available if there is another active stay, room is not in `MAINTENANCE`, or final condition is not safe. |
+| Public visibility | Public room catalog can show `MAINTENANCE` as `Sedang dicek`, with `canBook=false`. |
+| Public filter | `/rooms` includes a `Sedang Dicek` filter for rooms that are empty but still being prepared. |
+| Staff UX | Staff dashboard/work queue was compacted, stabilized, and cleaned from developer/internal permission copy. |
+| Pagination/list hygiene | Major list/table surfaces moved toward max 10 visible rows with pagination or compact preview behavior. |
+| Commit hygiene | Commit `2abf4c9` is pushed; generated Prisma was restored before commit. |
+
+### Active guardrails
+
+```text
+- Final checkout must remain blocked by open invoices: every status except PAID and CANCELLED blocks; DRAFT also blocks.
+- Admin approve checkout request is not final checkout.
+- Final checkout creates room-readiness work, not instant room availability.
+- MAINTENANCE is currently reused as the no-schema-change readiness gate; do not introduce new room status/schema without explicit approval.
+- Staff may perform/report inspection work but must not directly control sensitive finance/lifecycle decisions.
+- Public UI must not allow direct booking for rooms in MAINTENANCE / Sedang dicek.
+- Public UI must not expose raw room status enums.
+- M9 FULL PASS remains pending until all-role manual browser smoke is recorded.
+```
+
+### Honest label
+
+```text
+V5.9.8-A ROOM READINESS FLOW HARDENING = GIT PUSH PASS + BACKEND BUILD PASS + FRONTEND BUILD PASS by user local confirmation.
+M9 FULL PASS is still not claimed because full manual browser smoke across owner/admin/staff/tenant/public is still pending.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 0.0 Latest Current State — V5.9.5-A Public Room Assets & Slideshow

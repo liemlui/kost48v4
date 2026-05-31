@@ -1,5 +1,71 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening Journal
+
+Status:
+```text
+V5.9.8-A has been committed and pushed to main.
+Current relevant commit:
+- 2abf4c9 feat(rooms): gate checkout room readiness
+
+User confirmed:
+- Backend build PASS.
+- Frontend build PASS.
+```
+
+Implemented backend:
+- Final checkout no longer immediately makes a room `AVAILABLE`.
+- Final checkout sets the room to `MAINTENANCE` as the current no-schema-change readiness gate.
+- A `CHECKOUT_INSPECTION` ticket is created/reused for the checked-out stay/room.
+- Ticket creation avoids duplicate checkout-inspection work for the same stay/room/category.
+- Closing a safe checkout-inspection ticket can move the room from `MAINTENANCE` to `AVAILABLE`.
+- Room availability transition is blocked when another active stay exists, the room is not in maintenance, or the final condition is not safe.
+- Public room service exposes maintenance/readiness context so frontend can show `Sedang dicek`.
+
+Implemented frontend:
+- Public rooms include `Sedang Dicek` filter.
+- Public `MAINTENANCE` rooms use `Sedang dicek` / non-bookable copy and route to availability inquiry instead of booking.
+- Staff rooms/work queue show checkout inspection as `Cek kamar keluar` / room-preparation work.
+- Admin ticket close modal provides readiness warning and clearer validation.
+- Global UI/list cleanup from V5.9.6–V5.9.7 was included in the pushed commit:
+  - `useClientPagination`,
+  - ResourceTable fallback pagination,
+  - accounting/deposit/dashboard list pagination,
+  - staff work queue and dashboard layout stabilization,
+  - staff developer-copy cleanup.
+
+Verified:
+```text
+- Git commit created: 2abf4c9 feat(rooms): gate checkout room readiness.
+- Git push PASS to origin/main.
+- Backend build PASS confirmed by user local run.
+- Frontend build PASS confirmed by user local run.
+- Generated Prisma was restored before commit and not pushed.
+```
+
+Not changed:
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No generated Prisma commit.
+- No new dependency.
+- No separate room-readiness table/model yet.
+- No new microservice/apps folder/workspace migration.
+```
+
+Carry-forward:
+```text
+- Commit this docs sync separately.
+- Run targeted runtime smoke for room readiness:
+  final checkout -> room MAINTENANCE -> CHECKOUT_INSPECTION ticket -> admin close -> room AVAILABLE.
+- Run public browser smoke for Sedang Dicek state.
+- Run staff dashboard browser smoke for layout/card stability.
+- M9 FULL PASS remains gated by full manual browser smoke across all roles.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 2026-05-31 — V5.9.5-A Public Room Assets & Slideshow Journal

@@ -1,5 +1,74 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## A-1. Latest Release Checklist — V5.9.8-A Room Readiness Flow Hardening
+
+### Code and Git
+
+- [x] Commit pushed to main: `2abf4c9 feat(rooms): gate checkout room readiness`.
+- [x] Generated Prisma restored before commit.
+- [x] No generated Prisma commit included.
+- [x] No schema change.
+- [x] No DB reset.
+- [x] No production DB mutation.
+- [x] No new npm dependency.
+
+### Build
+
+- [x] Backend build PASS confirmed by user local run.
+- [x] Frontend build PASS confirmed by user local run.
+
+### Room Readiness Backend
+
+- [x] Final checkout no longer directly makes room `AVAILABLE`.
+- [x] Final checkout moves room to `MAINTENANCE` / readiness gate.
+- [x] Checkout inspection ticket category `CHECKOUT_INSPECTION` is created/reused.
+- [x] Duplicate checkout-inspection tickets are guarded by stay/room/category.
+- [x] Admin close of safe checkout-inspection ticket can move room to `AVAILABLE`.
+- [x] Room ready transition is blocked when active stay/status/condition blockers exist.
+- [x] No new room readiness schema/model introduced.
+
+### Public UI
+
+- [x] `MAINTENANCE` room is shown as `Sedang dicek`.
+- [x] `MAINTENANCE` room is not directly bookable.
+- [x] Public CTA for this state routes to availability inquiry, not direct booking.
+- [x] Public rooms include `Sedang Dicek` filter.
+
+### Staff/Admin UI
+
+- [x] Staff work queue recognizes checkout inspection as `Cek kamar keluar`.
+- [x] Staff copy cleaned from developer/internal permission terms.
+- [x] Staff dashboard layout hotfix applied after screenshot feedback.
+- [x] Admin ticket close modal includes readiness warning/validation.
+- [x] Completed staff work can be viewed from the staff queue.
+- [x] Staff ActionLauncher mobile overflow was addressed.
+- [x] Admin staff performance wrong first-card render removed.
+
+### Pagination / List Hygiene
+
+- [x] `useClientPagination` added.
+- [x] ResourceTable fallback pagination added.
+- [x] Major dashboard/accounting/deposit/staff/admin list surfaces moved toward max 10 visible items.
+- [x] Filter chips remain stable instead of disappearing at zero count where patched.
+
+### Still required before M9 FULL PASS
+
+- [ ] Commit this docs sync separately.
+- [ ] Run targeted room-readiness runtime smoke.
+- [ ] Verify final checkout -> room `MAINTENANCE`.
+- [ ] Verify `CHECKOUT_INSPECTION` ticket exists.
+- [ ] Verify staff sees checkout inspection task.
+- [ ] Verify admin close safe ticket -> room `AVAILABLE`.
+- [ ] Verify public room `Sedang Dicek` cannot be booked directly.
+- [ ] Manual browser smoke staff dashboard layout.
+- [ ] Manual browser smoke admin tickets close flow.
+- [ ] Manual browser smoke public rooms/detail/booking.
+- [ ] Full manual browser smoke owner/admin/staff/tenant/public.
+- [ ] Confirm no no-op CTA or `href="#"`.
+- [ ] Confirm no raw backend enums in public/tenant/staff UI.
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## A-1. Latest Release Checklist — V5.9.5-A Public Room Assets & Slideshow

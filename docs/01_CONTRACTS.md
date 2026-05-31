@@ -1,5 +1,100 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 0.0 Latest Contract Addendum — V5.9.8-A Room Readiness Flow Hardening
+
+```text
+Latest pushed main baseline:
+- 2abf4c9 feat(rooms): gate checkout room readiness
+
+Verification evidence reported:
+- Git push PASS to origin/main.
+- Backend build PASS confirmed by user local run.
+- Frontend build PASS confirmed by user local run.
+- Generated Prisma restored before commit.
+```
+
+### Room readiness after checkout contract
+
+Purpose:
+- Final checkout confirms the tenant has left and the stay can be completed.
+- Final checkout must not imply the room is already clean, inspected, inventoried, and ready for the next tenant.
+- Room readiness is an operational gate between checkout completion and bookable availability.
+
+Rules:
+- Final checkout changes the stay lifecycle to completed according to the existing core flow.
+- After final checkout, the room must enter a readiness gate:
+  - current no-schema-change implementation uses `Room.status = MAINTENANCE`.
+  - tenant/public/admin/staff UI should label this as `Perlu dicek`, `Cek kamar keluar`, or `Sedang dicek` depending on context.
+- Backend must create or reuse one checkout inspection task/ticket for that stay/room:
+  - category: `CHECKOUT_INSPECTION`,
+  - intent: staff checks room condition after the tenant leaves.
+- Duplicate checkout-inspection tickets for the same stay/room/category should be avoided.
+- Closing a safe checkout-inspection ticket may move the room from `MAINTENANCE` to `AVAILABLE`.
+- A checkout-inspection ticket must not mark a room `AVAILABLE` if:
+  - another active stay exists for the same room,
+  - the room is no longer in `MAINTENANCE`,
+  - the final condition or admin review indicates damage/problem,
+  - the close action is not the correct checkout-inspection completion path.
+
+### Staff inspection contract
+
+Rules:
+- Staff inspection is operational evidence collection and task completion.
+- Staff should see a clear work item such as `Cek kamar keluar` or `Cek kamar setelah penghuni keluar`.
+- Staff-facing copy should focus on:
+  - kebersihan,
+  - kunci,
+  - barang tertinggal,
+  - inventaris,
+  - kerusakan,
+  - foto kondisi akhir.
+- Staff UI must not use developer/internal permission copy such as:
+  - `lifecycle`,
+  - `official movement`,
+  - `final checkout`,
+  - `approval finance`,
+  - `computed by system`.
+- Staff must not mutate sensitive finance/lifecycle/payment/deposit decisions unless explicitly approved in a future decision.
+
+### Public room readiness contract
+
+Rules:
+- Public room card/detail must treat `MAINTENANCE` rooms as non-bookable.
+- Public-facing label for this readiness state should be `Sedang dicek`.
+- Public CTA for this state should be `Tanya Ketersediaan`, not `Ajukan Booking`.
+- Public filter may include `Sedang Dicek` so prospects can see recently vacated rooms without assuming they are ready today.
+- `canBook` remains the source of truth for direct booking action.
+
+### Pagination and duplicate UI contract
+
+Rules:
+- Main table/list surfaces should show max 10 visible rows per page where feasible.
+- If server metadata is unavailable, frontend may use client-side fallback pagination.
+- Row-click and `Detail/Lihat` button must not duplicate each other unless the button performs a different action.
+- Dashboard pages should prioritize compact queues, summaries, and disclosure sections over long table dumps.
+- Filters should reset pagination to page 1 and must remain visually lighter than primary actions.
+
+### Not approved in V5.9.8-A
+
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No new dependency.
+- No generated Prisma commit.
+- No new room readiness enum/table yet.
+- No official admin-managed room inspection schema yet.
+```
+
+### Future officialization candidates
+
+```text
+RoomReadinessStatus or RoomInspection may be considered later if explicitly approved.
+A future production-grade design may separate occupancy status from readiness/cleaning status instead of reusing MAINTENANCE.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 0.0 Latest Contract Addendum — V5.9.5-A Public Room Assets & Slideshow

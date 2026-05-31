@@ -1,5 +1,89 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+## 0.0 Latest Execution Plan — After V5.9.8-A Room Readiness Flow Hardening
+
+```text
+Latest pushed main baseline:
+- 2abf4c9 feat(rooms): gate checkout room readiness
+
+Reported verification:
+- Git push PASS.
+- Backend build PASS confirmed by user.
+- Frontend build PASS confirmed by user.
+- Generated Prisma restored before commit.
+```
+
+## A-1. Current Execution Override — After V5.9.8-A
+
+```text
+V5.9.8-A is now the active code baseline.
+The new business rule is: final checkout does not immediately make a room bookable.
+Final checkout sends the room into a staff/admin readiness gate first.
+Do not start another large feature before the room-readiness flow is smoke-tested in runtime/browser.
+```
+
+### Completed in V5.9.8-A
+
+- Final checkout now gates room readiness through `MAINTENANCE` / `Perlu dicek`.
+- Backend creates/reuses a `CHECKOUT_INSPECTION` ticket after final checkout.
+- Closing a safe checkout inspection can mark the room `AVAILABLE`.
+- Guardrails prevent automatic availability when there is another active stay, unsafe condition, or room status mismatch.
+- Public room display treats `MAINTENANCE` as `Sedang dicek` and non-bookable.
+- Public rooms gained `Sedang Dicek` filter.
+- Staff UX/list/table work from V5.9.6–V5.9.7 was also pushed in the same commit:
+  - pagination fallback hook,
+  - max-10 list/table behavior,
+  - staff work queue cleanup,
+  - staff layout stabilization,
+  - developer/internal staff copy cleanup.
+
+### Immediate verify order
+
+1. Confirm repository is clean after docs sync:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb
+```
+
+2. Run base smoke:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/public/rooms"
+```
+
+```powershell
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:3000/api/auth/login" -ContentType "application/json" -Body '{"identifier":"admin@kost48.com","password":"admin123"}'; $token=$login.data.accessToken; Invoke-RestMethod -Method Get -Uri "http://localhost:3000/api/payment-submissions/review-queue" -Headers @{Authorization="Bearer $token"}
+```
+
+3. Run room-readiness runtime smoke:
+   - final checkout an eligible active stay,
+   - verify room becomes `MAINTENANCE`,
+   - verify `CHECKOUT_INSPECTION` ticket exists,
+   - verify staff sees the task,
+   - close the inspection safely as admin,
+   - verify room becomes `AVAILABLE`,
+   - verify public catalog allows booking only after room is available.
+
+### Recommended next sequence
+
+1. Commit this docs sync separately.
+2. Run the room-readiness smoke flow.
+3. Run public room browser smoke for `Sedang Dicek`.
+4. Run staff dashboard browser smoke after layout hotfix.
+5. Continue Admin → Owner → Tenant → Public all-role browser smoke.
+6. Patch only bugs proven by smoke/screenshot evidence.
+7. Do not claim M9 FULL PASS until all-role browser smoke is recorded.
+
+### Future officialization
+
+```text
+A later backend officialization may separate room occupancy from room readiness through a schema/API design.
+Possible future model: RoomInspection or roomReadinessStatus.
+That is not approved in V5.9.8-A and must not be added without explicit approval.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
 ## 0.0 Latest Execution Plan — After V5.9.5-A Public Room Assets & Slideshow
