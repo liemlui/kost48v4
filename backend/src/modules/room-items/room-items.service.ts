@@ -70,6 +70,31 @@ export class RoomItemsService {
     return { items: await this.prisma.roomItem.findMany({ where: roomId ? { roomId } : undefined, include: { room: true, item: true }, orderBy: { id: 'desc' } }) };
   }
 
+  async findMyRoomItems(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ConflictException('Akun tenant belum terhubung ke data tenant');
+    }
+
+    const activeStay = await this.prisma.stay.findFirst({
+      where: { tenantId: actor.tenantId, status: 'ACTIVE' },
+      orderBy: [{ checkInDate: 'desc' }, { id: 'desc' }],
+      select: { id: true, roomId: true },
+    });
+
+    if (!activeStay) {
+      return { items: [], meta: { page: 1, limit: 50, totalItems: 0, totalPages: 1 } };
+    }
+
+    const items = await this.prisma.roomItem.findMany({
+      where: { roomId: activeStay.roomId },
+      include: { room: true, item: true },
+      orderBy: [{ status: 'asc' }, { id: 'desc' }],
+      take: 50,
+    });
+
+    return { items, meta: { page: 1, limit: 50, totalItems: items.length, totalPages: 1 } };
+  }
+
   async create(_dto: CreateRoomItemDto, actor: CurrentUserPayload) {
     this.assertOwnerOrAdmin(actor);
     throw new ConflictException('Gunakan Mutasi Stok tipe Pasang ke Kamar untuk menambah barang kamar. Ini menjaga stok gudang dan inventaris kamar tetap sinkron.');

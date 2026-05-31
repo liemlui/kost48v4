@@ -93,7 +93,15 @@ export class StaysQueryService {
     const stay = await this.prisma.stay.findFirst({
       where: { tenantId: user.tenantId, status: StayStatus.ACTIVE },
       include: {
-        room: true,
+        tenant: true,
+        room: {
+          include: {
+            facilities: {
+              where: { publicVisible: true },
+              orderBy: [{ category: 'asc' }, { id: 'asc' }],
+            },
+          },
+        },
         _count: {
           select: { invoices: true },
         },
