@@ -68,12 +68,6 @@ function buildWhatsAppUrl(room: PublicRoom) {
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
-function buildWhatsAppAvailabilityUrl(room: PublicRoom) {
-  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
-  const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia? Boleh tanya estimasi ketersediaannya?`;
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
-}
 
 function getFeatureIcon(title: string, value: string) {
   if (/kamar mandi/i.test(title)) return "🚿";
@@ -244,11 +238,7 @@ function RoomMarketCard({
         <div className="room-market-actions">
           {isAvailable ? (
             <Button className="w-100" onClick={handleBook}>Ajukan Booking</Button>
-          ) : (
-            <a className="btn btn-secondary w-100" href={buildWhatsAppAvailabilityUrl(room)} target="_blank" rel="noreferrer">
-              Tanya Ketersediaan
-            </a>
-          )}
+          ) : null}
           <a className="btn btn-outline-secondary w-100" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
             💬 Tanya via WhatsApp
           </a>
