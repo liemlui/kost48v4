@@ -1,62 +1,76 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## 0.0 Latest Execution Plan — After V5.9.4 Tenant Profile One-Time Fill
-
-```text
-Latest local commit (ahead 1):
-- 2597709 feat(tenant): add one-time profile completion
-
-Current verification evidence:
-- Backend tsc: 0 errors.
-- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
-- API smoke PASS: GET, PATCH fill, lock enforcement, notes exclusion verified.
-```
-
-## A-1. Current Execution Override — After V5.9.4
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## 0.0 Latest Execution Plan — After V5.9.5-A Public Room Assets & Slideshow
 
 ```text
-V5.9.4 tenant profile one-time fill is committed locally (ahead 1).
-Do not reopen profile onboarding scope unless browser smoke reveals a regression.
-Docs sync commit is the immediate next step.
-Next product work must be selected intentionally from the options below.
+Latest local commits for this scope:
+- f10ebe5 fix(public): wire room assets and slideshow
+- 419dc62 chore(public): add backend room image assets
+
+Reported verification:
+- Frontend build PASS.
+- Backend build PASS.
+- API smoke PASS.
+- Browser smoke PASS for public rooms/detail/booking scope.
 ```
 
-### Completed in V5.9.4
+## A-1. Current Execution Override — After V5.9.5-A
 
-- Added backend `GET /api/tenant/profile`: returns tenant safe profile fields + completion summary.
-- Added backend `PATCH /api/tenant/profile/onboarding`: one-time fill for 7 supplemental fields.
-- Backend enforces lock: filled fields cannot be overwritten by tenant.
-- `notes` excluded from all tenant self-profile responses via explicit Prisma select.
-- Added `TenantProfileController` to `TenantsModule`.
-- Added `TenantProfileOnboardingDto` with class-validator decorators.
-- Added `getTenantProfile` and `fillTenantProfileOnboarding` service methods with audit logging.
-- Added frontend `getTenantProfile()` and `fillTenantProfileOnboarding()` API functions.
-- Added `TenantProfileCompletionSummary`, `TenantSelfProfile`, `TenantProfileResponse` to frontend types.
-- Added "Data Penghuni Tambahan" card to `ProfilePage` for TENANT role.
-- Card shows completion badge, locked field readonly display, editable missing fields, and save button.
-- Added `frontend/src/data/kost48Assets.ts` stub to fix pre-existing `tsc` module resolution error.
+```text
+V5.9.5-A public room marketing/assets/slideshow scope is complete and committed locally.
+Do not reopen public room catalog/photo work unless browser evidence shows a new regression.
+Immediate next step is docs sync commit, then push the accumulated local commits.
+```
+
+### Completed in V5.9.5-A
+
+- Public API/catalog now supports occupied rooms appearing in marketing catalog.
+- Public detail route can display occupied/non-bookable rooms instead of treating them as missing.
+- Public DTO includes `canBook` so booking intent and marketing visibility are separated.
+- Room status language simplified for prospects: `Kosong`, `Terisi`, `Belum tersedia/Perawatan`.
+- `/rooms` has filters: `Semua`, `Kamar Kosong`, `Kamar Terisi`.
+- Non-bookable/occupied rooms show WhatsApp inquiry CTA, not direct booking submit.
+- Real Kost48 image assets copied to frontend and backend static folders.
+- Room cards, detail gallery, and booking preview can show multiple images/slideshow.
+- Broken image handling was hardened with local fallback image selection.
+- Backend room image assets were committed separately using force-add only for `backend/uploads/room-images`.
 
 ### Immediate local-state rule
 
 ```text
-Docs sync commit is pending immediately.
-kost48Assets.ts stub is a build-contract placeholder; do not remove it without adding the actual asset source.
-Stash@{0} (broad WIP) must still not be popped/committed wholesale.
+Commit docs sync separately after this code/assets batch.
+Before push, restore generated Prisma and remove tsconfig.tsbuildinfo if they appear.
+Do not add the entire backend/uploads folder; only curated backend/uploads/room-images assets are allowed.
+Do not claim M9 FULL PASS unless all-role browser smoke is recorded.
 ```
 
 ### Recommended next sequence
 
-1. Commit docs sync for V5.9.4 (this step).
-2. Decide next product slice:
-   - A. Quick `/portal/profile` browser smoke to confirm visual rendering.
-   - B. V5.9.5 Tenant Remaining Production Readiness: WiFi phone tap link, invoice tab URL state, announcements click-through, ticket form modal improvements.
-   - C. Staff UI/UX audit and remaining admin/owner browser smoke.
-   - D. Tenant photo: schema/API design decision before implementation.
-3. Keep tenant interaction/community/chat as roadmap planning only until profile/photo/privacy rules are defined.
-4. Keep M9 FULL PASS gated until full manual browser smoke across owner/admin/staff/tenant/public is complete.
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+1. Commit docs sync for V5.9.5-A.
+2. Push local commits to origin/main.
+3. Run/record final public smoke commands if needed:
+   - `/api/public/rooms`,
+   - `/rooms`,
+   - `/rooms/:id/detail`,
+   - `/booking/:roomId` for bookable room,
+   - non-bookable room detail/WhatsApp path.
+4. Continue remaining M9 manual browser smoke across tenant/admin/staff/owner.
+5. Next product slice should be selected intentionally:
+   - Tenant remaining production readiness, or
+   - Staff UI/UX audit, or
+   - Admin decision queue/readability audit, or
+   - Owner finance cockpit/report polish.
+
+### Future public room officialization
+
+```text
+Later production-grade work may add backend-managed room media entities, admin upload UI, alt text, sort order, and CDN/storage rules.
+That future media management should require explicit schema/API approval.
+V5.9.5-A is static curated asset integration only.
+```
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## 0.0 Latest Execution Plan — After V5.9.3-B Tenant Room Dossier Compact

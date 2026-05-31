@@ -1,71 +1,80 @@
 # KOST48 V5 — Contracts & API
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## 0.0 Latest Contract Addendum — V5.9.4 Tenant Profile One-Time Fill
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## 0.0 Latest Contract Addendum — V5.9.5-A Public Room Assets & Slideshow
 
 ```text
-Latest local commit (ahead 1):
-- 2597709 feat(tenant): add one-time profile completion
+Latest local commits for this scope:
+- f10ebe5 fix(public): wire room assets and slideshow
+- 419dc62 chore(public): add backend room image assets
 
-Current verification evidence:
-- Backend tsc: 0 errors.
-- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
-- API smoke PASS: GET profile, PATCH fill, PATCH lock enforcement, notes exclusion verified.
+Verification evidence reported:
+- Frontend build PASS.
+- Backend build PASS.
+- API smoke PASS for public rooms.
+- Public browser smoke PASS for room catalog/detail/booking scope.
 ```
 
-### Tenant Profile One-Time Fill contract
+### Public room catalog contract
 
 Purpose:
-- Tenant can view and supplement their own profile data through a dedicated self-service endpoint.
-- Supplemental fields can be filled only once by the tenant; once a field has a value it is locked from tenant self-edit.
-- Core identity fields (fullName, phone, email, identityNumber) remain admin-managed and are not editable by tenant.
-- Admin/Owner can still correct all tenant data via the existing admin tenant management endpoint `PATCH /tenants/:id`.
+- Public room discovery is a marketing and trust surface, not only an availability table.
+- Occupied rooms may remain visible so prospects can understand room types, pricing, photos, and future interest.
+- A visible room is not necessarily bookable; booking intent must depend on `canBook`.
 
 Rules:
-- `GET /api/tenant/profile` returns tenant safe fields and a completion summary.
-  - Response must use explicit Prisma `select`; `notes` must never appear in the response.
-  - Completion summary includes: `requiredFields`, `completedFields`, `missingFields`, `lockedFields`, `completionPercent`, `isComplete`, `isLocked`.
-- `PATCH /api/tenant/profile/onboarding` fills only fields that are currently null or empty.
-  - Backend enforces lock: if any field in the payload is already filled, that field is rejected.
-  - If all payload fields are locked, return HTTP 400 with a clear human-readable message.
-  - If payload is empty or contains no recognized fields, return HTTP 400.
-  - Successful update is audited with action `TENANT_PROFILE_ONBOARDING_UPDATE`.
-- Both endpoints require `actor.tenantId`; if missing, return controlled `ConflictException`.
+- Public list/detail may show active rooms with statuses such as `AVAILABLE`, `RESERVED`, `OCCUPIED`, and `MAINTENANCE` when the service marks them public/active.
+- Public DTO must expose a booking capability flag:
+  - `canBook = true` only for rooms that may enter the booking submission flow.
+  - `canBook = false` for occupied/non-bookable rooms.
+- Frontend must not infer bookability from labels alone; use `canBook` when present.
+- Public labels must be tenant/prospect-friendly:
+  - Bookable rooms: `Kosong` / `Bisa diajukan`.
+  - Occupied rooms: `Terisi`.
+  - Maintenance/unavailable rooms: `Belum tersedia` or `Perawatan` where useful.
+- Raw backend enums such as `AVAILABLE`, `OCCUPIED`, `RESERVED`, and `MAINTENANCE` must not appear in public UI.
 
-### Tenant-fillable fields (one-time only)
+### Room asset contract
+
+Rules:
+- Curated Kost48 image assets live in:
+  - `frontend/public/room-images/` for immediate Vite/static frontend rendering.
+  - `backend/uploads/room-images/` for backend-served public media paths.
+- Backend static uploads can serve room assets through upload paths such as:
+  - `/uploads/room-images/...`
+  - `/api/uploads/room-images/...` when the backend alias is active.
+- `backend/uploads` remains generally ignored; only `backend/uploads/room-images` curated marketing assets may be force-added.
+- Do not commit uploaded payment proofs, tenant documents, or unrelated runtime upload folders.
+- If an exact room-code photo does not exist, fallback images must be neutral marketing images and must not claim to be the exact room.
+- Public UI must handle missing/broken images with a clean fallback instead of a broken image icon.
+
+### Public CTA contract
+
+Rules:
+- `canBook = true` room:
+  - Primary CTA: `Ajukan Booking`.
+  - Secondary CTA may be WhatsApp inquiry.
+- `canBook = false` room:
+  - Do not allow direct booking submission.
+  - CTA should be `Tanya Ketersediaan` / `Minat Kamar Ini` via WhatsApp.
+  - Do not show a dead disabled button as the only action.
+- Booking page for a non-bookable room must show a friendly blocked/interest state, not a hard technical error.
+- Public booking copy must continue to state that booking does not lock the room until payment/admin approval is completed.
+
+### Not approved in V5.9.5-A
 
 ```text
-- gender
-- birthDate
-- originCity
-- occupation
-- companyOrCampus
-- emergencyContactName
-- emergencyContactPhone
-```
-
-### Notes exclusion contract
-
-```text
-- notes is an admin-internal field and must never appear in any tenant self-profile response.
-- Exclusion is enforced by explicit Prisma select, not runtime filtering.
-- Any future endpoint reading tenant data for the tenant must apply the same exclusion.
-```
-
-### Not approved in V5.9.4
-
-```text
-- No profile photo upload or avatar storage.
 - No schema change.
 - No DB reset.
 - No production DB mutation.
+- No lifecycle or payment rule rewrite.
+- No new dependency.
 - No generated Prisma commit.
-- No new npm dependency.
-- No tenant-to-tenant interaction.
-- notes exclusion is mandatory and cannot be waived without an explicit approval decision.
+- No automatic DB seeding of room image URLs.
+- No claim that fallback/generic photos are exact photos of a specific room.
 ```
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## 0.0 Latest Contract Addendum — V5.9.3-B Tenant Room Dossier Compact

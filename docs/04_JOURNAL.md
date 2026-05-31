@@ -1,57 +1,43 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## 2026-05-31 — V5.9.4 Tenant Profile One-Time Fill Journal
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## 2026-05-31 — V5.9.5-A Public Room Assets & Slideshow Journal
 
 Status:
 ```text
-2597709 committed locally. Main is ahead 1 of origin/main.
-Docs sync commit is next.
+Public room marketing/assets/slideshow work has been committed locally.
+Current relevant commits:
+- f10ebe5 fix(public): wire room assets and slideshow
+- 419dc62 chore(public): add backend room image assets
 ```
 
 Implemented backend:
-- Added `tenant-profile-onboarding.dto.ts`: 7 optional fields with class-validator decorators.
-- Added `tenant-profile.controller.ts`:
-  - `GET /api/tenant/profile` — role TENANT — returns safe tenant profile + completion summary.
-  - `PATCH /api/tenant/profile/onboarding` — role TENANT — one-time fill for empty fields.
-- Modified `tenants.service.ts`:
-  - Added module-level `ONBOARDING_FIELDS` constant.
-  - Added `isOnboardingFieldFilled()` private helper.
-  - Added `buildCompletionSummary()` private helper.
-  - Added `getTenantProfile()` public method with explicit Prisma select (notes excluded).
-  - Added `fillTenantProfileOnboarding()` public method with lock enforcement and audit log.
-- Modified `tenants.module.ts`: registered `TenantProfileController`.
+- Public marketing room service now allows public catalog/detail visibility for occupied/non-bookable active rooms where intended.
+- Public room DTO exposes `canBook` so UI can separate visibility from booking submission.
+- Room image fallback logic can supply real static marketing assets when DB room images are empty.
+- Backend static serving supports room image assets through uploads paths/alias in the current code.
+- Curated `.webp` assets were added under `backend/uploads/room-images` using intentional force-add, not broad `backend/uploads` staging.
 
 Implemented frontend:
-- Added `frontend/src/data/kost48Assets.ts` stub (build-contract fix; returns null).
-- Added `TenantProfileCompletionSummary`, `TenantSelfProfile`, `TenantProfileResponse` to `types/index.ts`.
-- Added `getTenantProfile()` and `fillTenantProfileOnboarding()` to `api/tenants.ts`.
-- Modified `ProfilePage.tsx`:
-  - Added useQuery for tenant profile (enabled for TENANT role only).
-  - Added useMutation for one-time fill.
-  - Added "Data Penghuni Tambahan" card with:
-    - Completion badge showing X/7 data terisi.
-    - Locked field readonly display with "Sudah tersimpan" hint.
-    - Editable input for missing fields.
-    - Save button disabled until at least one field has input.
-    - Tenant-friendly Indonesian copy.
-- Added `.tp-*` CSS classes to `styles.css`.
+- Added/expanded real room image asset mapping in `frontend/src/data/kost48Assets.ts`.
+- Added curated room/facility/logo assets under `frontend/public/room-images`.
+- Updated public room card image handling and slideshow behavior.
+- Updated room detail gallery to support multiple images and avoid broken image icons.
+- Updated booking page/summary photo preview to use valid fallback galleries.
+- Added public availability filters: `Semua`, `Kamar Kosong`, `Kamar Terisi`.
+- Simplified public labels to prospect-friendly `Kosong` / `Terisi` language.
+- Replaced non-bookable dead/disabled booking action with WhatsApp `Tanya Ketersediaan` path.
 
 Verified:
 ```text
-Backend:
-- tsc 0 errors.
-- dist/modules/tenants/tenant-profile.controller.js confirmed.
-- GET /tenant/profile: 6/7 completedFields, missingFields: birthDate.
-- PATCH /tenant/profile/onboarding fill birthDate: isComplete=True, 7/7.
-- PATCH retry locked field: HTTP 400 with clear message.
-- notes not present in GET response.
-- completionPercent=100 after fill.
-
-Frontend:
-- tsc -b PASS.
-- Vite build PASS: 22.03s, 733 modules, 0 errors.
+- Frontend build PASS reported.
+- Backend build PASS reported.
+- API smoke PASS reported for public rooms.
+- Browser smoke PASS reported for /rooms, room detail gallery, room filters, and booking/non-bookable room states.
+- Public rooms now show 13 rooms, including occupied rooms.
+- Occupied rooms remain visible but cannot submit booking directly.
+- Room images/logo show from real assets after A2/A3/A4 fixes.
 ```
 
 Not changed:
@@ -60,20 +46,19 @@ Not changed:
 - No DB reset.
 - No production DB mutation.
 - No generated Prisma commit.
-- No new npm dependency.
-- No lifecycle/payment/finance mutation.
-- No tenant photo upload.
-- No tenant interaction/chat.
+- No new dependency.
+- No lifecycle/payment logic rewrite.
+- No official admin-managed media library yet.
 ```
 
 Carry-forward:
 ```text
-- Browser visual smoke for /portal/profile recommended and pending.
-- M9 FULL PASS remains pending until full manual browser smoke across all roles is complete.
-- kost48Assets.ts stub is temporary; room cover photo integration requires a separate decision.
-- Do not pop/commit the broad leftover stash (stash@{0}) without first splitting into coherent batches.
+- Commit this docs sync separately.
+- Push accumulated local commits after docs sync.
+- M9 FULL PASS remains gated by full manual browser smoke across all roles unless recorded separately.
+- Future official media management should be a separate schema/API decision.
 ```
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## 2026-05-31 — V5.9.3-B Tenant Room Dossier Compact Journal

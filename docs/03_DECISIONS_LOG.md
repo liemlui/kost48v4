@@ -1,33 +1,33 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## 2026-05-31 — V5.9.4 Tenant Profile One-Time Fill Decisions
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## 2026-05-31 — V5.9.5-A Public Room Assets & Slideshow Decisions
 
 | # | Keputusan | Dampak |
 |---:|---|---|
-| 611 | Tenant profile self-service diizinkan hanya untuk field supplemental yang sudah ada di schema | Tidak membutuhkan schema change; tenant dapat melengkapi data tanpa menunggu implementasi baru. |
-| 612 | One-time fill enforced di backend, bukan hanya readonly frontend | Jika tenant mencoba overwrite field yang sudah terisi, backend menolak dengan HTTP 400. |
-| 613 | Field yang sudah terisi dikunci dari tenant self-edit dan memerlukan bantuan pengelola/admin | Admin/Owner tetap bisa koreksi via `PATCH /tenants/:id` yang sudah ada. |
-| 614 | `notes` dikecualikan dari semua tenant self-profile response | Catatan internal admin tidak boleh bocor ke tenant; eksklusif via explicit Prisma select, bukan runtime filter. |
-| 615 | Profile photo tetap deferred sebagai keputusan skema/API tersendiri | Belum ada storage backend, upload flow, atau permission model; tidak boleh diimplementasikan tanpa design approval. |
-| 616 | `kost48Assets.ts` stub adalah build-contract placeholder, bukan sumber aset final | Stub mengembalikan null sehingga UI fallback ke placeholder "K48"; implementasi asli memerlukan keputusan storage/CDN tersendiri. |
-| 617 | M9 FULL PASS masih memerlukan browser smoke manual lintas role | Build + API smoke bukan pengganti manual browser smoke; claim FULL PASS baru valid setelah smoke semua role selesai. |
+| 618 | Public room catalog boleh menampilkan kamar terisi | Katalog menjadi transparan dan lebih kuat untuk marketing, tetapi booking tetap dipisahkan lewat `canBook`. |
+| 619 | `canBook` menjadi pembeda utama antara marketing visibility dan booking action | Kamar `Terisi` tetap terlihat, tetapi tidak bisa submit booking langsung. |
+| 620 | Public status disederhanakan menjadi `Kosong` dan `Terisi` untuk user umum | Menghindari raw enum dan istilah operasional seperti `OCCUPIED`/`RESERVED` di UI publik. |
+| 621 | Filter public room ditambah `Semua`, `Kamar Kosong`, dan `Kamar Terisi` | Prospek dapat melihat semua pilihan atau langsung fokus pada kamar yang bisa diajukan. |
+| 622 | Kamar non-bookable memakai CTA WhatsApp `Tanya Ketersediaan` | Tidak ada tombol mati/disabled tanpa aksi; minat calon tenant tetap bisa ditangkap. |
+| 623 | Foto public room memakai curated static assets dari `img.zip` | Katalog/detail/booking tidak lagi bergantung pada placeholder kosong saat DB belum punya foto room. |
+| 624 | Asset disimpan di frontend public dan backend uploads room-images | Frontend bisa render cepat dari `/room-images`, backend juga punya copy untuk `/uploads`/`/api/uploads` path. |
+| 625 | `backend/uploads/room-images` boleh di-force add, tetapi folder upload lain tetap tidak boleh ikut | Mencegah payment proof/dokumen runtime ikut commit sambil tetap membawa curated marketing assets. |
+| 626 | Detail room gallery dan booking preview harus mendukung multi-photo/slideshow | User dapat melihat beberapa foto, bukan hanya satu gambar statis atau broken image. |
+| 627 | Fallback photo tidak boleh mengklaim foto persis kamar jika aset exact room tidak ada | Untuk kamar tanpa foto kode spesifik, copy harus tetap netral sebagai suasana/foto Kost48. |
+| 628 | V5.9.5-A tidak memakai schema change atau DB mutation | Integrasi aset bersifat static/frontend/backend read-shape, bukan media-management resmi. |
 
 Verification:
 ```text
-- 2597709 committed locally (ahead 1): feat(tenant): add one-time profile completion.
-- Backend tsc: 0 errors.
-- dist/modules/tenants/tenant-profile.controller.js confirmed compiled.
-- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
-- API smoke PASS:
-  - GET /tenant/profile: completedFields 6/7.
-  - PATCH /tenant/profile/onboarding fill birthDate: isComplete=True.
-  - PATCH retry locked field: HTTP 400 with clear message.
-  - notes not present in response.
-  - completionPercent=100 after fill.
+- f10ebe5 committed locally: fix(public): wire room assets and slideshow.
+- 419dc62 committed locally: chore(public): add backend room image assets.
+- Frontend build PASS reported.
+- Backend build PASS reported.
+- API smoke PASS reported.
+- Public room browser smoke PASS reported after photo/filter/slideshow hotfixes.
 ```
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## 2026-05-31 — V5.9.3-B Tenant Room Dossier Compact Decisions

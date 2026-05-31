@@ -1,64 +1,62 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## A-1. Latest Release Checklist — V5.9.4 Tenant Profile One-Time Fill
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## A-1. Latest Release Checklist — V5.9.5-A Public Room Assets & Slideshow
 
 ### Code and Git
 
-- [x] Code commit pushed locally: `2597709 feat(tenant): add one-time profile completion`.
-- [x] Main is ahead 1 of origin/main.
-- [x] No generated Prisma commit included in V5.9.4.
+- [x] Public room code/assets commit created: `f10ebe5 fix(public): wire room assets and slideshow`.
+- [x] Backend room image asset commit created: `419dc62 chore(public): add backend room image assets`.
+- [x] `backend/uploads/room-images` force-added intentionally for curated marketing assets only.
+- [x] No generated Prisma commit included.
 - [x] No schema change.
 - [x] No DB reset.
 - [x] No production DB mutation.
-- [x] No new npm dependency added.
+- [x] No new npm dependency.
 
-### Backend Endpoints
+### Backend/Public API
 
-- [x] `GET /api/tenant/profile` added — role TENANT.
-- [x] `PATCH /api/tenant/profile/onboarding` added — role TENANT.
-- [x] Both endpoints require `actor.tenantId`; missing tenantId returns ConflictException.
-- [x] Only 7 supplemental fields allowed for one-time fill.
-- [x] Filled fields are locked; PATCH on locked field returns HTTP 400 with clear message.
-- [x] `notes` field excluded via explicit Prisma select (not runtime filter).
-- [x] Successful PATCH audited as `TENANT_PROFILE_ONBOARDING_UPDATE`.
-- [x] Admin/Owner can still edit all tenant fields via `PATCH /tenants/:id`.
+- [x] Public rooms can include occupied/non-bookable rooms for catalog visibility.
+- [x] Public room detail can open occupied/non-bookable active rooms.
+- [x] Public DTO exposes/uses `canBook` to separate visibility from booking action.
+- [x] Backend has curated room image assets under `backend/uploads/room-images`.
+- [x] Static room image paths are supported by current backend serving configuration.
 
-### Frontend ProfilePage
+### Frontend Public Rooms
 
-- [x] "Data Penghuni Tambahan" card added for TENANT role only.
-- [x] Completion badge shows X/7 data terisi.
-- [x] Locked fields displayed readonly with "Sudah tersimpan" helper text.
-- [x] Missing fields rendered as editable inputs.
-- [x] Save button disabled until at least one field has user input.
-- [x] Gender displayed with Indonesian labels: Laki-laki / Perempuan / Lainnya.
-- [x] Save mutation invalidates profile query on success.
-- [x] Non-tenant users see no profile onboarding card.
+- [x] `/rooms` shows room photos/logo from real assets where available.
+- [x] `/rooms` avoids broken image icons through fallback handling.
+- [x] `/rooms` has filters: `Semua`, `Kamar Kosong`, `Kamar Terisi`.
+- [x] Public room cards use simple status labels: `Kosong` / `Terisi`.
+- [x] Occupied rooms remain visible in `Semua` and `Kamar Terisi`.
+- [x] Bookable rooms show `Ajukan Booking`.
+- [x] Non-bookable rooms show `Tanya Ketersediaan` via WhatsApp.
+- [x] Room cards/detail/booking preview support multi-photo/slideshow behavior.
 
-### Build and Verification
+### Verification
 
-- [x] Backend tsc: 0 errors.
-- [x] `dist/modules/tenants/tenant-profile.controller.js` confirmed compiled.
-- [x] Frontend `tsc -b` PASS.
-- [x] Frontend Vite build PASS: 22.03s, 733 modules, 0 errors.
-- [x] API smoke `GET /tenant/profile` PASS: 6/7 completedFields, missingFields: birthDate.
-- [x] API smoke `PATCH /tenant/profile/onboarding` PASS: isComplete=True, 7/7.
-- [x] API smoke locked field retry PASS: HTTP 400 with clear message.
-- [x] API smoke notes not in response PASS.
-- [x] API smoke completionPercent=100 PASS.
+- [x] Frontend build PASS reported.
+- [x] Backend build PASS reported.
+- [x] API smoke PASS reported for public rooms.
+- [x] Browser smoke PASS reported for `/rooms`.
+- [x] Browser smoke PASS reported for room detail gallery.
+- [x] Browser smoke PASS reported for room availability filters.
+- [x] Browser smoke PASS reported for booking/non-bookable state.
+- [x] Public catalog now shows 13 rooms.
+- [x] OCCUPIED rooms visible and `canBook=false`.
 
 ### Still required before M9 FULL PASS
 
-- [ ] Browser visual smoke for `/portal/profile` tenant view.
+- [ ] Commit docs sync for V5.9.5-A.
+- [ ] Push local commits to origin/main.
 - [ ] Full manual browser smoke owner dashboard/finance.
 - [ ] Full manual browser smoke admin dashboard/stays/invoices/payment/renew/checkout.
 - [ ] Full manual browser smoke staff warehouse/report/tickets.
 - [ ] Full manual browser smoke tenant portal stay/invoices/bookings/tickets/profile.
-- [ ] Full manual browser smoke public rooms/detail/booking.
 - [ ] Confirm no no-op CTA or link `#` across all roles.
-- [ ] Confirm no raw tenant backend terms across tenant portal.
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+- [ ] Confirm no raw tenant/backend terms in tenant/public user-facing UI.
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## A-1. Latest Release Checklist — V5.9.3-B Tenant Room Dossier Compact

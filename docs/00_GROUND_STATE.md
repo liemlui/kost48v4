@@ -1,71 +1,73 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-05-31 V5.9.4 Tenant Profile One-Time Fill
-**Status:** Source of truth utama setelah V5.9.4 Tenant Profile One-Time Fill. Commit `2597709` pushed locally (ahead 1). Backend build TypeScript 0 errors; frontend Vite build PASS 733 modules; API smoke PASS. M9 FULL PASS masih pending sampai manual browser smoke owner/admin/staff/tenant/public selesai.
+**Versi:** 2026-05-31 V5.9.5-A Public Room Assets & Slideshow
+**Status:** Source of truth utama setelah V5.9.5-A Public Room Assets & Slideshow. Public rooms/detail/booking scope build, API smoke, dan browser smoke dilaporkan PASS; katalog public menampilkan kamar kosong dan terisi dengan aset foto/logo asli. M9 FULL PASS tetap hanya boleh diklaim setelah manual browser smoke owner/admin/staff/tenant/public lengkap.
 
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_START -->
-## 0.0 Latest Current State — V5.9.4 Tenant Profile One-Time Fill
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_START -->
+## 0.0 Latest Current State — V5.9.5-A Public Room Assets & Slideshow
 
 ```text
-Latest local commit (ahead 1):
+Latest local commits after V5.9.4 docs push:
+- f10ebe5 fix(public): wire room assets and slideshow
+- 419dc62 chore(public): add backend room image assets
+
+Included previous V5.9.4 pushed baseline:
 - 2597709 feat(tenant): add one-time profile completion
+- 3578c85 docs: sync v594 tenant profile completion
 
-Previous pushed main baseline:
-- e2d7d58 fix(tenant): compact room dossier on my stay page
-- 7b89df6 fix(tenant): expose room dossier inventory data
-
-Current verification evidence:
-- Backend tsc: 0 errors.
-- dist/modules/tenants/tenant-profile.controller.js confirmed compiled.
-- Frontend tsc -b && vite build PASS: 22.03s, 733 modules, 0 errors.
-- API smoke PASS:
-  - POST /auth/login tenant.cindy PASS, token received.
-  - GET /tenant/profile PASS: 6/7 completedFields, missingFields: birthDate.
-  - PATCH /tenant/profile/onboarding fill birthDate PASS: isComplete=True, 7/7.
-  - PATCH retry locked field PASS: HTTP 400 with clear locked message.
-  - GET final: notes not present in response PASS.
-  - GET final: completionPercent=100 PASS.
+Current verification evidence reported by local run:
+- Frontend build PASS.
+- Backend build PASS.
+- API smoke PASS for GET /api/public/rooms.
+- Public rooms catalog now returns 13 rooms instead of only available/reserved rooms.
+- OCCUPIED rooms are visible in public catalog and detail pages.
+- canBook is false for OCCUPIED/non-bookable rooms and true for bookable rooms.
+- Browser smoke PASS for public rooms, room detail gallery, filters, and booking/non-booking states.
+- Backend room image assets committed separately under backend/uploads/room-images.
+- Working label for this scope: V5.9.5-A PUBLIC ROOM ASSETS & SLIDESHOW = BUILD PASS + API SMOKE PASS + BROWSER SMOKE PASS for public rooms/detail/booking scope.
 ```
 
-### V5.9.4 active baseline
+### V5.9.5-A active baseline
 
 ```text
-Tenant one-time profile fill is live.
-Tenant can fill 7 additional profile fields (gender, birthDate, originCity, occupation,
-companyOrCampus, emergencyContactName, emergencyContactPhone) through /portal/profile.
-Fields already filled are locked for tenant self-edit; admin/owner corrects via admin CRUD.
+Public room discovery is now marketing-ready enough for the current MVP slice.
+The public catalog shows both empty and occupied rooms, uses real Kost48 image assets, and keeps booking actions honest.
+Occupied rooms stay visible for transparency/marketing but route to WhatsApp interest instead of direct booking submission.
 ```
 
-### Implemented and pushed
+### Implemented and committed
 
 | Area | Result |
 |---|---|
-| Tenant self-profile read | `GET /api/tenant/profile` returns tenant safe fields + completion summary. |
-| Tenant one-time fill | `PATCH /api/tenant/profile/onboarding` fills only empty fields; filled fields are locked. |
-| Lock enforcement | Backend enforces lock; PATCH on locked fields returns HTTP 400 with clear message. |
-| notes exclusion | `notes` field is excluded from tenant self-profile via explicit Prisma select; admin-internal data does not leak. |
-| Frontend profile card | `/portal/profile` shows "Data Penghuni Tambahan" card with completion badge, locked field display, and editable missing fields. |
-| Admin tenant correction | Admin/Owner can still edit all tenant fields via existing `PATCH /tenants/:id`. |
-| kost48Assets stub | `frontend/src/data/kost48Assets.ts` added as build-contract stub; `getKost48RoomCover()` returns null until room photos are integrated. |
-| Business rules | No schema change, no DB reset, no production DB mutation, no generated Prisma commit, no new dependency. |
+| Public room visibility | Public rooms now include `AVAILABLE`, `RESERVED`, `OCCUPIED`, and `MAINTENANCE` active rooms where allowed by the public service. |
+| Public DTO | Public room DTO exposes `canBook` so frontend can separate booking action from interest/availability inquiry. |
+| Status language | Public-facing status is simplified to `Kosong`, `Terisi`, and `Belum tersedia/Perawatan` instead of raw backend enums. |
+| Availability filter | `/rooms` has quick filters: `Semua`, `Kamar Kosong`, `Kamar Terisi`. Default remains `Semua`. |
+| Occupied room CTA | Occupied/non-bookable rooms use `Tanya Ketersediaan` via WhatsApp, not dead disabled booking buttons. |
+| Real image assets | 116 curated `.webp` assets from `img.zip` are available in `frontend/public/room-images` and `backend/uploads/room-images`. |
+| Static serving | Backend serves room images through upload static paths, including the `/api/uploads/room-images` alias where supported by the current code. |
+| Slideshow/gallery | Room cards, detail gallery, and booking previews can rotate multiple images and avoid broken image icons. |
+| Logo | Public branding can use `logo-kost48-surabaya.webp` instead of only the K48 placeholder. |
+| Business rules | No schema change, no DB reset, no production DB mutation, no generated Prisma commit, no lifecycle/payment rewrite. |
 
 ### Active guardrails
 
 ```text
-- Tenant self-service is limited to 7 supplemental fields; core identity fields (fullName, phone, email, identityNumber) remain admin-managed.
-- Filled fields are one-way locked for tenants; pengelola/admin must correct via admin panel.
-- notes remains excluded from all tenant-facing profile responses.
-- Profile photo and tenant-to-tenant interaction remain roadmap items; not approved in V5.9.4.
-- kost48Assets stub is a build-contract placeholder; room cover photo integration requires a separate design/API decision.
+- Public catalog may show occupied rooms for marketing transparency, but booking submission must remain blocked unless canBook is true.
+- Public UI must use simple language: Kosong / Terisi / Tanya Ketersediaan / Ajukan Booking.
+- Do not expose raw room status enums in public UI.
+- Do not use disabled dead buttons or href="#" for room interest actions.
+- backend/uploads is normally ignored, but only backend/uploads/room-images was intentionally force-added for curated marketing assets.
+- Uploaded payment proofs or other tenant upload folders must not be committed.
+- If room-specific assets do not exist for a code such as F1/F2, UI may use neutral Kost48/generic room photos without claiming they are exact room photos.
 ```
 
 ### Honest label
 
 ```text
-V5.9.4 TENANT PROFILE ONE-TIME FILL = BUILD PASS + API SMOKE PASS.
-M9 FULL PASS is still not claimed because full manual browser smoke across owner/admin/staff/tenant/public is still pending.
-Browser visual smoke for /portal/profile is still recommended and pending.
+V5.9.5-A PUBLIC ROOM ASSETS & SLIDESHOW = PASS for the scoped public rooms/detail/booking smoke reported by user.
+M9 FULL PASS is still not claimed unless full manual browser smoke across owner/admin/staff/tenant/public is completed and recorded separately.
 ```
-<!-- KOST48_DOCS_SYNC_20260531_V594_TENANT_PROFILE_ONBOARDING_END -->
+<!-- KOST48_DOCS_SYNC_20260531_V595A_PUBLIC_ROOM_ASSETS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260531_V593B_ROOM_DOSSIER_START -->
 ## 0.0 Latest Current State — V5.9.3-B Tenant Room Dossier Compact
