@@ -16,6 +16,12 @@ import { RoomItemsService } from './room-items.service';
 export class RoomItemsController {
   constructor(private readonly roomItemsService: RoomItemsService) {}
 
+  @Get('my-room')
+  @Roles(UserRole.TENANT)
+  async findMyRoomItems(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Daftar barang kamar kamu berhasil diambil', data: await this.roomItemsService.findMyRoomItems(user) };
+  }
+
   @Get()
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async findAll(@Query('roomId') roomId?: string) {
