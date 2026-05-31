@@ -41,6 +41,8 @@ export class RateLimitGuard implements CanActivate {
     resetPassword: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
     // Unauthenticated public booking creation — guard against spam/DoS abuse.
     publicBooking: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
+    // Authenticated tenant file uploads — prevent disk exhaustion abuse.
+    tenantUpload: { maxRequests: 10, windowMs: 60 * 60 * 1000 },
   };
 
   canActivate(context: ExecutionContext): boolean {

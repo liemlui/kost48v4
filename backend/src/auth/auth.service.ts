@@ -56,6 +56,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       tenantId: user.tenantId,
+      pwdAt: user.passwordChangedAt?.getTime() ?? 0,
     });
 
     return {
@@ -211,7 +212,7 @@ export class AuthService {
       `);
     });
 
-    return { success: true, userId: user.id };
+    return { success: true };
   }
 
   async changePassword(userId: number, dto: ChangePasswordDto) {
@@ -245,7 +246,7 @@ export class AuthService {
       WHERE id = ${user.id}
     `);
 
-    return { userId: user.id };
+    return { success: true };
   }
 
   // ---- Private helpers ----

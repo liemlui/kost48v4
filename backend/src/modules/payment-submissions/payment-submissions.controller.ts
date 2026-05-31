@@ -1,19 +1,24 @@
-import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { createReadStream, existsSync, mkdirSync, renameSync, unlinkSync } from 'fs';
+import { basename, extname, join } from 'path';
+import { randomBytes } from 'crypto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { RejectPaymentSubmissionDto } from './dto/reject-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import { PaymentSubmissionsService } from './payment-submissions.service';
+import { detectImageMime, deleteFileSafe } from '../../common/utils/file-signature.util';
 
 @ApiTags('payment-submissions')
 @ApiBearerAuth()
@@ -21,6 +26,77 @@ import { PaymentSubmissionsService } from './payment-submissions.service';
 @Controller('payment-submissions')
 export class PaymentSubmissionsController {
   constructor(private readonly paymentSubmissionsService: PaymentSubmissionsService) {}
+
+  private readonly UPLOAD_DIR = join(process.cwd(), 'uploads', 'payment-proofs');
+
+  private ensureUploadDir() {
+    if (!existsSync(this.UPLOAD_DIR)) mkdirSync(this.UPLOAD_DIR, { recursive: true });
+  }
+
+  private generateSecureFilename(ext: string): string {
+    const timestamp = Date.now();
+    const rand = randomBytes(8).toString('hex');
+    return `${timestamp}-${rand}${ext}`;
+  }
+
+  /**
+   * Protected endpoint — stream payment proof images.
+   * Only OWNER/ADMIN see all; TENANT sees only their own submission's proof.
+   * STAFF is denied.
+   */
+  @Get('proofs/:filename')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
+  async getProof(
+    @Param('filename') filename: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // ── Filename sanitisation ──────────────────────────────────────────────
+    const safe = basename(filename);
+    // Reject path traversal indicators
+    if (safe !== filename || /\.\.|\\|\/|\0|%00/i.test(filename)) {
+      throw new BadRequestException('Nama file tidak valid');
+    }
+    // Allow only .jpg .jpeg .png .webp
+    const allowedExt = /\.(jpg|jpeg|png|webp)$/i;
+    if (!allowedExt.test(safe)) {
+      throw new BadRequestException('Tipe file bukti bayar tidak didukung');
+    }
+
+    const filePath = join(this.UPLOAD_DIR, safe);
+    if (!existsSync(filePath)) {
+      throw new BadRequestException('File bukti bayar tidak ditemukan');
+    }
+
+    // ── Tenant access guard: only their own submission ─────────────────────
+    if (user.role === UserRole.TENANT) {
+      const tenantId = user.tenantId;
+      if (!tenantId) {
+        throw new BadRequestException('Akun tenant tidak valid');
+      }
+      const owns = await this.paymentSubmissionsService.doesTenantOwnProof(tenantId, safe);
+      if (!owns) {
+        throw new BadRequestException('File bukti bayar tidak ditemukan');
+      }
+    }
+
+    // ── Stream ─────────────────────────────────────────────────────────────
+    const ext = extname(safe).toLowerCase();
+    const mimeMap: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+    };
+    const contentType = mimeMap[ext] ?? 'application/octet-stream';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+
+    const stream = createReadStream(filePath);
+    return new StreamableFile(stream);
+  }
 
 
   private mapMultipartBodyToDto(body: Record<string, any>, file: any): CreatePaymentSubmissionDto {
@@ -37,7 +113,7 @@ export class PaymentSubmissionsController {
       referenceNumber: body.referenceNumber || undefined,
       notes: body.notes || undefined,
       fileKey: file.filename,
-      fileUrl: `/uploads/payment-proofs/${file.filename}`,
+      fileUrl: `/api/payment-submissions/proofs/${file.filename}`,
       originalFilename: file.originalname,
       mimeType: file.mimetype,
       fileSizeBytes: file.size,
@@ -45,9 +121,10 @@ export class PaymentSubmissionsController {
   }
 
 
-
   @Post('submit-with-proof')
   @Roles(UserRole.TENANT)
+  @UseGuards(RateLimitGuard)
+  @RateLimit('tenantUpload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -57,19 +134,14 @@ export class PaymentSubmissionsController {
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, file, cb) => {
-          const safeBase = (file.originalname || 'proof')
-            .replace(/\.[^/.]+$/, '')
-            .replace(/[^a-zA-Z0-9-_]+/g, '-')
-            .slice(0, 60) || 'proof';
-          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        filename: (_req, _file, cb) => {
+          // Temporary filename; will be renamed after magic-byte verification
+          const tmp = `tmp_${Date.now()}_${randomBytes(4).toString('hex')}.bin`;
+          cb(null, tmp);
         },
       }),
-      fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Bukti bayar hanya menerima JPG, PNG, atau WebP'), false);
-        }
+      fileFilter: (_req, _file, cb) => {
+        // Accept all initially; we validate magic bytes after save
         cb(null, true);
       },
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -80,6 +152,25 @@ export class PaymentSubmissionsController {
     @Body() body: Record<string, any>,
     @CurrentUser() user: CurrentUserPayload,
   ) {
+    // ── Magic-byte verification ────────────────────────────────────────────
+    const filePath = join(this.UPLOAD_DIR, file.filename);
+    const detectedMime = detectImageMime(filePath);
+    if (!detectedMime) {
+      deleteFileSafe(filePath);
+      throw new BadRequestException('File bukti pembayaran harus berupa gambar JPG, PNG, atau WebP yang valid');
+    }
+
+    // ── Rename to secure filename ──────────────────────────────────────────
+    const safeExt = extname(detectedMime === 'image/jpeg' ? 'x.jpg' : detectedMime === 'image/png' ? 'x.png' : 'x.webp');
+    const secureName = this.generateSecureFilename(safeExt);
+    const securePath = join(this.UPLOAD_DIR, secureName);
+    renameSync(filePath, securePath);
+
+    // Update file object for mapMultipartBodyToDto
+    file.filename = secureName;
+    file.originalname = file.originalname || 'proof';
+    file.mimetype = detectedMime;
+
     return {
       message: 'Pembayaran dan bukti berhasil dikirim dalam satu langkah. Admin akan memeriksa bukti pembayaran.',
       data: await this.paymentSubmissionsService.createSubmission(user, this.mapMultipartBodyToDto(body, file)),
@@ -88,6 +179,8 @@ export class PaymentSubmissionsController {
 
   @Post('upload-proof')
   @Roles(UserRole.TENANT)
+  @UseGuards(RateLimitGuard)
+  @RateLimit('tenantUpload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -97,19 +190,12 @@ export class PaymentSubmissionsController {
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, file, cb) => {
-          const safeBase = (file.originalname || 'proof')
-            .replace(/\.[^/.]+$/, '')
-            .replace(/[^a-zA-Z0-9-_]+/g, '-')
-            .slice(0, 60) || 'proof';
-          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        filename: (_req, _file, cb) => {
+          const tmp = `tmp_${Date.now()}_${randomBytes(4).toString('hex')}.bin`;
+          cb(null, tmp);
         },
       }),
-      fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Bukti bayar hanya menerima JPG, PNG, atau WebP'), false);
-        }
+      fileFilter: (_req, _file, cb) => {
         cb(null, true);
       },
       limits: { fileSize: 2 * 1024 * 1024 },
@@ -117,13 +203,26 @@ export class PaymentSubmissionsController {
   )
   async uploadProof(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('File bukti bayar wajib dipilih');
+
+    const filePath = join(this.UPLOAD_DIR, file.filename);
+    const detectedMime = detectImageMime(filePath);
+    if (!detectedMime) {
+      deleteFileSafe(filePath);
+      throw new BadRequestException('File bukti pembayaran harus berupa gambar JPG, PNG, atau WebP yang valid');
+    }
+
+    const safeExt = extname(detectedMime === 'image/jpeg' ? 'x.jpg' : detectedMime === 'image/png' ? 'x.png' : 'x.webp');
+    const secureName = this.generateSecureFilename(safeExt);
+    const securePath = join(this.UPLOAD_DIR, secureName);
+    renameSync(filePath, securePath);
+
     return {
       message: 'Bukti bayar berhasil diunggah',
       data: {
-        fileKey: file.filename,
-        fileUrl: `/uploads/payment-proofs/${file.filename}`,
+        fileKey: secureName,
+        fileUrl: `/api/payment-submissions/proofs/${secureName}`,
         originalFilename: file.originalname,
-        mimeType: file.mimetype,
+        mimeType: detectedMime,
         fileSizeBytes: file.size,
       },
     };

@@ -1203,8 +1203,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
   private isPaymentSubmissionSchemaError(error: any) {
     const message = String(error?.message ?? '');
     const code = String(error?.code ?? error?.meta?.code ?? '');
-    console.error('=== PAYMENT SUBMISSION ERROR ===', { code, message: message.slice(0, 500) });
-    return code === '42P01' || code === '42704' || /PaymentSubmission|paymentsubmission/i.test(message);
+    const isSchemaError = code === '42P01' || code === '42704' || /PaymentSubmission|paymentsubmission/i.test(message);
+    if (isSchemaError) {
+      this.logger.warn(`Schema drift detected (code=${code}). Payment submission may be degraded.`);
+    }
+    return isSchemaError;
   }
 
   private handleSchemaError(error: any): never | void {
@@ -1291,5 +1294,20 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     } catch {
       // Notification failure must not rollback rejection
     }
+  }
+
+  /**
+   * Check whether a tenant's submission references the given file key.
+   * Used by the protected proof streaming endpoint.
+   */
+  async doesTenantOwnProof(tenantId: number, fileKey: string): Promise<boolean> {
+    const count = await this.prisma.paymentSubmission.count({
+      where: {
+        tenantId,
+        fileKey,
+        status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED, PaymentSubmissionStatus.REJECTED] },
+      },
+    });
+    return count > 0;
   }
 }

@@ -21,6 +21,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) throw new UnauthorizedException('User pada token tidak ditemukan');
     if (!user.isActive) throw new UnauthorizedException('User tidak aktif atau akses dicabut');
+
+    // Reject tokens issued before the most recent password change/reset.
+    if (user.passwordChangedAt) {
+      const pwdAtMs: number = payload.pwdAt ?? 0;
+      if (user.passwordChangedAt.getTime() > pwdAtMs) {
+        throw new UnauthorizedException('Sesi kedaluwarsa karena password telah diubah, silakan login ulang');
+      }
+    }
+
+    // Always return role from DB so a role downgrade takes effect immediately.
     return {
       id: user.id,
       email: user.email,

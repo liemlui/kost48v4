@@ -27,8 +27,13 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly accountingPosting: AccountingPostingService,
   ) {}
 
+  private static parseEnabled(): boolean {
+    const raw = String(process.env.AUTO_OPS_ENABLED ?? 'true').trim().toLowerCase();
+    return ['true', '1', 'yes', 'y', 'on'].includes(raw);
+  }
+
   onModuleInit() {
-    const enabled = String(process.env.AUTO_OPS_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const enabled = AutoOpsService.parseEnabled();
     if (!enabled) return;
     const intervalMs = Math.max(60_000, AUTO_OPS_DEADLINES.AUTO_OPS_INTERVAL_MINUTES * 60_000);
     this.timer = setInterval(() => {
@@ -64,7 +69,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const accountingAutoClosePolicy = await this.accountingPeriodCloseService.autoClosePolicy(now);
 
     return {
-      enabled: String(process.env.AUTO_OPS_ENABLED ?? 'true').toLowerCase() !== 'false',
+      enabled: AutoOpsService.parseEnabled(),
       now,
       intervalMinutes: AUTO_OPS_DEADLINES.AUTO_OPS_INTERVAL_MINUTES,
       deadlines: AUTO_OPS_DEADLINES,
