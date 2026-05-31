@@ -43,6 +43,13 @@ const sortOptions = [
 
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
+type AvailFilter = "" | "bookable" | "occupied";
+
+const availFilterOptions = [
+  { value: "", label: "Semua" },
+  { value: "bookable", label: "Kamar Kosong" },
+  { value: "occupied", label: "Kamar Terisi" },
+] as const;
 
 const pricingTerm: PricingTerm = "MONTHLY";
 
@@ -86,26 +93,28 @@ function RoomFeatureTile({ title, value }: { title: string; value: string }) {
 
 function RoomMarketImage({ room }: { room: PublicRoom }) {
   const firstImage = room.images?.[0];
-  const [imgFailed, setImgFailed] = useState(false);
   const resolved = firstImage ? resolveAbsoluteFileUrl(firstImage) : null;
-  const hasImage = Boolean(resolved && !imgFailed);
+  const [imgState, setImgState] = useState<"loading" | "ok" | "error">("loading");
+  const showImg = imgState === "ok";
 
   return (
-    <div className={`room-market-image-wrap ${hasImage ? "" : "is-placeholder"}`}>
-      {hasImage ? (
+    <div className={`room-market-image-wrap ${showImg ? "" : "is-placeholder"}`}>
+      {resolved ? (
         <img
-          src={resolved ?? ""}
+          src={resolved}
           alt="Foto kamar KOST48"
           className="room-market-image"
-          onError={() => setImgFailed(true)}
+          style={showImg ? {} : { position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
+          onLoad={() => setImgState("ok")}
+          onError={() => setImgState("error")}
         />
-      ) : (
+      ) : null}
+      {!showImg ? (
         <div className="room-market-placeholder">
           <span className="room-market-placeholder-icon">K48</span>
-          <strong>Foto kamar segera hadir</strong>
-          <small>Klik untuk detail.</small>
+          <strong>Foto kamar menyusul</strong>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -323,6 +332,7 @@ export default function PublicRoomsPage() {
 
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
+  const avail = (searchParams.get("avail") ?? "") as AvailFilter;
   const sort = searchParams.get("sort") ?? "price-asc";
 
   const query = useQuery({
@@ -336,6 +346,8 @@ export default function PublicRoomsPage() {
     let list = roomsFromApi.filter((room) => {
       if (bathroom && getPublicRoomBathroom(room) !== bathroom) return false;
       if (cooling && getPublicRoomCooling(room) !== cooling) return false;
+      if (avail === "bookable" && room.isAvailable === false) return false;
+      if (avail === "occupied" && room.isAvailable !== false) return false;
       return true;
     });
 
@@ -346,7 +358,7 @@ export default function PublicRoomsPage() {
     });
 
     return list;
-  }, [roomsFromApi, bathroom, cooling, sort]);
+  }, [roomsFromApi, bathroom, cooling, avail, sort]);
 
   const bookableCount = rooms.filter((room) => room.isAvailable !== false).length;
   const totalCount = rooms.length;
@@ -403,6 +415,12 @@ export default function PublicRoomsPage() {
             <Card className="rooms-market-filter-card border-0">
               <Card.Body>
                 <div className="rooms-market-filter-grid">
+                  <SegmentedFilter
+                    label="Ketersediaan"
+                    value={avail}
+                    options={availFilterOptions}
+                    onChange={(value) => updateParams({ avail: value })}
+                  />
                   <SegmentedFilter
                     label="Kamar mandi"
                     value={bathroom}

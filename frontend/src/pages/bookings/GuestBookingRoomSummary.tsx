@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Alert, Card } from 'react-bootstrap';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -25,17 +26,26 @@ interface GuestBookingRoomSummaryProps {
 function GuestRoomPhoto({ room }: { room: PublicRoom }) {
   const images = (room.images ?? []).map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
   const cover = images[0];
-  if (!cover) {
-    return (
-      <div className="booking-room-photo-empty compact">
-        <span>K48</span>
-        <strong>Foto kamar segera hadir</strong>
-      </div>
-    );
-  }
+  const [imgState, setImgState] = useState<'loading' | 'ok' | 'error'>('loading');
+  const showImg = imgState === 'ok';
+
   return (
-    <div className="booking-room-photo-strip compact">
-      <img src={cover} alt={`Foto utama kamar ${room.code}`} />
+    <div className={showImg ? 'booking-room-photo-strip compact' : 'booking-room-photo-empty compact'}>
+      {cover ? (
+        <img
+          src={cover}
+          alt={`Foto utama kamar ${room.code}`}
+          style={showImg ? {} : { position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
+          onLoad={() => setImgState('ok')}
+          onError={() => setImgState('error')}
+        />
+      ) : null}
+      {!showImg ? (
+        <>
+          <span>K48</span>
+          <strong>Foto kamar menyusul</strong>
+        </>
+      ) : null}
     </div>
   );
 }

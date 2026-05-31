@@ -5,6 +5,13 @@ import FacilityList from './FacilityList';
 import type { PublicRoom } from '../../types';
 import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate } from '../../utils/publicRoomDisplay';
 
+function buildWaInterestUrl(room: PublicRoom) {
+  const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
+  const roomCode = room.code || `Kamar #${room.id}`;
+  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Kapan kira-kira kamar ini bisa tersedia?`;
+  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
 interface RoomComparePanelProps {
   rooms: PublicRoom[];
   onClear: () => void;
@@ -158,9 +165,14 @@ export default function RoomComparePanel({ rooms, onClear }: RoomComparePanelPro
                         Ajukan
                       </Button>
                     ) : (
-                      <Button size="sm" variant="secondary" disabled>
-                        Tidak tersedia
-                      </Button>
+                      <a
+                        href={buildWaInterestUrl(room)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-outline-secondary"
+                      >
+                        Tanya ketersediaan
+                      </a>
                     )}
                   </td>
                 ))}
