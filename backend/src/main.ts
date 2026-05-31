@@ -1,7 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
 import compression from 'compression';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
@@ -11,8 +13,14 @@ import { NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: isProduction ? ['error', 'warn'] : ['log', 'error', 'warn', 'debug', 'verbose'],
+  });
+
+  // Room images are public marketing content — safe to serve statically.
+  // Payment proofs remain protected via the dedicated authenticated endpoint.
+  app.useStaticAssets(join(process.cwd(), 'uploads', 'room-images'), {
+    prefix: '/uploads/room-images',
   });
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
