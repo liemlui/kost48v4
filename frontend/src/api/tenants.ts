@@ -1,5 +1,5 @@
 import client from './client';
-import { ApiEnvelope } from '../types';
+import { ApiEnvelope, TenantProfileResponse } from '../types';
 
 export interface TogglePortalAccessResponse {
   tenantId: number;
@@ -63,6 +63,33 @@ export async function resetPortalPassword(
   const response = await client.post<ApiEnvelope<ResetPortalPasswordResponse>>(
     `/tenants/${tenantId}/portal-access/reset-password`,
     data
+  );
+  return response.data.data;
+}
+
+// ── Tenant self-service profile ───────────────────────────────────────────────
+
+export async function getTenantProfile(): Promise<TenantProfileResponse> {
+  const response = await client.get<ApiEnvelope<TenantProfileResponse>>('/tenant/profile');
+  return response.data.data;
+}
+
+export interface TenantProfileOnboardingPayload {
+  gender?: string;
+  birthDate?: string;
+  originCity?: string;
+  occupation?: string;
+  companyOrCampus?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+}
+
+export async function fillTenantProfileOnboarding(
+  payload: TenantProfileOnboardingPayload
+): Promise<TenantProfileResponse> {
+  const response = await client.patch<ApiEnvelope<TenantProfileResponse>>(
+    '/tenant/profile/onboarding',
+    payload
   );
   return response.data.data;
 }

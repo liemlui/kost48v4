@@ -66,6 +66,37 @@ export type Tenant = {
   portalUserSummary?: PortalUserSummary | null;
 };
 
+export type TenantProfileCompletionSummary = {
+  requiredFields: string[];
+  completedFields: string[];
+  missingFields: string[];
+  lockedFields: string[];
+  completionPercent: number;
+  isComplete: boolean;
+  isLocked: boolean;
+};
+
+export type TenantSelfProfile = {
+  id: number;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  identityNumber?: string | null;
+  gender?: string | null;
+  birthDate?: string | null;
+  originCity?: string | null;
+  occupation?: string | null;
+  companyOrCampus?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  isActive?: boolean;
+};
+
+export type TenantProfileResponse = {
+  tenant: TenantSelfProfile;
+  completion: TenantProfileCompletionSummary;
+};
+
 export type RoomFacility = {
   id: number;
   roomId: number;

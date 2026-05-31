@@ -17297,3 +17297,136 @@ div.tenant-stay-fact-chip {
     padding: 0.3rem 0.42rem;
   }
 }
+
+/* ─────────────────────────────────────────────
+   Tenant Profile Onboarding Card (ProfilePage)
+   ───────────────────────────────────────────── */
+
+.tenant-profile-onboarding-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 18px rgba(14, 30, 60, 0.06);
+}
+
+.tp-onboarding-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tp-completion-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 0.18rem;
+  font-size: 0.88rem;
+  color: #334155;
+  flex: 0 0 auto;
+}
+
+.tp-completion-badge > span:first-child {
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: #1d4ed8;
+  line-height: 1;
+}
+
+.tp-completion-badge > em {
+  font-style: normal;
+  color: #64748b;
+}
+
+.tp-complete-check {
+  margin-left: 0.4rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 8px;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.tp-all-locked-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.84rem;
+  color: #065f46;
+}
+
+.tp-all-locked-notice > span:first-child {
+  font-size: 1rem;
+}
+
+/* 2-column grid for the fields */
+.tp-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.tp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tp-field-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0;
+}
+
+.tp-field--locked .tp-field-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  padding: 0.38rem 0.55rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  min-height: 34px;
+}
+
+.tp-field-lock-hint {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.tp-field--editable .form-control,
+.tp-field--editable .form-select {
+  font-size: 0.88rem;
+}
+
+.tp-save-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+@media (max-width: 575px) {
+  .tp-fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tp-onboarding-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tp-save-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}

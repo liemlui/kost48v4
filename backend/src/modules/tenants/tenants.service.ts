@@ -8,9 +8,22 @@ import { CreateTenantDto, UpdateTenantDto } from './dto/tenant.dto';
 import { TenantsQueryDto } from './dto/tenants-query.dto';
 import { TogglePortalAccessDto } from './dto/toggle-portal-access.dto';
 import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
+import { TenantProfileOnboardingDto } from './dto/tenant-profile-onboarding.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { UserRole } from '../../common/enums/app.enums';
+
+const ONBOARDING_FIELDS = [
+  'gender',
+  'birthDate',
+  'originCity',
+  'occupation',
+  'companyOrCampus',
+  'emergencyContactName',
+  'emergencyContactPhone',
+] as const;
+
+type OnboardingField = typeof ONBOARDING_FIELDS[number];
 
 @Injectable()
 export class TenantsService {
@@ -405,6 +418,174 @@ export class TenantsService {
       portalIsActive: updatedUser.isActive,
       passwordChangedAt: new Date().toISOString(),
       lastLoginAt: updatedUser.lastLoginAt,
+    };
+  }
+
+  // ── Tenant self-service profile ───────────────────────────────────────────
+
+  private isOnboardingFieldFilled(value: unknown): boolean {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string' && value.trim() === '') return false;
+    return true;
+  }
+
+  private buildCompletionSummary(tenant: Record<string, unknown>) {
+    const completedFields = ONBOARDING_FIELDS.filter((f) =>
+      this.isOnboardingFieldFilled(tenant[f]),
+    );
+    const missingFields = ONBOARDING_FIELDS.filter(
+      (f) => !this.isOnboardingFieldFilled(tenant[f]),
+    );
+    const completionPercent = Math.round(
+      (completedFields.length / ONBOARDING_FIELDS.length) * 100,
+    );
+    return {
+      requiredFields: [...ONBOARDING_FIELDS] as string[],
+      completedFields: completedFields as string[],
+      missingFields: missingFields as string[],
+      lockedFields: completedFields as string[],
+      completionPercent,
+      isComplete: missingFields.length === 0,
+      isLocked: missingFields.length === 0,
+    };
+  }
+
+  async getTenantProfile(actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ConflictException('Akun tidak terhubung ke data penghuni. Hubungi admin.');
+    }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: actor.tenantId },
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        email: true,
+        identityNumber: true,
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        occupation: true,
+        companyOrCampus: true,
+        emergencyContactName: true,
+        emergencyContactPhone: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        // notes deliberately excluded — admin-internal field
+      },
+    });
+    if (!tenant) throw new NotFoundException('Data penghuni tidak ditemukan');
+
+    const tenantRecord = tenant as unknown as Record<string, unknown>;
+    return {
+      tenant,
+      completion: this.buildCompletionSummary(tenantRecord),
+    };
+  }
+
+  async fillTenantProfileOnboarding(dto: TenantProfileOnboardingDto, actor: CurrentUserPayload) {
+    if (!actor.tenantId) {
+      throw new ConflictException('Akun tidak terhubung ke data penghuni. Hubungi admin.');
+    }
+
+    const existing = await this.prisma.tenant.findUnique({
+      where: { id: actor.tenantId },
+      select: {
+        id: true,
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        occupation: true,
+        companyOrCampus: true,
+        emergencyContactName: true,
+        emergencyContactPhone: true,
+      },
+    });
+    if (!existing) throw new NotFoundException('Data penghuni tidak ditemukan');
+
+    const existingRecord = existing as unknown as Record<string, unknown>;
+
+    // Classify each field in the payload
+    const toUpdate: Partial<Record<OnboardingField, unknown>> = {};
+    const lockedAttempts: string[] = [];
+    let payloadFieldCount = 0;
+
+    for (const field of ONBOARDING_FIELDS) {
+      const dtoValue = (dto as unknown as Record<string, unknown>)[field];
+      if (dtoValue === undefined) continue;
+      payloadFieldCount++;
+
+      if (this.isOnboardingFieldFilled(existingRecord[field])) {
+        lockedAttempts.push(field);
+      } else {
+        toUpdate[field] = dtoValue;
+      }
+    }
+
+    if (payloadFieldCount === 0) {
+      throw new BadRequestException('Tidak ada data valid yang dikirimkan');
+    }
+
+    const updatableCount = Object.keys(toUpdate).length;
+
+    if (updatableCount === 0) {
+      throw new BadRequestException(
+        `Semua field sudah tersimpan dan dikunci: ${lockedAttempts.join(', ')}. Hubungi pengelola untuk mengubah data.`,
+      );
+    }
+
+    // Build Prisma update data — convert birthDate string to Date
+    const updateData: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(toUpdate)) {
+      if (key === 'birthDate' && typeof value === 'string' && value.trim() !== '') {
+        updateData[key] = /^\d{4}-\d{2}-\d{2}$/.test(value)
+          ? new Date(`${value}T00:00:00.000Z`)
+          : new Date(value);
+      } else {
+        updateData[key] = value;
+      }
+    }
+
+    const updated = await this.prisma.tenant.update({
+      where: { id: actor.tenantId },
+      data: updateData as Prisma.TenantUpdateInput,
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        email: true,
+        identityNumber: true,
+        gender: true,
+        birthDate: true,
+        originCity: true,
+        occupation: true,
+        companyOrCampus: true,
+        emergencyContactName: true,
+        emergencyContactPhone: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'TENANT_PROFILE_ONBOARDING_UPDATE',
+      entityType: 'Tenant',
+      entityId: String(actor.tenantId),
+      oldData: Object.fromEntries(
+        Object.keys(toUpdate).map((f) => [f, existingRecord[f] ?? null]),
+      ),
+      newData: Object.fromEntries(
+        Object.keys(toUpdate).map((f) => [f, (updated as unknown as Record<string, unknown>)[f] ?? null]),
+      ),
+    });
+
+    const updatedRecord = updated as unknown as Record<string, unknown>;
+    return {
+      tenant: updated,
+      completion: this.buildCompletionSummary(updatedRecord),
     };
   }
 }

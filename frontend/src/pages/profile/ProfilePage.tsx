@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import PasswordInput from '../../components/common/PasswordInput';
 import { changePassword } from '../../api/auth';
+import { getTenantProfile, fillTenantProfileOnboarding } from '../../api/tenants';
+import type { TenantProfileOnboardingPayload } from '../../api/tenants';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
+
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 function getUserTypeLabel(role?: string) {
   if (role === 'TENANT') return 'Penghuni';
@@ -14,59 +18,171 @@ function getUserTypeLabel(role?: string) {
   return '-';
 }
 
+function formatFieldDisplay(key: string, value: unknown): string {
+  if (value === null || value === undefined || value === '') return '-';
+  if (key === 'gender') {
+    if (value === 'MALE') return 'Laki-laki';
+    if (value === 'FEMALE') return 'Perempuan';
+    if (value === 'OTHER') return 'Lainnya';
+  }
+  if (key === 'birthDate') {
+    const d = new Date(value as string);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+  }
+  return String(value);
+}
+
+function getApiErrorMessage(err: unknown, fallback = 'Terjadi kesalahan.'): string {
+  if (err && typeof err === 'object' && 'response' in err) {
+    const msg = (err as { response?: { data?: { message?: string | string[] } } }).response?.data?.message;
+    if (Array.isArray(msg)) return msg.join(', ');
+    if (typeof msg === 'string' && msg.trim()) return msg;
+  }
+  return fallback;
+}
+
+// ── field definitions ─────────────────────────────────────────────────────────
+
+type OnboardingFieldDef =
+  | { key: string; label: string; type: 'text' | 'date' | 'tel' }
+  | { key: string; label: string; type: 'select'; options: { value: string; label: string }[] };
+
+const ONBOARDING_FIELD_DEFS: OnboardingFieldDef[] = [
+  {
+    key: 'gender',
+    label: 'Jenis kelamin',
+    type: 'select',
+    options: [
+      { value: 'MALE', label: 'Laki-laki' },
+      { value: 'FEMALE', label: 'Perempuan' },
+      { value: 'OTHER', label: 'Lainnya' },
+    ],
+  },
+  { key: 'birthDate', label: 'Tanggal lahir', type: 'date' },
+  { key: 'originCity', label: 'Kota asal', type: 'text' },
+  { key: 'occupation', label: 'Pekerjaan', type: 'text' },
+  { key: 'companyOrCampus', label: 'Instansi / kampus', type: 'text' },
+  { key: 'emergencyContactName', label: 'Nama kontak darurat', type: 'text' },
+  { key: 'emergencyContactPhone', label: 'Telepon kontak darurat', type: 'tel' },
+];
+
+// ── component ─────────────────────────────────────────────────────────────────
+
 export default function ProfilePage() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const isTenant = user?.role === 'TENANT';
+
+  // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
 
-  const isTenant = user?.role === 'TENANT';
+  // Onboarding form state (tenant only)
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const mutation = useMutation({
+  // Fetch tenant profile
+  const profileQuery = useQuery({
+    queryKey: ['tenant-self-profile'],
+    queryFn: getTenantProfile,
+    enabled: isTenant,
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const profile = profileQuery.data;
+  const completion = profile?.completion;
+  const tenantData = profile?.tenant;
+
+  // Password change mutation
+  const pwMutation = useMutation({
     mutationFn: () => changePassword({ currentPassword: currentPassword || undefined, newPassword }),
     onSuccess: () => {
-      setSuccess('Password berhasil diperbarui. Gunakan password baru saat login berikutnya.');
-      setError('');
+      setPwSuccess('Password berhasil diperbarui. Gunakan password baru saat login berikutnya.');
+      setPwError('');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     },
     onError: (err: unknown) => {
-      const message = err && typeof err === 'object' && 'response' in err
-        ? ((err as { response?: { data?: { message?: string | string[] } } }).response?.data?.message ?? 'Gagal mengubah password.')
-        : 'Gagal mengubah password.';
-      setError(Array.isArray(message) ? message.join(', ') : message);
-      setSuccess('');
+      setPwError(getApiErrorMessage(err, 'Gagal mengubah password.'));
+      setPwSuccess('');
     },
   });
 
-  const handleSubmit = () => {
-    setError('');
-    setSuccess('');
+  // Onboarding save mutation
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      // Only send non-empty values from formData (exclude locked fields)
+      const missingFields = completion?.missingFields ?? [];
+      const payload: TenantProfileOnboardingPayload = {};
+      for (const field of ONBOARDING_FIELD_DEFS) {
+        if (!missingFields.includes(field.key)) continue;
+        const val = formData[field.key];
+        if (val && val.trim() !== '') {
+          (payload as Record<string, string>)[field.key] = val.trim();
+        }
+      }
+      return fillTenantProfileOnboarding(payload);
+    },
+    onSuccess: () => {
+      setSaveSuccess(true);
+      setSaveError('');
+      setFormData({});
+      queryClient.invalidateQueries({ queryKey: ['tenant-self-profile'] });
+    },
+    onError: (err: unknown) => {
+      setSaveError(getApiErrorMessage(err, 'Gagal menyimpan data. Coba lagi.'));
+      setSaveSuccess(false);
+    },
+  });
 
+  const handlePwSubmit = () => {
+    setPwError('');
+    setPwSuccess('');
     if (!newPassword || newPassword.length < 8) {
-      setError('Password baru minimal 8 karakter.');
+      setPwError('Password baru minimal 8 karakter.');
       return;
     }
-
     if (newPassword !== confirmPassword) {
-      setError('Konfirmasi password baru tidak cocok.');
+      setPwError('Konfirmasi password baru tidak cocok.');
       return;
     }
-
-    mutation.mutate();
+    pwMutation.mutate();
   };
+
+  const handleFieldChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+    if (saveSuccess) setSaveSuccess(false);
+    if (saveError) setSaveError('');
+  };
+
+  const hasAnyInput = ONBOARDING_FIELD_DEFS.some(
+    (f) =>
+      (completion?.missingFields ?? []).includes(f.key) &&
+      formData[f.key] &&
+      formData[f.key].trim() !== '',
+  );
 
   return (
     <div>
       <PageHeader
         eyebrow="Akun"
         title="Profil Saya"
-        description={isTenant ? 'Data akun penghuni dan password portal.' : 'Lihat data akun aktif dan lakukan perubahan password dengan aman.'}
+        description={
+          isTenant
+            ? 'Data akun penghuni dan password portal.'
+            : 'Lihat data akun aktif dan lakukan perubahan password dengan aman.'
+        }
       />
 
+      {/* ── Account info + Password change ── */}
       <Row className="g-4">
         <Col lg={5}>
           <Card className="content-card border-0 h-100">
@@ -102,15 +218,17 @@ export default function ProfilePage() {
           <Card className="content-card border-0">
             <Card.Body>
               <h5 className="mb-2">Ganti Password</h5>
-              <p className="text-muted small mb-3">Gunakan password minimal 8 karakter. Jangan bagikan password ke orang lain.</p>
-              {error ? <Alert variant="danger">{error}</Alert> : null}
-              {success ? <Alert variant="success">{success}</Alert> : null}
+              <p className="text-muted small mb-3">
+                Gunakan password minimal 8 karakter. Jangan bagikan password ke orang lain.
+              </p>
+              {pwError ? <Alert variant="danger">{pwError}</Alert> : null}
+              {pwSuccess ? <Alert variant="success">{pwSuccess}</Alert> : null}
 
               <Form.Group className="mb-3">
                 <Form.Label>Password Saat Ini</Form.Label>
                 <PasswordInput
                   value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Masukkan password lama jika diminta"
                 />
               </Form.Group>
@@ -119,7 +237,7 @@ export default function ProfilePage() {
                 <Form.Label>Password Baru</Form.Label>
                 <PasswordInput
                   value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimal 8 karakter"
                 />
               </Form.Group>
@@ -128,20 +246,150 @@ export default function ProfilePage() {
                 <Form.Label>Konfirmasi Password Baru</Form.Label>
                 <PasswordInput
                   value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password baru"
                 />
               </Form.Group>
 
               <div className="d-flex justify-content-end">
-                <Button onClick={handleSubmit} disabled={mutation.isPending}>
-                  {mutation.isPending ? 'Menyimpan...' : 'Simpan Password Baru'}
+                <Button onClick={handlePwSubmit} disabled={pwMutation.isPending}>
+                  {pwMutation.isPending ? 'Menyimpan...' : 'Simpan Password Baru'}
                 </Button>
               </div>
             </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      {/* ── Tenant onboarding: Data Penghuni Tambahan ── */}
+      {isTenant && (
+        <Card className="tenant-profile-onboarding-card border-0 mt-4">
+          <Card.Body>
+            {/* Header */}
+            <div className="tp-onboarding-header">
+              <div>
+                <h5 className="mb-0">Data Penghuni Tambahan</h5>
+                <p className="text-muted small mb-0 mt-1">
+                  Isi sekali dengan benar. Setelah disimpan, perubahan perlu bantuan pengelola.
+                </p>
+              </div>
+              {completion ? (
+                <div className="tp-completion-badge">
+                  <span>{completion.completedFields.length}</span>
+                  <em>/{completion.requiredFields.length} data terisi</em>
+                  {completion.isComplete && (
+                    <span className="tp-complete-check">✓ Lengkap</span>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Loading */}
+            {profileQuery.isLoading && (
+              <p className="text-muted small mt-3">Memuat data penghuni...</p>
+            )}
+
+            {profileQuery.isError && (
+              <Alert variant="warning" className="mt-3">
+                Gagal memuat data penghuni. Coba muat ulang halaman.
+              </Alert>
+            )}
+
+            {/* Save feedback */}
+            {saveSuccess && (
+              <Alert variant="success" className="mt-3" dismissible onClose={() => setSaveSuccess(false)}>
+                Data berhasil disimpan. Field yang sudah diisi dikunci untuk keamanan.
+              </Alert>
+            )}
+            {saveError && (
+              <Alert variant="danger" className="mt-3" dismissible onClose={() => setSaveError('')}>
+                {saveError}
+              </Alert>
+            )}
+
+            {/* All locked */}
+            {completion?.isLocked && !profileQuery.isLoading && (
+              <div className="tp-all-locked-notice mt-3">
+                <span>✓</span>
+                <span>Semua data penghuni sudah terisi dan tersimpan. Hubungi pengelola jika ada yang perlu diubah.</span>
+              </div>
+            )}
+
+            {/* Field list */}
+            {profile && !profileQuery.isLoading ? (
+              <div className="tp-fields-grid mt-3">
+                {ONBOARDING_FIELD_DEFS.map((fieldDef) => {
+                  const isLocked = (completion?.lockedFields ?? []).includes(fieldDef.key);
+                  const currentVal = (tenantData as Record<string, unknown> | undefined)?.[fieldDef.key];
+
+                  if (isLocked) {
+                    return (
+                      <div key={fieldDef.key} className="tp-field tp-field--locked">
+                        <label className="tp-field-label">{fieldDef.label}</label>
+                        <div className="tp-field-value">
+                          {formatFieldDisplay(fieldDef.key, currentVal)}
+                        </div>
+                        <small className="tp-field-lock-hint">
+                          Sudah tersimpan — perubahan perlu bantuan pengelola.
+                        </small>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={fieldDef.key} className="tp-field tp-field--editable">
+                      <label className="tp-field-label" htmlFor={`tp-${fieldDef.key}`}>
+                        {fieldDef.label}
+                      </label>
+                      {fieldDef.type === 'select' ? (
+                        <Form.Select
+                          id={`tp-${fieldDef.key}`}
+                          size="sm"
+                          value={formData[fieldDef.key] ?? ''}
+                          onChange={(e) => handleFieldChange(fieldDef.key, e.target.value)}
+                        >
+                          <option value="">Pilih...</option>
+                          {fieldDef.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      ) : (
+                        <Form.Control
+                          id={`tp-${fieldDef.key}`}
+                          size="sm"
+                          type={fieldDef.type}
+                          value={formData[fieldDef.key] ?? ''}
+                          onChange={(e) => handleFieldChange(fieldDef.key, e.target.value)}
+                          placeholder={fieldDef.type === 'date' ? '' : `Isi ${fieldDef.label.toLowerCase()}`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+
+            {/* Save button */}
+            {profile && !completion?.isLocked ? (
+              <div className="tp-save-row mt-3">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => saveMutation.mutate()}
+                  disabled={saveMutation.isPending || !hasAnyInput}
+                >
+                  {saveMutation.isPending ? 'Menyimpan...' : 'Simpan Data'}
+                </Button>
+                <small className="text-muted">
+                  Field kosong yang tidak diisi akan tetap bisa diisi nanti.
+                </small>
+              </div>
+            ) : null}
+          </Card.Body>
+        </Card>
+      )}
     </div>
   );
 }
