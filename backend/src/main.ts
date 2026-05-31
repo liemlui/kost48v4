@@ -9,7 +9,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor';
 import { PrismaService } from './prisma/prisma.service';
-import { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -19,9 +19,13 @@ async function bootstrap() {
 
   // Room images are public marketing content — safe to serve statically.
   // Payment proofs remain protected via the dedicated authenticated endpoint.
-  app.useStaticAssets(join(process.cwd(), 'uploads', 'room-images'), {
+  const roomImagesPath = join(process.cwd(), 'uploads', 'room-images');
+  app.useStaticAssets(roomImagesPath, {
     prefix: '/uploads/room-images',
   });
+  // Some deployments/proxies only forward /api/* to the backend. Keep a
+  // public alias under /api so browser images work consistently in local/UAT.
+  app.use('/api/uploads/room-images', express.static(roomImagesPath));
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
 

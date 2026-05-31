@@ -27,6 +27,32 @@ const PUBLIC_ROOM_SELECT = {
 
 type PublicRoomRecord = Prisma.RoomGetPayload<{ select: typeof PUBLIC_ROOM_SELECT }>;
 
+
+const ROOM_IMAGE_BASE_PATH = '/api/uploads/room-images';
+
+const ROOM_MARKETING_IMAGE_FILES = new Set([
+  'kamar-a.webp', 'kamar-a-1.webp', 'kamar-a-2.webp', 'kamar-a-3.webp', 'kamar-a-4.webp', 'kamar-a-5.webp', 'kamar-a-6.webp',
+  'kamar-b.webp', 'kamar-b-1.webp', 'kamar-b-2.webp', 'kamar-b-3.webp', 'kamar-b-4.webp', 'kamar-b-5.webp', 'kamar-b-6.webp', 'kamar-b-7.webp', 'kamar-b-8.webp', 'kamar-b-9.webp',
+  'kamar-c.webp', 'kamar-c-1.webp', 'kamar-c-2.webp', 'kamar-c-3.webp',
+  'kamar-d.webp', 'kamar-d-1.webp', 'kamar-d-2.webp', 'kamar-d-3.webp', 'kamar-d-4.webp', 'kamar-d-5.webp', 'kamar-d-6.webp', 'kamar-d-7.webp', 'kamar-d-8.webp', 'kamar-d-9.webp',
+  'kamar-g.webp', 'kamar-g-1.webp', 'kamar-g-2.webp', 'kamar-g-3.webp', 'kamar-g-4.webp', 'kamar-g-5.webp', 'kamar-g-6.webp', 'kamar-g-7.webp',
+  'kamar-h.webp', 'kamar-h-1.webp', 'kamar-h-2.webp', 'kamar-h-3.webp', 'kamar-h-4.webp', 'kamar-h-5.webp', 'kamar-h-6.webp',
+  'kamar-i.webp', 'kamar-i-1.webp', 'kamar-i-2.webp', 'kamar-i-3.webp', 'kamar-i-4.webp', 'kamar-i-5.webp', 'kamar-i-6.webp',
+  'kamar-j.webp', 'kamar-j-1.webp', 'kamar-j-2.webp', 'kamar-j-3.webp', 'kamar-j-4.webp', 'kamar-j-5.webp', 'kamar-j-6.webp',
+  'kamar-k.webp', 'kamar-k-1.webp', 'kamar-k-2.webp', 'kamar-k-3.webp', 'kamar-k-4.webp',
+  'kamar-l.webp', 'kamar-l-1.webp', 'kamar-l-2.webp', 'kamar-l-3.webp', 'kamar-l-4.webp', 'kamar-l-5.webp', 'kamar-l-6.webp',
+  'kamar-m.webp', 'kamar-m-1.webp', 'kamar-m-2.webp', 'kamar-m-3.webp', 'kamar-m-4.webp', 'kamar-m-5.webp', 'kamar-m-6.webp', 'kamar-m-7.webp',
+]);
+
+const GENERIC_ROOM_MARKETING_IMAGES = [
+  'rumah-tampak-depan.webp',
+  'kamar-g.webp',
+  'kamar-h.webp',
+  'kamar-i.webp',
+  'kamar-l.webp',
+  'kost48-profile.webp',
+];
+
 @Injectable()
 export class MarketingPublicRoomsService {
   private bookingSchemaStatusCache: { hasReservedRoomStatus: boolean; hasStayExpiresAt: boolean } | null = null;
@@ -169,7 +195,7 @@ export class MarketingPublicRoomsService {
       name: room.name,
       floor: room.floor,
       status: room.status,
-      images: room.images ?? [],
+      images: this.resolveRoomMarketingImages(room),
       notes: room.notes,
       pricing: {
         dailyRateRupiah: room.dailyRateRupiah,
@@ -188,6 +214,50 @@ export class MarketingPublicRoomsService {
       availabilityNote: room.status === RoomStatus.RESERVED ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.' : null,
       facilities,
     };
+  }
+
+  private resolveRoomMarketingImages(room: Pick<PublicRoomRecord, 'id' | 'code' | 'name' | 'images'>): string[] {
+    const existingImages = this.normalizeExistingRoomImages(room.images);
+    if (existingImages.length > 0) return existingImages;
+
+    const codeCandidates = this.buildRoomImageCandidates(`${room.code ?? ''} ${room.name ?? ''}`);
+    const matched = codeCandidates.filter((filename) => ROOM_MARKETING_IMAGE_FILES.has(filename));
+    if (matched.length > 0) return matched.slice(0, 4).map((filename) => `${ROOM_IMAGE_BASE_PATH}/${filename}`);
+
+    const offset = room.id % GENERIC_ROOM_MARKETING_IMAGES.length;
+    const generic = [
+      ...GENERIC_ROOM_MARKETING_IMAGES.slice(offset),
+      ...GENERIC_ROOM_MARKETING_IMAGES.slice(0, offset),
+    ];
+    return generic.slice(0, 4).map((filename) => `${ROOM_IMAGE_BASE_PATH}/${filename}`);
+  }
+
+  private normalizeExistingRoomImages(images: unknown): string[] {
+    if (!Array.isArray(images)) return [];
+    return images
+      .filter((image): image is string => typeof image === 'string')
+      .map((image) => image.trim())
+      .filter(Boolean);
+  }
+
+  private buildRoomImageCandidates(source: string): string[] {
+    const normalized = source.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const candidates = new Set<string>();
+    const roomCodeMatches = normalized.matchAll(/\b([a-z])\s*0*(\d{1,3})\b/g);
+    for (const match of roomCodeMatches) {
+      const letter = match[1];
+      const number = match[2];
+      candidates.add(`kamar-${letter}-${number}.webp`);
+      candidates.add(`kamar-${letter}.webp`);
+    }
+
+    const letterMatches = normalized.matchAll(/\b(?:kamar\s*)?([a-z])\b/g);
+    for (const match of letterMatches) {
+      candidates.add(`kamar-${match[1]}.webp`);
+      for (let index = 1; index <= 3; index += 1) candidates.add(`kamar-${match[1]}-${index}.webp`);
+    }
+
+    return Array.from(candidates);
   }
 
   private buildPricingAvailabilityWhere(pricingTerm?: PricingTerm): Prisma.RoomWhereInput {

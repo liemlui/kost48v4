@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
@@ -11,7 +11,7 @@ import RoomComparePanel from "../../components/rooms/RoomComparePanel";
 import type { PricingTerm, PublicRoom } from "../../types";
 import { useAuth } from "../../context/AuthContext";
 import { useTenantPortalStage } from "../../hooks/useTenantPortalStage";
-import { resolveAbsoluteFileUrl } from "../../utils/resolveAbsoluteFileUrl";
+import { getKost48LogoUrl, getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
 import {
   getBestPublicRoomRate,
   getPublicRoomBathroom,
@@ -22,6 +22,7 @@ import {
   getPublicRoomInitialCostEstimate,
   getPublicRoomAvailabilityDisplay,
   getPublicRoomVisibleAmenities,
+  isPublicRoomBookable,
 } from "../../utils/publicRoomDisplay";
 
 const bathroomOptions = [
@@ -64,7 +65,7 @@ function getSelectedUnit() {
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
   const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya ingin tanya kamar ${roomCode}. Apakah masih tersedia?`;
+  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
@@ -86,29 +87,75 @@ function RoomFeatureTile({ title, value }: { title: string; value: string }) {
 }
 
 function RoomMarketImage({ room }: { room: PublicRoom }) {
-  const firstImage = room.images?.[0];
-  const resolved = firstImage ? resolveAbsoluteFileUrl(firstImage) : null;
-  const [imgState, setImgState] = useState<"loading" | "ok" | "error">("loading");
-  const showImg = imgState === "ok";
+  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 6), [room.code, room.name]);
+  const apiGallery = useMemo(
+    () => (room.images ?? []).map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
+    [room.images],
+  );
+  const candidateImages = useMemo(
+    () => Array.from(new Set([...localGallery, ...apiGallery])),
+    [localGallery, apiGallery],
+  );
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const [isHovered, setIsHovered] = useState(false);
+  const resolvedImages = candidateImages.filter((imageUrl) => !failedImages.has(imageUrl));
+  const activeImage = resolvedImages.length ? resolvedImages[activeIndex % resolvedImages.length] : null;
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setFailedImages(new Set());
+  }, [room.id, candidateImages.join('|')]);
+
+  useEffect(() => {
+    if (activeIndex >= resolvedImages.length) setActiveIndex(0);
+  }, [activeIndex, resolvedImages.length]);
+
+  useEffect(() => {
+    if (!isHovered || resolvedImages.length <= 1) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % resolvedImages.length);
+    }, 1250);
+    return () => window.clearInterval(timer);
+  }, [isHovered, resolvedImages.length]);
+
+  const markImageFailed = (imageUrl: string) => {
+    setFailedImages((previous) => {
+      if (previous.has(imageUrl)) return previous;
+      const next = new Set(previous);
+      next.add(imageUrl);
+      return next;
+    });
+  };
 
   return (
-    <div className={`room-market-image-wrap ${showImg ? "" : "is-placeholder"}`}>
-      {resolved ? (
+    <div
+      className={`room-market-image-wrap ${activeImage ? "" : "is-placeholder"}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {activeImage ? (
         <img
-          src={resolved}
+          key={activeImage}
+          src={activeImage}
           alt="Foto kamar KOST48"
           className="room-market-image"
-          style={showImg ? {} : { position: "absolute", opacity: 0, pointerEvents: "none", width: 0, height: 0 }}
-          onLoad={() => setImgState("ok")}
-          onError={() => setImgState("error")}
+          onError={() => markImageFailed(activeImage)}
         />
-      ) : null}
-      {!showImg ? (
+      ) : (
         <div className="room-market-placeholder">
           <span className="room-market-placeholder-icon">K48</span>
           <strong>Foto kamar menyusul</strong>
         </div>
+      )}
+      {resolvedImages.length > 1 ? (
+        <div className="room-market-slide-dots" aria-hidden="true">
+          {resolvedImages.slice(0, 6).map((imageUrl, index) => (
+            <span key={`${room.id}-dot-${imageUrl}`} className={index === activeIndex % resolvedImages.length ? 'active' : ''} />
+          ))}
+        </div>
       ) : null}
+      {resolvedImages.length > 1 ? <span className="room-market-image-counter">{(activeIndex % resolvedImages.length) + 1}/{resolvedImages.length}</span> : null}
     </div>
   );
 }
@@ -240,7 +287,7 @@ function RoomMarketCard({
             <Button className="w-100" onClick={handleBook}>Ajukan Booking</Button>
           ) : null}
           <a className="btn btn-outline-secondary w-100" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
-            💬 Tanya via WhatsApp
+            💬 {isAvailable ? "Tanya via WhatsApp" : "Tanya Ketersediaan"}
           </a>
         </div>
       </Card.Body>
@@ -282,11 +329,22 @@ function SegmentedFilter({
 function PublicTopbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [logoBroken, setLogoBroken] = useState(false);
+  const logoUrl = getKost48LogoUrl();
 
   return (
     <header className="rooms-public-topbar">
       <div className="rooms-public-brand">
-        <div className="brand-mark">K48</div>
+        {logoUrl && !logoBroken ? (
+          <img
+            className="brand-mark rooms-public-logo"
+            src={logoUrl}
+            alt="Logo Kost48 Surabaya"
+            onError={() => setLogoBroken(true)}
+          />
+        ) : (
+          <div className="brand-mark">K48</div>
+        )}
         <div>
           <div className="brand-title">Kost48 Surabaya</div>
           <div className="brand-subtitle">Surabaya Barat</div>
@@ -336,8 +394,10 @@ export default function PublicRoomsPage() {
     let list = roomsFromApi.filter((room) => {
       if (bathroom && getPublicRoomBathroom(room) !== bathroom) return false;
       if (cooling && getPublicRoomCooling(room) !== cooling) return false;
-      if (avail === "bookable" && room.isAvailable === false) return false;
-      if (avail === "occupied" && room.isAvailable !== false) return false;
+      const bookable = isPublicRoomBookable(room);
+      const status = String(room.status ?? "").toUpperCase();
+      if (avail === "bookable" && !bookable) return false;
+      if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
       return true;
     });
 
@@ -350,7 +410,7 @@ export default function PublicRoomsPage() {
     return list;
   }, [roomsFromApi, bathroom, cooling, avail, sort]);
 
-  const bookableCount = rooms.filter((room) => room.isAvailable !== false).length;
+  const bookableCount = rooms.filter((room) => isPublicRoomBookable(room)).length;
   const totalCount = rooms.length;
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
   const comparedRooms = useMemo(

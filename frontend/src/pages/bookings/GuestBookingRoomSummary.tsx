@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Card } from 'react-bootstrap';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import StatusBadge from '../../components/common/StatusBadge';
 import type { PublicRoom } from '../../types';
 import { isUtilitiesIncludedForPricingTerm } from '../../utils/pricing';
-import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
 import {
   getPublicRoomBathroomSentence,
   getPublicRoomBusinessHighlight,
@@ -24,28 +24,54 @@ interface GuestBookingRoomSummaryProps {
 }
 
 function GuestRoomPhoto({ room }: { room: PublicRoom }) {
-  const images = (room.images ?? []).map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
-  const cover = images[0];
-  const [imgState, setImgState] = useState<'loading' | 'ok' | 'error'>('loading');
-  const showImg = imgState === 'ok';
+  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 5), [room.code, room.name]);
+  const apiGallery = useMemo(
+    () => (room.images ?? []).map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
+    [room.images],
+  );
+  const candidateImages = useMemo(() => Array.from(new Set([...localGallery, ...apiGallery])), [localGallery, apiGallery]);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const [activeIndex, setActiveIndex] = useState(0);
+  const resolvedImages = candidateImages.filter((imageUrl) => !failedImages.has(imageUrl));
+  const cover = resolvedImages.length ? resolvedImages[activeIndex % resolvedImages.length] : null;
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setFailedImages(new Set());
+  }, [room.id, candidateImages.join('|')]);
+
+  useEffect(() => {
+    if (resolvedImages.length <= 1) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % resolvedImages.length);
+    }, 2200);
+    return () => window.clearInterval(timer);
+  }, [resolvedImages.length]);
+
+  const markImageFailed = (imageUrl: string) => {
+    setFailedImages((previous) => {
+      if (previous.has(imageUrl)) return previous;
+      const next = new Set(previous);
+      next.add(imageUrl);
+      return next;
+    });
+  };
 
   return (
-    <div className={showImg ? 'booking-room-photo-strip compact' : 'booking-room-photo-empty compact'}>
+    <div className={cover ? 'booking-room-photo-strip compact' : 'booking-room-photo-empty compact'}>
       {cover ? (
         <img
+          key={cover}
           src={cover}
           alt={`Foto utama kamar ${room.code}`}
-          style={showImg ? {} : { position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
-          onLoad={() => setImgState('ok')}
-          onError={() => setImgState('error')}
+          onError={() => markImageFailed(cover)}
         />
-      ) : null}
-      {!showImg ? (
+      ) : (
         <>
           <span>K48</span>
           <strong>Foto kamar menyusul</strong>
         </>
-      ) : null}
+      )}
     </div>
   );
 }

@@ -130,6 +130,7 @@ export type Room = {
   currentStay?: Stay | null;
   facilities?: RoomFacility[];
   isAvailable?: boolean;
+  canBook?: boolean;
   availabilityNote?: string | null;
 };
 
@@ -414,6 +415,7 @@ export type PublicRoom = {
   availablePricingTerms?: PricingTerm[];
   facilities?: RoomFacility[];
   isAvailable?: boolean;
+  canBook?: boolean;
   availabilityNote?: string | null;
 };
 

@@ -3,5 +3,13 @@ export function resolveAbsoluteFileUrl(fileUrl?: string | null): string | null {
   if (/^https?:\/\//i.test(fileUrl)) return fileUrl;
   const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
   const origin = apiBase.replace(/\/api\/?$/, '');
-  return `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+
+  // Public room images are served through both /uploads/room-images and
+  // /api/uploads/room-images. Prefer the /api alias so deployments that proxy
+  // only /api/* still show room/logo assets correctly.
+  const normalizedFileUrl = fileUrl.startsWith('/uploads/room-images/')
+    ? `/api${fileUrl}`
+    : fileUrl;
+
+  return `${origin}${normalizedFileUrl.startsWith('/') ? '' : '/'}${normalizedFileUrl}`;
 }

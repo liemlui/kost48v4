@@ -15,7 +15,7 @@ import type {
   PublicRoom,
 } from "../../types";
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm } from "../../utils/pricing";
-import { resolveAbsoluteFileUrl } from "../../utils/resolveAbsoluteFileUrl";
+import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
 import {
   getPublicRoomBathroomSentence,
   getPublicRoomBusinessHighlight,
@@ -37,14 +37,37 @@ function todayString() {
 
 function BookingRoomPhotoStrip({ room }: { room: PublicRoom }) {
   const images = room.images ?? [];
-  const resolvedImages = images.map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
+  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 5), [room.code, room.name]);
+  const apiGallery = useMemo(
+    () => images.map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
+    [images],
+  );
+  const candidateImages = useMemo(() => Array.from(new Set([
+    ...localGallery,
+    ...apiGallery,
+  ])), [localGallery, apiGallery]);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const resolvedImages = candidateImages.filter((imageUrl) => !failedImages.has(imageUrl));
   const cover = resolvedImages[0];
+
+  useEffect(() => {
+    setFailedImages(new Set());
+  }, [room.id, candidateImages.join('|')]);
+
+  const markImageFailed = (imageUrl: string) => {
+    setFailedImages((previous) => {
+      if (previous.has(imageUrl)) return previous;
+      const next = new Set(previous);
+      next.add(imageUrl);
+      return next;
+    });
+  };
 
   if (!cover) {
     return (
       <div className="booking-room-photo-empty">
         <span>K48</span>
-        <strong>Foto kamar segera hadir</strong>
+        <strong>Foto kamar menyusul</strong>
         <small>Admin bisa kirim foto terbaru jika kamu butuh sebelum masuk.</small>
       </div>
     );
@@ -52,11 +75,11 @@ function BookingRoomPhotoStrip({ room }: { room: PublicRoom }) {
 
   return (
     <div className="booking-room-photo-strip">
-      <img src={cover} alt={`Foto utama kamar ${room.code}`} />
+      <img src={cover} alt={`Foto utama kamar ${room.code}`} onError={() => markImageFailed(cover)} />
       {resolvedImages.length > 1 ? (
         <div className="booking-room-photo-thumbs" aria-label="Foto detail kamar">
           {resolvedImages.slice(1, 5).map((imageUrl, index) => (
-            <img key={`${imageUrl}-${index}`} src={imageUrl} alt={`Foto detail kamar ${index + 2}`} />
+            <img key={`${imageUrl}-${index}`} src={imageUrl} alt={`Foto detail kamar ${index + 2}`} onError={() => markImageFailed(imageUrl)} />
           ))}
         </div>
       ) : null}

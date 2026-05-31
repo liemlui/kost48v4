@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Alert, Badge, Button, Card, Carousel, Col, Container, Row, Spinner, Table } from 'react-bootstrap';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import type { PricingTerm, PublicRoom } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
-import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
 import { calculateRentByPricingTerm, isUtilitiesIncludedForPricingTerm, ALL_PRICING_TERMS } from '../../utils/pricing';
 import { getPublicRoomAvailabilityDisplay, getPublicRoomInitialCostEstimate, publicBookingSafetySteps } from '../../utils/publicRoomDisplay';
 
@@ -108,7 +108,7 @@ function getDefaultTerm(rows: TermRow[]) {
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
   const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya ingin tanya detail kamar ${roomCode}. Apakah fotonya bisa dikirim?`;
+  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
@@ -126,15 +126,43 @@ function DetailFeatureCard({ icon, label, value }: { icon: string; label: string
 
 function RoomImageBlock({ room }: { room: PublicRoom }) {
   const images = room.images ?? [];
-  const resolvedImages = images.map((url) => resolveAbsoluteFileUrl(url)).filter(Boolean) as string[];
+  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 10), [room.code, room.name]);
+  const apiGallery = useMemo(
+    () => images.map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
+    [images],
+  );
+  const candidateImages = useMemo(() => Array.from(new Set([
+    ...localGallery,
+    ...apiGallery,
+  ])), [localGallery, apiGallery]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const resolvedImages = candidateImages.filter((imageUrl) => !failedImages.has(imageUrl));
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setFailedImages(new Set());
+  }, [room.id, candidateImages.join('|')]);
+
+  useEffect(() => {
+    if (activeIndex >= resolvedImages.length) setActiveIndex(0);
+  }, [activeIndex, resolvedImages.length]);
+
+  const markImageFailed = (imageUrl: string) => {
+    setFailedImages((previous) => {
+      if (previous.has(imageUrl)) return previous;
+      const next = new Set(previous);
+      next.add(imageUrl);
+      return next;
+    });
+  };
 
   if (!resolvedImages.length) {
     return (
       <div className="room-detail-photo-empty">
-        <div className="room-detail-photo-empty-icon">📷</div>
+        <div className="room-detail-photo-empty-icon">K48</div>
         <div>
-          <strong>Foto kamar segera hadir</strong>
+          <strong>Foto kamar menyusul</strong>
           <span>Admin bisa mengirim foto terbaru lewat WhatsApp sebelum kamu booking.</span>
         </div>
         <a href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
@@ -147,14 +175,20 @@ function RoomImageBlock({ room }: { room: PublicRoom }) {
   return (
     <div className="room-detail-gallery">
       <Carousel
-        interval={null}
-        indicators={false}
+        interval={resolvedImages.length > 1 ? 3400 : null}
+        indicators={resolvedImages.length > 1}
+        controls={resolvedImages.length > 1}
         activeIndex={activeIndex}
         onSelect={(index) => setActiveIndex(index ?? 0)}
       >
         {resolvedImages.map((imageUrl, index) => (
-          <Carousel.Item key={`${room.id}-${index}`}>
-            <img src={imageUrl} alt={`Foto kamar ${room.code} ${index + 1}`} className="room-detail-gallery-image" />
+          <Carousel.Item key={`${room.id}-${imageUrl}`}>
+            <img
+              src={imageUrl}
+              alt={`Foto kamar ${room.code} ${index + 1}`}
+              className="room-detail-gallery-image"
+              onError={() => markImageFailed(imageUrl)}
+            />
           </Carousel.Item>
         ))}
       </Carousel>
@@ -162,20 +196,20 @@ function RoomImageBlock({ room }: { room: PublicRoom }) {
         <div className="room-detail-gallery-thumbs" aria-label="Pilih foto kamar">
           {resolvedImages.map((imageUrl, index) => (
             <button
-              key={`${room.id}-thumb-${index}`}
+              key={`${room.id}-thumb-${imageUrl}`}
               type="button"
               className={index === activeIndex ? 'active' : ''}
               onClick={() => setActiveIndex(index)}
               aria-label={`Lihat foto ${index + 1}`}
             >
-              <img src={imageUrl} alt="" />
+              <img src={imageUrl} alt="" onError={() => markImageFailed(imageUrl)} />
             </button>
           ))}
         </div>
       ) : null}
       <div className="room-detail-gallery-caption">
-        <span>Foto {activeIndex + 1}/{resolvedImages.length}</span>
-        {resolvedImages.length > 1 ? <span>Gunakan panah atau thumbnail untuk melihat foto lain.</span> : null}
+        <span>Foto {Math.min(activeIndex + 1, resolvedImages.length)}/{resolvedImages.length}</span>
+        {resolvedImages.length > 1 ? <span>Slideshow otomatis; gunakan panah atau thumbnail untuk memilih foto.</span> : null}
       </div>
     </div>
   );
@@ -373,8 +407,10 @@ export default function PublicRoomDetailPage() {
                     </div>
 
                     <div className="d-grid gap-2 mt-3">
-                      <Button size="lg" onClick={handleBook} disabled={!availability?.canBook}>Ajukan Booking</Button>
-                      <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 Tanya via WhatsApp</a>
+                      {availability?.canBook ? (
+                        <Button size="lg" onClick={handleBook}>Ajukan Booking</Button>
+                      ) : null}
+                      <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">💬 {availability?.canBook ? 'Tanya via WhatsApp' : 'Tanya Ketersediaan'}</a>
                     </div>
                   </Card.Body>
                 </Card>
@@ -386,7 +422,11 @@ export default function PublicRoomDetailPage() {
                 <span>{selectedRow?.label ?? 'Tarif'}</span>
                 <strong><CurrencyDisplay amount={selectedRow?.rent ?? 0} showZero={false} /></strong>
               </div>
-              <Button onClick={handleBook} disabled={!availability?.canBook}>Ajukan Booking</Button>
+              {availability?.canBook ? (
+                <Button onClick={handleBook}>Ajukan Booking</Button>
+              ) : (
+                <a className="btn btn-outline-secondary" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">Tanya Ketersediaan</a>
+              )}
             </div>
           </>
         ) : null}

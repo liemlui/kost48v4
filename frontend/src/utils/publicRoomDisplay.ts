@@ -125,36 +125,25 @@ export type PublicRoomAvailabilityDisplay = {
   canBook: boolean;
 };
 
+export function isPublicRoomBookable(room: PublicRoom): boolean {
+  const status = String(room.status ?? "").toUpperCase();
+  if (typeof room.canBook === "boolean") return room.canBook;
+  if (typeof room.isAvailable === "boolean") return room.isAvailable;
+  return status === "AVAILABLE" || status === "RESERVED";
+}
+
 export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAvailabilityDisplay {
   const status = String(room.status ?? "").toUpperCase();
-  const isBookable = room.isAvailable !== false;
-
-  if (status === "OCCUPIED") {
-    return {
-      label: "Terisi",
-      tone: "is-occupied",
-      shortCopy: "Kamar sedang ditempati. Bisa tanya estimasi kosong.",
-      detailCopy: "Kamar ini sedang ditempati. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa tersedia lagi.",
-      canBook: false,
-    };
-  }
-
-  if (status === "MAINTENANCE") {
-    return {
-      label: "Perawatan",
-      tone: "is-maintenance",
-      shortCopy: "Kamar sedang dalam perawatan.",
-      detailCopy: "Kamar ini sedang dalam perawatan dan belum bisa diajukan. Hubungi admin untuk informasi ketersediaan.",
-      canBook: false,
-    };
-  }
+  const isBookable = isPublicRoomBookable(room);
 
   if (!isBookable) {
     return {
       label: "Terisi",
-      tone: "is-full",
-      shortCopy: "Kamar belum bisa diajukan sekarang.",
-      detailCopy: "Kamar ini belum bisa diajukan saat ini. Pilih kamar lain atau tanya ke admin untuk jadwal ketersediaan berikutnya.",
+      tone: status === "MAINTENANCE" ? "is-maintenance" : "is-occupied",
+      shortCopy: status === "MAINTENANCE" ? "Kamar belum kosong untuk diajukan." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
+      detailCopy: status === "MAINTENANCE"
+        ? "Kamar ini belum kosong untuk diajukan sekarang. Anda tetap bisa tanya ke admin untuk informasi ketersediaan berikutnya."
+        : "Kamar ini sedang terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",
       canBook: false,
     };
   }

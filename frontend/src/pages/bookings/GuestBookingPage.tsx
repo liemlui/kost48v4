@@ -118,8 +118,9 @@ export default function GuestBookingPage() {
       />
     );
   }
-  if (!room.isAvailable) {
-    const availability = getPublicRoomAvailabilityDisplay(room);
+  const roomAvailability = getPublicRoomAvailabilityDisplay(room);
+  if (!roomAvailability.canBook) {
+    const availability = roomAvailability;
     const roomCode = room.code || `Kamar #${room.id}`;
     const waUrl = buildWaAvailabilityUrl(roomCode);
 
@@ -130,7 +131,7 @@ export default function GuestBookingPage() {
             <div className="card-body">
               <div className="text-center mb-4">
                 <div className="fs-1 mb-2">🚪</div>
-                <h5 className="mb-1">Kamar ini belum bisa diajukan sekarang</h5>
+                <h5 className="mb-1">Kamar ini sedang terisi</h5>
                 <div className="mb-2">
                   <span className={`room-market-status-badge ${availability.tone}`}>{availability.label}</span>
                 </div>
@@ -138,7 +139,7 @@ export default function GuestBookingPage() {
               </div>
 
               <Alert variant="info" className="small">
-                Anda masih bisa tanya ketersediaan berikutnya via WhatsApp. Admin akan membantu menginformasikan estimasi ketersediaan kamar ini.
+                Anda masih bisa tanya estimasi kapan kamar ini kosong via WhatsApp. Admin akan bantu cek pilihan yang paling cocok.
               </Alert>
 
               <div className="d-grid gap-2">

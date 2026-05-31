@@ -17466,3 +17466,120 @@ div.tenant-stay-fact-chip {
     gap: 0.4rem;
   }
 }
+
+
+/* V5.9.5-A — Public room real assets + simple availability polish */
+.rooms-public-logo {
+  display: block;
+  object-fit: contain;
+  background: #ffffff !important;
+  padding: .28rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.rooms-market-trust-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  margin-top: 1rem;
+}
+
+.rooms-market-trust-chips span {
+  border: 1px solid rgba(16, 185, 129, 0.24);
+  border-radius: 999px;
+  padding: .42rem .68rem;
+  background: rgba(236, 253, 245, 0.86);
+  color: #065f46;
+  font-size: .78rem;
+  font-weight: 760;
+}
+
+.room-market-image-wrap:not(.is-placeholder) {
+  background: #dbeafe;
+}
+
+.room-market-image-wrap.is-placeholder .room-market-placeholder {
+  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+}
+
+.room-market-status-badge.is-occupied {
+  background: #475569;
+}
+
+.room-market-status-badge.is-maintenance {
+  background: #475569;
+}
+
+/* V5.9.5-A4 — Public room multi-photo gallery + hover slideshow */
+.room-market-image-wrap {
+  position: relative;
+}
+
+.room-market-image {
+  transition: opacity .22s ease, transform .35s ease;
+}
+
+.room-market-card:hover .room-market-image {
+  transform: scale(1.025);
+}
+
+.room-market-slide-dots {
+  position: absolute;
+  left: 50%;
+  bottom: .7rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  transform: translateX(-50%);
+  padding: .28rem .42rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.room-market-slide-dots span {
+  width: .38rem;
+  height: .38rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.room-market-slide-dots span.active {
+  width: .9rem;
+  background: #ffffff;
+}
+
+.room-market-image-counter {
+  position: absolute;
+  right: .75rem;
+  bottom: .68rem;
+  z-index: 3;
+  min-width: 2.55rem;
+  border-radius: 999px;
+  padding: .22rem .48rem;
+  background: rgba(15, 23, 42, 0.56);
+  color: #ffffff;
+  font-size: .68rem;
+  font-weight: 780;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.room-detail-gallery .carousel-indicators {
+  margin-bottom: .75rem;
+}
+
+.room-detail-gallery .carousel-indicators [data-bs-target] {
+  width: .55rem;
+  height: .55rem;
+  border: 0;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+}
+
+.room-detail-gallery .carousel-indicators .active {
+  width: 1.45rem;
+  background-color: #ffffff;
+}
