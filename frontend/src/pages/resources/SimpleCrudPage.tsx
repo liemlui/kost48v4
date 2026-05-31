@@ -249,7 +249,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
   const [resourceFilter, setResourceFilter] = useState<ResourceFilterId>('ALL');
   const [stockMovementConfirm, setStockMovementConfirm] = useState<{ payload: Record<string, unknown>; isEdit: boolean } | null>(null);
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 10;
   const movementContext = searchParams.toString();
 
 

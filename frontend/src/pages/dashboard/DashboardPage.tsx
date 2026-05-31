@@ -3,6 +3,7 @@ import { Alert, Button, Card, Col, Collapse, Modal, Row, Spinner, Tab, Table, Ta
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
+import PaginationControls from '../../components/common/PaginationControls';
 import StatusBadge from '../../components/common/StatusBadge';
 import { AssistantPanel, ActionQueueTable, CompactMetrics, type ActionQueueItem, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, EntityBadgeFilterBar } from '../../components/workspace';
@@ -25,6 +26,7 @@ import { getDefaultRoute } from '../../config/navigation';
 import { useBusinessHealthScore } from '../../hooks/useBusinessHealthScore';
 import { useCashflowForecast } from '../../hooks/useCashflowForecast';
 import { useOperationalStressIndex } from '../../hooks/useOperationalStressIndex';
+import { useClientPagination } from '../../hooks/useClientPagination';
 import { dedupeCommandItems } from '../../utils/commandCenterDedup';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { addHoursToDate, formatClockWib, formatDateTimeWib, getDeadlineMeta, parseDateTimeSafe } from '../../utils/dateTime';
@@ -320,32 +322,46 @@ function CompactDisclosure({ title, subtitle, children, defaultOpen = false }: {
 
 function RecentTerlambatTable({ overdue }: { overdue: Invoice[] }) {
   const navigate = useNavigate();
+  const overduePagination = useClientPagination(overdue, [overdue.length], 10);
   return (
     <Card className="content-card border-0 h-100">
       <Card.Body>
         <div className="table-meta">
           <div>
             <div className="panel-title">Tagihan Bermasalah</div>
-            <div className="panel-subtitle">Detail disembunyikan dari dashboard utama; buka saat butuh follow-up.</div>
+            <div className="panel-subtitle">Maksimal 10 data per halaman. Klik baris untuk buka tagihan.</div>
           </div>
-          <Button variant="outline-primary" size="sm" onClick={() => navigate('/invoices')}>Lihat semua</Button>
+          <Button variant="outline-primary" size="sm" onClick={() => navigate('/invoices')}>Buka daftar tagihan</Button>
         </div>
         {!overdue.length ? (
           <EmptyState icon="✅" title="Tidak ada overdue" description="Belum ada tagihan overdue dari data yang dimuat." />
         ) : (
-          <Table responsive hover className="mt-3">
-            <thead><tr><th>Tagihan</th><th>Tenant</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
-            <tbody>
-              {overdue.slice(0, 6).map((invoice) => (
-                <tr key={invoice.id} className="clickable-row" onClick={() => navigate(`/invoices/${invoice.id}`)}>
-                  <td><div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div><div className="small text-muted">Rp {formatNumber(getInvoiceTotalAmount(invoice))}</div></td>
-                  <td>{invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`}</td>
-                  <td>{formatDateSafe(invoice.dueDate)}</td>
-                  <td><StatusBadge status={invoice.status} domain="invoice" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <>
+            <Table responsive hover className="mt-3 compact-data-table responsive-data-table">
+              <thead><tr><th>Tagihan</th><th>Tenant</th><th>Jatuh Tempo</th><th>Status</th></tr></thead>
+              <tbody>
+                {overduePagination.pagedItems.map((invoice) => (
+                  <tr key={invoice.id} className="clickable-row" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                    <td data-label="Tagihan"><div className="fw-semibold">{invoice.invoiceNumber || `INV-${invoice.id}`}</div><div className="small text-muted">Rp {formatNumber(getInvoiceTotalAmount(invoice))}</div></td>
+                    <td data-label="Tenant">{invoice.stay?.tenant?.fullName || `Masa sewa #${invoice.stayId}`}</td>
+                    <td data-label="Jatuh Tempo">{formatDateSafe(invoice.dueDate)}</td>
+                    <td data-label="Status"><StatusBadge status={invoice.status} domain="invoice" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            {overduePagination.hasPagination ? (
+              <div className="table-pagination-shell mt-3">
+                <PaginationControls
+                  currentPage={overduePagination.page}
+                  totalPages={overduePagination.totalPages}
+                  totalItems={overduePagination.totalItems}
+                  pageSize={overduePagination.pageSize}
+                  onPageChange={overduePagination.setPage}
+                />
+              </div>
+            ) : null}
+          </>
         )}
       </Card.Body>
     </Card>
@@ -556,8 +572,7 @@ function AdminAreaInternalMenu({ title, items, onNavigate }: { title: string; it
 function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading?: boolean }) {
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'GOOD' | 'HELP' | 'EVALUATE'>('ALL');
   const staffRows = [...items]
-    .sort((a, b) => Number(b?.score?.final ?? 0) - Number(a?.score?.final ?? 0))
-    .slice(0, 20);
+    .sort((a, b) => Number(b?.score?.final ?? 0) - Number(a?.score?.final ?? 0));
 
   const isNeedHelp = (item: any) => Number(item?.monthlyKpi?.needHelpCount ?? item?.monthlyKpi?.needHelp ?? 0) > 0;
   const getScore = (item: any) => Number(item?.score?.final ?? 0);
@@ -578,6 +593,7 @@ function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading
     if (id === 'EVALUATE') return staffRows.filter((item) => getScore(item) > 0 && getScore(item) < 60).length;
     return 0;
   };
+  const staffPagination = useClientPagination(filteredRows, [filter, filteredRows.length], 10);
 
   return (
     <Card className="content-card border-0 mb-3 admin-staff-frontline-card true-workspace-card">
@@ -587,7 +603,7 @@ function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading
             <div className="panel-title">Staff & skor bulan ini</div>
             <div className="panel-subtitle">Klik row staff untuk membuka detail kinerja. Sub-menu staff tetap tersedia di atas table.</div>
           </div>
-          <span className="unified-table-hint">Maks. 20 staff</span>
+          <span className="unified-table-hint">10 staff per halaman</span>
         </div>
         <EntityBadgeFilterBar
           activeId={filter}
@@ -606,7 +622,7 @@ function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading
           <Table responsive hover className="compact-data-table admin-staff-score-table mb-0">
             <thead><tr><th>Staff</th><th>Skor</th><th>Kategori</th><th>Tiket selesai</th><th>Checklist</th><th>Sinyal</th></tr></thead>
             <tbody>
-              {filteredRows.map((item) => {
+              {staffPagination.pagedItems.map((item) => {
                 const score = getScore(item);
                 const category = item?.category?.label ?? 'Belum dinilai';
                 const tone = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
@@ -624,6 +640,18 @@ function AdminStaffFrontlineList({ items, isLoading }: { items: any[]; isLoading
               })}
             </tbody>
           </Table>
+        ) : null}
+        {staffPagination.hasPagination ? (
+          <div className="table-pagination-shell mt-3">
+            <PaginationControls
+              currentPage={staffPagination.page}
+              totalPages={staffPagination.totalPages}
+              totalItems={staffPagination.totalItems}
+              pageSize={staffPagination.pageSize}
+              onPageChange={staffPagination.setPage}
+              isLoading={Boolean(isLoading)}
+            />
+          </div>
         ) : null}
       </Card.Body>
     </Card>
@@ -741,11 +769,13 @@ function AdminStaysUnifiedList({
   });
 
   const rows = [...bookingRows, ...activeRows, ...renewRows, ...checkoutRows];
-  const visibleRows = rows.filter((row) => {
+  const filteredRows = rows.filter((row) => {
     if (filter === 'ALL') return true;
     if (filter === 'FOLLOWUP') return row.tone === 'danger' || row.tone === 'warning';
     return row.group === filter;
-  }).slice(0, 20);
+  });
+  const rowPagination = useClientPagination(filteredRows, [filter, filteredRows.length], 10);
+  const visibleRows = rowPagination.pagedItems;
 
   const countBy = (value: AdminStayFlowFilter) => value === 'ALL'
     ? rows.length
@@ -794,6 +824,17 @@ function AdminStaysUnifiedList({
             </tbody>
           </Table>
         )}
+        {rowPagination.hasPagination ? (
+          <div className="table-pagination-shell mt-3">
+            <PaginationControls
+              currentPage={rowPagination.page}
+              totalPages={rowPagination.totalPages}
+              totalItems={rowPagination.totalItems}
+              pageSize={rowPagination.pageSize}
+              onPageChange={rowPagination.setPage}
+            />
+          </div>
+        ) : null}
       </Card.Body>
     </Card>
   );
@@ -881,8 +922,8 @@ function AdminFinanceWorkspace({
     .sort((a, b) => {
       const rank: Record<string, number> = { PAYMENT_REVIEW: 0, OVERDUE: 1, DRAFT: 2, OPEN: 3, PAID: 4 };
       return (rank[a.group] ?? 9) - (rank[b.group] ?? 9) || b.amount - a.amount;
-    })
-    .slice(0, 20);
+    });
+  const financePagination = useClientPagination(rows, [filter, rows.length], 10);
 
   const allRows = [...paymentRows, ...invoiceRows];
   const countBy = (value: AdminFinanceDashboardFilter) => value === 'ALL' ? allRows.length : allRows.filter((row) => row.group === value).length;
@@ -895,7 +936,7 @@ function AdminFinanceWorkspace({
             <div className="panel-title">Semua proses finance</div>
             <div className="panel-subtitle">Tagihan dan bukti pembayaran tampil langsung di tab Finance. Klik row untuk detail; tidak ada shortcut silang.</div>
           </div>
-          <span className="unified-table-hint">Maks. 20 item</span>
+          <span className="unified-table-hint">10 item per halaman</span>
         </div>
         <EntityBadgeFilterBar
           activeId={filter}
@@ -915,7 +956,7 @@ function AdminFinanceWorkspace({
           <Table responsive hover className="compact-data-table mb-0">
             <thead><tr><th>Penghuni / Masa Sewa</th><th>Alur</th><th>Status</th><th>Nominal</th><th>Batas Waktu</th><th>Catatan</th><th>Detail</th></tr></thead>
             <tbody>
-              {rows.map((row) => (
+              {financePagination.pagedItems.map((row) => (
                 <tr key={row.id} className="clickable-row" onClick={() => onNavigate(row.to)}>
                   <td><strong>{row.subject}</strong></td>
                   <td>{row.flow}</td>
@@ -929,6 +970,17 @@ function AdminFinanceWorkspace({
             </tbody>
           </Table>
         )}
+        {financePagination.hasPagination ? (
+          <div className="table-pagination-shell mt-3">
+            <PaginationControls
+              currentPage={financePagination.page}
+              totalPages={financePagination.totalPages}
+              totalItems={financePagination.totalItems}
+              pageSize={financePagination.pageSize}
+              onPageChange={financePagination.setPage}
+            />
+          </div>
+        ) : null}
       </Card.Body>
     </Card>
   );
@@ -965,8 +1017,8 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
     .sort((a, b) => {
       const rank: Record<string, number> = { OPEN: 0, IN_PROGRESS: 1, DONE: 2, CLOSED: 3 };
       return (rank[a.status] ?? 9) - (rank[b.status] ?? 9) || new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() - new Date(a.updatedAt ?? a.createdAt ?? 0).getTime();
-    })
-    .slice(0, 20);
+    });
+  const ticketPagination = useClientPagination(rows, [filter, rows.length], 10);
 
   return (
     <Card className="content-card border-0 mb-3 true-workspace-card">
@@ -976,7 +1028,7 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
             <div className="panel-title">Semua tiket aktif</div>
             <div className="panel-subtitle">Tiket langsung tampil di tab ini. Tiket DONE bisa ditutup setelah admin mengecek hasil staff.</div>
           </div>
-          <span className="unified-table-hint">Maks. 20 tiket</span>
+          <span className="unified-table-hint">10 tiket per halaman</span>
         </div>
         <EntityBadgeFilterBar
           activeId={filter}
@@ -993,7 +1045,7 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
           <Table responsive hover className="compact-data-table mb-0">
             <thead><tr><th>Tiket</th><th>Status</th><th>Lokasi / orang</th><th>Petugas</th><th>Diperbarui</th><th>Aksi</th></tr></thead>
             <tbody>
-              {rows.map((ticket) => (
+              {ticketPagination.pagedItems.map((ticket) => (
                 <tr key={ticket.id} className="clickable-row" onClick={() => setDetailTicket(ticket)}>
                   <td><strong>{ticket.ticketNumber ?? `TIK-${ticket.id}`}</strong><div className="small text-muted">{ticket.title ?? 'Tiket operasional'}</div></td>
                   <td><StatusBadge status={ticket.status} /></td>
@@ -1008,6 +1060,17 @@ function AdminTicketsWorkspace({ tickets, onNavigate }: { tickets: Ticket[]; onN
             </tbody>
           </Table>
         )}
+        {ticketPagination.hasPagination ? (
+          <div className="table-pagination-shell mt-3">
+            <PaginationControls
+              currentPage={ticketPagination.page}
+              totalPages={ticketPagination.totalPages}
+              totalItems={ticketPagination.totalItems}
+              pageSize={ticketPagination.pageSize}
+              onPageChange={ticketPagination.setPage}
+            />
+          </div>
+        ) : null}
       </Card.Body>
       <Modal show={Boolean(detailTicket)} onHide={() => setDetailTicket(null)} centered size="lg">
         <Modal.Header closeButton><Modal.Title>{detailTicket?.ticketNumber ?? `Tiket #${detailTicket?.id ?? ''}`}</Modal.Title></Modal.Header>
@@ -1081,9 +1144,10 @@ function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: { rooms
       if (filter === 'MAINTENANCE') return ['MAINTENANCE', 'INACTIVE'].includes(String(room.status));
       if (filter === 'STOCK_LOW') return false;
       return room.status === filter;
-    })
-    .slice(0, 20);
-  const stockRows = lowStockItems.slice(0, 20);
+    });
+  const stockRows = lowStockItems;
+  const roomPagination = useClientPagination(roomRows, [filter, roomRows.length], 10);
+  const stockPagination = useClientPagination(stockRows, [filter, stockRows.length], 10);
 
   return (
     <Card className="content-card border-0 mb-3 true-workspace-card">
@@ -1109,10 +1173,11 @@ function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: { rooms
         />
         {filter === 'STOCK_LOW' ? (
           !stockRows.length ? <EmptyState icon="📦" title="Tidak ada stok menipis" description="Stok gudang aman berdasarkan qty dan batas minimum." /> : (
-            <Table responsive hover className="compact-data-table mb-0">
+            <>
+              <Table responsive hover className="compact-data-table mb-0">
               <thead><tr><th>Barang</th><th>Kategori</th><th>Stok</th><th>Min</th><th>Status</th></tr></thead>
               <tbody>
-                {stockRows.map((item) => (
+                {stockPagination.pagedItems.map((item) => (
                   <tr key={item.id} className="clickable-row" onClick={() => onNavigate('/inventory-items')}>
                     <td><strong>{item.name ?? `Barang #${item.id}`}</strong><div className="small text-muted">{item.sku ?? '-'}</div></td>
                     <td>{item.category ?? '-'}</td>
@@ -1123,13 +1188,26 @@ function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: { rooms
                 ))}
               </tbody>
             </Table>
+            {stockPagination.hasPagination ? (
+              <div className="table-pagination-shell mt-3">
+                <PaginationControls
+                  currentPage={stockPagination.page}
+                  totalPages={stockPagination.totalPages}
+                  totalItems={stockPagination.totalItems}
+                  pageSize={stockPagination.pageSize}
+                  onPageChange={stockPagination.setPage}
+                />
+              </div>
+            ) : null}
+            </>
           )
         ) : (
           !roomRows.length ? <EmptyState icon="🚪" title="Tidak ada kamar pada filter ini" description="Pilih badge lain untuk melihat status kamar berbeda." /> : (
-            <Table responsive hover className="compact-data-table mb-0">
+            <>
+              <Table responsive hover className="compact-data-table mb-0">
               <thead><tr><th>Kamar</th><th>Status</th><th>Penghuni / pemesan</th><th>Tarif bulanan</th><th>Detail</th></tr></thead>
               <tbody>
-                {roomRows.map((room) => {
+                {roomPagination.pagedItems.map((room) => {
                   const tenantName = room.currentStay?.tenant?.fullName;
                   return (
                     <tr key={room.id} className="clickable-row" onClick={() => onNavigate(`/rooms/${room.id}`)}>
@@ -1143,6 +1221,18 @@ function AdminRoomsStockWorkspace({ rooms, inventoryItems, onNavigate }: { rooms
                 })}
               </tbody>
             </Table>
+            {roomPagination.hasPagination ? (
+              <div className="table-pagination-shell mt-3">
+                <PaginationControls
+                  currentPage={roomPagination.page}
+                  totalPages={roomPagination.totalPages}
+                  totalItems={roomPagination.totalItems}
+                  pageSize={roomPagination.pageSize}
+                  onPageChange={roomPagination.setPage}
+                />
+              </div>
+            ) : null}
+            </>
           )
         )}
       </Card.Body>
@@ -1824,8 +1914,8 @@ function OwnerDashboard() {
       <AutoOpsUrgencyCard status={autoOpsQuery.data} role="OWNER" />
       <AutoOpsControlPanel status={autoOpsQuery.data} role="OWNER" onCompleted={refreshDashboard} />
       <OwnerContinuityStrip pendingPaymentReviewCount={pendingPaymentReviewCount} pendingRenewCount={pendingRenewCount} approvedCheckoutRequestCount={approvedCheckoutRequestCount} overdueCount={overdue.length} openInvoiceCount={cashflowForecast.openInvoiceCount} onNavigate={navigate} />
-      {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan tagihan dihitung dari {invoices.length} data dari total {invoicesQuery.data.totalItems}. Jika data membesar, nanti perlu endpoint ringkasan backend.</Alert> : null}
-      <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Diagnosis ringkas dari rule engine; detail pekerjaan ada di antrean." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
+      {invoicesQuery.data?.isTruncated ? <Alert variant="warning" className="py-2 small">Ringkasan tagihan dihitung dari {invoices.length} dari total {invoicesQuery.data.totalItems} tagihan.</Alert> : null}
+      <AssistantPanel title="Asisten Kesehatan Bisnis" subtitle="Ringkasan prioritas bisnis; detail pekerjaan ada di antrean." items={businessHealth.assistantItems} maxItems={3} emptyTitle="Bisnis terlihat stabil" emptyMessage="Tidak ada pembayaran tertahan atau tagihan overdue dari data yang dimuat." />
       <CompactMetrics metrics={businessHealth.metrics} />
       <OwnerFinancialHealthCockpit
         invoices={invoices}
@@ -1847,10 +1937,10 @@ function OwnerDashboard() {
       />
       {backendBusinessHealth ? (
         <Alert variant="info" className="py-2 small">
-          Backend Finance Core aktif: score {Math.round(backendBusinessHealth.score)} ({backendBusinessHealth.grade}) · {backendBusinessHealth.headline} · generated {formatDateSafe(backendBusinessHealth.generatedAt)}.
+          Analisis kesehatan keuangan aktif: {backendBusinessHealth.grade} · {backendBusinessHealth.headline} · {formatDateSafe(backendBusinessHealth.generatedAt)}.
         </Alert>
       ) : backendBusinessHealthQuery.isError ? (
-        <Alert variant="light" className="py-2 small text-muted">Backend finance summary belum tersedia; dashboard memakai Tier 0 frontend rule engine sebagai fallback.</Alert>
+        <Alert variant="light" className="py-2 small text-muted">Analisis kesehatan keuangan dihitung dari data transaksi lokal.</Alert>
       ) : null}
 
       <Tabs activeKey={activeTab} onSelect={(key) => setActiveTab(key ?? 'priorities')} className="command-tabs mb-3">
@@ -1868,7 +1958,7 @@ function OwnerDashboard() {
         <Tab eventKey="finance" title="Keuangan">
           <Row className="g-4">
             <Col xl={6}>
-              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Cashflow Forecast Ringan</div><div className="panel-subtitle mb-3">Deterministic rule engine dari tagihan open; bukan LLM.</div><div className="kpi-list"><div className="kpi-item"><span>Expected inflow</span><strong>Rp {formatCurrencyCompact(cashflowForecast.expectedInflowRupiah)}</strong></div><div className="kpi-item"><span>Terlambat</span><strong>Rp {formatCurrencyCompact(cashflowForecast.overdueRupiah)}</strong></div><div className="kpi-item"><span>Due ≤7 hari</span><strong>Rp {formatCurrencyCompact(cashflowForecast.dueSoonRupiah)}</strong></div></div><p className="small text-muted mt-3 mb-0">{cashflowForecast.assumption}</p></Card.Body></Card>
+              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Cashflow Forecast Ringan</div><div className="panel-subtitle mb-3">Proyeksi dari tagihan aktif yang belum lunas.</div><div className="kpi-list"><div className="kpi-item"><span>Expected inflow</span><strong>Rp {formatCurrencyCompact(cashflowForecast.expectedInflowRupiah)}</strong></div><div className="kpi-item"><span>Terlambat</span><strong>Rp {formatCurrencyCompact(cashflowForecast.overdueRupiah)}</strong></div><div className="kpi-item"><span>Due ≤7 hari</span><strong>Rp {formatCurrencyCompact(cashflowForecast.dueSoonRupiah)}</strong></div></div><p className="small text-muted mt-3 mb-0">{cashflowForecast.assumption}</p></Card.Body></Card>
             </Col>
             <Col xl={6}><FinanceReadinessCard /></Col>
           </Row>

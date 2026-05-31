@@ -1,11 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Spinner, Table } from 'react-bootstrap';
 import { listResource } from '../../api/resources';
 import StatusBadge from '../common/StatusBadge';
+import PaginationControls from '../common/PaginationControls';
 import type { InventoryItem } from '../../types';
 import { getInventoryHealth, getInventoryPhysicalIssueLabel, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
 import StaffInventoryStatusModal from './StaffInventoryStatusModal';
+
+type InventoryViewFilter = 'ALL' | 'ATTENTION' | 'OUT' | 'LOW' | 'PHYSICAL' | 'GOOD';
 
 function priorityScore(item: InventoryItem) {
   const health = getInventoryHealth(item);
@@ -18,6 +21,9 @@ function priorityScore(item: InventoryItem) {
 
 export default function StaffGeneralInventorySection({ embedded = false }: { embedded?: boolean }) {
   const [selected, setSelected] = useState<InventoryItem | null>(null);
+  const [activeFilter, setActiveFilter] = useState<InventoryViewFilter>('ATTENTION');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const query = useQuery({
     queryKey: ['staff-general-inventory'],
     queryFn: () => listResource<InventoryItem>('/inventory-items', { limit: 200, isActive: 'true' }),
@@ -34,8 +40,39 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
     const out = items.filter((item) => getInventoryHealth(item).status === 'OUT_OF_STOCK').length;
     const low = items.filter((item) => getInventoryHealth(item).status === 'LOW_STOCK').length;
     const physical = items.filter((item) => isInventoryPhysicalIssue(item.status)).length;
-    return { out, low, physical };
+    const attention = items.filter((item) => getInventoryHealth(item).status !== 'GOOD' || isInventoryPhysicalIssue(item.status)).length;
+    const good = Math.max(0, items.length - attention);
+    return { out, low, physical, attention, good };
   }, [items]);
+
+  const inventoryFilters: Array<{ id: InventoryViewFilter; label: string; count: number }> = [
+    { id: 'ATTENTION', label: 'Perlu dicek', count: stockSummary.attention },
+    { id: 'OUT', label: 'Habis', count: stockSummary.out },
+    { id: 'LOW', label: 'Menipis', count: stockSummary.low },
+    { id: 'PHYSICAL', label: 'Masalah fisik', count: stockSummary.physical },
+    { id: 'GOOD', label: 'Aman', count: stockSummary.good },
+    { id: 'ALL', label: 'Semua barang', count: items.length },
+  ];
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const health = getInventoryHealth(item);
+      const physical = isInventoryPhysicalIssue(item.status);
+      if (activeFilter === 'OUT') return health.status === 'OUT_OF_STOCK';
+      if (activeFilter === 'LOW') return health.status === 'LOW_STOCK';
+      if (activeFilter === 'PHYSICAL') return physical;
+      if (activeFilter === 'GOOD') return health.status === 'GOOD' && !physical;
+      if (activeFilter === 'ATTENTION') return health.status !== 'GOOD' || physical;
+      return true;
+    });
+  }, [activeFilter, items]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const visibleItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <Card className={embedded ? 'border-0 staff-general-inventory-card embedded' : 'content-card border-0 staff-general-inventory-card'}>
@@ -52,10 +89,28 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
             <span>{stockSummary.physical} masalah fisik</span>
           </div>
         </div>
+        {!!items.length ? (
+          <div className="staff-inventory-filter-row" aria-label="Filter gudang staff">
+            {inventoryFilters.map((filter) => {
+              if (filter.id !== 'ALL' && filter.count === 0) return null;
+              return (
+                <button
+                  type="button"
+                  key={filter.id}
+                  className={`staff-filter-chip${activeFilter === filter.id ? ' active' : ''}`}
+                  onClick={() => setActiveFilter(filter.id)}
+                >
+                  <span>{filter.label}</span>
+                  <strong>{filter.count}</strong>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         {query.isLoading ? <div className="py-4 text-center"><Spinner size="sm" /> Memuat barang gudang...</div> : null}
         {query.isError ? <Alert variant="danger">Gagal memuat barang umum/gudang.</Alert> : null}
-        {!query.isLoading && !query.isError && !items.length ? <Alert variant="secondary" className="mb-0">Belum ada data barang umum atau gudang. Admin/owner bisa menambahkan master barang terlebih dahulu.</Alert> : null}
-        {!!items.length ? (
+        {!query.isLoading && !query.isError && !items.length ? <Alert variant="secondary" className="mb-0">Belum ada data barang umum atau gudang. Data barang akan muncul setelah master barang tersedia.</Alert> : null}
+        {!!filteredItems.length ? (
           <Table responsive hover className="staff-compact-table mb-0">
             <thead>
               <tr>
@@ -68,7 +123,7 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => {
+              {visibleItems.map((item) => {
                 const health = getInventoryHealth(item);
                 const physicalIssue = getInventoryPhysicalIssueLabel(item.status);
                 return (
@@ -95,6 +150,21 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
               })}
             </tbody>
           </Table>
+        ) : null}
+        {!query.isLoading && !query.isError && !!items.length && !filteredItems.length ? (
+          <Alert variant="secondary" className="mb-0">Tidak ada barang pada filter ini.</Alert>
+        ) : null}
+        {filteredItems.length > PAGE_SIZE ? (
+          <div className="mt-3">
+            <PaginationControls
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredItems.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+              isLoading={query.isLoading}
+            />
+          </div>
         ) : null}
       </Card.Body>
       <StaffInventoryStatusModal

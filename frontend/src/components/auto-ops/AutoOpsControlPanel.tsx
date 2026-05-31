@@ -183,10 +183,10 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
         <div className="autoops-uat-checklist mt-3">
           <div className="autoops-uat-header">
             <div>
-              <div className="panel-title">Checklist UAT first-paid</div>
-              <div className="panel-subtitle">Jika angka masih 0/0/0, panel sudah safe no-op; deep UAT perlu data booking/payment yang cocok.</div>
+              <div className="panel-title">Checklist pembayaran pertama</div>
+              <div className="panel-subtitle">Jika angka masih 0/0/0, belum ada data booking atau pembayaran yang bisa diproses otomatis.</div>
             </div>
-            <Badge bg={hasWork ? 'warning' : 'secondary'} text={hasWork ? 'dark' : undefined}>{hasWork ? 'Ada kandidat' : 'Butuh data UAT'}</Badge>
+            <Badge bg={hasWork ? 'warning' : 'secondary'} text={hasWork ? 'dark' : undefined}>{hasWork ? 'Ada kandidat' : 'Belum ada kandidat'}</Badge>
           </div>
           <div className="autoops-uat-grid">
             {AUTOOPS_UAT_CHECKS.map((item) => (
@@ -205,7 +205,7 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
             <div className="table-meta mb-2">
               <div>
                 <div className="panel-title">Hasil run terakhir</div>
-                <div className="panel-subtitle">Gunakan angka ini untuk UAT AutoOps tanpa membaca log mentah.</div>
+                <div className="panel-subtitle">Ringkasan hasil proses otomatis terakhir.</div>
               </div>
             </div>
             <div className="autoops-result-grid">

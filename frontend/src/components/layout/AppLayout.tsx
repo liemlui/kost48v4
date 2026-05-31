@@ -43,11 +43,11 @@ function getInitials(name?: string) {
 function getWorkspaceTitle(role?: string) {
   switch (role) {
     case 'OWNER':
-      return 'Workspace Owner';
+      return 'Kokpit Owner';
     case 'ADMIN':
-      return 'Workspace Admin';
+      return 'Command Center Admin';
     case 'STAFF':
-      return 'Pekerjaan Staf';
+      return 'Operasional KOST48';
     case 'TENANT':
       return 'Portal Penghuni';
     default:
@@ -58,11 +58,11 @@ function getWorkspaceTitle(role?: string) {
 function getWorkspaceSummary(role?: string) {
   switch (role) {
     case 'OWNER':
-      return 'Surface owner dipersempit untuk KPI, finance summary, dan arah keputusan bisnis.';
+      return 'Pantau kesehatan bisnis, kamar, dan laporan keuangan utama.';
     case 'ADMIN':
-      return 'Surface admin dipusatkan ke operasional harian, approval, dan kontrol data penting.';
+      return 'Kelola keputusan harian, pembayaran, kamar, dan laporan operasional.';
     case 'STAFF':
-      return 'Kerjakan tugas yang terlihat di daftar. Yang penting: cek kamar, kerjakan tiket, dan catat hasilnya.';
+      return 'Mulai dari pekerjaan hari ini, lalu catat hasil kerja dengan rapi.';
     case 'TENANT':
       return 'Portal sederhana untuk kamar, tagihan, tiket, pengumuman, dan profil.';
     default:
@@ -194,7 +194,7 @@ function SidebarContent({
 
       <div className={`sidebar-footer sidebar-footer-compact ${isAdmin ? 'sidebar-footer-admin' : ''}`}>
         <strong>{getRoleLabel(userRole)}</strong>
-        <div className="app-caption text-white-50">{isAdmin ? 'Sidebar adalah navigasi utama · detail tetap di halaman area' : userRole === 'STAFF' ? 'Lihat tugas, lalu kerjakan satu per satu' : 'Menu ringkas · detail ada di dashboard'}</div>
+        <div className="app-caption text-white-50">{isAdmin ? 'Gunakan menu untuk membuka area kerja' : userRole === 'STAFF' ? 'Mulai dari tugas hari ini' : 'Menu ringkas · detail ada di dashboard'}</div>
       </div>
     </>
   );
@@ -233,7 +233,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
             <button type="button" className="staff-workspace-brand" onClick={() => navigate('/dashboard')}>
               <span className="brand-mark small" aria-hidden="true">K48</span>
               <span>
-                <strong>KOST48 Staff Workspace</strong>
+                <strong>Operasional KOST48</strong>
                 <em>Kerja harian, kamar, gudang, dan laporan</em>
               </span>
             </button>

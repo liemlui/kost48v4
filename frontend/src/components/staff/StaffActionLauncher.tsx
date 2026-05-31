@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
-  ButtonGroup,
   Dropdown,
   Form,
   Modal,
@@ -50,7 +49,7 @@ const reportCopy: Record<
     button: "Barang Rusak / Hilang",
     problemLabel: "Nama barang dan masalah",
     placeholder: "Contoh: Remote AC hilang / kursi patah",
-    help: "Untuk barang kamar, lebih baik buka Kamar → Barang Kamar lalu kirim laporan kondisi agar admin mendapat konteks barangnya. Tombol ini tetap bisa dipakai untuk laporan umum.",
+    help: "Untuk barang kamar, buka Kamar → Barang Kamar bila ingin konteks lokasi lebih jelas. Tombol ini tetap bisa dipakai untuk laporan umum.",
   },
   CEK_KAMAR: {
     title: "Laporkan Kondisi Kamar",
@@ -65,7 +64,7 @@ const reportCopy: Record<
     problemLabel: "Stok atau alat yang bermasalah",
     placeholder:
       "Contoh: sabun lantai habis / alat pel rusak / plastik sampah tinggal sedikit",
-    help: "Untuk stok gudang dan barang umum, buka tab Gudang lalu kirim laporan kondisi agar admin bisa cek stok/mutasi resmi. Tombol ini tetap bisa dipakai untuk laporan cepat.",
+    help: "Untuk stok gudang dan barang umum, buka tab Gudang bila ingin melihat data barang lebih lengkap. Tombol ini tetap bisa dipakai untuk laporan cepat.",
   },
 };
 
@@ -347,26 +346,28 @@ export default function StaffActionLauncher({
             </Dropdown.Menu>
           </Dropdown>
         ) : (
-          <ButtonGroup size="sm" className="staff-action-group">
-            <Button variant="primary" onClick={() => open("BARANG_RUSAK")}>
+          <div className="staff-action-group staff-action-grid" role="group" aria-label="Aksi laporan lapangan">
+            <Button size="sm" variant="primary" onClick={() => open("BARANG_RUSAK")}>
               Laporkan Barang
             </Button>
             <Button
+              size="sm"
               variant="outline-primary"
               onClick={() => open("CATAT_METER")}
             >
               Meter Listrik/Air
             </Button>
             <Button
+              size="sm"
               variant="outline-primary"
               onClick={() => open("STOK_HABIS")}
             >
               Laporkan Stok
             </Button>
-            <Button variant="outline-primary" onClick={() => open("CEK_KAMAR")}>
+            <Button size="sm" variant="outline-primary" onClick={() => open("CEK_KAMAR")}>
               Kondisi Kamar
             </Button>
-          </ButtonGroup>
+          </div>
         )}
       </div>
 
@@ -384,14 +385,12 @@ export default function StaffActionLauncher({
           ) : null}
           {mode === "CATAT_METER" ? (
             <Alert variant="info" className="py-2 small">
-              Catat angka meter hari ini. Data lama tidak bisa diedit oleh
-              staff.
+              Catat angka meter hari ini. Pastikan angka terlihat jelas sebelum disimpan.
             </Alert>
           ) : copy ? (
             <>
               <Alert variant="info" className="py-2 small">
-                Ini laporan lapangan. Admin/owner yang menentukan keputusan
-                final.
+                Laporan ini akan masuk ke antrean tindak lanjut.
               </Alert>
               <Alert variant="light" className="border py-2 small">
                 {copy.help}

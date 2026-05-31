@@ -236,7 +236,7 @@ export default function AccountingSetupPage() {
     onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async (result) => {
       setActionError(null);
-      setActionMessage(`Auto journal diproses: ${result.createdCount} dibuat, ${result.skippedCount} diskip, ${result.failedCount} gagal.`);
+      setActionMessage(`Auto journal diproses: ${result.createdCount} dibuat, ${result.skippedCount} dilewati, ${result.failedCount} gagal.`);
       await refreshAccounting();
     },
     onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menjalankan backfill auto journal.')); },
@@ -511,7 +511,7 @@ export default function AccountingSetupPage() {
             <div className="section-kicker mb-2">Posting Operasional</div>
             <h3 className="h5 mb-1">{autoJournalEnabled ? 'Auto journal operasional aktif' : 'Auto journal operasional belum aktif'}</h3>
             <p className="text-muted mb-0">
-              Tagihan, pembayaran, pengeluaran, dan voucher WiFi dicatat sebagai JournalEntry POSTED secara idempotent. Gunakan backfill hanya untuk data operasional lama yang memang perlu dipetakan ke ledger.
+              Tagihan, pembayaran, pengeluaran, dan voucher WiFi dicatat otomatis ke jurnal akuntansi. Gunakan fitur ini hanya untuk data operasional lama yang belum terjurnal.
             </p>
             {postingBoundaryQuery.data?.note ? <small className="text-muted d-block mt-2">{postingBoundaryQuery.data.note}</small> : null}
           </div>

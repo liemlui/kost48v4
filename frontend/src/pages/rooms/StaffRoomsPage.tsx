@@ -13,7 +13,7 @@ function staffRoomStatusLabel(status?: string | null) {
     case 'OCCUPIED': return 'Ada penghuni';
     case 'AVAILABLE': return 'Kosong';
     case 'RESERVED': return 'Dipesan';
-    case 'MAINTENANCE': return 'Perlu diperbaiki';
+    case 'MAINTENANCE': return 'Perlu dicek';
     case 'INACTIVE': return 'Tidak dipakai';
     default: return 'Perlu dicek';
   }
@@ -101,9 +101,9 @@ export default function StaffRoomsPage() {
                   <span>Lantai {room.floor || '-'}</span>
                 </div>
                 <div className={issueSummary ? 'staff-room-issue-note' : 'staff-room-ok-note'}>
-                  <span>{issueSummary ? 'Perlu dicek' : 'Status kamar'}</span>
-                  <strong>{issueSummary || 'Tidak ada masalah aktif'}</strong>
-                  <small>{issueSummary ? roomIssueDetail(room.id, roomItems) : 'Klik kartu untuk buka detail, barang kamar, meter, dan catatan.'}</small>
+                  <span>{issueSummary || room.status === 'MAINTENANCE' ? 'Perlu dicek' : 'Status kamar'}</span>
+                  <strong>{issueSummary || (room.status === 'MAINTENANCE' ? 'Cek setelah checkout / perawatan' : 'Tidak ada masalah aktif')}</strong>
+                  <small>{issueSummary ? roomIssueDetail(room.id, roomItems) : room.status === 'MAINTENANCE' ? 'Pastikan kebersihan, kunci, inventaris, dan kondisi kamar sebelum siap ditempati lagi.' : 'Klik kartu untuk buka detail, barang kamar, meter, dan catatan.'}</small>
                 </div>
                 <div className="staff-room-card-footer">
                   <span> Klik untuk buka detail</span>

@@ -3,6 +3,8 @@ import { Alert, Badge, Button, Card, Spinner, Table } from 'react-bootstrap';
 import type { DepositLedgerReconciliationLite, DepositLedgerSummary } from '../../api/depositLedger';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { formatDepositLedgerDate, getDepositLedgerTypeLabel } from './depositLedgerLabels';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 type Props = {
   summary?: DepositLedgerSummary;
@@ -16,6 +18,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
   const totals = summary?.totals;
   const recentEntries = summary?.recentEntries ?? [];
   const mismatchCount = reconciliation?.mismatchCount ?? 0;
+  const entryPagination = useClientPagination(recentEntries, [recentEntries.length], 10);
 
   return (
     <Card className="content-card border-0 mb-3 deposit-operations-panel">
@@ -35,7 +38,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
         </div>
 
         {isLoading ? <Alert variant="light" className="border"><Spinner size="sm" className="me-2" />Memuat deposit operasional...</Alert> : null}
-            {isError ? <Alert variant="warning">Deposit operasional belum bisa dimuat. Pastikan endpoint deposit aktif sebelum audit UI.</Alert> : null}
+            {isError ? <Alert variant="warning">Deposit operasional belum bisa dimuat. Coba muat ulang halaman.</Alert> : null}
         {reconciliation?.note ? <Alert variant="info" className="small">{reconciliation.note}</Alert> : null}
 
         <div className="deposit-ops-metrics mb-3">
@@ -46,33 +49,47 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
         </div>
 
         {recentEntries.length ? (
-          <Table responsive hover className="mb-0 deposit-ledger-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>Tenant / Kamar</th>
-                <th>Event</th>
-                <th>Jumlah</th>
-                <th>Saldo</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentEntries.slice(0, 8).map((entry) => (
-                <tr key={entry.id}>
-                  <td className="small text-muted">{formatDepositLedgerDate(entry.occurredAt)}</td>
-                  <td>
-                    <div className="fw-semibold">{entry.tenantName ?? `Tenant #${entry.tenantId}`}</div>
-                    <div className="small text-muted">Kamar {entry.roomCode ?? entry.roomId}</div>
-                  </td>
-                  <td>{getDepositLedgerTypeLabel(entry.type)}</td>
-                  <td className="fw-semibold">{formatRupiah(entry.amountRupiah)}</td>
-                  <td>{formatRupiah(entry.balanceAfterRupiah)}</td>
-                  <td><Button as={Link as any} to={`/stays/${entry.stayId}?tab=finance`} size="sm" variant="outline-primary">Buka Masa Sewa</Button></td>
+          <>
+            <Table responsive hover className="mb-0 deposit-ledger-table compact-data-table responsive-data-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Tenant / Kamar</th>
+                  <th>Event</th>
+                  <th>Jumlah</th>
+                  <th>Saldo</th>
+                  <th>Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {entryPagination.pagedItems.map((entry) => (
+                  <tr key={entry.id}>
+                    <td data-label="Waktu" className="small text-muted">{formatDepositLedgerDate(entry.occurredAt)}</td>
+                    <td data-label="Tenant / Kamar">
+                      <div className="fw-semibold">{entry.tenantName ?? `Tenant #${entry.tenantId}`}</div>
+                      <div className="small text-muted">Kamar {entry.roomCode ?? entry.roomId}</div>
+                    </td>
+                    <td data-label="Event">{getDepositLedgerTypeLabel(entry.type)}</td>
+                    <td data-label="Jumlah" className="fw-semibold">{formatRupiah(entry.amountRupiah)}</td>
+                    <td data-label="Saldo">{formatRupiah(entry.balanceAfterRupiah)}</td>
+                    <td data-label="Aksi"><Button as={Link as any} to={`/stays/${entry.stayId}?tab=finance`} size="sm" variant="outline-primary">Buka</Button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            {entryPagination.hasPagination ? (
+              <div className="table-pagination-shell mt-3">
+                <PaginationControls
+                  currentPage={entryPagination.page}
+                  totalPages={entryPagination.totalPages}
+                  totalItems={entryPagination.totalItems}
+                  pageSize={entryPagination.pageSize}
+                  onPageChange={entryPagination.setPage}
+                  isLoading={isLoading}
+                />
+              </div>
+            ) : null}
+          </>
         ) : (
           <Alert variant="light" className="border mb-0">Belum ada event deposit baru di ledger operasional. Jika ada deposit historis, gunakan dry-run/review sebelum backfill.</Alert>
         )}

@@ -79,7 +79,7 @@ export default function DepositLedgerPanel({ stay, enabled = true, tenantView = 
         <Alert variant={tenantView ? 'info' : 'warning'}>
           {tenantView
             ? 'Riwayat detail deposit belum bisa dimuat. Ringkasan deposit tetap mengikuti data masa sewa.'
-            : 'Gagal memuat riwayat deposit. Cek endpoint deposit sebelum proses refund atau potongan.'}
+            : 'Gagal memuat riwayat deposit. Coba muat ulang halaman sebelum melanjutkan proses refund atau potongan.'}
         </Alert>
       ) : null}
 

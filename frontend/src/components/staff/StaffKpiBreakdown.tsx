@@ -71,7 +71,7 @@ export default function StaffKpiBreakdown({ performance }: Props) {
               <NeedItem show={proofRate < 80}>Bukti foto belum kuat untuk pekerjaan yang perlu dibuktikan.</NeedItem>
               <NeedItem show={fixNotes > 0}>Ada {fixNotes} catatan perbaikan yang perlu diperhatikan.</NeedItem>
               <NeedItem show={!performance?.tenantReviews?.count}>Belum ada review tenant bulan ini.</NeedItem>
-              <NeedItem show={auditTotal === 0}>Belum ada pengecekan admin/owner bulan ini.</NeedItem>
+              <NeedItem show={auditTotal === 0}>Belum ada pengecekan bulan ini.</NeedItem>
               <NeedItem show={(kpi?.meterCount ?? 0) === 0}>Belum ada catatan meter listrik/air bulan ini.</NeedItem>
             </ul>
           ) : <span>Semua bukti utama sudah terlihat rapi bulan ini.</span>}

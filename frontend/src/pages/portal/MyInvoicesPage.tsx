@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button, Card, Spinner, Table } from 'react-bootstrap';
 import { listResource } from '../../api/resources';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import PaginationControls from '../../components/common/PaginationControls';
 import PageHeader from '../../components/common/PageHeader';
 import type { AssistantItem, MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, StatusStrip } from '../../components/workspace';
@@ -31,6 +32,8 @@ export default function MyInvoicesPage() {
   const userId = user?.id;
   const tenantId = user?.tenantId;
   const [activeTab, setActiveTab] = useState<'UNPAID' | 'REVIEW' | 'PAID' | 'ALL'>('UNPAID');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const query = useQuery({
     queryKey: ['portal-invoices', { userId, tenantId }],
@@ -124,6 +127,13 @@ export default function MyInvoicesPage() {
     return isPayableInvoiceStatus(item.status) && !pendingReviewByInvoiceId.has(item.id);
   });
 
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+  const pagedItems = visibleItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div>
       <PageHeader eyebrow="Portal Penghuni" title="Tagihan Saya" description="Bayar, cek bukti, dan lihat riwayat tagihan." />
@@ -170,7 +180,7 @@ export default function MyInvoicesPage() {
           <Table hover responsive className="responsive-data-table">
             <thead><tr><th>No. Tagihan</th><th>Masa Sewa</th><th>Jatuh Tempo</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody>
-              {visibleItems.map((item) => {
+              {pagedItems.map((item) => {
                 const overdue = isTenantInvoiceOverdue(item) && !pendingReviewByInvoiceId.has(item.id);
                 const payable = isPayableInvoiceStatus(item.status);
                 const pendingReview = pendingReviewByInvoiceId.has(item.id);
@@ -190,6 +200,11 @@ export default function MyInvoicesPage() {
               })}
             </tbody>
           </Table>
+        ) : null}
+        {visibleItems.length > PAGE_SIZE ? (
+          <div className="mt-3">
+            <PaginationControls currentPage={page} totalPages={totalPages} totalItems={visibleItems.length} pageSize={PAGE_SIZE} onPageChange={setPage} isLoading={query.isLoading} />
+          </div>
         ) : null}
       </Card.Body></Card>
     </div>

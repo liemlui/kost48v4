@@ -127,7 +127,7 @@ export default function StaffReportPrintView({ performance }: Props) {
         <ul className="staff-print-checklist">
           {proofNeeds > 0 ? <li>{proofNeeds} pekerjaan selesai belum memiliki foto bukti.</li> : null}
           {!performance.tenantReviews?.count ? <li>Belum ada review tenant pada periode ini.</li> : null}
-          {!auditTotal ? <li>Belum ada pengecekan admin/owner pada periode ini.</li> : null}
+          {!auditTotal ? <li>Belum ada pengecekan pada periode ini.</li> : null}
           {(kpi.meterCount ?? 0) === 0 ? <li>Belum ada catatan meter listrik/air bulan ini.</li> : null}
           {!proofNeeds && performance.tenantReviews?.count && auditTotal && (kpi.meterCount ?? 0) > 0 ? <li>Semua poin utama terlihat lengkap pada periode ini.</li> : null}
         </ul>
@@ -141,7 +141,7 @@ export default function StaffReportPrintView({ performance }: Props) {
               <tr><th>Tanggal</th><th>Jenis</th><th>Pekerjaan</th><th>Lokasi</th><th>Bukti</th><th>Status</th></tr>
             </thead>
             <tbody>
-              {rows.slice(0, 40).map((row) => (
+              {rows.slice(0, 10).map((row) => (
                 <tr key={row.id}>
                   <td>{formatDate(row.date)}</td>
                   <td>{row.type}</td>
@@ -179,13 +179,13 @@ export default function StaffReportPrintView({ performance }: Props) {
                 </div>
               ))}
             </div>
-          ) : <p className="staff-print-muted">Belum ada pengecekan admin/owner pada periode ini.</p>}
+          ) : <p className="staff-print-muted">Belum ada pengecekan pada periode ini.</p>}
         </div>
       </div>
 
       <div className="staff-print-section staff-print-system-note">
         <h2>Catatan Sistem</h2>
-        <p>Laporan ini adalah bukti kerja berdasarkan data aplikasi. Admin/owner tetap dapat melakukan pengecekan lapangan secara mendadak atau berkala untuk memastikan pekerjaan sesuai kondisi nyata.</p>
+        <p>Laporan ini adalah bukti kerja berdasarkan data aplikasi. Pengecekan lapangan tetap dapat dilakukan berkala agar kondisi nyata sesuai catatan.</p>
       </div>
 
       <footer className="staff-print-signature-grid">

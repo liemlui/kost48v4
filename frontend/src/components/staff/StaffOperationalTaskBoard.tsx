@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Col, ProgressBar, Row } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import type { InventoryItem, Room, Ticket } from '../../types';
 import type { StaffRoutineKpiResponse, StaffRoutineTodayResponse } from '../../api/staffRoutines';
@@ -17,8 +17,9 @@ type StaffLane = {
   value: number;
   helper: string;
   tone: LaneTone;
-  actionLabel: string;
-  to: string;
+  actionLabel?: string;
+  to?: string;
+  targetId?: string;
 };
 
 type FocusItem = {
@@ -27,8 +28,9 @@ type FocusItem = {
   meta: string;
   helper: string;
   tone: LaneTone;
-  actionLabel: string;
-  to: string;
+  actionLabel?: string;
+  to?: string;
+  targetId?: string;
 };
 
 type Props = {
@@ -83,12 +85,12 @@ function makeInventoryFocus(items: InventoryItem[]): FocusItem[] {
       meta: item.category || 'Gudang / umum',
       helper: physicalIssue || health.actionCopy,
       tone: health.status === 'OUT_OF_STOCK' ? 'danger' : 'warning',
-      actionLabel: 'Cek Stok',
+      actionLabel: 'Cek Gudang',
       to: '/staff-warehouse',
     }));
 }
 
-export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryItems, routineToday, routineKpi, isLoading, onRefresh }: Props) {
+export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryItems, routineToday, isLoading, onRefresh }: Props) {
   const navigate = useNavigate();
   const routines = routineToday?.items ?? [];
   const activeTickets = tickets.filter((ticket) => activeTicketStatuses.has(String(ticket.status ?? '').toUpperCase()));
@@ -99,7 +101,6 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
   const waitingAdminTickets = activeTickets.filter((ticket) => String(ticket.status ?? '').toUpperCase() === 'DONE');
   const openTickets = activeTickets.filter((ticket) => String(ticket.status ?? '').toUpperCase() === 'OPEN');
   const maintenanceRooms = rooms.filter((room) => ['MAINTENANCE', 'INACTIVE'].includes(String(room.status ?? '').toUpperCase()));
-  const availableRooms = rooms.filter((room) => String(room.status ?? '').toUpperCase() === 'AVAILABLE');
   const lowStockItems = inventoryItems.filter((item) => {
     const health = getInventoryHealth(item);
     return item.isActive !== false && (health.status !== 'GOOD' || isInventoryPhysicalIssue(item.status));
@@ -107,52 +108,68 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
   const completedToday = numberValue(routineToday?.summary.completed) + tickets.filter((ticket) => doneTicketStatuses.has(String(ticket.status ?? '').toUpperCase())).length;
   const totalWork = Math.max(1, completedToday + todoRoutines.length + activeTickets.length);
   const progress = Math.min(100, Math.round((completedToday / totalWork) * 100));
+  const urgentCount = urgentRoutines.length + lowStockItems.filter((item) => getInventoryHealth(item).status === 'OUT_OF_STOCK').length + maintenanceRooms.length;
+  const todayCount = todoRoutines.length + openTickets.length;
+  const progressCount = inProgressRoutines.length + inProgressTickets.length;
+
+  const scrollToStaffSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const openStaffTarget = (target: Pick<StaffLane, 'to' | 'targetId'>) => {
+    if (target.targetId) {
+      scrollToStaffSection(target.targetId);
+      return;
+    }
+    if (target.to) navigate(target.to);
+  };
 
   const lanes: StaffLane[] = [
     {
       id: 'urgent',
       label: 'Mendesak',
-      value: urgentRoutines.length + lowStockItems.filter((item) => getInventoryHealth(item).status === 'OUT_OF_STOCK').length + maintenanceRooms.length,
-      helper: 'Kendala checklist, stok habis, atau kamar perlu cek.',
+      value: urgentCount,
+      helper: 'Kendala checklist, stok habis, atau kamar perlu dicek.',
       tone: urgentRoutines.length || maintenanceRooms.length ? 'danger' : lowStockItems.length ? 'warning' : 'success',
-      actionLabel: urgentRoutines.length ? 'Lihat Checklist' : maintenanceRooms.length ? 'Cek Kamar' : 'Cek Stok',
-      to: urgentRoutines.length ? '/dashboard' : maintenanceRooms.length ? '/rooms' : '/staff-warehouse',
+      actionLabel: urgentCount ? (urgentRoutines.length ? 'Buka daftar kerja' : maintenanceRooms.length ? 'Cek Kamar' : 'Cek Gudang') : undefined,
+      targetId: urgentRoutines.length ? 'staff-work-queue' : undefined,
+      to: !urgentRoutines.length && urgentCount ? (maintenanceRooms.length ? '/rooms' : '/staff-warehouse') : undefined,
     },
     {
       id: 'today',
       label: 'Hari Ini',
-      value: todoRoutines.length + openTickets.length,
+      value: todayCount,
       helper: 'Checklist dan tiket yang belum mulai.',
       tone: todoRoutines.length || openTickets.length ? 'warning' : 'success',
-      actionLabel: 'Mulai Tugas',
-      to: '/dashboard',
+      actionLabel: todayCount ? 'Buka daftar kerja' : undefined,
+      targetId: todayCount ? 'staff-work-queue' : undefined,
     },
     {
       id: 'progress',
       label: 'Dalam Proses',
-      value: inProgressRoutines.length + inProgressTickets.length,
+      value: progressCount,
       helper: 'Pekerjaan aktif yang perlu diselesaikan dulu.',
       tone: inProgressRoutines.length || inProgressTickets.length ? 'info' : 'neutral',
-      actionLabel: 'Lanjutkan',
-      to: '/dashboard',
+      actionLabel: progressCount ? 'Buka daftar kerja' : undefined,
+      targetId: progressCount ? 'staff-work-queue' : undefined,
     },
     {
       id: 'admin',
       label: 'Menunggu Admin',
       value: waitingAdminTickets.length,
-      helper: 'Tiket sudah dikerjakan dan menunggu konfirmasi final.',
+      helper: 'Pekerjaan selesai dan menunggu pengecekan.',
       tone: waitingAdminTickets.length ? 'info' : 'success',
-      actionLabel: 'Lihat Tiket',
-      to: '/tickets',
+      actionLabel: waitingAdminTickets.length ? 'Lihat Tiket' : undefined,
+      to: waitingAdminTickets.length ? '/tickets' : undefined,
     },
     {
       id: 'done',
       label: 'Selesai',
       value: completedToday,
-      helper: 'Bukti kerja yang sudah tercatat hari/bulan ini.',
+      helper: 'Pekerjaan yang sudah tercatat hari ini.',
       tone: 'success',
-      actionLabel: 'Laporan Saya',
-      to: '/staff-report',
+      actionLabel: completedToday ? 'Laporan Saya' : undefined,
+      to: completedToday ? '/staff-report' : undefined,
     },
   ];
 
@@ -163,8 +180,8 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
       meta: routineLocation(item),
       helper: item.status === 'NEED_HELP' ? 'Kendala sudah dicatat. Lanjutkan tugas lain yang aman sambil menunggu admin.' : 'Checklist terlewat, kerjakan susulan jika masih relevan.',
       tone: item.status === 'NEED_HELP' ? 'danger' as const : 'warning' as const,
-      actionLabel: item.status === 'NEED_HELP' ? 'Lihat Kendala' : 'Kerjakan Susulan',
-      to: '/dashboard',
+      actionLabel: 'Buka daftar kerja',
+      targetId: 'staff-work-queue',
     })),
     ...inProgressRoutines.slice(0, 2).map((item) => ({
       id: `routine-progress-${item.occurrenceKey}`,
@@ -172,8 +189,8 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
       meta: routineLocation(item),
       helper: 'Selesaikan pekerjaan aktif dulu sebelum membuka pekerjaan lain.',
       tone: 'info' as const,
-      actionLabel: 'Tandai Selesai',
-      to: '/dashboard',
+      actionLabel: 'Buka daftar kerja',
+      targetId: 'staff-work-queue',
     })),
     ...inProgressTickets.slice(0, 2).map((ticket) => ({
       id: `ticket-progress-${ticket.id}`,
@@ -181,8 +198,8 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
       meta: ticketLocation(ticket),
       helper: 'Update progress atau selesaikan tiket jika pekerjaan fisik sudah rapi.',
       tone: 'info' as const,
-      actionLabel: 'Update Tiket',
-      to: '/tickets',
+      actionLabel: 'Buka daftar kerja',
+      targetId: 'staff-work-queue',
     })),
     ...openTickets.slice(0, 2).map((ticket) => ({
       id: `ticket-open-${ticket.id}`,
@@ -190,8 +207,8 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
       meta: ticketLocation(ticket),
       helper: ticket.description || 'Tiket baru. Mulai dari inspeksi lokasi dan catat kondisi lapangan.',
       tone: 'warning' as const,
-      actionLabel: 'Mulai Tiket',
-      to: '/tickets',
+      actionLabel: 'Buka daftar kerja',
+      targetId: 'staff-work-queue',
     })),
     ...makeInventoryFocus(inventoryItems),
     ...maintenanceRooms.slice(0, 2).map((room) => ({
@@ -205,86 +222,56 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
     })),
   ].slice(0, 8);
 
-  const assistantTitle = focusItems.length ? 'Fokus kerja hari ini' : 'Tidak ada tugas mendesak';
+  const assistantTitle = focusItems.length ? 'Prioritas terdekat' : 'Operasional aman';
   const assistantBody = focusItems.length
-    ? `Mulai dari ${focusItems[0].title}. Jangan menyentuh approval pembayaran, perpanjangan, final keluar, atau deposit; itu tetap tugas admin/owner.`
-    : 'Operasional lapangan sedang aman. Tetap cek kebersihan area umum, stok harian, dan laporan tenant yang baru masuk.';
+    ? `Mulai dari ${focusItems[0].title}. Catat hasil kerja dengan singkat agar tindak lanjut berikutnya jelas.`
+    : 'Tidak ada pekerjaan mendesak dari data yang dimuat. Tetap cek area umum, stok harian, dan laporan penghuni yang baru masuk.';
 
   return (
     <Card className="staff-operational-board border-0">
       <Card.Body>
         <div className="staff-operational-head">
           <div>
-            <span className="staff-hero-pill">Papan Kerja Operasional</span>
-            <h2>Prioritas tugas staff</h2>
+            <span className="staff-hero-pill">Papan Kerja</span>
+            <h2>Ringkasan hari ini</h2>
             <p>{assistantBody}</p>
           </div>
-          <div className="staff-operational-progress" aria-label="Progress pekerjaan staff">
+          <div className="staff-operational-progress simple" aria-label="Progress pekerjaan">
             <strong>{progress}%</strong>
-            <span>tercatat selesai</span>
-            <ProgressBar now={progress} />
+            <span>selesai hari ini</span>
           </div>
         </div>
 
         <div className="staff-board-lanes" aria-label="Lane tugas staff">
-          {lanes.map((lane) => (
-            <button type="button" key={lane.id} className={`staff-board-lane tone-${lane.tone}`} onClick={() => navigate(lane.to)}>
-              <span>{lane.label}</span>
-              <strong>{lane.value}</strong>
-              <small>{lane.helper}</small>
-              <em>{lane.actionLabel}</em>
-            </button>
-          ))}
+          {lanes.map((lane) => {
+            const className = `staff-board-lane tone-${lane.tone}${lane.actionLabel ? ' is-actionable' : ' is-static'}`;
+            const content = (
+              <>
+                <span>{lane.label}</span>
+                <strong>{lane.value}</strong>
+                <small>{lane.helper}</small>
+                <em>{lane.actionLabel ?? 'Aman'}</em>
+              </>
+            );
+            return lane.actionLabel ? (
+              <button type="button" key={lane.id} className={className} onClick={() => openStaffTarget(lane)}>
+                {content}
+              </button>
+            ) : (
+              <div key={lane.id} className={className} aria-label={`${lane.label}: aman`}>
+                {content}
+              </div>
+            );
+          })}
         </div>
 
-        <Row className="g-3 mt-1">
-          <Col lg={8}>
-            <div className="staff-focus-panel">
-              <div className="staff-focus-title-row">
-                <div>
-                  <strong>{assistantTitle}</strong>
-                  <span>Urutan dibuat dari checklist, tiket aktif, stok, dan kamar yang perlu dicek.</span>
-                </div>
-                <Button variant="outline-primary" size="sm" onClick={() => onRefresh?.()} disabled={isLoading}>{isLoading ? 'Memuat...' : 'Refresh'}</Button>
-              </div>
-              {!focusItems.length ? (
-                <div className="staff-focus-empty">
-                  <strong>Operasional lapangan aman.</strong>
-                  <span>Tidak ada checklist/tiket/stok yang mendesak dari data yang dimuat.</span>
-                </div>
-              ) : (
-                <div className="staff-focus-list">
-                  {focusItems.map((item, index) => (
-                    <button type="button" key={item.id} className={`staff-focus-row tone-${item.tone}`} onClick={() => navigate(item.to)}>
-                      <span className="staff-focus-rank">{index + 1}</span>
-                      <span className="staff-focus-main">
-                        <strong>{item.title}</strong>
-                        <small>{item.meta} · {item.helper}</small>
-                      </span>
-                      <em>{item.actionLabel}</em>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Col>
-          <Col lg={4}>
-            <div className="staff-guardrail-card">
-              <strong>Batas aman staff</strong>
-              <span>Staff fokus pada pekerjaan lapangan dan laporan kondisi. Keputusan finance/lifecycle tetap di admin/owner.</span>
-              <ul>
-                <li>Tidak approve pembayaran.</li>
-                <li>Tidak final checkout.</li>
-                <li>Tidak proses deposit.</li>
-                <li>Status stok habis/menipis dihitung sistem.</li>
-              </ul>
-              <Button variant="outline-secondary" size="sm" onClick={() => navigate('/staff-warehouse')}>Cek Gudang</Button>
-            </div>
-          </Col>
-        </Row>
-
-        {routineKpi?.message ? <Alert variant="info" className="mt-3 mb-0 small">{routineKpi.message}</Alert> : null}
-        {availableRooms.length ? <div className="staff-room-hint mt-3">{availableRooms.length} kamar tersedia. Staff hanya cek kesiapan fisik bila diminta admin; booking/payment tetap di admin.</div> : null}
+        {focusItems.length ? (
+          <div className="staff-nearest-inline" aria-label="Prioritas terdekat">
+            <strong>Prioritas terdekat</strong>
+            <span>{focusItems[0].title} · {focusItems[0].meta}</span>
+            <Button variant="outline-primary" size="sm" onClick={() => scrollToStaffSection('staff-work-queue')}>Buka daftar kerja</Button>
+          </div>
+        ) : null}
       </Card.Body>
     </Card>
   );

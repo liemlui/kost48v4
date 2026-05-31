@@ -49,7 +49,7 @@ function staffRoomStatusLabel(status?: string | null) {
     case 'OCCUPIED': return 'Ada penghuni';
     case 'AVAILABLE': return 'Kosong';
     case 'RESERVED': return 'Dipesan';
-    case 'MAINTENANCE': return 'Perlu diperbaiki';
+    case 'MAINTENANCE': return 'Perlu dicek';
     case 'INACTIVE': return 'Tidak dipakai';
     default: return 'Perlu dicek';
   }

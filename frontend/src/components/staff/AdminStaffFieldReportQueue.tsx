@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
@@ -22,6 +23,8 @@ import {
   inventoryMovementTypeOptions,
 } from "../../constants/staffRepairOptions";
 import type { StaffFieldReport } from "../../types";
+import PaginationControls from "../common/PaginationControls";
+import { useClientPagination } from "../../hooks/useClientPagination";
 
 function reportTitle(report: StaffFieldReport) {
   return (
@@ -52,6 +55,7 @@ export default function AdminStaffFieldReportQueue() {
     "APPROVE" | "REJECT" | "NEEDS_MORE_INFO"
   >("APPROVE");
   const [adminNotes, setAdminNotes] = useState("");
+  const [adminNotesTouched, setAdminNotesTouched] = useState(false);
   const [createMovement, setCreateMovement] = useState(false);
   const [movementType, setMovementType] = useState<"ASSIGN_TO_ROOM" | "OUT">(
     "ASSIGN_TO_ROOM",
@@ -99,12 +103,17 @@ export default function AdminStaffFieldReportQueue() {
         }),
         queryClient.invalidateQueries({ queryKey: ["tickets"] }),
         queryClient.invalidateQueries({ queryKey: ["inventory-items"] }),
-        queryClient.invalidateQueries({ queryKey: ["/inventory-items", "list"] }),
-        queryClient.invalidateQueries({ queryKey: ["/inventory-movements", "list"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["/inventory-items", "list"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["/inventory-movements", "list"],
+        }),
         queryClient.invalidateQueries({ queryKey: ["room"] }),
       ]);
       setSelected(null);
       setAdminNotes("");
+      setAdminNotesTouched(false);
       setDecision("APPROVE");
       setCreateMovement(false);
       setMovementType("ASSIGN_TO_ROOM");
@@ -115,10 +124,38 @@ export default function AdminStaffFieldReportQueue() {
   });
 
   const queue = queueQuery.data;
+  const stockApprovalItems = useMemo(
+    () => queue?.pendingStockApproval ?? [],
+    [queue?.pendingStockApproval],
+  );
+  const itemDecisionItems = useMemo(
+    () => queue?.pendingItemDecision ?? [],
+    [queue?.pendingItemDecision],
+  );
+  const verificationItems = useMemo(
+    () => queue?.pendingVerification ?? [],
+    [queue?.pendingVerification],
+  );
   const total =
-    (queue?.pendingStockApproval?.length ?? 0) +
-    (queue?.pendingItemDecision?.length ?? 0) +
-    (queue?.pendingVerification?.length ?? 0);
+    stockApprovalItems.length +
+    itemDecisionItems.length +
+    verificationItems.length;
+  const PAGE_SIZE = 10;
+  const stockApprovalPagination = useClientPagination(
+    stockApprovalItems,
+    [stockApprovalItems.length],
+    PAGE_SIZE,
+  );
+  const itemDecisionPagination = useClientPagination(
+    itemDecisionItems,
+    [itemDecisionItems.length],
+    PAGE_SIZE,
+  );
+  const verificationPagination = useClientPagination(
+    verificationItems,
+    [verificationItems.length],
+    PAGE_SIZE,
+  );
 
   const openReview = (
     report: StaffFieldReport,
@@ -132,6 +169,7 @@ export default function AdminStaffFieldReportQueue() {
     setFinalDecisionChecked(false);
     setStockMovementChecked(false);
     setAdminNotes("");
+    setAdminNotesTouched(false);
   };
 
   return (
@@ -162,7 +200,7 @@ export default function AdminStaffFieldReportQueue() {
           <Row className="g-3">
             <Col lg={4}>
               <div className="small fw-semibold mb-2">Permintaan barang</div>
-              {(queue?.pendingStockApproval ?? []).slice(0, 5).map((report) => (
+              {stockApprovalPagination.pagedItems.map((report) => (
                 <div className="staff-admin-report-card" key={report.id}>
                   <strong>{reportTitle(report)}</strong>
                   <span>
@@ -183,15 +221,27 @@ export default function AdminStaffFieldReportQueue() {
                   </Button>
                 </div>
               ))}
-              {!(queue?.pendingStockApproval ?? []).length ? (
+              {!stockApprovalItems.length ? (
                 <div className="small text-muted">
                   Tidak ada permintaan barang.
+                </div>
+              ) : null}
+              {stockApprovalPagination.hasPagination ? (
+                <div className="staff-work-pagination compact mt-2">
+                  <PaginationControls
+                    currentPage={stockApprovalPagination.page}
+                    totalPages={stockApprovalPagination.totalPages}
+                    totalItems={stockApprovalPagination.totalItems}
+                    pageSize={stockApprovalPagination.pageSize}
+                    onPageChange={stockApprovalPagination.setPage}
+                    isLoading={queueQuery.isFetching}
+                  />
                 </div>
               ) : null}
             </Col>
             <Col lg={4}>
               <div className="small fw-semibold mb-2">Keputusan barang</div>
-              {(queue?.pendingItemDecision ?? []).slice(0, 5).map((report) => (
+              {itemDecisionPagination.pagedItems.map((report) => (
                 <div className="staff-admin-report-card" key={report.id}>
                   <strong>{reportTitle(report)}</strong>
                   <span>
@@ -213,15 +263,27 @@ export default function AdminStaffFieldReportQueue() {
                   </Button>
                 </div>
               ))}
-              {!(queue?.pendingItemDecision ?? []).length ? (
+              {!itemDecisionItems.length ? (
                 <div className="small text-muted">
                   Tidak ada keputusan barang pending.
+                </div>
+              ) : null}
+              {itemDecisionPagination.hasPagination ? (
+                <div className="staff-work-pagination compact mt-2">
+                  <PaginationControls
+                    currentPage={itemDecisionPagination.page}
+                    totalPages={itemDecisionPagination.totalPages}
+                    totalItems={itemDecisionPagination.totalItems}
+                    pageSize={itemDecisionPagination.pageSize}
+                    onPageChange={itemDecisionPagination.setPage}
+                    isLoading={queueQuery.isFetching}
+                  />
                 </div>
               ) : null}
             </Col>
             <Col lg={4}>
               <div className="small fw-semibold mb-2">Selesai perlu cek</div>
-              {(queue?.pendingVerification ?? []).slice(0, 5).map((ticket) => (
+              {verificationPagination.pagedItems.map((ticket) => (
                 <div className="staff-admin-report-card" key={ticket.id}>
                   <strong>
                     {ticket.title ||
@@ -232,13 +294,34 @@ export default function AdminStaffFieldReportQueue() {
                     {ticket.room?.code || "Lokasi belum jelas"} · DONE
                   </span>
                   <small>
-                    Close tiket dari daftar tiket setelah bukti dicek.
+                    Buka tiket untuk cek bukti dan menutup pekerjaan jika sudah
+                    sesuai.
                   </small>
+                  <Button
+                    as={Link as any}
+                    to="/tickets"
+                    size="sm"
+                    variant="outline-primary"
+                  >
+                    Buka Tiket
+                  </Button>
                 </div>
               ))}
-              {!(queue?.pendingVerification ?? []).length ? (
+              {!verificationItems.length ? (
                 <div className="small text-muted">
                   Tidak ada pekerjaan selesai yang menunggu cek.
+                </div>
+              ) : null}
+              {verificationPagination.hasPagination ? (
+                <div className="staff-work-pagination compact mt-2">
+                  <PaginationControls
+                    currentPage={verificationPagination.page}
+                    totalPages={verificationPagination.totalPages}
+                    totalItems={verificationPagination.totalItems}
+                    pageSize={verificationPagination.pageSize}
+                    onPageChange={verificationPagination.setPage}
+                    isLoading={queueQuery.isFetching}
+                  />
                 </div>
               ) : null}
             </Col>
@@ -254,6 +337,7 @@ export default function AdminStaffFieldReportQueue() {
           setFinalDecisionChecked(false);
           setStockMovementChecked(false);
           setAdminNotes("");
+          setAdminNotesTouched(false);
         }}
         centered
       >
@@ -277,8 +361,8 @@ export default function AdminStaffFieldReportQueue() {
                 </Alert>
               ) : null}
               <Alert variant="info" className="py-2 small">
-                Staff hanya melapor. Admin/owner yang menentukan keputusan final
-                dan mutasi stok.
+                Laporan ini menjadi bahan tindak lanjut. Periksa catatan dan
+                foto sebelum menyimpan keputusan.
               </Alert>
               <div className="mb-3 rounded-4 border bg-light p-3">
                 <Form.Check
@@ -294,7 +378,7 @@ export default function AdminStaffFieldReportQueue() {
                 <Form.Check
                   type="checkbox"
                   id="staff-report-final-decision-check"
-                  label="Saya paham keputusan ini adalah keputusan admin, bukan keputusan staff."
+                  label="Saya sudah memastikan keputusan ini sesuai kondisi lapangan."
                   checked={finalDecisionChecked}
                   onChange={(event) =>
                     setFinalDecisionChecked(event.currentTarget.checked)
@@ -393,13 +477,16 @@ export default function AdminStaffFieldReportQueue() {
                         )}
                       </Form.Text>
                       <Alert variant="warning" className="small mt-2 mb-2">
-                        Ini mengubah stok resmi. Pastikan bukti staff sudah dicek.
+                        Ini mengubah stok resmi. Pastikan bukti staff sudah
+                        dicek.
                       </Alert>
                       <Form.Check
                         type="checkbox"
                         label="Saya paham ini mengubah stok resmi."
                         checked={stockMovementChecked}
-                        onChange={(event) => setStockMovementChecked(event.currentTarget.checked)}
+                        onChange={(event) =>
+                          setStockMovementChecked(event.currentTarget.checked)
+                        }
                       />
                     </Form.Group>
                   ) : null}
@@ -411,14 +498,24 @@ export default function AdminStaffFieldReportQueue() {
                   as="textarea"
                   rows={3}
                   value={adminNotes}
-                  onChange={(event) => setAdminNotes(event.currentTarget.value)}
+                  onChange={(event) => {
+                    setAdminNotes(event.currentTarget.value);
+                    setAdminNotesTouched(true);
+                  }}
+                  onBlur={() => setAdminNotesTouched(true)}
                   placeholder="Contoh: disetujui, ambil lampu cadangan 1 pcs dari gudang"
                   isInvalid={
-                    Boolean(adminNotes) && adminNotes.trim().length < 8
+                    Boolean(selected) &&
+                    adminNotes.trim().length < 8 &&
+                    (adminNotesTouched || adminNotes.length === 0)
                   }
                 />
-                <Form.Text>
-                  Minimal 8 karakter untuk audit keputusan admin.
+                <Form.Text
+                  className={
+                    adminNotes.trim().length < 8 ? "text-danger" : undefined
+                  }
+                >
+                  Tulis catatan tindak lanjut minimal 8 karakter.
                 </Form.Text>
                 <Form.Control.Feedback type="invalid">
                   Catatan admin minimal 8 karakter.
@@ -436,6 +533,7 @@ export default function AdminStaffFieldReportQueue() {
               setFinalDecisionChecked(false);
               setStockMovementChecked(false);
               setAdminNotes("");
+              setAdminNotesTouched(false);
             }}
           >
             Batal
@@ -447,7 +545,9 @@ export default function AdminStaffFieldReportQueue() {
               adminNotes.trim().length < 8 ||
               !evidenceChecked ||
               !finalDecisionChecked ||
-              (decision === "APPROVE" && createMovement && !stockMovementChecked)
+              (decision === "APPROVE" &&
+                createMovement &&
+                !stockMovementChecked)
             }
           >
             {reviewMutation.isPending ? "Menyimpan..." : "Konfirmasi Admin"}

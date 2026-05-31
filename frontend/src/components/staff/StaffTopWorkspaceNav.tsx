@@ -5,6 +5,7 @@ import { fetchStaffRoutineToday } from '../../api/staffRoutines';
 import { fetchMyStaffPerformance } from '../../api/staffPerformance';
 import { listResource } from '../../api/resources';
 import type { InventoryItem, RoomItem } from '../../types';
+import { getInventoryHealth, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
 
 type StaffTicketLite = {
   id: number;
@@ -27,9 +28,10 @@ function problemRoomItems(items: RoomItem[]) {
 
 function problemWarehouseItems(items: InventoryItem[]) {
   return items.filter((item) => {
-    const status = String(item.status ?? '').toUpperCase();
     const category = String(item.category ?? '').toUpperCase();
-    return category !== 'BARANG_KAMAR' && PROBLEM_ITEM_STATUSES.has(status);
+    if (category === 'BARANG_KAMAR' || item.isActive === false) return false;
+    const health = getInventoryHealth(item);
+    return health.status !== 'GOOD' || isInventoryPhysicalIssue(item.status);
   }).length;
 }
 

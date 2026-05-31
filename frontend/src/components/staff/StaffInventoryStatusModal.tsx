@@ -263,9 +263,9 @@ export default function StaffInventoryStatusModal({
 
   const helperCopy = useMemo(() => {
     if (isRoomTarget) {
-      return "Jawab sesuai kondisi lapangan. Staff mengirim laporan; admin/owner menentukan status final barang.";
+      return "Jawab sesuai kondisi lapangan. Tambahkan foto atau catatan agar tindak lanjut lebih jelas.";
     }
-    return "Stok habis/menipis dihitung otomatis. Staff cukup lapor masalah fisik atau kebutuhan restock.";
+    return "Stok habis/menipis terbaca dari jumlah barang. Laporkan masalah fisik atau kebutuhan restock bila perlu.";
   }, [isRoomTarget]);
 
   const reset = () => {
@@ -490,7 +490,7 @@ export default function StaffInventoryStatusModal({
                 <ChoiceCard
                   active={roomTriage === "PROBLEM"}
                   title="Ada masalah"
-                  helper="Barang rusak, hilang, atau perlu dicek admin."
+                  helper="Barang rusak, hilang, atau perlu dicek."
                   tone="warning"
                   onClick={() => chooseRoomTriage("PROBLEM")}
                 />
@@ -504,8 +504,7 @@ export default function StaffInventoryStatusModal({
                   <div>
                     <strong>Masalah yang terlihat?</strong>
                     <small>
-                      Staff cukup menjelaskan kondisi. Status final tetap
-                      admin/owner.
+                      Jelaskan kondisi yang terlihat dan tambahkan foto bila perlu.
                     </small>
                   </div>
                 </div>

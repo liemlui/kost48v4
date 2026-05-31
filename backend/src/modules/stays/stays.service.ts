@@ -712,8 +712,59 @@ export class StaysService {
       if (otherActive === 0) {
         await tx.room.update({
           where: { id: existing.roomId },
-          data: { status: RoomStatus.AVAILABLE },
+          data: { status: RoomStatus.MAINTENANCE },
         });
+
+        const existingInspectionTicket = await tx.ticket.findFirst({
+          where: {
+            stayId: id,
+            roomId: existing.roomId,
+            category: "CHECKOUT_INSPECTION",
+          },
+          select: { id: true, ticketNumber: true, status: true },
+        });
+
+        if (!existingInspectionTicket) {
+          const staffAssignee = await tx.user.findFirst({
+            where: { role: UserRole.STAFF, isActive: true },
+            orderBy: { id: "asc" },
+            select: { id: true },
+          });
+          const room = await tx.room.findUnique({
+            where: { id: existing.roomId },
+            select: { code: true, name: true },
+          });
+          const roomLabel = room?.code || room?.name || `Kamar #${existing.roomId}`;
+          const baseTicketNumber = `TIC-${new Date().getFullYear()}-CHK-${id}`;
+          let ticketNumber = baseTicketNumber;
+          let suffix = 1;
+          while (
+            await tx.ticket.findUnique({
+              where: { ticketNumber },
+              select: { id: true },
+            })
+          ) {
+            suffix += 1;
+            ticketNumber = `${baseTicketNumber}-${suffix}`;
+          }
+
+          await tx.ticket.create({
+            data: {
+              ticketNumber,
+              tenantId: existing.tenantId,
+              roomId: existing.roomId,
+              stayId: id,
+              title: `Cek kamar setelah penghuni keluar - ${roomLabel}`,
+              description: [
+                `Kamar ${roomLabel} sudah selesai checkout final dan perlu dicek sebelum ditawarkan lagi.`,
+                "Cek kebersihan, kunci, barang tertinggal, inventaris kamar, kerusakan, dan foto kondisi akhir.",
+                "Jika semua aman, tandai pekerjaan selesai agar admin bisa menjadikan kamar siap ditempati kembali.",
+              ].join("\n"),
+              category: "CHECKOUT_INSPECTION",
+              assignedToId: staffAssignee?.id,
+            },
+          });
+        }
       }
 
       return stay;
@@ -729,7 +780,8 @@ export class StaysService {
     });
     return normalizeStayForResponse({
       ...updated,
-      roomStatusAfterSync: "AVAILABLE",
+      roomStatusAfterSync: "MAINTENANCE",
+      roomReadinessAfterCheckout: "NEEDS_INSPECTION",
     });
   }
 

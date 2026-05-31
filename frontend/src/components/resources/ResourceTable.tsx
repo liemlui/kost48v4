@@ -2,6 +2,7 @@ import { Alert, Button, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 import StatusBadge from '../common/StatusBadge';
 import {
   canDeleteResourceItem,
@@ -309,6 +310,16 @@ export default function ResourceTable({
     ? config.columns.filter((column) => !['monthlyRateRupiah', 'dailyRateRupiah', 'weeklyRateRupiah', 'defaultDepositRupiah'].includes(column.key))
     : config.columns;
 
+  const serverPagination = Boolean(meta && onPageChange);
+  const clientPagination = useClientPagination(
+    filteredItems,
+    [config.path, filteredItems.length, searchTerm, showActiveOnly],
+    10,
+  );
+  const tableItems = serverPagination
+    ? filteredItems.slice(0, meta?.limit ?? 10)
+    : clientPagination.pagedItems;
+
   return (
     <>
       {isLoading ? <div className="py-5 text-center"><Spinner /></div> : null}
@@ -324,7 +335,7 @@ export default function ResourceTable({
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map((item) => {
+            {tableItems.map((item) => {
               const editGuard = canEditResourceItem(config, currentUserRole, item);
               const deleteGuard = canDeleteResourceItem(config, currentUserRole, item);
               const quickAction = renderQuickActions(item);
@@ -368,9 +379,21 @@ export default function ResourceTable({
           </tbody>
         </Table>
       ) : null}
+      {!serverPagination && clientPagination.hasPagination ? (
+        <div className="mt-3 table-pagination-shell">
+          <PaginationControls
+            currentPage={clientPagination.page}
+            totalPages={clientPagination.totalPages}
+            totalItems={clientPagination.totalItems}
+            pageSize={clientPagination.pageSize}
+            onPageChange={clientPagination.setPage}
+            isLoading={isLoading}
+          />
+        </div>
+      ) : null}
 
       {meta && onPageChange && (currentPage ?? 1) > 0 ? (
-        <div className="mt-3">
+        <div className="mt-3 table-pagination-shell">
           <PaginationControls
             currentPage={currentPage ?? 1}
             totalPages={meta.totalPages}

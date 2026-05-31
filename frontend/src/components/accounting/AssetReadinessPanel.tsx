@@ -107,8 +107,8 @@ export default function AssetReadinessPanel({ readiness, isLoading }: Props) {
               </div>
               <small className="text-muted">
                 {readiness?.runtimeProof.ready
-                  ? 'Posting ledger inti sudah terbukti oleh JournalEntry POSTED.'
-                  : 'Buat transaksi nyata tagihan/pembayaran/pengeluaran/WiFi sampai setiap source punya JournalEntry POSTED.'}
+                  ? 'Transaksi operasional sudah terjurnal dengan benar.'
+                  : 'Buat transaksi nyata (tagihan, pembayaran, pengeluaran, WiFi) sampai semua sudah terjurnal.'}
               </small>
             </div>
           </Col>

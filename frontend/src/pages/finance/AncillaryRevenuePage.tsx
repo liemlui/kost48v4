@@ -4,8 +4,8 @@ import PageHeader from '../../components/common/PageHeader';
 import { StatusStrip } from '../../components/workspace';
 
 const revenueStreams = [
-  { id: 'wifi', icon: '📶', name: 'Voucher WiFi', buyer: 'Tenant / tamu', status: 'Aktif sekarang', route: '/wifi-sales', note: 'Gunakan WifiSale yang sudah tersedia untuk mencatat penjualan voucher WiFi.' },
-  { id: 'laundry', icon: '🧺', name: 'Laundry', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Masuk roadmap AncillarySale setelah model produk tambahan siap.' },
+  { id: 'wifi', icon: '📶', name: 'Voucher WiFi', buyer: 'Tenant / tamu', status: 'Aktif sekarang', route: '/wifi-sales', note: 'Gunakan menu Voucher WiFi untuk mencatat penjualan.' },
+  { id: 'laundry', icon: '🧺', name: 'Laundry', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Direncanakan untuk dikembangkan ke depannya.' },
   { id: 'gallon', icon: '💧', name: 'Air Galon', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu stok galon isi/kosong dan status antar sebelum dibuka sebagai transaksi.' },
   { id: 'cleaning', icon: '🧹', name: 'Jasa Bersih Kamar', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu order, jadwal, staff, dan status selesai.' },
   { id: 'parking', icon: '🅿️', name: 'Parkir Tambahan', buyer: 'Tenant', status: 'Belum aktif', route: '', note: 'Perlu plat nomor, slot, periode, dan approval admin.' },
@@ -67,8 +67,7 @@ export default function AncillaryRevenuePage() {
       <StatusStrip
         items={[
           { id: 'ready', label: 'Aktif sekarang', value: activeStreams.length, helper: 'Voucher WiFi sudah bisa dicatat', tone: 'success' },
-          { id: 'future', label: 'Belum aktif', value: futureStreams.length, helper: 'Menunggu model AncillarySale', tone: 'info' },
-          { id: 'model', label: 'Model berikutnya', value: 'Generic', helper: 'AncillaryProduct + AncillarySale', tone: 'warning' },
+          { id: 'future', label: 'Belum aktif', value: futureStreams.length, helper: 'Belum dibuka untuk admin', tone: 'info' },
         ]}
       />
 
@@ -106,7 +105,7 @@ export default function AncillaryRevenuePage() {
               <div className="ancillary-roadmap-box mt-3">
                 <div>
                   <strong>Rencana pendapatan tambahan berikutnya</strong>
-                  <p className="mb-0 text-muted">Belum menjadi aksi admin harian. Dibuka setelah model AncillaryProduct + AncillarySale siap.</p>
+                  <p className="mb-0 text-muted">Layanan ini direncanakan untuk dikembangkan ke depannya.</p>
                 </div>
                 <div className="ancillary-roadmap-grid">
                   {futureStreams.map((stream) => (
@@ -124,25 +123,6 @@ export default function AncillaryRevenuePage() {
           </Card>
         </Col>
 
-        <Col lg={4}>
-          <Card className="content-card border-0 h-100">
-            <Card.Body>
-              <div className="panel-title mb-2">Model data yang disarankan</div>
-              <p className="text-muted mb-3">Jangan buat tabel terpisah untuk setiap layanan. Gunakan model generik setelah WiFi quick win stabil.</p>
-              <div className="ancillary-model-box">
-                <strong>AncillaryProduct</strong>
-                <span>name, category, price, unit, hasStock, isActive</span>
-              </div>
-              <div className="ancillary-model-box">
-                <strong>AncillarySale</strong>
-                <span>productId, tenantId, qty, unitPrice, totalPrice, status, orderSource</span>
-              </div>
-              <div className="small text-muted mt-3">
-                Short-term: pakai WifiSale yang sudah ada. Medium-term: migrasi bertahap ke AncillaryProduct + AncillarySale tanpa menghapus histori WiFi.
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
     </div>
   );

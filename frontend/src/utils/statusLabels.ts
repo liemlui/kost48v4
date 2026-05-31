@@ -44,7 +44,7 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     AVAILABLE: 'Tersedia',
     RESERVED: 'Dipesan',
     OCCUPIED: 'Terisi',
-    MAINTENANCE: 'Perbaikan',
+    MAINTENANCE: 'Perlu dicek',
     INACTIVE_ROOM: 'Nonaktif',
     INACTIVE_ROOM_STATUS: 'Nonaktif',
     UNAVAILABLE: 'Tidak Tersedia',

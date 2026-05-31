@@ -1,13 +1,16 @@
 import { Alert, Card, Table } from 'react-bootstrap';
 import type { BalanceSheetGuard, StatementLine } from '../../api/accounting';
 import { formatRupiah } from '../../utils/formatCurrency';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 function StatementLines({ lines, emptyLabel }: { lines?: StatementLine[]; emptyLabel: string }) {
-  const visible = (lines ?? []).filter((line) => (line.balanceRupiah ?? line.amountRupiah ?? 0) !== 0).slice(0, 8);
-  if (!visible.length) return <tr><td colSpan={2} className="text-muted">{emptyLabel}</td></tr>;
+  const allVisible = (lines ?? []).filter((line) => (line.balanceRupiah ?? line.amountRupiah ?? 0) !== 0);
+  const pagination = useClientPagination(allVisible, [allVisible.length], 10);
+  if (!allVisible.length) return <tr><td colSpan={2} className="text-muted">{emptyLabel}</td></tr>;
   return (
     <>
-      {visible.map((line) => {
+      {pagination.pagedItems.map((line) => {
         const value = line.balanceRupiah ?? line.amountRupiah ?? 0;
         return (
           <tr key={`${line.type}-${line.accountId}`}>
@@ -19,6 +22,19 @@ function StatementLines({ lines, emptyLabel }: { lines?: StatementLine[]; emptyL
           </tr>
         );
       })}
+      {pagination.hasPagination ? (
+        <tr>
+          <td colSpan={2}>
+            <PaginationControls
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={pagination.setPage}
+            />
+          </td>
+        </tr>
+      ) : null}
     </>
   );
 }

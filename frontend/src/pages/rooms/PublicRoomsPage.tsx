@@ -44,12 +44,13 @@ const sortOptions = [
 
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
-type AvailFilter = "" | "bookable" | "occupied";
+type AvailFilter = "" | "bookable" | "occupied" | "checking";
 
 const availFilterOptions = [
   { value: "", label: "Semua" },
   { value: "bookable", label: "Kamar Kosong" },
   { value: "occupied", label: "Kamar Terisi" },
+  { value: "checking", label: "Sedang Dicek" },
 ] as const;
 
 const pricingTerm: PricingTerm = "MONTHLY";
@@ -398,6 +399,7 @@ export default function PublicRoomsPage() {
       const status = String(room.status ?? "").toUpperCase();
       if (avail === "bookable" && !bookable) return false;
       if (avail === "occupied" && (bookable || status !== "OCCUPIED")) return false;
+      if (avail === "checking" && status !== "MAINTENANCE") return false;
       return true;
     });
 

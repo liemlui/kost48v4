@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Card, Col, Form, Row, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
+import PaginationControls from '../../components/common/PaginationControls';
 import StaffPerformanceCategoryCard from '../../components/staff/StaffPerformanceCategoryCard';
 import StaffKpiBreakdown from '../../components/staff/StaffKpiBreakdown';
 import StaffMonthlyEvidenceTable from '../../components/staff/StaffMonthlyEvidenceTable';
@@ -25,6 +26,9 @@ function formatDate(value?: string | null) {
 
 export default function StaffMonthlyReportPage() {
   const [month, setMonth] = useState(currentMonth());
+  const [reviewPage, setReviewPage] = useState(1);
+  const [auditPage, setAuditPage] = useState(1);
+  const PAGE_SIZE = 10;
   const query = useQuery({
     queryKey: ['staff-performance-me-evidence', month],
     queryFn: () => fetchMyStaffPerformanceEvidence(month),
@@ -34,6 +38,15 @@ export default function StaffMonthlyReportPage() {
   const performance = query.data;
   const audits = performance?.audits ?? [];
   const reviews = performance?.tenantReviews?.items ?? [];
+  const reviewTotalPages = Math.max(1, Math.ceil(reviews.length / PAGE_SIZE));
+  const auditTotalPages = Math.max(1, Math.ceil(audits.length / PAGE_SIZE));
+  const visibleReviews = useMemo(() => reviews.slice((reviewPage - 1) * PAGE_SIZE, reviewPage * PAGE_SIZE), [reviews, reviewPage]);
+  const visibleAudits = useMemo(() => audits.slice((auditPage - 1) * PAGE_SIZE, auditPage * PAGE_SIZE), [audits, auditPage]);
+
+  useEffect(() => {
+    setReviewPage(1);
+    setAuditPage(1);
+  }, [month]);
 
   return (
     <div className="staff-report-page">
@@ -72,14 +85,19 @@ export default function StaffMonthlyReportPage() {
                   <div className="staff-review-score"><strong>{performance.tenantReviews.averageRating ?? '-'}</strong><span>/5</span><small>{performance.tenantReviews.count} review bulan ini</small></div>
                   {!reviews.length ? <div className="staff-empty-box mt-3"><strong>Belum ada review tenant.</strong><span>Review akan muncul setelah tenant menilai pekerjaan selesai.</span></div> : null}
                   <div className="staff-mini-review-list">
-                    {reviews.slice(0, 5).map((review: any) => (
+                    {visibleReviews.map((review: any) => (
                       <div key={review.id}>
-                        <strong>{'⭐'.repeat(Number(review.rating || 0))}</strong>
+                        <strong>{Number(review.rating || 0) > 0 ? '⭐'.repeat(Number(review.rating || 0)) : 'Tanpa rating'}</strong>
                         <span>{review.comment || 'Tanpa komentar'}</span>
                         <small>{review.tenant?.fullName || 'Tenant'} · {formatDate(review.createdAt)}</small>
                       </div>
                     ))}
                   </div>
+                  {reviews.length > PAGE_SIZE ? (
+                    <div className="mt-3">
+                      <PaginationControls currentPage={reviewPage} totalPages={reviewTotalPages} totalItems={reviews.length} pageSize={PAGE_SIZE} onPageChange={setReviewPage} />
+                    </div>
+                  ) : null}
                 </Card.Body>
               </Card>
             </Col>
@@ -90,7 +108,7 @@ export default function StaffMonthlyReportPage() {
                   <div className="panel-subtitle mb-3">Jika ada pengecekan mendadak, hasilnya menjadi catatan kerja bulan ini.</div>
                   {!audits.length ? <div className="staff-empty-box"><strong>Belum ada audit bulan ini.</strong><span>Audit random akan muncul di sini.</span></div> : null}
                   <div className="staff-mini-audit-list">
-                    {audits.slice(0, 6).map((audit: any) => (
+                    {visibleAudits.map((audit: any) => (
                       <div key={audit.id}>
                         <StaffAuditResultBadge result={audit.result} />
                         <span>{audit.notes || 'Tidak ada catatan tambahan.'}</span>
@@ -98,6 +116,11 @@ export default function StaffMonthlyReportPage() {
                       </div>
                     ))}
                   </div>
+                  {audits.length > PAGE_SIZE ? (
+                    <div className="mt-3">
+                      <PaginationControls currentPage={auditPage} totalPages={auditTotalPages} totalItems={audits.length} pageSize={PAGE_SIZE} onPageChange={setAuditPage} />
+                    </div>
+                  ) : null}
                 </Card.Body>
               </Card>
             </Col>

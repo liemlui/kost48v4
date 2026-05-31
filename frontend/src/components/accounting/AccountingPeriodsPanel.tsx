@@ -1,5 +1,7 @@
 import { Alert, Badge, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
 import type { AccountingPeriod, AccountingReadiness } from '../../api/accounting';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 const statusVariant: Record<string, string> = {
   OPEN: 'success',
@@ -34,7 +36,8 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
   const postingPeriodId = readiness?.postingPeriod?.id ?? null;
   const currentPeriod = periods.find((period) => period.isCurrentPostingPeriod || (postingPeriodId && period.id === postingPeriodId));
   const postingBlocked = Boolean(readiness?.postingPeriod && !readiness.postingPeriod.ready);
-  const latestPeriods = periods.slice(0, 12);
+  const periodPagination = useClientPagination(periods, [periods.length], 10);
+  const latestPeriods = periodPagination.pagedItems;
   const canSubmitReopen = Boolean(canManage && currentPeriod?.status === 'CLOSED' && reopenReason.trim().length >= 8 && !isReopening);
 
   return (
@@ -74,8 +77,8 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
               <div className="mt-3">
                 <Form.Group controlId="currentPeriodReopenReason">
                   <Form.Label>Alasan buka ulang periode {periodKey(currentPeriod)}</Form.Label>
-                  <Form.Control as="textarea" rows={2} value={reopenReason} onChange={(event) => onReopenReasonChange(event.target.value)} placeholder="Contoh: UAT invoice posting setelah periode ditutup untuk validasi accounting governance." />
-                  <Form.Text>Minimal 8 karakter. Sistem akan membuat jurnal CLOSING_REVERSAL, bukan menghapus closing lama.</Form.Text>
+                  <Form.Control as="textarea" rows={2} value={reopenReason} onChange={(event) => onReopenReasonChange(event.target.value)} placeholder="Contoh: Koreksi tagihan bulan lalu yang ditemukan setelah periode ditutup." />
+                  <Form.Text>Minimal 8 karakter. Sistem akan membuat jurnal pembatalan penutupan, bukan menghapus data lama.</Form.Text>
                 </Form.Group>
                 <div className="d-flex justify-content-end mt-2">
                   <Button variant="danger" onClick={onReopenCurrentPeriod} disabled={!canSubmitReopen}>{isReopening ? 'Membuka ulang...' : 'Buka Ulang Periode Posting'}</Button>
@@ -122,6 +125,18 @@ export default function AccountingPeriodsPanel({ periods, readiness, isLoading, 
                 )}
               </tbody>
             </Table>
+            {periodPagination.hasPagination ? (
+              <div className="table-pagination-shell mt-3">
+                <PaginationControls
+                  currentPage={periodPagination.page}
+                  totalPages={periodPagination.totalPages}
+                  totalItems={periodPagination.totalItems}
+                  pageSize={periodPagination.pageSize}
+                  onPageChange={periodPagination.setPage}
+                  isLoading={Boolean(isLoading)}
+                />
+              </div>
+            ) : null}
           </div>
         )}
       </Card.Body>

@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { completeStaffRoutine, sendStaffRoutineNeedHelp, startStaffRoutine, type StaffRoutineItem, type StaffRoutineTodayResponse } from '../../api/staffRoutines';
@@ -6,10 +6,13 @@ import { postAction } from '../../api/resources';
 import { listStaffFieldReports } from '../../api/staffFieldReports';
 import { fieldReportStatusLabels, getTicketStatusLabel } from '../../constants/staffRepairOptions';
 import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 import type { StaffFieldReport, Ticket } from '../../types';
 
 type WorkType = 'CLEANING' | 'REPAIR' | 'ROOM' | 'WAREHOUSE' | 'METER' | 'OTHER';
 type WorkStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'WAITING_CHECK' | 'NEED_HELP';
+type WorkFilterKey = 'ALL' | 'DONE' | WorkType;
 
 type WorkItem = {
   uid: string;
@@ -40,13 +43,14 @@ type Props = {
   onUpdated?: () => void | Promise<void>;
 };
 
-const filters: Array<{ key: 'ALL' | WorkType; label: string }> = [
-  { key: 'ALL', label: 'Semua' },
+const filters: Array<{ key: WorkFilterKey; label: string }> = [
+  { key: 'ALL', label: 'Aktif' },
   { key: 'CLEANING', label: 'Kebersihan' },
   { key: 'REPAIR', label: 'Perbaikan' },
   { key: 'ROOM', label: 'Kamar' },
   { key: 'WAREHOUSE', label: 'Gudang' },
   { key: 'METER', label: 'Meter' },
+  { key: 'DONE', label: 'Selesai' },
 ];
 
 
@@ -86,6 +90,7 @@ function routineType(item: StaffRoutineItem): { type: WorkType; label: string } 
 
 function ticketType(ticket: Ticket): { type: WorkType; label: string } {
   const value = String(ticket.category ?? '').toUpperCase();
+  if (value === 'CHECKOUT_INSPECTION') return { type: 'ROOM', label: 'Cek kamar keluar' };
   if (value.includes('CLEAN')) return { type: 'CLEANING', label: 'Kebersihan tambahan' };
   if (value.includes('STOK') || value.includes('INVENTORY')) return { type: 'WAREHOUSE', label: 'Stok/gudang' };
   if (value.includes('METER')) return { type: 'METER', label: 'Meter listrik/air' };
@@ -116,7 +121,7 @@ function statusInfo(source: 'ROUTINE' | 'TICKET', rawStatus?: string | null): { 
 
 function buildWorkItems(routines: StaffRoutineItem[], tickets: Ticket[]): WorkItem[] {
   const routineItems = routines
-    .filter((item) => !['DONE', 'SKIPPED'].includes(String(item.status ?? '').toUpperCase()))
+    .filter((item) => !['SKIPPED'].includes(String(item.status ?? '').toUpperCase()))
     .map((item) => {
       const type = routineType(item);
       const status = statusInfo('ROUTINE', item.status);
@@ -180,12 +185,15 @@ async function compressImageFile(file: File): Promise<File> {
 
 export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, onUpdated }: Props) {
   const queryClient = useQueryClient();
-  const [activeFilter, setActiveFilter] = useState<'ALL' | WorkType>('ALL');
+  const [activeFilter, setActiveFilter] = useState<WorkFilterKey>('ALL');
   const [modal, setModal] = useState<ModalState>(null);
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<UploadedImageMeta | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const reportsQuery = useQuery({
     queryKey: ['staff-field-reports', 'assigned-to-me'],
@@ -193,15 +201,36 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     staleTime: 60_000,
   });
   const pendingReports = useMemo(() => (reportsQuery.data?.items ?? [])
-    .filter((report) => ['REPORTED', 'UNDER_REVIEW', 'APPROVED', 'IN_REPAIR', 'REJECTED'].includes(String(report.status)))
-    .slice(0, 5), [reportsQuery.data?.items]);
+    .filter((report) => ['REPORTED', 'UNDER_REVIEW', 'APPROVED', 'IN_REPAIR', 'REJECTED'].includes(String(report.status))), [reportsQuery.data?.items]);
+  const pendingReportPagination = useClientPagination(
+    pendingReports,
+    [activeFilter, pendingReports.length],
+    PAGE_SIZE,
+  );
 
   const workItems = useMemo(() => buildWorkItems(routines?.items ?? [], tickets), [routines, tickets]);
   const activeItem = workItems.find((item) => item.status === 'IN_PROGRESS') ?? null;
   const waitingCount = workItems.filter((item) => item.status === 'WAITING_CHECK').length;
   const todoCount = workItems.filter((item) => item.status === 'TODO').length;
-  const actionableItems = workItems.filter((item) => activeFilter === 'ALL' || item.type === activeFilter);
-  const filteredItems = actionableItems.filter((item) => item.status !== 'DONE');
+  const activeWorkItems = useMemo(() => workItems.filter((item) => item.status !== 'DONE'), [workItems]);
+  const doneWorkItems = useMemo(() => workItems.filter((item) => item.status === 'DONE'), [workItems]);
+  const filteredItems = useMemo(() => {
+    if (activeFilter === 'DONE') return doneWorkItems;
+    const base = activeFilter === 'ALL' ? activeWorkItems : activeWorkItems.filter((item) => item.type === activeFilter);
+    return base;
+  }, [activeFilter, activeWorkItems, doneWorkItems]);
+  useEffect(() => {
+    setPage(1);
+  }, [activeFilter]);
+
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = window.setTimeout(() => setSuccessMessage(''), 3500);
+    return () => window.clearTimeout(timer);
+  }, [successMessage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
+  const visibleWorkItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const doneCount = (routines?.summary.completed ?? 0) + tickets.filter((ticket) => ticket.status === 'DONE' || ticket.status === 'CLOSED').length;
   const totalCount = Math.max(doneCount + todoCount + (activeItem ? 1 : 0) + waitingCount, routines?.summary.total ?? 0);
 
@@ -211,6 +240,7 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     setPhoto(null);
     setPhotoPreview('');
     setError('');
+    setSuccessMessage('');
   };
 
   const invalidate = async () => {
@@ -247,8 +277,14 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
       return null;
     },
     onSuccess: async () => {
+      const message = modal?.action === 'START'
+        ? 'Pekerjaan dimulai. Selesaikan pekerjaan ini dulu sebelum mulai yang lain.'
+        : modal?.action === 'NEED_HELP'
+          ? 'Kendala berhasil dikirim.'
+          : 'Pekerjaan ditandai selesai.';
       await invalidate();
       resetModal();
+      setSuccessMessage(message);
     },
     onError: (err: any) => setError(err?.response?.data?.message || err?.message || 'Aksi belum berhasil. Coba sekali lagi.'),
   });
@@ -275,18 +311,19 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
     setPhoto(null);
     setPhotoPreview('');
     setError('');
+    setSuccessMessage('');
   };
 
   const blockedByActive = (item: WorkItem) => activeItem && activeItem.uid !== item.uid;
 
   return (
-    <section className="staff-unified-work">
+    <section id="staff-work-queue" className="staff-unified-work">
       <Card className="staff-work-summary-card border-0">
         <Card.Body>
           <div>
             <span className="staff-hero-pill">Pekerjaan Hari Ini</span>
-            <h2>Satu daftar kerja</h2>
-            <p>Kebersihan rutin dan perbaikan digabung di sini. Kerjakan satu pekerjaan sampai selesai dulu sebelum mulai yang lain.</p>
+            <h2>Satu daftar kerja nyata</h2>
+            <p>Kebersihan rutin dan perbaikan digabung di sini. Mulai, selesaikan, atau kirim kendala dari satu antrean yang rapi.</p>
           </div>
           <div className="staff-work-summary-stats">
             <span><strong>{activeItem ? 1 : 0}</strong><small>Sedang dikerjakan</small></span>
@@ -317,56 +354,80 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
           <Card.Body>
             <div className="table-meta align-items-start mb-2">
               <div>
-                <div className="small fw-semibold">Laporan menunggu admin</div>
-                <div className="small text-muted">Laporan kondisi barang yang sudah kamu kirim. Lanjut kerja sesuai status dari admin.</div>
+                <div className="small fw-semibold">Laporan menunggu tindak lanjut</div>
+                <div className="small text-muted">Laporan kondisi yang sudah kamu kirim. Pantau statusnya sambil lanjut pekerjaan lain.</div>
               </div>
               <span className="table-meta-count">{pendingReports.length} laporan</span>
             </div>
             <div className="row g-2">
-              {pendingReports.map((report) => (
+              {pendingReportPagination.pagedItems.map((report) => (
                 <div className="col-md-6" key={report.id}>
                   <div className="staff-admin-report-card h-100">
                     <strong>{fieldReportTitle(report)}</strong>
                     <span>{fieldReportLocation(report)} · {fieldReportStatusLabel(report.status)}</span>
-                    <small>{report.adminNotes || report.conditionNotes || 'Menunggu keputusan admin.'}</small>
+                    <small>{report.adminNotes || report.conditionNotes || 'Menunggu tindak lanjut.'}</small>
                   </div>
                 </div>
               ))}
             </div>
+            {pendingReportPagination.hasPagination ? (
+              <div className="staff-work-pagination mt-3">
+                <PaginationControls
+                  currentPage={pendingReportPagination.page}
+                  totalPages={pendingReportPagination.totalPages}
+                  totalItems={pendingReportPagination.totalItems}
+                  pageSize={pendingReportPagination.pageSize}
+                  onPageChange={pendingReportPagination.setPage}
+                  isLoading={reportsQuery.isFetching}
+                />
+              </div>
+            ) : null}
           </Card.Body>
         </Card>
       ) : null}
 
       <div className="staff-filter-row compact" aria-label="Filter pekerjaan hari ini">
         {filters.map((filter) => {
-          const count = filter.key === 'ALL' ? workItems.filter((item) => item.status === 'TODO' || item.status === 'IN_PROGRESS').length : workItems.filter((item) => item.type === filter.key && (item.status === 'TODO' || item.status === 'IN_PROGRESS')).length;
-          if (filter.key !== 'ALL' && count === 0) return null;
+          const count = filter.key === 'ALL'
+            ? activeWorkItems.length
+            : filter.key === 'DONE'
+              ? doneWorkItems.length
+              : activeWorkItems.filter((item) => item.type === filter.key).length;
+          const isEmpty = count === 0;
           return (
-            <button key={filter.key} type="button" className={`staff-filter-chip${activeFilter === filter.key ? ' active' : ''}`} onClick={() => setActiveFilter(filter.key)}>
+            <button
+              key={filter.key}
+              type="button"
+              className={`staff-filter-chip${activeFilter === filter.key ? ' active' : ''}${isEmpty ? ' is-empty' : ''}`}
+              onClick={() => !isEmpty || activeFilter === filter.key ? setActiveFilter(filter.key) : undefined}
+              disabled={isEmpty && activeFilter !== filter.key}
+              aria-disabled={isEmpty && activeFilter !== filter.key}
+            >
               <span>{filter.label}</span>
-              {count > 0 ? <strong>{count}</strong> : null}
+              <strong>{count}</strong>
             </button>
           );
         })}
       </div>
 
+      {successMessage ? <Alert variant="success" className="staff-alert">{successMessage}</Alert> : null}
       {actionMutation.isError && error ? <Alert variant="danger" className="staff-alert">{error}</Alert> : null}
       {isLoading ? <div className="staff-empty-box">Memuat pekerjaan hari ini...</div> : null}
       {!isLoading && !filteredItems.length ? (
-        <div className="staff-empty-box"><strong>Tidak ada pekerjaan di filter ini.</strong><span>Pekerjaan rutin dan perbaikan aktif akan muncul di sini.</span></div>
+        <div className="staff-empty-box"><strong>{activeFilter === 'DONE' ? 'Belum ada pekerjaan selesai.' : 'Tidak ada pekerjaan di filter ini.'}</strong><span>{activeFilter === 'DONE' ? 'Pekerjaan yang selesai hari ini akan muncul di sini.' : 'Pekerjaan rutin dan perbaikan aktif akan muncul di sini.'}</span></div>
       ) : null}
 
-      <div className="staff-work-list unified">
-        {filteredItems.map((item, index) => {
+      <div className="staff-work-list unified tenant-like-dossier">
+        {visibleWorkItems.map((item, index) => {
           const disabled = Boolean(blockedByActive(item) || actionMutation.isPending);
           return (
             <article key={item.uid} className={`staff-work-card staff-status-${item.status.toLowerCase()} ${item.source.toLowerCase()}`}>
-              <div className="staff-work-rank">{index + 1}</div>
+              <div className="staff-work-rank">{(page - 1) * PAGE_SIZE + index + 1}</div>
               <div className="staff-work-main">
                 <div className="staff-work-topline">
                   <span className={`staff-status-pill status-${item.status.toLowerCase().replace(/_/g, '-')}`}>{item.statusLabel}</span>
                   <span className="staff-category-pill">{item.typeLabel}</span>
-                  <span className="staff-category-pill soft">{item.source === 'ROUTINE' ? 'Rutin' : 'Perbaikan'}</span>
+                  <span className="staff-category-pill soft">{item.source === 'ROUTINE' ? 'Rutin' : item.ticket?.category === 'CHECKOUT_INSPECTION' ? 'Siapkan kamar' : 'Perbaikan'}</span>
                 </div>
                 <h3>{item.title}</h3>
                 <p>{item.location}</p>
@@ -383,6 +444,18 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
           );
         })}
       </div>
+        {filteredItems.length > PAGE_SIZE ? (
+          <div className="staff-work-pagination">
+            <PaginationControls
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={filteredItems.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+              isLoading={Boolean(isLoading) || actionMutation.isPending}
+            />
+          </div>
+        ) : null}
 
       <Modal show={Boolean(modal)} onHide={resetModal} centered>
         <Modal.Header closeButton>

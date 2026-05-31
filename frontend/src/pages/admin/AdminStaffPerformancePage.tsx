@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import PageHeader from '../../components/common/PageHeader';
-import StaffPerformanceCategoryCard from '../../components/staff/StaffPerformanceCategoryCard';
+import PaginationControls from '../../components/common/PaginationControls';
 import StaffAuditModal from '../../components/admin/StaffAuditModal';
 import AdminSmartAuditPanel from '../../components/admin/AdminSmartAuditPanel';
 import { fetchAdminStaffAuditSuggestions, fetchAdminStaffPerformance, type StaffPerformanceSummary } from '../../api/staffPerformance';
@@ -15,9 +15,17 @@ function currentMonth() {
 export default function AdminStaffPerformancePage() {
   const [month, setMonth] = useState(currentMonth());
   const [selected, setSelected] = useState<StaffPerformanceSummary | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const query = useQuery({ queryKey: ['admin-staff-performance', month], queryFn: () => fetchAdminStaffPerformance(month), staleTime: 60_000 });
   const suggestionsQuery = useQuery({ queryKey: ['admin-staff-audit-suggestions', month], queryFn: () => fetchAdminStaffAuditSuggestions(month), staleTime: 60_000 });
   const items = query.data?.items ?? [];
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const visibleItems = useMemo(() => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [items, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [month]);
 
   return (
     <div>
@@ -56,7 +64,7 @@ export default function AdminStaffPerformancePage() {
             <Table responsive hover className="mt-3 staff-performance-table">
               <thead><tr><th>Staff</th><th>Kategori</th><th>Skor</th><th>Checklist</th><th>Tugas</th><th>Meter</th><th>Rating Tenant</th><th>Negative</th><th>Aksi</th></tr></thead>
               <tbody>
-                {items.map((item) => (
+                {visibleItems.map((item) => (
                   <tr key={item.staff.id}>
                     <td><div className="fw-semibold">{item.staff.fullName}</div><div className="small text-muted">{item.staff.email}</div></td>
                     <td><span className={`staff-audit-badge audit-${item.category.tone}`}>{item.category.label}</span></td>
@@ -72,10 +80,14 @@ export default function AdminStaffPerformancePage() {
               </tbody>
             </Table>
           ) : null}
+          {items.length > PAGE_SIZE ? (
+            <div className="mt-3">
+              <PaginationControls currentPage={page} totalPages={totalPages} totalItems={items.length} pageSize={PAGE_SIZE} onPageChange={setPage} isLoading={query.isLoading} />
+            </div>
+          ) : null}
         </Card.Body>
       </Card>
 
-      {items[0] ? <StaffPerformanceCategoryCard performance={items[0]} compact /> : null}
       <StaffAuditModal show={Boolean(selected)} staff={selected} onHide={() => setSelected(null)} />
     </div>
   );

@@ -62,7 +62,7 @@ export default function InvoicesPage() {
   const [activeTab, setActiveTab] = useState<StatusTab>('BILLING');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 10;
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [issueTarget, setIssueTarget] = useState<any | null>(null);

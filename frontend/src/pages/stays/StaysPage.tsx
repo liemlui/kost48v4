@@ -138,7 +138,7 @@ export default function StaysPage() {
   const [rejectBookingTarget, setRejectBookingTarget] = useState<Stay | null>(null);
   const [approveTarget, setApproveTarget] = useState<CheckoutRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<CheckoutRequest | null>(null);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 10;
 
   const isBookingsMode = statusFilter === 'BOOKINGS';
   const apiStatusFilter = statusFilter === 'ALL' || statusFilter === 'BOOKINGS' ? undefined : statusFilter;

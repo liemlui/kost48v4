@@ -1,6 +1,8 @@
 import { Alert, Badge, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import type { PeriodClosePreview, PeriodCloseReadiness, PeriodReopenPreview } from '../../api/accounting';
 import { formatRupiah } from '../../utils/formatCurrency';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 type Props = {
   year: number;
@@ -40,12 +42,13 @@ function CheckBadge({ ready }: { ready: boolean }) {
 }
 
 function JournalPreviewTable({ lines, totalDebit, totalCredit }: { lines: PeriodClosePreview['lines']; totalDebit: number; totalCredit: number }) {
+  const linePagination = useClientPagination(lines, [lines.length], 10);
   return (
     <div className="table-responsive">
       <Table hover size="sm" className="align-middle mb-0">
         <thead><tr><th>Akun</th><th>Deskripsi</th><th className="text-end">Debit</th><th className="text-end">Kredit</th></tr></thead>
         <tbody>
-          {lines.length ? lines.slice(0, 12).map((line) => (
+          {lines.length ? linePagination.pagedItems.map((line) => (
             <tr key={`${line.chartOfAccountId}-${line.sortOrder}-${line.debitRupiah}-${line.creditRupiah}`}>
               <td><strong>{line.accountCode}</strong> · {line.accountName}</td>
               <td className="text-muted">{line.description}</td>
@@ -53,6 +56,19 @@ function JournalPreviewTable({ lines, totalDebit, totalCredit }: { lines: Period
               <td className="text-end">{formatRupiah(line.creditRupiah)}</td>
             </tr>
           )) : <tr><td colSpan={4} className="text-muted">Tidak ada line jurnal.</td></tr>}
+          {linePagination.hasPagination ? (
+            <tr>
+              <td colSpan={4}>
+                <PaginationControls
+                  currentPage={linePagination.page}
+                  totalPages={linePagination.totalPages}
+                  totalItems={linePagination.totalItems}
+                  pageSize={linePagination.pageSize}
+                  onPageChange={linePagination.setPage}
+                />
+              </td>
+            </tr>
+          ) : null}
           <tr>
             <td colSpan={2}><strong>Total</strong></td>
             <td className="text-end"><strong>{formatRupiah(totalDebit)}</strong></td>
@@ -190,7 +206,7 @@ export default function PeriodClosePanel({
                 onChange={(event) => onReopenReasonChange(event.target.value)}
                 placeholder="Contoh: Koreksi jurnal expense yang ditemukan setelah closing."
               />
-              <Form.Text>Minimal 8 karakter. Reopen akan membuat CLOSING_REVERSAL dan periode kembali OPEN.</Form.Text>
+              <Form.Text>Minimal 8 karakter. Sistem akan membuat jurnal pembatalan penutupan dan periode kembali terbuka.</Form.Text>
             </Form.Group>
             {reopenPreview ? (
               <div className="mb-3">

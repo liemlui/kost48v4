@@ -137,12 +137,13 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
   const isBookable = isPublicRoomBookable(room);
 
   if (!isBookable) {
+    const isMaintenance = status === "MAINTENANCE";
     return {
-      label: "Terisi",
-      tone: status === "MAINTENANCE" ? "is-maintenance" : "is-occupied",
-      shortCopy: status === "MAINTENANCE" ? "Kamar belum kosong untuk diajukan." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
-      detailCopy: status === "MAINTENANCE"
-        ? "Kamar ini belum kosong untuk diajukan sekarang. Anda tetap bisa tanya ke admin untuk informasi ketersediaan berikutnya."
+      label: isMaintenance ? "Sedang dicek" : "Terisi",
+      tone: isMaintenance ? "is-maintenance" : "is-occupied",
+      shortCopy: isMaintenance ? "Kamar kosong, tetapi sedang dicek dan dibersihkan dulu." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
+      detailCopy: isMaintenance
+        ? "Kamar ini sudah kosong, tetapi belum dibuka untuk booking karena tim masih mengecek kebersihan, kunci, inventaris, dan kondisi akhir. Anda tetap bisa tanya admin untuk estimasi siap ditempati."
         : "Kamar ini sedang terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",
       canBook: false,
     };

@@ -1,18 +1,34 @@
 import { Alert, Badge, Card, Table } from 'react-bootstrap';
 import type { ProfitLossLite, StatementLine } from '../../api/accounting';
 import { formatRupiah } from '../../utils/formatCurrency';
+import PaginationControls from '../common/PaginationControls';
+import { useClientPagination } from '../../hooks/useClientPagination';
 
 function StatementRows({ lines, emptyLabel }: { lines: StatementLine[]; emptyLabel: string }) {
+  const pagination = useClientPagination(lines, [lines.length], 10);
   if (!lines.length) return <tr><td colSpan={3} className="text-muted">{emptyLabel}</td></tr>;
   return (
     <>
-      {lines.slice(0, 8).map((line) => (
+      {pagination.pagedItems.map((line) => (
         <tr key={`${line.type}-${line.accountId}`}>
           <td><strong>{line.code}</strong> · {line.name}</td>
           <td>{line.type}</td>
           <td className="text-end">{formatRupiah(line.amountRupiah ?? line.balanceRupiah ?? 0)}</td>
         </tr>
       ))}
+      {pagination.hasPagination ? (
+        <tr>
+          <td colSpan={3}>
+            <PaginationControls
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
+              pageSize={pagination.pageSize}
+              onPageChange={pagination.setPage}
+            />
+          </td>
+        </tr>
+      ) : null}
     </>
   );
 }

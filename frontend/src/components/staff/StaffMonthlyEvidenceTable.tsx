@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, Table } from 'react-bootstrap';
+import PaginationControls from '../common/PaginationControls';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
 
 type Props = { performance?: StaffPerformanceSummary | null };
@@ -29,6 +30,8 @@ function statusClass(status?: string | null) {
 
 export default function StaffMonthlyEvidenceTable({ performance }: Props) {
   const [filter, setFilter] = useState<EvidenceFilter>('ALL');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const routines = performance?.evidence?.routines ?? [];
   const tickets = performance?.evidence?.tickets ?? [];
   const meters = performance?.evidence?.meters ?? [];
@@ -45,6 +48,13 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
     if (filter === 'DONE') return ['DONE', 'CLOSED', 'TERCATAT'].includes(String(row.status).toUpperCase());
     return row.kind === filter;
   });
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const pagedRows = filteredRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const filters: { key: EvidenceFilter; label: string; count: number; tone?: string }[] = [
     { key: 'ALL', label: 'Semua bukti', count: rows.length },
     { key: 'NEED_PROOF', label: 'Belum ada foto', count: needProofCount, tone: needProofCount ? 'danger' : 'success' },
@@ -60,7 +70,7 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
         <div className="table-meta">
           <div>
             <div className="panel-title">Bukti Pekerjaan Bulan Ini</div>
-            <div className="panel-subtitle">Filter bukti supaya staff, admin, dan owner mudah melihat pekerjaan yang selesai atau belum lengkap fotonya.</div>
+            <div className="panel-subtitle">Filter bukti kerja supaya pekerjaan selesai dan foto pendukung mudah dicek.</div>
           </div>
           <span className="table-meta-count">{filteredRows.length} catatan</span>
         </div>
@@ -77,7 +87,7 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
           <Table responsive hover className="mt-3 staff-evidence-table">
             <thead><tr><th>Tanggal</th><th>Jenis</th><th>Pekerjaan</th><th>Lokasi</th><th>Bukti</th><th>Status</th></tr></thead>
             <tbody>
-              {filteredRows.slice(0, 80).map((row) => (
+              {pagedRows.map((row) => (
                 <tr key={row.id}>
                   <td>{formatDate(row.date)}</td>
                   <td>{row.type}</td>
@@ -89,6 +99,11 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
               ))}
             </tbody>
           </Table>
+        ) : null}
+        {filteredRows.length > PAGE_SIZE ? (
+          <div className="mt-3">
+            <PaginationControls currentPage={page} totalPages={totalPages} totalItems={filteredRows.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
+          </div>
         ) : null}
       </Card.Body>
     </Card>

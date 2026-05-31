@@ -533,6 +533,9 @@ export class TicketsService {
           "Status akhir barang gudang wajib dipilih sebelum tiket ditutup.",
         );
 
+      let roomMarkedReady = false;
+      let roomReadyBlockedReason: string | null = null;
+
       const updated = await this.prisma.$transaction(async (tx) => {
         const closed = await tx.ticket.update({
           where: { id },
@@ -602,6 +605,34 @@ export class TicketsService {
           data: { status: "CLOSED" as any },
         });
 
+        if (ticket.category === "CHECKOUT_INSPECTION" && ticket.roomId) {
+          const otherActiveStays = await tx.stay.count({
+            where: {
+              roomId: ticket.roomId,
+              status: "ACTIVE" as any,
+              id: ticket.stayId ? { not: ticket.stayId } : undefined,
+            },
+          });
+          const hasProblemFinalStatus =
+            (dto.finalRoomItemStatus && dto.finalRoomItemStatus !== "GOOD") ||
+            (dto.finalInventoryItemStatus && dto.finalInventoryItemStatus !== "GOOD");
+
+          if (otherActiveStays > 0) {
+            roomReadyBlockedReason = "ACTIVE_STAY_EXISTS";
+          } else if (hasProblemFinalStatus) {
+            roomReadyBlockedReason = "FINAL_ITEM_STATUS_NOT_READY";
+          } else {
+            const readyResult = await tx.room.updateMany({
+              where: { id: ticket.roomId, status: "MAINTENANCE" as any },
+              data: { status: "AVAILABLE" as any },
+            });
+            roomMarkedReady = readyResult.count === 1;
+            if (!roomMarkedReady) {
+              roomReadyBlockedReason = "ROOM_NOT_IN_MAINTENANCE";
+            }
+          }
+        }
+
         return closed;
       });
 
@@ -617,6 +648,11 @@ export class TicketsService {
           finalAdminNoteProvided: !!dto.finalAdminNote,
           finalRoomItemStatus: dto.finalRoomItemStatus,
           finalInventoryItemStatus: dto.finalInventoryItemStatus,
+          roomMarkedReady,
+          roomReadyBlockedReason,
+          roomReadinessTransition: roomMarkedReady
+            ? "MAINTENANCE_TO_AVAILABLE"
+            : undefined,
         },
       });
 

@@ -159,6 +159,7 @@ function getStaffCategoryText(category?: string | null) {
   const value = String(category ?? "").toUpperCase();
   if (value === "BARANG_RUSAK") return "Barang rusak / hilang";
   if (value === "STOK_HABIS") return "Stok habis";
+  if (value === "CHECKOUT_INSPECTION") return "Cek kamar keluar";
   if (value === "CEK_KAMAR") return "Cek kamar";
   if (value === "CATATAN_METER") return "Catat meter";
   if (value === "KEBERSIHAN") return "Bersih-bersih";
@@ -198,6 +199,9 @@ function StaffTicketsMode({
   simpleAction: any;
   setDoneTicket: (ticket: TicketItem | null) => void;
 }) {
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+
   const activeWork = useMemo(
     () =>
       items
@@ -233,6 +237,13 @@ function StaffTicketsMode({
       return item.status === activeTab;
     return false;
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+  const pagedItems = visibleItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const chips: { key: StatusTab; label: string; count: number }[] = [
     { key: "ALL", label: "Semua tugas", count: openCount + progressCount },
@@ -293,12 +304,12 @@ function StaffTicketsMode({
 
           {!isLoading && !isError && visibleItems.length ? (
             <div className="staff-work-list">
-              {visibleItems.map((item, index) => (
+              {pagedItems.map((item, index) => (
                 <article
                   key={item.id}
                   className={`staff-work-card staff-status-${item.status.toLowerCase()}`}
                 >
-                  <div className="staff-work-rank">{index + 1}</div>
+                  <div className="staff-work-rank">{(page - 1) * PAGE_SIZE + index + 1}</div>
                   <div className="staff-work-main">
                     <div className="staff-work-topline">
                       <span
@@ -354,6 +365,18 @@ function StaffTicketsMode({
               ))}
             </div>
           ) : null}
+          {!isLoading && !isError && visibleItems.length > PAGE_SIZE ? (
+            <div className="staff-work-pagination">
+              <PaginationControls
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={visibleItems.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+                isLoading={isLoading || simpleAction.isPending}
+              />
+            </div>
+          ) : null}
         </Card.Body>
       </Card>
     </div>
@@ -381,8 +404,9 @@ export default function TicketsPage() {
   const [finalAdminNote, setFinalAdminNote] = useState("");
   const [adminCheckedEvidence, setAdminCheckedEvidence] = useState(false);
   const [adminCheckedFinalImpact, setAdminCheckedFinalImpact] = useState(false);
+  const [closeSubmitAttempted, setCloseSubmitAttempted] = useState(false);
 
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 10;
   const ticketsQuery = useQuery({
     queryKey: ["tickets"],
     queryFn: () => listResource<TicketItem>("/tickets", { limit: 200 }),
@@ -484,8 +508,10 @@ export default function TicketsPage() {
       finalAdminNote.trim().length < 8 ||
       !adminCheckedEvidence ||
       !adminCheckedFinalImpact
-    )
+    ) {
+      setCloseSubmitAttempted(true);
       return;
+    }
     simpleAction.mutate({
       path: `/tickets/${closeTicket.id}/close`,
       payload: {
@@ -505,6 +531,7 @@ export default function TicketsPage() {
     setFinalAdminNote("");
     setAdminCheckedEvidence(false);
     setAdminCheckedFinalImpact(false);
+    setCloseSubmitAttempted(false);
   };
 
   useEffect(() => {
@@ -514,9 +541,13 @@ export default function TicketsPage() {
       setFinalAdminNote("");
       setAdminCheckedEvidence(false);
       setAdminCheckedFinalImpact(false);
+      setCloseSubmitAttempted(false);
     }
   }, [closeTicket?.id]);
 
+  const isClosingCheckoutInspection =
+    String(closeTicket?.category ?? "").toUpperCase() === "CHECKOUT_INSPECTION";
+  const closeNoteInvalid = closeSubmitAttempted && finalAdminNote.trim().length < 8;
   const canConfirmCloseTicket =
     Boolean(closeTicket) &&
     finalAdminNote.trim().length >= 8 &&
@@ -1196,9 +1227,17 @@ export default function TicketsPage() {
           <Modal.Title>Konfirmasi Final Admin</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Alert variant="info" className="py-2 small">
-            Tutup tiket hanya setelah bukti dicek. Staff melapor; admin
-            menentukan status final.
+          <Alert variant={isClosingCheckoutInspection ? "warning" : "info"} className="py-2 small">
+            {isClosingCheckoutInspection ? (
+              <>
+                Menutup tiket cek kamar akan membuat kamar siap ditawarkan kembali jika tidak ada masalah aktif.
+                Jika barang/kondisi akhir belum aman, kamar tetap perlu dicek.
+              </>
+            ) : (
+              <>
+                Tutup tiket hanya setelah bukti dicek. Staff melapor; admin menentukan status final.
+              </>
+            )}
           </Alert>
           <div className="mb-3 rounded-4 border bg-light p-3">
             <Form.Check
@@ -1214,7 +1253,7 @@ export default function TicketsPage() {
             <Form.Check
               type="checkbox"
               id="admin-ticket-final-impact-check"
-              label="Saya paham ini menutup tiket dan menetapkan status final barang bila dipilih."
+              label={isClosingCheckoutInspection ? "Saya paham penutupan tiket dapat membuat kamar siap ditawarkan kembali jika aman." : "Saya paham ini menutup tiket dan menetapkan status final barang bila dipilih."}
               checked={adminCheckedFinalImpact}
               onChange={(event) =>
                 setAdminCheckedFinalImpact(event.currentTarget.checked)
@@ -1263,11 +1302,9 @@ export default function TicketsPage() {
               value={finalAdminNote}
               onChange={(event) => setFinalAdminNote(event.currentTarget.value)}
               placeholder="Contoh: lampu baru sudah terpasang, status barang kembali baik"
-              isInvalid={
-                Boolean(finalAdminNote) && finalAdminNote.trim().length < 8
-              }
+              isInvalid={closeNoteInvalid}
             />
-            <Form.Text>
+            <Form.Text className={closeNoteInvalid ? "text-danger" : undefined}>
               Minimal 8 karakter untuk audit keputusan final.
             </Form.Text>
             <Form.Control.Feedback type="invalid">

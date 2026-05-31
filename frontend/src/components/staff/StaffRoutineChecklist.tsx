@@ -323,7 +323,7 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
                     <div>
                       {canStart ? <Button size="sm" className="staff-action-button" onClick={() => openModal(item, 'START')} disabled={saveMutation.isPending}>Mulai</Button> : null}
                       {active ? <Button size="sm" variant="success" onClick={() => openModal(item, 'DONE')} disabled={saveMutation.isPending}>Tandai selesai</Button> : null}
-                      {!done && !needHelp ? <Button size="sm" variant="outline-danger" className="routine-help-button" onClick={() => openModal(item, 'NEED_HELP')} disabled={saveMutation.isPending}>Butuh bantuan</Button> : null}
+                      {active && !needHelp ? <Button size="sm" variant="outline-danger" className="routine-help-button" onClick={() => openModal(item, 'NEED_HELP')} disabled={saveMutation.isPending}>Butuh bantuan</Button> : null}
                     </div>
                   </div>
                   {needHelp ? <div className="routine-task-note">Kendala sudah dikirim. Lanjutkan pekerjaan lain yang aman sambil menunggu arahan.</div> : null}

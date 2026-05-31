@@ -585,7 +585,7 @@ function LockedFormalRatios({ readiness: backendReadiness, balanceSheetDraft, is
           <Card.Header><span>Balance Sheet Readiness</span><Badge bg="warning">Foundation</Badge></Card.Header>
           <Card.Body>
             <p className="text-muted small">Formal ratio tetap dikunci sampai Assets = Liabilities + Equity bisa dibangun dari data yang reliable.</p>
-            {isBackendUnavailable ? <Alert variant="light" className="small">Backend finance readiness belum bisa diambil; memakai penjelasan frontend fallback.</Alert> : null}
+            {isBackendUnavailable ? <Alert variant="light" className="small">Data readiness keuangan belum bisa dimuat saat ini.</Alert> : null}
             {balanceSheetDraft ? (
               <div className="report-readiness-snapshot mb-3">
                 <div><span>Known assets</span><strong>{knownAssets === null ? '-' : formatCompactRupiah(knownAssets)}</strong></div>

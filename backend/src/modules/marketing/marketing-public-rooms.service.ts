@@ -211,7 +211,12 @@ export class MarketingPublicRoomsService {
       availablePricingTerms: this.getAvailablePricingTerms(room),
       isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
       canBook: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
-      availabilityNote: room.status === RoomStatus.RESERVED ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.' : null,
+      availabilityNote:
+        room.status === RoomStatus.RESERVED
+          ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.'
+          : room.status === RoomStatus.MAINTENANCE
+            ? 'Kamar kosong, tetapi sedang dicek sebelum dibuka untuk booking.'
+            : null,
       facilities,
     };
   }
