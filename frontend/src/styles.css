@@ -16718,3 +16718,582 @@ body {
     border-radius: 12px;
   }
 }
+
+/* ─────────────────────────────────────────────
+   /portal/stay — compact v3 dossier patch
+   ───────────────────────────────────────────── */
+
+/* Main integrated card */
+.tenant-stay-main-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 18px rgba(14, 30, 60, 0.06);
+}
+
+/* Guide banner inside card */
+.tenant-stay-guide-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  flex-wrap: wrap;
+}
+
+.tenant-stay-guide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.tenant-stay-guide-body strong {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #1e3a5f;
+  line-height: 1.3;
+}
+
+.tenant-stay-guide-body span {
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.38;
+}
+
+.tenant-stay-guide-info  { background: #eff6ff; border-color: #bfdbfe; }
+.tenant-stay-guide-warning { background: #fff9eb; border-color: #fde3a7; }
+.tenant-stay-guide-danger  { background: #fff1f2; border-color: #fecdd3; }
+.tenant-stay-guide-safe    { background: #f0fdf4; border-color: #bbf7d0; }
+
+.tenant-stay-guide-warning .tenant-stay-guide-body strong { color: #92400e; }
+.tenant-stay-guide-danger  .tenant-stay-guide-body strong { color: #991b1b; }
+.tenant-stay-guide-safe    .tenant-stay-guide-body strong { color: #14532d; }
+
+/* Deposit metric — static div, no button */
+.tenant-metric-static {
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #fff;
+  border-radius: 16px;
+  padding: .85rem;
+  min-height: 98px;
+}
+
+.tenant-metric-static.tone-info { background: #eff6ff; border-color: #bfdbfe; }
+
+.tenant-metric-static > span {
+  display: block;
+  color: #64748b;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 700;
+}
+
+.tenant-metric-static > strong {
+  display: block;
+  margin-top: .25rem;
+  color: #102033;
+  font-size: 1rem;
+}
+
+.tenant-metric-static > small {
+  display: block;
+  color: #52627a;
+  font-size: 0.76rem;
+  margin-top: 0.15rem;
+}
+
+/* Secondary actions row */
+.tenant-stay-secondary-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* Journey timeline — collapsible details */
+.tenant-stay-journey {
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.tenant-stay-journey > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 750;
+  font-size: 0.9rem;
+  color: #1e3a5f;
+  user-select: none;
+  gap: 0.5rem;
+}
+
+.tenant-stay-journey > summary::-webkit-details-marker { display: none; }
+
+.tenant-stay-journey > summary > span { flex: 1; }
+
+.tenant-stay-journey > summary::after {
+  content: '+';
+  font-size: 1.1rem;
+  color: #94a3b8;
+  font-weight: 400;
+  flex: 0 0 auto;
+}
+
+.tenant-stay-journey[open] > summary::after { content: '−'; }
+
+.tenant-stay-journey-body {
+  padding: 0 1rem 1rem;
+}
+
+/* Items footer: count + report CTA */
+.tenant-installed-items-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.42rem 0.55rem;
+  border-radius: 10px;
+  background: #f8fbff;
+  border: 1px dashed rgba(37, 99, 235, 0.2);
+}
+
+.tenant-installed-items-footer > span {
+  font-size: 0.78rem;
+  color: #52627a;
+  font-weight: 600;
+}
+
+.tenant-installed-items-report {
+  background: none;
+  border: none;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.tenant-installed-items-report:hover {
+  text-decoration: underline;
+  color: #1e40af;
+}
+
+/* Mobile: compact overrides */
+@media (max-width: 575px) {
+  .tenant-stay-guide-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    padding: 0.62rem 0.75rem;
+  }
+
+  .tenant-stay-guide-body strong { font-size: 0.84rem; }
+  .tenant-stay-guide-body span   { font-size: 0.75rem; }
+
+  .tenant-metric-static {
+    min-height: auto;
+    padding: 0.5rem;
+  }
+
+  .tenant-metric-static > strong { font-size: 0.84rem; }
+  .tenant-metric-static > small  { display: none; }
+
+  .tenant-stay-journey > summary {
+    padding: 0.68rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  .tenant-installed-items-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   /portal/stay — v3 dossier components
+   ───────────────────────────────────────────── */
+
+/* Compact room header: thumbnail + info inline */
+.tenant-room-dossier-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 0.85rem;
+}
+
+.tenant-room-dossier-thumb-wrap {
+  flex: 0 0 auto;
+}
+
+.tenant-room-dossier-thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: 14px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.tenant-room-dossier-thumb-empty {
+  width: 88px;
+  height: 88px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1rem;
+  color: #3b82f6;
+  letter-spacing: 0.04em;
+}
+
+.tenant-room-dossier-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tenant-room-dossier-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 0.12rem 0 0.2rem;
+}
+
+.tenant-room-dossier-name {
+  font-size: 1.1rem;
+  font-weight: 850;
+  color: #102033;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.tenant-room-dossier-room-meta {
+  font-size: 0.78rem;
+  color: #52627a;
+  line-height: 1.35;
+  margin-bottom: 0.22rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tenant-room-dossier-end-date {
+  font-size: 0.78rem;
+  color: #52627a;
+  line-height: 1.35;
+}
+
+.tenant-room-dossier-end-date strong {
+  color: #1e293b;
+}
+
+.tenant-room-dossier-end-date em {
+  font-style: normal;
+  color: #64748b;
+}
+
+.tenant-room-dossier-end-date.near-end strong {
+  color: #b45309;
+}
+
+/* Mini fact chips strip */
+.tenant-stay-facts-strip {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.tenant-stay-fact-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 13px;
+  padding: 0.48rem 0.6rem;
+  background: #fff;
+  font-family: inherit;
+  text-align: left;
+}
+
+button.tenant-stay-fact-chip {
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+button.tenant-stay-fact-chip:hover {
+  background: #f8fafc;
+  border-color: #bfdbfe;
+}
+
+div.tenant-stay-fact-chip {
+  cursor: default;
+}
+
+.tenant-stay-fact-chip .fact-label {
+  display: block;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1;
+}
+
+.tenant-stay-fact-chip strong {
+  display: block;
+  font-size: 0.94rem;
+  font-weight: 800;
+  color: #102033;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tenant-stay-fact-chip small {
+  display: block;
+  font-size: 0.68rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.tenant-stay-fact-chip.tone-info    { background: #eff6ff; border-color: #bfdbfe; }
+.tenant-stay-fact-chip.tone-warning { background: #fff9eb; border-color: #fde3a7; }
+.tenant-stay-fact-chip.tone-danger  { background: #fff1f2; border-color: #fecdd3; }
+.tenant-stay-fact-chip.tone-success { background: #f0fdf4; border-color: #bbf7d0; }
+
+/* Dossier expandable sections */
+.tenant-dossier-section {
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  margin-top: 0.1rem;
+}
+
+.tenant-dossier-section > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.62rem 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.tenant-dossier-section > summary::-webkit-details-marker { display: none; }
+
+.tenant-dossier-section > summary > span:first-child {
+  flex: 1;
+  font-size: 0.84rem;
+  font-weight: 750;
+  color: #1e3a5f;
+}
+
+.tenant-dossier-section > summary::after {
+  content: '▾';
+  font-size: 0.85rem;
+  color: #94a3b8;
+  flex: 0 0 auto;
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.tenant-dossier-section[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.tenant-dossier-count {
+  font-size: 0.7rem;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 0.1rem 0.38rem;
+  border-radius: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tenant-dossier-body {
+  padding: 0.1rem 0 0.7rem;
+}
+
+/* Tarif table inside dossier */
+.tenant-dossier-tarif {
+  display: grid;
+  gap: 0;
+}
+
+.tenant-dossier-tarif-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.38rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.83rem;
+}
+
+.tenant-dossier-tarif-row:last-child {
+  border-bottom: none;
+}
+
+.tenant-dossier-tarif-row > span {
+  color: #64748b;
+  flex: 1;
+}
+
+.tenant-dossier-tarif-row > strong {
+  color: #1e293b;
+  font-weight: 700;
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+/* Facilities chip list */
+.tenant-dossier-facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+  padding-top: 0.1rem;
+}
+
+.tenant-dossier-facility-chip {
+  display: inline-block;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 0.22rem 0.58rem;
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+/* Inventory list */
+.tenant-dossier-inventory-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.26rem;
+  margin-bottom: 0.1rem;
+  border-radius: 10px;
+  padding: 0.1rem 0;
+}
+
+.tenant-dossier-inventory-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.36rem 0.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.81rem;
+}
+
+.tenant-dossier-inventory-row > strong {
+  flex: 1;
+  color: #1e293b;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inv-qty {
+  color: #64748b;
+  white-space: nowrap;
+  font-size: 0.77rem;
+}
+
+.inv-status {
+  white-space: nowrap;
+  font-size: 0.77rem;
+  font-weight: 650;
+}
+
+.inv-status-good   { color: #16a34a; }
+.inv-status-bad    { color: #dc2626; }
+.inv-status-check  { color: #d97706; }
+.inv-status-normal { color: #64748b; }
+
+/* Mobile overrides for dossier */
+@media (max-width: 575px) {
+  .tenant-room-dossier-thumb,
+  .tenant-room-dossier-thumb-empty {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+  }
+
+  .tenant-room-dossier-thumb-empty {
+    font-size: 0.82rem;
+  }
+
+  .tenant-room-dossier-name {
+    font-size: 1rem;
+  }
+
+  .tenant-room-dossier-room-meta {
+    font-size: 0.72rem;
+  }
+
+  .tenant-room-dossier-end-date {
+    font-size: 0.72rem;
+  }
+
+  .tenant-stay-facts-strip {
+    gap: 0.38rem;
+  }
+
+  .tenant-stay-fact-chip {
+    padding: 0.42rem 0.48rem;
+    border-radius: 11px;
+  }
+
+  .tenant-stay-fact-chip strong {
+    font-size: 0.84rem;
+  }
+
+  .tenant-stay-fact-chip small {
+    font-size: 0.62rem;
+  }
+
+  .tenant-dossier-section > summary > span:first-child {
+    font-size: 0.82rem;
+  }
+
+  .tenant-dossier-tarif-row {
+    font-size: 0.79rem;
+    padding: 0.32rem 0;
+  }
+
+  .tenant-dossier-facility-chip {
+    font-size: 0.74rem;
+    padding: 0.18rem 0.48rem;
+  }
+
+  .tenant-dossier-inventory-list {
+    max-height: 190px;
+  }
+
+  .tenant-dossier-inventory-row {
+    font-size: 0.77rem;
+    padding: 0.3rem 0.42rem;
+  }
+}
