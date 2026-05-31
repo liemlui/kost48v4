@@ -31,19 +31,19 @@ export default function LoginPage() {
   const modeCopy = useMemo(() => {
     if (mode === 'TENANT') {
       return {
-        helper: 'Baru pertama kali booking? Tidak perlu buat akun dulu. Pilih kamar dari katalog, lalu akun portal akan dibuat setelah pemesanan diproses.',
+        helper: 'Penghuni masuk untuk cek kamar, tagihan, dan laporan. Belum punya akun? Mulai dari katalog kamar.',
         identifierLabel: 'Email atau No. HP',
         identifierPlaceholder: 'Contoh: nama@email.com atau 0812...',
         passwordPlaceholder: 'Masukkan password',
-        expectedRoleError: 'Akun ini adalah akun pengelola. Gunakan tab Admin/Backoffice untuk masuk ke workspace operasional.',
+        expectedRoleError: 'Akun ini adalah akun pengelola. Gunakan tab Admin / Operasional untuk masuk ke area kerja kos.',
       };
     }
     return {
-      helper: 'Area khusus pengelola KOST48 untuk menangani pemesanan, pembayaran, kamar, dan operasional harian.',
+      helper: 'Area kerja owner, admin, dan staff KOST48.',
       identifierLabel: 'Email Admin / Staff',
       identifierPlaceholder: 'admin@kost48.com',
       passwordPlaceholder: 'Masukkan password admin',
-      expectedRoleError: 'Akun ini adalah akun penghuni. Gunakan tab Tenant untuk masuk ke portal kamu.',
+      expectedRoleError: 'Akun ini adalah akun penghuni. Gunakan tab Penghuni untuk masuk ke portal kamu.',
     };
   }, [mode]);
 
@@ -91,9 +91,9 @@ export default function LoginPage() {
       <div className="login-wrap">
         <section className="login-aside" aria-label="Tentang KOST48 Surabaya">
           <div className="login-chip"><span /> KOST48 Surabaya Barat</div>
-          <h1 className="login-title">Kos nyaman di Surabaya Barat — lebih tenang dari pilih kamar sampai tinggal.</h1>
+          <h1 className="login-title">Kos nyaman Surabaya Barat, dari booking sampai tinggal.</h1>
           <p className="login-copy">
-            Pilih kamar, pantau proses pemesanan, dan urus tagihan awal dari satu portal yang jelas tanpa bolak-balik tanya.
+            Pilih kamar, pantau pemesanan, dan urus tagihan dari satu portal.
           </p>
 
           <div className="login-feature-list">
@@ -101,21 +101,21 @@ export default function LoginPage() {
               <div className="login-feature-icon">✓</div>
               <div>
                 <strong>Kamar siap dihuni</strong>
-                <div className="mt-1 small">Lihat pilihan kamar, harga, deposit, dan informasi penting sebelum mengajukan pemesanan.</div>
+                <div className="mt-1 small">Lihat kamar, harga, deposit, dan info penting.</div>
               </div>
             </div>
             <div className="login-feature-item">
               <div className="login-feature-icon">✓</div>
               <div>
                 <strong>Pemesanan lebih transparan</strong>
-                <div className="mt-1 small">Pantau apakah pemesanan sedang direview, disetujui, atau menunggu pembayaran.</div>
+                <div className="mt-1 small">Pantau proses review, pembayaran, dan status kamar.</div>
               </div>
             </div>
             <div className="login-feature-item">
               <div className="login-feature-icon">✓</div>
               <div>
                 <strong>Portal pribadi penghuni</strong>
-                <div className="mt-1 small">Saat sudah tinggal, tagihan, masa sewa, laporan, dan pengumuman ada dalam satu tempat.</div>
+                <div className="mt-1 small">Tagihan, masa sewa, laporan, dan pengumuman jadi satu.</div>
               </div>
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function LoginPage() {
           <div className="login-mark" aria-hidden="true">K48</div>
           <div className="login-heading-block text-center">
             <h2>Masuk ke Portal KOST48</h2>
-            <p>Pantau pemesanan, tagihan, dan status hunian kamu dengan lebih mudah.</p>
+            <p>Cek pemesanan, tagihan, dan laporan kamu.</p>
           </div>
 
           <div className="login-segment" role="tablist" aria-label="Pilih jenis akun">
@@ -136,7 +136,7 @@ export default function LoginPage() {
               aria-selected={mode === 'TENANT'}
               onClick={() => handleModeChange('TENANT')}
             >
-              <span>◎</span> Tenant
+              <span>◎</span> Penghuni
             </button>
             <button
               type="button"
@@ -145,7 +145,7 @@ export default function LoginPage() {
               aria-selected={mode === 'BACKOFFICE'}
               onClick={() => handleModeChange('BACKOFFICE')}
             >
-              <span>▣</span> Admin/Backoffice
+              <span>▣</span> Admin / Operasional
             </button>
           </div>
 
@@ -205,7 +205,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <div className="login-backoffice-note">
-              Workspace ini untuk owner, admin, dan staff KOST48. Gunakan akun penghuni di tab Tenant.
+              Area ini untuk owner, admin, dan staff KOST48. Gunakan akun penghuni di tab Penghuni.
             </div>
           )}
         </section>

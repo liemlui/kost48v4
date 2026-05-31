@@ -21,6 +21,7 @@ import ReminderPreviewPage from './pages/reminders/ReminderPreviewPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import MyAnnouncementsPage from './pages/portal/MyAnnouncementsPage';
+import TenantAnnouncementDetailPage from './pages/portal/TenantAnnouncementDetailPage';
 import MyInvoicesPage from './pages/portal/MyInvoicesPage';
 import TenantInvoiceDetailPage from './pages/portal/TenantInvoiceDetailPage';
 import MyBookingsPage from './pages/portal/MyBookingsPage';
@@ -137,6 +138,7 @@ export default function App() {
           <Route path="/notifications" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF', 'TENANT']}><NotificationsPage /></RequireRoles>} />
 
           <Route path="/portal/announcements" element={<RequireRoles allowed={['TENANT']}><MyAnnouncementsPage /></RequireRoles>} />
+          <Route path="/portal/announcements/:id" element={<RequireRoles allowed={['TENANT']}><TenantAnnouncementDetailPage /></RequireRoles>} />
           <Route path="/portal/stay" element={<RequireRoles allowed={['TENANT']}><MyStayPage /></RequireRoles>} />
           <Route path="/portal/bookings" element={<RequireRoles allowed={['TENANT']}><MyBookingsPage /></RequireRoles>} />
           <Route path="/portal/invoices" element={<RequireRoles allowed={['TENANT']}><MyInvoicesPage /></RequireRoles>} />

@@ -14835,3 +14835,1886 @@ button.status-strip-item:hover {
     font-size: .66rem;
   }
 }
+
+/* V5.8 Public booking smoke polish */
+.booking-summary-alert {
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.96));
+}
+
+.booking-summary-alert-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.booking-summary-alert-grid span {
+  display: block;
+  line-height: 1.45;
+}
+
+@media (min-width: 992px) {
+  .booking-summary-alert-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .booking-summary-alert-grid {
+    gap: 0.4rem;
+  }
+}
+
+/* V5.8.1 tenant/public simplification */
+.tenant-simple-card,
+.tenant-main-action-card {
+  border-radius: 22px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+}
+
+.tenant-simple-header,
+.tenant-main-action-card .card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tenant-simple-header h3,
+.tenant-main-action-card h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.tenant-simple-header p,
+.tenant-main-action-card p {
+  margin: .25rem 0 0;
+  color: #52627a;
+}
+
+.tenant-simple-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: flex-end;
+}
+
+.tenant-simple-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.tenant-simple-metric {
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #fff;
+  border-radius: 16px;
+  padding: .85rem;
+  min-height: 98px;
+}
+
+.tenant-simple-metric:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.tenant-simple-metric span,
+.tenant-detail-field span,
+.tenant-deposit-simple span {
+  display: block;
+  color: #64748b;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 700;
+}
+
+.tenant-simple-metric strong {
+  display: block;
+  margin-top: .25rem;
+  color: #102033;
+  font-size: 1rem;
+}
+
+.tenant-simple-metric small,
+.tenant-deposit-simple small {
+  color: #52627a;
+}
+
+.tenant-simple-metric.tone-warning { background: #fff9eb; border-color: #fde3a7; }
+.tenant-simple-metric.tone-danger { background: #fff1f2; border-color: #fecdd3; }
+.tenant-simple-metric.tone-success { background: #f0fdf4; border-color: #bbf7d0; }
+.tenant-simple-metric.tone-info { background: #eff6ff; border-color: #bfdbfe; }
+
+.tenant-short-alert {
+  border-radius: 16px;
+  padding: .85rem 1rem;
+}
+
+.tenant-simple-steps {
+  display: grid;
+  gap: .65rem;
+}
+
+.tenant-simple-steps > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  padding: .8rem .95rem;
+  background: #fff;
+}
+
+.tenant-simple-steps > div::before {
+  content: '';
+  width: .55rem;
+  height: .55rem;
+  border-radius: 999px;
+  margin-right: .6rem;
+  flex: 0 0 auto;
+  background: #94a3b8;
+}
+
+.tenant-simple-steps > div.done::before { background: #22c55e; }
+.tenant-simple-steps > div.waiting::before { background: #f59e0b; }
+.tenant-simple-steps > div.idle::before { background: #60a5fa; }
+.tenant-simple-steps > div strong { flex: 1; }
+.tenant-simple-steps > div span { color: #52627a; font-size: .92rem; }
+
+.tenant-deposit-simple {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.tenant-deposit-simple strong {
+  display: block;
+  font-size: 1.35rem;
+  color: #0f3f83;
+  margin-top: .25rem;
+}
+
+.tenant-details-disclosure summary,
+.booking-optional-details summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #1d4ed8;
+  list-style: none;
+}
+
+.tenant-details-disclosure summary::-webkit-details-marker,
+.booking-optional-details summary::-webkit-details-marker { display: none; }
+
+.tenant-details-disclosure summary::after,
+.booking-optional-details summary::after {
+  content: ' +';
+}
+
+.tenant-details-disclosure[open] summary::after,
+.booking-optional-details[open] summary::after {
+  content: ' −';
+}
+
+.tenant-detail-field {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  padding: .65rem 0;
+}
+
+.tenant-main-action-info { background: linear-gradient(135deg, #eff6ff, #ffffff); }
+.tenant-main-action-warning { background: linear-gradient(135deg, #fff7ed, #ffffff); }
+.tenant-main-action-danger { background: linear-gradient(135deg, #fff1f2, #ffffff); }
+.tenant-main-action-success { background: linear-gradient(135deg, #f0fdf4, #ffffff); }
+
+.room-market-card-simple .card-body {
+  padding: 1rem;
+}
+
+.room-market-card-simple .room-market-status-badge {
+  top: .8rem;
+  right: .8rem;
+}
+
+.room-market-image-wrap.compact {
+  min-height: 150px;
+  max-height: 170px;
+}
+
+.room-market-placeholder.compact {
+  gap: .35rem;
+}
+
+.room-market-title-block.compact h2 {
+  font-size: 1.3rem;
+  margin-bottom: .1rem;
+}
+
+.room-compact-amenities {
+  color: #52627a;
+  font-weight: 600;
+  min-height: 2.5rem;
+}
+
+.room-market-main-price.compact {
+  margin-top: .9rem;
+  padding-top: .75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.room-compact-price-box {
+  display: grid;
+  gap: .35rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: .75rem;
+  margin: .75rem 0;
+}
+
+.room-compact-price-line {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  font-size: .84rem;
+}
+
+.room-compact-price-line span { color: #64748b; }
+.room-compact-price-line strong { color: #102033; }
+
+.room-market-booking-safety-note.compact {
+  margin: .75rem 0;
+  padding: .75rem;
+  border-radius: 14px;
+  background: #ecfeff;
+  border: 1px solid #a5f3fc;
+  color: #0e7490;
+  font-weight: 700;
+}
+
+.room-compact-estimate {
+  display: flex;
+  justify-content: space-between;
+  gap: .75rem;
+  color: #52627a;
+  margin-bottom: .85rem;
+}
+
+.room-market-actions.compact {
+  display: block;
+}
+
+.booking-simple-form .card-body {
+  padding: 1.25rem;
+}
+
+.booking-form-section-title {
+  font-size: .82rem;
+  color: #1d4ed8;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .8rem;
+}
+
+.booking-optional-details {
+  border: 1px dashed #bfdbfe;
+  border-radius: 16px;
+  padding: .9rem;
+  background: #f8fbff;
+}
+
+.booking-room-summary-simple .booking-room-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-bottom: 1rem;
+}
+
+.booking-room-summary-simple .booking-room-facts span {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 991.98px) {
+  .tenant-simple-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tenant-simple-header,
+  .tenant-main-action-card .card-body { align-items: flex-start; flex-direction: column; }
+  .tenant-main-action-card .btn { width: 100%; }
+}
+
+@media (max-width: 575.98px) {
+  .tenant-simple-grid { grid-template-columns: 1fr; }
+  .tenant-simple-metric { min-height: auto; }
+  .tenant-detail-field { display: block; }
+  .room-market-image-wrap.compact { min-height: 120px; }
+}
+
+/* V5.8.2 Staff UI deep simplification */
+.staff-workspace-brand strong { letter-spacing: -0.01em; }
+.staff-workspace-tab:focus,
+.staff-workspace-tab:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16) !important;
+}
+.staff-workspace-tab.active {
+  border-color: #93c5fd !important;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12), 0 8px 20px rgba(37, 99, 235, 0.08) !important;
+}
+.staff-daily-workspace { display: grid; gap: 16px; }
+.staff-operational-board-simple .card-body { padding: 20px; }
+.staff-operational-head.simple {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.staff-operational-head.simple h2 { margin: 8px 0 4px; font-size: 1.55rem; }
+.staff-operational-head.simple p { margin: 0; max-width: 680px; color: #475569; }
+.staff-simple-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.staff-simple-summary-row span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: .86rem;
+}
+.staff-simple-summary-row strong { color: #2563eb; font-size: 1.05rem; }
+.staff-focus-list.simple { display: grid; gap: 10px; }
+.staff-focus-empty.simple { border: 1px dashed #bfdbfe; border-radius: 18px; padding: 18px; background: #f8fbff; display: grid; gap: 4px; }
+.staff-focus-row .staff-focus-main strong { font-size: 1rem; }
+.staff-focus-row .staff-focus-main small { line-height: 1.35; }
+.staff-room-card .staff-room-issue-note.compact,
+.staff-room-card .staff-room-ok-note.compact { margin-top: 12px; padding: 12px; min-height: auto; }
+.staff-room-card .staff-room-issue-note.compact small,
+.staff-room-card .staff-room-ok-note.compact small { display: block; margin-top: 3px; }
+.staff-room-card-footer.compact { margin-top: 12px; display: flex; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+.staff-room-card-footer.compact .btn { min-width: 86px; }
+.staff-meter-simple .staff-meter-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.staff-meter-summary-row > div {
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  padding: 14px;
+  background: #f8fbff;
+}
+.staff-meter-summary-row span { display: block; color: #64748b; font-size: .82rem; margin-bottom: 4px; }
+.staff-meter-summary-row strong { color: #0f172a; }
+.staff-simple-report-summary { margin-bottom: 16px; }
+.staff-simple-summary-row.report span { border-radius: 16px; min-width: 130px; justify-content: center; }
+.staff-report-note-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.staff-report-note-row span { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 8px 10px; color: #9a3412; font-size: .9rem; }
+.staff-general-inventory-card .btn { white-space: nowrap; }
+@media (max-width: 768px) {
+  .staff-operational-head.simple { display: grid; }
+  .staff-meter-simple .staff-meter-summary-row { grid-template-columns: 1fr; }
+  .staff-simple-summary-row.report span { min-width: calc(50% - 6px); }
+}
+
+/* V5.8.3 admin simplification */
+.admin-sensitive-note,
+.admin-simple-note {
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.96));
+  color: #24415f;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  line-height: 1.45;
+}
+
+.admin-sensitive-note strong,
+.admin-simple-note strong {
+  color: #0f2a4a;
+  white-space: nowrap;
+}
+
+.admin-operations-command-card .assistant-panel,
+.admin-operations-command-card .compact-metrics,
+.payment-command-page .compact-metrics,
+.payment-review-command-modal .ai-proof-card {
+  display: none !important;
+}
+
+.admin-ops-command-hero p,
+.admin-command-head p,
+.finance-inline-menu small,
+.panel-subtitle {
+  max-width: 860px;
+}
+
+.admin-area-internal-menu-scroll .admin-area-internal-chip small {
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.payment-command-page .admin-simple-note,
+.renew-command-page .admin-simple-note {
+  margin-top: -0.25rem;
+}
+
+@media (max-width: 768px) {
+  .admin-sensitive-note,
+  .admin-simple-note {
+    display: block;
+  }
+
+  .admin-sensitive-note strong,
+  .admin-simple-note strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    white-space: normal;
+  }
+}
+
+
+/* V5.8.4 Owner UI simplification */
+.owner-policy-card {
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #f8fbff, #eef6ff);
+}
+.owner-policy-card.danger {
+  background: linear-gradient(135deg, #fff7f7, #fff1f2);
+}
+.owner-policy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.owner-policy-row h3 {
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+.owner-policy-pills {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.owner-policy-pills span, .owner-policy-alert {
+  border-radius: 999px;
+  background: rgba(37, 99, 235, .08);
+  color: #1d4ed8;
+  font-size: .78rem;
+  font-weight: 650;
+  padding: .35rem .65rem;
+}
+.owner-policy-alert {
+  display: inline-flex;
+  background: rgba(220, 38, 38, .1);
+  color: #b91c1c;
+}
+.owner-financial-health-cockpit .metric-grid {
+  margin-top: .75rem;
+}
+.owner-financial-health-headline {
+  border-radius: 16px;
+}
+.owner-production-gate-card {
+  background: #f8fafc;
+}
+@media (max-width: 768px) {
+  .owner-policy-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .owner-policy-pills {
+    justify-content: flex-start;
+  }
+}
+
+/* V5.8.9 — finance report center + tenant journey intelligence */
+.finance-report-center {
+  display: grid;
+  gap: 14px;
+}
+
+.finance-command-strip .card-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1.2fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.finance-command-copy h2 {
+  margin: 6px 0 8px;
+  color: #0f172a;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.finance-command-copy p {
+  margin: 0;
+  max-width: 680px;
+  color: #64748b;
+}
+
+.finance-command-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.finance-subtabbar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: 24px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 36px rgba(37, 99, 235, 0.08);
+}
+
+.finance-subtabbar button {
+  min-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: transparent;
+  color: #475569;
+  font-weight: 900;
+}
+
+.finance-subtabbar button:hover {
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.07);
+}
+
+.finance-subtabbar button.active {
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+}
+
+.finance-subtabbar em {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  font-style: normal;
+  font-size: 0.72rem;
+}
+
+.finance-bridge-chart,
+.balance-sheet-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.finance-bridge-row,
+.balance-sheet-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.8fr) minmax(160px, 1.2fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.10);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+}
+
+.finance-bridge-row strong,
+.balance-sheet-row strong {
+  display: block;
+  color: #0f172a;
+}
+
+.finance-bridge-row span,
+.balance-sheet-row span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.finance-bridge-row.negative .finance-bridge-track {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.finance-bridge-track {
+  height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.09);
+}
+
+.finance-bridge-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.finance-donut-meter {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+}
+
+.finance-donut {
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: conic-gradient(#2563eb var(--p), rgba(37, 99, 235, 0.10) 0);
+  box-shadow: 0 20px 45px rgba(37, 99, 235, 0.15);
+}
+
+.finance-donut > div {
+  width: 122px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: inherit;
+  background: #fff;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.finance-donut strong {
+  color: #0f172a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.finance-donut span,
+.finance-donut-meter p {
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.balance-sheet-snapshot .alert {
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.tenant-journey-card {
+  border-radius: 26px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(239,246,255,0.92)),
+    radial-gradient(circle at top right, rgba(37,99,235,0.14), transparent 36%) !important;
+  box-shadow: 0 22px 60px rgba(37, 99, 235, 0.12) !important;
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+}
+
+.tenant-journey-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.tenant-journey-layout h3 {
+  margin: 4px 0 6px;
+  color: #0f172a;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+}
+
+.tenant-journey-layout p {
+  margin: 0;
+  color: #64748b;
+}
+
+.tenant-payment-ring {
+  width: 138px;
+  height: 138px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: conic-gradient(#0ea5e9 var(--p), rgba(14, 165, 233, 0.12) 0);
+  box-shadow: 0 18px 40px rgba(14, 165, 233, 0.18);
+}
+
+.tenant-payment-ring > div {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: inherit;
+  background: #fff;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+}
+
+.tenant-payment-ring strong {
+  color: #0f172a;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.tenant-payment-ring span {
+  color: #64748b;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.tenant-journey-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tenant-journey-stats > div {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(37, 99, 235, 0.10);
+}
+
+.tenant-journey-stats span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.tenant-journey-stats strong {
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+@media (max-width: 992px) {
+  .finance-command-strip .card-body,
+  .finance-command-metrics,
+  .tenant-journey-layout,
+  .tenant-journey-stats {
+    grid-template-columns: 1fr;
+  }
+  .tenant-payment-ring {
+    justify-self: start;
+  }
+}
+
+/* V5.9.0 Tenant final cleanup: reduce duplicate hero/header on small screens */
+@media (max-width: 768px) {
+  .tenant-workspace-main {
+    width: min(100% - 1rem, 1220px);
+    padding-top: .5rem;
+  }
+
+  .tenant-workspace-topbar {
+    top: .35rem;
+    border-radius: 18px;
+    padding: .65rem .75rem;
+    gap: .5rem;
+  }
+
+  .tenant-workspace-brand em {
+    display: none;
+  }
+
+  .tenant-workspace-userbar {
+    gap: .35rem;
+  }
+
+  .tenant-workspace-userbar .payment-urgency-chip {
+    max-width: 170px;
+    padding: .45rem .55rem;
+  }
+
+  .tenant-workspace-userbar .notification-bell-toggle {
+    display: none !important;
+  }
+
+  .tenant-workspace-userbar .staff-user-profile-trigger span.text-end {
+    display: none;
+  }
+
+  .tenant-workspace-userbar .btn {
+    padding: .35rem .55rem;
+    font-size: .76rem;
+  }
+
+  .tenant-workspace-guide-strip {
+    display: none;
+  }
+
+  .tenant-workspace-tabs {
+    display: flex;
+    gap: .5rem;
+    overflow-x: auto;
+    padding: .55rem;
+    border-radius: 18px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tenant-workspace-tab {
+    min-width: 112px;
+    scroll-snap-align: start;
+  }
+
+  .tenant-journey-card,
+  .tenant-simple-card,
+  .content-card,
+  .tenant-main-action-card {
+    border-radius: 20px !important;
+  }
+
+  .tenant-journey-layout {
+    gap: 12px;
+  }
+
+  .tenant-payment-ring {
+    width: 112px;
+    height: 112px;
+  }
+
+  .tenant-payment-ring > div {
+    width: 78px;
+    height: 78px;
+  }
+
+  .tenant-payment-ring strong {
+    font-size: 1.35rem;
+  }
+}
+
+/* V5.9.0 Tenant announcement: rare info lives under header, not as a main menu item */
+.tenant-announcement-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: .75rem;
+  padding: .8rem 1rem;
+  border: 1px solid rgba(59, 130, 246, .16);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(239, 246, 255, .96), rgba(255, 255, 255, .94));
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .05);
+}
+
+.tenant-announcement-strip-main {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: .7rem;
+}
+
+.tenant-announcement-icon {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dbeafe;
+  flex: 0 0 auto;
+}
+
+.tenant-announcement-label {
+  color: #1d4ed8;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .12rem;
+}
+
+.tenant-announcement-strip strong {
+  display: block;
+  color: #102033;
+  font-size: .98rem;
+  line-height: 1.2;
+}
+
+.tenant-announcement-strip p {
+  margin: .18rem 0 0;
+  max-width: 760px;
+  color: #52627a;
+  font-size: .86rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .tenant-announcement-strip {
+    align-items: flex-start;
+    margin-top: .55rem;
+    padding: .65rem .7rem;
+    border-radius: 16px;
+  }
+
+  .tenant-announcement-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .tenant-announcement-strip strong {
+    font-size: .9rem;
+  }
+
+  .tenant-announcement-strip p {
+    -webkit-line-clamp: 1;
+    font-size: .8rem;
+  }
+
+  .tenant-announcement-strip .btn {
+    padding: .32rem .55rem;
+    font-size: .75rem;
+  }
+}
+
+/* V5.9.1 Compact UI Density Pass — more content per screen without losing readability */
+:root {
+  --density-page-x: 16px;
+  --density-page-y: 14px;
+  --density-section-gap: 14px;
+  --density-card-pad: 14px;
+  --density-card-pad-sm: 12px;
+  --density-radius-lg: 18px;
+  --density-radius-md: 14px;
+  --density-body: 14px;
+  --density-small: 12px;
+}
+
+body {
+  font-size: var(--density-body);
+}
+
+.btn,
+.form-control,
+.form-select,
+.input-group-text {
+  font-size: 0.88rem;
+}
+
+.btn {
+  padding-top: 0.42rem;
+  padding-bottom: 0.42rem;
+  border-radius: 12px;
+}
+
+.btn-sm {
+  padding-top: 0.28rem;
+  padding-bottom: 0.28rem;
+  font-size: 0.78rem;
+}
+
+.form-control,
+.form-select {
+  min-height: 40px;
+  padding-top: 0.42rem;
+  padding-bottom: 0.42rem;
+  border-radius: 12px;
+}
+
+.alert {
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.85rem;
+  border-radius: var(--density-radius-md) !important;
+  font-size: 0.88rem;
+}
+
+.app-shell {
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+}
+
+.app-shell-grid {
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.app-sidebar {
+  top: 14px;
+  min-height: calc(100vh - 28px);
+  padding: 14px;
+  border-radius: 22px;
+  gap: 12px;
+}
+
+.brand-block { gap: 9px; }
+.brand-mark { width: 38px; height: 38px; border-radius: 13px; font-size: 0.76rem; }
+.brand-mark.small { width: 34px; height: 34px; border-radius: 12px; font-size: 0.72rem; }
+.brand-title { font-size: 0.95rem; }
+.brand-subtitle,
+.app-caption,
+.form-helper { font-size: 0.78rem; }
+
+.sidebar-context-card { padding: 0.62rem 0.7rem; border-radius: 14px; }
+.sidebar-context-topline span { font-size: 0.62rem; }
+.sidebar-context-topline strong { font-size: 0.84rem; }
+.sidebar-nav-groups { gap: 0.65rem; }
+.sidebar-section-toggle { padding: 0.18rem 0.1rem 0.38rem; font-size: 0.65rem; }
+.sidebar-section-toggle em { width: 1.15rem; height: 1.15rem; font-size: 0.8rem; }
+.sidebar-link { padding: 0.58rem 0.65rem; border-radius: 13px; gap: 0.5rem; font-size: 0.86rem; }
+.sidebar-link-icon { width: 27px; height: 27px; border-radius: 10px; font-size: 0.86rem; }
+.sidebar-link-label { gap: 0.5rem; }
+.sidebar-footer { padding: 0.68rem; border-radius: 15px; }
+
+.app-topbar {
+  border-radius: 18px;
+  padding: 0.72rem 0.85rem;
+  margin-bottom: 0.85rem;
+}
+.app-topbar-row { gap: 0.65rem; }
+.topbar-actions-simple,
+.topbar-user { gap: 0.5rem; }
+.user-avatar { width: 34px; height: 34px; border-radius: 12px; font-size: 0.78rem; }
+.topbar-profile-trigger strong,
+.staff-user-profile-trigger strong { font-size: 0.82rem; }
+.topbar-profile-trigger em,
+.staff-user-profile-trigger em { font-size: 0.7rem; }
+
+.page-header {
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.page-eyebrow,
+.command-eyebrow {
+  margin-bottom: 0.38rem;
+  padding: 0.25rem 0.52rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+.page-header h1,
+.page-header h2 {
+  font-size: clamp(1.28rem, 1.65vw, 1.75rem);
+  line-height: 1.12;
+}
+.page-header p,
+.page-header .text-muted {
+  margin-top: 0.32rem;
+  font-size: 0.86rem;
+  max-width: 640px;
+}
+.page-header-actions { gap: 0.45rem; }
+
+.content-card,
+.glass-card,
+.table-card,
+.metric-card,
+.detail-hero,
+.stat-card,
+.command-card,
+.compact-metric-card,
+.blocked-reason-card,
+.tenant-simple-card,
+.tenant-main-action-card,
+.tenant-journey-card,
+.staff-chart-card,
+.staff-appreciation-card,
+.staff-focus-card,
+.owner-policy-card {
+  border-radius: var(--density-radius-lg) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.045) !important;
+}
+.content-card .card-body,
+.metric-card .card-body,
+.table-card .card-body,
+.stat-card .card-body,
+.command-card .card-body,
+.compact-metric-card .card-body,
+.blocked-reason-card .card-body,
+.tenant-simple-card .card-body,
+.tenant-main-action-card .card-body,
+.tenant-journey-card .card-body,
+.staff-chart-card .card-body,
+.staff-appreciation-card .card-body,
+.staff-focus-card .card-body,
+.smart-chart-card .card-body {
+  padding: var(--density-card-pad) !important;
+}
+.card-title-soft { font-size: 0.72rem; }
+
+.metric-grid,
+.compact-metrics,
+.staff-kpi-row,
+.staff-routine-summary-grid,
+.finance-command-metrics {
+  gap: 0.55rem !important;
+}
+.compact-metric-topline { margin-bottom: 0.45rem; }
+.compact-metric-icon { width: 30px; height: 30px; border-radius: 11px; }
+.compact-metric-label { font-size: 0.67rem; }
+.compact-metric-value { font-size: clamp(1.08rem, 1.45vw, 1.38rem); }
+.compact-metric-helper { margin-top: 0.25rem; font-size: 0.76rem; }
+
+.table > :not(caption) > * > * {
+  padding-top: 0.48rem;
+  padding-bottom: 0.48rem;
+}
+.content-card .table thead th,
+.table thead th {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+.content-card .table tbody td,
+.content-card .table tbody th,
+.table tbody td,
+.table tbody th {
+  font-size: 0.84rem;
+}
+
+/* Tenant compact mode */
+.tenant-workspace-main {
+  width: min(1180px, calc(100% - 1.25rem));
+  padding: 0.55rem 0 1.25rem;
+}
+.tenant-workspace-topbar {
+  top: 0.45rem;
+  gap: 0.55rem;
+  padding: 0.58rem 0.7rem;
+  border-radius: 18px;
+}
+.tenant-workspace-brand { gap: 0.5rem; }
+.tenant-workspace-brand strong { font-size: 0.86rem; }
+.tenant-workspace-brand em { font-size: 0.7rem; margin-top: 0.05rem; }
+.tenant-workspace-userbar { gap: 0.38rem; }
+.tenant-workspace-userbar .staff-user-profile-trigger {
+  padding: 0.24rem;
+  border-radius: 13px;
+}
+.tenant-workspace-userbar .btn { padding: 0.3rem 0.52rem; font-size: 0.74rem; }
+.tenant-workspace-userbar .payment-urgency-chip { padding: 0.34rem 0.52rem; font-size: 0.74rem; }
+.tenant-workspace-guide-strip { display: none !important; }
+.tenant-announcement-strip {
+  margin-top: 0.48rem;
+  padding: 0.55rem 0.72rem;
+  border-radius: 15px;
+  gap: 0.65rem;
+}
+.tenant-announcement-label { font-size: 0.64rem; }
+.tenant-announcement-strip strong { font-size: 0.84rem; }
+.tenant-announcement-strip p { margin: 0.08rem 0 0; font-size: 0.76rem; line-height: 1.32; }
+.tenant-workspace-tabs {
+  gap: 0.45rem;
+  margin: 0.6rem 0 0.65rem;
+  padding: 0.45rem;
+  border-radius: 17px;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+}
+.tenant-workspace-tab {
+  min-height: 54px;
+  padding: 0.5rem 0.58rem;
+  border-radius: 14px;
+  flex-direction: row;
+  align-items: center;
+}
+.tenant-workspace-tab > span { font-size: 1rem; }
+.tenant-workspace-tab strong { font-size: 0.78rem; }
+.tenant-workspace-tab em { display: none; }
+.tenant-workspace-content { padding: 0.1rem 0 1rem; }
+
+.tenant-journey-card { margin-bottom: 0.75rem !important; }
+.tenant-journey-layout { gap: 0.75rem; }
+.tenant-journey-layout h3 { margin: 0.15rem 0 0.25rem; font-size: 1.05rem; }
+.tenant-journey-layout p { font-size: 0.84rem; line-height: 1.38; }
+.tenant-payment-ring { width: 104px; height: 104px; box-shadow: 0 10px 26px rgba(14, 165, 233, 0.12); }
+.tenant-payment-ring > div { width: 72px; height: 72px; }
+.tenant-payment-ring strong { font-size: 1.22rem; }
+.tenant-payment-ring span { font-size: 0.64rem; }
+
+.tenant-simple-card,
+.tenant-main-action-card { margin-bottom: 0.75rem !important; }
+.tenant-simple-header,
+.tenant-main-action-card .card-body { gap: 0.65rem; }
+.tenant-simple-header h3,
+.tenant-main-action-card h3 { font-size: 1.05rem; }
+.tenant-simple-header p,
+.tenant-main-action-card p { font-size: 0.82rem; line-height: 1.35; }
+.tenant-simple-badges { gap: 0.32rem; }
+.tenant-simple-grid {
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+.tenant-simple-metric {
+  border-radius: 13px;
+  padding: 0.62rem;
+  min-height: 76px;
+}
+.tenant-simple-metric span,
+.tenant-detail-field span,
+.tenant-deposit-simple span { font-size: 0.63rem; letter-spacing: 0.045em; }
+.tenant-simple-metric strong { margin-top: 0.14rem; font-size: 0.9rem; }
+.tenant-simple-metric small,
+.tenant-deposit-simple small { font-size: 0.74rem; line-height: 1.3; }
+.tenant-short-alert { border-radius: 13px; padding: 0.58rem 0.72rem; font-size: 0.82rem; }
+.tenant-simple-steps { gap: 0.42rem; }
+.tenant-simple-steps > div {
+  padding: 0.52rem 0.62rem;
+  border-radius: 12px;
+}
+.tenant-simple-steps > div span { font-size: 0.78rem; }
+.tenant-deposit-simple { border-radius: 13px; padding: 0.68rem; }
+.tenant-deposit-simple strong { font-size: 1.02rem; }
+.tenant-detail-field { padding: 0.42rem 0; gap: 0.65rem; }
+.tenant-details-disclosure summary,
+.booking-optional-details summary { font-size: 0.86rem; }
+
+/* Public / booking density */
+.public-page-shell .container,
+.public-page-shell .container-lg,
+.public-page-shell .container-xl { padding-left: 0.85rem; padding-right: 0.85rem; }
+.public-topbar { padding: 0.55rem 0.75rem; }
+.room-market-card-simple .card-body { padding: 0.72rem; }
+.room-market-image-wrap.compact { min-height: 118px; max-height: 140px; }
+.room-market-title-block.compact h2 { font-size: 1.08rem; }
+.room-compact-amenities { min-height: 1.8rem; font-size: 0.82rem; }
+.room-market-main-price.compact { margin-top: 0.62rem; padding-top: 0.52rem; }
+.room-compact-price-box { margin: 0.55rem 0; padding: 0.55rem; border-radius: 12px; }
+.room-compact-price-line { font-size: 0.77rem; }
+.room-market-booking-safety-note.compact { margin: 0.52rem 0; padding: 0.52rem; font-size: 0.78rem; }
+.room-compact-estimate { margin-bottom: 0.58rem; font-size: 0.82rem; }
+.booking-simple-form .card-body { padding: 0.85rem !important; }
+.booking-form-section-title { margin-bottom: 0.55rem; font-size: 0.72rem; }
+.booking-optional-details { padding: 0.62rem; border-radius: 13px; }
+
+/* Staff/Admin/Owner density */
+.staff-workspace-main { width: min(1120px, calc(100% - 1.25rem)); padding-top: 0.65rem; }
+.staff-workspace-topbar { padding: 0.62rem 0.75rem; border-radius: 18px; margin-bottom: 0.65rem; }
+.staff-workspace-content { padding-top: 0.1rem; }
+.staff-workspace-tabs { gap: 0.45rem; padding: 0.45rem; margin-bottom: 0.7rem; border-radius: 16px; }
+.staff-workspace-tab { min-height: 48px; padding: 0.45rem 0.55rem; border-radius: 13px; }
+.staff-motivation-dashboard { gap: 0.62rem; }
+.staff-motivation-hero { border-radius: 18px; }
+.staff-motivation-hero .card-body { padding: 0.8rem 0.9rem; }
+.staff-hero-copy h1 { font-size: clamp(1.1rem, 1.8vw, 1.45rem); margin-bottom: 0.16rem; }
+.staff-hero-copy p { font-size: 0.82rem; }
+.staff-mini-kpi { min-height: 68px; padding: 0.62rem; border-radius: 14px; }
+.staff-mini-kpi strong { font-size: 1.22rem; }
+.staff-section-head { margin-bottom: 0.55rem; }
+.staff-donut-wrap,
+.staff-week-bars { min-height: 118px; }
+.staff-donut { width: 92px; height: 92px; flex-basis: 92px; }
+.staff-donut::after { width: 60px; height: 60px; }
+.staff-focus-item { padding: 0.54rem; border-radius: 13px; }
+.staff-routine-card { padding: 10px; border-radius: 15px; margin-bottom: 10px; }
+.staff-routine-item { padding: 0.55rem; border-radius: 12px; }
+.staff-report-card .card-body,
+.staff-work-tip-card .card-body { padding: 0.68rem 0.75rem; }
+
+.admin-sensitive-note,
+.admin-simple-note { padding: 0.62rem 0.75rem; border-radius: 14px; font-size: 0.84rem; }
+.command-card-header { gap: 0.65rem; margin-bottom: 0.65rem; }
+.command-card-header h3 { font-size: clamp(1.02rem, 1.35vw, 1.28rem); }
+.command-card-header p { margin-top: 0.2rem; font-size: 0.82rem; }
+.assistant-list { gap: 0.55rem; }
+.assistant-item { gap: 0.65rem; padding: 0.68rem; border-radius: 14px; }
+.assistant-item-icon { width: 34px; height: 34px; border-radius: 12px; }
+.assistant-item-title { font-size: 0.88rem; }
+.assistant-item-message { font-size: 0.78rem; }
+.assistant-empty { padding: 0.68rem; border-radius: 14px; }
+.action-queue-compact .action-queue-table td,
+.action-queue-compact .action-queue-table th { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+
+.owner-policy-card { margin-bottom: 0.65rem; }
+.owner-policy-row { gap: 0.65rem; }
+.owner-policy-row h3 { font-size: 0.92rem; }
+.owner-policy-pills span,
+.owner-policy-alert { font-size: 0.7rem; padding: 0.25rem 0.48rem; }
+.finance-report-center { gap: 0.65rem; }
+.finance-command-strip .card-body { gap: 0.8rem; }
+.finance-command-copy h2 { margin: 0.2rem 0 0.35rem; font-size: 1.2rem; }
+.finance-command-copy p { font-size: 0.84rem; }
+.finance-subtabbar { padding: 0.38rem; gap: 0.34rem; border-radius: 16px; }
+.finance-subtabbar button { padding: 0.5rem 0.65rem; font-size: 0.78rem; }
+.finance-bridge-row,
+.balance-sheet-row { padding: 0.62rem; border-radius: 14px; }
+.finance-donut { width: 138px; height: 138px; }
+.finance-donut > div { width: 92px; height: 92px; }
+.finance-donut strong { font-size: 1.45rem; }
+
+@media (max-width: 991.98px) {
+  .app-shell { padding: 0; }
+  .app-main { padding: 0.65rem; }
+  .app-topbar { margin-bottom: 0.65rem; }
+  .page-header h1,
+  .page-header h2 { font-size: 1.28rem; }
+  .content-card .card-body,
+  .metric-card .card-body,
+  .table-card .card-body,
+  .stat-card .card-body,
+  .command-card .card-body,
+  .tenant-simple-card .card-body,
+  .tenant-main-action-card .card-body,
+  .tenant-journey-card .card-body { padding: var(--density-card-pad-sm) !important; }
+  .finance-command-strip .card-body { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 575.98px) {
+  body { font-size: 13.5px; }
+  .page-header { margin-bottom: 0.6rem; }
+  .page-header p,
+  .page-header .text-muted { font-size: 0.8rem; }
+  .tenant-workspace-main { width: min(100% - 0.65rem, 1220px); padding-top: 0.35rem; }
+  .tenant-workspace-topbar { top: 0.28rem; padding: 0.48rem 0.55rem; border-radius: 15px; }
+  .tenant-workspace-brand .brand-mark { width: 30px; height: 30px; }
+  .tenant-workspace-brand strong { font-size: 0.78rem; }
+  .tenant-workspace-brand em { display: none; }
+  .tenant-workspace-userbar .payment-urgency-chip { max-width: 132px; }
+  .tenant-workspace-userbar .staff-user-profile-trigger span.text-end { display: none; }
+  .tenant-workspace-userbar .user-avatar { width: 30px; height: 30px; border-radius: 11px; }
+  .tenant-workspace-userbar .btn { padding: 0.25rem 0.42rem; font-size: 0.7rem; }
+  .tenant-announcement-strip { align-items: flex-start; padding: 0.48rem 0.58rem; }
+  .tenant-announcement-strip .btn { padding: 0.22rem 0.42rem; }
+  .tenant-workspace-tabs { margin: 0.48rem 0 0.55rem; padding: 0.36rem; gap: 0.35rem; }
+  .tenant-workspace-tab { min-width: 92px; min-height: 42px; padding: 0.38rem 0.46rem; }
+  .tenant-workspace-tab > span { font-size: 0.9rem; }
+  .tenant-workspace-tab strong { font-size: 0.72rem; }
+  .tenant-journey-layout { grid-template-columns: minmax(0,1fr) auto; align-items: center; }
+  .tenant-payment-ring { width: 82px; height: 82px; }
+  .tenant-payment-ring > div { width: 58px; height: 58px; }
+  .tenant-payment-ring strong { font-size: 1rem; }
+  .tenant-payment-ring span { display: none; }
+  .tenant-simple-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tenant-simple-metric { padding: 0.5rem; min-height: 64px; }
+  .tenant-simple-metric strong { font-size: 0.84rem; }
+  .tenant-simple-metric small { display: none; }
+  .tenant-simple-header,
+  .tenant-main-action-card .card-body { gap: 0.45rem; }
+  .tenant-detail-field { display: flex; }
+  .tenant-simple-steps > div { align-items: flex-start; }
+  .tenant-simple-steps > div span { font-size: 0.72rem; }
+  .table-responsive { margin-bottom: 0; }
+  .public-topbar { border-radius: 0 0 16px 16px; }
+  .staff-workspace-main { width: min(100% - 0.65rem, 1120px); }
+  .staff-workspace-brand em { display: none; }
+  .staff-workspace-userbar .notification-bell-toggle { display: none !important; }
+  .staff-workspace-userbar .staff-user-profile-trigger span.text-end { display: none; }
+}
+
+/* V5.9.2 Tenant engagement and room transparency */
+.tenant-room-transparency-card {
+  overflow: hidden;
+}
+
+.tenant-room-transparency {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  gap: 0.9rem;
+  margin: 0.85rem 0;
+}
+
+.tenant-room-photo-card {
+  min-height: 170px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e0f2fe, #eff6ff);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+}
+
+.tenant-room-photo-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.tenant-room-photo-empty {
+  min-height: 170px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  gap: 0.22rem;
+  color: #1d4ed8;
+  padding: 1rem;
+}
+
+.tenant-room-photo-empty span {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+}
+
+.tenant-room-photo-empty strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+.tenant-room-photo-empty small {
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.tenant-room-booking-info {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.tenant-room-booking-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.tenant-room-booking-head span,
+.tenant-room-price-grid span,
+.tenant-installed-items-head span {
+  display: block;
+  color: #64748b;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+  font-weight: 800;
+}
+
+.tenant-room-booking-head strong,
+.tenant-installed-items-head strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1rem;
+  margin-top: 0.12rem;
+}
+
+.tenant-room-booking-head small,
+.tenant-installed-items-head small {
+  display: block;
+  color: #52627a;
+  line-height: 1.35;
+}
+
+.tenant-room-price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.tenant-room-price-grid > div {
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.10);
+  background: #f8fbff;
+}
+
+.tenant-room-price-grid strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.86rem;
+  margin-top: 0.1rem;
+}
+
+.tenant-installed-items-panel {
+  margin-top: 0.75rem;
+  padding: 0.8rem;
+  border-radius: 16px;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  background: linear-gradient(135deg, #f8fbff, #ffffff);
+}
+
+.tenant-installed-items-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 0.62rem;
+}
+
+.tenant-installed-items-head small {
+  max-width: 360px;
+  text-align: right;
+}
+
+.tenant-installed-items-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.tenant-installed-items-list > div,
+.tenant-installed-items-empty {
+  padding: 0.55rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: #fff;
+}
+
+.tenant-installed-items-list strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+
+.tenant-installed-items-list span,
+.tenant-installed-items-empty {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.tenant-engagement-card {
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eef6ff, #ffffff);
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.07);
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+}
+
+.tenant-engagement-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.tenant-engagement-head h3 {
+  margin: 0.12rem 0 0.25rem;
+  font-size: 1.06rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.tenant-engagement-head p {
+  margin: 0;
+  color: #52627a;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.tenant-service-interest-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.tenant-service-interest-grid button,
+.tenant-service-interest-chip {
+  text-align: left;
+  border: 1px solid rgba(37, 99, 235, 0.13);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 0.6rem;
+  color: inherit;
+}
+
+.tenant-service-interest-grid button:hover {
+  border-color: rgba(37, 99, 235, 0.32);
+  transform: translateY(-1px);
+}
+
+.tenant-service-interest-chip {
+  cursor: default;
+}
+
+.tenant-service-interest-grid strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.86rem;
+}
+
+.tenant-service-interest-grid span,
+.tenant-engagement-note {
+  display: block;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.tenant-engagement-note {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+@media (max-width: 991.98px) {
+  .tenant-room-transparency { grid-template-columns: 1fr; }
+  .tenant-room-photo-card,
+  .tenant-room-photo-card img,
+  .tenant-room-photo-empty { min-height: 150px; }
+  .tenant-room-price-grid,
+  .tenant-installed-items-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tenant-installed-items-head { display: grid; }
+  .tenant-installed-items-head small { max-width: none; text-align: left; }
+  .tenant-service-interest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 575.98px) {
+  .tenant-room-transparency { gap: 0.55rem; margin: 0.55rem 0; }
+  .tenant-room-photo-card,
+  .tenant-room-photo-card img,
+  .tenant-room-photo-empty { min-height: 112px; }
+  .tenant-room-photo-empty span { width: 34px; height: 34px; border-radius: 12px; font-size: 0.76rem; }
+  .tenant-room-photo-empty strong { font-size: 0.86rem; }
+  .tenant-room-photo-empty small { font-size: 0.72rem; }
+  .tenant-room-booking-info,
+  .tenant-installed-items-panel { padding: 0.58rem; border-radius: 13px; }
+  .tenant-room-booking-head { display: grid; gap: 0.5rem; }
+  .tenant-room-booking-head .btn { justify-self: start; padding: 0.25rem 0.5rem; font-size: 0.72rem; }
+  .tenant-room-price-grid { gap: 0.38rem; }
+  .tenant-room-price-grid > div { padding: 0.42rem; border-radius: 10px; }
+  .tenant-room-price-grid span,
+  .tenant-installed-items-head span { font-size: 0.6rem; }
+  .tenant-room-price-grid strong { font-size: 0.76rem; }
+  .tenant-installed-items-list { gap: 0.38rem; }
+  .tenant-installed-items-list > div,
+  .tenant-installed-items-empty { padding: 0.42rem; border-radius: 10px; }
+  .tenant-installed-items-list strong { font-size: 0.76rem; }
+  .tenant-installed-items-list span,
+  .tenant-installed-items-empty { font-size: 0.7rem; }
+  .tenant-engagement-card .card-body { padding: 0.68rem !important; }
+  .tenant-engagement-head { display: grid; gap: 0.48rem; margin-bottom: 0.52rem; }
+  .tenant-engagement-head h3 { font-size: 0.94rem; margin-bottom: 0.16rem; }
+  .tenant-engagement-head p { font-size: 0.76rem; }
+  .tenant-service-interest-grid { grid-template-columns: 1fr 1fr; gap: 0.38rem; }
+  .tenant-service-interest-grid button,
+  .tenant-service-interest-chip { padding: 0.45rem; border-radius: 10px; }
+  .tenant-service-interest-grid strong { font-size: 0.74rem; }
+  .tenant-service-interest-grid span { display: none; }
+  .tenant-engagement-note { font-size: 0.68rem; padding: 0.42rem; }
+}
+
+.rooms-public-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  object-fit: contain;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+  padding: 4px;
+}
+
+/* V5.9.6 Tenant UI acceptance compact route-fix pass */
+.tenant-main-action-review {
+  background: linear-gradient(135deg, #eff6ff, #ffffff) !important;
+  border: 1px solid rgba(37, 99, 235, 0.12) !important;
+}
+
+.tenant-installed-items-more {
+  width: 100%;
+  text-align: left;
+  border: 1px dashed rgba(37, 99, 235, 0.24);
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #1d4ed8;
+  font-weight: 750;
+  font-size: 0.78rem;
+  padding: 0.55rem;
+}
+
+.tenant-installed-items-more:hover {
+  background: #eff6ff;
+}
+
+.tenant-service-extra-details {
+  margin-top: 0.55rem;
+}
+
+.tenant-service-extra-details summary {
+  cursor: pointer;
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 0.82rem;
+  list-style: none;
+}
+
+.tenant-service-extra-details summary::-webkit-details-marker { display: none; }
+.tenant-service-extra-details summary::after { content: ' +'; }
+.tenant-service-extra-details[open] summary::after { content: ' −'; }
+
+.tenant-announcement-list-card .announcement-body-text,
+.tenant-announcement-list-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tenant-announcement-detail-card h3 {
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.tenant-announcement-detail-image {
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #f8fafc;
+}
+
+.tenant-announcement-detail-image img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.tenant-announcement-detail-body {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.tenant-profile-safe-note {
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #334155;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.tenant-wifi-steps {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tenant-wifi-steps span {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 0.6rem 0.75rem;
+  color: #334155;
+  font-weight: 650;
+}
+
+.tenant-wifi-steps strong {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 767.98px) {
+  .login-experience-v518d .login-heading-block p,
+  .login-experience-v518d .login-helper-card,
+  .login-experience-v518d .login-catalog-card span,
+  .login-experience-v518d .login-backoffice-note {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .login-experience-v518d .login-heading-block p {
+    margin: 0.4rem 0 1rem;
+  }
+
+  .login-experience-v518d .login-helper-card {
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .login-experience-v518d .login-catalog-card,
+  .login-experience-v518d .login-backoffice-note {
+    margin-top: 1rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .tenant-workspace-topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .tenant-workspace-userbar {
+    width: auto;
+    justify-content: flex-end;
+    gap: 0.28rem;
+  }
+
+  .tenant-workspace-userbar .payment-urgency-chip {
+    grid-column: 1 / -1;
+    order: 3;
+    max-width: none;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tenant-workspace-userbar .notification-bell-toggle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .tenant-logout-button {
+    max-width: 42px;
+    overflow: hidden;
+    white-space: nowrap;
+    color: transparent !important;
+    position: relative;
+  }
+
+  .tenant-logout-button::after {
+    content: '↪';
+    color: #dc2626;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+  }
+
+  .tenant-room-price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tenant-installed-items-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tenant-installed-items-head small {
+    display: none;
+  }
+
+  .tenant-announcement-detail-image img {
+    max-height: 180px;
+  }
+
+  .tenant-wifi-steps span {
+    padding: 0.5rem 0.6rem;
+    border-radius: 12px;
+  }
+}

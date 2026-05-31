@@ -6,6 +6,14 @@ import { changePassword } from '../../api/auth';
 import PageHeader from '../../components/common/PageHeader';
 import { useAuth } from '../../context/AuthContext';
 
+function getUserTypeLabel(role?: string) {
+  if (role === 'TENANT') return 'Penghuni';
+  if (role === 'OWNER') return 'Owner';
+  if (role === 'ADMIN') return 'Admin Operasional';
+  if (role === 'STAFF') return 'Staff';
+  return '-';
+}
+
 export default function ProfilePage() {
   const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
@@ -13,6 +21,8 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const isTenant = user?.role === 'TENANT';
 
   const mutation = useMutation({
     mutationFn: () => changePassword({ currentPassword: currentPassword || undefined, newPassword }),
@@ -54,7 +64,7 @@ export default function ProfilePage() {
       <PageHeader
         eyebrow="Akun"
         title="Profil Saya"
-        description="Lihat data akun aktif dan lakukan perubahan password dengan aman."
+        description={isTenant ? 'Data akun penghuni dan password portal.' : 'Lihat data akun aktif dan lakukan perubahan password dengan aman.'}
       />
 
       <Row className="g-4">
@@ -71,13 +81,19 @@ export default function ProfilePage() {
                 <div className="fw-semibold">{user?.email ?? '-'}</div>
               </div>
               <div className="mb-3">
-                <div className="text-muted small">Role</div>
-                <div className="fw-semibold">{user?.role ?? '-'}</div>
+                <div className="text-muted small">Jenis akses</div>
+                <div className="fw-semibold">{getUserTypeLabel(user?.role)}</div>
               </div>
-              <div>
-                <div className="text-muted small">Tenant terkait</div>
-                <div className="fw-semibold">{user?.tenantId ?? '-'}</div>
-              </div>
+              {isTenant ? (
+                <div className="tenant-profile-safe-note">
+                  Data penghuni kamu sudah terhubung dengan portal. Kalau nama, email, atau nomor HP salah, kirim laporan agar admin memperbarui data.
+                </div>
+              ) : (
+                <div>
+                  <div className="text-muted small">Penghuni terkait</div>
+                  <div className="fw-semibold">{user?.tenantId ?? '-'}</div>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -85,7 +101,8 @@ export default function ProfilePage() {
         <Col lg={7}>
           <Card className="content-card border-0">
             <Card.Body>
-              <h5 className="mb-3">Ganti Password</h5>
+              <h5 className="mb-2">Ganti Password</h5>
+              <p className="text-muted small mb-3">Gunakan password minimal 8 karakter. Jangan bagikan password ke orang lain.</p>
               {error ? <Alert variant="danger">{error}</Alert> : null}
               {success ? <Alert variant="success">{success}</Alert> : null}
 
@@ -94,7 +111,7 @@ export default function ProfilePage() {
                 <PasswordInput
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
-                  placeholder="Isi jika endpoint membutuhkan verifikasi password lama"
+                  placeholder="Masukkan password lama jika diminta"
                 />
               </Form.Group>
 

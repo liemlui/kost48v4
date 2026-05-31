@@ -1,8 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
+import { useQuery } from '@tanstack/react-query';
 import NotificationBell from '../notifications/NotificationBell';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import { getNavigationLinks, type TenantPortalStage } from '../../config/navigation';
+import { getResource } from '../../api/resources';
+import type { Announcement } from '../../types';
 
 function getStageTitle(stage: TenantPortalStage) {
   if (stage === 'browsing') return 'Pilih kamar yang cocok';
@@ -14,6 +17,49 @@ function getStageSummary(stage: TenantPortalStage) {
   if (stage === 'browsing') return 'Pilih kamar, lalu pantau status pemesanan.';
   if (stage === 'booking') return 'Lihat status pemesanan, tagihan, dan bukti bayar.';
   return 'Kamar, tagihan, laporan, dan aksi penting.';
+}
+
+function normalizeAnnouncement(item: Announcement | undefined) {
+  if (!item) return null;
+  const title = item.title?.trim() || 'Pengumuman';
+  const content = item.content?.trim() || '';
+  if (!title && !content) return null;
+  return {
+    id: item.id,
+    title,
+    content,
+    isPinned: Boolean(item.isPinned),
+  };
+}
+
+function TenantAnnouncementStrip({ stage }: { stage: TenantPortalStage }) {
+  const navigate = useNavigate();
+  const query = useQuery({
+    queryKey: ['portal-announcements', 'top-strip'],
+    queryFn: () => getResource<{ items: Announcement[] }>('/announcements/active'),
+    enabled: stage === 'occupied',
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+
+  const items = Array.isArray(query.data?.items) ? query.data.items : [];
+  const selected = normalizeAnnouncement([...items].sort((a, b) => Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned)))[0]);
+
+  if (stage !== 'occupied' || !selected) return null;
+
+  return (
+    <section className="tenant-announcement-strip" aria-label="Pengumuman penghuni">
+      <div className="tenant-announcement-strip-main">
+        <span className="tenant-announcement-icon" aria-hidden="true">📢</span>
+        <div>
+          <div className="tenant-announcement-label">Pengumuman</div>
+          <strong>{selected.title}</strong>
+          {selected.content ? <p>{selected.content}</p> : null}
+        </div>
+      </div>
+      <Button variant="outline-primary" size="sm" onClick={() => navigate(`/portal/announcements/${selected.id}`)}>Lihat</Button>
+    </section>
+  );
 }
 
 export default function TenantWorkspaceTabs({
@@ -53,9 +99,11 @@ export default function TenantWorkspaceTabs({
               {initials}
             </span>
           </button>
-          <Button variant="outline-danger" size="sm" onClick={onLogout}>Logout</Button>
+          <Button variant="outline-danger" size="sm" className="tenant-logout-button" onClick={onLogout}>Keluar</Button>
         </div>
       </section>
+
+      <TenantAnnouncementStrip stage={stage} />
 
       <section className="tenant-workspace-guide-strip">
         <div>

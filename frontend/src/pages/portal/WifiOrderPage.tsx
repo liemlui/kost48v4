@@ -7,17 +7,21 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 export default function WifiOrderPage() {
   return (
     <div>
-      <PageHeader title="Pesan WiFi" description="Dummy flow sementara untuk pembelian paket WiFi tenant." />
+      <PageHeader eyebrow="Portal Penghuni" title="Pesan WiFi" description="Pesan atau tanya paket WiFi lewat WhatsApp." />
       <Card className="content-card border-0">
         <Card.Body>
-          <div className="mb-3 small text-uppercase text-muted fw-semibold">Prosedur sementara</div>
-          <h4 className="mb-3">Hubungi WhatsApp pengelola untuk pesan WiFi</h4>
-          <p className="text-muted mb-4">
-            Untuk sementara, proses pembelian paket WiFi belum dibuat penuh di sistem. Silakan hubungi WhatsApp berikut untuk memesan paket atau menanyakan harga terbaru.
+          <div className="mb-3 small text-uppercase text-muted fw-semibold">Cara pesan WiFi</div>
+          <h4 className="mb-2">WiFi tambahan</h4>
+          <p className="text-muted mb-3">
+            Untuk saat ini pemesanan WiFi diproses lewat WhatsApp agar paket dan harga bisa dikonfirmasi langsung.
           </p>
-          <div className="alert alert-info small mb-4">
-            <strong>Kontak WiFi:</strong> 085648887628<br />
-            Banner harga dan proses pemesanan penuh akan disambungkan pada iterasi berikutnya.
+          <div className="tenant-wifi-steps mb-3">
+            <span><strong>1</strong> Chat pengelola</span>
+            <span><strong>2</strong> Pilih paket</span>
+            <span><strong>3</strong> Ikuti instruksi bayar</span>
+          </div>
+          <div className="alert alert-info small mb-3">
+            <strong>Kontak WiFi:</strong> 085648887628
           </div>
           <Button as="a" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
             Hubungi via WhatsApp
