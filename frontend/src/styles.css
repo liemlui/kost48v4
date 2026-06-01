@@ -21630,6 +21630,178 @@ div.tenant-stay-fact-chip {
   line-height: 1.35;
 }
 
+/* Marketing data */
+.gx-market-section {
+  scroll-margin-top: 72px;
+  padding: 5rem 0;
+  background: #f8fafc;
+}
+
+.gx-market-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.gx-market-head .gx-section-head {
+  margin-bottom: 0;
+}
+
+.gx-market-head .gx-btn-outline {
+  flex-shrink: 0;
+}
+
+.gx-market-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+
+.gx-market-proof {
+  display: grid;
+  gap: .3rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.gx-market-proof span,
+.gx-market-chart-head span {
+  color: #0284c7;
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.gx-market-proof strong {
+  min-height: 2rem;
+  color: #0c1a2e;
+  font-family: 'Cormorant Garant', 'Plus Jakarta Sans', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.gx-market-proof small,
+.gx-market-chart-head small {
+  color: #64748b;
+  font-size: .74rem;
+  line-height: 1.45;
+}
+
+.gx-market-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  gap: 1rem;
+}
+
+.gx-market-chart-card {
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.gx-market-chart-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .45rem;
+}
+
+.gx-market-chart-head h3 {
+  margin: .18rem 0 0;
+  color: #0c1a2e;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.gx-market-chart-loading {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  color: #64748b;
+  font-size: .84rem;
+}
+
+.gx-market-donut-wrap {
+  display: grid;
+  grid-template-columns: minmax(190px, .82fr) minmax(150px, 1fr);
+  align-items: center;
+  gap: .25rem;
+}
+
+.gx-market-donut {
+  position: relative;
+  min-width: 0;
+}
+
+.gx-market-donut-center {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: grid;
+  justify-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.gx-market-donut-center strong {
+  color: #0c1a2e;
+  font-family: 'Cormorant Garant', 'Plus Jakarta Sans', serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: .9;
+}
+
+.gx-market-donut-center span {
+  margin-top: .28rem;
+  color: #64748b;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gx-market-legend {
+  display: grid;
+  gap: .62rem;
+}
+
+.gx-market-legend div {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .5rem;
+}
+
+.gx-market-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.gx-market-legend span,
+.gx-market-legend strong {
+  color: #475569;
+  font-size: .8rem;
+  font-style: normal;
+  line-height: 1.2;
+}
+
+.gx-market-legend strong {
+  color: #0f172a;
+  font-weight: 850;
+}
+
 /* ── Photo divider ── */
 .gx-photo-divider {
   height: 340px;
@@ -22039,6 +22211,7 @@ div.tenant-stay-fact-chip {
   .gx-hero-title { font-size: clamp(3.5rem, 12vw, 6rem); }
   .gx-photo-grid { grid-template-columns: repeat(2, 1fr); }
   .gx-avail-wrap { grid-template-columns: 1fr; }
+  .gx-market-chart-grid { grid-template-columns: 1fr; }
   .gx-facility-wrap { grid-template-columns: 1fr; gap: 2rem; }
   .gx-tariff-head, .gx-tariff-row { grid-template-columns: 1.2fr 1.8fr 1fr; }
   .gx-tariff-head span:last-child, .gx-tariff-row span:last-child { display: none; }
@@ -22054,6 +22227,9 @@ div.tenant-stay-fact-chip {
   .gx-pcard { height: 180px; }
   .gx-avail-stats { grid-template-columns: 1fr; gap: .65rem; }
   .gx-stat { padding: 1rem; }
+  .gx-market-head { display: grid; align-items: start; }
+  .gx-market-head .gx-btn-outline { justify-self: start; }
+  .gx-market-proof-grid { grid-template-columns: 1fr; }
   .gx-photo-divider { background-attachment: scroll; height: 220px; }
   .gx-tariff-head, .gx-tariff-row { grid-template-columns: 1fr 1.5fr; }
   .gx-tariff-head span:nth-child(3), .gx-tariff-row span:nth-child(3) { display: none; }
@@ -22067,6 +22243,7 @@ div.tenant-stay-fact-chip {
   .gx-hero-cta { flex-direction: column; align-items: stretch; }
   .gx-hero-cta a { text-align: center; }
   .gx-nav-cta .gx-btn-ghost { display: none; }
+  .gx-market-donut-wrap { grid-template-columns: 1fr; }
 }
 
 /* ── Lightbox modal ── */
@@ -23452,5 +23629,99 @@ div.tenant-stay-fact-chip {
   .invoice-analytics-row,
   .staff-analytics-row {
     gap: 0.75rem;
+  }
+}
+
+/* ─── Ticket / Payment / Renew / Tenant Invoice Analytics ─── */
+.ticket-analytics-row .content-card,
+.payment-analytics-row .content-card,
+.tenant-invoice-snapshot-row .content-card {
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-subtle);
+  transition: box-shadow var(--transition-base);
+}
+
+.ticket-analytics-row .content-card:hover,
+.payment-analytics-row .content-card:hover,
+.tenant-invoice-snapshot-row .content-card:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+/* Renew analytics */
+.renew-analytics-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.renew-analytics-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.renew-stat-item {
+  display: grid;
+  grid-template-columns: 10px 80px 1fr 36px;
+  align-items: center;
+  gap: 6px;
+}
+
+.renew-stat-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.renew-stat-item > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.renew-stat-item > div strong {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.renew-stat-item > div span {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.renew-stat-bar {
+  height: 6px;
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.renew-stat-bar > div {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.renew-stat-pct {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-align: right;
+  font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+  .ticket-analytics-row,
+  .payment-analytics-row,
+  .tenant-invoice-snapshot-row {
+    gap: 0.75rem;
+  }
+
+  .renew-analytics-wrap {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

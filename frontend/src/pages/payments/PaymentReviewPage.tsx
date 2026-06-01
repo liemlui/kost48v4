@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
@@ -45,6 +47,129 @@ function getTargetLabel(item: PaymentSubmission) {
 
 function getPaymentImpact(item: PaymentSubmission) {
   return getPaymentReviewSafety(item).impactText;
+}
+
+function fmtCompact(v: number) {
+  const s = Math.abs(v || 0);
+  if (s >= 1_000_000_000) return `Rp ${(s / 1_000_000_000).toFixed(1)} M`;
+  if (s >= 1_000_000) return `Rp ${(s / 1_000_000).toFixed(1)} jt`;
+  if (s >= 1_000) return `Rp ${(s / 1_000).toFixed(0)} rb`;
+  return `Rp ${new Intl.NumberFormat('id-ID').format(s)}`;
+}
+
+function PaymentAnalyticsPanel({ items, pendingAmount, proofCount, missingProofCount, highRiskCount, manualRiskCount, invoiceCount, depositCount }: {
+  items: any[];
+  pendingAmount: number;
+  proofCount: number;
+  missingProofCount: number;
+  highRiskCount: number;
+  manualRiskCount: number;
+  invoiceCount: number;
+  depositCount: number;
+}) {
+  const riskData = [
+    { name: 'Risiko Tinggi', value: highRiskCount, color: '#ef4444' },
+    { name: 'Perlu Checklist', value: manualRiskCount, color: '#f59e0b' },
+    { name: 'Aman', value: Math.max(0, items.length - highRiskCount - manualRiskCount), color: '#16a34a' },
+  ].filter((d) => d.value > 0);
+
+  const proofRate = items.length > 0 ? Math.round((proofCount / items.length) * 100) : 0;
+
+  const targetData = [
+    { name: 'Invoice', value: invoiceCount, color: '#2563eb' },
+    { name: 'Deposit', value: depositCount, color: '#7c3aed' },
+  ].filter((d) => d.value > 0);
+
+  const methodData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach((item) => {
+      const method = item.paymentMethod ?? 'Tidak Diketahui';
+      const label = method === 'TRANSFER' ? 'Transfer' : method === 'CASH' ? 'Tunai' : method === 'QRIS' ? 'QRIS' : method === 'EWALLET' ? 'E-Wallet' : method;
+      counts[label] = (counts[label] ?? 0) + 1;
+    });
+    const colors = ['#2563eb', '#0ea5e9', '#16a34a', '#7c3aed'];
+    return Object.entries(counts).map(([label, value], i) => ({ label, value, color: colors[i % colors.length] })).sort((a, b) => b.value - a.value);
+  }, [items]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <Row className="g-3 mb-3 payment-analytics-row">
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Bukti & Kelengkapan</div>
+            <div className="panel-subtitle mb-2">Ketersediaan file bukti bayar</div>
+            <div className="invoice-collection-gauge-wrap">
+              <DonutGauge
+                value={proofRate}
+                center={<><strong>{proofRate}%</strong><span>Ada Bukti</span></>}
+                ariaLabel={`Bukti tersedia: ${proofRate}%`}
+                size={120}
+                innerRadius={38}
+                outerRadius={54}
+                color={proofRate >= 80 ? '#16a34a' : proofRate >= 50 ? '#f59e0b' : '#ef4444'}
+                trackColor="rgba(148,163,184,0.15)"
+              />
+            </div>
+            <div className="invoice-gauge-labels mt-2">
+              <span>Ada bukti: <strong>{proofCount}</strong></span>
+              <span>Tanpa bukti: <strong>{missingProofCount}</strong></span>
+            </div>
+            <div className="invoice-gauge-labels" style={{ marginTop: 4 }}>
+              <span>Total nominal: <strong>{fmtCompact(pendingAmount)}</strong></span>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Level Risiko</div>
+            <div className="panel-subtitle mb-2">Distribusi risiko bukti yang masuk</div>
+            <div className="stay-analytics-donut-wrap">
+              <ResponsiveContainer width="100%" height={150}>
+                <PieChart>
+                  <Pie data={riskData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={44} outerRadius={64} paddingAngle={2} stroke="none">
+                    {riskData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: unknown, name: unknown) => [`${Number(v ?? 0)} bukti`, String(name ?? '')]} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="stay-analytics-donut-center"><strong>{items.length}</strong><span>Total</span></div>
+            </div>
+            <div className="stay-analytics-legend">
+              {riskData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Metode & Target</div>
+            <div className="panel-subtitle mb-2">Cara bayar dan tujuan pembayaran</div>
+            {methodData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart layout="vertical" data={methodData} margin={{ top: 4, right: 40, bottom: 4, left: 4 }}>
+                  <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="label" width={72} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} bukti`, '']} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                    {methodData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : null}
+            <div className="stay-analytics-legend mt-2">
+              {targetData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
 }
 
 function CommandFlowStrip() {
@@ -168,6 +293,19 @@ export default function PaymentReviewPage() {
       <CommandFlowStrip />
       <AssistantPanel title="Asisten Review Pembayaran" subtitle="Prioritaskan bukti yang menahan flow." items={assistantItems} emptyTitle="Antrean pembayaran aman" emptyMessage="Filter ini aman." />
       <CompactMetrics metrics={metrics} />
+
+      {items.length > 0 && (
+        <PaymentAnalyticsPanel
+          items={items}
+          pendingAmount={pendingAmount}
+          proofCount={proofCount}
+          missingProofCount={missingProofCount}
+          highRiskCount={highRiskCount}
+          manualRiskCount={manualRiskCount}
+          invoiceCount={invoiceCount}
+          depositCount={depositCount}
+        />
+      )}
 
       <Card className="content-card border-0 mb-4 command-filter-card">
         <Card.Body>

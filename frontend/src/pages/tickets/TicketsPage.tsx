@@ -10,6 +10,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import PaginationControls from "../../components/common/PaginationControls";
@@ -35,6 +36,111 @@ import {
 } from "./ticketsShared";
 import StaffTicketsMode from "./TicketsStaffMode";
 
+function TicketAnalyticsPanel({ items, counts }: { items: TicketItem[]; counts: { all: number; open: number; inProgress: number; done: number; closed: number } }) {
+  const statusData = [
+    { name: 'Baru', value: counts.open, color: '#ef4444' },
+    { name: 'Dikerjakan', value: counts.inProgress, color: '#f59e0b' },
+    { name: 'Selesai', value: counts.done, color: '#2563eb' },
+    { name: 'Ditutup', value: counts.closed, color: '#16a34a' },
+  ].filter((d) => d.value > 0);
+
+  const categoryData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach((item) => {
+      const cat = (item as any).category ?? 'Lainnya';
+      const label = cat === 'ROOM_REPAIR' ? 'Perbaikan Kamar' : cat === 'CHECKOUT_INSPECTION' ? 'Cek Keluar' : cat === 'CLEANING' ? 'Kebersihan' : cat === 'GENERAL' ? 'Umum' : String(cat);
+      counts[label] = (counts[label] ?? 0) + 1;
+    });
+    const colors = ['#2563eb', '#f59e0b', '#16a34a', '#ef4444', '#7c3aed', '#0ea5e9'];
+    return Object.entries(counts).map(([label, value], i) => ({ label, value, color: colors[i % colors.length] })).sort((a, b) => b.value - a.value);
+  }, [items]);
+
+  const agingData = useMemo(() => {
+    const now = Date.now();
+    const buckets = { 'Hari ini': 0, '1–3 hari': 0, '3–7 hari': 0, '7+ hari': 0 };
+    items.filter((t) => ['OPEN', 'IN_PROGRESS'].includes(t.status)).forEach((t) => {
+      const created = new Date((t as any).createdAt ?? 0).getTime();
+      const days = Math.floor((now - created) / 86400000);
+      if (days === 0) buckets['Hari ini']++;
+      else if (days <= 3) buckets['1–3 hari']++;
+      else if (days <= 7) buckets['3–7 hari']++;
+      else buckets['7+ hari']++;
+    });
+    const colors: Record<string, string> = { 'Hari ini': '#16a34a', '1–3 hari': '#f59e0b', '3–7 hari': '#f97316', '7+ hari': '#ef4444' };
+    return Object.entries(buckets).map(([label, value]) => ({ label, value, color: colors[label] }));
+  }, [items]);
+
+  if (counts.all === 0) return null;
+
+  const donutTotal = statusData.reduce((s, d) => s + d.value, 0);
+
+  return (
+    <Row className="g-3 mb-3 ticket-analytics-row">
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Status Tiket</div>
+            <div className="panel-subtitle mb-2">Komposisi tiket aktif saat ini</div>
+            <div className="stay-analytics-donut-wrap">
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={2} stroke="none">
+                    {statusData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: unknown, name: unknown) => [`${Number(v ?? 0)} tiket`, String(name ?? '')]} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="stay-analytics-donut-center"><strong>{donutTotal}</strong><span>Total</span></div>
+            </div>
+            <div className="stay-analytics-legend">
+              {statusData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Kategori Tiket</div>
+            <div className="panel-subtitle mb-2">Jenis pekerjaan yang masuk</div>
+            {categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart layout="vertical" data={categoryData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                  <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="label" width={110} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tiket`, '']} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                    {categoryData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <div className="text-muted small mt-4 text-center">Belum ada data kategori</div>}
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Umur Tiket Aktif</div>
+            <div className="panel-subtitle mb-2">Tiket Open/In Progress berdasarkan usia</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={agingData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={72} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tiket`, '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {agingData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+}
 
 export default function TicketsPage() {
   const { user } = useAuth();
@@ -474,6 +580,8 @@ export default function TicketsPage() {
       {user?.role === "OWNER" || user?.role === "ADMIN" ? (
         <AdminStaffFieldReportQueue />
       ) : null}
+
+      {items.length > 0 && <TicketAnalyticsPanel items={items} counts={counts} />}
 
       <div className="ticket-status-strip mb-3">
         <button

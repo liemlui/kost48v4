@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import PageHeader from '../../components/common/PageHeader';
 import { PeriodVisualizer, type AssistantItem, type MetricChip } from '../../components/command-center';
 import { AssistantInsightLine, EntityBadgeFilterBar, StatusStrip } from '../../components/workspace';
@@ -57,6 +58,52 @@ const STATUS_OPTIONS = [
   { value: 'APPROVED', label: 'Disetujui' },
   { value: 'REJECTED', label: 'Ditolak' },
 ];
+
+function RenewAnalyticsPanel({ pendingCount, approvedCount, rejectedCount, total }: { pendingCount: number; approvedCount: number; rejectedCount: number; total: number }) {
+  if (total === 0) return null;
+  const data = [
+    { name: 'Menunggu', value: pendingCount, color: '#f59e0b' },
+    { name: 'Disetujui', value: approvedCount, color: '#16a34a' },
+    { name: 'Ditolak', value: rejectedCount, color: '#ef4444' },
+  ].filter((d) => d.value > 0);
+
+  return (
+    <Card className="content-card border-0 mb-3">
+      <Card.Body>
+        <div className="panel-title mb-1">Distribusi Perpanjangan</div>
+        <div className="panel-subtitle mb-2">Status semua permintaan perpanjangan</div>
+        <div className="renew-analytics-wrap">
+          <div className="stay-analytics-donut-wrap" style={{ maxWidth: 180 }}>
+            <ResponsiveContainer width={160} height={140}>
+              <PieChart>
+                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={42} outerRadius={62} paddingAngle={2} stroke="none">
+                  {data.map((d) => <Cell key={d.name} fill={d.color} />)}
+                </Pie>
+                <Tooltip formatter={(v: unknown, name: unknown) => [`${Number(v ?? 0)} renew`, String(name ?? '')]} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="stay-analytics-donut-center"><strong>{total}</strong><span>Total</span></div>
+          </div>
+          <div className="renew-analytics-stats">
+            {data.map((d) => (
+              <div key={d.name} className="renew-stat-item">
+                <i style={{ background: d.color }} />
+                <div>
+                  <strong>{d.value}</strong>
+                  <span>{d.name}</span>
+                </div>
+                <div className="renew-stat-bar">
+                  <div style={{ width: `${Math.round((d.value / total) * 100)}%`, background: d.color }} />
+                </div>
+                <span className="renew-stat-pct">{Math.round((d.value / total) * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+}
 
 function RenewFlowStrip() {
   return (
@@ -258,6 +305,8 @@ export default function RenewRequestsAdminPage() {
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
         }))}
       />
+
+      <RenewAnalyticsPanel pendingCount={pendingCount} approvedCount={approvedCount} rejectedCount={rejectedCount} total={items.length} />
 
       <Card className="content-card border-0 mb-4 command-filter-card compact-filter-only">
         <Card.Body className="py-3">

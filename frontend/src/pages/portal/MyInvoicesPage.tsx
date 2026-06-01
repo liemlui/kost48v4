@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Row, Spinner, Table } from 'react-bootstrap';
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import DonutGauge from '../../components/charts/DonutGauge';
 import { listResource } from '../../api/resources';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
@@ -14,6 +16,76 @@ import { getOpenTenantInvoices, getPendingReviewInvoiceIds, isTenantInvoiceOverd
 import { isPayableInvoiceStatus, tenantInvoiceStatusLabel } from '../../utils/tenantCopy';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { formatDateTimeWib, getDeadlineMeta } from '../../utils/dateTime';
+
+function fmtC(v: number) {
+  const s = Math.abs(v || 0);
+  if (s >= 1_000_000) return `Rp ${(s / 1_000_000).toFixed(1)} jt`;
+  if (s >= 1_000) return `Rp ${(s / 1_000).toFixed(0)} rb`;
+  return `Rp ${new Intl.NumberFormat('id-ID').format(s)}`;
+}
+
+function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount }: { allItems: any[]; paidCount: number; unpaidCount: number; overdueCount: number }) {
+  const totalBilled = useMemo(() => allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0), [allItems]);
+  const totalPaid = useMemo(() => allItems.reduce((s, inv) => s + (Number(inv.paidAmountRupiah) || 0), 0), [allItems]);
+  const outstanding = Math.max(0, totalBilled - totalPaid);
+  const paidRate = totalBilled > 0 ? Math.round((totalPaid / totalBilled) * 100) : 0;
+
+  const statusBars = [
+    { label: 'Lunas', value: paidCount, color: '#16a34a' },
+    { label: 'Belum Bayar', value: unpaidCount, color: '#f59e0b' },
+    { label: 'Overdue', value: overdueCount, color: '#ef4444' },
+  ].filter((d) => d.value > 0);
+
+  if (allItems.length === 0) return null;
+
+  return (
+    <Row className="g-3 mb-3 tenant-invoice-snapshot-row">
+      <Col sm={5}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Tingkat Pelunasan</div>
+            <div className="panel-subtitle mb-2">Dari total tagihan yang diterbitkan</div>
+            <div className="invoice-collection-gauge-wrap">
+              <DonutGauge
+                value={paidRate}
+                center={<><strong>{paidRate}%</strong><span>Lunas</span></>}
+                ariaLabel={`Tingkat pelunasan: ${paidRate}%`}
+                size={110}
+                innerRadius={35}
+                outerRadius={50}
+                color={paidRate >= 80 ? '#16a34a' : paidRate >= 50 ? '#f59e0b' : '#ef4444'}
+                trackColor="rgba(148,163,184,0.15)"
+              />
+            </div>
+            <div className="invoice-gauge-labels mt-1">
+              <span>Terbayar: <strong>{fmtC(totalPaid)}</strong></span>
+              <span>Sisa: <strong>{fmtC(outstanding)}</strong></span>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col sm={7}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Tagihan per Status</div>
+            <div className="panel-subtitle mb-2">Jumlah tagihan berdasarkan kondisi bayar</div>
+            <ResponsiveContainer width="100%" height={130}>
+              <BarChart layout="vertical" data={statusBars} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={90} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0)} tagihan`, '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {statusBars.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+}
 
 function formatPeriod(start?: string, end?: string) {
   if (!start && !end) return '-';
@@ -105,6 +177,8 @@ export default function MyInvoicesPage() {
               ))}
             </div>
           </div>
+
+          {allItems.length > 0 && <TenantInvoiceSnapshot allItems={allItems} paidCount={paidCount} unpaidCount={unpaidCount} overdueCount={overdueCount} />}
 
           {overdueCount > 0 ? (
             <Alert variant="warning" className="tenant-short-alert mb-3">
