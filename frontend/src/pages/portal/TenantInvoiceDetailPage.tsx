@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getResource } from '../../api/resources';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import SafeImage from '../../components/common/SafeImage';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
@@ -583,7 +584,14 @@ export default function TenantInvoiceDetailPage() {
                   {payFileLabel ? <div className="small mt-2">File siap dikirim: <strong>{payFileLabel}</strong></div> : null}
                   {payProofPreviewUrl ? (
                     <div className="mt-3">
-                      <img src={payProofPreviewUrl} alt="Pratinjau bukti pembayaran" style={{ width: 180, maxWidth: '100%', height: 140, objectFit: 'cover', borderRadius: 10, border: '1px solid rgba(15, 23, 42, 0.12)' }} />
+                      <SafeImage
+                        src={payProofPreviewUrl}
+                        alt="Pratinjau bukti pembayaran"
+                        style={{ width: 180, maxWidth: '100%', height: 140, objectFit: 'cover', borderRadius: 10, border: '1px solid rgba(15, 23, 42, 0.12)' }}
+                        fallbackTitle="Pratinjau tidak bisa dimuat"
+                        fallbackDescription="Coba pilih ulang file bukti pembayaran."
+                        resolveUrl={false}
+                      />
                       <div className="small text-muted mt-2">Pratinjau bukti pembayaran sebelum dikirim ke admin.</div>
                     </div>
                   ) : null}

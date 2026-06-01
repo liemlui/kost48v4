@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getPublicRoomDetail } from '../../api/bookings';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import Kost48OfficialInfoCard from '../../components/common/Kost48OfficialInfoCard';
 import type { PricingTerm, PublicRoom } from '../../types';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from '../../data/kost48Assets';
@@ -73,7 +74,7 @@ function getBusinessHighlight(room: PublicRoom) {
   if (raw && !/seed|dummy|test|uat|\.ps1|auto[- ]?created|checkout[_ -]?guard|script|developer/i.test(raw)) return raw;
   const bathroom = getBathroomType(room).toLowerCase();
   const cooling = getCoolingType(room).toLowerCase();
-  return `Kamar siap dipilih dengan kamar mandi ${bathroom}, ${cooling}, dan informasi harga yang transparan.`;
+  return `Kamar dengan kamar mandi ${bathroom}, ${cooling}, dan informasi harga yang transparan.`;
 }
 
 function getTermRent(room: PublicRoom, term: PricingTerm) {
@@ -108,7 +109,10 @@ function getDefaultTerm(rows: TermRow[]) {
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? '').replace(/\D/g, '');
   const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
+  const isChecking = String(room.status ?? '').toUpperCase() === 'MAINTENANCE';
+  const message = isChecking
+    ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
+    : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
   return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
@@ -283,7 +287,7 @@ export default function PublicRoomDetailPage() {
                         <DetailFeatureCard {...getFeature(room, 'bathroom')} />
                         <DetailFeatureCard {...getFeature(room, 'cooling')} />
                         <DetailFeatureCard {...getFeature(room, 'size')} />
-                        <DetailFeatureCard icon="🛡️" label="Deposit" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
+                        <DetailFeatureCard icon="🛡️" label="Dana titipan" value={room.defaultDepositRupiah ? `Rp ${Number(room.defaultDepositRupiah).toLocaleString('id-ID')}` : 'Tanya admin'} />
                       </div>
 
                       <div className="room-detail-amenities" aria-label="Fasilitas kamar">
@@ -337,7 +341,7 @@ export default function PublicRoomDetailPage() {
                       </Table>
 
                       <Alert variant="light" className="room-detail-disclaimer mt-3 mb-0">
-                        Estimasi awal: sewa pertama <strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong> + deposit <strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong>.
+                        Estimasi awal: sewa pertama <strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong> + dana titipan <strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong> = <strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong>.
                       </Alert>
                     </Card.Body>
                   </Card>
@@ -400,7 +404,7 @@ export default function PublicRoomDetailPage() {
 
                     <div className="room-detail-booking-summary">
                       <div><span>Sewa pertama</span><strong><CurrencyDisplay amount={initialCost.rent} showZero={false} /></strong></div>
-                      <div><span>Deposit</span><strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong></div>
+                      <div><span>Dana titipan</span><strong><CurrencyDisplay amount={initialCost.deposit} showZero={false} /></strong></div>
                       <div><span>Total awal</span><strong><CurrencyDisplay amount={initialCost.total} showZero={false} /></strong></div>
                       <div><span>Kamar mandi</span><strong>{getBathroomType(room)}</strong></div>
                       <div><span>Pendingin</span><strong>{getCoolingType(room)}</strong></div>
@@ -414,6 +418,8 @@ export default function PublicRoomDetailPage() {
                     </div>
                   </Card.Body>
                 </Card>
+
+                <Kost48OfficialInfoCard variant="detail" compact />
               </Col>
             </Row>
 

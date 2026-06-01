@@ -10,6 +10,8 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import OwnerDashboardPage from './pages/dashboard/OwnerDashboardPage';
+import PublicGuestDashboardPage from './pages/public/PublicGuestDashboardPage';
 import RenewRequestsAdminPage from './pages/renew-requests/RenewRequestsAdminPage';
 import InvoiceDetailPage from './pages/invoices/InvoiceDetailPage';
 import InvoicesPage from './pages/invoices/InvoicesPage';
@@ -44,6 +46,7 @@ import StaffRoutinesAdminPage from './pages/staff-routines/StaffRoutinesAdminPag
 import StaffMonthlyReportPage from './pages/staff/StaffMonthlyReportPage';
 import StaffWarehousePage from './pages/staff/StaffWarehousePage';
 import AdminStaffPerformancePage from './pages/admin/AdminStaffPerformancePage';
+import OwnerSettingsPage from './pages/settings/OwnerSettingsPage';
 
 type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'TENANT';
 
@@ -62,10 +65,11 @@ function TenantBookingRouteGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function RootRedirect() {
+function RootEntry() {
   const { user } = useAuth();
   const { stage } = useTenantPortalStage();
-  return <Navigate to={getDefaultRoute(user?.role, stage)} replace />;
+  if (!user) return <PublicGuestDashboardPage />;
+  return <Navigate to={getDefaultRoute(user.role, stage)} replace />;
 }
 
 export default function App() {
@@ -77,14 +81,23 @@ export default function App() {
       <Route path="/rooms" element={<RoomsRouteEntry />} />
       <Route path="/rooms/:roomId/detail" element={<PublicRoomDetailPage />} />
       <Route path="/booking/:roomId" element={<GuestBookingPage />} />
-      <Route path="/" element={<RootRedirect />} />
+      <Route path="/" element={<RootEntry />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route
             path="/dashboard"
             element={(
-              <RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}>
+              <RequireRoles allowed={['ADMIN', 'STAFF']}>
                 <DashboardPage />
+              </RequireRoles>
+            )}
+          />
+
+          <Route
+            path="/owner-dashboard"
+            element={(
+              <RequireRoles allowed={['OWNER']}>
+                <OwnerDashboardPage />
               </RequireRoles>
             )}
           />
@@ -135,6 +148,7 @@ export default function App() {
           <Route path="/expenses" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><SimpleCrudPage config={resourceConfigs.expenses} /></RequireRoles>} />
           <Route path="/reminders" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ReminderPreviewPage /></RequireRoles>} />
           <Route path="/reports" element={<RequireRoles allowed={['OWNER']}><ReportsPage /></RequireRoles>} />
+          <Route path="/settings" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><OwnerSettingsPage /></RequireRoles>} />
           <Route path="/notifications" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF', 'TENANT']}><NotificationsPage /></RequireRoles>} />
 
           <Route path="/portal/announcements" element={<RequireRoles allowed={['TENANT']}><MyAnnouncementsPage /></RequireRoles>} />

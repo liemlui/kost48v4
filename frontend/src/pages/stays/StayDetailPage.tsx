@@ -258,7 +258,7 @@ export default function StayDetailPage() {
       ) : null}
 
       <ReadinessChecklist title="Safety Belt Checkout" subtitle="Cek tagihan, meter, kamar, deposit." items={readinessItems} />
-      <LifecycleTimeline title="Alur Masa Sewa" subtitle="Alur dari check-in sampai final checkout." steps={timelineSteps} />
+      <LifecycleTimeline title="Alur Masa Sewa" subtitle="Alur dari masuk sampai keluar selesai." steps={timelineSteps} />
 
       <Card className="detail-hero border-0 mb-4">
         <Card.Body>
@@ -286,7 +286,7 @@ export default function StayDetailPage() {
               ) : null}
               {stay.status === 'ACTIVE' && stay.room?.status !== 'RESERVED' ? (
                 <>
-                  <Button onClick={() => setShowCompleteModal(true)} disabled={openInvoiceCount > 0} title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum final checkout' : undefined}>Finalkan Checkout</Button>
+                  <Button onClick={() => setShowCompleteModal(true)} disabled={openInvoiceCount > 0} title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum finalkan keluar' : undefined}>Finalkan Checkout</Button>
                   <Button variant="outline-success" onClick={() => setShowRenewModal(true)} disabled={showRenewModal}>Perpanjang Masa Sewa</Button>
                   <Button variant="outline-danger" onClick={() => setShowCancelModal(true)} disabled={showCancelModal}>Batalkan</Button>
                 </>
@@ -347,7 +347,7 @@ export default function StayDetailPage() {
                   · Alasan: {pendingCheckoutRequest.checkoutReason || pendingCheckoutRequest.requestNotes || '-'}
                 </div>
                 <div className="small mt-1 text-muted">
-                  Approval belum final checkout. Tagihan aktif tetap memblokir pelepasan kamar.
+                  Persetujuan keluar belum menyelesaikan masa sewa. Tagihan aktif tetap memblokir pelepasan kamar.
                 </div>
               </div>
               <div className="d-flex gap-2 flex-shrink-0 ms-3">
@@ -406,7 +406,7 @@ export default function StayDetailPage() {
                     variant="primary"
                     onClick={() => setShowCompleteModal(true)}
                     disabled={openInvoiceCount > 0}
-                    title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum final checkout' : undefined}
+                    title={openInvoiceCount > 0 ? 'Selesaikan tagihan aktif dulu sebelum finalkan keluar' : undefined}
                   >
                     Finalkan Checkout
                   </Button>
@@ -434,7 +434,7 @@ export default function StayDetailPage() {
               <Card.Body>
                 {notesError ? <Alert variant="danger">{notesError}</Alert> : null}
                 <Form.Group className="mb-3">
-                  <Form.Label>Catatan Stay</Form.Label>
+                  <Form.Label>Catatan Masa Sewa</Form.Label>
                   <Form.Control as="textarea" rows={6} value={notes} onChange={(e) => setNotes(e.target.value)} />
                 </Form.Group>
                 <Button onClick={handleSaveNotes} disabled={updateMutation.isPending}>

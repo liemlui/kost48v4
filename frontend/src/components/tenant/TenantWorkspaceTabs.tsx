@@ -3,6 +3,7 @@ import { Button } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import NotificationBell from '../notifications/NotificationBell';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
+import Kost48LogoMark from '../common/Kost48LogoMark';
 import { getNavigationLinks, type TenantPortalStage } from '../../config/navigation';
 import { getResource } from '../../api/resources';
 import type { Announcement } from '../../types';
@@ -80,7 +81,7 @@ export default function TenantWorkspaceTabs({
     <>
       <section className="tenant-workspace-topbar">
         <button type="button" className="tenant-workspace-brand" onClick={() => navigate(stage === 'browsing' ? '/rooms' : stage === 'booking' ? '/portal/bookings' : '/portal/stay')}>
-          <span className="brand-mark small" aria-hidden="true">K48</span>
+          <Kost48LogoMark size="small" />
           <span>
             <strong>KOST48 Portal Penghuni</strong>
             <em>{getStageTitle(stage)}</em>

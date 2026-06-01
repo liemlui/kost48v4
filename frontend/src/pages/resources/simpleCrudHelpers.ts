@@ -50,7 +50,7 @@ export function formatDateForInput(dateValue: string | Date | null | undefined):
 }
 
 /**
- * Normalisasi data untuk field type="date" sebelum dikirim ke backend
+ * Normalisasi data untuk field type="date" sebelum dikirim ke sistem
  * - Hanya ambil field yang ada di config.fields
  * - Konversi YYYY-MM-DD dari input ke string yang sama
  * - Empty string dihapus dari payload
@@ -61,7 +61,7 @@ export function normalizeFormDataForSubmit(formState: Record<string, any>, field
   fields.forEach((field) => {
     const value = formState[field.name];
     
-    // Skip field yang undefined atau null (biarkan backend handle default)
+    // Skip field yang undefined atau null (biarkan sistem mengisi default)
     if (value === undefined || value === null) {
       return;
     }

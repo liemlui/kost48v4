@@ -234,6 +234,26 @@ export class AccountingController {
     return { message: 'Kesiapan asset register berhasil diambil', data: await this.reportsService.assetReadiness() };
   }
 
+  @Get('cashflow')
+  async cashflow(@Query() query: TrialBalanceQueryDto) {
+    return { message: 'Laporan arus kas berhasil diambil', data: await this.reportsService.cashflow(query) };
+  }
+
+  @Get('financial-ratios')
+  async financialRatios(@Query() query: TrialBalanceQueryDto) {
+    return { message: 'Rasio keuangan berhasil diambil', data: await this.reportsService.financialRatios(query) };
+  }
+
+  @Get('profit-loss/detail')
+  async profitLossDetail(@Query() query: TrialBalanceQueryDto) {
+    return { message: 'P&L detail berhasil diambil', data: await this.reportsService.profitLossDetail(query) };
+  }
+
+  @Get('balance-sheet/detail')
+  async balanceSheetDetail(@Query() query: TrialBalanceQueryDto) {
+    return { message: 'Balance sheet detail berhasil diambil', data: await this.reportsService.balanceSheetDetail(query) };
+  }
+
   @Get('deposit-position')
   async depositPosition() {
     return { message: 'Posisi liability deposit berhasil diambil', data: await this.reportsService.depositPosition() };

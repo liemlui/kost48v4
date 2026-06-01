@@ -100,6 +100,24 @@ enum BookingDepositPaymentStatus {
   PAID
 }
 
+enum TenantDepositLedgerEntryType {
+  CHARGED
+  PAYMENT_RECEIVED
+  HELD
+  REFUND
+  DEDUCTION
+  FORFEIT
+  SETTLEMENT
+  ADJUSTMENT
+  MIGRATION_SNAPSHOT
+}
+
+enum TenantDepositLedgerDirection {
+  INCREASE_LIABILITY
+  DECREASE_LIABILITY
+  INFO
+}
+
 enum RenewRequestStatus {
   PENDING
   APPROVED
@@ -127,6 +145,43 @@ enum RoomItemStatus {
   MISSING
 }
 
+enum InventoryItemStatus {
+  GOOD
+  LOW_STOCK
+  OUT_OF_STOCK
+  DAMAGED
+  MISSING
+  NEEDS_REPAIR
+  PENDING_CHECK
+}
+
+enum ReportedCondition {
+  DAMAGED
+  MISSING
+  NEEDS_REPAIR
+  NEEDS_REPLACEMENT
+  NEEDS_CLEANING
+  LOW_STOCK
+  OUT_OF_STOCK
+  PENDING_CHECK
+}
+
+enum AdminDecision {
+  APPROVE
+  REJECT
+  NEEDS_MORE_INFO
+}
+
+enum StaffFieldReportStatus {
+  REPORTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IN_REPAIR
+  DONE
+  CLOSED
+}
+
 enum InventoryMovementType {
   IN
   OUT
@@ -152,10 +207,50 @@ enum StaffRoutineAreaType {
 }
 
 enum StaffRoutineStatus {
+  IN_PROGRESS
   DONE
   NEED_HELP
   MISSED
   SKIPPED
+}
+
+enum StaffWorkSourceType {
+  ROUTINE
+  TICKET
+  METER
+  ROOM_CHECK
+  STOCK_REPORT
+  INVENTORY_REPORT
+  TENANT_REVIEW
+  MANUAL_AUDIT
+}
+
+enum StaffAuditResult {
+  PASS
+  NEEDS_FIX
+  FAILED
+  NOT_DONE
+}
+
+enum StaffReviewStatus {
+  VISIBLE
+  HIDDEN
+  FLAGGED
+}
+
+enum StaffPerformanceEventType {
+  ROUTINE_DONE
+  ROUTINE_NEED_HELP
+  TICKET_DONE
+  METER_RECORDED
+  STOCK_REPORTED
+  AUDIT_PASS
+  AUDIT_NEEDS_FIX
+  AUDIT_FAILED
+  TENANT_REVIEW_HIGH
+  TENANT_REVIEW_LOW
+  MISSING_PROOF
+  MANUAL_ADJUSTMENT
 }
 
 enum AnnouncementAudience {
@@ -205,6 +300,120 @@ enum ExpenseCategory {
   OTHER
 }
 
+enum AccountingAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  COGS
+  EXPENSE
+}
+
+enum AccountingNormalBalance {
+  DEBIT
+  CREDIT
+}
+
+enum AccountingPeriodStatus {
+  OPEN
+  CLOSED
+  LOCKED
+}
+
+enum CashAccountType {
+  CASH
+  BANK
+  QRIS
+  EWALLET
+  OTHER
+}
+
+enum OpeningBalanceBatchStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  POSTED
+  VOID
+}
+
+enum JournalSourceType {
+  MANUAL
+  OPENING_BALANCE
+  SYSTEM_PLACEHOLDER
+  INVOICE
+  INVOICE_PAYMENT
+  PAYMENT_SUBMISSION
+  EXPENSE
+  WIFI_SALE
+  DEPOSIT
+  INVENTORY
+  DEPRECIATION
+  ADJUSTMENT
+  CLOSING_ENTRY
+  CLOSING_REVERSAL
+}
+
+enum FixedAssetCategory {
+  BUILDING
+  RENOVATION
+  ROOM_EQUIPMENT
+  FURNITURE
+  ELECTRONIC
+  UTILITY_EQUIPMENT
+  VEHICLE
+  SOFTWARE
+  OTHER
+}
+
+enum FixedAssetStatus {
+  DRAFT
+  ACTIVE
+  FULLY_DEPRECIATED
+  DISPOSED
+  WRITTEN_OFF
+}
+
+enum FixedAssetLocationType {
+  GENERAL
+  ROOM
+  WAREHOUSE
+}
+
+enum FixedAssetCapitalizationSource {
+  OPENING_BALANCE
+  PURCHASE_JOURNAL
+  DISCLOSURE_ONLY
+}
+
+enum FixedAssetDepreciationMethod {
+  STRAIGHT_LINE
+}
+
+enum FixedAssetLedgerAlignmentStatus {
+  NOT_REQUIRED
+  NEEDS_REVIEW
+  PREVIEWED
+  ALIGNED
+  DISCLOSURE_ONLY
+  VOIDED
+}
+
+enum FixedAssetLedgerAlignmentMethod {
+  RECLASSIFY_FROM_CASH
+  OWNER_CAPITAL_CONTRIBUTION
+  DISCLOSURE_ONLY
+  MANUAL_REVIEW
+}
+
+enum AssetDepreciationRunStatus {
+  POSTED
+  VOID
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   fullName          String
@@ -218,27 +427,37 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  tenant                       Tenant?                  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  announcementsCreated         Announcement[]           @relation("AnnouncementCreatedBy")
-  staysCreated                 Stay[]                   @relation("StayCreatedBy")
-  staysInitialMetersRecorded   Stay[]                   @relation("StayInitialMetersRecordedBy")
-  invoicesCreated              Invoice[]                @relation("InvoiceCreatedBy")
-  paymentsCaptured             InvoicePayment[]         @relation("InvoicePaymentCapturedBy")
-  ticketsAssigned              Ticket[]                 @relation("TicketAssignedTo")
-  staffRoutineTemplatesCreated StaffRoutineTemplate[]   @relation("StaffRoutineTemplateCreatedBy")
-  staffRoutineAssignments      StaffRoutineAssignment[] @relation("StaffRoutineAssignedTo")
-  staffRoutineCompletions      StaffRoutineCompletion[] @relation("StaffRoutineCompletedBy")
-  meterReadingsRecorded        MeterReading[]           @relation("MeterReadingRecordedBy")
-  inventoryMovementsCreated    InventoryMovement[]      @relation("InventoryMovementCreatedBy")
-  wifiSalesCreated             WifiSale[]               @relation("WifiSaleCreatedBy")
-  expensesCreated              Expense[]                @relation("ExpenseCreatedBy")
-  renewRequestsReviewed        RenewRequest[]           @relation("RenewRequestReviewedBy")
-  checkoutRequestsReviewed     CheckoutRequest[]        @relation("CheckoutRequestReviewedBy")
-  auditLogs                    AuditLog[]               @relation("AuditLogActor")
-  paymentSubmissionsSubmitted  PaymentSubmission[]      @relation("PaymentSubmissionSubmittedBy")
-  paymentSubmissionsReviewed   PaymentSubmission[]      @relation("PaymentSubmissionReviewedBy")
+  tenant                       Tenant?                    @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  announcementsCreated         Announcement[]             @relation("AnnouncementCreatedBy")
+  staysCreated                 Stay[]                     @relation("StayCreatedBy")
+  staysInitialMetersRecorded   Stay[]                     @relation("StayInitialMetersRecordedBy")
+  invoicesCreated              Invoice[]                  @relation("InvoiceCreatedBy")
+  paymentsCaptured             InvoicePayment[]           @relation("InvoicePaymentCapturedBy")
+  ticketsAssigned              Ticket[]                   @relation("TicketAssignedTo")
+  staffRoutineTemplatesCreated StaffRoutineTemplate[]     @relation("StaffRoutineTemplateCreatedBy")
+  staffRoutineAssignments      StaffRoutineAssignment[]   @relation("StaffRoutineAssignedTo")
+  staffRoutineCompletions      StaffRoutineCompletion[]   @relation("StaffRoutineCompletedBy")
+  staffPerformanceEvents       StaffPerformanceEvent[]    @relation("StaffPerformanceEventStaff")
+  staffPerformanceAudits       StaffWorkAudit[]           @relation("StaffWorkAuditStaff")
+  staffPerformanceAuditsMade   StaffWorkAudit[]           @relation("StaffWorkAuditAuditor")
+  staffReviewsReceived         StaffReview[]              @relation("StaffReviewStaff")
+  staffReviewsModerated        StaffReview[]              @relation("StaffReviewModeratedBy")
+  meterReadingsRecorded        MeterReading[]             @relation("MeterReadingRecordedBy")
+  inventoryMovementsCreated    InventoryMovement[]        @relation("InventoryMovementCreatedBy")
+  wifiSalesCreated             WifiSale[]                 @relation("WifiSaleCreatedBy")
+  expensesCreated              Expense[]                  @relation("ExpenseCreatedBy")
+  renewRequestsReviewed        RenewRequest[]             @relation("RenewRequestReviewedBy")
+  checkoutRequestsReviewed     CheckoutRequest[]          @relation("CheckoutRequestReviewedBy")
+  auditLogs                    AuditLog[]                 @relation("AuditLogActor")
+  paymentSubmissionsSubmitted  PaymentSubmission[]        @relation("PaymentSubmissionSubmittedBy")
+  paymentSubmissionsReviewed   PaymentSubmission[]        @relation("PaymentSubmissionReviewedBy")
   passwordResetTokens          PasswordResetToken[]
   notifications                AppNotification[]
+  staffFieldReportsCreated     StaffFieldReport[]         @relation("StaffFieldReportCreatedBy")
+  staffFieldReportsReviewed    StaffFieldReport[]         @relation("StaffFieldReportReviewedBy")
+  fixedAssetsCreated           FixedAsset[]               @relation("FixedAssetCreatedBy")
+  assetDepreciationRunsCreated AssetDepreciationRun[]     @relation("AssetDepreciationRunCreatedBy")
+  depositLedgerEntriesActed    TenantDepositLedgerEntry[] @relation("DepositLedgerActor")
 
   @@index([role])
   @@index([isActive])
@@ -264,11 +483,13 @@ model Tenant {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  user               User?
-  stays              Stay[]
-  tickets            Ticket[]
-  paymentSubmissions PaymentSubmission[]
-  renewRequests      RenewRequest[]
+  user                 User?
+  stays                Stay[]
+  tickets              Ticket[]
+  paymentSubmissions   PaymentSubmission[]
+  renewRequests        RenewRequest[]
+  staffReviews         StaffReview[]
+  depositLedgerEntries TenantDepositLedgerEntry[]
 
   @@index([fullName])
   @@index([phone])
@@ -306,11 +527,14 @@ model Room {
   meterReadings           MeterReading[]
   tickets                 Ticket[]
   roomItems               RoomItem[]
-  staffRoutineAssignments StaffRoutineAssignment[] @relation("StaffRoutineAssignmentRoom")
-  staffRoutineCompletions StaffRoutineCompletion[] @relation("StaffRoutineCompletionRoom")
+  staffRoutineAssignments StaffRoutineAssignment[]   @relation("StaffRoutineAssignmentRoom")
+  staffRoutineCompletions StaffRoutineCompletion[]   @relation("StaffRoutineCompletionRoom")
   expenses                Expense[]
   inventoryMovements      InventoryMovement[]
+  staffFieldReports       StaffFieldReport[]
   facilities              RoomFacility[]
+  fixedAssets             FixedAsset[]
+  depositLedgerEntries    TenantDepositLedgerEntry[]
 
   @@index([status])
   @@index([isActive])
@@ -381,12 +605,13 @@ model Stay {
   createdBy               User?  @relation("StayCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   initialMetersRecordedBy User?  @relation("StayInitialMetersRecordedBy", fields: [initialMetersRecordedById], references: [id], onDelete: SetNull)
 
-  invoices           Invoice[]
-  tickets            Ticket[]
-  expenses           Expense[]
-  paymentSubmissions PaymentSubmission[]
-  renewRequests      RenewRequest[]
-  checkoutRequests   CheckoutRequest[]
+  invoices             Invoice[]
+  tickets              Ticket[]
+  expenses             Expense[]
+  paymentSubmissions   PaymentSubmission[]
+  renewRequests        RenewRequest[]
+  checkoutRequests     CheckoutRequest[]
+  depositLedgerEntries TenantDepositLedgerEntry[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -397,6 +622,43 @@ model Stay {
   @@index([expiresAt])
   @@index([bookingSource])
   @@index([stayPurpose])
+}
+
+model TenantDepositLedgerEntry {
+  id                        Int                          @id @default(autoincrement())
+  stayId                    Int
+  tenantId                  Int
+  roomId                    Int
+  type                      TenantDepositLedgerEntryType
+  direction                 TenantDepositLedgerDirection
+  amountRupiah              Int                          @default(0)
+  balanceAfterRupiah        Int                          @default(0)
+  depositStatusAfter        DepositStatus?
+  depositPaymentStatusAfter BookingDepositPaymentStatus?
+  sourceType                String?
+  sourceId                  String?
+  paymentSubmissionId       Int?
+  invoicePaymentId          Int?
+  journalEntryId            Int?
+  actorUserId               Int?
+  occurredAt                DateTime                     @default(now())
+  note                      String?
+  metadataJson              Json?
+  createdAt                 DateTime                     @default(now())
+
+  stay      Stay   @relation(fields: [stayId], references: [id], onDelete: Restrict)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  room      Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  actorUser User?  @relation("DepositLedgerActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([type])
+  @@index([direction])
+  @@index([occurredAt])
+  @@index([sourceType, sourceId])
+  @@index([paymentSubmissionId])
 }
 
 model MeterReading {
@@ -545,9 +807,9 @@ model PaymentSubmission {
 }
 
 model Ticket {
-  id                              Int          @id @default(autoincrement())
-  ticketNumber                    String       @unique
-  tenantId                        Int
+  id                              Int                  @id @default(autoincrement())
+  ticketNumber                    String               @unique
+  tenantId                        Int?
   roomId                          Int?
   stayId                          Int?
   title                           String
@@ -563,23 +825,33 @@ model Ticket {
   resolutionImageOriginalFilename String?
   resolutionImageMimeType         String?
   resolutionImageFileSizeBytes    Int?
-  status                          TicketStatus @default(OPEN)
+  status                          TicketStatus         @default(OPEN)
   assignedToId                    Int?
+  linkedRoomItemId                Int?
+  linkedInventoryItemId           Int?
+  finalRoomItemStatus             RoomItemStatus?
+  finalInventoryItemStatus        InventoryItemStatus?
+  finalAdminNote                  String?
   resolutionNote                  String?
   resolvedAt                      DateTime?
   closedAt                        DateTime?
-  createdAt                       DateTime     @default(now())
-  updatedAt                       DateTime     @updatedAt
+  createdAt                       DateTime             @default(now())
+  updatedAt                       DateTime             @updatedAt
 
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  room       Room?  @relation(fields: [roomId], references: [id], onDelete: SetNull)
-  stay       Stay?  @relation(fields: [stayId], references: [id], onDelete: SetNull)
-  assignedTo User?  @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  tenant              Tenant?            @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  room                Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  stay                Stay?              @relation(fields: [stayId], references: [id], onDelete: SetNull)
+  assignedTo          User?              @relation("TicketAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  linkedRoomItem      RoomItem?          @relation("TicketLinkedRoomItem", fields: [linkedRoomItemId], references: [id], onDelete: SetNull)
+  linkedInventoryItem InventoryItem?     @relation("TicketLinkedInventoryItem", fields: [linkedInventoryItemId], references: [id], onDelete: SetNull)
+  staffFieldReports   StaffFieldReport[]
 
   @@index([tenantId])
   @@index([roomId])
   @@index([stayId])
   @@index([status])
+  @@index([linkedRoomItemId])
+  @@index([linkedInventoryItemId])
 }
 
 model StaffRoutineTemplate {
@@ -652,6 +924,70 @@ model StaffRoutineCompletion {
   @@index([roomId])
 }
 
+model StaffWorkAudit {
+  id          Int                 @id @default(autoincrement())
+  staffId     Int
+  sourceType  StaffWorkSourceType
+  sourceId    Int?
+  auditedById Int
+  result      StaffAuditResult
+  scoreDelta  Int                 @default(0)
+  notes       String?
+  photoUrl    String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  staff     User @relation("StaffWorkAuditStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  auditedBy User @relation("StaffWorkAuditAuditor", fields: [auditedById], references: [id], onDelete: Restrict)
+
+  @@index([staffId, createdAt])
+  @@index([sourceType, sourceId])
+  @@index([result])
+  @@index([auditedById])
+}
+
+model StaffPerformanceEvent {
+  id         Int                       @id @default(autoincrement())
+  staffId    Int
+  sourceType StaffWorkSourceType
+  sourceId   Int?
+  eventType  StaffPerformanceEventType
+  scoreDelta Int                       @default(0)
+  reason     String?
+  createdAt  DateTime                  @default(now())
+
+  staff User @relation("StaffPerformanceEventStaff", fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId, createdAt])
+  @@index([sourceType, sourceId])
+  @@index([eventType])
+}
+
+model StaffReview {
+  id                  Int               @id @default(autoincrement())
+  staffId             Int
+  tenantId            Int
+  ticketId            Int?
+  routineCompletionId Int?
+  rating              Int
+  comment             String?
+  status              StaffReviewStatus @default(VISIBLE)
+  moderatedById       Int?
+  moderatedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  staff       User   @relation("StaffReviewStaff", fields: [staffId], references: [id], onDelete: Cascade)
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moderatedBy User?  @relation("StaffReviewModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, ticketId])
+  @@index([staffId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([ticketId])
+  @@index([status])
+}
+
 model Announcement {
   id                    Int                  @id @default(autoincrement())
   title                 String
@@ -681,24 +1017,30 @@ model Announcement {
 }
 
 model InventoryItem {
-  id        Int      @id @default(autoincrement())
-  sku       String?  @unique
+  id        Int                 @id @default(autoincrement())
+  sku       String?             @unique
   name      String
   category  String?
-  unit      String   @default("pcs")
-  qtyOnHand Decimal  @default(0) @db.Decimal(12, 2)
-  minQty    Decimal  @default(0) @db.Decimal(12, 2)
-  images    String[] @default([])
+  unit      String              @default("pcs")
+  qtyOnHand Decimal             @default(0) @db.Decimal(12, 2)
+  minQty    Decimal             @default(0) @db.Decimal(12, 2)
+  status    InventoryItemStatus @default(GOOD)
+  images    String[]            @default([])
   notes     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive  Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
-  roomItems RoomItem[]
-  movements InventoryMovement[]
+  roomItems                   RoomItem[]
+  movements                   InventoryMovement[]
+  linkedTickets               Ticket[]            @relation("TicketLinkedInventoryItem")
+  fieldReportsAsItem          StaffFieldReport[]  @relation("StaffFieldReportInventoryItem")
+  fieldReportsAsRequestedItem StaffFieldReport[]  @relation("StaffFieldReportRequestedInventoryItem")
+  fixedAssets                 FixedAsset[]
 
   @@index([name])
   @@index([category])
+  @@index([status])
   @@index([isActive])
 }
 
@@ -712,8 +1054,11 @@ model RoomItem {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  room Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  item InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  room              Room               @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  item              InventoryItem      @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  linkedTickets     Ticket[]           @relation("TicketLinkedRoomItem")
+  staffFieldReports StaffFieldReport[] @relation("StaffFieldReportRoomItem")
+  fixedAssets       FixedAsset[]
 
   @@unique([roomId, itemId])
   @@index([roomId])
@@ -732,14 +1077,59 @@ model InventoryMovement {
   createdById  Int?
   createdAt    DateTime              @default(now())
 
-  item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
-  room      Room?         @relation(fields: [roomId], references: [id], onDelete: SetNull)
-  createdBy User?         @relation("InventoryMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  item         InventoryItem      @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  room         Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  createdBy    User?              @relation("InventoryMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  fieldReports StaffFieldReport[] @relation("StaffFieldReportMovement")
 
   @@index([itemId])
   @@index([roomId])
   @@index([movementDate])
   @@index([movementType])
+}
+
+model StaffFieldReport {
+  id                       Int                    @id @default(autoincrement())
+  ticketId                 Int?
+  roomId                   Int?
+  roomItemId               Int?
+  inventoryItemId          Int?
+  reportedByStaffId        Int
+  reportedCondition        ReportedCondition
+  conditionNotes           String?
+  photoUrl                 String?
+  photoFileKey             String?
+  photoOriginalFilename    String?
+  photoMimeType            String?
+  photoFileSizeBytes       Int?
+  requestsReplacement      Boolean                @default(false)
+  requestedInventoryItemId Int?
+  requestedQty             Decimal?               @db.Decimal(12, 2)
+  adminReviewedById        Int?
+  adminDecision            AdminDecision?
+  adminNotes               String?
+  relatedMovementId        Int?
+  status                   StaffFieldReportStatus @default(REPORTED)
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+
+  ticket                 Ticket?            @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  room                   Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomItem               RoomItem?          @relation("StaffFieldReportRoomItem", fields: [roomItemId], references: [id], onDelete: SetNull)
+  inventoryItem          InventoryItem?     @relation("StaffFieldReportInventoryItem", fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  requestedInventoryItem InventoryItem?     @relation("StaffFieldReportRequestedInventoryItem", fields: [requestedInventoryItemId], references: [id], onDelete: SetNull)
+  reportedByStaff        User               @relation("StaffFieldReportCreatedBy", fields: [reportedByStaffId], references: [id], onDelete: Restrict)
+  adminReviewedBy        User?              @relation("StaffFieldReportReviewedBy", fields: [adminReviewedById], references: [id], onDelete: SetNull)
+  relatedMovement        InventoryMovement? @relation("StaffFieldReportMovement", fields: [relatedMovementId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([roomId])
+  @@index([roomItemId])
+  @@index([inventoryItemId])
+  @@index([requestedInventoryItemId])
+  @@index([reportedByStaffId])
+  @@index([adminReviewedById])
+  @@index([status, createdAt])
 }
 
 model RenewRequest {
@@ -756,9 +1146,9 @@ model RenewRequest {
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
 
-  stay       Stay   @relation(fields: [stayId], references: [id], onDelete: Cascade)
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  reviewedBy User?  @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  stay       Stay    @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  reviewedBy User?   @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([stayId])
   @@index([tenantId])
@@ -817,15 +1207,122 @@ model Expense {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
-  room      Room? @relation(fields: [roomId], references: [id], onDelete: SetNull)
-  stay      Stay? @relation(fields: [stayId], references: [id], onDelete: SetNull)
-  createdBy User? @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  room        Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  stay        Stay?        @relation(fields: [stayId], references: [id], onDelete: SetNull)
+  createdBy   User?        @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  fixedAssets FixedAsset[]
 
   @@index([expenseDate])
   @@index([type])
   @@index([category])
   @@index([roomId])
   @@index([stayId])
+}
+
+model FixedAsset {
+  id                             Int                              @id @default(autoincrement())
+  assetCode                      String                           @unique
+  name                           String
+  category                       FixedAssetCategory               @default(OTHER)
+  status                         FixedAssetStatus                 @default(ACTIVE)
+  locationType                   FixedAssetLocationType           @default(GENERAL)
+  capitalizationSource           FixedAssetCapitalizationSource   @default(DISCLOSURE_ONLY)
+  depreciationMethod             FixedAssetDepreciationMethod     @default(STRAIGHT_LINE)
+  acquisitionDate                DateTime                         @db.Date
+  depreciationStartDate          DateTime?                        @db.Date
+  acquisitionCostRupiah          Int
+  salvageValueRupiah             Int                              @default(0)
+  usefulLifeMonths               Int
+  accumulatedDepreciationRupiah  Int                              @default(0)
+  depreciationEnabled            Boolean                          @default(false)
+  roomId                         Int?
+  inventoryItemId                Int?
+  roomItemId                     Int?
+  expenseId                      Int?
+  createdById                    Int?
+  ledgerAlignmentStatus          FixedAssetLedgerAlignmentStatus  @default(NEEDS_REVIEW)
+  ledgerAlignmentMethod          FixedAssetLedgerAlignmentMethod?
+  ledgerAlignmentAmountRupiah    Int?
+  ledgerAlignmentCreditAccountId Int?
+  ledgerAlignmentJournalEntryId  Int?
+  ledgerAlignedAt                DateTime?
+  ledgerAlignedById              Int?
+  ledgerAlignmentNote            String?
+  ledgerAlignmentReviewedAt      DateTime?
+  ledgerAlignmentReviewedById    Int?
+  notes                          String?
+  disposedAt                     DateTime?                        @db.Date
+  disposalNote                   String?
+  createdAt                      DateTime                         @default(now())
+  updatedAt                      DateTime                         @updatedAt
+
+  room                         Room?                   @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  inventoryItem                InventoryItem?          @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  roomItem                     RoomItem?               @relation(fields: [roomItemId], references: [id], onDelete: SetNull)
+  expense                      Expense?                @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  createdBy                    User?                   @relation("FixedAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  ledgerAlignmentCreditAccount ChartOfAccount?         @relation("FixedAssetAlignmentCreditAccount", fields: [ledgerAlignmentCreditAccountId], references: [id], onDelete: SetNull)
+  ledgerAlignmentJournalEntry  JournalEntry?           @relation("FixedAssetAlignmentJournalEntry", fields: [ledgerAlignmentJournalEntryId], references: [id], onDelete: SetNull)
+  depreciationLines            AssetDepreciationLine[]
+
+  @@index([status])
+  @@index([category])
+  @@index([locationType])
+  @@index([capitalizationSource])
+  @@index([depreciationEnabled])
+  @@index([roomId])
+  @@index([inventoryItemId])
+  @@index([roomItemId])
+  @@index([expenseId])
+  @@index([ledgerAlignmentStatus])
+  @@index([ledgerAlignmentMethod])
+  @@index([ledgerAlignmentCreditAccountId])
+  @@index([ledgerAlignmentJournalEntryId])
+  @@index([acquisitionDate])
+}
+
+model AssetDepreciationRun {
+  id                      Int                        @id @default(autoincrement())
+  runNumber               String                     @unique
+  periodYear              Int
+  periodMonth             Int
+  runDate                 DateTime                   @db.Date
+  status                  AssetDepreciationRunStatus @default(POSTED)
+  totalDepreciationRupiah Int                        @default(0)
+  journalEntryId          Int?
+  createdById             Int?
+  postedAt                DateTime?
+  voidedAt                DateTime?
+  notes                   String?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
+
+  journalEntry JournalEntry?           @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  createdBy    User?                   @relation("AssetDepreciationRunCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  lines        AssetDepreciationLine[]
+
+  @@unique([periodYear, periodMonth])
+  @@index([status])
+  @@index([runDate])
+  @@index([journalEntryId])
+}
+
+model AssetDepreciationLine {
+  id                       Int      @id @default(autoincrement())
+  runId                    Int
+  fixedAssetId             Int
+  depreciationAmountRupiah Int
+  accumulatedBeforeRupiah  Int
+  accumulatedAfterRupiah   Int
+  bookValueBeforeRupiah    Int
+  bookValueAfterRupiah     Int
+  createdAt                DateTime @default(now())
+
+  run        AssetDepreciationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  fixedAsset FixedAsset           @relation(fields: [fixedAssetId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, fixedAssetId])
+  @@index([fixedAssetId])
 }
 
 model AppNotification {
@@ -863,4 +1360,193 @@ model AuditLog {
   @@index([actorUserId])
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+model ChartOfAccount {
+  id              Int                     @id @default(autoincrement())
+  code            String                  @unique
+  name            String
+  type            AccountingAccountType
+  normalBalance   AccountingNormalBalance
+  description     String?
+  parentId        Int?
+  isSystemDefault Boolean                 @default(false)
+  isActive        Boolean                 @default(true)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  parent                     ChartOfAccount?      @relation("ChartOfAccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children                   ChartOfAccount[]     @relation("ChartOfAccountHierarchy")
+  cashAccounts               CashAccount[]
+  openingBalanceLines        OpeningBalanceLine[]
+  journalLines               JournalLine[]
+  fixedAssetAlignmentCredits FixedAsset[]         @relation("FixedAssetAlignmentCreditAccount")
+
+  @@index([type])
+  @@index([normalBalance])
+  @@index([parentId])
+  @@index([isActive])
+}
+
+model CashAccount {
+  id                   Int             @id @default(autoincrement())
+  name                 String          @unique
+  accountType          CashAccountType @default(BANK)
+  chartOfAccountId     Int
+  bankName             String?
+  accountNumberMasked  String?
+  holderName           String?
+  openingBalanceRupiah Int             @default(0)
+  currentBalanceRupiah Int             @default(0)
+  isDefault            Boolean         @default(false)
+  isActive             Boolean         @default(true)
+  notes                String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+  journalLines   JournalLine[]
+
+  @@index([accountType])
+  @@index([chartOfAccountId])
+  @@index([isActive])
+  @@index([isDefault])
+}
+
+model AccountingPeriod {
+  id                    Int                    @id @default(autoincrement())
+  year                  Int
+  month                 Int
+  startDate             DateTime               @db.Date
+  endDate               DateTime               @db.Date
+  status                AccountingPeriodStatus @default(OPEN)
+  closedAt              DateTime?
+  closedById            Int?
+  closingJournalEntryId Int?
+  closingNote           String?
+  closeBasis            String?
+  closeVersion          Int                    @default(0)
+  reopenedAt            DateTime?
+  reopenedById          Int?
+  reopenJournalEntryId  Int?
+  reopenReason          String?
+  reopenVersion         Int                    @default(0)
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  openingBalanceBatches OpeningBalanceBatch[]
+  journalEntries        JournalEntry[]
+
+  @@unique([year, month])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@index([closedById])
+  @@index([closingJournalEntryId])
+  @@index([reopenedById])
+  @@index([reopenJournalEntryId])
+}
+
+model OpeningBalanceBatch {
+  id                 Int                       @id @default(autoincrement())
+  batchNumber        String                    @unique
+  accountingPeriodId Int?
+  cutoverDate        DateTime                  @db.Date
+  status             OpeningBalanceBatchStatus @default(DRAFT)
+  notes              String?
+  totalDebitRupiah   Int                       @default(0)
+  totalCreditRupiah  Int                       @default(0)
+  createdById        Int?
+  postedById         Int?
+  postedAt           DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  accountingPeriod AccountingPeriod?    @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
+  lines            OpeningBalanceLine[]
+
+  @@index([accountingPeriodId])
+  @@index([cutoverDate])
+  @@index([status])
+}
+
+model OpeningBalanceLine {
+  id               Int      @id @default(autoincrement())
+  batchId          Int
+  chartOfAccountId Int
+  description      String?
+  debitRupiah      Int      @default(0)
+  creditRupiah     Int      @default(0)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  batch          OpeningBalanceBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  chartOfAccount ChartOfAccount      @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+
+  @@index([batchId])
+  @@index([chartOfAccountId])
+}
+
+model JournalEntry {
+  id                 Int                @id @default(autoincrement())
+  entryNumber        String             @unique
+  entryDate          DateTime           @db.Date
+  accountingPeriodId Int?
+  status             JournalEntryStatus @default(DRAFT)
+  sourceType         JournalSourceType  @default(MANUAL)
+  sourceId           String?
+  memo               String?
+  totalDebitRupiah   Int                @default(0)
+  totalCreditRupiah  Int                @default(0)
+  isBalanced         Boolean            @default(false)
+  createdById        Int?
+  postedById         Int?
+  postedAt           DateTime?
+  voidedAt           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  accountingPeriod           AccountingPeriod?      @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
+  lines                      JournalLine[]
+  depreciationRuns           AssetDepreciationRun[]
+  fixedAssetLedgerAlignments FixedAsset[]           @relation("FixedAssetAlignmentJournalEntry")
+
+  @@index([entryDate])
+  @@index([accountingPeriodId])
+  @@index([status])
+  @@index([sourceType, sourceId])
+}
+
+model JournalLine {
+  id               Int      @id @default(autoincrement())
+  journalEntryId   Int
+  chartOfAccountId Int
+  cashAccountId    Int?
+  description      String?
+  debitRupiah      Int      @default(0)
+  creditRupiah     Int      @default(0)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  journalEntry   JournalEntry   @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id], onDelete: Restrict)
+  cashAccount    CashAccount?   @relation(fields: [cashAccountId], references: [id], onDelete: SetNull)
+
+  @@index([journalEntryId])
+  @@index([chartOfAccountId])
+  @@index([cashAccountId])
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String   @db.Text
+  category  String   @default("Umum")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive, sortOrder])
 }

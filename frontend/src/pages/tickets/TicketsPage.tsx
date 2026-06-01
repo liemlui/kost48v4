@@ -727,9 +727,9 @@ export default function TicketsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Staff & Tiket"
-        title="Staff & Tiket Operasional"
-        description="Tiket digabung dengan staff karena ini pekerjaan operasional. Tiket, checklist, laporan lapangan, dan skor staff berada dalam satu area."
+        eyebrow="Operasional"
+        title="Tiket & Pekerjaan Operasional"
+        description="Tiket, checklist, laporan lapangan, dan kinerja staff diringkas sebagai pekerjaan operasional harian."
       />
 
       <div
@@ -737,8 +737,8 @@ export default function TicketsPage() {
         aria-label="Sub-menu Staff dan Tiket"
       >
         <div className="admin-area-internal-menu-head">
-          <span>Menu Staff & Tiket</span>
-          <small>Tiket dan kinerja staff satu area, bukan menu terpisah.</small>
+          <span>Menu Operasional</span>
+          <small>Pilih area kerja yang perlu dicek tanpa membuka menu berulang.</small>
         </div>
         <div className="admin-area-internal-menu-scroll">
           {[
@@ -1230,8 +1230,8 @@ export default function TicketsPage() {
           <Alert variant={isClosingCheckoutInspection ? "warning" : "info"} className="py-2 small">
             {isClosingCheckoutInspection ? (
               <>
-                Menutup tiket cek kamar akan membuat kamar siap ditawarkan kembali jika tidak ada masalah aktif.
-                Jika barang/kondisi akhir belum aman, kamar tetap perlu dicek.
+                Menutup tiket cek kamar dapat membuat kamar siap ditawarkan kembali jika semua kondisi aman.
+                Jika kebersihan, kunci, inventaris, atau kondisi akhir belum aman, jangan tutup sebagai aman.
               </>
             ) : (
               <>
@@ -1253,7 +1253,7 @@ export default function TicketsPage() {
             <Form.Check
               type="checkbox"
               id="admin-ticket-final-impact-check"
-              label={isClosingCheckoutInspection ? "Saya paham penutupan tiket dapat membuat kamar siap ditawarkan kembali jika aman." : "Saya paham ini menutup tiket dan menetapkan status final barang bila dipilih."}
+              label={isClosingCheckoutInspection ? "Saya paham kamar bisa ditawarkan kembali hanya jika hasil cek aman." : "Saya paham ini menutup tiket dan menetapkan status final barang bila dipilih."}
               checked={adminCheckedFinalImpact}
               onChange={(event) =>
                 setAdminCheckedFinalImpact(event.currentTarget.checked)
@@ -1305,10 +1305,10 @@ export default function TicketsPage() {
               isInvalid={closeNoteInvalid}
             />
             <Form.Text className={closeNoteInvalid ? "text-danger" : undefined}>
-              Minimal 8 karakter untuk audit keputusan final.
+              Minimal 8 karakter untuk catatan keputusan.
             </Form.Text>
             <Form.Control.Feedback type="invalid">
-              Catatan final admin minimal 8 karakter.
+              Catatan admin minimal 8 karakter.
             </Form.Control.Feedback>
           </Form.Group>
         </Modal.Body>
@@ -1321,7 +1321,7 @@ export default function TicketsPage() {
             disabled={!canConfirmCloseTicket || simpleAction.isPending}
             onClick={submitCloseTicket}
           >
-            Konfirmasi & Tutup Tiket
+            Tutup Tiket
           </Button>
         </Modal.Footer>
       </Modal>

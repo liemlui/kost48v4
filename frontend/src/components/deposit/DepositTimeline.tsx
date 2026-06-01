@@ -20,10 +20,10 @@ export default function DepositTimeline({ entries = [], tenantView = false, comp
       <Card.Body>
         <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-1">Riwayat Deposit</div>
-            <h3 className="h5 mb-1">{title ?? (tenantView ? 'Perjalanan deposit kamu' : 'Timeline deposit')}</h3>
+            <div className="section-kicker mb-1">Riwayat Dana Titipan</div>
+            <h3 className="h5 mb-1">{title ?? (tenantView ? 'Perjalanan dana titipan kamu' : 'Timeline dana titipan')}</h3>
             <p className="text-muted small mb-0">
-              {subtitle ?? (tenantView ? 'Setiap perubahan deposit penting akan muncul di sini dengan bahasa sederhana.' : 'Histori event deposit dari pembayaran awal sampai settlement.')}
+              {subtitle ?? (tenantView ? 'Setiap perubahan dana titipan penting akan muncul di sini dengan bahasa sederhana.' : 'Histori event dana titipan dari pembayaran awal sampai penyelesaian.')}
             </p>
           </div>
           <Badge bg="light" text="dark">{entries.length} event</Badge>
@@ -32,8 +32,8 @@ export default function DepositTimeline({ entries = [], tenantView = false, comp
         {!entries.length ? (
           <EmptyState
             icon="💙"
-            title={tenantView ? 'Belum ada riwayat detail deposit' : 'Belum ada event deposit'}
-            description={tenantView ? 'Jika deposit sudah tercatat, statusnya tetap terlihat di ringkasan masa sewa.' : 'Untuk data lama, jalankan review/dry-run backfill sebelum membuat histori.'}
+            title={tenantView ? 'Belum ada riwayat detail dana titipan' : 'Belum ada event dana titipan'}
+            description={tenantView ? 'Jika dana titipan sudah tercatat, statusnya tetap terlihat di ringkasan masa sewa.' : 'Untuk data lama, jalankan review sebelum membuat histori.'}
           />
         ) : compact ? (
           <div className="deposit-timeline-list">

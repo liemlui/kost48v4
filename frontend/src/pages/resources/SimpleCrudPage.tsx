@@ -127,7 +127,7 @@ function getResourceFilterDefinitions(configPath: string, items: Array<Record<st
     return [
       { id: 'ALL', label: 'Semua Barang', count: items.length, tone: 'info' as const },
       { id: 'GOOD', label: 'Baik', count: statusCount('GOOD'), tone: 'success' as const },
-      { id: 'MAINTENANCE', label: 'Maintenance', count: statusCount('MAINTENANCE'), tone: 'warning' as const },
+      { id: 'MAINTENANCE', label: 'Perlu Dicek', count: statusCount('MAINTENANCE'), tone: 'warning' as const },
       { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
       { id: 'MISSING', label: 'Hilang', count: statusCount('MISSING'), tone: 'danger' as const },
     ];
@@ -167,7 +167,7 @@ function getResourceFilterDefinitions(configPath: string, items: Array<Record<st
       { id: 'ALL', label: 'Semua Biaya', count: items.length, tone: 'info' as const },
       { id: 'FIXED', label: 'Tetap', count: count((item) => asString(item.type) === 'FIXED'), tone: 'info' as const },
       { id: 'VARIABLE', label: 'Variabel', count: count((item) => asString(item.type) === 'VARIABLE'), tone: 'warning' as const },
-      { id: 'MAINTENANCE', label: 'Maintenance', count: count((item) => asString(item.category) === 'MAINTENANCE'), tone: 'warning' as const },
+      { id: 'MAINTENANCE', label: 'Perawatan', count: count((item) => asString(item.category) === 'MAINTENANCE'), tone: 'warning' as const },
       { id: 'COGS_SERVICE', label: 'COGS Layanan', count: count((item) => ['INTERNET', 'CLEANING', 'SUPPLIES'].includes(asString(item.category))), tone: 'info' as const },
       { id: 'ADMIN_COST', label: 'Admin/Platform', count: count((item) => ['TAX', 'MARKETING', 'OTHER'].includes(asString(item.category))), tone: 'neutral' as const },
     ];
@@ -562,7 +562,7 @@ export default function SimpleCrudPage({ config }: { config: ResourceConfig }) {
       const hasActiveStay = Boolean(editingItem.activeStayId || editingItem.currentStay);
       const isTryingToDeactivate = formState.isActive === false;
       if (hasActiveStay && isTryingToDeactivate) {
-        setError('Tenant ini masih menempati kamar. Checkout atau batalkan stay terlebih dahulu dari modul Stays sebelum menonaktifkan tenant.');
+        setError('Tenant ini masih menempati kamar. Selesaikan atau batalkan masa sewa terlebih dahulu dari menu Masa Sewa sebelum menonaktifkan tenant.');
         return;
       }
     }

@@ -119,11 +119,11 @@ export default function CompleteStayModal({
       return;
     }
     if (openInvoices.length > 0) {
-      setError("Tagihan aktif masih memblokir final checkout.");
+      setError("Tagihan aktif masih memblokir proses keluar final.");
       return;
     }
     if (!confirmedFinalCheck) {
-      setError("Centang konfirmasi final checkout terlebih dahulu.");
+      setError("Centang konfirmasi keluar final terlebih dahulu.");
       return;
     }
 

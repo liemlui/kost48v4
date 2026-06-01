@@ -851,3 +851,123 @@ export async function fetchReversalWatch() {
 export async function fetchJournalBySource(params: { sourceType: string; sourceId: string | number }) {
   return unwrap<JournalBySourceResult>(client.get('/accounting/journal-by-source', { params }));
 }
+
+// ==============================
+// F1-F5: Full Feature Fetch Fns
+// ==============================
+
+export type CashflowLine = {
+  sourceType: string;
+  amountRupiah: number;
+  count: number;
+};
+
+export type CashflowStatement = {
+  asOf: string;
+  period: { year: number; month: number; startDate: string; endDate: string };
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  cashAccounts: Array<{ id: number; name: string; accountType: string; currentBalanceRupiah: number; openingBalanceRupiah: number }>;
+  operating: {
+    cashIn: CashflowLine[];
+    cashOut: CashflowLine[];
+    totalInRupiah: number;
+    totalOutRupiah: number;
+    netRupiah: number;
+  };
+  investing: { totalInRupiah: number; totalOutRupiah: number; netRupiah: number };
+  financing: { totalInRupiah: number; totalOutRupiah: number; netRupiah: number };
+  totals: { netCashflowRupiah: number; cashBeginningRupiah: number; cashEndingRupiah: number };
+  note: string;
+};
+
+export type FinancialRatiosStatement = {
+  asOf: string;
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  readiness: {
+    trialBalanceBalanced: boolean;
+    balanceSheetReady: boolean;
+    cashAndBankAvailable: boolean;
+    currentLiabilitiesAvailable: boolean;
+    equityAvailable: boolean;
+  };
+  liquidity: { currentRatio: number; quickRatio: number; cashRatio: number; workingCapitalRupiah: number; label: string };
+  profitability: { netProfitMarginPercent: number; grossProfitMarginPercent: number; returnOnAssetsPercent: number; returnOnCapitalEmployedPercent: number; label: string };
+  solvency: { debtToEquity: number; debtRatio: number; label: string };
+  efficiency: { expenseRatioPercent: number; occupancyRatePercent: number; label: string };
+  note: string;
+};
+
+export type ProfitLossDetailLine = {
+  accountId: number;
+  code: string;
+  name: string;
+  type: string;
+  amountRupiah: number;
+  prevAmountRupiah: number;
+  changePercent: number;
+};
+
+export type ProfitLossDetail = {
+  asOf: string;
+  period: { year: number; month: number; key: string; startDate: string; endDate: string; status: string };
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  current: {
+    revenueLines: ProfitLossDetailLine[];
+    cogsLines: ProfitLossDetailLine[];
+    expenseLines: ProfitLossDetailLine[];
+    totals: { revenueRupiah: number; cogsRupiah: number; expenseRupiah: number; netProfitRupiah: number; netProfitMarginPercent: number };
+  };
+  previous: { totals: { revenueRupiah: number; cogsRupiah: number; expenseRupiah: number; netProfitRupiah: number; netProfitMarginPercent: number } };
+  change: { revenueChangePercent: number; expenseChangePercent: number; netProfitChangePercent: number; revenueRupiah: number; expenseRupiah: number; netProfitRupiah: number };
+  closing: any;
+  note: string;
+};
+
+export type BalanceSheetDetailStatement = {
+  assetsRupiah: number;
+  currentAssetsRupiah: number;
+  fixedAssetsRupiah: number;
+  liabilitiesRupiah: number;
+  equityRupiah: number;
+  balanced: boolean;
+};
+
+export type BalanceSheetDetail = {
+  asOf: string;
+  basis: string;
+  ledgerBacked: boolean;
+  formalStatementReady: boolean;
+  readiness: any;
+  trialBalancePreview: any;
+  closing: any;
+  current: {
+    statement: BalanceSheetDetailStatement;
+    lines: any;
+    assetRegisterDisclosure: any;
+  };
+  previous: { statement: BalanceSheetDetailStatement };
+  change: { assetsChangePercent: number; liabilitiesChangePercent: number; equityChangePercent: number; assetsRupiah: number; liabilitiesRupiah: number; equityRupiah: number };
+  note: string;
+};
+
+export async function fetchCashflowStatement(params?: { asOf?: string; year?: number; month?: number }) {
+  return unwrap<CashflowStatement>(client.get('/accounting/cashflow', { params }));
+}
+
+export async function fetchFinancialRatios(params?: { asOf?: string; year?: number; month?: number }) {
+  return unwrap<FinancialRatiosStatement>(client.get('/accounting/financial-ratios', { params }));
+}
+
+export async function fetchProfitLossDetail(params?: { asOf?: string; year?: number; month?: number }) {
+  return unwrap<ProfitLossDetail>(client.get('/accounting/profit-loss/detail', { params }));
+}
+
+export async function fetchBalanceSheetDetail(params?: { asOf?: string; year?: number; month?: number }) {
+  return unwrap<BalanceSheetDetail>(client.get('/accounting/balance-sheet/detail', { params }));
+}

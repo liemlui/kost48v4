@@ -942,7 +942,7 @@ function AdminFinanceWorkspace({
           activeId={filter}
           onChange={(id) => setFilter(id as AdminFinanceDashboardFilter)}
           filters={[
-            { id: 'ALL', label: 'Semua Finance', count: countBy('ALL'), tone: 'info' },
+            { id: 'ALL', label: 'Semua Keuangan', count: countBy('ALL'), tone: 'info' },
             { id: 'PAYMENT_REVIEW', label: 'Bukti Bayar', count: countBy('PAYMENT_REVIEW'), tone: 'warning' },
             { id: 'OPEN', label: 'Tagihan Aktif', count: countBy('OPEN'), tone: 'info' },
             { id: 'OVERDUE', label: 'Terlambat', count: countBy('OVERDUE'), tone: 'danger' },
@@ -1296,8 +1296,8 @@ type AdminQueueArea = 'today' | 'stays' | 'finance' | 'tickets' | 'staff' | 'roo
 
 const ADMIN_QUEUE_AREAS: Array<{ id: AdminQueueArea; label: string; helper: string }> = [
   { id: 'today', label: 'Hari Ini', helper: 'Orientasi cepat: kondisi hari ini dan pekerjaan yang butuh keputusan.' },
-  { id: 'stays', label: 'Masa Sewa', helper: 'Pemesanan, penghuni aktif, perpanjangan, keluar, dan lifecycle masa sewa.' },
-  { id: 'finance', label: 'Finance', helper: 'Tagihan, bukti pembayaran, overdue, manual payment, dan pengeluaran.' },
+  { id: 'stays', label: 'Masa Sewa', helper: 'Pemesanan, penghuni aktif, perpanjangan, dan proses keluar.' },
+  { id: 'finance', label: 'Keuangan', helper: 'Tagihan, bukti pembayaran, tunggakan, pembayaran manual, dan pengeluaran.' },
   { id: 'tickets', label: 'Tiket', helper: 'Tiket tenant, kamar rusak, follow-up, dan target penanganan.' },
   { id: 'staff', label: 'Staff', helper: 'Checklist, ketersediaan staff, laporan lapangan, dan kinerja.' },
   { id: 'rooms', label: 'Kamar & Stok', helper: 'Status kamar, barang kamar, stok gudang, dan mutasi inventaris.' },
@@ -1353,7 +1353,7 @@ function makeAdminTicketPoints(tickets: Ticket[]): SmartChartPoint[] {
   return [
     { label: 'Baru', value: open, detail: 'Belum mulai / perlu assign', to: '/tickets' },
     { label: 'Dikerjakan', value: progress, detail: 'Sedang ditangani staff', to: '/tickets' },
-    { label: 'Menunggu cek', value: done, detail: 'Staff selesai, admin konfirmasi', to: '/tickets' },
+    { label: 'Menunggu cek', value: done, detail: 'Staff selesai, admin cek akhir', to: '/tickets' },
     { label: 'Final', value: final, detail: 'Selesai atau batal', to: '/tickets' },
   ];
 }
@@ -1499,18 +1499,18 @@ function AdminOverviewCharts({ activeArea, rooms, invoices, tickets, pendingPaym
   checkoutCount: number;
 }) {
   const stayPoints: SmartChartPoint[] = [
-    { label: 'Booking review', value: pendingApprovalCount, detail: 'Menunggu keputusan admin', to: '/stays?status=BOOKINGS' },
+    { label: 'Review booking', value: pendingApprovalCount, detail: 'Menunggu keputusan admin', to: '/stays?status=BOOKINGS' },
     { label: 'Menunggu bayar', value: waitingInitialPaymentCount, detail: 'Tenant punya deadline bayar', to: '/stays?status=BOOKINGS' },
     { label: 'Cek meter perpanjangan', value: pendingRenewCount, detail: 'Butuh cek meter', to: '/renew-requests' },
-    { label: 'Keluar', value: checkoutCount, detail: 'Review/final keluar', to: '/stays?status=BOOKINGS' },
+    { label: 'Keluar', value: checkoutCount, detail: 'Review dan finalkan keluar', to: '/stays?status=BOOKINGS' },
   ];
   if (activeArea === 'today') return null;
   const panels: Array<{ id: AdminQueueArea | 'stays-overview'; area: AdminQueueArea[]; node: ReactNode }> = [
     { id: 'stays-overview', area: ['stays'], node: <SmartChartPanel title="Masa Sewa & Penghuni" subtitle="Booking, bayar awal, perpanjangan, dan keluar dalam satu alur." points={stayPoints} defaultMode="bar" ctaLabel="Buka masa sewa" ctaTo="/stays" totalLabel="Alur" /> },
-    { id: 'finance', area: ['finance'], node: <SmartChartPanel title="Finance Ops" subtitle="Tagihan, bukti pembayaran, draft, dan overdue tetap bisa dibuka dari sini." points={makeAdminFinancePoints(invoices, pendingPaymentReviewCount)} defaultMode="bar" ctaLabel="Semua tagihan" ctaTo="/invoices" totalLabel="Finance" /> },
+    { id: 'finance', area: ['finance'], node: <SmartChartPanel title="Keuangan" subtitle="Tagihan, bukti pembayaran, draft, dan overdue tetap bisa dibuka dari sini." points={makeAdminFinancePoints(invoices, pendingPaymentReviewCount)} defaultMode="bar" ctaLabel="Semua tagihan" ctaTo="/invoices" totalLabel="Keuangan" /> },
     { id: 'tickets', area: ['tickets'], node: <SmartChartPanel title="Tiket Operasional" subtitle="Tiket baru, pekerjaan aktif, dan konfirmasi final admin." points={makeAdminTicketPoints(tickets)} defaultMode="bar" ctaLabel="Buka tiket" ctaTo="/tickets" totalLabel="Tiket" /> },
     { id: 'rooms', area: ['rooms'], node: <SmartChartPanel title="Kamar & Inventaris" subtitle="Admin melihat kesiapan kamar dan barang; harga/tambah kamar tetap owner." points={makeRoomPoints(rooms)} defaultMode="bar" ctaLabel="Status kamar" ctaTo="/rooms" totalLabel="Kamar" /> },
-    { id: 'staff', area: ['staff'], node: <SmartChartPanel title="Staff Ops" subtitle="Ketersediaan kerja dari tiket aktif; fitur libur penuh menyusul backend." points={makeAdminStaffPoints(tickets)} defaultMode="bar" ctaLabel="Kinerja staff" ctaTo="/staff-performance" totalLabel="Staff work" /> },
+    { id: 'staff', area: ['staff'], node: <SmartChartPanel title="Pekerjaan Staff" subtitle="Ketersediaan kerja dari tiket aktif; jadwal libur penuh menyusul setelah data siap." points={makeAdminStaffPoints(tickets)} defaultMode="bar" ctaLabel="Kinerja staff" ctaTo="/staff-performance" totalLabel="Kerja Staff" /> },
   ];
   const visible = panels.filter((panel) => panel.area.includes(activeArea));
   const hasUsefulData = (() => {
@@ -1699,7 +1699,7 @@ function OwnerFinancialHealthCockpit({
       priority: 'WARNING' as const,
       type: 'Keluar + deposit',
       subject: `${approvedCheckoutRequestCount} pengajuan keluar disetujui`,
-      issue: 'Ada pengajuan keluar disetujui dan deposit masih ditahan. Pastikan final checkout dan settlement deposit tidak tertunda.',
+      issue: 'Ada pengajuan keluar disetujui dan deposit masih ditahan. Pastikan proses keluar dan penyelesaian dana titipan tidak tertunda.',
       recommendedAction: 'Cek Checkout',
       actionTo: '/stays?status=BOOKINGS',
       dedupKey: 'checkout-deposit-followup',
@@ -1946,9 +1946,9 @@ function OwnerDashboard() {
       <Tabs activeKey={activeTab} onSelect={(key) => setActiveTab(key ?? 'priorities')} className="command-tabs mb-3">
         <Tab eventKey="priorities" title="Prioritas">
           <Row className="g-4">
-            <Col xl={8}><ActionQueueTable title="Prioritas Owner" subtitle="Hanya pekerjaan konkret; tidak mengulang semua isi assistant." items={businessHealth.queueItems} maxItems={8} /></Col>
+            <Col xl={8}><ActionQueueTable title="Prioritas Owner" subtitle="Hanya pekerjaan konkret; tidak mengulang semua isi asisten." items={businessHealth.queueItems} maxItems={8} /></Col>
             <Col xl={4}>
-              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Business health score</div><div className="business-health-score"><strong>{Math.round(backendBusinessHealth?.score ?? businessHealth.score)}</strong><span>{backendBusinessHealth?.grade ?? businessHealth.grade}</span></div><div className="panel-subtitle mt-2">{backendBusinessHealth?.headline ?? businessHealth.headline}</div><div className="mt-3 d-flex gap-2 flex-wrap">{businessHealth.drivers.map((driver) => <span className="surface-pill" key={driver}>{driver}</span>)}</div></Card.Body></Card>
+              <Card className="content-card border-0 h-100"><Card.Body><div className="panel-title mb-1">Skor kesehatan bisnis</div><div className="business-health-score"><strong>{Math.round(backendBusinessHealth?.score ?? businessHealth.score)}</strong><span>{backendBusinessHealth?.grade ?? businessHealth.grade}</span></div><div className="panel-subtitle mt-2">{backendBusinessHealth?.headline ?? businessHealth.headline}</div><div className="mt-3 d-flex gap-2 flex-wrap">{businessHealth.drivers.map((driver) => <span className="surface-pill" key={driver}>{driver}</span>)}</div></Card.Body></Card>
             </Col>
           </Row>
         </Tab>
@@ -2157,7 +2157,7 @@ function AdminDashboard() {
       id: 'admin-assistant-overdue',
       severity: 'HIGH' as const,
       title: 'Tagihan overdue mengunci flow tenant',
-      message: `${overdueInvoiceCount} tagihan overdue dapat menahan renew/checkout. Follow-up pembayaran sebelum proses lifecycle lanjut.`,
+      message: `${overdueInvoiceCount} tagihan terlambat dapat menahan perpanjangan/keluar. Follow-up pembayaran sebelum proses masa sewa lanjut.`,
       count: overdueInvoiceCount,
       actionLabel: 'Lihat Tagihan',
       actionTo: '/invoices',
@@ -2187,7 +2187,7 @@ function AdminDashboard() {
 
   const adminHealthMetrics: MetricChip[] = [
     { id: 'admin-metric-payment', label: 'Bukti pending', value: pendingPaymentReviewCount, helper: expiredPaymentReviewCount ? `${expiredPaymentReviewCount} lewat SLA` : 'Perlu verifikasi manual', status: expiredPaymentReviewCount ? 'DANGER' : pendingPaymentReviewCount ? 'WARNING' : 'SUCCESS', icon: '✅', to: '/payment-submissions/review' },
-    { id: 'admin-metric-booking', label: 'Booking review', value: pendingApprovalCount, helper: expiredBookingReviewCount ? `${expiredBookingReviewCount} lewat deadline` : 'Sebelum invoice awal', status: expiredBookingReviewCount ? 'DANGER' : pendingApprovalCount ? 'WARNING' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
+    { id: 'admin-metric-booking', label: 'Review booking', value: pendingApprovalCount, helper: expiredBookingReviewCount ? `${expiredBookingReviewCount} lewat deadline` : 'Sebelum invoice awal', status: expiredBookingReviewCount ? 'DANGER' : pendingApprovalCount ? 'WARNING' : 'SUCCESS', icon: '📝', to: '/stays?status=BOOKINGS' },
     { id: 'admin-metric-renew', label: 'Perpanjangan pending', value: pendingRenewCount, helper: 'Butuh cek meter', status: pendingRenewCount ? 'WARNING' : 'SUCCESS', icon: '🔁', to: '/renew-requests' },
     { id: 'admin-metric-checkout', label: 'Pekerjaan keluar', value: checkoutWorkCount, helper: `${pendingCheckoutRequestCount} review · ${approvedCheckoutRequestCount} final`, status: checkoutWorkCount ? 'WARNING' : 'SUCCESS', icon: '🚪', to: '/stays?status=BOOKINGS' },
     { id: 'admin-metric-invoice', label: 'Tagihan open', value: openInvoiceCount, helper: overdueInvoiceCount ? `${overdueInvoiceCount} overdue` : 'Belum lunas/dibatalkan', status: overdueInvoiceCount ? 'DANGER' : openInvoiceCount ? 'WARNING' : 'SUCCESS', icon: '🧾', to: '/invoices' },
@@ -2342,33 +2342,33 @@ function AdminDashboard() {
   const urgentQueueCount = filteredQueueItems.filter((item) => item.priority === 'BLOCKER' || item.priority === 'HIGH' || item.timeStatusTone === 'danger').length;
   const activeAreaConfig = ADMIN_QUEUE_AREAS.find((area) => area.id === activeArea) ?? ADMIN_QUEUE_AREAS[0];
   const activeAreaMenuItems: AdminAreaMenuItem[] = activeArea === 'stays' ? [
-    { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Table utama proses sewa aktif', to: '/dashboard?area=stays', count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
+    { id: 'stays-all', icon: '🏠', label: 'Semua Proses', helper: 'Daftar utama proses sewa aktif', to: '/dashboard?area=stays', count: pendingApprovalCount + waitingInitialPaymentCount + stays.length + pendingRenewCount + pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: 'info', active: true },
     { id: 'stays-bookings', icon: '📝', label: 'Booking Baru', helper: 'Review booking dan bayar awal', to: '/stays?status=BOOKINGS', count: pendingApprovalCount + waitingInitialPaymentCount, tone: pendingApprovalCount ? 'warning' : 'info' },
     { id: 'stays-active', icon: '🛏️', label: 'Masa sewa aktif', helper: 'Masa sewa sedang berjalan', to: '/stays', count: stays.length, tone: 'success' },
     { id: 'stays-renew', icon: '🔁', label: 'Perpanjangan', helper: 'Pengajuan perpanjangan dan cek meter', to: '/renew-requests', count: pendingRenewCount, tone: pendingRenewCount ? 'warning' : 'info' },
-    { id: 'stays-checkout', icon: '🚪', label: 'Keluar', helper: 'Review keluar dan final keluar', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
-    { id: 'stays-tenant', icon: '👤', label: 'Tenant', helper: 'Data tenant dan portal access', to: '/tenants', count: undefined, tone: 'info' },
+    { id: 'stays-checkout', icon: '🚪', label: 'Keluar', helper: 'Review keluar dan finalkan keluar', to: '/stays?status=BOOKINGS', count: pendingCheckoutRequestCount + approvedCheckoutRequestCount, tone: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'warning' : 'info' },
+    { id: 'stays-tenant', icon: '👤', label: 'Tenant', helper: 'Data penghuni dan akses portal', to: '/tenants', count: undefined, tone: 'info' },
   ] : activeArea === 'finance' ? [
-    { id: 'finance-all', icon: '💳', label: 'Semua Finance', helper: 'Table utama finance di tab ini', to: '/dashboard?area=finance', count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
+    { id: 'finance-all', icon: '💳', label: 'Semua Keuangan', helper: 'Daftar utama keuangan di tab ini', to: '/dashboard?area=finance', count: invoices.length + pendingPaymentReviewCount, tone: 'info', active: true },
     { id: 'finance-invoices', icon: '🧾', label: 'Tagihan', helper: 'Semua tagihan tenant', to: '/invoices', count: invoices.length, tone: 'info' },
-    { id: 'finance-review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar pending review', to: '/payment-submissions/review', count: pendingPaymentReviewCount, tone: pendingPaymentReviewCount ? 'warning' : 'success' },
+    { id: 'finance-review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar menunggu dicek', to: '/payment-submissions/review', count: pendingPaymentReviewCount, tone: pendingPaymentReviewCount ? 'warning' : 'success' },
     { id: 'finance-overdue', icon: '⚠️', label: 'Terlambat', helper: 'Tagihan lewat jatuh tempo', to: '/invoices', count: overdueInvoices.length, tone: overdueInvoices.length ? 'danger' : 'success' },
     { id: 'finance-draft', icon: '📝', label: 'Belum Terbit', helper: 'Tagihan belum diterbitkan', to: '/invoices', count: invoices.filter((invoice) => invoice.status === 'DRAFT').length, tone: 'info' },
     { id: 'finance-expenses', icon: '💸', label: 'Expenses', helper: 'Catatan pengeluaran operasional', to: '/expenses', count: undefined, tone: 'info' },
     { id: 'finance-history', icon: '📚', label: 'Riwayat Pembayaran', helper: 'Pembayaran invoice yang sudah tercatat', to: '/invoice-payments', count: undefined, tone: 'info' },
   ] : activeArea === 'tickets' ? [
-    { id: 'tickets-all', icon: '🎫', label: 'Semua Tiket', helper: 'Table utama tiket di tab ini', to: '/dashboard?area=tickets', count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length, tone: 'info', active: true },
+    { id: 'tickets-all', icon: '🎫', label: 'Semua Tiket', helper: 'Daftar utama tiket di tab ini', to: '/dashboard?area=tickets', count: tickets.filter((ticket) => ticket.status !== 'CANCELLED').length, tone: 'info', active: true },
     { id: 'tickets-assign', icon: '👷', label: 'Perlu Assign', helper: 'Tiket baru belum punya petugas', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'OPEN' && !ticket.assignedToId).length, tone: 'warning' },
     { id: 'tickets-progress', icon: '🔧', label: 'Dikerjakan', helper: 'Sedang ditangani staff', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'IN_PROGRESS').length, tone: 'info' },
-    { id: 'tickets-check', icon: '✅', label: 'Perlu Cek', helper: 'Staff selesai, admin konfirmasi', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'DONE').length, tone: 'warning' },
-    { id: 'tickets-final', icon: '📦', label: 'Selesai', helper: 'Tiket final/closed', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'CLOSED').length, tone: 'success' },
+    { id: 'tickets-check', icon: '✅', label: 'Perlu Cek', helper: 'Staff selesai, admin cek akhir', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'DONE').length, tone: 'warning' },
+    { id: 'tickets-final', icon: '📦', label: 'Selesai', helper: 'Tiket selesai', to: '/tickets', count: tickets.filter((ticket) => ticket.status === 'CLOSED').length, tone: 'success' },
   ] : activeArea === 'staff' ? [
-    { id: 'staff-score', icon: '👥', label: 'Staff & Skor', helper: 'Table skor staff di tab ini', to: '/dashboard?area=staff', count: staffPerformanceItems.length, tone: 'info', active: true },
+    { id: 'staff-score', icon: '👥', label: 'Staff & Skor', helper: 'Daftar skor staff di tab ini', to: '/dashboard?area=staff', count: staffPerformanceItems.length, tone: 'info', active: true },
     { id: 'staff-checklist', icon: '📋', label: 'Checklist', helper: 'Checklist harian/mingguan/bulanan staff', to: '/staff-routines', count: undefined, tone: 'success' },
     { id: 'staff-reports', icon: '📝', label: 'Laporan Lapangan', helper: 'Review laporan kondisi dari staff', to: '/tickets', count: tickets.filter((ticket) => Boolean(ticket.linkedRoomItemId || ticket.linkedInventoryItemId)).length, tone: 'warning' },
-    { id: 'staff-performance', icon: '📈', label: 'Kinerja', helper: 'Detail performa dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
+    { id: 'staff-performance', icon: '📈', label: 'Kinerja', helper: 'Detail kinerja dan ulasan staff', to: '/staff-performance', count: undefined, tone: 'info' },
   ] : activeArea === 'rooms' ? [
-    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan occupancy', to: '/dashboard?area=rooms', count: rooms.length, tone: 'info', active: true },
+    { id: 'rooms-list', icon: '🏘️', label: 'Kamar', helper: 'Status kamar dan keterisian', to: '/dashboard?area=rooms', count: rooms.length, tone: 'info', active: true },
     { id: 'rooms-room-items', icon: '🪑', label: 'Barang Kamar', helper: 'Inventaris per kamar', to: '/room-items', count: undefined, tone: 'info' },
     { id: 'rooms-stock', icon: '📦', label: 'Stok Gudang', helper: 'Barang gudang dan stok minimum', to: '/inventory-items', count: inventoryItems.length, tone: 'info' },
     { id: 'rooms-movements', icon: '🔄', label: 'Mutasi Stok', helper: 'Riwayat masuk/keluar/pasang barang', to: '/inventory-movements', count: undefined, tone: 'info' },
@@ -2404,7 +2404,7 @@ function AdminDashboard() {
       <AssistantInsightLine
         title="Asisten Operasional"
         tone={supportQueriesError ? 'warning' : urgentQueueCount ? 'warning' : topQueueItem ? 'info' : 'success'}
-        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat. Coba refresh atau buka menu detail terkait.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman. Data utama ada di table, sub-menu area ada tepat di bawah ini.`}
+        message={supportQueriesError ? 'Data utama sudah tampil, tetapi sebagian data pendukung gagal dimuat. Coba refresh atau buka menu detail terkait.' : topQueueItem ? `${topQueueItem.type}: ${topQueueItem.issue}` : activeArea === 'today' ? 'Tidak ada blocker besar. Gunakan sidebar untuk membuka detail per area.' : `${activeAreaConfig.label} sedang aman. Data utama ada di daftar, sub-menu area ada tepat di bawah ini.`}
       />
 
       {supportQueriesLoading ? (

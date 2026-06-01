@@ -222,6 +222,29 @@ exports.Prisma.StayScalarFieldEnum = {
   initialMetersPromotedAt: 'initialMetersPromotedAt'
 };
 
+exports.Prisma.TenantDepositLedgerEntryScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  tenantId: 'tenantId',
+  roomId: 'roomId',
+  type: 'type',
+  direction: 'direction',
+  amountRupiah: 'amountRupiah',
+  balanceAfterRupiah: 'balanceAfterRupiah',
+  depositStatusAfter: 'depositStatusAfter',
+  depositPaymentStatusAfter: 'depositPaymentStatusAfter',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  paymentSubmissionId: 'paymentSubmissionId',
+  invoicePaymentId: 'invoicePaymentId',
+  journalEntryId: 'journalEntryId',
+  actorUserId: 'actorUserId',
+  occurredAt: 'occurredAt',
+  note: 'note',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.MeterReadingScalarFieldEnum = {
   id: 'id',
   roomId: 'roomId',
@@ -337,6 +360,11 @@ exports.Prisma.TicketScalarFieldEnum = {
   resolutionImageFileSizeBytes: 'resolutionImageFileSizeBytes',
   status: 'status',
   assignedToId: 'assignedToId',
+  linkedRoomItemId: 'linkedRoomItemId',
+  linkedInventoryItemId: 'linkedInventoryItemId',
+  finalRoomItemStatus: 'finalRoomItemStatus',
+  finalInventoryItemStatus: 'finalInventoryItemStatus',
+  finalAdminNote: 'finalAdminNote',
   resolutionNote: 'resolutionNote',
   resolvedAt: 'resolvedAt',
   closedAt: 'closedAt',
@@ -386,6 +414,46 @@ exports.Prisma.StaffRoutineCompletionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.StaffWorkAuditScalarFieldEnum = {
+  id: 'id',
+  staffId: 'staffId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  auditedById: 'auditedById',
+  result: 'result',
+  scoreDelta: 'scoreDelta',
+  notes: 'notes',
+  photoUrl: 'photoUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StaffPerformanceEventScalarFieldEnum = {
+  id: 'id',
+  staffId: 'staffId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  eventType: 'eventType',
+  scoreDelta: 'scoreDelta',
+  reason: 'reason',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.StaffReviewScalarFieldEnum = {
+  id: 'id',
+  staffId: 'staffId',
+  tenantId: 'tenantId',
+  ticketId: 'ticketId',
+  routineCompletionId: 'routineCompletionId',
+  rating: 'rating',
+  comment: 'comment',
+  status: 'status',
+  moderatedById: 'moderatedById',
+  moderatedAt: 'moderatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AnnouncementScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -414,6 +482,7 @@ exports.Prisma.InventoryItemScalarFieldEnum = {
   unit: 'unit',
   qtyOnHand: 'qtyOnHand',
   minQty: 'minQty',
+  status: 'status',
   images: 'images',
   notes: 'notes',
   isActive: 'isActive',
@@ -442,6 +511,32 @@ exports.Prisma.InventoryMovementScalarFieldEnum = {
   note: 'note',
   createdById: 'createdById',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.StaffFieldReportScalarFieldEnum = {
+  id: 'id',
+  ticketId: 'ticketId',
+  roomId: 'roomId',
+  roomItemId: 'roomItemId',
+  inventoryItemId: 'inventoryItemId',
+  reportedByStaffId: 'reportedByStaffId',
+  reportedCondition: 'reportedCondition',
+  conditionNotes: 'conditionNotes',
+  photoUrl: 'photoUrl',
+  photoFileKey: 'photoFileKey',
+  photoOriginalFilename: 'photoOriginalFilename',
+  photoMimeType: 'photoMimeType',
+  photoFileSizeBytes: 'photoFileSizeBytes',
+  requestsReplacement: 'requestsReplacement',
+  requestedInventoryItemId: 'requestedInventoryItemId',
+  requestedQty: 'requestedQty',
+  adminReviewedById: 'adminReviewedById',
+  adminDecision: 'adminDecision',
+  adminNotes: 'adminNotes',
+  relatedMovementId: 'relatedMovementId',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.RenewRequestScalarFieldEnum = {
@@ -501,6 +596,73 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.FixedAssetScalarFieldEnum = {
+  id: 'id',
+  assetCode: 'assetCode',
+  name: 'name',
+  category: 'category',
+  status: 'status',
+  locationType: 'locationType',
+  capitalizationSource: 'capitalizationSource',
+  depreciationMethod: 'depreciationMethod',
+  acquisitionDate: 'acquisitionDate',
+  depreciationStartDate: 'depreciationStartDate',
+  acquisitionCostRupiah: 'acquisitionCostRupiah',
+  salvageValueRupiah: 'salvageValueRupiah',
+  usefulLifeMonths: 'usefulLifeMonths',
+  accumulatedDepreciationRupiah: 'accumulatedDepreciationRupiah',
+  depreciationEnabled: 'depreciationEnabled',
+  roomId: 'roomId',
+  inventoryItemId: 'inventoryItemId',
+  roomItemId: 'roomItemId',
+  expenseId: 'expenseId',
+  createdById: 'createdById',
+  ledgerAlignmentStatus: 'ledgerAlignmentStatus',
+  ledgerAlignmentMethod: 'ledgerAlignmentMethod',
+  ledgerAlignmentAmountRupiah: 'ledgerAlignmentAmountRupiah',
+  ledgerAlignmentCreditAccountId: 'ledgerAlignmentCreditAccountId',
+  ledgerAlignmentJournalEntryId: 'ledgerAlignmentJournalEntryId',
+  ledgerAlignedAt: 'ledgerAlignedAt',
+  ledgerAlignedById: 'ledgerAlignedById',
+  ledgerAlignmentNote: 'ledgerAlignmentNote',
+  ledgerAlignmentReviewedAt: 'ledgerAlignmentReviewedAt',
+  ledgerAlignmentReviewedById: 'ledgerAlignmentReviewedById',
+  notes: 'notes',
+  disposedAt: 'disposedAt',
+  disposalNote: 'disposalNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AssetDepreciationRunScalarFieldEnum = {
+  id: 'id',
+  runNumber: 'runNumber',
+  periodYear: 'periodYear',
+  periodMonth: 'periodMonth',
+  runDate: 'runDate',
+  status: 'status',
+  totalDepreciationRupiah: 'totalDepreciationRupiah',
+  journalEntryId: 'journalEntryId',
+  createdById: 'createdById',
+  postedAt: 'postedAt',
+  voidedAt: 'voidedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AssetDepreciationLineScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  fixedAssetId: 'fixedAssetId',
+  depreciationAmountRupiah: 'depreciationAmountRupiah',
+  accumulatedBeforeRupiah: 'accumulatedBeforeRupiah',
+  accumulatedAfterRupiah: 'accumulatedAfterRupiah',
+  bookValueBeforeRupiah: 'bookValueBeforeRupiah',
+  bookValueAfterRupiah: 'bookValueAfterRupiah',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.AppNotificationScalarFieldEnum = {
   id: 'id',
   recipientUserId: 'recipientUserId',
@@ -525,6 +687,130 @@ exports.Prisma.AuditLogScalarFieldEnum = {
   newData: 'newData',
   meta: 'meta',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.ChartOfAccountScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  normalBalance: 'normalBalance',
+  description: 'description',
+  parentId: 'parentId',
+  isSystemDefault: 'isSystemDefault',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CashAccountScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  accountType: 'accountType',
+  chartOfAccountId: 'chartOfAccountId',
+  bankName: 'bankName',
+  accountNumberMasked: 'accountNumberMasked',
+  holderName: 'holderName',
+  openingBalanceRupiah: 'openingBalanceRupiah',
+  currentBalanceRupiah: 'currentBalanceRupiah',
+  isDefault: 'isDefault',
+  isActive: 'isActive',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AccountingPeriodScalarFieldEnum = {
+  id: 'id',
+  year: 'year',
+  month: 'month',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  closedAt: 'closedAt',
+  closedById: 'closedById',
+  closingJournalEntryId: 'closingJournalEntryId',
+  closingNote: 'closingNote',
+  closeBasis: 'closeBasis',
+  closeVersion: 'closeVersion',
+  reopenedAt: 'reopenedAt',
+  reopenedById: 'reopenedById',
+  reopenJournalEntryId: 'reopenJournalEntryId',
+  reopenReason: 'reopenReason',
+  reopenVersion: 'reopenVersion',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OpeningBalanceBatchScalarFieldEnum = {
+  id: 'id',
+  batchNumber: 'batchNumber',
+  accountingPeriodId: 'accountingPeriodId',
+  cutoverDate: 'cutoverDate',
+  status: 'status',
+  notes: 'notes',
+  totalDebitRupiah: 'totalDebitRupiah',
+  totalCreditRupiah: 'totalCreditRupiah',
+  createdById: 'createdById',
+  postedById: 'postedById',
+  postedAt: 'postedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OpeningBalanceLineScalarFieldEnum = {
+  id: 'id',
+  batchId: 'batchId',
+  chartOfAccountId: 'chartOfAccountId',
+  description: 'description',
+  debitRupiah: 'debitRupiah',
+  creditRupiah: 'creditRupiah',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.JournalEntryScalarFieldEnum = {
+  id: 'id',
+  entryNumber: 'entryNumber',
+  entryDate: 'entryDate',
+  accountingPeriodId: 'accountingPeriodId',
+  status: 'status',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  memo: 'memo',
+  totalDebitRupiah: 'totalDebitRupiah',
+  totalCreditRupiah: 'totalCreditRupiah',
+  isBalanced: 'isBalanced',
+  createdById: 'createdById',
+  postedById: 'postedById',
+  postedAt: 'postedAt',
+  voidedAt: 'voidedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.JournalLineScalarFieldEnum = {
+  id: 'id',
+  journalEntryId: 'journalEntryId',
+  chartOfAccountId: 'chartOfAccountId',
+  cashAccountId: 'cashAccountId',
+  description: 'description',
+  debitRupiah: 'debitRupiah',
+  creditRupiah: 'creditRupiah',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.FaqScalarFieldEnum = {
+  id: 'id',
+  question: 'question',
+  answer: 'answer',
+  category: 'category',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -624,6 +910,24 @@ exports.StayPurpose = exports.$Enums.StayPurpose = {
   OTHER: 'OTHER'
 };
 
+exports.TenantDepositLedgerEntryType = exports.$Enums.TenantDepositLedgerEntryType = {
+  CHARGED: 'CHARGED',
+  PAYMENT_RECEIVED: 'PAYMENT_RECEIVED',
+  HELD: 'HELD',
+  REFUND: 'REFUND',
+  DEDUCTION: 'DEDUCTION',
+  FORFEIT: 'FORFEIT',
+  SETTLEMENT: 'SETTLEMENT',
+  ADJUSTMENT: 'ADJUSTMENT',
+  MIGRATION_SNAPSHOT: 'MIGRATION_SNAPSHOT'
+};
+
+exports.TenantDepositLedgerDirection = exports.$Enums.TenantDepositLedgerDirection = {
+  INCREASE_LIABILITY: 'INCREASE_LIABILITY',
+  DECREASE_LIABILITY: 'DECREASE_LIABILITY',
+  INFO: 'INFO'
+};
+
 exports.UtilityType = exports.$Enums.UtilityType = {
   ELECTRICITY: 'ELECTRICITY',
   WATER: 'WATER'
@@ -675,6 +979,23 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.RoomItemStatus = exports.$Enums.RoomItemStatus = {
+  GOOD: 'GOOD',
+  DAMAGED: 'DAMAGED',
+  MAINTENANCE: 'MAINTENANCE',
+  MISSING: 'MISSING'
+};
+
+exports.InventoryItemStatus = exports.$Enums.InventoryItemStatus = {
+  GOOD: 'GOOD',
+  LOW_STOCK: 'LOW_STOCK',
+  OUT_OF_STOCK: 'OUT_OF_STOCK',
+  DAMAGED: 'DAMAGED',
+  MISSING: 'MISSING',
+  NEEDS_REPAIR: 'NEEDS_REPAIR',
+  PENDING_CHECK: 'PENDING_CHECK'
+};
+
 exports.StaffRoutineFrequency = exports.$Enums.StaffRoutineFrequency = {
   DAILY: 'DAILY',
   WEEKLY: 'WEEKLY',
@@ -692,22 +1013,55 @@ exports.StaffRoutineAreaType = exports.$Enums.StaffRoutineAreaType = {
 };
 
 exports.StaffRoutineStatus = exports.$Enums.StaffRoutineStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
   DONE: 'DONE',
   NEED_HELP: 'NEED_HELP',
   MISSED: 'MISSED',
   SKIPPED: 'SKIPPED'
 };
 
+exports.StaffWorkSourceType = exports.$Enums.StaffWorkSourceType = {
+  ROUTINE: 'ROUTINE',
+  TICKET: 'TICKET',
+  METER: 'METER',
+  ROOM_CHECK: 'ROOM_CHECK',
+  STOCK_REPORT: 'STOCK_REPORT',
+  INVENTORY_REPORT: 'INVENTORY_REPORT',
+  TENANT_REVIEW: 'TENANT_REVIEW',
+  MANUAL_AUDIT: 'MANUAL_AUDIT'
+};
+
+exports.StaffAuditResult = exports.$Enums.StaffAuditResult = {
+  PASS: 'PASS',
+  NEEDS_FIX: 'NEEDS_FIX',
+  FAILED: 'FAILED',
+  NOT_DONE: 'NOT_DONE'
+};
+
+exports.StaffPerformanceEventType = exports.$Enums.StaffPerformanceEventType = {
+  ROUTINE_DONE: 'ROUTINE_DONE',
+  ROUTINE_NEED_HELP: 'ROUTINE_NEED_HELP',
+  TICKET_DONE: 'TICKET_DONE',
+  METER_RECORDED: 'METER_RECORDED',
+  STOCK_REPORTED: 'STOCK_REPORTED',
+  AUDIT_PASS: 'AUDIT_PASS',
+  AUDIT_NEEDS_FIX: 'AUDIT_NEEDS_FIX',
+  AUDIT_FAILED: 'AUDIT_FAILED',
+  TENANT_REVIEW_HIGH: 'TENANT_REVIEW_HIGH',
+  TENANT_REVIEW_LOW: 'TENANT_REVIEW_LOW',
+  MISSING_PROOF: 'MISSING_PROOF',
+  MANUAL_ADJUSTMENT: 'MANUAL_ADJUSTMENT'
+};
+
+exports.StaffReviewStatus = exports.$Enums.StaffReviewStatus = {
+  VISIBLE: 'VISIBLE',
+  HIDDEN: 'HIDDEN',
+  FLAGGED: 'FLAGGED'
+};
+
 exports.AnnouncementAudience = exports.$Enums.AnnouncementAudience = {
   TENANT: 'TENANT',
   ALL: 'ALL'
-};
-
-exports.RoomItemStatus = exports.$Enums.RoomItemStatus = {
-  GOOD: 'GOOD',
-  DAMAGED: 'DAMAGED',
-  MAINTENANCE: 'MAINTENANCE',
-  MISSING: 'MISSING'
 };
 
 exports.InventoryMovementType = exports.$Enums.InventoryMovementType = {
@@ -716,6 +1070,33 @@ exports.InventoryMovementType = exports.$Enums.InventoryMovementType = {
   ASSIGN_TO_ROOM: 'ASSIGN_TO_ROOM',
   RETURN_FROM_ROOM: 'RETURN_FROM_ROOM',
   ADJUSTMENT: 'ADJUSTMENT'
+};
+
+exports.ReportedCondition = exports.$Enums.ReportedCondition = {
+  DAMAGED: 'DAMAGED',
+  MISSING: 'MISSING',
+  NEEDS_REPAIR: 'NEEDS_REPAIR',
+  NEEDS_REPLACEMENT: 'NEEDS_REPLACEMENT',
+  NEEDS_CLEANING: 'NEEDS_CLEANING',
+  LOW_STOCK: 'LOW_STOCK',
+  OUT_OF_STOCK: 'OUT_OF_STOCK',
+  PENDING_CHECK: 'PENDING_CHECK'
+};
+
+exports.AdminDecision = exports.$Enums.AdminDecision = {
+  APPROVE: 'APPROVE',
+  REJECT: 'REJECT',
+  NEEDS_MORE_INFO: 'NEEDS_MORE_INFO'
+};
+
+exports.StaffFieldReportStatus = exports.$Enums.StaffFieldReportStatus = {
+  REPORTED: 'REPORTED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  IN_REPAIR: 'IN_REPAIR',
+  DONE: 'DONE',
+  CLOSED: 'CLOSED'
 };
 
 exports.RenewRequestStatus = exports.$Enums.RenewRequestStatus = {
@@ -749,12 +1130,127 @@ exports.ExpenseCategory = exports.$Enums.ExpenseCategory = {
   OTHER: 'OTHER'
 };
 
+exports.FixedAssetCategory = exports.$Enums.FixedAssetCategory = {
+  BUILDING: 'BUILDING',
+  RENOVATION: 'RENOVATION',
+  ROOM_EQUIPMENT: 'ROOM_EQUIPMENT',
+  FURNITURE: 'FURNITURE',
+  ELECTRONIC: 'ELECTRONIC',
+  UTILITY_EQUIPMENT: 'UTILITY_EQUIPMENT',
+  VEHICLE: 'VEHICLE',
+  SOFTWARE: 'SOFTWARE',
+  OTHER: 'OTHER'
+};
+
+exports.FixedAssetStatus = exports.$Enums.FixedAssetStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  FULLY_DEPRECIATED: 'FULLY_DEPRECIATED',
+  DISPOSED: 'DISPOSED',
+  WRITTEN_OFF: 'WRITTEN_OFF'
+};
+
+exports.FixedAssetLocationType = exports.$Enums.FixedAssetLocationType = {
+  GENERAL: 'GENERAL',
+  ROOM: 'ROOM',
+  WAREHOUSE: 'WAREHOUSE'
+};
+
+exports.FixedAssetCapitalizationSource = exports.$Enums.FixedAssetCapitalizationSource = {
+  OPENING_BALANCE: 'OPENING_BALANCE',
+  PURCHASE_JOURNAL: 'PURCHASE_JOURNAL',
+  DISCLOSURE_ONLY: 'DISCLOSURE_ONLY'
+};
+
+exports.FixedAssetDepreciationMethod = exports.$Enums.FixedAssetDepreciationMethod = {
+  STRAIGHT_LINE: 'STRAIGHT_LINE'
+};
+
+exports.FixedAssetLedgerAlignmentStatus = exports.$Enums.FixedAssetLedgerAlignmentStatus = {
+  NOT_REQUIRED: 'NOT_REQUIRED',
+  NEEDS_REVIEW: 'NEEDS_REVIEW',
+  PREVIEWED: 'PREVIEWED',
+  ALIGNED: 'ALIGNED',
+  DISCLOSURE_ONLY: 'DISCLOSURE_ONLY',
+  VOIDED: 'VOIDED'
+};
+
+exports.FixedAssetLedgerAlignmentMethod = exports.$Enums.FixedAssetLedgerAlignmentMethod = {
+  RECLASSIFY_FROM_CASH: 'RECLASSIFY_FROM_CASH',
+  OWNER_CAPITAL_CONTRIBUTION: 'OWNER_CAPITAL_CONTRIBUTION',
+  DISCLOSURE_ONLY: 'DISCLOSURE_ONLY',
+  MANUAL_REVIEW: 'MANUAL_REVIEW'
+};
+
+exports.AssetDepreciationRunStatus = exports.$Enums.AssetDepreciationRunStatus = {
+  POSTED: 'POSTED',
+  VOID: 'VOID'
+};
+
+exports.AccountingAccountType = exports.$Enums.AccountingAccountType = {
+  ASSET: 'ASSET',
+  LIABILITY: 'LIABILITY',
+  EQUITY: 'EQUITY',
+  REVENUE: 'REVENUE',
+  COGS: 'COGS',
+  EXPENSE: 'EXPENSE'
+};
+
+exports.AccountingNormalBalance = exports.$Enums.AccountingNormalBalance = {
+  DEBIT: 'DEBIT',
+  CREDIT: 'CREDIT'
+};
+
+exports.CashAccountType = exports.$Enums.CashAccountType = {
+  CASH: 'CASH',
+  BANK: 'BANK',
+  QRIS: 'QRIS',
+  EWALLET: 'EWALLET',
+  OTHER: 'OTHER'
+};
+
+exports.AccountingPeriodStatus = exports.$Enums.AccountingPeriodStatus = {
+  OPEN: 'OPEN',
+  CLOSED: 'CLOSED',
+  LOCKED: 'LOCKED'
+};
+
+exports.OpeningBalanceBatchStatus = exports.$Enums.OpeningBalanceBatchStatus = {
+  DRAFT: 'DRAFT',
+  POSTED: 'POSTED',
+  VOID: 'VOID'
+};
+
+exports.JournalEntryStatus = exports.$Enums.JournalEntryStatus = {
+  DRAFT: 'DRAFT',
+  POSTED: 'POSTED',
+  VOID: 'VOID'
+};
+
+exports.JournalSourceType = exports.$Enums.JournalSourceType = {
+  MANUAL: 'MANUAL',
+  OPENING_BALANCE: 'OPENING_BALANCE',
+  SYSTEM_PLACEHOLDER: 'SYSTEM_PLACEHOLDER',
+  INVOICE: 'INVOICE',
+  INVOICE_PAYMENT: 'INVOICE_PAYMENT',
+  PAYMENT_SUBMISSION: 'PAYMENT_SUBMISSION',
+  EXPENSE: 'EXPENSE',
+  WIFI_SALE: 'WIFI_SALE',
+  DEPOSIT: 'DEPOSIT',
+  INVENTORY: 'INVENTORY',
+  DEPRECIATION: 'DEPRECIATION',
+  ADJUSTMENT: 'ADJUSTMENT',
+  CLOSING_ENTRY: 'CLOSING_ENTRY',
+  CLOSING_REVERSAL: 'CLOSING_REVERSAL'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Tenant: 'Tenant',
   Room: 'Room',
   RoomFacility: 'RoomFacility',
   Stay: 'Stay',
+  TenantDepositLedgerEntry: 'TenantDepositLedgerEntry',
   MeterReading: 'MeterReading',
   Invoice: 'Invoice',
   InvoiceLine: 'InvoiceLine',
@@ -765,16 +1261,31 @@ exports.Prisma.ModelName = {
   StaffRoutineTemplate: 'StaffRoutineTemplate',
   StaffRoutineAssignment: 'StaffRoutineAssignment',
   StaffRoutineCompletion: 'StaffRoutineCompletion',
+  StaffWorkAudit: 'StaffWorkAudit',
+  StaffPerformanceEvent: 'StaffPerformanceEvent',
+  StaffReview: 'StaffReview',
   Announcement: 'Announcement',
   InventoryItem: 'InventoryItem',
   RoomItem: 'RoomItem',
   InventoryMovement: 'InventoryMovement',
+  StaffFieldReport: 'StaffFieldReport',
   RenewRequest: 'RenewRequest',
   CheckoutRequest: 'CheckoutRequest',
   WifiSale: 'WifiSale',
   Expense: 'Expense',
+  FixedAsset: 'FixedAsset',
+  AssetDepreciationRun: 'AssetDepreciationRun',
+  AssetDepreciationLine: 'AssetDepreciationLine',
   AppNotification: 'AppNotification',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ChartOfAccount: 'ChartOfAccount',
+  CashAccount: 'CashAccount',
+  AccountingPeriod: 'AccountingPeriod',
+  OpeningBalanceBatch: 'OpeningBalanceBatch',
+  OpeningBalanceLine: 'OpeningBalanceLine',
+  JournalEntry: 'JournalEntry',
+  JournalLine: 'JournalLine',
+  Faq: 'Faq'
 };
 
 /**

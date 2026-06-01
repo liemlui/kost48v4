@@ -53,17 +53,17 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     PARTIAL: 'Sebagian',
     DRAFT: 'Draft',
     OVERDUE: 'Jatuh Tempo',
-    HELD: 'Deposit Ditahan',
+    HELD: 'Dana Titipan',
     REFUNDED: 'Dikembalikan',
     PARTIALLY_REFUNDED: 'Sebagian Dikembalikan',
     FORFEITED: 'Hangus',
-    PAYMENT_RECEIVED: 'Deposit Diterima',
+    PAYMENT_RECEIVED: 'Dana Titipan Diterima',
     REFUND: 'Deposit Dikembalikan',
     DEDUCTION: 'Deposit Dipotong',
     FORFEIT: 'Deposit Hangus',
     MIGRATION_SNAPSHOT: 'Snapshot Migrasi',
-    INCREASE_LIABILITY: 'Deposit Masuk',
-    DECREASE_LIABILITY: 'Deposit Keluar',
+    INCREASE_LIABILITY: 'Dana Titipan Masuk',
+    DECREASE_LIABILITY: 'Dana Titipan Keluar',
     SUCCESS: 'Aman',
     WARNING: 'Perhatian',
     DANGER: 'Bahaya',
@@ -164,7 +164,7 @@ export function getBookingStatusLabel(input: BookingStatusInput): { label: strin
   if (input.isCompleted) return { label: 'Selesai', variant: 'COMPLETED' };
   if (input.isActiveOccupied) return { label: 'Aktif', variant: 'ACTIVE' };
   if (input.isReserved && input.isExpired) return { label: 'Kedaluwarsa', variant: 'EXPIRED' };
-  if (input.isReserved && !input.hasInvoice) return { label: 'Menunggu Approval', variant: 'WARNING' };
+  if (input.isReserved && !input.hasInvoice) return { label: 'Menunggu Persetujuan', variant: 'WARNING' };
   if (input.isReserved && input.hasInvoice) return { label: 'Menunggu Pembayaran', variant: 'INFO' };
   return { label: 'Perlu Review', variant: 'WARNING' };
 }

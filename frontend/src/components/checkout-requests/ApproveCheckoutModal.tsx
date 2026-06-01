@@ -78,11 +78,11 @@ export default function ApproveCheckoutModal({
 
         {hasKnownOpenInvoice ? (
           <Alert variant="danger" className="small">
-            Ada {openInvoiceCount} tagihan aktif. Backend akan menolak approval sampai tagihan selesai.
+            Ada {openInvoiceCount} tagihan aktif. Sistem akan menolak persetujuan sampai tagihan selesai.
           </Alert>
         ) : (
           <Alert variant="info" className="small">
-            Setujui pengajuan saja. Final keluar tetap aksi terpisah.
+            Setujui jadwal keluar saja. Keluar final tetap aksi terpisah.
           </Alert>
         )}
 
@@ -92,14 +92,14 @@ export default function ApproveCheckoutModal({
             id="checkout-final-separate"
             checked={checklist.finalSeparate}
             onChange={() => handleToggle('finalSeparate')}
-            label="Saya paham approval ini belum melepas kamar."
+            label="Saya paham persetujuan ini belum melepas kamar."
           />
           <Form.Check
             type="checkbox"
             id="checkout-invoice-guard"
             checked={checklist.invoiceGuard}
             onChange={() => handleToggle('invoiceGuard')}
-            label="Tagihan aktif tetap menjadi blocker final checkout."
+            label="Tagihan aktif tetap memblokir keluar final."
           />
           <Form.Check
             type="checkbox"
@@ -115,7 +115,7 @@ export default function ApproveCheckoutModal({
           <Form.Control
             as="textarea"
             rows={3}
-            placeholder="Opsional, contoh: jadwal disetujui, final checkout menyusul."
+            placeholder="Opsional, contoh: jadwal disetujui, keluar final menyusul."
             value={reviewNotes}
             onChange={(event) => setReviewNotes(event.target.value)}
           />

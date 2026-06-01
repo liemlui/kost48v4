@@ -78,7 +78,7 @@ function getAmountImpact(item: PaymentSubmission, amountTone: PaymentAmountTone)
     return 'Parsial: blocker tetap ada sampai lunas.';
   }
   if (amountTone === 'OVERPAY') {
-    return 'Nominal lebih. Backend bisa menolak.';
+    return 'Nominal lebih. Sistem bisa menolak.';
   }
   if (amountTone === 'EXACT') {
     return 'Jika lunas, blocker bisa terbuka.';
@@ -188,7 +188,7 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
     {
       id: 'mutation-understood',
       label: 'Saya paham approve dapat memengaruhi tagihan, masa sewa, kamar, meter, atau deposit.',
-      helper: 'Payment approval adalah flow sensitif dan tetap mengikuti guard backend.',
+      helper: 'Persetujuan pembayaran adalah alur sensitif dan tetap mengikuti pengaman sistem.',
       required: true,
       tone: 'info',
     },
@@ -207,7 +207,7 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
   if (amountTone === 'OVERPAY') {
     checklist.push({
       id: 'overpay-understood',
-      label: 'Saya paham nominal lebih besar dan backend bisa menolak approve.',
+      label: 'Saya paham nominal lebih besar dan sistem bisa menolak persetujuan.',
       helper: 'Koreksi dengan tenant lebih aman jika nominal memang salah.',
       required: true,
       tone: 'danger',
@@ -228,7 +228,7 @@ export function getPaymentReviewSafety(item: PaymentSubmission | null | undefine
   if (!hasProof && item) approveLabel = 'Bukti Belum Ada';
   else if (isDeposit) approveLabel = 'Setujui Deposit Titipan';
   else if (amountTone === 'PARTIAL') approveLabel = 'Setujui Pembayaran Parsial';
-  else if (amountTone === 'OVERPAY') approveLabel = 'Kirim untuk Dicek Backend';
+  else if (amountTone === 'OVERPAY') approveLabel = 'Kirim untuk Dicek Sistem';
   else if (amountTone === 'UNKNOWN') approveLabel = 'Setujui Setelah Cek Manual';
 
   const approveDisabledReason = blockers[0]?.message;

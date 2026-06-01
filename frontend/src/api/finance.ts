@@ -60,6 +60,49 @@ export type BalanceSheetDraft = {
   note: string;
 };
 
+export type OwnerDashboardKpi = {
+  totalRevenueRupiah: number;
+  totalRevenuePrevMonthRupiah: number;
+  totalRevenueChangePercent: number;
+  netProfitRupiah: number;
+  netProfitPrevMonthRupiah: number;
+  netProfitChangePercent: number;
+  netProfitMarginPercent: number;
+  occupancyRatePercent: number;
+  occupancyRatePrevMonthPercent: number | null;
+  occupancyRateChangePercent: number | null;
+  netCashFlowRupiah: number;
+  netCashFlowPrevMonthRupiah: number;
+  netCashFlowChangePercent: number;
+};
+
+export type OwnerDashboardSignal = {
+  type: string;
+  count: number;
+  totalRupiah?: number;
+  route: string;
+};
+
+export type OwnerDashboardTrendMonth = {
+  year: number;
+  month: number;
+  revenue: number;
+  expense: number;
+  netProfit: number;
+};
+
+export type OwnerDashboard = {
+  year: number;
+  month: number;
+  grade: string;
+  score: number;
+  headline: string;
+  kpi: OwnerDashboardKpi;
+  signals: OwnerDashboardSignal[];
+  trend6Months: OwnerDashboardTrendMonth[];
+  generatedAt: string;
+};
+
 function params(year?: number, month?: number) {
   return { ...(year ? { year } : {}), ...(month ? { month } : {}) };
 }
@@ -81,5 +124,10 @@ export async function fetchFormalRatiosReadiness() {
 
 export async function fetchBalanceSheetDraft(year?: number, month?: number) {
   const response = await client.get<ApiEnvelope<BalanceSheetDraft>>('/finance/balance-sheet/draft', { params: params(year, month) });
+  return response.data.data;
+}
+
+export async function fetchOwnerDashboard(year?: number, month?: number) {
+  const response = await client.get<ApiEnvelope<OwnerDashboard>>('/finance/owner-dashboard', { params: params(year, month) });
   return response.data.data;
 }

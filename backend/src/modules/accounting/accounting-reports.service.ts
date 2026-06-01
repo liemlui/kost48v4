@@ -1009,6 +1009,404 @@ export class AccountingReportsService {
   }
 
 
+  async cashflow(query: TrialBalanceQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    const asOf = query.asOf ? new Date(query.asOf) : new Date();
+    asOf.setHours(23, 59, 59, 999);
+    const year = asOf.getUTCFullYear();
+    const month = asOf.getUTCMonth() + 1;
+    const periodStart = new Date(Date.UTC(year, month - 1, 1));
+    const periodEnd = new Date(Date.UTC(year, month, 0));
+    periodEnd.setUTCHours(23, 59, 59, 999);
+
+    const [cashAccounts, journalLines, openingSums] = await Promise.all([
+      (this.prisma as any).cashAccount.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } }),
+      (this.prisma as any).journalLine.findMany({
+        where: {
+          journalEntry: {
+            status: 'POSTED' as any,
+            entryDate: { gte: periodStart, lte: periodEnd },
+          },
+        },
+        include: {
+          journalEntry: { select: { id: true, entryNumber: true, sourceType: true, sourceId: true, memo: true, entryDate: true } },
+          chartOfAccount: { select: { id: true, code: true, name: true, type: true } },
+          cashAccount: { select: { id: true, name: true, accountType: true } },
+        },
+        orderBy: { id: 'asc' },
+      }),
+      (this.prisma as any).openingBalanceLine.findMany({
+        where: {
+          batch: { status: 'POSTED' as any },
+          chartOfAccount: { type: 'ASSET' as any, code: { startsWith: '11' } },
+        },
+        select: { chartOfAccountId: true, debitRupiah: true, creditRupiah: true },
+      }),
+    ]);
+
+    // Classify cash accounts
+    const cashAccountIds = new Set(cashAccounts.map((ca: any) => ca.chartOfAccountId));
+    const cashCOACodes = new Set(cashAccounts.map((ca: any) => {
+      // find COA code from journal lines
+      return null;
+    }));
+
+    // Build operating/investing/financing classification
+    const operatingCashIn: Array<{ sourceType: string; amountRupiah: number; count: number }> = [];
+    const operatingCashOut: Array<{ sourceType: string; amountRupiah: number; count: number }> = [];
+    let investingCashIn = 0;
+    let investingCashOut = 0;
+    let financingCashIn = 0;
+    let financingCashOut = 0;
+    let operatingInTotal = 0;
+    let operatingOutTotal = 0;
+
+    // Group by source type for operating classification
+    const sourceBuckets = new Map<string, { amount: number; count: number }>();
+    const sourceTypeSet = new Set<string>();
+
+    for (const line of journalLines) {
+      const sourceType = String(line.journalEntry?.sourceType ?? 'UNKNOWN');
+      const coaType = String(line.chartOfAccount?.type ?? '');
+      const debit = Number(line.debitRupiah ?? 0);
+      const credit = Number(line.creditRupiah ?? 0);
+
+      // Only cash-related accounts (ASSET type with code starting with 11)
+      const isCashAccount = line.chartOfAccount?.code && String(line.chartOfAccount.code).startsWith('11');
+      if (!isCashAccount) continue;
+
+      // Cash in: debit on cash account
+      if (debit > 0) {
+        sourceTypeSet.add(sourceType);
+        const current = sourceBuckets.get(sourceType) ?? { amount: 0, count: 0 };
+        current.amount += debit;
+        current.count += 1;
+        sourceBuckets.set(sourceType, current);
+        operatingInTotal += debit;
+      }
+      // Cash out: credit on cash account
+      if (credit > 0) {
+        const current = sourceBuckets.get(sourceType) ?? { amount: 0, count: 0 };
+        current.amount -= credit;
+        current.count += 1;
+        sourceBuckets.set(sourceType, current);
+        operatingOutTotal += credit;
+      }
+    }
+
+    // Classify source types
+    for (const [sourceType, data] of sourceBuckets) {
+      const absAmount = Math.abs(data.amount);
+      if (sourceType === 'INVOICE_PAYMENT' || sourceType === 'WIFI_SALE') {
+        operatingCashIn.push({ sourceType, amountRupiah: absAmount, count: data.count });
+      } else if (sourceType === 'EXPENSE') {
+        operatingCashOut.push({ sourceType, amountRupiah: absAmount, count: data.count });
+      } else if (sourceType === 'FIXED_ASSET' || sourceType === 'DEPRECIATION') {
+        investingCashOut += absAmount;
+      } else if (sourceType === 'OPENING_BALANCE') {
+        financingCashIn += absAmount;
+      } else {
+        // fallback to operating
+        if (data.amount > 0) operatingCashIn.push({ sourceType, amountRupiah: absAmount, count: data.count });
+        else operatingCashOut.push({ sourceType, amountRupiah: absAmount, count: data.count });
+      }
+    }
+
+    // Get cash account balances
+    const cashAccountBalances = cashAccounts.map((ca: any) => ({
+      id: ca.id,
+      name: ca.name,
+      accountType: ca.accountType,
+      currentBalanceRupiah: Number(ca.currentBalanceRupiah ?? 0),
+      openingBalanceRupiah: Number(ca.openingBalanceRupiah ?? 0),
+    }));
+    const totalCashOpening = cashAccountBalances.reduce((sum: number, ca: any) => sum + ca.openingBalanceRupiah, 0);
+    const totalCashCurrent = cashAccountBalances.reduce((sum: number, ca: any) => sum + ca.currentBalanceRupiah, 0);
+
+    // Opening balance from journal if cash account balances not set
+    const openingBalanceFromJournal = openingSums.reduce(
+      (sum: number, row: any) => sum + Number(row.debitRupiah ?? 0) - Number(row.creditRupiah ?? 0),
+      0,
+    );
+
+    const netOperating = operatingInTotal - operatingOutTotal;
+    const netInvesting = investingCashIn - investingCashOut;
+    const netFinancing = financingCashIn - financingCashOut;
+    const netCashflow = netOperating + netInvesting + netFinancing;
+    const cashBeginning = totalCashOpening || openingBalanceFromJournal;
+    const cashEnding = totalCashCurrent || (cashBeginning + operatingInTotal - operatingOutTotal);
+
+    return {
+      asOf: asOf.toISOString().slice(0, 10),
+      period: {
+        year,
+        month,
+        startDate: periodStart.toISOString().slice(0, 10),
+        endDate: periodEnd.toISOString().slice(0, 10),
+      },
+      basis: 'LEDGER_CASHFLOW_DIRECT_METHOD_F1',
+      ledgerBacked: true,
+      formalStatementReady: cashAccounts.length > 0,
+      cashAccounts: cashAccountBalances,
+      operating: {
+        cashIn: operatingCashIn,
+        cashOut: operatingCashOut,
+        totalInRupiah: operatingInTotal,
+        totalOutRupiah: operatingOutTotal,
+        netRupiah: netOperating,
+      },
+      investing: {
+        totalInRupiah: investingCashIn,
+        totalOutRupiah: investingCashOut,
+        netRupiah: netInvesting,
+      },
+      financing: {
+        totalInRupiah: financingCashIn,
+        totalOutRupiah: financingCashOut,
+        netRupiah: netFinancing,
+      },
+      totals: {
+        netCashflowRupiah: netCashflow,
+        cashBeginningRupiah: cashBeginning,
+        cashEndingRupiah: cashEnding,
+      },
+      note: cashAccounts.length > 0
+        ? 'Cashflow menggunakan CashAccount balance untuk saldo awal/akhir. Operating terklasifikasi via source type journal.'
+        : 'Belum ada CashAccount. Cashflow hanya membaca journal line pada akun tipe ASSET kode 11xx. Buat CashAccount untuk saldo formal.',
+    };
+  }
+
+  async financialRatios(query: TrialBalanceQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    const trial = await this.trialBalance(query);
+    const pnl = await this.profitLoss(query);
+    const bs = await this.balanceSheet(query);
+
+    const lines = (trial.lines ?? []) as Array<{
+      type: string; code: string; balanceRupiah: number; debitRupiah: number; creditRupiah: number;
+    }>;
+
+    // Calculate current assets (ASSET type, code starts with 11, 12, 13, 14, not 15)
+    const currentAssets = lines
+      .filter((l) => l.type === 'ASSET' && !String(l.code).startsWith('15'))
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Current liabilities (LIABILITY type, code starts with 21)
+    const currentLiabilities = lines
+      .filter((l) => l.type === 'LIABILITY' && String(l.code).startsWith('21'))
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Total liabilities
+    const totalLiabilities = lines
+      .filter((l) => l.type === 'LIABILITY')
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Total equity
+    const totalEquity = lines
+      .filter((l) => l.type === 'EQUITY')
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Total assets
+    const totalAssets = lines
+      .filter((l) => l.type === 'ASSET')
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Revenue
+    const totalRevenue = lines
+      .filter((l) => l.type === 'REVENUE')
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Gross profit (Revenue - COGS)
+    const totalCogs = lines
+      .filter((l) => l.type === 'COGS')
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    const grossProfit = totalRevenue - totalCogs;
+    // Net profit from P&L
+    const netProfit = pnl.totals?.netProfitRupiah ?? 0;
+    const netProfitMargin = pnl.totals?.netProfitMarginPercent ?? 0;
+    // Cash & bank (ASSET code 1100-1199)
+    const cashAndBank = lines
+      .filter((l) => l.type === 'ASSET' && String(l.code).startsWith('11'))
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // Inventory (ASSET code 14xx)
+    const inventory = lines
+      .filter((l) => l.type === 'ASSET' && String(l.code).startsWith('14'))
+      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+
+    const currentRatio = currentLiabilities > 0 ? Math.round((currentAssets / currentLiabilities) * 100) / 100 : 0;
+    const quickRatio = currentLiabilities > 0 ? Math.round(((currentAssets - inventory) / currentLiabilities) * 100) / 100 : 0;
+    const cashRatio = currentLiabilities > 0 ? Math.round((cashAndBank / currentLiabilities) * 100) / 100 : 0;
+    const debtToEquity = totalEquity > 0 ? Math.round((totalLiabilities / totalEquity) * 100) / 100 : 0;
+    const debtRatio = totalAssets > 0 ? Math.round((totalLiabilities / totalAssets) * 100) / 100 : 0;
+    const grossProfitMargin = totalRevenue > 0 ? Math.round((grossProfit / totalRevenue) * 10000) / 100 : 0;
+    const roa = totalAssets > 0 ? Math.round((netProfit / totalAssets) * 10000) / 100 : 0;
+    const roce = (totalAssets - currentLiabilities) > 0
+      ? Math.round((netProfit / (totalAssets - currentLiabilities)) * 10000) / 100
+      : 0;
+    const expenseRatio = totalRevenue > 0 ? Math.round((pnl.totals?.expenseRupiah ?? 0 / totalRevenue) * 10000) / 100 : 0;
+    const occupancyRate = bs.statement?.occupancyRate ?? 0;
+
+    return {
+      asOf: trial.asOf,
+      basis: 'LEDGER_FINANCIAL_RATIOS_F2',
+      ledgerBacked: trial.isBalanced && bs.ready,
+      formalStatementReady: trial.isBalanced && bs.ready,
+      readiness: {
+        trialBalanceBalanced: trial.isBalanced,
+        balanceSheetReady: bs.ready,
+        cashAndBankAvailable: cashAndBank > 0 || cashAndBank < 0,
+        currentLiabilitiesAvailable: currentLiabilities > 0,
+        equityAvailable: totalEquity >= 0,
+      },
+      liquidity: {
+        currentRatio,
+        quickRatio,
+        cashRatio,
+        workingCapitalRupiah: currentAssets - currentLiabilities,
+        label: currentRatio >= 2 ? 'BAIK' : currentRatio >= 1 ? 'CUKUP' : 'RENDAH',
+      },
+      profitability: {
+        netProfitMarginPercent: netProfitMargin,
+        grossProfitMarginPercent: grossProfitMargin,
+        returnOnAssetsPercent: roa,
+        returnOnCapitalEmployedPercent: roce,
+        label: netProfitMargin >= 20 ? 'BAIK' : netProfitMargin >= 10 ? 'CUKUP' : 'RENDAH',
+      },
+      solvency: {
+        debtToEquity,
+        debtRatio,
+        label: debtToEquity <= 1 ? 'RENDAH' : debtToEquity <= 2 ? 'CUKUP' : 'TINGGI',
+      },
+      efficiency: {
+        expenseRatioPercent: expenseRatio,
+        occupancyRatePercent: occupancyRate,
+        label: expenseRatio <= 50 ? 'EFISIEN' : expenseRatio <= 70 ? 'CUKUP' : 'BOROS',
+      },
+      note: trial.isBalanced && bs.ready
+        ? 'Rasio keuangan dihitung dari Trial Balance POSTED. Data ini siap digunakan untuk analisis formal.'
+        : 'Rasio bersifat parsial karena Trial Balance belum balanced atau Balance Sheet belum siap. Beberapa rasio mungkin 0.',
+    };
+  }
+
+  async profitLossDetail(query: TrialBalanceQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    const current = await this.profitLoss(query);
+
+    // Calculate previous period
+    const baseDate = query.asOf ? new Date(query.asOf) : new Date();
+    const year = query.year ?? baseDate.getUTCFullYear();
+    const month = query.month ?? baseDate.getUTCMonth() + 1;
+    let prevYear = year;
+    let prevMonth = month - 1;
+    if (prevMonth <= 0) { prevMonth += 12; prevYear -= 1; }
+
+    const previous = await this.profitLoss({ year: prevYear, month: prevMonth });
+
+    const changePercent = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 10000) / 100;
+    };
+
+    const buildLinesWithPrev = (type: string): any[] => {
+      const currentLines: any[] = (current.lines as any)?.[type] ?? [];
+      const prevLines: any[] = (previous.lines as any)?.[type] ?? [];
+      const prevMap = new Map(prevLines.map((l: any) => [l.code, l]));
+      return currentLines.map((line: any) => {
+        const prev = prevMap.get(line.code);
+        const prevAmount = prev?.amountRupiah ?? 0;
+        const amt = line.amountRupiah ?? line.balanceRupiah ?? 0;
+        return {
+          ...line,
+          amountRupiah: amt,
+          prevAmountRupiah: prevAmount,
+          changePercent: changePercent(amt, prevAmount),
+        };
+      });
+    };
+
+    return {
+      asOf: current.asOf,
+      period: current.period,
+      basis: 'LEDGER_OPERATIONAL_PNL_WITH_PREV_PERIOD_F3',
+      ledgerBacked: current.ledgerBacked,
+      formalStatementReady: current.formalStatementReady,
+      current: {
+        revenueLines: buildLinesWithPrev('revenue'),
+        cogsLines: buildLinesWithPrev('cogs'),
+        expenseLines: buildLinesWithPrev('expenses'),
+        totals: current.totals,
+      },
+      previous: {
+        totals: previous.totals,
+      },
+      change: {
+        revenueChangePercent: changePercent(current.totals?.revenueRupiah ?? 0, previous.totals?.revenueRupiah ?? 0),
+        expenseChangePercent: changePercent(current.totals?.expenseRupiah ?? 0, previous.totals?.expenseRupiah ?? 0),
+        netProfitChangePercent: changePercent(current.totals?.netProfitRupiah ?? 0, previous.totals?.netProfitRupiah ?? 0),
+        revenueRupiah: (current.totals?.revenueRupiah ?? 0) - (previous.totals?.revenueRupiah ?? 0),
+        expenseRupiah: (current.totals?.expenseRupiah ?? 0) - (previous.totals?.expenseRupiah ?? 0),
+        netProfitRupiah: (current.totals?.netProfitRupiah ?? 0) - (previous.totals?.netProfitRupiah ?? 0),
+      },
+      closing: current.closing,
+      note: 'P&L Detail menambahkan perbandingan month-over-month dengan perubahan absolut dan persen. Closing info diambil dari periode berjalan.',
+    };
+  }
+
+  async balanceSheetDetail(query: TrialBalanceQueryDto = {}) {
+    await this.schemaGuard.assertReady();
+    const current = await this.balanceSheet(query);
+
+    // Calculate previous period (last month)
+    const baseDate = query.asOf ? new Date(query.asOf) : new Date();
+    const year = query.year ?? baseDate.getUTCFullYear();
+    const month = query.month ?? baseDate.getUTCMonth() + 1;
+    let prevYear = year;
+    let prevMonth = month - 1;
+    if (prevMonth <= 0) { prevMonth += 12; prevYear -= 1; }
+
+    const previous = await this.balanceSheet({ year: prevYear, month: prevMonth });
+
+    const changePercent = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 10000) / 100;
+    };
+
+    const buildStatement = (stmt: any) => ({
+      assetsRupiah: stmt?.assetsRupiah ?? 0,
+      currentAssetsRupiah: stmt?.currentAssetsRupiah ?? 0,
+      fixedAssetsRupiah: stmt?.netFixedAssetsRupiah ?? 0,
+      liabilitiesRupiah: stmt?.liabilitiesRupiah ?? 0,
+      equityRupiah: stmt?.equityIncludingCurrentProfitRupiah ?? 0,
+      balanced: stmt?.balanced ?? false,
+    });
+
+    const currentStmt = buildStatement(current.statement);
+    const prevStmt = buildStatement(previous.statement);
+
+    return {
+      asOf: current.asOf,
+      basis: 'LEDGER_BALANCE_SHEET_DETAIL_F3',
+      ledgerBacked: current.ledgerBacked,
+      formalStatementReady: current.formalStatementReady,
+      readiness: current.readiness,
+      trialBalancePreview: current.trialBalancePreview,
+      closing: current.closing,
+      current: {
+        statement: currentStmt,
+        lines: current.lines,
+        assetRegisterDisclosure: current.assetRegisterDisclosure,
+      },
+      previous: {
+        statement: prevStmt,
+      },
+      change: {
+        assetsChangePercent: changePercent(currentStmt.assetsRupiah, prevStmt.assetsRupiah),
+        liabilitiesChangePercent: changePercent(currentStmt.liabilitiesRupiah, prevStmt.liabilitiesRupiah),
+        equityChangePercent: changePercent(currentStmt.equityRupiah, prevStmt.equityRupiah),
+        assetsRupiah: currentStmt.assetsRupiah - prevStmt.assetsRupiah,
+        liabilitiesRupiah: currentStmt.liabilitiesRupiah - prevStmt.liabilitiesRupiah,
+        equityRupiah: currentStmt.equityRupiah - prevStmt.equityRupiah,
+      },
+      note: current.formalStatementReady
+        ? 'Balance Sheet Detail menambahkan perbandingan month-over-month. Klasifikasi sama dengan Balance Sheet utama.'
+        : 'Balance Sheet belum siap formal. Detail hanya sebagai preview.',
+    };
+  }
+
   private formatJournalEntry(entry: any) {
     return {
       id: entry.id,

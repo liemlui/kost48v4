@@ -39,7 +39,7 @@ export function getCheckoutReadinessSummary(invoices: Invoice[], hasApprovedChec
   if (openInvoices.length) {
     return {
       tone: 'danger' as const,
-      title: 'Belum bisa final checkout',
+      title: 'Belum bisa final keluar',
       message: getInvoiceBlockerCopy(invoices),
     };
   }
@@ -48,14 +48,14 @@ export function getCheckoutReadinessSummary(invoices: Invoice[], hasApprovedChec
     return {
       tone: 'warning' as const,
       title: 'Tagihan clear, cek keputusan keluar',
-      message: 'Tagihan sudah tidak memblokir. Pastikan rencana keluar tenant sudah disetujui atau alasan checkout sudah jelas sebelum final.',
+      message: 'Tagihan sudah tidak memblokir. Pastikan rencana keluar penghuni sudah disetujui atau alasan keluar sudah jelas sebelum final.',
     };
   }
 
   return {
     tone: 'success' as const,
-    title: 'Bisa final checkout',
-    message: 'Tagihan clear dan rencana keluar sudah disetujui. Finalkan hanya setelah cek kamar dan catatan meter akhir siap.',
+    title: 'Bisa final keluar',
+    message: 'Tagihan sudah aman dan rencana keluar sudah disetujui. Finalkan hanya setelah cek kamar dan catatan meter akhir siap.',
   };
 }
 
@@ -83,17 +83,17 @@ export function buildCheckoutReadinessItems({
   return [
     {
       id: 'invoice-clearance',
-      label: openInvoices.length ? 'Tagihan belum clear' : 'Tagihan sudah clear',
+      label: openInvoices.length ? 'Tagihan belum aman' : 'Tagihan sudah aman',
       description: openInvoices.length
         ? getInvoiceBlockerCopy(invoices)
-        : 'Tidak ada tagihan aktif. Final keluar tidak terblokir oleh tagihan.',
+        : 'Tidak ada tagihan aktif. Proses keluar final tidak terblokir oleh tagihan.',
       state: openInvoices.length ? 'block' : 'pass',
     },
     {
       id: 'draft-invoices',
       label: draftInvoices.length ? 'Ada tagihan draft' : 'Tidak ada tagihan draft terbuka',
       description: draftInvoices.length
-        ? 'DRAFT tetap dihitung sebagai tagihan aktif. Batalkan atau selesaikan dulu sebelum final checkout.'
+        ? 'Draft tetap dihitung sebagai tagihan aktif. Batalkan atau selesaikan dulu sebelum keluar final.'
         : 'Tidak ada draft yang menggantung untuk masa sewa ini.',
       state: draftInvoices.length ? 'block' : 'pass',
     },
@@ -102,17 +102,17 @@ export function buildCheckoutReadinessItems({
       label: overdueInvoices.length ? 'Ada tagihan terlambat' : 'Tidak ada tagihan terlambat aktif',
       description: overdueInvoices.length
         ? 'Selesaikan tagihan terlambat sebelum melepas kamar.'
-        : 'Tidak ada tagihan overdue yang masih aktif.',
+        : 'Tidak ada tagihan terlambat yang masih aktif.',
       state: overdueInvoices.length ? 'block' : 'pass',
     },
     {
       id: 'checkout-request',
-      label: hasApprovedCheckoutRequest ? 'Rencana keluar sudah disetujui' : hasPendingCheckoutRequest ? 'Rencana keluar masih menunggu review' : 'Keputusan keluar perlu dicek',
+      label: hasApprovedCheckoutRequest ? 'Rencana keluar sudah disetujui' : hasPendingCheckoutRequest ? 'Rencana keluar masih menunggu dicek' : 'Keputusan keluar perlu dicek',
       description: hasApprovedCheckoutRequest
-        ? 'Approval rencana keluar hanya menyetujui jadwal. Kamar baru lepas setelah final checkout.'
+        ? 'Persetujuan rencana keluar hanya menyetujui jadwal. Kamar baru lepas setelah keluar final.'
         : hasPendingCheckoutRequest
-          ? 'Review dulu pengajuan keluar tenant sebelum final checkout.'
-          : 'Jika checkout manual tanpa request, pastikan alasan keluar dan tanggalnya benar.',
+          ? 'Review dulu pengajuan keluar penghuni sebelum keluar final.'
+          : 'Jika keluar manual tanpa pengajuan, pastikan alasan keluar dan tanggalnya benar.',
       state: hasApprovedCheckoutRequest ? 'pass' : hasPendingCheckoutRequest ? 'warn' : 'info',
     },
     {
@@ -126,17 +126,17 @@ export function buildCheckoutReadinessItems({
     {
       id: 'room-check',
       label: 'Cek kondisi kamar dan barang',
-      description: 'Final keluar melepas kamar. Keputusan refund/potong deposit sebaiknya mengikuti hasil cek kondisi kamar.',
+      description: 'Keluar final melepas kamar. Keputusan pengembalian/potongan dana titipan sebaiknya mengikuti hasil cek kondisi kamar.',
       state: 'warn',
     },
     {
       id: 'deposit-settlement',
-      label: isFinished ? (depositHeld ? 'Deposit masih perlu diproses' : 'Deposit sudah selesai') : 'Deposit diproses setelah final checkout',
+      label: isFinished ? (depositHeld ? 'Dana titipan masih perlu diproses' : 'Dana titipan sudah selesai') : 'Dana titipan diproses setelah keluar final',
       description: isFinished
         ? depositHeld
-          ? 'Masa sewa sudah selesai/cancelled tetapi deposit masih ditahan. Proses refund, potongan, atau hangus setelah cek kamar.'
+          ? 'Masa sewa sudah selesai/dibatalkan tetapi dana titipan masih tersimpan. Proses pengembalian, potongan, atau hangus setelah cek kamar.'
           : 'Status deposit tidak lagi menggantung.'
-        : 'Deposit adalah dana titipan. Jangan dianggap omzet; proses terpisah setelah tenant keluar dan kamar dicek.',
+        : 'Dana titipan adalah kewajiban kos. Jangan dianggap omzet; proses terpisah setelah penghuni keluar dan kamar dicek.',
       state: isFinished ? (depositHeld ? 'warn' : 'pass') : 'info',
     },
   ];

@@ -350,7 +350,7 @@ export default function RenewRequestsAdminPage() {
 
           <div className="renew-approval-hero mb-3">
             <div>
-              <div className="section-kicker">Approval checkpoint</div>
+              <div className="section-kicker">Checkpoint Persetujuan</div>
               <h4>{getRoomCode(approveTarget)} · {getTenantName(approveTarget)}</h4>
               <p>Catat meter. Sistem membuat tagihan renew.</p>
             </div>
@@ -390,7 +390,7 @@ export default function RenewRequestsAdminPage() {
                   points={[
                     { id: 'current', label: 'Akhir masa sewa sekarang', value: formatDate((approveTarget as any)?.stay?.plannedCheckOutDate), status: 'INFO', statusLabel: 'Saat ini' },
                     { id: 'requested', label: 'Diajukan tenant', value: formatDate(approveTarget?.requestedCheckOutDate), status: 'WARNING', statusLabel: 'Request' },
-                    { id: 'approved', label: 'Akan disetujui', value: plannedCheckOutDate ? formatDate(plannedCheckOutDate) : formatDate(approveTarget?.requestedCheckOutDate), status: 'SUCCESS', statusLabel: 'Approval' },
+                    { id: 'approved', label: 'Akan disetujui', value: plannedCheckOutDate ? formatDate(plannedCheckOutDate) : formatDate(approveTarget?.requestedCheckOutDate), status: 'SUCCESS', statusLabel: 'Disetujui' },
                   ]}
                 />
                 <Form.Group className="mb-3 mt-3">
@@ -441,7 +441,7 @@ export default function RenewRequestsAdminPage() {
                   <div className="renew-ack-list">
                     {approvalSafety.checklist.map((item) => <div key={item}>✓ {item}</div>)}
                   </div>
-                  <Form.Check className="mt-3" type="checkbox" checked={approvalAcknowledged} onChange={(e) => { setApprovalAcknowledged(e.target.checked); if (e.target.checked) setApproveFormError(''); }} label="Saya sudah cek dan siap approve." />
+                  <Form.Check className="mt-3" type="checkbox" checked={approvalAcknowledged} onChange={(e) => { setApprovalAcknowledged(e.target.checked); if (e.target.checked) setApproveFormError(''); }} label="Saya sudah cek dan siap menyetujui." />
                 </div>
               ) : null}
               <div className="decision-section-card mt-3">

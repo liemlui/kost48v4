@@ -1,377 +1,305 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
+import { Alert, Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { listPublicRooms } from "../../api/bookings";
 import CurrencyDisplay from "../../components/common/CurrencyDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
+import Kost48LogoMark from "../../components/common/Kost48LogoMark";
 import type { PricingTerm, PublicRoom } from "../../types";
 import { useAuth } from "../../context/AuthContext";
 import { useTenantPortalStage } from "../../hooks/useTenantPortalStage";
-import { getKost48LogoUrl, getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
+import { getKost48RoomGallery, resolveKost48MarketingImageUrl } from "../../data/kost48Assets";
+import { officialKost48Location } from "../../data/officialKost48Content";
 import {
   getBestPublicRoomRate,
   getPublicRoomBathroom,
   getPublicRoomBathroomLabel,
-  getPublicRoomBusinessHighlight,
   getPublicRoomCooling,
   getPublicRoomCoolingLabel,
-  getPublicRoomInitialCostEstimate,
   getPublicRoomAvailabilityDisplay,
   getPublicRoomVisibleAmenities,
   isPublicRoomBookable,
 } from "../../utils/publicRoomDisplay";
 
-const bathroomOptions = [
-  { value: "", label: "Semua" },
-  { value: "inside", label: "Dalam" },
-  { value: "outside", label: "Luar" },
-] as const;
-
-const coolingOptions = [
-  { value: "", label: "Semua" },
-  { value: "ac", label: "AC" },
-  { value: "fan", label: "Kipas" },
-] as const;
-
-const sortOptions = [
-  { value: "price-asc", label: "Termurah" },
-  { value: "price-desc", label: "Termahal" },
-];
-
 type BathroomFilter = "" | "inside" | "outside";
 type CoolingFilter = "" | "ac" | "fan";
 type AvailFilter = "" | "bookable" | "occupied" | "checking";
-
-const availFilterOptions = [
-  { value: "", label: "Semua" },
-  { value: "bookable", label: "Kamar Kosong" },
-  { value: "occupied", label: "Kamar Terisi" },
-  { value: "checking", label: "Sedang Dicek" },
-] as const;
+type SortFilter = "price-asc" | "price-desc";
 
 const pricingTerm: PricingTerm = "MONTHLY";
-
-function getBestRate(room: PublicRoom, term: PricingTerm) {
-  return getBestPublicRoomRate(room, term);
-}
-
-function getSelectedUnit() {
-  return "/bulan";
-}
 
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
   const roomCode = room.code || `Kamar #${room.id}`;
-  const message = `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
-  return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const isChecking = String(room.status ?? "").toUpperCase() === "MAINTENANCE";
+  const message = isChecking
+    ? `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Saya lihat kamar sedang dicek. Boleh tanya estimasi kapan siap ditempati?`
+    : `Halo Admin KOST48, saya tertarik dengan kamar ${roomCode}. Boleh tanya ketersediaan atau estimasi kapan kosong?`;
+  return number
+    ? `https://wa.me/${number}?text=${encodeURIComponent(message)}`
+    : `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
-
-function getFeatureIcon(title: string, value: string) {
-  if (/kamar mandi/i.test(title)) return "🚿";
-  if (/pendingin/i.test(title)) return /ac/i.test(value) ? "❄️" : "🌬️";
-  return "✓";
-}
-
-function RoomFeatureTile({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="room-market-feature-tile">
-      <span className="room-market-feature-icon" aria-hidden="true">{getFeatureIcon(title, value)}</span>
-      <small>{title}</small>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-function RoomMarketImage({ room }: { room: PublicRoom }) {
-  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 6), [room.code, room.name]);
+// ── Room image carousel ────────────────────────────────────────────────────
+function RoomCardImage({ room }: { room: PublicRoom }) {
+  const localGallery = useMemo(() => getKost48RoomGallery(room.code, room.name, 5), [room.code, room.name]);
   const apiGallery = useMemo(
     () => (room.images ?? []).map((url) => resolveKost48MarketingImageUrl(url)).filter(Boolean) as string[],
     [room.images],
   );
-  const candidateImages = useMemo(
-    () => Array.from(new Set([...localGallery, ...apiGallery])),
-    [localGallery, apiGallery],
-  );
+  const candidates = useMemo(() => Array.from(new Set([...localGallery, ...apiGallery])), [localGallery, apiGallery]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
-  const [isHovered, setIsHovered] = useState(false);
-  const resolvedImages = candidateImages.filter((imageUrl) => !failedImages.has(imageUrl));
-  const activeImage = resolvedImages.length ? resolvedImages[activeIndex % resolvedImages.length] : null;
+  const [failed, setFailed] = useState<Set<string>>(() => new Set());
+  const [hovered, setHovered] = useState(false);
+  const resolved = candidates.filter((url) => !failed.has(url));
+  const active = resolved.length ? resolved[activeIndex % resolved.length] : null;
 
+  useEffect(() => { setActiveIndex(0); setFailed(new Set()); }, [room.id, candidates.join("|")]);
+  useEffect(() => { if (activeIndex >= resolved.length) setActiveIndex(0); }, [activeIndex, resolved.length]);
   useEffect(() => {
-    setActiveIndex(0);
-    setFailedImages(new Set());
-  }, [room.id, candidateImages.join('|')]);
+    if (!hovered || resolved.length <= 1) return undefined;
+    const t = window.setInterval(() => setActiveIndex((i) => (i + 1) % resolved.length), 1200);
+    return () => clearInterval(t);
+  }, [hovered, resolved.length]);
 
-  useEffect(() => {
-    if (activeIndex >= resolvedImages.length) setActiveIndex(0);
-  }, [activeIndex, resolvedImages.length]);
-
-  useEffect(() => {
-    if (!isHovered || resolvedImages.length <= 1) return undefined;
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % resolvedImages.length);
-    }, 1250);
-    return () => window.clearInterval(timer);
-  }, [isHovered, resolvedImages.length]);
-
-  const markImageFailed = (imageUrl: string) => {
-    setFailedImages((previous) => {
-      if (previous.has(imageUrl)) return previous;
-      const next = new Set(previous);
-      next.add(imageUrl);
-      return next;
-    });
-  };
+  const markFailed = (url: string) => setFailed((prev) => {
+    if (prev.has(url)) return prev;
+    return new Set([...prev, url]);
+  });
 
   return (
     <div
-      className={`room-market-image-wrap ${activeImage ? "" : "is-placeholder"}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`rm-card-img-wrap${active ? "" : " rm-card-img-empty"}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {activeImage ? (
+      {active ? (
         <img
-          key={activeImage}
-          src={activeImage}
-          alt="Foto kamar KOST48"
-          className="room-market-image"
-          onError={() => markImageFailed(activeImage)}
+          key={active}
+          src={active}
+          alt={`Foto kamar ${room.code}`}
+          className="rm-card-img"
+          onError={() => markFailed(active)}
         />
       ) : (
-        <div className="room-market-placeholder">
-          <span className="room-market-placeholder-icon">K48</span>
-          <strong>Foto kamar menyusul</strong>
+        <div className="rm-card-img-placeholder">
+          <span>K48</span>
+          <small>Foto menyusul</small>
         </div>
       )}
-      {resolvedImages.length > 1 ? (
-        <div className="room-market-slide-dots" aria-hidden="true">
-          {resolvedImages.slice(0, 6).map((imageUrl, index) => (
-            <span key={`${room.id}-dot-${imageUrl}`} className={index === activeIndex % resolvedImages.length ? 'active' : ''} />
+      {resolved.length > 1 && (
+        <div className="rm-card-img-dots" aria-hidden="true">
+          {resolved.slice(0, 5).map((_, i) => (
+            <span key={i} className={i === activeIndex % resolved.length ? "active" : ""} />
           ))}
         </div>
-      ) : null}
-      {resolvedImages.length > 1 ? <span className="room-market-image-counter">{(activeIndex % resolvedImages.length) + 1}/{resolvedImages.length}</span> : null}
+      )}
     </div>
   );
 }
 
-function PriceRow({ label, amount, unit }: { label: string; amount?: number | null; unit: string }) {
-  const value = Number(amount ?? 0);
-  return (
-    <div className="room-market-price-row">
-      <span>{label}</span>
-      <strong>{value > 0 ? <><CurrencyDisplay amount={value} /> <small>{unit}</small></> : "Tanya admin"}</strong>
-    </div>
-  );
-}
-
-function RoomMarketCard({
+// ── Room card ──────────────────────────────────────────────────────────────
+function RoomCard({
   room,
   isTenant,
-  pricingTerm,
   isCompared,
   compareDisabled,
   onToggleCompare,
 }: {
   room: PublicRoom;
   isTenant: boolean;
-  pricingTerm: PricingTerm;
   isCompared: boolean;
   compareDisabled: boolean;
   onToggleCompare: () => void;
 }) {
   const navigate = useNavigate();
-  const availability = getPublicRoomAvailabilityDisplay(room);
-  const isAvailable = availability.canBook;
-  const mainRate = getBestRate(room, pricingTerm);
-  const selectedUnit = getSelectedUnit();
-  const initialCost = getPublicRoomInitialCostEstimate(room, pricingTerm);
+  const avail = getPublicRoomAvailabilityDisplay(room);
+  const mainRate = getBestPublicRoomRate(room, pricingTerm);
+  const amenities = getPublicRoomVisibleAmenities(room).slice(0, 3);
 
-  const handleDetail = () => {
-    navigate(`/rooms/${room.id}/detail`, { state: { room } });
+  const goDetail = () => navigate(`/rooms/${room.id}/detail`, { state: { room } });
+  const goBook = () => navigate(isTenant ? `/portal/booking/${room.id}` : `/booking/${room.id}`, { state: { room } });
+
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    if ((e.target as HTMLElement).closest("button,a")) return;
+    goDetail();
   };
-
-  const handleBook = () => {
-    navigate(isTenant ? `/portal/booking/${room.id}` : `/booking/${room.id}`, { state: { room } });
-  };
-
-  const handleCardClick = (event: React.MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("button,a,input,select,textarea")) return;
-    handleDetail();
-  };
-
-  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const target = event.target as HTMLElement;
-    if (target.closest("button,a,input,select,textarea")) return;
-    event.preventDefault();
-    handleDetail();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    if ((e.target as HTMLElement).closest("button,a")) return;
+    e.preventDefault();
+    goDetail();
   };
 
   return (
-    <Card
-      className="room-market-card room-market-card-clickable h-100 border-0"
+    <article
+      className="rm-card"
       role="link"
       tabIndex={0}
       onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}
+      onKeyDown={handleKeyDown}
       aria-label={`Lihat detail ${room.name || room.code || `kamar ${room.id}`}`}
     >
-      <RoomMarketImage room={room} />
-      <button
-        type="button"
-        className={`room-market-compare-toggle ${isCompared ? "active" : ""}`}
-        onClick={(event) => { event.stopPropagation(); onToggleCompare(); }}
-        disabled={compareDisabled}
-        aria-pressed={isCompared}
-        aria-label={isCompared ? "Hapus dari perbandingan" : "Tambahkan kamar ke perbandingan"}
-        title={compareDisabled ? "Maksimal 3 kamar untuk dibandingkan" : isCompared ? "Hapus dari perbandingan" : "Tambahkan ke perbandingan"}
-      >
-        <span className="room-market-compare-symbol">{isCompared ? "✓" : "+"}</span>
-        <span>{isCompared ? "Dipilih" : "Bandingkan"}</span>
-      </button>
-      <span className={`room-market-status-badge ${availability.tone}`}>
-        {availability.label}
-      </span>
-      <Card.Body>
-        <div className="room-market-title-block">
-          <h2>{room.code || `Kamar ${room.id}`}</h2>
-          <p>{room.name || "Kamar KOST48 Surabaya"}</p>
-        </div>
-
-        <div className="room-market-features room-market-features-two">
-          <RoomFeatureTile title="Kamar mandi" value={getPublicRoomBathroomLabel(room)} />
-          <RoomFeatureTile title="Pendingin" value={getPublicRoomCoolingLabel(room)} />
-        </div>
-
-        <div className="room-market-amenities" aria-label="Fasilitas utama">
-          {getPublicRoomVisibleAmenities(room).map((name) => <span key={name}>{name}</span>)}
-        </div>
-
-        <div className="room-market-divider" />
-
-        <div className="room-market-main-price">
-          <strong><CurrencyDisplay amount={mainRate} /></strong>
-          <span>{selectedUnit}</span>
-        </div>
-
-        <div className="room-market-price-box">
-          <PriceRow label="Bulanan" amount={room.pricing?.monthlyRateRupiah} unit="/bln" />
-          <PriceRow label="Mingguan" amount={room.pricing?.weeklyRateRupiah} unit="/mgg" />
-          <PriceRow label="Harian" amount={room.pricing?.dailyRateRupiah} unit="/hari" />
-          <PriceRow label="Deposit" amount={room.defaultDepositRupiah} unit="" />
-        </div>
-
-        <p className="room-market-copy">{getPublicRoomBusinessHighlight(room)}</p>
-
-        <div className="room-market-booking-safety-note">
-          <strong>{availability.shortCopy}</strong>
-          {isAvailable ? <span> Aman setelah pembayaran disetujui.</span> : null}
-        </div>
-
-        {isAvailable ? (
-          <div className="room-market-price-box room-market-initial-cost-box">
-            <PriceRow label="Estimasi awal" amount={initialCost.total} unit="" />
-            <small>Sewa pertama + deposit.</small>
-          </div>
-        ) : null}
-
-        <div className="room-market-actions">
-          {isAvailable ? (
-            <Button className="w-100" onClick={handleBook}>Ajukan Booking</Button>
-          ) : null}
-          <a className="btn btn-outline-secondary w-100" href={buildWhatsAppUrl(room)} target="_blank" rel="noreferrer">
-            💬 {isAvailable ? "Tanya via WhatsApp" : "Tanya Ketersediaan"}
-          </a>
-        </div>
-      </Card.Body>
-    </Card>
-  );
-}
-
-function SegmentedFilter({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: readonly { value: string; label: string }[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="rooms-market-segment-group" aria-label={label}>
-      <div className="rooms-market-filter-label">{label}</div>
-      <div className="rooms-market-segment-options">
-        {options.map((option) => (
-          <button
-            key={option.value || "all"}
-            type="button"
-            className={value === option.value ? "active" : ""}
-            onClick={() => onChange(option.value)}
-            aria-pressed={value === option.value}
-          >
-            {option.label}
-          </button>
-        ))}
+      {/* Image */}
+      <div className="rm-card-img-shell">
+        <RoomCardImage room={room} />
+        <span className={`rm-card-badge rm-badge-${avail.tone}`}>{avail.label}</span>
+        <button
+          type="button"
+          className={`rm-card-compare-btn${isCompared ? " active" : ""}`}
+          onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
+          disabled={compareDisabled}
+          aria-pressed={isCompared}
+          title={compareDisabled ? "Maks. 3 kamar" : isCompared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
+        >
+          {isCompared ? "✓" : "+"}
+        </button>
       </div>
-    </div>
+
+      {/* Body */}
+      <div className="rm-card-body">
+        <div className="rm-card-title-row">
+          <div>
+            <div className="rm-card-code">{room.code || `Kamar ${room.id}`}</div>
+            <div className="rm-card-name">{room.name || "Kamar KOST48 Surabaya"}</div>
+          </div>
+        </div>
+
+        <div className="rm-card-specs">
+          <span>
+            {getPublicRoomBathroom(room) === "inside" ? "🚿" : "🪣"} {getPublicRoomBathroomLabel(room)}
+          </span>
+          <span>
+            {getPublicRoomCooling(room) === "ac" ? "❄️" : "🌬️"} {getPublicRoomCoolingLabel(room)}
+          </span>
+        </div>
+
+        {amenities.length > 0 && (
+          <div className="rm-card-amenities">
+            {amenities.map((a) => <span key={a}>{a}</span>)}
+          </div>
+        )}
+
+        <div className="rm-card-price-row">
+          <strong>
+            <CurrencyDisplay amount={mainRate} />
+          </strong>
+          <span>/bulan</span>
+          {mainRate === 0 && <span className="rm-card-price-ask">Tanya admin</span>}
+        </div>
+
+        <div className="rm-card-actions">
+          {avail.canBook && (
+            <Button size="sm" className="rm-btn-book" onClick={(e) => { e.stopPropagation(); goBook(); }}>
+              Ajukan Booking
+            </Button>
+          )}
+          <a
+            className="btn btn-sm btn-outline-secondary rm-btn-wa"
+            href={buildWhatsAppUrl(room)}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            💬 {avail.canBook ? "Tanya via WhatsApp" : "Tanya Ketersediaan"}
+          </a>
+          <button
+            type="button"
+            className="rm-btn-detail"
+            onClick={(e) => { e.stopPropagation(); goDetail(); }}
+          >
+            Lihat detail →
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
 
-function PublicTopbar() {
+// ── Chip filter ────────────────────────────────────────────────────────────
+function FilterChip({
+  label,
+  active,
+  onClick,
+}: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`rm-filter-chip${active ? " active" : ""}`}
+      onClick={onClick}
+      aria-pressed={active}
+    >
+      {label}
+    </button>
+  );
+}
+
+// ── Public topbar for rooms page ───────────────────────────────────────────
+function RoomsTopbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [logoBroken, setLogoBroken] = useState(false);
-  const logoUrl = getKost48LogoUrl();
+  const [iconBroken, setIconBroken] = useState(false);
+  const [textBroken, setTextBroken] = useState(false);
 
   return (
-    <header className="rooms-public-topbar">
-      <div className="rooms-public-brand">
-        {logoUrl && !logoBroken ? (
+    <header className="rm-topbar">
+      <button type="button" className="rm-topbar-brand" onClick={() => navigate("/")}>
+        {!iconBroken ? (
           <img
-            className="brand-mark rooms-public-logo"
-            src={logoUrl}
-            alt="Logo Kost48 Surabaya"
-            onError={() => setLogoBroken(true)}
+            className="rm-topbar-logo"
+            src="/room-images/logo-kost48-sby.webp"
+            alt=""
+            aria-hidden="true"
+            onError={() => setIconBroken(true)}
           />
         ) : (
-          <div className="brand-mark">K48</div>
+          <Kost48LogoMark size="small" />
         )}
-        <div>
-          <div className="brand-title">Kost48 Surabaya</div>
-          <div className="brand-subtitle">Surabaya Barat</div>
-        </div>
-      </div>
-      <nav className="rooms-public-nav" aria-label="Navigasi katalog">
+        {!textBroken ? (
+          <img
+            src="/room-images/logo-kost48-surabaya.webp"
+            alt="Kost 48 Surabaya"
+            className="rm-topbar-text-logo"
+            onError={() => setTextBroken(true)}
+          />
+        ) : (
+          <div className="rm-topbar-brand-text"><span>Kost48 Surabaya</span><small>Surabaya Barat</small></div>
+        )}
+      </button>
+
+      <nav className="rm-topbar-nav" aria-label="Navigasi">
         <button type="button" onClick={() => navigate("/")}>⌂ Beranda</button>
+        <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">📍 Maps</a>
+        <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">💬 WhatsApp</a>
+      </nav>
+
+      <div className="rm-topbar-user">
         {user ? (
           <>
             <Button
+              size="sm"
               variant="outline-secondary"
               onClick={() => navigate(user.role === "TENANT" ? "/portal/bookings" : "/dashboard")}
             >
               {user.role === "TENANT" ? "Portal Saya" : "Workspace"}
             </Button>
-            <Button variant="outline-danger" onClick={logout}>Logout</Button>
+            <Button size="sm" variant="outline-danger" onClick={logout}>Keluar</Button>
           </>
         ) : (
-          <Button onClick={() => navigate("/login")}>Masuk</Button>
+          <Button size="sm" onClick={() => navigate("/login")}>Masuk Portal</Button>
         )}
-      </nav>
+      </div>
     </header>
   );
 }
 
+// ── Main page ──────────────────────────────────────────────────────────────
 export default function PublicRoomsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [comparedRoomIds, setComparedRoomIds] = useState<number[]>([]);
   const comparePanelRef = useRef<HTMLDivElement | null>(null);
@@ -382,7 +310,7 @@ export default function PublicRoomsPage() {
   const bathroom = (searchParams.get("bathroom") ?? "") as BathroomFilter;
   const cooling = (searchParams.get("cooling") ?? "") as CoolingFilter;
   const avail = (searchParams.get("avail") ?? "") as AvailFilter;
-  const sort = searchParams.get("sort") ?? "price-asc";
+  const sort = (searchParams.get("sort") ?? "price-asc") as SortFilter;
 
   const query = useQuery({
     queryKey: ["public-rooms", { pricingTerm }],
@@ -404,129 +332,153 @@ export default function PublicRoomsPage() {
     });
 
     list = [...list].sort((a, b) => {
-      const aRate = getBestRate(a, pricingTerm);
-      const bRate = getBestRate(b, pricingTerm);
+      const aRate = getBestPublicRoomRate(a, pricingTerm);
+      const bRate = getBestPublicRoomRate(b, pricingTerm);
       return sort === "price-desc" ? bRate - aRate : aRate - bRate;
     });
 
     return list;
   }, [roomsFromApi, bathroom, cooling, avail, sort]);
 
-  const bookableCount = rooms.filter((room) => isPublicRoomBookable(room)).length;
-  const totalCount = rooms.length;
+  const bookableCount = rooms.filter((r) => isPublicRoomBookable(r)).length;
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
+
   const comparedRooms = useMemo(
-    () => comparedRoomIds
-      .map((id) => roomsFromApi.find((room) => room.id === id))
-      .filter((room): room is PublicRoom => Boolean(room)),
+    () => comparedRoomIds.map((id) => roomsFromApi.find((r) => r.id === id)).filter((r): r is PublicRoom => Boolean(r)),
     [comparedRoomIds, roomsFromApi],
   );
 
   const toggleCompare = (roomId: number) => {
-    setComparedRoomIds((current) => {
-      if (current.includes(roomId)) return current.filter((id) => id !== roomId);
-      if (current.length >= 3) return current;
-      return [...current, roomId];
+    setComparedRoomIds((prev) => {
+      if (prev.includes(roomId)) return prev.filter((id) => id !== roomId);
+      if (prev.length >= 3) return prev;
+      return [...prev, roomId];
     });
   };
 
-  const scrollToCompare = () => {
-    comparePanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const update = (next: Record<string, string>) => {
+    const p = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([k, v]) => { if (v) p.set(k, v); else p.delete(k); });
+    setSearchParams(p, { replace: true });
   };
 
-  const updateParams = (next: Record<string, string>) => {
-    const params = new URLSearchParams(searchParams);
-    Object.entries(next).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    });
-    setSearchParams(params, { replace: true });
-  };
+  const hasActiveFilter = !!(bathroom || cooling || avail || sort !== "price-asc");
 
   return (
-    <div className={isTenant ? "tenant-room-discovery-page" : "public-page-shell rooms-market-page"}>
-      {!isTenant ? <PublicTopbar /> : null}
-      <Container fluid="xl" className={isTenant ? "py-0" : "py-4 py-lg-5"}>
-        {isTenantStageLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-        {lockedForTenant ? <TenantBookingGate mode="rooms" /> : null}
+    <div className={isTenant ? "tenant-room-discovery-page" : "rm-page"}>
+      {!isTenant && <RoomsTopbar />}
 
-        {!lockedForTenant ? (
+      <Container fluid="xl" className={isTenant ? "py-0" : "rm-container"}>
+        {isTenantStageLoading && <div className="py-5 text-center"><Spinner animation="border" /></div>}
+        {lockedForTenant && <TenantBookingGate mode="rooms" />}
+
+        {!lockedForTenant && (
           <>
-            <section className="rooms-market-hero">
-              <div className="rooms-market-breadcrumb"><button type="button">Beranda</button><span>›</span><strong>Katalog Kamar</strong></div>
-              <h1>Kamar kos yang jelas biayanya, jujur statusnya</h1>
-              <p>Lihat semua kamar — termasuk yang sedang ditempati. Status transparan, booking dibantu admin, kamar aman setelah pembayaran disetujui.</p>
-              <div className="rooms-market-trust-chips">
-                <span>✓ Biaya awal jelas</span>
-                <span>✓ Booking direview admin</span>
-                <span>✓ Kamar aman setelah pembayaran disetujui</span>
-                <span>✓ Listrik &amp; air sesuai aturan kamar</span>
-              </div>
-            </section>
-
-            <Card className="rooms-market-filter-card border-0">
-              <Card.Body>
-                <div className="rooms-market-filter-grid">
-                  <SegmentedFilter
-                    label="Ketersediaan"
-                    value={avail}
-                    options={availFilterOptions}
-                    onChange={(value) => updateParams({ avail: value })}
-                  />
-                  <SegmentedFilter
-                    label="Kamar mandi"
-                    value={bathroom}
-                    options={bathroomOptions}
-                    onChange={(value) => updateParams({ bathroom: value })}
-                  />
-                  <SegmentedFilter
-                    label="Pendingin"
-                    value={cooling}
-                    options={coolingOptions}
-                    onChange={(value) => updateParams({ cooling: value })}
-                  />
-                  <SegmentedFilter
-                    label="Urutkan harga bulanan"
-                    value={sort}
-                    options={sortOptions}
-                    onChange={(value) => updateParams({ sort: value })}
-                  />
+            {/* ── Header ── */}
+            {!isTenant && (
+              <div className="rm-page-header">
+                <div className="rm-breadcrumb">
+                  <button type="button" onClick={() => navigate("/")}>Beranda</button>
+                  <span aria-hidden="true">›</span>
+                  <strong>Katalog Kamar</strong>
                 </div>
-              </Card.Body>
-            </Card>
+                <h1 className="rm-page-title">Cek Kamar KOST48</h1>
+                <p className="rm-page-subtitle">
+                  Pilih kamar berdasarkan tipe, fasilitas, dan status ketersediaan.
+                  Status transparan — kamar aman setelah pembayaran disetujui admin.
+                </p>
+                <div className="rm-page-meta-chips">
+                  <span>✓ Dekat Pakuwon Mall / PTC</span>
+                  <span>✓ Status jelas dan transparan</span>
+                  <span>✓ Booking dibantu admin</span>
+                </div>
+              </div>
+            )}
 
-            <Alert variant="info" className="rooms-market-safety-alert small">
-              <strong>Aturan booking:</strong> Booking belum mengunci kamar. Kamar aman setelah pembayaran disetujui.
-            </Alert>
-
-            <div className="rooms-market-count">
-              <strong>{totalCount} kamar</strong> tersedia di katalog
-              {bookableCount < totalCount ? (
-                <span className="rooms-market-count-bookable"> · <strong>{bookableCount}</strong> bisa diajukan sekarang</span>
-              ) : null}
+            {/* ── Filter bar ── */}
+            <div className="rm-filter-bar">
+              <div className="rm-filter-group">
+                <span className="rm-filter-label">Ketersediaan</span>
+                <FilterChip label="Semua" active={!avail} onClick={() => update({ avail: "" })} />
+                <FilterChip label="Bisa diajukan" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
+                <FilterChip label="Sedang dicek" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
+                <FilterChip label="Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
+              </div>
+              <div className="rm-filter-divider" aria-hidden="true" />
+              <div className="rm-filter-group">
+                <span className="rm-filter-label">Pendingin</span>
+                <FilterChip label="AC" active={cooling === "ac"} onClick={() => update({ cooling: cooling === "ac" ? "" : "ac" })} />
+                <FilterChip label="Kipas" active={cooling === "fan"} onClick={() => update({ cooling: cooling === "fan" ? "" : "fan" })} />
+              </div>
+              <div className="rm-filter-divider" aria-hidden="true" />
+              <div className="rm-filter-group">
+                <span className="rm-filter-label">Kamar mandi</span>
+                <FilterChip label="KM Dalam" active={bathroom === "inside"} onClick={() => update({ bathroom: bathroom === "inside" ? "" : "inside" })} />
+                <FilterChip label="KM Luar" active={bathroom === "outside"} onClick={() => update({ bathroom: bathroom === "outside" ? "" : "outside" })} />
+              </div>
+              <div className="rm-filter-divider" aria-hidden="true" />
+              <div className="rm-filter-group">
+                <span className="rm-filter-label">Harga</span>
+                <FilterChip label="Termurah" active={sort === "price-asc"} onClick={() => update({ sort: "price-asc" })} />
+                <FilterChip label="Termahal" active={sort === "price-desc"} onClick={() => update({ sort: "price-desc" })} />
+              </div>
+              {hasActiveFilter && (
+                <button
+                  type="button"
+                  className="rm-filter-reset"
+                  onClick={() => setSearchParams({}, { replace: true })}
+                >
+                  ✕ Reset filter
+                </button>
+              )}
             </div>
 
-            {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
-            {query.isError ? <Alert variant="danger" className="mt-4">Gagal memuat katalog kamar. Silakan coba lagi.</Alert> : null}
-            {!query.isLoading && !query.isError && rooms.length === 0 ? (
-              <div className="mt-4">
-                <EmptyState icon="🛏️" title="Belum ada kamar yang cocok" description="Coba ubah filter kamar mandi atau pendingin." />
-              </div>
-            ) : null}
+            {/* ── Count ── */}
+            <div className="rm-count-bar">
+              {query.isLoading ? (
+                <span className="text-muted"><Spinner animation="border" size="sm" className="me-2" />Memuat kamar...</span>
+              ) : (
+                <span>
+                  <strong>{rooms.length}</strong> kamar ditampilkan
+                  {bookableCount > 0 && rooms.length !== bookableCount && (
+                    <> · <strong className="rm-count-bookable">{bookableCount}</strong> bisa diajukan sekarang</>
+                  )}
+                </span>
+              )}
+            </div>
 
-            <Row className="g-4 mt-2">
+            {/* ── States ── */}
+            {query.isError && (
+              <Alert variant="danger" className="rm-alert">
+                Gagal memuat katalog kamar. Silakan coba lagi atau hubungi admin.
+                <a className="ms-2 alert-link" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+              </Alert>
+            )}
+
+            {/* ── Room grid ── */}
+            {!query.isLoading && !query.isError && rooms.length === 0 && (
+              <div className="rm-empty">
+                <EmptyState
+                  icon="🛏️"
+                  title="Tidak ada kamar yang cocok"
+                  description="Coba ubah atau reset filter di atas."
+                />
+                <a className="btn btn-outline-secondary mt-3" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
+                  💬 Tanya ketersediaan via WhatsApp
+                </a>
+              </div>
+            )}
+
+            <Row className="g-3 rm-grid">
               {rooms.map((room) => {
                 const isCompared = comparedRoomIds.includes(room.id);
-                const compareDisabled = !isCompared && comparedRoomIds.length >= 3;
-
                 return (
                   <Col xl={4} md={6} key={room.id}>
-                    <RoomMarketCard
+                    <RoomCard
                       room={room}
                       isTenant={isTenant}
-                      pricingTerm={pricingTerm}
                       isCompared={isCompared}
-                      compareDisabled={compareDisabled}
+                      compareDisabled={!isCompared && comparedRoomIds.length >= 3}
                       onToggleCompare={() => toggleCompare(room.id)}
                     />
                   </Col>
@@ -534,26 +486,30 @@ export default function PublicRoomsPage() {
               })}
             </Row>
 
-            {comparedRooms.length > 0 ? (
-              <div className="room-market-compare-anchor" ref={comparePanelRef}>
-                <RoomComparePanel rooms={comparedRooms} onClear={() => setComparedRoomIds([])} />
-              </div>
-            ) : null}
-
-            {comparedRooms.length > 0 ? (
-              <div className="room-market-compare-bar" role="status" aria-live="polite">
-                <div>
-                  <strong>{comparedRooms.length} kamar dipilih</strong>
-                  <span>Bandingkan estimasi awal.</span>
+            {/* ── Compare ── */}
+            {comparedRooms.length > 0 && (
+              <>
+                <div className="rm-compare-anchor" ref={comparePanelRef}>
+                  <RoomComparePanel rooms={comparedRooms} onClear={() => setComparedRoomIds([])} />
                 </div>
-                <div className="room-market-compare-bar-actions">
-                  <Button size="sm" onClick={scrollToCompare}>Lihat Perbandingan</Button>
-                  <Button size="sm" variant="outline-secondary" onClick={() => setComparedRoomIds([])}>Bersihkan</Button>
+                <div className="rm-compare-bar" role="status" aria-live="polite">
+                  <div>
+                    <strong>{comparedRooms.length} kamar dipilih</strong>
+                    <span>Lihat perbandingan estimasi awal</span>
+                  </div>
+                  <div className="rm-compare-bar-actions">
+                    <Button size="sm" onClick={() => comparePanelRef.current?.scrollIntoView({ behavior: "smooth" })}>
+                      Lihat Perbandingan
+                    </Button>
+                    <Button size="sm" variant="outline-secondary" onClick={() => setComparedRoomIds([])}>
+                      Bersihkan
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              </>
+            )}
           </>
-        ) : null}
+        )}
       </Container>
     </div>
   );

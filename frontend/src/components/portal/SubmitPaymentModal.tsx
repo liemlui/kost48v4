@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
+import SafeImage from '../common/SafeImage';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
 import { getDeadlineMeta } from '../../utils/dateTime';
@@ -261,7 +262,14 @@ export default function SubmitPaymentModal({
               {previewUrl ? (
                 <div className="mt-3">
                   <button type="button" className="btn btn-link p-0 border rounded overflow-hidden bg-white" onClick={() => setShowZoom(true)}>
-                    <img src={previewUrl} alt="Preview bukti bayar" style={{ width: 180, maxWidth: '100%', height: 140, objectFit: 'cover', display: 'block' }} />
+                    <SafeImage
+                      src={previewUrl}
+                      alt="Preview bukti bayar"
+                      style={{ width: 180, maxWidth: '100%', height: 140, objectFit: 'cover', display: 'block' }}
+                      fallbackTitle="Preview tidak bisa dimuat"
+                      fallbackDescription="Coba pilih ulang file bukti pembayaran."
+                      resolveUrl={false}
+                    />
                   </button>
                   <div className="small text-muted mt-2">Preview dibuat kecil agar halaman tetap ringan. Klik gambar untuk zoom.</div>
                 </div>
@@ -334,7 +342,16 @@ export default function SubmitPaymentModal({
         <Modal.Title>Zoom Bukti Bayar</Modal.Title>
       </Modal.Header>
       <Modal.Body className="text-center">
-        {previewUrl ? <img src={previewUrl} alt="Zoom bukti bayar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
+        {previewUrl ? (
+          <SafeImage
+            src={previewUrl}
+            alt="Zoom bukti bayar"
+            style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }}
+            fallbackTitle="Preview tidak bisa dimuat"
+            fallbackDescription="Coba pilih ulang file bukti pembayaran."
+            resolveUrl={false}
+          />
+        ) : null}
       </Modal.Body>
     </Modal>
     </>

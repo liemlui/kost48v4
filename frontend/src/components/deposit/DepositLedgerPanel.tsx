@@ -71,15 +71,15 @@ export default function DepositLedgerPanel({ stay, enabled = true, tenantView = 
     <div className="deposit-ledger-panel mb-4">
       {ledgerQuery.isLoading ? (
         <Alert variant="light" className="border d-flex align-items-center gap-2">
-          <Spinner size="sm" /> Memuat riwayat deposit...
+          <Spinner size="sm" /> Memuat riwayat dana titipan...
         </Alert>
       ) : null}
 
       {ledgerQuery.isError ? (
         <Alert variant={tenantView ? 'info' : 'warning'}>
           {tenantView
-            ? 'Riwayat detail deposit belum bisa dimuat. Ringkasan deposit tetap mengikuti data masa sewa.'
-            : 'Gagal memuat riwayat deposit. Coba muat ulang halaman sebelum melanjutkan proses refund atau potongan.'}
+            ? 'Riwayat detail dana titipan belum bisa dimuat. Ringkasan dana titipan tetap mengikuti data masa sewa.'
+            : 'Gagal memuat riwayat dana titipan. Coba muat ulang halaman sebelum melanjutkan proses pengembalian atau potongan.'}
         </Alert>
       ) : null}
 
@@ -94,8 +94,8 @@ export default function DepositLedgerPanel({ stay, enabled = true, tenantView = 
             entries={entries}
             tenantView={tenantView}
             compact={compact}
-            title={tenantView ? 'Riwayat deposit kamu' : 'Timeline deposit masa sewa'}
-            subtitle={tenantView ? 'Status deposit selama masa sewa, termasuk saldo ditahan, pengembalian, atau potongan.' : 'Riwayat deposit dari pembayaran awal sampai proses penyelesaian.'}
+            title={tenantView ? 'Riwayat dana titipan kamu' : 'Timeline dana titipan masa sewa'}
+            subtitle={tenantView ? 'Status dana titipan selama masa sewa, termasuk saldo ditahan, pengembalian, atau potongan.' : 'Riwayat dana titipan dari pembayaran awal sampai proses penyelesaian.'}
           />
         </Col>
       </Row>

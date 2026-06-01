@@ -27,12 +27,12 @@ export default function DepositSummaryCard({ snapshot, tenantView = false, isLoa
       <Card.Body>
         <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-1">{tenantView ? 'Deposit Saya' : 'Deposit Masa Sewa'}</div>
-            <h3 className="h5 mb-1">{tenantView ? 'Status deposit masa sewa' : 'Ringkasan deposit operasional'}</h3>
+            <div className="section-kicker mb-1">{tenantView ? 'Dana Titipan Saya' : 'Dana Titipan Masa Sewa'}</div>
+            <h3 className="h5 mb-1">{tenantView ? 'Status dana titipan masa sewa' : 'Ringkasan dana titipan operasional'}</h3>
             <p className="text-muted small mb-0">
               {tenantView
-                ? 'Deposit bukan tagihan baru. Ini uang jaminan yang ditahan selama masa sewa dan diproses saat keluar final.'
-                : 'Data masa sewa tetap menjadi status operasional, sedangkan timeline menampilkan riwayat deposit.'}
+                ? 'Dana titipan bukan tagihan baru. Ini uang jaminan yang ditahan selama masa sewa dan diproses saat keluar final.'
+                : 'Data masa sewa tetap menjadi status operasional, sedangkan timeline menampilkan riwayat dana titipan.'}
             </p>
           </div>
           <div className="d-flex flex-column align-items-end gap-1">
@@ -43,7 +43,7 @@ export default function DepositSummaryCard({ snapshot, tenantView = false, isLoa
 
         <div className="deposit-summary-grid">
           <div className="deposit-summary-item primary">
-            <span>{tenantView ? 'Deposit dibayar' : 'Dibayar'}</span>
+            <span>{tenantView ? 'Dana titipan dibayar' : 'Dibayar'}</span>
             <strong>{isLoading ? '...' : formatRupiah(paid)}</strong>
           </div>
           <div className="deposit-summary-item">
@@ -51,7 +51,7 @@ export default function DepositSummaryCard({ snapshot, tenantView = false, isLoa
             <strong>{isLoading ? '...' : formatRupiah(held)}</strong>
           </div>
           <div className="deposit-summary-item">
-            <span>{tenantView ? 'Dikembalikan' : 'Refund'}</span>
+            <span>{tenantView ? 'Dikembalikan' : 'Pengembalian'}</span>
             <strong>{isLoading ? '...' : formatRupiah(refunded)}</strong>
           </div>
           <div className="deposit-summary-item">

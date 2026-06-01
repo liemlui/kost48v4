@@ -426,7 +426,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
 
           <div className="d-flex gap-2">
             <Button variant="outline-secondary" onClick={() => handleCloseSuccess('/stays')}>
-              Kembali ke Daftar Stay
+              Kembali ke Daftar Masa Sewa
             </Button>
             <Button variant="primary" onClick={() => handleCloseSuccess(`/stays/${stay.id}`)}>
               Lihat Detail Masa Sewa #{stay.id}
@@ -506,7 +506,7 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
               {step < 3 ? <Button type="submit">Lanjut</Button> : null}
               {step === 3 ? (
                 <Button type="submit" disabled={createStayMutation.isPending}>
-                  {createStayMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Submit Check-in'}
+                  {createStayMutation.isPending ? <><Spinner size="sm" className="me-2" />Memproses...</> : 'Simpan Check-in'}
                 </Button>
               ) : null}
             </div>

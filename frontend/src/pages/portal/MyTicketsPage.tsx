@@ -4,6 +4,7 @@ import { Alert, Button, Card, Form, Modal, Spinner } from 'react-bootstrap';
 import { createResource, listResource } from '../../api/resources';
 import { uploadTicketImage } from '../../api/mediaUploads';
 import EmptyState from '../../components/common/EmptyState';
+import SafeImage from '../../components/common/SafeImage';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
@@ -178,8 +179,28 @@ export default function MyTicketsPage() {
                   {ticket.priority ? <StatusBadge status="SECONDARY" customLabel={ticket.priority} /> : null}
                 </div>
               </div>
-              {ticket.issueImageUrl ? <div className="mb-2"><img src={ticket.issueImageUrl} alt="Bukti laporan" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
-              {ticket.resolutionImageUrl ? <div className="mb-2"><img src={ticket.resolutionImageUrl} alt="Bukti selesai" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
+              {ticket.issueImageUrl ? (
+                <div className="mb-2">
+                  <SafeImage
+                    src={ticket.issueImageUrl}
+                    alt="Bukti laporan"
+                    style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                    fallbackTitle="Foto laporan tidak bisa dimuat"
+                    fallbackDescription="Detail laporan tetap tersedia di teks."
+                  />
+                </div>
+              ) : null}
+              {ticket.resolutionImageUrl ? (
+                <div className="mb-2">
+                  <SafeImage
+                    src={ticket.resolutionImageUrl}
+                    alt="Bukti selesai"
+                    style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                    fallbackTitle="Foto penyelesaian tidak bisa dimuat"
+                    fallbackDescription="Status laporan tetap bisa dibaca."
+                  />
+                </div>
+              ) : null}
               <div className="app-caption">{ticket.lastMessage || ticket.description || 'Belum ada pembaruan tambahan.'}</div>
             </Card.Body>
           </Card>
@@ -222,7 +243,17 @@ export default function MyTicketsPage() {
             <Form.Label>Foto Masalah (opsional)</Form.Label>
             <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleTicketImage} disabled={uploadingImage} />
             <Form.Text muted>Preview akan dibuat kecil. Klik setelah laporan dibuat untuk melihat hasil di daftar tiket.</Form.Text>
-            {imagePreview ? <div className="mt-2"><img src={imagePreview} alt="Preview tiket" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }} /></div> : null}
+            {imagePreview ? (
+              <div className="mt-2">
+                <SafeImage
+                  src={imagePreview}
+                  alt="Preview tiket"
+                  style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                  fallbackTitle="Preview foto tidak bisa dimuat"
+                  fallbackDescription="Coba pilih ulang foto."
+                />
+              </div>
+            ) : null}
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

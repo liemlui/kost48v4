@@ -21,6 +21,7 @@ import {
   FinancialRatios,
   Occupancy,
 } from '../../api/reports';
+import UnlockedFormalReports from './UnlockedFormalReports';
 import { fetchBalanceSheetDraft, fetchFormalRatiosReadiness, type BalanceSheetDraft, type FinanceReadiness } from '../../api/finance';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
@@ -201,7 +202,7 @@ export default function ReportsPage() {
 
       {hasError && (
         <Card className="report-warning-card mb-3">
-          <Card.Body>⚠️ Sebagian data laporan gagal dimuat. Cek backend report endpoint sebelum mengambil keputusan bisnis.</Card.Body>
+          <Card.Body>⚠️ Sebagian data laporan gagal dimuat. Coba muat ulang atau cek menu detail sebelum mengambil keputusan bisnis.</Card.Body>
         </Card>
       )}
 
@@ -213,9 +214,9 @@ export default function ReportsPage() {
               <strong>{overall?.label ?? 'Memuat'}</strong>
               <small>{overall?.headline ?? 'Menunggu data'}</small>
             </div>
-            <ReportKpiCard label="Total Revenue" value={formatCompactRupiah(profitLoss.data!.totalRevenueRupiah)} detail={`Invoice ${formatCompactRupiah(profitLoss.data!.invoiceRevenueRupiah)} + WiFi ${formatCompactRupiah(profitLoss.data!.wifiRevenueRupiah)}`} tone="blue" />
-            <ReportKpiCard label="Net Cashflow" value={formatCompactRupiah(cashFlow.data!.netCashFlowRupiah)} detail={`In ${formatCompactRupiah(cashFlow.data!.cashIn.totalRupiah)} / Out ${formatCompactRupiah(cashFlow.data!.cashOut.totalRupiah)}`} tone={cashFlow.data!.netCashFlowRupiah >= 0 ? 'green' : 'red'} />
-            <ReportKpiCard label="Outstanding" value={formatCompactRupiah(monthlyIncome.data!.outstandingRupiah)} detail={`${monthlyIncome.data!.unpaidInvoiceCount} belum bayar · ${monthlyIncome.data!.partialInvoiceCount} partial`} tone={monthlyIncome.data!.outstandingRupiah > 0 ? 'orange' : 'green'} />
+            <ReportKpiCard label="Total Pendapatan" value={formatCompactRupiah(profitLoss.data!.totalRevenueRupiah)} detail={`Invoice ${formatCompactRupiah(profitLoss.data!.invoiceRevenueRupiah)} + WiFi ${formatCompactRupiah(profitLoss.data!.wifiRevenueRupiah)}`} tone="blue" />
+            <ReportKpiCard label="Arus Kas Bersih" value={formatCompactRupiah(cashFlow.data!.netCashFlowRupiah)} detail={`In ${formatCompactRupiah(cashFlow.data!.cashIn.totalRupiah)} / Out ${formatCompactRupiah(cashFlow.data!.cashOut.totalRupiah)}`} tone={cashFlow.data!.netCashFlowRupiah >= 0 ? 'green' : 'red'} />
+            <ReportKpiCard label="Belum Tertagih" value={formatCompactRupiah(monthlyIncome.data!.outstandingRupiah)} detail={`${monthlyIncome.data!.unpaidInvoiceCount} belum bayar · ${monthlyIncome.data!.partialInvoiceCount} partial`} tone={monthlyIncome.data!.outstandingRupiah > 0 ? 'orange' : 'green'} />
             <ReportKpiCard label="Okupansi" value={`${occupancy.data!.occupancyRatePercent}%`} detail={`${occupancy.data!.occupiedRooms}/${occupancy.data!.totalOperableRooms} kamar terisi`} tone="cyan" />
           </section>
 
@@ -295,7 +296,7 @@ export default function ReportsPage() {
           {activeTab === 'finance' && (
             <Row className="g-3">
               <Col xl={6}><ReportSection title="Pendapatan Bulanan" badge={monthLabel(ym)}><MonthlyIncomeTable data={monthlyIncome.data!} /></ReportSection></Col>
-              <Col xl={6}><ReportSection title="Arus Kas" badge={cashFlow.data!.netCashFlowRupiah >= 0 ? 'Positive' : 'Negative'}><CashFlowTable data={cashFlow.data!} /></ReportSection></Col>
+              <Col xl={6}><ReportSection title="Arus Kas" badge={cashFlow.data!.netCashFlowRupiah >= 0 ? 'Positif' : 'Negatif'}><CashFlowTable data={cashFlow.data!} /></ReportSection></Col>
               <Col xl={6}><ReportSection title="Profit & Loss" badge={`${profitLoss.data!.netProfitMarginPercent}% margin`}><ProfitLossTable data={profitLoss.data!} /></ReportSection></Col>
               <Col xl={6}><ReportSection title="Expense Split" badge={`${expenseSummary.data!.categories.length} kategori`}><ExpenseSummaryVisual data={expenseSummary.data!} /></ReportSection></Col>
             </Row>
@@ -310,12 +311,12 @@ export default function ReportsPage() {
 
           {activeTab === 'operations' && (
             <Row className="g-3">
-              <Col xl={5}><ReportSection title="Okupansi & Revenue per Room" badge={`${occupancy.data!.occupancyRatePercent}%`}><OccupancyTable data={occupancy.data!} /></ReportSection></Col>
-              <Col xl={7}><ReportSection title="Operational Command Bars" badge="Snapshot"><OperationsBars occupancy={occupancy.data!} monthlyIncome={monthlyIncome.data!} depositLiability={depositLiability.data!} /></ReportSection></Col>
+              <Col xl={5}><ReportSection title="Okupansi & Pendapatan per Kamar" badge={`${occupancy.data!.occupancyRatePercent}%`}><OccupancyTable data={occupancy.data!} /></ReportSection></Col>
+              <Col xl={7}><ReportSection title="Ringkasan Operasional" badge="Snapshot"><OperationsBars occupancy={occupancy.data!} monthlyIncome={monthlyIncome.data!} depositLiability={depositLiability.data!} /></ReportSection></Col>
             </Row>
           )}
 
-          {activeTab === 'formal' && <LockedFormalRatios readiness={financeReadiness.data} balanceSheetDraft={balanceSheetDraft.data} isBackendUnavailable={financeReadiness.isError || balanceSheetDraft.isError} />}
+          {activeTab === 'formal' && <UnlockedFormalReports />}
         </>
       )}
     </Container>
@@ -335,7 +336,7 @@ function ReportKpiCard({ label, value, detail, tone }: { label: string; value: s
 function ReportTabs({ activeTab, onChange, counts }: { activeTab: ReportTab; onChange: (tab: ReportTab) => void; counts: { invoices: number; overdue: number; rooms: number } }) {
   const tabs: { key: ReportTab; label: string; badge?: number | string }[] = [
     { key: 'command', label: 'Command Center', badge: 'Live' },
-    { key: 'finance', label: 'Finance', badge: counts.invoices },
+    { key: 'finance', label: 'Keuangan', badge: counts.invoices },
     { key: 'aging', label: 'Aging & Deposit', badge: counts.overdue },
     { key: 'operations', label: 'Operations', badge: counts.rooms },
     { key: 'formal', label: 'Formal Ratios', badge: 'Locked' },
@@ -421,10 +422,10 @@ function OverdueHeatmap({ data }: { data: OverdueAging }) {
 
 function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cashFlow }: { financialRatios: FinancialRatios; profitLoss: ProfitLoss; occupancy: Occupancy; cashFlow: CashFlow }) {
   const rows = [
-    { label: 'Collection Rate', value: financialRatios.collectionRatePercent, suffix: '%', note: 'Pembayaran / tagihan', meta: collectionRateLabel(financialRatios.collectionRatePercent) },
-    { label: 'Net Profit Margin', value: profitLoss.netProfitMarginPercent, suffix: '%', note: 'Laba bersih / revenue', meta: netProfitMarginLabel(profitLoss.netProfitMarginPercent) },
+    { label: 'Rasio Tertagih', value: financialRatios.collectionRatePercent, suffix: '%', note: 'Pembayaran / tagihan', meta: collectionRateLabel(financialRatios.collectionRatePercent) },
+    { label: 'Margin Laba Bersih', value: profitLoss.netProfitMarginPercent, suffix: '%', note: 'Laba bersih / revenue', meta: netProfitMarginLabel(profitLoss.netProfitMarginPercent) },
     { label: 'Expense Ratio', value: financialRatios.expenseRatioPercent, suffix: '%', note: 'Expense / revenue', meta: expenseRatioLabel(financialRatios.expenseRatioPercent) },
-    { label: 'Occupancy Rate', value: occupancy.occupancyRatePercent, suffix: '%', note: 'Kamar terisi', meta: occupancyRateLabel(occupancy.occupancyRatePercent) },
+    { label: 'Tingkat Okupansi', value: occupancy.occupancyRatePercent, suffix: '%', note: 'Kamar terisi', meta: occupancyRateLabel(occupancy.occupancyRatePercent) },
     { label: 'Overdue Rate', value: financialRatios.overdueRateSnapshotPercent, suffix: '%', note: 'Tunggakan snapshot', meta: overdueRateLabel(financialRatios.overdueRateSnapshotPercent) },
   ];
   const cf = cashFlowLabel(cashFlow.netCashFlowRupiah);
@@ -438,7 +439,7 @@ function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cashFlow }:
         </div>
       ))}
       <div className="report-matrix-row">
-        <div><strong>Net Cashflow</strong><span>Kas masuk - kas keluar</span></div>
+        <div><strong>Arus Kas Bersih</strong><span>Kas masuk - kas keluar</span></div>
         <div className="report-matrix-meter"><i className={`meter-${cf.tone}`} style={{ width: `${cashFlow.netCashFlowRupiah > 0 ? 100 : 35}%` }} /></div>
         <div className="report-matrix-value"><strong>{formatCompactRupiah(cashFlow.netCashFlowRupiah)}</strong><Badge bg={cf.color}>{cf.label}</Badge></div>
       </div>
@@ -449,7 +450,7 @@ function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cashFlow }:
 function InsightStack({ monthlyIncome, cashFlow, overdueAging, occupancy, financialRatios }: { monthlyIncome: MonthlyIncome; cashFlow: CashFlow; overdueAging: OverdueAging; occupancy: Occupancy; financialRatios: FinancialRatios }) {
   const insights = [
     {
-      title: monthlyIncome.outstandingRupiah > 0 ? 'Outstanding perlu dikejar' : 'Outstanding bersih',
+      title: monthlyIncome.outstandingRupiah > 0 ? 'Belum Tertagih perlu dikejar' : 'Belum Tertagih bersih',
       body: monthlyIncome.outstandingRupiah > 0 ? `${formatCompactRupiah(monthlyIncome.outstandingRupiah)} belum masuk kas.` : 'Tidak ada outstanding pada laporan bulan ini.',
       tone: monthlyIncome.outstandingRupiah > 0 ? 'watch' : 'good',
     },
@@ -504,7 +505,7 @@ function OperationsBars({ occupancy, monthlyIncome, depositLiability }: { occupa
   const rows = [
     { label: 'Occupancy', value: occupancy.occupancyRatePercent, suffix: '%' },
     { label: 'Tagihan Lunas', value: monthlyIncome.invoiceCount > 0 ? (monthlyIncome.paidInvoiceCount / monthlyIncome.invoiceCount) * 100 : 0, suffix: '%' },
-    { label: 'Deposit Lunas', value: depositLiability.activeStayCount > 0 ? (depositLiability.fullyPaidCount / depositLiability.activeStayCount) * 100 : 0, suffix: '%' },
+    { label: 'Dana Titipan Lunas', value: depositLiability.activeStayCount > 0 ? (depositLiability.fullyPaidCount / depositLiability.activeStayCount) * 100 : 0, suffix: '%' },
   ];
   return (
     <div className="report-operation-bars">
@@ -522,17 +523,17 @@ function buildOwnerReportsCsv(params: { ym: { year: number; month: number }; mon
   const lines: string[] = [];
   lines.push(generateCsv([
     ['KOST48 Owner Report', label],
-    ['Total Revenue', `Rp ${formatRupiah(profitLoss.totalRevenueRupiah)}`],
-    ['Net Profit', `Rp ${formatRupiah(profitLoss.netProfitRupiah)}`],
-    ['Net Cashflow', `Rp ${formatRupiah(cashFlow.netCashFlowRupiah)}`],
-    ['Collection Rate', `${financialRatios.collectionRatePercent}%`],
-    ['Occupancy Rate', `${occupancy.occupancyRatePercent}%`],
-    ['Overdue Total', `Rp ${formatRupiah(overdueAging.totalOverdueRupiah)}`],
-    ['Deposit Outstanding', `Rp ${formatRupiah(depositLiability.totalDepositOutstandingRupiah)}`],
+    ['Total Pendapatan', `Rp ${formatRupiah(profitLoss.totalRevenueRupiah)}`],
+    ['Laba Bersih', `Rp ${formatRupiah(profitLoss.netProfitRupiah)}`],
+    ['Arus Kas Bersih', `Rp ${formatRupiah(cashFlow.netCashFlowRupiah)}`],
+    ['Rasio Tertagih', `${financialRatios.collectionRatePercent}%`],
+    ['Tingkat Okupansi', `${occupancy.occupancyRatePercent}%`],
+    ['Total Tunggakan', `Rp ${formatRupiah(overdueAging.totalOverdueRupiah)}`],
+    ['Dana Titipan Belum Dibayar', `Rp ${formatRupiah(depositLiability.totalDepositOutstandingRupiah)}`],
     [''],
   ]));
   lines.push(generateCsv([
-    ['Pendapatan Bulanan'], ['Total Tagihan', `Rp ${formatRupiah(monthlyIncome.totalBilledRupiah)}`], ['Total Dibayar', `Rp ${formatRupiah(monthlyIncome.totalPaidRupiah)}`], ['WiFi', `Rp ${formatRupiah(monthlyIncome.totalWifiRevenueRupiah)}`], ['Outstanding', `Rp ${formatRupiah(monthlyIncome.outstandingRupiah)}`], ['']
+    ['Pendapatan Bulanan'], ['Total Tagihan', `Rp ${formatRupiah(monthlyIncome.totalBilledRupiah)}`], ['Total Dibayar', `Rp ${formatRupiah(monthlyIncome.totalPaidRupiah)}`], ['WiFi', `Rp ${formatRupiah(monthlyIncome.totalWifiRevenueRupiah)}`], ['Belum Tertagih', `Rp ${formatRupiah(monthlyIncome.outstandingRupiah)}`], ['']
   ]));
   lines.push(generateCsv([
     ['Expense Summary'], ['Kategori', 'Jumlah', 'Rupiah'], ...expenseSummary.categories.map((c) => [EXPENSE_CATEGORY_LABELS[c.category] ?? c.category, String(c.count), `Rp ${formatRupiah(c.totalRupiah)}`]), ['Total', '', `Rp ${formatRupiah(expenseSummary.totalExpenseRupiah)}`], ['']
@@ -555,14 +556,14 @@ function ExportAllCsvButton({ ym, monthlyIncome, cashFlow, overdueAging, deposit
   return <Button variant="light" className="report-export-btn" size="sm" disabled={!ready} onClick={handleExport}>⬇ Export CSV</Button>;
 }
 
-function MonthlyIncomeTable({ data }: { data: MonthlyIncome }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Total Tagihan</td><td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td></tr><tr><td>Total Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalPaidRupiah)}</td></tr><tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.totalWifiRevenueRupiah)}</td></tr><tr><td><strong>Outstanding</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.outstandingRupiah)}</strong></td></tr><tr><td>Jumlah Tagihan</td><td className="text-end">{data.invoiceCount}</td></tr><tr><td>Lunas</td><td className="text-end"><Badge bg="success">{data.paidInvoiceCount}</Badge></td></tr><tr><td>Partial</td><td className="text-end"><Badge bg="warning">{data.partialInvoiceCount}</Badge></td></tr><tr><td>Belum Bayar</td><td className="text-end"><Badge bg="danger">{data.unpaidInvoiceCount}</Badge></td></tr></tbody></Table>; }
+function MonthlyIncomeTable({ data }: { data: MonthlyIncome }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Total Tagihan</td><td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td></tr><tr><td>Total Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalPaidRupiah)}</td></tr><tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.totalWifiRevenueRupiah)}</td></tr><tr><td><strong>Belum Tertagih</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.outstandingRupiah)}</strong></td></tr><tr><td>Jumlah Tagihan</td><td className="text-end">{data.invoiceCount}</td></tr><tr><td>Lunas</td><td className="text-end"><Badge bg="success">{data.paidInvoiceCount}</Badge></td></tr><tr><td>Sebagian</td><td className="text-end"><Badge bg="warning">{data.partialInvoiceCount}</Badge></td></tr><tr><td>Belum Bayar</td><td className="text-end"><Badge bg="danger">{data.unpaidInvoiceCount}</Badge></td></tr></tbody></Table>; }
 function CashFlowTable({ data }: { data: CashFlow }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Kas Masuk</td><td className="text-end">Rp {formatRupiah(data.cashIn.totalRupiah)}</td></tr><tr><td>Pembayaran Tagihan</td><td className="text-end">Rp {formatRupiah(data.cashIn.invoicePaymentsRupiah)}</td></tr><tr><td>Penjualan WiFi</td><td className="text-end">Rp {formatRupiah(data.cashIn.wifiSalesRupiah)}</td></tr><tr><td>Kas Keluar</td><td className="text-end">Rp {formatRupiah(data.cashOut.expensesRupiah)}</td></tr><tr><td><strong>Arus Kas Bersih</strong></td><td className={`text-end ${data.netCashFlowRupiah >= 0 ? 'text-success' : 'text-danger'}`}><strong>Rp {formatRupiah(data.netCashFlowRupiah)}</strong></td></tr></tbody></Table>; }
-function OverdueAgingTable({ data }: { data: OverdueAging }) { const b = data.buckets; return <Table responsive bordered size="sm" className="mb-0 report-table"><thead><tr><th>Umur</th><th className="text-end">Jumlah</th><th className="text-end">Rupiah</th></tr></thead><tbody><tr><td>Current</td><td className="text-end">{b.current.count}</td><td className="text-end">Rp {formatRupiah(b.current.totalRupiah)}</td></tr><tr><td>1–30 hari</td><td className="text-end">{b.days1to30.count}</td><td className="text-end">Rp {formatRupiah(b.days1to30.totalRupiah)}</td></tr><tr><td>31–60 hari</td><td className="text-end">{b.days31to60.count}</td><td className="text-end">Rp {formatRupiah(b.days31to60.totalRupiah)}</td></tr><tr><td>61–90 hari</td><td className="text-end">{b.days61to90.count}</td><td className="text-end">Rp {formatRupiah(b.days61to90.totalRupiah)}</td></tr><tr><td>91+ hari</td><td className="text-end">{b.days91plus.count}</td><td className="text-end">Rp {formatRupiah(b.days91plus.totalRupiah)}</td></tr><tr><td><strong>Total Tunggakan</strong></td><td className="text-end"><strong>{data.totalOverdueCount}</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalOverdueRupiah)}</strong></td></tr></tbody></Table>; }
-function DepositLiabilityTable({ data }: { data: DepositLiability }) { return <Table responsive bordered size="sm" className="mb-0 mt-3 report-table"><tbody><tr><td>Total Deposit Dinilai</td><td className="text-end">Rp {formatRupiah(data.totalDepositAmountRupiah)}</td></tr><tr><td>Sudah Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalDepositPaidRupiah)}</td></tr><tr><td><strong>Sisa Deposit Belum Dibayar</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalDepositOutstandingRupiah)}</strong></td></tr><tr><td>Masa sewa aktif</td><td className="text-end">{data.activeStayCount}</td></tr><tr><td>Lunas / Partial / Belum</td><td className="text-end"><Badge bg="success">{data.fullyPaidCount}</Badge> <Badge bg="warning">{data.partiallyPaidCount}</Badge> <Badge bg="danger">{data.unpaidCount}</Badge></td></tr></tbody></Table>; }
-function ProfitLossTable({ data }: { data: ProfitLoss }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Pendapatan Tagihan</td><td className="text-end">Rp {formatRupiah(data.invoiceRevenueRupiah)}</td></tr><tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.wifiRevenueRupiah)}</td></tr><tr><td>Total Pendapatan</td><td className="text-end">Rp {formatRupiah(data.totalRevenueRupiah)}</td></tr><tr><td>Total Pengeluaran</td><td className="text-end">Rp {formatRupiah(data.totalExpenseRupiah)}</td></tr><tr><td><strong>Laba/Rugi Bersih</strong></td><td className={`text-end ${data.netProfitRupiah >= 0 ? 'text-success' : 'text-danger'}`}><strong>Rp {formatRupiah(data.netProfitRupiah)}</strong></td></tr><tr><td>Net Profit Margin</td><td className="text-end"><strong>{data.netProfitMarginPercent}%</strong></td></tr></tbody></Table>; }
+function OverdueAgingTable({ data }: { data: OverdueAging }) { const b = data.buckets; return <Table responsive bordered size="sm" className="mb-0 report-table"><thead><tr><th>Umur</th><th className="text-end">Jumlah</th><th className="text-end">Rupiah</th></tr></thead><tbody><tr><td>Belum jatuh tempo</td><td className="text-end">{b.current.count}</td><td className="text-end">Rp {formatRupiah(b.current.totalRupiah)}</td></tr><tr><td>1–30 hari</td><td className="text-end">{b.days1to30.count}</td><td className="text-end">Rp {formatRupiah(b.days1to30.totalRupiah)}</td></tr><tr><td>31–60 hari</td><td className="text-end">{b.days31to60.count}</td><td className="text-end">Rp {formatRupiah(b.days31to60.totalRupiah)}</td></tr><tr><td>61–90 hari</td><td className="text-end">{b.days61to90.count}</td><td className="text-end">Rp {formatRupiah(b.days61to90.totalRupiah)}</td></tr><tr><td>91+ hari</td><td className="text-end">{b.days91plus.count}</td><td className="text-end">Rp {formatRupiah(b.days91plus.totalRupiah)}</td></tr><tr><td><strong>Total Tunggakan</strong></td><td className="text-end"><strong>{data.totalOverdueCount}</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalOverdueRupiah)}</strong></td></tr></tbody></Table>; }
+function DepositLiabilityTable({ data }: { data: DepositLiability }) { return <Table responsive bordered size="sm" className="mb-0 mt-3 report-table"><tbody><tr><td>Total Dana Titipan Dinilai</td><td className="text-end">Rp {formatRupiah(data.totalDepositAmountRupiah)}</td></tr><tr><td>Sudah Dibayar</td><td className="text-end">Rp {formatRupiah(data.totalDepositPaidRupiah)}</td></tr><tr><td><strong>Sisa Dana Titipan Belum Dibayar</strong></td><td className="text-end"><strong>Rp {formatRupiah(data.totalDepositOutstandingRupiah)}</strong></td></tr><tr><td>Masa sewa aktif</td><td className="text-end">{data.activeStayCount}</td></tr><tr><td>Lunas / Partial / Belum</td><td className="text-end"><Badge bg="success">{data.fullyPaidCount}</Badge> <Badge bg="warning">{data.partiallyPaidCount}</Badge> <Badge bg="danger">{data.unpaidCount}</Badge></td></tr></tbody></Table>; }
+function ProfitLossTable({ data }: { data: ProfitLoss }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Pendapatan Tagihan</td><td className="text-end">Rp {formatRupiah(data.invoiceRevenueRupiah)}</td></tr><tr><td>Pendapatan WiFi</td><td className="text-end">Rp {formatRupiah(data.wifiRevenueRupiah)}</td></tr><tr><td>Total Pendapatan</td><td className="text-end">Rp {formatRupiah(data.totalRevenueRupiah)}</td></tr><tr><td>Total Pengeluaran</td><td className="text-end">Rp {formatRupiah(data.totalExpenseRupiah)}</td></tr><tr><td><strong>Laba/Rugi Bersih</strong></td><td className={`text-end ${data.netProfitRupiah >= 0 ? 'text-success' : 'text-danger'}`}><strong>Rp {formatRupiah(data.netProfitRupiah)}</strong></td></tr><tr><td>Margin Laba Bersih</td><td className="text-end"><strong>{data.netProfitMarginPercent}%</strong></td></tr></tbody></Table>; }
 function OccupancyTable({ data }: { data: Occupancy }) { return <Table responsive bordered size="sm" className="mb-0 report-table"><tbody><tr><td>Total Kamar Operasional</td><td className="text-end"><strong>{data.totalOperableRooms}</strong></td></tr><tr><td>Kamar Terisi</td><td className="text-end"><strong>{data.occupiedRooms}</strong></td></tr><tr><td>Tingkat Okupansi</td><td className="text-end"><strong>{data.occupancyRatePercent}%</strong></td></tr><tr><td>Total Tagihan Bulan Ini</td><td className="text-end">Rp {formatRupiah(data.totalBilledRupiah)}</td></tr><tr><td>Pendapatan per Kamar Terisi</td><td className="text-end"><strong>Rp {formatRupiah(data.revenuePerOccupiedRoomRupiah)}</strong></td></tr><tr><td colSpan={2} className="text-muted small">{data.occupancyNote}<br />{data.revenueNote}</td></tr></tbody></Table>; }
 
-function LockedFormalRatios({ readiness: backendReadiness, balanceSheetDraft, isBackendUnavailable }: { readiness?: FinanceReadiness; balanceSheetDraft?: BalanceSheetDraft; isBackendUnavailable?: boolean }) {
+function LockedFormalRatios({ readiness: financeReadiness, balanceSheetDraft, isDataUnavailable }: { readiness?: FinanceReadiness; balanceSheetDraft?: BalanceSheetDraft; isDataUnavailable?: boolean }) {
   const ratios = [
     { name: 'Rasio Lancar', formula: 'Aset Lancar / Kewajiban Lancar', reason: 'Belum akurat karena kas/bank aktual dan current liabilities belum dimodelkan.' },
     { name: 'Rasio Cepat', formula: '(Aset Lancar - Inventory) / Kewajiban Lancar', reason: 'Belum akurat karena kas/bank, inventory, dan current liabilities belum dimodelkan.' },
@@ -571,25 +572,25 @@ function LockedFormalRatios({ readiness: backendReadiness, balanceSheetDraft, is
   ];
   const readiness = [
     { label: 'Piutang tagihan', state: 'Ready', note: 'Tagihan aktif dapat menjadi kandidat piutang.' },
-    { label: 'Deposit ditahan', state: 'Ready', note: 'Deposit ditampilkan sebagai kewajiban, bukan pendapatan.' },
+    { label: 'Dana titipan', state: 'Ready', note: 'Dana titipan ditampilkan sebagai kewajiban, bukan pendapatan.' },
     { label: 'Kas / rekening bank', state: 'Locked', note: 'Belum ada sumber saldo kas/bank formal.' },
     { label: 'Ekuitas / modal kerja', state: 'Locked', note: 'Belum ada model ekuitas dan aset formal.' },
   ];
-  const backendMissing = backendReadiness?.missing ?? [];
+  const missingFinanceData = financeReadiness?.missing ?? [];
   const knownAssets = balanceSheetDraft?.totals?.knownAssetsRupiah ?? null;
   const knownLiabilities = balanceSheetDraft?.totals?.knownLiabilitiesRupiah ?? null;
   return (
     <Row className="g-3">
       <Col xl={5}>
         <Card className="report-panel h-100">
-          <Card.Header><span>Balance Sheet Readiness</span><Badge bg="warning">Foundation</Badge></Card.Header>
+          <Card.Header><span>Kesiapan Neraca</span><Badge bg="warning">Fondasi</Badge></Card.Header>
           <Card.Body>
-            <p className="text-muted small">Formal ratio tetap dikunci sampai Assets = Liabilities + Equity bisa dibangun dari data yang reliable.</p>
-            {isBackendUnavailable ? <Alert variant="light" className="small">Data readiness keuangan belum bisa dimuat saat ini.</Alert> : null}
+            <p className="text-muted small">Rasio formal tetap dikunci sampai Aset = Kewajiban + Ekuitas bisa dibangun dari data yang dapat dipercaya.</p>
+            {isDataUnavailable ? <Alert variant="light" className="small">Data readiness keuangan belum bisa dimuat saat ini.</Alert> : null}
             {balanceSheetDraft ? (
               <div className="report-readiness-snapshot mb-3">
-                <div><span>Known assets</span><strong>{knownAssets === null ? '-' : formatCompactRupiah(knownAssets)}</strong></div>
-                <div><span>Known liabilities</span><strong>{knownLiabilities === null ? '-' : formatCompactRupiah(knownLiabilities)}</strong></div>
+                <div><span>Aset tercatat</span><strong>{knownAssets === null ? '-' : formatCompactRupiah(knownAssets)}</strong></div>
+                <div><span>Kewajiban tercatat</span><strong>{knownLiabilities === null ? '-' : formatCompactRupiah(knownLiabilities)}</strong></div>
                 <small>{balanceSheetDraft.note}</small>
               </div>
             ) : null}
@@ -602,9 +603,9 @@ function LockedFormalRatios({ readiness: backendReadiness, balanceSheetDraft, is
                 </div>
               ))}
             </div>
-            {backendMissing.length ? (
+            {missingFinanceData.length ? (
               <div className="mt-3 small text-muted">
-                <strong>Backend missing data:</strong> {backendMissing.join(', ')}
+                <strong>Data yang belum lengkap:</strong> {missingFinanceData.join(', ')}
               </div>
             ) : null}
           </Card.Body>
@@ -612,7 +613,7 @@ function LockedFormalRatios({ readiness: backendReadiness, balanceSheetDraft, is
       </Col>
       <Col xl={7}>
         <Card className="report-panel h-100">
-          <Card.Header><span>Formal Accounting Ratios</span><Badge bg="secondary">Data Locked</Badge></Card.Header>
+          <Card.Header><span>Rasio Akuntansi Formal</span><Badge bg="secondary">Data Dikunci</Badge></Card.Header>
           <Card.Body className="p-0"><Table responsive bordered size="sm" className="mb-0 report-table"><tbody>{ratios.map((r) => <tr key={r.name}><td style={{ width: 220 }}><strong>{r.name}</strong><br /><span className="text-muted small">{r.formula}</span></td><td><Badge bg="secondary" className="me-2">Belum Tersedia</Badge><span className="text-muted small">{r.reason}</span></td></tr>)}</tbody></Table></Card.Body>
         </Card>
       </Col>

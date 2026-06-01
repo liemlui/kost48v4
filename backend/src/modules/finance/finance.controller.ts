@@ -46,4 +46,12 @@ export class FinanceController {
       data: await this.financeService.balanceSheetDraft(query),
     };
   }
+
+  @Get('owner-dashboard')
+  async ownerDashboard(@Query() query: FinancePeriodQueryDto) {
+    return {
+      message: 'Dashboard owner berhasil diambil',
+      data: await this.financeService.ownerDashboard(query),
+    };
+  }
 }

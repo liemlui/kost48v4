@@ -130,7 +130,7 @@ export default function InvoiceDetailPage() {
       id: 'invoice-open',
       severity: isDraft ? 'MEDIUM' : 'HIGH',
       title: isDraft ? 'Draft belum terlihat tenant' : 'Masih ada sisa tagihan',
-      message: isDraft ? 'Terbitkan tagihan setelah rincian benar agar tenant bisa melihatnya.' : 'Tagihan terbuka akan menjadi blocker saat final checkout sampai dilunasi atau dibatalkan.',
+      message: isDraft ? 'Terbitkan tagihan setelah rincian benar agar tenant bisa melihatnya.' : 'Tagihan terbuka akan memblokir keluar final sampai dilunasi atau dibatalkan.',
       source: 'Business rule',
       actionLabel: canTakePayment && !isDraft ? 'Catat Pembayaran' : undefined,
       onAction: canTakePayment && !isDraft ? () => setShowPaymentModal(true) : undefined,
@@ -215,7 +215,7 @@ export default function InvoiceDetailPage() {
 
           {isOpenInvoice ? (
             <BlockedReasonCard
-              title="Tagihan ini masih bisa memblokir final checkout"
+              title="Tagihan ini masih bisa memblokir keluar final"
               reason="Business rule aktif: final keluar hanya boleh dilakukan jika semua tagihan masa sewa sudah PAID atau CANCELLED. Tagihan belum terbit juga dihitung sebagai tagihan terbuka."
               actionLabel={canTakePayment && !isDraft ? 'Catat Pembayaran' : undefined}
               actionTo={undefined}

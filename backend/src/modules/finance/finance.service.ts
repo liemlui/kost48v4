@@ -276,4 +276,215 @@ export class FinanceService {
       note: 'Draft ini sengaja tidak menampilkan formal ratio karena belum ada cash/bank, payables, equity, dan asset ledger yang reliable.',
     };
   }
+
+  async ownerDashboard(query: FinancePeriodQueryDto = {}) {
+    const { year, month, start, end } = monthWindow(query);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    // Prev month for comparison
+    const prevStart = new Date(Date.UTC(year, month - 2, 1));
+    const prevEnd = new Date(Date.UTC(year, month - 1, 1));
+
+    const [
+      roomStatusGroups,
+      activeStayCount,
+      invoiceAgg,
+      prevInvoiceAgg,
+      paymentAgg,
+      prevPaymentAgg,
+      expenseAgg,
+      prevExpenseAgg,
+      openInvoiceAgg,
+      overdueAgg,
+      wifiAgg,
+      prevWifiAgg,
+      pendingPaymentCount,
+    ] = await Promise.all([
+      this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any } }),
+      // Current month invoice
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: start, lt: end } },
+      }),
+      // Prev month invoice
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: prevStart, lt: prevEnd } },
+      }),
+      // Current month payment
+      this.prisma.invoicePayment.aggregate({
+        _sum: { amountRupiah: true },
+        where: { paymentDate: { gte: start, lt: end } },
+      }),
+      // Prev month payment
+      this.prisma.invoicePayment.aggregate({
+        _sum: { amountRupiah: true },
+        where: { paymentDate: { gte: prevStart, lt: prevEnd } },
+      }),
+      // Current month expense
+      this.prisma.expense.aggregate({
+        _sum: { amountRupiah: true },
+        where: { expenseDate: { gte: start, lt: end } },
+      }),
+      // Prev month expense
+      this.prisma.expense.aggregate({
+        _sum: { amountRupiah: true },
+        where: { expenseDate: { gte: prevStart, lt: prevEnd } },
+      }),
+      // Open invoices
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        _count: { id: true },
+        where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
+      }),
+      // Overdue
+      this.prisma.invoice.aggregate({
+        _sum: { totalAmountRupiah: true },
+        _count: { id: true },
+        where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] as any }, dueDate: { lt: today } },
+      }),
+      // Current month WiFi
+      this.prisma.wifiSale.aggregate({
+        _sum: { soldPriceRupiah: true },
+        where: { saleDate: { gte: start, lt: end } },
+      }),
+      // Prev month WiFi
+      this.prisma.wifiSale.aggregate({
+        _sum: { soldPriceRupiah: true },
+        where: { saleDate: { gte: prevStart, lt: prevEnd } },
+      }),
+      this.prisma.paymentSubmission.count({ where: { status: PaymentSubmissionStatus.PENDING_REVIEW as any } }),
+    ]);
+
+    // --- Room occupancy ---
+    const byStatus = roomStatusGroups.reduce<Record<string, number>>((acc, row) => {
+      acc[String(row.status)] = row._count.id;
+      return acc;
+    }, {});
+    const totalRooms = Object.values(byStatus).reduce((sum, value) => sum + value, 0);
+    const maintenanceRooms = (byStatus[RoomStatus.MAINTENANCE] ?? 0) + (byStatus[RoomStatus.INACTIVE] ?? 0);
+    const operableRooms = Math.max(0, totalRooms - maintenanceRooms);
+    const occupancyRate = operableRooms > 0 ? roundPercent((activeStayCount / operableRooms) * 100) : 0;
+
+    // --- KPI values (current month) ---
+    const invoiceRevenue = Number(invoiceAgg._sum.totalAmountRupiah ?? 0);
+    const wifiRevenue = Number(wifiAgg._sum.soldPriceRupiah ?? 0);
+    const totalRevenue = invoiceRevenue + wifiRevenue;
+    const totalExpense = Number(expenseAgg._sum.amountRupiah ?? 0);
+    const netProfit = totalRevenue - totalExpense;
+    const cashIn = Number(paymentAgg._sum.amountRupiah ?? 0) + wifiRevenue;
+    const cashOut = totalExpense;
+    const netCashFlow = cashIn - cashOut;
+    const netProfitMargin = totalRevenue > 0 ? roundPercent((netProfit / totalRevenue) * 100) : 0;
+
+    // --- KPI values (prev month) ---
+    const prevInvoiceRevenue = Number(prevInvoiceAgg._sum.totalAmountRupiah ?? 0);
+    const prevWifiRevenue = Number(prevWifiAgg._sum.soldPriceRupiah ?? 0);
+    const prevTotalRevenue = prevInvoiceRevenue + prevWifiRevenue;
+    const prevTotalExpense = Number(prevExpenseAgg._sum.amountRupiah ?? 0);
+    const prevNetProfit = prevTotalRevenue - prevTotalExpense;
+    const prevCashIn = Number(prevPaymentAgg._sum.amountRupiah ?? 0) + prevWifiRevenue;
+    const prevCashOut = prevTotalExpense;
+    const prevNetCashFlow = prevCashIn - prevCashOut;
+
+    // --- Change percent ---
+    const changePercent = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return roundPercent(((current - previous) / previous) * 100);
+    };
+
+    // --- Grade ---
+    const occupancyScore = occupancyRate >= 85 ? 25 : occupancyRate >= 60 ? 20 : 10;
+    const profitScore = netProfitMargin >= 30 ? 25 : netProfitMargin >= 10 ? 15 : 5;
+    const cashScore = netCashFlow >= 0 ? 25 : 10;
+    const overduePenalty = Number(overdueAgg._count.id ?? 0) * 4;
+    const pendingPenalty = pendingPaymentCount * 2;
+    const score = Math.max(0, Math.min(100, occupancyScore + profitScore + cashScore + 25 - overduePenalty - pendingPenalty));
+    const gradeMap = score >= 80 ? 'SEHAT' : score >= 60 ? 'PERHATIAN' : score >= 40 ? 'RISIKO' : 'KRITIS';
+
+    // --- Signals ---
+    const signals: Array<{ type: string; count: number; totalRupiah?: number; route: string }> = [];
+    if (Number(overdueAgg._count.id ?? 0) > 0) {
+      signals.push({ type: 'overdue', count: Number(overdueAgg._count.id), totalRupiah: Number(overdueAgg._sum.totalAmountRupiah ?? 0), route: '/invoices' });
+    }
+    if (pendingPaymentCount > 0) {
+      signals.push({ type: 'pending_payment', count: pendingPaymentCount, route: '/payment-submissions/review' });
+    }
+    const outstanding = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
+    const outstandingCount = Number(openInvoiceAgg._count.id ?? 0);
+    if (outstanding > 0) {
+      signals.push({ type: 'outstanding', count: outstandingCount, totalRupiah: outstanding, route: '/invoices' });
+    }
+
+    // --- Trend 6 months ---
+    const trendMonths: Array<{ year: number; month: number; revenue: number; expense: number; netProfit: number }> = [];
+    for (let i = 5; i >= 0; i--) {
+      const m = month - i;
+      let ty = year;
+      let tm = m;
+      while (tm <= 0) { tm += 12; ty -= 1; }
+      const trendStart = new Date(Date.UTC(ty, tm - 1, 1));
+      const trendEnd = new Date(Date.UTC(ty, tm, 1));
+      const [trendInvoice, trendExpense, trendWifi] = await Promise.all([
+        this.prisma.invoice.aggregate({
+          _sum: { totalAmountRupiah: true },
+          where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: trendStart, lt: trendEnd } },
+        }),
+        this.prisma.expense.aggregate({
+          _sum: { amountRupiah: true },
+          where: { expenseDate: { gte: trendStart, lt: trendEnd } },
+        }),
+        this.prisma.wifiSale.aggregate({
+          _sum: { soldPriceRupiah: true },
+          where: { saleDate: { gte: trendStart, lt: trendEnd } },
+        }),
+      ]);
+      const rev = Number(trendInvoice._sum.totalAmountRupiah ?? 0) + Number(trendWifi._sum.soldPriceRupiah ?? 0);
+      const exp = Number(trendExpense._sum.amountRupiah ?? 0);
+      trendMonths.push({ year: ty, month: tm, revenue: rev, expense: exp, netProfit: rev - exp });
+    }
+
+    // --- Headline ---
+    const headlineParts: string[] = [];
+    if (netProfit > 0 && occupancyRate >= 70) {
+      headlineParts.push('Bulan ini bisnis Anda sehat.');
+    } else if (netProfit > 0) {
+      headlineParts.push('Bulan ini masih untung, tapi ada yang perlu diperhatikan.');
+    } else {
+      headlineParts.push('Bulan ini perlu perhatian lebih.');
+    }
+    const revChange = changePercent(totalRevenue, prevTotalRevenue);
+    if (revChange > 0) headlineParts.push(`Pendapatan naik ${revChange}% dibanding bulan lalu.`);
+    else if (revChange < 0) headlineParts.push(`Pendapatan turun ${Math.abs(revChange)}% dibanding bulan lalu.`);
+    else headlineParts.push('Pendapatan stabil dibanding bulan lalu.');
+    if (signals.length > 0) headlineParts.push(`Ada ${signals.length} hal yang perlu ditindaklanjuti.`);
+
+    return {
+      year,
+      month,
+      grade: gradeMap,
+      score,
+      headline: headlineParts.join(' '),
+      kpi: {
+        totalRevenueRupiah: totalRevenue,
+        totalRevenuePrevMonthRupiah: prevTotalRevenue,
+        totalRevenueChangePercent: changePercent(totalRevenue, prevTotalRevenue),
+        netProfitRupiah: netProfit,
+        netProfitPrevMonthRupiah: prevNetProfit,
+        netProfitChangePercent: changePercent(netProfit, prevNetProfit),
+        netProfitMarginPercent: netProfitMargin,
+        occupancyRatePercent: occupancyRate,
+        occupancyRatePrevMonthPercent: null, // occupancy is snapshot, not period-based
+        occupancyRateChangePercent: null,
+        netCashFlowRupiah: netCashFlow,
+        netCashFlowPrevMonthRupiah: prevNetCashFlow,
+        netCashFlowChangePercent: changePercent(netCashFlow, prevNetCashFlow),
+      },
+      signals,
+      trend6Months: trendMonths,
+      generatedAt: new Date().toISOString(),
+    };
+  }
 }

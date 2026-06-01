@@ -2,6 +2,9 @@ import { FormEvent, useMemo, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/common/PasswordInput';
+import Kost48LogoMark from '../../components/common/Kost48LogoMark';
+import Kost48DecorGallery from '../../components/common/Kost48DecorGallery';
+import { officialKost48Highlights, officialKost48Location } from '../../data/officialKost48Content';
 import { getDefaultRoute } from '../../config/navigation';
 import { useAuth } from '../../context/AuthContext';
 import type { UserRole } from '../../types';
@@ -90,39 +93,29 @@ export default function LoginPage() {
     <div className="login-shell login-experience-v518d">
       <div className="login-wrap">
         <section className="login-aside" aria-label="Tentang KOST48 Surabaya">
-          <div className="login-chip"><span /> KOST48 Surabaya Barat</div>
-          <h1 className="login-title">Kos nyaman Surabaya Barat, dari booking sampai tinggal.</h1>
+          <div className="login-chip"><span /> {officialKost48Location.address}</div>
+          <h1 className="login-title">Kos Surabaya Barat dekat Pakuwon Mall / PTC.</h1>
           <p className="login-copy">
-            Pilih kamar, pantau pemesanan, dan urus tagihan dari satu portal.
+            Pilih kamar, pantau pemesanan, cek tagihan, dan laporkan kebutuhan kos dari satu portal KOST48.
           </p>
 
+          <Kost48DecorGallery variant="auth" maxItems={3} />
+
           <div className="login-feature-list">
-            <div className="login-feature-item">
-              <div className="login-feature-icon">✓</div>
-              <div>
-                <strong>Kamar siap dihuni</strong>
-                <div className="mt-1 small">Lihat kamar, harga, deposit, dan info penting.</div>
+            {officialKost48Highlights.slice(0, 3).map((item) => (
+              <div key={item.title} className="login-feature-item">
+                <div className="login-feature-icon">{item.icon}</div>
+                <div>
+                  <strong>{item.title}</strong>
+                  <div className="mt-1 small">{item.description}</div>
+                </div>
               </div>
-            </div>
-            <div className="login-feature-item">
-              <div className="login-feature-icon">✓</div>
-              <div>
-                <strong>Pemesanan lebih transparan</strong>
-                <div className="mt-1 small">Pantau proses review, pembayaran, dan status kamar.</div>
-              </div>
-            </div>
-            <div className="login-feature-item">
-              <div className="login-feature-icon">✓</div>
-              <div>
-                <strong>Portal pribadi penghuni</strong>
-                <div className="mt-1 small">Tagihan, masa sewa, laporan, dan pengumuman jadi satu.</div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
         <section className="login-panel" aria-label="Form masuk KOST48">
-          <div className="login-mark" aria-hidden="true">K48</div>
+          <Kost48LogoMark size="login" className="login-mark" />
           <div className="login-heading-block text-center">
             <h2>Masuk ke Portal KOST48</h2>
             <p>Cek pemesanan, tagihan, dan laporan kamu.</p>

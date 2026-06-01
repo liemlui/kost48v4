@@ -152,10 +152,10 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
       <Card.Body>
         <div className="autoops-control-layout">
           <div>
-            <div className="page-eyebrow mb-1">AutoOps First-Paid Control</div>
+            <div className="page-eyebrow mb-1">AutoOps Pembayaran Pertama</div>
             <h3 className="mb-1">Kamar mengikuti pembayaran valid pertama, bukan sekadar booking.</h3>
             <p className="mb-0 text-muted">
-              Panel ini menjalankan reset booking lewat batas, melepas kamar reserved orphan, dan menahan bukti pembayaran pending agar tetap direview manusia.
+              Panel ini menjalankan reset booking lewat batas, melepas kamar booking menggantung, dan menahan bukti pembayaran menunggu cek agar tetap diputuskan manusia.
             </p>
           </div>
           <div className="autoops-control-actions">
@@ -166,18 +166,18 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
             >
               {mutation.isPending ? <><Spinner animation="border" size="sm" className="me-2" />Menjalankan...</> : 'Jalankan AutoOps sekarang'}
             </Button>
-            <small>{role === 'OWNER' ? 'Owner dapat trigger manual untuk audit.' : 'Admin dapat trigger operasional, bukan approval pembayaran.'}</small>
+            <small>{role === 'OWNER' ? 'Owner dapat menjalankan manual untuk audit.' : 'Admin dapat menjalankan operasional, bukan menyetujui pembayaran.'}</small>
           </div>
         </div>
 
         <div className="autoops-control-grid mt-3">
-          <div><strong>{expired}</strong><span>siap reset/cancel</span></div>
-          <div><strong>{held}</strong><span>bukti pending review</span></div>
-          <div><strong>{orphan}</strong><span>reserved orphan</span></div>
+          <div><strong>{expired}</strong><span>siap dibatalkan</span></div>
+          <div><strong>{held}</strong><span>bukti menunggu cek</span></div>
+          <div><strong>{orphan}</strong><span>booking menggantung</span></div>
         </div>
 
         <Alert variant={hasWork ? 'warning' : 'info'} className="mt-3 mb-0 small">
-          AutoOps tidak approve pembayaran, tidak approve perpanjangan, tidak final checkout, dan tidak refund deposit. Flow sensitif tetap keputusan manusia.
+          AutoOps tidak menyetujui pembayaran, tidak menyetujui perpanjangan, tidak menyelesaikan keluar final, dan tidak mengembalikan dana titipan. Alur sensitif tetap keputusan manusia.
         </Alert>
 
         <div className="autoops-uat-checklist mt-3">

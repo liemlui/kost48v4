@@ -286,7 +286,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
     path: '/stays',
     createLabel: 'Check-in Baru',
     columns: [
-      { key: 'id', label: 'Stay' },
+      { key: 'id', label: 'Masa Sewa' },
       { key: 'checkInDate', label: 'Check-in' },
       { key: 'status', label: 'Status' },
       { key: 'agreedRentAmountRupiah', label: 'Sewa' },
@@ -600,7 +600,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
         options: [
           { value: 'GOOD', label: 'Baik' },
           { value: 'DAMAGED', label: 'Rusak' },
-          { value: 'MAINTENANCE', label: 'Maintenance' },
+          { value: 'MAINTENANCE', label: 'Perlu Dicek' },
           { value: 'MISSING', label: 'Hilang' },
         ],
         required: true,
@@ -826,7 +826,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
           { value: 'ELECTRICITY', label: 'Listrik PLN' },
           { value: 'WATER', label: 'Air / PDAM / Pompa' },
           { value: 'INTERNET', label: 'Internet / ISP / Modal WiFi' },
-          { value: 'MAINTENANCE', label: 'Maintenance / Perbaikan / Pest Control' },
+          { value: 'MAINTENANCE', label: 'Perawatan / Perbaikan / Pest Control' },
           { value: 'CLEANING', label: 'Kebersihan / Laundry Partner / Jasa Bersih' },
           { value: 'SUPPLIES', label: 'Supplies / Galon / Inventaris Kecil' },
           { value: 'TAX', label: 'Pajak / Retribusi / Sampah' },
@@ -863,7 +863,7 @@ export const resourceConfigs: Record<string, ResourceConfig> = {
       },
       {
         name: 'stayId',
-        label: 'Stay Terkait',
+        label: 'Masa Sewa Terkait',
         type: 'number',
         placeholder: 'Pilih stay bila applicable',
       },

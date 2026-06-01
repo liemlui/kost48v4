@@ -30,9 +30,9 @@ export default function AdminStaffPerformancePage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Staff Accountability"
-        title="Staff Performance"
-        description="Monitoring kinerja staff dari checklist, tugas, meter listrik/air, laporan stok, audit random, dan review tenant."
+        eyebrow="Akuntabilitas Staff"
+        title="Kinerja Staff"
+        description="Monitoring kinerja staff dari checklist, tugas, meter listrik/air, laporan stok, audit random, dan ulasan penghuni."
         secondaryAction={<Form.Control type="month" value={month} onChange={(event) => setMonth(event.currentTarget.value)} style={{ maxWidth: 190 }} />}
       />
 
@@ -44,7 +44,7 @@ export default function AdminStaffPerformancePage() {
           <Card className="border-0"><Card.Body><span>Total staff</span><strong>{query.data.summary.totalStaff}</strong><small>Staff aktif</small></Card.Body></Card>
           <Card className="border-0"><Card.Body><span>Sangat baik</span><strong>{query.data.summary.veryGood}</strong><small>Kinerja kuat</small></Card.Body></Card>
           <Card className="border-0"><Card.Body><span>Perlu dibantu/diawasi</span><strong>{query.data.summary.needWatch}</strong><small>Butuh follow-up</small></Card.Body></Card>
-          <Card className="border-0"><Card.Body><span>Negative KPI</span><strong>{query.data.summary.negativeValue}</strong><small>Audit gagal/bukti kurang</small></Card.Body></Card>
+          <Card className="border-0"><Card.Body><span>Sinyal negatif</span><strong>{query.data.summary.negativeValue}</strong><small>Audit gagal/bukti kurang</small></Card.Body></Card>
         </div>
       ) : null}
 
@@ -62,7 +62,7 @@ export default function AdminStaffPerformancePage() {
           {!items.length && !query.isLoading ? <div className="staff-empty-box mt-3"><strong>Belum ada data staff.</strong><span>Data akan muncul setelah user staff aktif tersedia.</span></div> : null}
           {items.length ? (
             <Table responsive hover className="mt-3 staff-performance-table">
-              <thead><tr><th>Staff</th><th>Kategori</th><th>Skor</th><th>Checklist</th><th>Tugas</th><th>Meter</th><th>Rating Tenant</th><th>Negative</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>Staff</th><th>Kategori</th><th>Skor</th><th>Checklist</th><th>Tugas</th><th>Meter</th><th>Rating Penghuni</th><th>Sinyal</th><th>Aksi</th></tr></thead>
               <tbody>
                 {visibleItems.map((item) => (
                   <tr key={item.staff.id}>

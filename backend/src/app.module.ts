@@ -35,6 +35,7 @@ import { AutoOpsModule } from './modules/auto-ops/auto-ops.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { DepositLedgerModule } from './modules/deposit-ledger/deposit-ledger.module';
+import { FaqsModule } from './modules/faqs/faqs.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -73,6 +74,7 @@ import { DepositLedgerModule } from './modules/deposit-ledger/deposit-ledger.mod
     AccountingModule,
     AssetsModule,
     DepositLedgerModule,
+    FaqsModule,
   ],
 })
 export class AppModule {}

@@ -153,7 +153,7 @@ export function getFlowNote(configPath: string) {
         description:
           'Untuk pencatatan paling sederhana, buka detail invoice lalu catat pembayaran dari sana. Halaman ini tetap berguna untuk koreksi, audit, dan input cepat massal.',
         backendNote:
-          'Backend berikutnya idealnya menyiapkan endpoint invoice outstanding siap-bayar dan preview status invoice setelah nominal dimasukkan.',
+          'Tahap berikutnya idealnya menyiapkan data tagihan siap-bayar dan preview status setelah nominal dimasukkan.',
       };
     case '/inventory-items':
       return {
@@ -185,7 +185,7 @@ export function getFlowNote(configPath: string) {
         description:
           'Hubungkan expense ke kamar atau stay hanya jika memang ada kaitan langsung. Untuk biaya umum seperti gaji dan internet pusat, biarkan relasi kamar/stay kosong.',
         backendNote:
-          'Backend berikutnya idealnya menyiapkan filter laporan bulanan, include relasi kamar/stay, dan agregasi total per kategori.',
+          'Tahap berikutnya idealnya menyiapkan filter laporan bulanan, relasi kamar/masa sewa, dan agregasi total per kategori.',
       };
     default:
       return null;

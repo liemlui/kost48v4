@@ -1,12 +1,14 @@
 // KOST48 PWA — Safe Service Worker MVP
 // Cache policy: static app shell only. No API/auth/private data caching.
 // Cache name versioned for easy cleanup on updates.
-const CACHE_NAME = 'kost48-pwa-v1';
+const CACHE_NAME = 'kost48-pwa-v2';
 
 // Static assets to precache on install (best-effort).
 const PRECACHE_URLS = [
   '/rooms',
   '/manifest.webmanifest',
+  '/icons/favicon-32.png',
+  '/icons/apple-touch-icon.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-512-maskable.png',

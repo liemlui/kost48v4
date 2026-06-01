@@ -6,6 +6,8 @@ import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
+import SafeImage from '../../components/common/SafeImage';
+import Kost48OfficialInfoCard from '../../components/common/Kost48OfficialInfoCard';
 import { getResource, listResource } from '../../api/resources';
 import { listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
@@ -94,9 +96,10 @@ function getInventoryItems(roomItems: RoomItem[], stayRoomId: number | string | 
 }
 
 function getRoomCoverImage(stay: Stay) {
+  const localCover = getKost48RoomCover(stay.room?.code, stay.room?.name);
   const firstImage = stay.room?.images?.[0];
   const resolved = firstImage ? resolveAbsoluteFileUrl(firstImage) : null;
-  return resolved ?? getKost48RoomCover(stay.room?.code, stay.room?.name);
+  return localCover ?? resolved;
 }
 
 function getRoomPriceFacts(stay: Stay): { label: string; value: ReactNode }[] {
@@ -313,7 +316,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       ? 'Ada tagihan tanpa nominal pembayaran. Hubungi admin agar statusnya dicek sebelum ajukan perpanjangan atau keluar.'
       : null;
 
-  const showRenewSecondary = canRequestRenew && !guide.onAction;
+  const showRenewSecondary = canRequestRenew;
   const showCheckoutSecondary = canRequestCheckout;
 
   // ── helpers for fact-chip tones ─────────────────────────────────────────────
@@ -332,33 +335,25 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       <Card className="tenant-stay-main-card border-0 mb-3">
         <Card.Body>
 
-          {/* Guide / status banner */}
-          <div className={`tenant-stay-guide-banner tenant-stay-guide-${guide.tone}`}>
-            <div className="tenant-stay-guide-body">
-              <strong>{guide.title}</strong>
-              <span>{compactText(guide.message, 90)}</span>
-            </div>
-            <Button
-              variant={guide.tone === 'danger' ? 'danger' : 'primary'}
-              size="sm"
-              onClick={guide.onAction ?? (() => navigate(guide.primaryRoute ?? '/portal/invoices'))}
-            >
-              {guide.primaryLabel}
-            </Button>
-          </div>
+          {/* Topbar PaymentUrgencyChip is the main assistant. Body stays compact. */}
+          {nearEnd && !hasOpenInvoice ? (
+            <Alert variant="warning" className="tenant-short-alert mb-3">
+              Masa sewa hampir selesai. Ajukan perpanjangan atau keluar sebelum akhir masa sewa.
+            </Alert>
+          ) : null}
 
           {/* ── Compact room header: thumbnail + key info ── */}
           <div className="tenant-room-dossier-header">
             <div className="tenant-room-dossier-thumb-wrap">
-              {roomCoverImage ? (
-                <img
-                  src={roomCoverImage}
-                  alt={`Foto kamar ${stay.room?.code ?? stay.roomId}`}
-                  className="tenant-room-dossier-thumb"
-                />
-              ) : (
-                <div className="tenant-room-dossier-thumb-empty">K48</div>
-              )}
+              <SafeImage
+                src={roomCoverImage}
+                alt={`Foto kamar ${stay.room?.code ?? stay.roomId}`}
+                className="tenant-room-dossier-thumb"
+                placeholderClassName="tenant-room-dossier-thumb-empty"
+                fallbackTitle="Foto kamar belum tersedia"
+                fallbackDescription="Detail kamar tetap dapat dicek di bawah."
+                resolveUrl={false}
+              />
             </div>
             <div className="tenant-room-dossier-info">
               <div className="command-eyebrow">Kamar Saya</div>
@@ -526,6 +521,11 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
           {blockedText ? <Alert variant="warning" className="tenant-short-alert mt-3 mb-0">{blockedText}</Alert> : null}
         </Card.Body>
       </Card>
+
+      <details className="tenant-official-guide-details mb-3">
+        <summary><span>Panduan resmi KOST48</span><small>Lokasi, WiFi, listrik, dan layanan</small></summary>
+        <Kost48OfficialInfoCard variant="tenant" compact />
+      </details>
 
       {/* ── Secondary actions ── */}
       {(showRenewSecondary || showCheckoutSecondary) && (

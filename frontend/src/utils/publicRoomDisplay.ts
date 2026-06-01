@@ -95,7 +95,7 @@ export function getCleanPublicRoomNote(room: PublicRoom) {
 export function getPublicRoomBusinessHighlight(room: PublicRoom) {
   const cleanNote = getCleanPublicRoomNote(room);
   if (cleanNote) return cleanNote;
-  return `Kamar siap dipilih dengan ${getPublicRoomBathroomSentence(room)}, ${getPublicRoomCoolingSentence(room)}, dan informasi harga yang transparan.`;
+  return `Kamar dengan ${getPublicRoomBathroomSentence(room)}, ${getPublicRoomCoolingSentence(room)}, dan informasi harga yang transparan.`;
 }
 
 export function getPublicRoomUtilityCopy(room: PublicRoom, pricingTerm: PricingTerm) {
@@ -141,7 +141,7 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
     return {
       label: isMaintenance ? "Sedang dicek" : "Terisi",
       tone: isMaintenance ? "is-maintenance" : "is-occupied",
-      shortCopy: isMaintenance ? "Kamar kosong, tetapi sedang dicek dan dibersihkan dulu." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
+      shortCopy: isMaintenance ? "Kamar kosong, tetapi sedang dicek sebelum siap ditempati." : "Kamar sedang terisi. Bisa tanya estimasi kosong.",
       detailCopy: isMaintenance
         ? "Kamar ini sudah kosong, tetapi belum dibuka untuk booking karena tim masih mengecek kebersihan, kunci, inventaris, dan kondisi akhir. Anda tetap bisa tanya admin untuk estimasi siap ditempati."
         : "Kamar ini sedang terisi. Anda tetap bisa melihat detail dan tanya ke admin kapan kamar ini bisa kosong lagi.",

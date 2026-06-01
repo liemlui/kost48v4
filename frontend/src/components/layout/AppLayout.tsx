@@ -6,6 +6,7 @@ import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
+import Kost48LogoMark from '../common/Kost48LogoMark';
 import {
   getDefaultRoute,
   getNavigationLinks,
@@ -64,7 +65,7 @@ function getWorkspaceSummary(role?: string) {
     case 'STAFF':
       return 'Mulai dari pekerjaan hari ini, lalu catat hasil kerja dengan rapi.';
     case 'TENANT':
-      return 'Portal sederhana untuk kamar, tagihan, tiket, pengumuman, dan profil.';
+      return 'Portal sederhana untuk kamar, tagihan, laporan, WiFi, dan profil.';
     default:
       return 'Menu utama workspace.';
   }
@@ -144,7 +145,7 @@ function SidebarContent({
   return (
     <>
       <button type="button" className="brand-block border-0 bg-transparent text-start w-100" onClick={onBrandClick}>
-        <div className="brand-mark" aria-hidden="true">K48</div>
+        <Kost48LogoMark />
         <div>
           <div className="brand-title">Kost48 Surabaya</div>
           <div className="brand-subtitle">{userRole === 'STAFF' ? 'Pusat Kerja' : 'Command Center'}</div>
@@ -231,7 +232,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
         <main className="staff-workspace-main">
           <section className="staff-workspace-topbar">
             <button type="button" className="staff-workspace-brand" onClick={() => navigate('/dashboard')}>
-              <span className="brand-mark small" aria-hidden="true">K48</span>
+              <Kost48LogoMark size="small" />
               <span>
                 <strong>Operasional KOST48</strong>
                 <em>Kerja harian, kamar, gudang, dan laporan</em>

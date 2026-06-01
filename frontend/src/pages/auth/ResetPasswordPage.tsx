@@ -3,6 +3,7 @@ import { Alert, Button, Form } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PasswordInput from '../../components/common/PasswordInput';
 import { resetPassword } from '../../api/auth';
+import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default function ResetPasswordPage() {
 
         <section className="login-panel">
           <div className="brand-block">
-            <div className="brand-mark">K48</div>
+            <Kost48LogoMark />
             <div>
               <div className="brand-title">Reset Password</div>
               <div className="brand-subtitle">Buat password baru untuk akun Anda</div>

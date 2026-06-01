@@ -108,7 +108,7 @@ export default function ReviewPaymentModal({
         tone: safety.amountTone === 'EXACT' ? 'success' : safety.amountTone === 'OVERPAY' ? 'danger' : 'warning',
       },
       { label: '2. Dampak approve', value: safety.impactText, tone: safety.amountTone === 'PARTIAL' ? 'warning' : 'success' },
-      { label: '3. Setelah approve', value: 'Cek ulang jika backend menolak.', tone: 'info' },
+      { label: '3. Setelah approve', value: 'Cek ulang jika sistem menolak.', tone: 'info' },
     ];
   }, [safety, submission]);
 
@@ -221,7 +221,7 @@ export default function ReviewPaymentModal({
                   {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
                   {normalizedError ? (
                     <Alert variant="danger" className="payment-flow-blocker">
-                      <div className="fw-semibold mb-1">Flow blocker dari backend</div>
+                      <div className="fw-semibold mb-1">Pengaman sistem</div>
                       <div>{normalizedError}</div>
                       <div className="small mt-2">Perbaiki penyebabnya dulu.</div>
                     </Alert>

@@ -82,16 +82,16 @@ function getBookingApprovalMeta(stay: Stay) {
       variant: 'INFO',
       helper:
         stay.latestInvoiceNumber
-          ? `Invoice awal ${stay.latestInvoiceNumber} sudah terbentuk. Booking ini tidak lagi menunggu approval.`
-          : 'Invoice awal booking sudah terbentuk. Booking ini tidak lagi menunggu approval.',
+          ? `Tagihan awal ${stay.latestInvoiceNumber} sudah terbentuk. Booking ini tidak lagi menunggu persetujuan.`
+          : 'Tagihan awal booking sudah terbentuk. Booking ini tidak lagi menunggu persetujuan.',
     };
   }
 
   return {
     isPendingApproval: true,
-    label: 'Menunggu Approval',
+    label: 'Menunggu Persetujuan',
     variant: 'WARNING',
-    helper: 'Booking reserved ini masih menunggu approval admin dan pembentukan invoice awal.',
+    helper: 'Booking ini masih menunggu persetujuan admin dan pembuatan tagihan awal.',
   };
 }
 
@@ -289,7 +289,7 @@ export default function StaysPage() {
       id: 'checkout-pending',
       severity: 'HIGH',
       title: `${pendingCheckoutRequestCount} pengajuan keluar menunggu review`,
-      message: 'Review dulu. Approval belum melepas kamar.',
+      message: 'Review dulu. Persetujuan belum melepas kamar.',
       source: 'Pengajuan keluar',
       count: pendingCheckoutRequestCount,
       actionLabel: firstPendingCheckoutRequest ? 'Review pengajuan' : undefined,
@@ -299,8 +299,8 @@ export default function StaysPage() {
       id: 'checkout-approved',
       severity: 'BLOCKER',
       title: `${approvedCheckoutRequestCount} rencana keluar sudah disetujui tapi belum final`,
-      message: 'Buka detail, cek tagihan, lalu finalkan.',
-      source: 'Lifecycle',
+      message: 'Buka detail, cek tagihan, lalu finalkan keluar.',
+      source: 'Masa sewa',
       count: approvedCheckoutRequestCount,
       actionLabel: firstApprovedCheckoutRequest ? 'Buka detail' : undefined,
       actionTo: firstApprovedCheckoutRequest ? `/stays/${firstApprovedCheckoutRequest.stayId}` : undefined,
@@ -328,9 +328,9 @@ export default function StaysPage() {
   ].filter(Boolean) as AssistantItem[];
 
   const metrics: MetricChip[] = [
-    { id: 'active', label: 'Masa sewa aktif', value: operationalActive.length, helper: 'Tenant sedang menempati kamar', icon: '🏠', status: 'SUCCESS' },
-    { id: 'approval', label: 'Menunggu approval', value: pendingApprovalCount, helper: 'Booking reserved tanpa invoice awal', icon: '📝', status: pendingApprovalCount ? 'WARNING' : 'SUCCESS' },
-    { id: 'due', label: 'Akhir masa sewa dekat', value: checkoutSoonCount, helper: 'H-10 sampai overdue', icon: '⏰', status: checkoutSoonCount ? 'WARNING' : 'SUCCESS' },
+    { id: 'active', label: 'Masa sewa aktif', value: operationalActive.length, helper: 'Penghuni sedang menempati kamar', icon: '🏠', status: 'SUCCESS' },
+    { id: 'approval', label: 'Menunggu persetujuan', value: pendingApprovalCount, helper: 'Booking tanpa tagihan awal', icon: '📝', status: pendingApprovalCount ? 'WARNING' : 'SUCCESS' },
+    { id: 'due', label: 'Akhir masa sewa dekat', value: checkoutSoonCount, helper: 'H-10 sampai terlambat', icon: '⏰', status: checkoutSoonCount ? 'WARNING' : 'SUCCESS' },
     { id: 'checkout', label: 'Pengajuan keluar', value: pendingCheckoutRequestCount + approvedCheckoutRequestCount, helper: `${approvedCheckoutRequestCount} sudah disetujui`, icon: '🚪', status: pendingCheckoutRequestCount || approvedCheckoutRequestCount ? 'DANGER' : 'SUCCESS' },
   ];
 
@@ -373,7 +373,7 @@ export default function StaysPage() {
         subject: stay.tenant?.fullName ?? `Tenant #${stay.tenantId}`,
         issue: approvalMeta.helper,
         age: expiryMeta.helperText,
-        recommendedAction: approvalMeta.isPendingApproval ? 'Approve booking' : 'Buka detail',
+        recommendedAction: approvalMeta.isPendingApproval ? 'Setujui booking' : 'Buka detail',
         actionTo: `/stays/${stay.id}`,
       };
     }),
@@ -382,23 +382,23 @@ export default function StaysPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Stays & Tenant"
-        title="Stays & Tenant"
-        description="Booking, masa sewa aktif, perpanjangan, checkout, dan tenant dalam satu area."
+        eyebrow="Masa Sewa & Penghuni"
+        title="Masa Sewa & Penghuni"
+        description="Booking, masa sewa aktif, perpanjangan, keluar, dan data penghuni dalam satu area."
         actionLabel="Check-in Baru"
         onAction={() => navigate('/stays/check-in')}
       />
 
-      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Stays dan Tenant">
+      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu masa sewa dan penghuni">
         <div className="admin-area-internal-menu-head">
-          <span>Menu Stays & Tenant</span>
+          <span>Menu Masa Sewa & Penghuni</span>
           <small>Navigasi</small>
         </div>
         <div className="admin-area-internal-menu-scroll">
           {[
             { id: 'process', icon: '🏠', label: 'Masa Sewa', helper: 'Booking dan masa sewa aktif.', to: '/stays', active: true },
-            { id: 'renew', icon: '🔁', label: 'Perpanjangan', helper: 'Review perpanjangan dan meter checkpoint.', to: '/renew-requests', active: false },
-            { id: 'tenant', icon: '👤', label: 'Tenant', helper: 'Daftar tenant dan akses portal.', to: '/tenants', active: false },
+            { id: 'renew', icon: '🔁', label: 'Perpanjangan', helper: 'Review perpanjangan dan catatan meter.', to: '/renew-requests', active: false },
+            { id: 'tenant', icon: '👤', label: 'Penghuni', helper: 'Daftar penghuni dan akses portal.', to: '/tenants', active: false },
             { id: 'checkin', icon: '➕', label: 'Check-in', helper: 'Masukkan tenant ke kamar.', to: '/stays/check-in', active: false },
           ].map((item) => (
             <button type="button" key={item.id} className={`admin-area-internal-chip info ${item.active ? 'is-active' : ''}`.trim()} onClick={() => navigate(item.to)} title={item.helper}>
@@ -451,8 +451,8 @@ export default function StaysPage() {
               icon={statusFilter === 'BOOKINGS' ? '🗓️' : '🏠'}
               title={statusFilter === 'BOOKINGS' ? 'Tidak ada item yang perlu ditindaklanjuti' : 'Belum ada data masa sewa'}
               description={statusFilter === 'BOOKINGS'
-                ? 'Semua booking sudah ditangani dan tidak ada masa sewa yang mendekati tanggal renew/keluar.'
-                : 'Coba ubah filter atau mulai check-in tenant baru.'}
+                ? 'Semua booking sudah ditangani dan tidak ada masa sewa yang mendekati tanggal perpanjangan/keluar.'
+                : 'Coba ubah filter atau mulai check-in penghuni baru.'}
               action={statusFilter === 'BOOKINGS' ? undefined : { label: 'Check-in Baru', onClick: () => navigate('/stays/check-in') }}
             />
           ) : null}
@@ -463,7 +463,7 @@ export default function StaysPage() {
               <Table hover responsive className="mb-3 responsive-data-table">
                 <thead>
                   <tr>
-                    <th>Tenant</th>
+                    <th>Penghuni</th>
                     <th>Kamar</th>
                     <th>Tgl Diajukan</th>
                     <th>Alasan</th>
@@ -473,7 +473,7 @@ export default function StaysPage() {
                 <tbody>
                   {pendingCheckoutRequests.map((cr) => (
                     <tr key={`cr-${cr.id}`}>
-                      <td data-label="Tenant">
+                      <td data-label="Penghuni">
                         <div className="fw-semibold">{cr.stay?.tenant?.fullName ?? '-'}</div>
                         <div className="small text-muted">{cr.stay?.tenant?.phone ?? ''}</div>
                       </td>
@@ -528,7 +528,7 @@ export default function StaysPage() {
               <Table hover responsive className="mb-3 responsive-data-table">
                 <thead>
                   <tr>
-                    <th>Tenant</th>
+                    <th>Penghuni</th>
                     <th>Kamar</th>
                     <th>Tgl Keluar Diajukan</th>
                     <th>Alasan</th>
@@ -539,7 +539,7 @@ export default function StaysPage() {
                 <tbody>
                   {approvedCheckoutRequests.map((cr) => (
                     <tr key={`approved-cr-${cr.id}`}>
-                      <td data-label="Tenant">
+                      <td data-label="Penghuni">
                         <div className="fw-semibold">{cr.stay?.tenant?.fullName ?? '-'}</div>
                         <div className="small text-muted">{cr.stay?.tenant?.phone ?? ''}</div>
                       </td>
@@ -583,10 +583,10 @@ export default function StaysPage() {
               <Table hover responsive className="mb-0 responsive-data-table">
                 <thead>
                   <tr>
-                    <th>Tenant</th>
+                    <th>Penghuni</th>
                     <th>Kamar</th>
                     <th>Check-in</th>
-                    <th>Pricing</th>
+                    <th>Masa sewa</th>
                     <th>Masa Berlaku</th>
                     <th>Status / Risiko</th>
                     <th>Aksi</th>
@@ -608,24 +608,24 @@ export default function StaysPage() {
                     const showExpirySubBadge = expiryMeta.variant === 'DANGER' || expiryMeta.variant === 'WARNING';
                     return (
                       <tr key={item.id}>
-                        <td data-label="Tenant">
-                          <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
+                        <td data-label="Penghuni">
+                          <div className="fw-semibold">{item.tenant?.fullName ?? `Penghuni #${item.tenantId}`}</div>
                           {item.tenant?.identityNumber ? (
                             <div className="small text-muted font-monospace">NIK: {item.tenant.identityNumber}</div>
                           ) : null}
                           <div className="small text-muted">{item.bookingSource ? `Sumber: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
                         </td>
                         <td data-label="Kamar">
-                          <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
+                          <div className="fw-semibold">{item.room?.code ?? `Kamar #${item.roomId}`}</div>
                           <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}{item.room?.floor ? ` · Lantai ${item.room.floor}` : ''}</div>
                         </td>
                         <td data-label="Check-in">
                           <div className="fw-semibold">{formatDateSafe(item.checkInDate)}</div>
                           <div className="small text-muted">Akhir masa sewa: {formatDateSafe(item.plannedCheckOutDate)}</div>
                         </td>
-                        <td data-label="Pricing">
+                        <td data-label="Masa sewa">
                           <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
-                          <div className="small text-muted">Deposit <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
+                          <div className="small text-muted">Dana titipan <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} /></div>
                         </td>
                         <td data-label="Masa Berlaku">
                           <div className="fw-semibold">{formatDateSafe(item.expiresAt)}</div>
@@ -651,7 +651,7 @@ export default function StaysPage() {
                             {canApprove ? (
                               <>
                                 <Button size="sm" onClick={() => setSelectedBooking(item)}>
-                                  Review Approve
+                                  Setujui
                                 </Button>
                                 <Button size="sm" variant="outline-danger" onClick={() => setRejectBookingTarget(item)}>
                                   Tolak
@@ -692,12 +692,12 @@ export default function StaysPage() {
             <Table hover responsive className="mb-0 responsive-data-table">
               <thead>
                 <tr>
-                  <th>Tenant</th>
+                  <th>Penghuni</th>
                   <th>Kamar</th>
                   <th>Status</th>
                   <th>Check-in</th>
-                  <th>Pricing</th>
-                  <th>Deposit</th>
+                  <th>Masa sewa</th>
+                  <th>Dana titipan</th>
                   <th style={{ width: 140 }}>Aksi</th>
                 </tr>
               </thead>
@@ -722,12 +722,12 @@ export default function StaysPage() {
                         }
                       }}
                     >
-                      <td data-label="Tenant">
-                        <div className="fw-semibold">{item.tenant?.fullName ?? `Tenant #${item.tenantId}`}</div>
+                      <td data-label="Penghuni">
+                        <div className="fw-semibold">{item.tenant?.fullName ?? `Penghuni #${item.tenantId}`}</div>
                         <div className="small text-muted">{item.bookingSource ? `Sumber: ${getStatusLabel(item.bookingSource)}` : item.stayPurpose ? getStatusLabel(item.stayPurpose) : 'Tanpa keterangan tambahan'}</div>
                       </td>
                       <td data-label="Kamar">
-                        <div className="fw-semibold">{item.room?.code ?? `Room #${item.roomId}`}</div>
+                        <div className="fw-semibold">{item.room?.code ?? `Kamar #${item.roomId}`}</div>
                         <div className="small text-muted">{item.room?.name || 'Nama kamar belum tersedia'}</div>
                       </td>
                       <td data-label="Status">
@@ -740,11 +740,11 @@ export default function StaysPage() {
                         <div>{item.checkInDate ? formatDateSafe(item.checkInDate) : 'Belum Check-in'}</div>
                         {isReservedBookingRow ? <div className="small text-muted">Berakhir {formatDateSafe(item.expiresAt)} · {expiryMeta.helperText}</div> : null}
                       </td>
-                      <td data-label="Pricing">
+                      <td data-label="Masa sewa">
                         <div className="fw-semibold">{item.pricingTerm ? getStatusLabel(item.pricingTerm) : '-'}</div>
                         <div className="small text-muted">Akhir masa sewa: {formatDateSafe(item.plannedCheckOutDate)}</div>
                       </td>
-                      <td data-label="Deposit">
+                      <td data-label="Dana titipan">
                         <CurrencyDisplay amount={item.depositAmountRupiah} showZero={false} />
                         {item.depositStatus && item.depositStatus !== 'HELD' ? (
                           <div className="small text-muted mt-1">

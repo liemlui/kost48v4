@@ -25,10 +25,10 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
       <Card.Body>
         <div className="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-3">
           <div>
-            <div className="section-kicker mb-2">Deposit Operasional</div>
-            <h3 className="h5 mb-1">Timeline deposit tenant</h3>
+            <div className="section-kicker mb-2">Dana Titipan Operasional</div>
+            <h3 className="h5 mb-1">Timeline dana titipan penghuni</h3>
             <p className="text-muted mb-0">
-              Panel ini membaca TenantDepositLedgerEntry untuk audit operasional deposit. Ini berbeda dari JournalEntry accounting formal; jangan gunakan backfill tulis sebelum review owner.
+              Panel ini membaca riwayat dana titipan untuk audit operasional. Ini berbeda dari jurnal akuntansi formal; jangan lakukan backfill tulis sebelum review owner.
             </p>
           </div>
           <div className="d-flex gap-2 align-items-start">
@@ -37,13 +37,13 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
           </div>
         </div>
 
-        {isLoading ? <Alert variant="light" className="border"><Spinner size="sm" className="me-2" />Memuat deposit operasional...</Alert> : null}
-            {isError ? <Alert variant="warning">Deposit operasional belum bisa dimuat. Coba muat ulang halaman.</Alert> : null}
+        {isLoading ? <Alert variant="light" className="border"><Spinner size="sm" className="me-2" />Memuat dana titipan operasional...</Alert> : null}
+            {isError ? <Alert variant="warning">Dana titipan operasional belum bisa dimuat. Coba muat ulang halaman.</Alert> : null}
         {reconciliation?.note ? <Alert variant="info" className="small">{reconciliation.note}</Alert> : null}
 
         <div className="deposit-ops-metrics mb-3">
-          <div className="deposit-ops-metric primary"><span>Deposit diterima</span><strong>{formatRupiah(totals?.increaseRupiah ?? 0)}</strong></div>
-          <div className="deposit-ops-metric"><span>Refund / potongan</span><strong>{formatRupiah(totals?.decreaseRupiah ?? 0)}</strong></div>
+          <div className="deposit-ops-metric primary"><span>Dana titipan diterima</span><strong>{formatRupiah(totals?.increaseRupiah ?? 0)}</strong></div>
+          <div className="deposit-ops-metric"><span>Pengembalian / potongan</span><strong>{formatRupiah(totals?.decreaseRupiah ?? 0)}</strong></div>
           <div className="deposit-ops-metric"><span>Saldo ditahan</span><strong>{formatRupiah(totals?.ledgerHeldBalanceRupiah ?? 0)}</strong></div>
           <div className="deposit-ops-metric"><span>Masa sewa direview</span><strong>{reconciliation?.totalItems ?? 0}</strong></div>
         </div>
@@ -54,7 +54,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
               <thead>
                 <tr>
                   <th>Waktu</th>
-                  <th>Tenant / Kamar</th>
+                  <th>Penghuni / Kamar</th>
                   <th>Event</th>
                   <th>Jumlah</th>
                   <th>Saldo</th>
@@ -65,8 +65,8 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
                 {entryPagination.pagedItems.map((entry) => (
                   <tr key={entry.id}>
                     <td data-label="Waktu" className="small text-muted">{formatDepositLedgerDate(entry.occurredAt)}</td>
-                    <td data-label="Tenant / Kamar">
-                      <div className="fw-semibold">{entry.tenantName ?? `Tenant #${entry.tenantId}`}</div>
+                    <td data-label="Penghuni / Kamar">
+                      <div className="fw-semibold">{entry.tenantName ?? `Penghuni #${entry.tenantId}`}</div>
                       <div className="small text-muted">Kamar {entry.roomCode ?? entry.roomId}</div>
                     </td>
                     <td data-label="Event">{getDepositLedgerTypeLabel(entry.type)}</td>
@@ -91,7 +91,7 @@ export default function DepositOperationsPanel({ summary, reconciliation, isLoad
             ) : null}
           </>
         ) : (
-          <Alert variant="light" className="border mb-0">Belum ada event deposit baru di ledger operasional. Jika ada deposit historis, gunakan dry-run/review sebelum backfill.</Alert>
+          <Alert variant="light" className="border mb-0">Belum ada event dana titipan baru di ledger operasional. Jika ada data historis, gunakan review sebelum backfill.</Alert>
         )}
       </Card.Body>
     </Card>

@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { forgotPassword } from '../../api/auth';
+import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 
 export default function ForgotPasswordPage() {
   const [identifier, setIdentifier] = useState('');
@@ -43,7 +44,7 @@ export default function ForgotPasswordPage() {
 
         <section className="login-panel">
           <div className="brand-block">
-            <div className="brand-mark">K48</div>
+            <Kost48LogoMark />
             <div>
               <div className="brand-title">Lupa Password</div>
               <div className="brand-subtitle">Reset akses akun tenant / backoffice</div>

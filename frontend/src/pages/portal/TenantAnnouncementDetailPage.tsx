@@ -3,11 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Spinner } from 'react-bootstrap';
 import EmptyState from '../../components/common/EmptyState';
-import PageHeader from '../../components/common/PageHeader';
+import SafeImage from '../../components/common/SafeImage';
 import { getResource } from '../../api/resources';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { Announcement } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { getOfficialAnnouncementFallbackImage } from '../../data/officialKost48Content';
 
 function formatDate(value?: string | null) {
   if (!value) return '-';
@@ -48,15 +49,7 @@ export default function TenantAnnouncementDetailPage() {
   if (!isStageLoading && stage !== 'occupied') return <Navigate to="/portal/bookings" replace />;
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="Portal Penghuni"
-        title="Detail Pengumuman"
-        description="Informasi resmi dari pengelola KOST48."
-        actionLabel="Kembali"
-        onAction={() => navigate('/portal/announcements')}
-      />
-
+    <div className="tenant-announcement-detail-page">
       {query.isLoading ? <div className="py-5 text-center"><Spinner animation="border" /></div> : null}
       {query.isError ? <Alert variant="danger">Gagal memuat pengumuman. Coba lagi atau hubungi admin.</Alert> : null}
 
@@ -87,11 +80,15 @@ export default function TenantAnnouncementDetailPage() {
               <Button variant="outline-primary" size="sm" onClick={() => navigate('/portal/announcements')}>Daftar Pengumuman</Button>
             </div>
 
-            {item.imageUrl ? (
-              <div className="tenant-announcement-detail-image">
-                <img src={resolveAbsoluteFileUrl(item.imageUrl) ?? item.imageUrl} alt={item.title} />
-              </div>
-            ) : null}
+            <div className="tenant-announcement-detail-image">
+              <SafeImage
+                src={item.imageUrl ? (resolveAbsoluteFileUrl(item.imageUrl) ?? item.imageUrl) : getOfficialAnnouncementFallbackImage()}
+                alt={item.title}
+                fallbackTitle="Gambar pengumuman belum tersedia"
+                fallbackDescription="Pengumuman tetap bisa dibaca dari teks di bawah."
+                resolveUrl={false}
+              />
+            </div>
 
             <div className="announcement-body-text tenant-announcement-detail-body">{item.content}</div>
           </Card.Body>
