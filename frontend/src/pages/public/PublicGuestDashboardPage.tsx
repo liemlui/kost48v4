@@ -2,19 +2,27 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Accordion, Container, Modal, Spinner } from 'react-bootstrap';
 import { Link, Navigate } from 'react-router-dom';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { listPublicRooms } from '../../api/bookings';
 import { fetchPublicFaqs } from '../../api/faqs';
+import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
 import { getDefaultRoute } from '../../config/navigation';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import { officialKost48Faq, officialKost48Location } from '../../data/officialKost48Content';
 import { getKost48FrontPhotoUrl } from '../../data/kost48Assets';
-import { isPublicRoomBookable } from '../../utils/publicRoomDisplay';
+import {
+  getBestPublicRoomRate,
+  getPublicRoomBathroom,
+  getPublicRoomCooling,
+  isPublicRoomBookable,
+} from '../../utils/publicRoomDisplay';
 
 const NAV_LINKS = [
   { href: '#fasilitas', label: 'Fasilitas' },
   { href: '#cek-kamar', label: 'Cek Kamar' },
+  { href: '#pilihan-kamar', label: 'Pilihan Kamar' },
   { href: '#faq', label: 'FAQ' },
   { href: '#hubungi-kami', label: 'Hubungi Kami' },
 ];
@@ -67,6 +75,20 @@ const MAPS_EMBED_URL =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5304.776378640393!2d112.67025188642698!3d-7.28650073405867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7fc338c5ea093%3A0x68545aa7b3330f0a!2sKost%2048%20Dekat%20PTC%20%2F%20Supermall%20-%20Kost%20Surabaya%20Barat!5e0!3m2!1sid!2sid!4v1625312629036!5m2!1sid!2sid';
 
 /* ── Lightbox ─────────────────────────────────────────────────────── */
+
+function formatCompactRupiah(value: number) {
+  if (!value) return 'Tanya admin';
+  if (value >= 1_000_000) {
+    return `Rp ${(value / 1_000_000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt`;
+  }
+  return `Rp ${Math.round(value / 1_000).toLocaleString('id-ID')} rb`;
+}
+
+function formatMonthlyRange(minimum: number, maximum: number) {
+  if (!minimum || !maximum) return 'Tanya admin';
+  if (minimum === maximum) return formatCompactRupiah(minimum);
+  return `${formatCompactRupiah(minimum)} - ${formatCompactRupiah(maximum)}`;
+}
 
 function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
   useEffect(() => {
@@ -185,6 +207,29 @@ export default function PublicGuestDashboardPage() {
     occupied: rooms.filter((r) => String(r.status ?? '').toUpperCase() === 'OCCUPIED').length,
   }), [rooms]);
 
+  const marketingData = useMemo(() => {
+    const monthlyRates = rooms
+      .map((room) => getBestPublicRoomRate(room, 'MONTHLY'))
+      .filter((rate) => rate > 0);
+
+    return {
+      totalRooms: rooms.length,
+      minMonthlyRate: monthlyRates.length ? Math.min(...monthlyRates) : 0,
+      maxMonthlyRate: monthlyRates.length ? Math.max(...monthlyRates) : 0,
+      statusMix: [
+        { label: 'Siap booking', value: stats.bookable, color: '#16a34a' },
+        { label: 'Sedang dicek', value: stats.checking, color: '#f59e0b' },
+        { label: 'Terisi', value: stats.occupied, color: '#64748b' },
+      ].filter((item) => item.value > 0),
+      facilityMix: [
+        { label: 'Kamar AC', value: rooms.filter((room) => getPublicRoomCooling(room) === 'ac').length, color: '#0ea5e9' },
+        { label: 'Kipas angin', value: rooms.filter((room) => getPublicRoomCooling(room) === 'fan').length, color: '#14b8a6' },
+        { label: 'KM dalam', value: rooms.filter((room) => getPublicRoomBathroom(room) === 'inside').length, color: '#8b5cf6' },
+        { label: 'KM luar', value: rooms.filter((room) => getPublicRoomBathroom(room) === 'outside').length, color: '#f59e0b' },
+      ],
+    };
+  }, [rooms, stats.bookable, stats.checking, stats.occupied]);
+
   const filteredFaq = useMemo(
     () => faqFilter === 'Semua' ? faqData : faqData.filter((q) => q.category === faqFilter),
     [faqFilter, faqData],
@@ -245,6 +290,112 @@ export default function PublicGuestDashboardPage() {
                 <div className="gx-stat-note">Referensi tipe & fasilitas</div>
               </div>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ══ MARKETING DATA ══ */}
+      <section className="gx-market-section" id="pilihan-kamar">
+        <Container fluid="xl">
+          <div className="gx-market-head">
+            <div className="gx-section-head">
+              <div className="gx-label">Data Pilihan Kamar</div>
+              <h2>Cari kamar dengan gambaran yang lebih jelas.</h2>
+              <p>Ringkasan katalog ini diperbarui dari sistem KOST48 agar kamu lebih mudah membandingkan pilihan sebelum menghubungi admin.</p>
+            </div>
+            <Link className="gx-btn-outline" to="/rooms">Bandingkan Kamar</Link>
+          </div>
+
+          <div className="gx-market-proof-grid">
+            <div className="gx-market-proof">
+              <span>Katalog kamar</span>
+              <strong>{roomsQuery.isLoading ? <Spinner animation="border" size="sm" /> : marketingData.totalRooms}</strong>
+              <small>Pilihan kamar dengan detail fasilitas</small>
+            </div>
+            <div className="gx-market-proof">
+              <span>Tarif bulanan</span>
+              <strong>
+                {roomsQuery.isLoading
+                  ? <Spinner animation="border" size="sm" />
+                  : formatMonthlyRange(marketingData.minMonthlyRate, marketingData.maxMonthlyRate)}
+              </strong>
+              <small>Rentang tarif dari katalog saat ini</small>
+            </div>
+            <div className="gx-market-proof">
+              <span>Dekat Pakuwon Mall / PTC</span>
+              <strong>7 menit</strong>
+              <small>Estimasi berjalan kaki dari lokasi kos</small>
+            </div>
+          </div>
+
+          <div className="gx-market-chart-grid">
+            <article className="gx-market-chart-card">
+              <div className="gx-market-chart-head">
+                <div>
+                  <span>Status live</span>
+                  <h3>Ketersediaan kamar</h3>
+                </div>
+                <small>Dari katalog publik</small>
+              </div>
+              {roomsQuery.isLoading ? (
+                <div className="gx-market-chart-loading"><Spinner animation="border" size="sm" /> Memuat data kamar</div>
+              ) : marketingData.statusMix.length ? (
+                <div className="gx-market-donut-wrap">
+                  <div className="gx-market-donut">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <PieChart>
+                        <Pie data={marketingData.statusMix} dataKey="value" nameKey="label" innerRadius={62} outerRadius={88} paddingAngle={3} stroke="none">
+                          {marketingData.statusMix.map((item) => <Cell key={item.label} fill={item.color} />)}
+                        </Pie>
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            const item = payload?.[0]?.payload as { label: string; value: number } | undefined;
+                            if (!active || !item) return null;
+                            return <div className="recharts-tooltip"><strong>{item.label}</strong><span>{item.value} kamar</span></div>;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="gx-market-donut-center"><strong>{marketingData.totalRooms}</strong><span>kamar</span></div>
+                  </div>
+                  <div className="gx-market-legend">
+                    {marketingData.statusMix.map((item) => (
+                      <div key={item.label}>
+                        <i style={{ background: item.color }} />
+                        <span>{item.label}</span>
+                        <strong>{item.value}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="gx-market-chart-loading">Data kamar belum tersedia.</div>
+              )}
+            </article>
+
+            <article className="gx-market-chart-card">
+              <div className="gx-market-chart-head">
+                <div>
+                  <span>Komposisi fasilitas</span>
+                  <h3>Temukan tipe yang cocok</h3>
+                </div>
+                <small>{marketingData.totalRooms} kamar tercatat</small>
+              </div>
+              {roomsQuery.isLoading ? (
+                <div className="gx-market-chart-loading"><Spinner animation="border" size="sm" /> Memuat data kamar</div>
+              ) : marketingData.totalRooms ? (
+                <HorizontalBarChart
+                  points={marketingData.facilityMix}
+                  ariaLabel="Komposisi pilihan kamar berdasarkan fasilitas"
+                  height={220}
+                  leftWidth={84}
+                  barSize={16}
+                  valueFormatter={(value) => `${value} kamar`}
+                />
+              ) : (
+                <div className="gx-market-chart-loading">Data fasilitas belum tersedia.</div>
+              )}
+            </article>
           </div>
         </Container>
       </section>
