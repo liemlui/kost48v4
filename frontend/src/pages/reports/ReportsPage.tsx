@@ -163,9 +163,9 @@ export default function ReportsPage() {
     <Container fluid className="reports-command-page px-2 py-3">
       <section className="report-hero mb-3">
         <div>
-          <div className="report-eyebrow">OWNER INTELLIGENCE CENTER</div>
-          <h1>Laporan Operasional & Keuangan</h1>
-          <p>Drill-down dari dashboard: revenue, cashflow, aging tunggakan, deposit, okupansi, margin, dan kesiapan balance sheet.</p>
+          <div className="report-eyebrow">BUSINESS FINANCIAL REPORTS</div>
+          <h1>Financial & Operations Report</h1>
+          <p>Complete overview: revenue, cash flow, overdue aging, deposit liability, occupancy, profit margin, and financial position.</p>
         </div>
         <div className="report-hero-controls">
           <div className="report-period-card">
@@ -242,7 +242,7 @@ export default function ReportsPage() {
             </Col>
             <Col xl={4}>
               <Card className="report-panel h-100">
-                <Card.Header><span>Aging Heatmap</span><Badge bg="danger">Risk</Badge></Card.Header>
+                <Card.Header><span>Overdue Aging</span><Badge bg="danger">At Risk</Badge></Card.Header>
                 <Card.Body>
                   <OverdueHeatmap data={overdueAging.data!} />
                 </Card.Body>
@@ -335,11 +335,11 @@ function ReportKpiCard({ label, value, detail, tone }: { label: string; value: s
 
 function ReportTabs({ activeTab, onChange, counts }: { activeTab: ReportTab; onChange: (tab: ReportTab) => void; counts: { invoices: number; overdue: number; rooms: number } }) {
   const tabs: { key: ReportTab; label: string; badge?: number | string }[] = [
-    { key: 'command', label: 'Command Center', badge: 'Live' },
-    { key: 'finance', label: 'Keuangan', badge: counts.invoices },
+    { key: 'command', label: 'Overview', badge: 'Live' },
+    { key: 'finance', label: 'Finance', badge: counts.invoices },
     { key: 'aging', label: 'Aging & Deposit', badge: counts.overdue },
     { key: 'operations', label: 'Operations', badge: counts.rooms },
-    { key: 'formal', label: 'Formal Ratios', badge: 'Locked' },
+    { key: 'formal', label: 'Formal Reports', badge: 'New' },
   ];
   return (
     <div className="report-tabbar mb-3">

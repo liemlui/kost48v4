@@ -197,11 +197,11 @@ export default function AssetRegisterPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Asset Register"
-        description="B6: daftar aset, depresiasi, dan alignment ledger yang owner-approved agar Balance Sheet tidak double-count."
-        secondaryAction={<Badge bg="primary">B6 Ledger Alignment</Badge>}
-      />
+  <PageHeader
+    title="Asset Register"
+    description="List fixed assets, depreciation, and ledger alignment — ensure assets are recorded correctly in the Balance Sheet."
+    secondaryAction={<Badge bg="primary">Fixed Asset</Badge>}
+  />
 
       <Row className="g-3 mb-3">
         <Col md={3}>
