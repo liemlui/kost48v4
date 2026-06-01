@@ -148,6 +148,17 @@ export default function TicketsPage() {
   const queryClient = useQueryClient();
   const [assignMap, setAssignMap] = useState<Record<number, string>>({});
   const [activeTab, setActiveTab] = useState<StatusTab>("ALL");
+  const [showCreateTicket, setShowCreateTicket] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    category: 'KEBERSIHAN',
+    title: '',
+    description: '',
+    assignedToId: '',
+    fromLocation: '',
+    toLocation: '',
+    itemName: '',
+    itemQty: '',
+  });
   const [page, setPage] = useState(1);
   const [doneTicket, setDoneTicket] = useState<TicketItem | null>(null);
   const [detailTicket, setDetailTicket] = useState<TicketItem | null>(null);
@@ -194,6 +205,15 @@ export default function TicketsPage() {
           queryKey: ["staff-field-report-review-queue"],
         }),
       ]);
+    },
+  });
+
+  const createTicketMutation = useMutation({
+    mutationFn: (payload: any) => postAction('/tickets', payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      setShowCreateTicket(false);
+      setCreateForm({ category: 'KEBERSIHAN', title: '', description: '', assignedToId: '', fromLocation: '', toLocation: '', itemName: '', itemQty: '' });
     },
   });
 
@@ -489,6 +509,8 @@ export default function TicketsPage() {
         eyebrow="Operasional"
         title="Tiket & Pekerjaan Operasional"
         description="Tiket, checklist, laporan lapangan, dan kinerja staff diringkas sebagai pekerjaan operasional harian."
+        actionLabel={canAssign ? 'Buat Tiket Pekerjaan' : undefined}
+        onAction={canAssign ? () => setShowCreateTicket(true) : undefined}
       />
 
       <div
@@ -1083,6 +1105,137 @@ export default function TicketsPage() {
             onClick={submitCloseTicket}
           >
             Tutup Tiket
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* ── Modal Buat Tiket Pekerjaan ── */}
+      <Modal show={showCreateTicket} onHide={() => setShowCreateTicket(false)} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Buat Tiket Pekerjaan</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {createTicketMutation.isError && <Alert variant="danger">Gagal membuat tiket. Coba lagi.</Alert>}
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold">Jenis Pekerjaan</Form.Label>
+            <div className="create-ticket-category-grid">
+              {[
+                { value: 'KEBERSIHAN', label: 'Kebersihan', icon: '🧹', desc: 'Bersih-bersih kamar, koridor, toilet, atau area umum' },
+                { value: 'PERBAIKAN', label: 'Perbaikan', icon: '🔧', desc: 'Perbaikan kerusakan kamar, fasilitas, atau infrastruktur' },
+                { value: 'AUDIT_INVENTARIS', label: 'Audit Inventaris', icon: '📦', desc: 'Cek fisik stok gudang atau barang kamar vs catatan sistem' },
+                { value: 'BARANG_PINDAH', label: 'Pindah Barang', icon: '🚚', desc: 'Pindahkan barang dari gudang ke kamar, atau antar lokasi' },
+                { value: 'PEMERIKSAAN', label: 'Pemeriksaan', icon: '🔍', desc: 'Cek kondisi kamar atau area khusus atas perintah admin' },
+                { value: 'UMUM', label: 'Umum', icon: '📋', desc: 'Pekerjaan lain yang belum masuk kategori di atas' },
+              ].map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  className={`create-ticket-cat-btn ${createForm.category === cat.value ? 'selected' : ''}`}
+                  onClick={() => setCreateForm((prev) => ({ ...prev, category: cat.value, title: prev.title || cat.label }))}
+                  title={cat.desc}
+                >
+                  <span className="cat-btn-icon">{cat.icon}</span>
+                  <span className="cat-btn-label">{cat.label}</span>
+                  <small className="cat-btn-desc">{cat.desc}</small>
+                </button>
+              ))}
+            </div>
+          </Form.Group>
+
+          {createForm.category === 'BARANG_PINDAH' && (
+            <Alert variant="info" className="py-2 small mb-3">
+              Tiket <strong>Pindah Barang</strong> akan menjadi job untuk staff — dari lokasi asal ke tujuan. Staff konfirmasi dengan foto selesai.
+            </Alert>
+          )}
+
+          <Row className="g-3 mb-3">
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label className="fw-semibold">Judul Pekerjaan</Form.Label>
+                <Form.Control
+                  value={createForm.title}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, title: e.target.value }))}
+                  placeholder={
+                    createForm.category === 'KEBERSIHAN' ? 'Contoh: Bersihkan kamar mandi lantai 2'
+                    : createForm.category === 'PERBAIKAN' ? 'Contoh: Perbaiki kunci pintu kamar A3'
+                    : createForm.category === 'BARANG_PINDAH' ? 'Contoh: Pindah lemari dari gudang ke kamar B2'
+                    : createForm.category === 'AUDIT_INVENTARIS' ? 'Contoh: Audit stok sprei dan bantal gudang'
+                    : 'Tulis judul pekerjaan yang jelas'
+                  }
+                />
+              </Form.Group>
+            </Col>
+            {createForm.category === 'BARANG_PINDAH' && (
+              <>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label className="fw-semibold">Nama Barang</Form.Label>
+                    <Form.Control value={createForm.itemName} onChange={(e) => setCreateForm((prev) => ({ ...prev, itemName: e.target.value }))} placeholder="Contoh: Sprei, Lemari, Galon" />
+                  </Form.Group>
+                </Col>
+                <Col md={2}>
+                  <Form.Group>
+                    <Form.Label className="fw-semibold">Jumlah</Form.Label>
+                    <Form.Control type="number" value={createForm.itemQty} onChange={(e) => setCreateForm((prev) => ({ ...prev, itemQty: e.target.value }))} placeholder="1" min="1" />
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label className="fw-semibold">Dari (Lokasi)</Form.Label>
+                    <Form.Control value={createForm.fromLocation} onChange={(e) => setCreateForm((prev) => ({ ...prev, fromLocation: e.target.value }))} placeholder="Gudang / Kamar A1" />
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label className="fw-semibold">Ke (Tujuan)</Form.Label>
+                    <Form.Control value={createForm.toLocation} onChange={(e) => setCreateForm((prev) => ({ ...prev, toLocation: e.target.value }))} placeholder="Kamar B2 / Gudang" />
+                  </Form.Group>
+                </Col>
+              </>
+            )}
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label className="fw-semibold">Detail & Instruksi</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={createForm.description}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Instruksi detail untuk staff: area yang perlu dikerjakan, prioritas, kondisi saat ini..."
+                />
+              </Form.Group>
+            </Col>
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label className="fw-semibold">Assign ke Staff (opsional)</Form.Label>
+                <Form.Select value={createForm.assignedToId} onChange={(e) => setCreateForm((prev) => ({ ...prev, assignedToId: e.target.value }))}>
+                  <option value="">— Pilih staff (bisa diassign nanti) —</option>
+                  {assignableUsers.map((staff) => (
+                    <option key={staff.id} value={String(staff.id)}>{staff.fullName}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setShowCreateTicket(false)}>Batal</Button>
+          <Button
+            onClick={() => {
+              if (!createForm.title.trim()) return;
+              const moveDetails = createForm.category === 'BARANG_PINDAH' && (createForm.fromLocation || createForm.toLocation || createForm.itemName)
+                ? `\n\n📦 Pindah Barang:\n• Barang: ${createForm.itemName || '-'} (${createForm.itemQty || '1'} unit)\n• Dari: ${createForm.fromLocation || '-'}\n• Ke: ${createForm.toLocation || '-'}`
+                : '';
+              createTicketMutation.mutate({
+                category: createForm.category,
+                title: createForm.title.trim(),
+                description: (createForm.description.trim() + moveDetails) || undefined,
+                assignedToId: createForm.assignedToId ? Number(createForm.assignedToId) : undefined,
+              });
+            }}
+            disabled={!createForm.title.trim() || createTicketMutation.isPending}
+          >
+            {createTicketMutation.isPending ? 'Membuat...' : `Buat Tiket ${createForm.category === 'BARANG_PINDAH' ? 'Pindah Barang' : 'Pekerjaan'}`}
           </Button>
         </Modal.Footer>
       </Modal>

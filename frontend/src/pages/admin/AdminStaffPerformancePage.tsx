@@ -198,6 +198,63 @@ export default function AdminStaffPerformancePage() {
         <StaffAnalyticsPanel items={items} summary={query.data.summary} />
       )}
 
+      {/* Complaint Alert Panel */}
+      {items.length > 0 && (() => {
+        const lowRatingStaff = items.filter((item) => {
+          const avg = item.tenantReviews?.averageRating;
+          return avg !== null && avg !== undefined && Number(avg) > 0 && Number(avg) < 3;
+        });
+        const noProofStaff = items.filter((item) => (item.monthlyKpi?.proofCompletionRate ?? 0) < 50 && (item.monthlyKpi?.routineDone ?? 0) > 0);
+        const hasAlerts = lowRatingStaff.length > 0 || noProofStaff.length > 0;
+        if (!hasAlerts) return null;
+        return (
+          <Card className="content-card border-0 mb-3 staff-complaint-alert-card">
+            <Card.Body>
+              <div className="table-meta mb-3">
+                <div>
+                  <div className="panel-title text-danger">⚠️ Perlu Perhatian Admin</div>
+                  <div className="panel-subtitle">Staff dengan rating rendah atau bukti kerja kurang lengkap bulan ini.</div>
+                </div>
+              </div>
+              {lowRatingStaff.length > 0 && (
+                <div className="staff-alert-section mb-3">
+                  <div className="staff-alert-section-head">
+                    <span className="staff-alert-badge danger">Rating Rendah (&lt;3⭐)</span>
+                    <small>{lowRatingStaff.length} staff</small>
+                  </div>
+                  <div className="staff-alert-grid">
+                    {lowRatingStaff.map((item) => (
+                      <div key={item.staff.id} className="staff-alert-chip danger">
+                        <strong>{item.staff.fullName}</strong>
+                        <span>Avg: {Number(item.tenantReviews?.averageRating ?? 0).toFixed(1)}/5 · {item.tenantReviews?.count ?? 0} review</span>
+                        <button type="button" onClick={() => setSelected(item)}>Audit →</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {noProofStaff.length > 0 && (
+                <div className="staff-alert-section">
+                  <div className="staff-alert-section-head">
+                    <span className="staff-alert-badge warning">Bukti Kerja &lt;50%</span>
+                    <small>{noProofStaff.length} staff</small>
+                  </div>
+                  <div className="staff-alert-grid">
+                    {noProofStaff.map((item) => (
+                      <div key={item.staff.id} className="staff-alert-chip warning">
+                        <strong>{item.staff.fullName}</strong>
+                        <span>Bukti: {item.monthlyKpi?.proofCompletionRate ?? 0}% · {item.monthlyKpi?.routineDone ?? 0} checklist</span>
+                        <button type="button" onClick={() => setSelected(item)}>Audit →</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        );
+      })()}
+
       <AdminSmartAuditPanel data={suggestionsQuery.data} isLoading={suggestionsQuery.isLoading} isError={suggestionsQuery.isError} staffItems={items} onAudit={setSelected} />
 
       <Card className="content-card border-0 my-3">
@@ -222,8 +279,20 @@ export default function AdminStaffPerformancePage() {
                     <td>{item.monthlyKpi.routineDone}</td>
                     <td>{item.monthlyKpi.ticketsDone}</td>
                     <td>{item.monthlyKpi.meterCount}</td>
-                    <td>{item.tenantReviews.averageRating ?? '-'} <span className="small text-muted">({item.tenantReviews.count})</span></td>
-                    <td>{item.score.negativeValue}</td>
+                    <td>
+                      {item.tenantReviews.averageRating !== null && item.tenantReviews.averageRating !== undefined ? (
+                        <span className={Number(item.tenantReviews.averageRating) < 3 ? 'text-danger fw-bold' : ''}>
+                          {Number(item.tenantReviews.averageRating) < 3 ? '⚠️ ' : ''}
+                          {Number(item.tenantReviews.averageRating).toFixed(1)}
+                        </span>
+                      ) : '-'}
+                      <span className="small text-muted ms-1">({item.tenantReviews.count})</span>
+                    </td>
+                    <td>
+                      <span className={item.score.negativeValue > 0 ? 'text-danger fw-semibold' : 'text-muted'}>
+                        {item.score.negativeValue > 0 ? `⛔ ${item.score.negativeValue}` : item.score.negativeValue}
+                      </span>
+                    </td>
                     <td><Button size="sm" variant="outline-primary" onClick={() => setSelected(item)}>Audit</Button></td>
                   </tr>
                 ))}
