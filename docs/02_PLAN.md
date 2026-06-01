@@ -1,7 +1,61 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+## 0.0 Latest Execution Plan — After V5.9.9 Fix: Missing getBookingExpiryMeta import
+
+```text
+Latest pushed main baseline:
+- f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+
+Reported verification:
+- Git push PASS.
+- Frontend build PASS confirmed by user.
+- No schema change.
+- No DB reset.
+- No new dependency.
+```
+
+### Completed in V5.9.9
+
+- Fixed TS2304: Cannot find name `getBookingExpiryMeta` at 3 locations in StaysPage.tsx.
+- The function was defined in `bookingExpiry.ts` but was not imported in `StaysPage.tsx`.
+- Import added: `import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';`
+- All other accumulated backend helpers, frontend cleanup files, and new docs committed together in commit `f3eb43b`.
+
+### Immediate verification
+
+1. Confirm repository is clean:
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb
+```
+
+2. Run frontend build (already PASS confirmed):
+
+```powershell
+Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
+```
+
+### Not changed in V5.9.9
+
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No lifecycle/payment business rule change.
+- No room readiness flow change from V5.9.8-A.
+- No generated Prisma commit.
+```
+
+### Recommended next sequence
+
+1. Commit this docs sync separately.
+2. Continue with V5.24-D — Admin UI Architecture + Performance Hardening.
+3. Full manual browser smoke across all roles.
+
+---
+
 ## 0.0 Latest Execution Plan — After V5.9.8-A Room Readiness Flow Hardening
 
 ```text

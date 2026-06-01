@@ -1,7 +1,29 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+## A-0. Latest Release Checklist — V5.9.9 Missing getBookingExpiryMeta import
+
+### Code and Git
+
+- [x] Commit pushed to main: `f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx`.
+- [x] No schema change.
+- [x] No DB reset.
+- [x] No production DB mutation.
+- [x] No new npm dependency.
+
+### Build
+
+- [x] Frontend build PASS confirmed by user local run.
+
+### Import fix
+
+- [x] `getBookingExpiryMeta` added to import from `../../utils/bookingExpiry` in `StaysPage.tsx`.
+- [x] TS2304 resolved at all 3 call sites (lines 279, 509, 620).
+- [x] Remaining backend helpers and frontend cleanup files committed together.
+
+---
+
 ## A-1. Latest Release Checklist — V5.9.8-A Room Readiness Flow Hardening
 
 ### Code and Git

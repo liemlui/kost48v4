@@ -1,7 +1,85 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+## 2026-06-01 — V5.9.9 Fix: Missing getBookingExpiryMeta import Journal
+
+Status:
+```text
+V5.9.9 has been committed and pushed to main.
+Current relevant commit:
+- f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+
+User confirmed:
+- Frontend build PASS.
+```
+
+### Implemented
+
+- Added missing `getBookingExpiryMeta` import in `StaysPage.tsx` from `../../utils/bookingExpiry`.
+- Function was already defined at line 52 of `bookingExpiry.ts` but was not imported.
+- TS2304 resolved at 3 call sites (lines 279, 509, 620).
+- All other accumulated backend helpers (accounting-posting-helpers.ts, accounting-report-helpers.ts, stays-service-helpers.ts, tenant-bookings-helpers.ts), frontend cleanup files, and new doc (05_BUSINESS_MANAGEMENT_INTELLIGENCE_PLAN.md) committed together.
+
+### Files changed
+
+```text
+M frontend/src/pages/stays/StaysPage.tsx (import only)
+M backend/src/modules/accounting/accounting-posting.service.ts (pre-existing)
+M backend/src/modules/accounting/accounting-reports.service.ts (pre-existing)
+M backend/src/modules/finance/dto/finance-query.dto.ts (pre-existing)
+M backend/src/modules/finance/finance.service.ts (pre-existing)
+M backend/src/modules/stays/stays.service.ts (pre-existing)
+M backend/src/modules/tenant-bookings/tenant-bookings.service.ts (pre-existing)
+M frontend/package-lock.json (pre-existing)
+M frontend/package.json (pre-existing)
+M frontend/src/api/accounting.ts (pre-existing)
+M frontend/src/api/finance.ts (pre-existing)
+M frontend/src/config/navigation.ts (pre-existing)
+M frontend/src/config/resources.ts (pre-existing)
+M frontend/src/pages/dashboard/DashboardPage.tsx (pre-existing)
+M frontend/src/pages/dashboard/OwnerDashboardPage.tsx (pre-existing)
+M frontend/src/pages/resources/SimpleCrudPage.tsx (pre-existing)
+M frontend/src/pages/resources/simpleCrudHelpers.ts (pre-existing)
+M frontend/src/pages/tickets/TicketsPage.tsx (pre-existing)
+?? backend/src/modules/accounting/accounting-posting-helpers.ts (new)
+?? backend/src/modules/accounting/accounting-report-helpers.ts (new)
+?? backend/src/modules/stays/stays-service-helpers.ts (new)
+?? backend/src/modules/tenant-bookings/tenant-bookings-helpers.ts (new)
+?? docs/05_BUSINESS_MANAGEMENT_INTELLIGENCE_PLAN.md (new)
+?? frontend/src/api/accounting-types.ts (new)
+?? frontend/src/config/resources/ (new: communications.ts, finance.ts, inventory.ts, people.ts, property.ts)
+?? frontend/src/pages/dashboard/DashboardAdmin.tsx (new)
+?? frontend/src/pages/dashboard/DashboardOwner.tsx (new)
+?? frontend/src/pages/dashboard/DashboardStaff.tsx (new)
+?? frontend/src/pages/dashboard/dashboardShared.tsx (new)
+?? frontend/src/pages/stays/stayPredicates.ts (new)
+?? frontend/src/pages/tickets/TicketsStaffMode.tsx (new)
+?? frontend/src/pages/tickets/ticketsShared.ts (new)
+```
+
+### Git
+
+```text
+f3eb43b (HEAD -> main, origin/main, origin/HEAD) fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+```
+
+### Next Journal Target
+
+```text
+PLAN V5.24-D — Admin UI Architecture + Performance Hardening
+```
+
+Focus:
+- dashboard query loading/performance,
+- sidebar/dashboard navigation consistency,
+- RoleWorkspaceTabs dead code decision,
+- admin sidebar context,
+- meaningful status strip metrics,
+- limited font-weight cleanup.
+
+---
+
 ## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening Journal
 
 Status:

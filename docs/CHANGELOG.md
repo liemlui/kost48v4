@@ -1,7 +1,38 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+## 2026-06-01 — V5.9.9 Fix: Missing getBookingExpiryMeta import
+
+### Type
+
+Backend + frontend patch: added missing `getBookingExpiryMeta` import in StaysPage.tsx, plus accumulated backend helpers and frontend cleanup files committed together.
+
+### Added
+
+- Added missing `getBookingExpiryMeta` import in `StaysPage.tsx` from `../../utils/bookingExpiry`.
+
+### Changed
+
+- Frontend `tsc -b` now passes without TS2304.
+
+### Files included in commit `f3eb43b`
+
+- **New backend helpers:** accounting-posting-helpers.ts, accounting-report-helpers.ts, stays-service-helpers.ts, tenant-bookings-helpers.ts
+- **New frontend:** DashboardAdmin.tsx, DashboardOwner.tsx, DashboardStaff.tsx, dashboardShared.tsx, stayPredicates.ts, TicketsStaffMode.tsx, ticketsShared.ts, accounting-types.ts, config resources split (communications.ts, finance.ts, inventory.ts, people.ts, property.ts)
+- **New doc:** 05_BUSINESS_MANAGEMENT_INTELLIGENCE_PLAN.md
+
+### Verified
+
+```text
+- Commit pushed to main: f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx.
+- Git push PASS to origin/main.
+- Frontend build PASS confirmed by user.
+- No schema change. No DB reset. No new dependency.
+```
+
+---
+
 ## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening
 
 ### Type

@@ -1,7 +1,52 @@
 # KOST48 V5 — Contracts & API
 **Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+## 0.0 Latest Contract Addendum — V5.9.9 Fix: Missing getBookingExpiryMeta import
+
+```text
+Latest pushed main baseline:
+- f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+
+Verification evidence reported:
+- Git push PASS to origin/main.
+- Frontend build PASS confirmed by user local run.
+- No schema change.
+- No DB reset.
+- No new dependency.
+```
+
+### V5.9.9 patch scope
+
+```text
+Fix TS2304: Cannot find name 'getBookingExpiryMeta' at 3 locations in StaysPage.tsx.
+The function was defined in bookingExpiry.ts but was not imported in StaysPage.tsx.
+```
+
+### Files changed in commit f3eb43b
+
+Modified:
+- `frontend/src/pages/stays/StaysPage.tsx` — added `getBookingExpiryMeta` to import from `../../utils/bookingExpiry`.
+
+Other accumulated files committed together (pre-existing or new from previous work):
+- Backend helpers: accounting-posting-helpers.ts, accounting-report-helpers.ts, stays-service-helpers.ts, tenant-bookings-helpers.ts
+- Frontend: DashboardAdmin.tsx, DashboardOwner.tsx, DashboardStaff.tsx, dashboardShared.tsx, stayPredicates.ts, TicketsStaffMode.tsx, ticketsShared.ts, accounting-types.ts, config resources split
+- Docs: 05_BUSINESS_MANAGEMENT_INTELLIGENCE_PLAN.md
+
+### Not changed in V5.9.9
+
+```text
+- No schema change.
+- No DB reset.
+- No production DB mutation.
+- No new dependency.
+- No generated Prisma commit.
+- No lifecycle/payment business rule change.
+- No room readiness behavior change from V5.9.8-A.
+```
+
+---
+
 ## 0.0 Latest Contract Addendum — V5.9.8-A Room Readiness Flow Hardening
 
 ```text

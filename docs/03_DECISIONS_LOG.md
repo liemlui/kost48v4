@@ -1,7 +1,7 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-05-31 V5.9.8-A Room Readiness Flow Hardening
+**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
 
-<!-- KOST48_DOCS_SYNC_20260531_V598A_ROOM_READINESS_FLOW_START -->
+<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
 ## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening Decisions
 
 | # | Keputusan | Dampak |
