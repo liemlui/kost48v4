@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -7,6 +8,7 @@ import {
   MinLength,
 } from "class-validator";
 import {
+  BACKOFFICE_TICKET_CATEGORIES,
   InventoryItemStatus,
   RoomItemStatus,
 } from "../../../common/enums/app.enums";
@@ -55,7 +57,7 @@ export class CreateBackofficeTicketDto extends TicketImageFieldsDto {
   description!: string;
 
   @IsOptional()
-  @IsString()
+  @IsIn(BACKOFFICE_TICKET_CATEGORIES as unknown as string[], { message: "Kategori tiket backoffice tidak valid" })
   category?: string;
 }
 

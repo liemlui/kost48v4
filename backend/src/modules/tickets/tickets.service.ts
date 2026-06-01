@@ -9,6 +9,8 @@ import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
 import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
+import { STAFF_FIELD_CATEGORY_SET } from "../../common/enums/app.enums";
+import { AppNotificationService } from "../notifications/app-notification.service";
 import {
   AssignTicketDto,
   CloseTicketDto,
@@ -18,15 +20,6 @@ import {
 } from "./dto/ticket.dto";
 import { TicketsQueryDto } from "./dto/tickets-query.dto";
 
-const STAFF_FIELD_CATEGORIES = new Set([
-  "BARANG_RUSAK",
-  "CEK_KAMAR",
-  "STOK_HABIS",
-  "PERBAIKAN",
-  "CATATAN_METER",
-  "KEBERSIHAN",
-]);
-
 const STAFF_ACTIVE_TICKET_STATUSES = ["OPEN", "IN_PROGRESS", "DONE"] as const;
 
 @Injectable()
@@ -34,6 +27,7 @@ export class TicketsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
+    private readonly notification: AppNotificationService,
   ) {}
 
   async findAll(query: TicketsQueryDto, actor?: CurrentUserPayload) {
@@ -274,7 +268,7 @@ export class TicketsService {
   ) {
     if (
       actor.role === "STAFF" &&
-      (!dto.category || !STAFF_FIELD_CATEGORIES.has(dto.category))
+      (!dto.category || !STAFF_FIELD_CATEGORY_SET.has(dto.category as any))
     ) {
       throw new ConflictException("Jenis laporan staf tidak sesuai");
     }
@@ -604,6 +598,25 @@ export class TicketsService {
           },
           data: { status: "CLOSED" as any },
         });
+
+        // BARANG_PINDAH: log movement completion in audit metadata
+        if (ticket.category === "BARANG_PINDAH") {
+          const moveDesc = ticket.description || '';
+          const fromMatch = moveDesc.match(/Dari:\s*(.+)/i);
+          const toMatch = moveDesc.match(/Ke:\s*(.+)/i);
+          const itemMatch = moveDesc.match(/Barang:\s*(.+?)\s*\(/i);
+          const qtyMatch = moveDesc.match(/\((\d+)\s*unit\)/i);
+          if (fromMatch || toMatch || itemMatch) {
+            await this.notification.create({
+              recipientUserId: actor.id,
+              title: '📦 Tiket Pindah Barang Selesai',
+              body: `Tiket "${ticket.title}" ditutup. ${itemMatch?.[1] ? `Barang: ${itemMatch[1]}` : ''} ${fromMatch?.[1] ? `dari ${fromMatch[1]}` : ''} ${toMatch?.[1] ? `ke ${toMatch[1]}` : ''}. Catatan: ${dto.finalAdminNote}`,
+              linkTo: `/tickets`,
+              entityType: 'Ticket',
+              entityId: String(closed.id),
+            });
+          }
+        }
 
         if (ticket.category === "CHECKOUT_INSPECTION" && ticket.roomId) {
           const otherActiveStays = await tx.stay.count({

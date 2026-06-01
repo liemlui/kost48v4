@@ -1,0 +1,400 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Cormorant+Garant:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+
+:root {
+  --app-bg: #f0f6ff;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --surface-main: #ffffff;
+  --surface-soft: #f7fbff;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(14, 165, 233, 0.18);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --primary: #0ea5e9;
+  --primary-strong: #0284c7;
+  --primary-soft: rgba(14, 165, 233, 0.10);
+  --color-success: #15803d;
+  --color-success-bg: rgba(34, 197, 94, 0.12);
+  --color-warning: #b45309;
+  --color-warning-bg: rgba(245, 158, 11, 0.16);
+  --color-danger: #b91c1c;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-info: #1d4ed8;
+  --color-info-bg: rgba(59, 130, 246, 0.12);
+  --color-muted-bg: rgba(148, 163, 184, 0.12);
+  --success-soft: var(--color-success-bg);
+  --warning-soft: var(--color-warning-bg);
+  --danger-soft: var(--color-danger-bg);
+  --info-soft: var(--color-info-bg);
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
+  --shadow-subtle: 0 10px 24px rgba(15, 23, 42, 0.06);
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --font-display: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'DM Sans', 'Inter', sans-serif;
+  --font-data: 'DM Mono', 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #f0f6ff;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text-main);
+  overscroll-behavior-y: none;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.07), transparent 30%),
+    linear-gradient(180deg, #f8fbff 0%, #f0f6ff 100%);
+  font-family: var(--font-body), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  /* 100dvh untuk iOS Safari dynamic toolbar — mencegah black gap */
+  min-height: 100dvh;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+
+.app-shell-grid {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.app-sidebar,
+.app-topbar,
+.content-card,
+.glass-card,
+.metric-card,
+.toolbar-card,
+.table-card,
+.detail-hero,
+.login-panel,
+.login-aside,
+.stat-card {
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 20px;
+  border-radius: 30px;
+  padding: 22px;
+  min-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: white;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 16px 34px rgba(14, 165, 233, 0.22);
+}
+
+
+
+.kost48-logo-mark {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  padding: 0.18rem;
+  box-shadow: 0 12px 26px rgba(14, 165, 233, 0.16);
+}
+
+.kost48-logo-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.kost48-logo-mark.small {
+  padding: 0.14rem;
+}
+
+.kost48-logo-mark.tiny {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  padding: 0.12rem;
+}
+
+.kost48-logo-mark.login {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  margin: 0 auto 2rem;
+  padding: 0.26rem;
+  background: linear-gradient(135deg, #ffffff, #eff6ff);
+  box-shadow: 0 16px 28px rgba(37, 99, 235, .18);
+}
+
+.kost48-logo-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #ffffff;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.brand-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+  font-family: var(--font-display);
+}
+
+.brand-subtitle,
+.app-caption,
+.form-helper {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.sidebar-section-label {
+  margin-bottom: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.73rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.sidebar-link {
+  color: #334155;
+  text-decoration: none;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.sidebar-link:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-main);
+}
+
+.sidebar-link.active {
+  background: var(--primary-soft);
+  border: 1px solid var(--border-strong);
+  color: var(--primary-strong);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-link-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.sidebar-link-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.sidebar-link-label span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-link-arrow {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.sidebar-nav-groups {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.sidebar-nav-group + .sidebar-nav-group {
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.sidebar-nav-group .sidebar-section-label {
+  margin-bottom: 0.65rem;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(51, 65, 85, 0.96));
+  color: white;
+}
+
+.sidebar-footer strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.app-main {
+  min-width: 0;
+}
+
+.app-topbar {
+  border-radius: 26px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.app-topbar-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.app-topbar-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #0ea5e9, #10b981);
+  color: white;
+  font-weight: 800;
+}
+
+.role-pill,
+.surface-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.84);
+  color: #475569;
+}
+
+.page-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 1.4rem;
+}
+
+.page-header-copy {
+  min-width: 0;
+}
+
+.page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.7rem;
+  padding: 0.4rem 0.72rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.page-header h1,
+.page-header h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+}
+
+.page-header p,
+.page-header .text-muted {
+  margin: 0.55rem 0 0;
+  color: var(--text-muted) !important;
+  max-width: 720px;
+  font-size: 0.98rem;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.content-card,
+.glass-card,
+.table-card,
+.metric-card,
+.detail-hero,
+.stat-card {
+  border-radius: 24px;
+}
