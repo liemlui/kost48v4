@@ -1,38 +1,46 @@
 # KOST48 V5 — Ground State
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
-**Status:** Source of truth utama setelah V5.9.9 Fix build TS. Commit `f3eb43b` sudah pushed ke origin/main, frontend build PASS. Perbaikan import `getBookingExpiryMeta` di StaysPage.tsx.
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
+**Status:** Source of truth utama setelah V5.10.0. Commit `6479352` sudah pushed ke origin/main. TypeScript PASS, Vite build PASS. No schema change.
 
-<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
-## 0.0 Latest Current State — V5.9.9 Fix: Missing getBookingExpiryMeta import
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## 0.0 Latest Current State — V5.10.0
 
 ```text
 Latest pushed main baseline:
-- f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+- 6479352 refactor: split styles.css (24K baris) menjadi 13 modul CSS + backend ticket categories
+- 37fec46 feat: perkuat sistem review, komplain tenant→staff, dan tiket pekerjaan operasional
+- 345c838 feat: tambah chart ketersediaan kamar dan fasilitas di halaman publik
+- 358426b feat: tambah chart analytics di Tiket, Review Pembayaran, Perpanjangan, dan Portal Tenant
+- 4df023c feat(frontend): improve owner workspace and recharts dashboards
 
-This commit includes the accumulated V5.9.8-A Room Readiness Flow Hardening work plus:
-- Backend helpers: accounting-posting-helpers.ts, accounting-report-helpers.ts,
-  stays-service-helpers.ts, tenant-bookings-helpers.ts
-- Frontend cleanup: new dashboard components (DashboardAdmin, DashboardOwner, DashboardStaff, dashboardShared),
-  tickets staff mode, stayPredicates, accounting-types, config resources split
-- New doc: 05_BUSINESS_MANAGEMENT_INTELLIGENCE_PLAN.md
-
-Verification evidence reported by local run:
-- Git push PASS to origin/main.
-- Frontend build PASS confirmed by user local run.
-- No schema change.
-- No DB reset.
-- No new dependency.
+Verification:
+- Git push PASS ke origin/main.
+- TypeScript check PASS (npx tsc --noEmit clean).
+- Vite production build PASS (661 KB CSS, 1.9 MB JS).
+- No schema change. No DB reset. No new npm dependency.
+- CSS split: 13/13 file balanced.
 ```
 
-### V5.9.9 active baseline
+### V5.10.0 active baseline — Fitur Baru
 
-```text
-Fix TS2304: Cannot find name 'getBookingExpiryMeta' at 3 locations in StaysPage.tsx.
-The function was defined in bookingExpiry.ts but not imported in StaysPage.tsx.
-All other accumulated backend helpers and frontend cleanup files are included in the same commit.
-```
+| Area | Status |
+|---|---|
+| Recharts chart library | ✅ Installed & digunakan di semua halaman utama |
+| DonutGauge, HorizontalBarChart components | ✅ Di `src/components/charts/` |
+| Charts: StaysPage, InvoicesPage, AdminStaffPerformancePage | ✅ 3 panel per halaman |
+| Charts: TicketsPage, PaymentReviewPage, RenewRequestsAdminPage | ✅ 3 panel per halaman |
+| Charts: MyInvoicesPage (tenant portal) | ✅ Gauge + bar |
+| Charts: PublicGuestDashboardPage | ✅ Donut ketersediaan + bar fasilitas |
+| Charts: OwnerDashboardPage (trend line/bar + best-fit) | ✅ Multi-mode chart |
+| Review tenant → kategori komplain (≤2⭐) | ✅ Wajib pilih Kebersihan/Kualitas/dll |
+| Review tenant → tag pujian (≥4⭐) | ✅ Opsional |
+| Admin alert panel rating jelek | ✅ Badge ⚠️ + panel merah otomatis |
+| Staff laporan: distribusi rating chart | ✅ Bar 1⭐–5⭐ + label kategori |
+| Modal "Buat Tiket Pekerjaan" (admin/owner) | ✅ 6 kategori termasuk BARANG_PINDAH |
+| Backend TicketCategory enum baru | ✅ BARANG_PINDAH, AUDIT_INVENTARIS, PEMERIKSAAN |
+| CSS split: 13 modul di `src/styles/` | ✅ styles.css = 16 baris @import saja |
 
-### Implemented and pushed (V5.9.8-A carryover)
+### Implementasi V5.9.8-A (carryover, masih aktif)
 
 | Area | Result |
 |---|---|

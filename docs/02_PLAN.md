@@ -1,58 +1,78 @@
 # KOST48 V5 — Execution Plan
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
 
-<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
-## 0.0 Latest Execution Plan — After V5.9.9 Fix: Missing getBookingExpiryMeta import
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## 0.0 Latest Execution Plan — After V5.10.0
 
 ```text
-Latest pushed main baseline:
-- f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx
+Latest pushed main baseline (HEAD):
+- 6479352 refactor: split styles.css + backend ticket categories
+- 37fec46 feat: review komplain + tiket pekerjaan operasional
+- 345c838 feat: chart halaman publik
+- 358426b feat: chart analytics halaman operasional
+- 4df023c feat: recharts dashboard upgrade
 
-Reported verification:
-- Git push PASS.
-- Frontend build PASS confirmed by user.
-- No schema change.
-- No DB reset.
-- No new dependency.
+Verification:
+- Git push PASS ke origin/main.
+- TypeScript PASS (clean tsc --noEmit).
+- Vite build PASS.
+- No schema change. No DB reset. No new dependency.
 ```
 
-### Completed in V5.9.9
+### Completed in V5.10.0
 
-- Fixed TS2304: Cannot find name `getBookingExpiryMeta` at 3 locations in StaysPage.tsx.
-- The function was defined in `bookingExpiry.ts` but was not imported in `StaysPage.tsx`.
-- Import added: `import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';`
-- All other accumulated backend helpers, frontend cleanup files, and new docs committed together in commit `f3eb43b`.
+#### Charts & Analytics
+- Semua halaman utama kini punya chart panel dari data yang sudah dimuat (zero extra API calls).
+- Reusable: DonutGauge, HorizontalBarChart, SmartChartPanel di `src/components/charts/`.
+- Recharts `^3.8.1` adalah satu-satunya chart library di project.
+
+#### Review & Komplain
+- `TenantStaffReviewPrompt` sekarang memiliki kategori komplain wajib (rating ≤ 2) dan tag pujian opsional (rating ≥ 4).
+- Admin mendapat panel alert merah otomatis jika ada staff dengan avg rating < 3.
+- Staff dapat melihat distribusi rating dan label kategori di laporan bulanan.
+
+#### Tiket Pekerjaan Operasional
+- Admin/Owner bisa buat tiket pekerjaan langsung dari halaman Tiket.
+- Kategori `BARANG_PINDAH` menjadi job movement barang untuk staff.
+- Backend: `TicketCategory` enum + validasi DTO sudah diupdate.
+
+#### CSS Architecture
+- `src/styles.css` → 16 baris @import saja.
+- 13 modul di `src/styles/` — setiap fitur punya file sendiri.
+- AI dan editor tidak perlu memuat 538 KB sekaligus.
 
 ### Immediate verification
 
-1. Confirm repository is clean:
-
 ```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle"; git status -sb
+# Dari repo root
+git log --oneline -5
+git status -sb
+
+# Frontend TypeScript
+Set-Location frontend; npx tsc --noEmit
+
+# Frontend build
+npx vite build
 ```
 
-2. Run frontend build (already PASS confirmed):
-
-```powershell
-Set-Location "C:\Users\lieml\Desktop\Big Personal Web App\kost48surabaya-v3\kost48_full_frontend_backend_upgrade_bundle\final_bundle\frontend"; npm run build
-```
-
-### Not changed in V5.9.9
+### Tidak berubah di V5.10.0
 
 ```text
 - No schema change.
 - No DB reset.
 - No production DB mutation.
 - No lifecycle/payment business rule change.
-- No room readiness flow change from V5.9.8-A.
+- No room readiness flow change dari V5.9.8-A.
 - No generated Prisma commit.
 ```
 
 ### Recommended next sequence
 
-1. Commit this docs sync separately.
-2. Continue with V5.24-D — Admin UI Architecture + Performance Hardening.
-3. Full manual browser smoke across all roles.
+1. Manual browser smoke test semua role (owner, admin, staff, tenant, guest).
+2. Verifikasi complaint category tersimpan benar di comment field backend.
+3. Pertimbangkan backend endpoint baru `GET /admin/staff-reviews` untuk admin lihat review individual per staff.
+4. Pertimbangkan push notification (OneSignal/FCM) untuk alert review jelek ke admin.
+5. Pertimbangkan WebSocket untuk live update dashboard tanpa polling.
 
 ---
 

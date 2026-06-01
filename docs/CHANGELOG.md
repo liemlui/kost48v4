@@ -1,7 +1,107 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
 
-<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## 2026-06-02 — V5.10.0 Analytics Dashboard, Review Komplain, Tiket Operasional, Refactor CSS
+
+### Type
+Frontend feature sprint + backend enum additions + CSS architecture refactor.
+No schema change. No DB reset. No new npm dependency.
+
+### Added — Charts & Analytics (Recharts)
+
+- `DonutGauge` dan `HorizontalBarChart` sebagai reusable chart components di `src/components/charts/`.
+- `SmartChartPanel` diperkuat dengan mode donut/bar/tabel/summary.
+- **StaysPage** — 3 chart panel: donut status penghuni, horizontal bar booking flow, bar tipe pembayaran.
+- **InvoicesPage** — 3 chart panel: bar status tagihan, donut gauge rasio penagihan, bar ringkasan rupiah.
+- **AdminStaffPerformancePage** — 3 chart panel: bar distribusi kategori kinerja, bar aktivitas KPI tim, gauge rata-rata skor + donut audit.
+- **TicketsPage** — 3 chart panel: donut status tiket, bar kategori pekerjaan, bar aging umur tiket.
+- **PaymentReviewPage** — 3 chart panel: gauge kelengkapan bukti, donut level risiko, bar metode bayar.
+- **RenewRequestsAdminPage** — chart distribusi status perpanjangan (donut + progress bar mini).
+- **MyInvoicesPage** (portal tenant) — gauge tingkat pelunasan + bar status tagihan.
+- **PublicGuestDashboardPage** — donut ketersediaan kamar + bar komposisi fasilitas dari katalog publik.
+- **OwnerDashboardPage** — line chart + bar chart tren pendapatan/biaya/laba dengan best-fit line dan rentang 1/3/6/12 bulan.
+
+### Added — Review & Komplain Tenant → Staff
+
+- `TenantStaffReviewPrompt` diperkuat: rating bintang animasi dengan hover effect.
+- Rating ≤ 2 → wajib pilih kategori komplain: **Kebersihan / Kualitas Kerja / Keterlambatan / Kerusakan / Sikap Staff / Lainnya**.
+- Rating ≥ 4 → tag pujian opsional: Cepat & Tepat, Bersih & Rapi, Ramah, Profesional.
+- Kategori dikodekan sebagai `[Kategori] komentar` dalam `comment` field untuk kompatibilitas backend.
+- Tombol submit berubah warna dan label ("Kirim Komplain" merah vs "Kirim Rating" biru).
+
+### Added — Admin: Panel Komplain & Alert Kinerja
+
+- **AdminStaffPerformancePage** — panel alert merah otomatis untuk staff dengan avg rating < 3 bulan ini.
+- Panel alert kuning untuk staff dengan proof completion < 50%.
+- Badge ⚠️ di kolom rating dan ⛔ di kolom sinyal negatif.
+- Quick action "Audit →" langsung dari alert panel ke modal audit.
+
+### Added — Staff: Visualisasi Review
+
+- **StaffMonthlyReportPage** — bar chart distribusi 1⭐–5⭐ review per bulan.
+- Counter "X komplain" merah, label kategori komplain/pujian dari `[tag]` prefix.
+- Review item dengan border merah (komplain) / hijau (pujian).
+
+### Added — Tiket Pekerjaan Baru (Admin/Owner)
+
+- Tombol **"Buat Tiket Pekerjaan"** di header halaman Tiket (visible untuk ADMIN/OWNER).
+- Modal dengan 6 kategori: Kebersihan 🧹 / Perbaikan 🔧 / Audit Inventaris 📦 / **Pindah Barang 🚚** / Pemeriksaan 🔍 / Umum 📋.
+- Kategori **BARANG_PINDAH**: form khusus nama barang, jumlah, dari lokasi, ke lokasi — menjadi job operasional staff.
+- Assign langsung ke staff saat tiket dibuat.
+
+### Refactored — CSS Architecture
+
+- `src/styles.css` (24.138 baris / 538 KB) dipecah menjadi 13 modul di `src/styles/`:
+
+| File | Baris | Isi |
+|---|---|---|
+| `01-base.css` | 400 | CSS variables, reset, fonts |
+| `02-layout.css` | 971 | App layout, sidebar, topbar |
+| `03-components.css` | 645 | Badge, tabel, modal, toast, print |
+| `04-operations.css` | 2.221 | Command center, smart panels |
+| `05-staff.css` | 2.948 | Staff: work mode, routines, field ops |
+| `06-tenant.css` | 2.177 | Portal tenant |
+| `07-public.css` | 2.172 | Halaman publik & kamar |
+| `08-admin.css` | 1.548 | Dashboard admin/owner |
+| `09-finance.css` | 1.945 | Finance & accounting |
+| `10-misc.css` | 4.568 | Global styles & responsive |
+| `11-public-pages.css` | 2.942 | Guest home & landing |
+| `12-owner.css` | 919 | Owner settings & reports |
+| `13-charts.css` | 682 | Charts & analytics panels |
+
+- `src/styles.css` kini hanya 16 baris berisi `@import` ke 13 modul tersebut.
+- Vite build verified: semua modul balanced (comment opens = closes), output 661 KB CSS.
+
+### Backend
+
+- `TicketCategory` enum ditambah: `BARANG_PINDAH`, `AUDIT_INVENTARIS`, `PEMERIKSAAN`.
+- `BACKOFFICE_TICKET_CATEGORIES` constant untuk validasi `CreateBackofficeTicketDto`.
+- `CreateBackofficeTicketDto.category` kini divalidasi dengan `@IsIn` (sebelumnya `@IsString`).
+- Tenant-staff-reviews: minor service refinement.
+
+### Commits
+
+| Hash | Deskripsi |
+|---|---|
+| `4df023c` | feat: improve owner workspace and recharts dashboards |
+| `358426b` | feat: chart analytics Tiket, Review Bayar, Perpanjangan, Portal Tenant |
+| `345c838` | feat: chart ketersediaan kamar dan fasilitas di halaman publik |
+| `37fec46` | feat: perkuat review, komplain tenant→staff, tiket pekerjaan operasional |
+| `6479352` | refactor: split styles.css (24K baris) menjadi 13 modul CSS + backend ticket categories |
+
+### Verified
+
+```text
+- TypeScript check: PASS (npx tsc --noEmit clean di semua 5 commit).
+- Vite production build: PASS (661 KB CSS output, 1.9 MB JS, build 50s).
+- Git push: PASS ke origin/main.
+- No schema change. No DB reset. No new npm dependency.
+- CSS split: 13/13 file balanced (comment opens === closes).
+```
+
+---
+
 ## 2026-06-01 — V5.9.9 Fix: Missing getBookingExpiryMeta import
 
 ### Type

@@ -1,12 +1,16 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
 
-<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
-## A-0. Latest Release Checklist — V5.9.9 Missing getBookingExpiryMeta import
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## A-0. Latest Release Checklist — V5.10.0
 
 ### Code and Git
 
-- [x] Commit pushed to main: `f3eb43b fix: add missing getBookingExpiryMeta import in StaysPage.tsx`.
+- [x] Commit `6479352` pushed to main: CSS split + backend ticket categories.
+- [x] Commit `37fec46` pushed to main: review komplain + tiket pekerjaan.
+- [x] Commit `345c838` pushed to main: chart halaman publik.
+- [x] Commit `358426b` pushed to main: chart analytics halaman operasional.
+- [x] Commit `4df023c` pushed to main: recharts dashboard upgrade.
 - [x] No schema change.
 - [x] No DB reset.
 - [x] No production DB mutation.
@@ -14,13 +18,47 @@
 
 ### Build
 
-- [x] Frontend build PASS confirmed by user local run.
+- [x] TypeScript check PASS (`npx tsc --noEmit` clean di semua commit).
+- [x] Vite production build PASS (661 KB CSS, 1.9 MB JS).
+- [x] CSS split 13/13 file balanced (comment opens === closes).
 
-### Import fix
+### Charts & Analytics
 
-- [x] `getBookingExpiryMeta` added to import from `../../utils/bookingExpiry` in `StaysPage.tsx`.
-- [x] TS2304 resolved at all 3 call sites (lines 279, 509, 620).
-- [x] Remaining backend helpers and frontend cleanup files committed together.
+- [x] DonutGauge & HorizontalBarChart reusable components tersedia.
+- [x] StaysPage: status donut + booking flow bar + tipe pembayaran bar.
+- [x] InvoicesPage: status bar + collection rate gauge + rupiah bar.
+- [x] AdminStaffPerformancePage: kategori bar + aktivitas bar + skor gauge + audit donut.
+- [x] TicketsPage: status donut + kategori bar + aging bar.
+- [x] PaymentReviewPage: bukti gauge + risiko donut + metode bar.
+- [x] RenewRequestsAdminPage: distribusi status donut + progress bar.
+- [x] MyInvoicesPage: pelunasan gauge + status bar.
+- [x] PublicGuestDashboardPage: ketersediaan donut + fasilitas bar.
+- [x] OwnerDashboardPage: line/bar trend + best-fit line.
+
+### Review & Komplain Tenant
+
+- [x] Rating ≤ 2 → wajib pilih kategori komplain.
+- [x] Rating ≥ 4 → tag pujian opsional.
+- [x] Kategori dikodekan di `comment` field `[Kategori] teks`.
+- [x] Admin panel alert merah untuk staff avg rating < 3.
+- [x] Admin panel alert kuning untuk staff proof < 50%.
+- [x] Staff laporan: bar chart distribusi rating, label kategori komplain/pujian.
+
+### Tiket Pekerjaan Operasional
+
+- [x] Modal "Buat Tiket Pekerjaan" di header halaman Tiket (ADMIN/OWNER only).
+- [x] 6 kategori: Kebersihan, Perbaikan, Audit Inventaris, Pindah Barang, Pemeriksaan, Umum.
+- [x] Kategori BARANG_PINDAH: form dari/ke lokasi + nama barang + jumlah.
+- [x] Assign ke staff opsional saat membuat tiket.
+- [x] Backend `TicketCategory` enum + `BACKOFFICE_TICKET_CATEGORIES` constant.
+- [x] `CreateBackofficeTicketDto.category` divalidasi `@IsIn`.
+
+### CSS Refactor
+
+- [x] `src/styles.css` = 16 baris @import saja.
+- [x] 13 modul di `src/styles/` (01-base hingga 13-charts).
+- [x] Vite resolve `@import` via postcss-import — build PASS.
+- [x] Semua 13 file balanced (no unclosed comments).
 
 ---
 

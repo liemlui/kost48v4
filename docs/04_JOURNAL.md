@@ -1,7 +1,69 @@
 # KOST48 V5 — Project Journal
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
 
-<!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## 2026-06-02 — V5.10.0 Sprint Journal
+
+### Status
+
+```text
+V5.10.0 sprint selesai dan telah di-push ke origin/main (5 commit).
+HEAD: 6479352 refactor: split styles.css + backend ticket categories
+
+Semua TypeScript PASS. Vite build PASS. No schema change.
+```
+
+### Sprint ini dimulai dari
+
+- User meminta semua chart dialihkan ke Recharts → ternyata sudah semua pakai Recharts.
+- Lalu berkembang: tambah chart ke halaman yang belum punya.
+- Lalu diperkuat: sistem review komplain, tiket pekerjaan operasional.
+- Terakhir: refactor CSS monolitik 24K baris menjadi 13 modul.
+
+### Yang diselesaikan
+
+**Recharts Charts (5 commit berurutan):**
+- Audit codebase → semua chart sudah Recharts, tidak ada library lain.
+- Tambah chart panel di 9 halaman: Stays, Invoices, StaffPerformance, Tickets, PaymentReview, RenewRequests, MyInvoices (tenant), PublicGuestDashboard, OwnerDashboard.
+- Pendekatan: semua chart computed dari data yang sudah di-fetch → zero extra API calls.
+- DonutGauge dan HorizontalBarChart jadi reusable di `src/components/charts/`.
+
+**Review & Komplain Tenant:**
+- `TenantStaffReviewPrompt` total rewrite — animated stars, complaint categories, praise tags.
+- Rating ≤ 2 → wajib pilih kategori (Kebersihan/Kualitas Kerja/Keterlambatan/Kerusakan/Sikap/Lainnya).
+- Kategori masuk ke `comment` field sebagai `[Kategori] teks` — no schema change.
+- Admin: panel alert merah otomatis jika ada staff avg rating < 3 bulan ini.
+- Staff laporan: distribusi rating chart 1⭐–5⭐ + label kategori per review.
+
+**Tiket Pekerjaan Operasional:**
+- Modal baru "Buat Tiket Pekerjaan" untuk ADMIN/OWNER.
+- Kategori BARANG_PINDAH: form khusus dari/ke/barang/jumlah → menjadi job staff.
+- Backend: `TicketCategory` enum + `BACKOFFICE_TICKET_CATEGORIES` + validasi DTO `@IsIn`.
+
+**CSS Split:**
+- File 24.138 baris / 538 KB → 13 modul di `src/styles/`.
+- `styles.css` → 16 baris @import.
+- Split menggunakan Node.js script dengan deteksi clean boundary untuk mencegah unclosed comment.
+- Vite build verified sebelum commit.
+
+### Pelajaran dari sprint ini
+
+- CSS `@import` diproses oleh `postcss-import` di Vite — harus split di boundary bersih (blank line / comment start), bukan di tengah multi-line comment.
+- Splitting naive langsung di target line number bisa memotong `/* ===...*/` di tengah → unclosed comment error di postcss.
+- Solusi: cari nearest clean boundary (±20 baris) sebelum cut.
+- Kategori komplain sebaiknya juga ada di backend sebagai enum/column untuk filtering analytics yang lebih baik di masa depan.
+
+### Tidak berubah
+
+```text
+- Database schema: tidak ada perubahan.
+- Prisma migration: tidak ada.
+- npm dependency: tidak ada yang baru.
+- Business rules: payment, booking, checkout, room readiness — tidak berubah.
+```
+
+---
+
 ## 2026-06-01 — V5.9.9 Fix: Missing getBookingExpiryMeta import Journal
 
 Status:

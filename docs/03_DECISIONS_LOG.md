@@ -1,5 +1,27 @@
 # KOST48 V5 — Decisions Log
-**Versi:** 2026-06-01 V5.9.9 — Patch: Missing getBookingExpiryMeta import
+**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
+
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
+## 2026-06-02 — V5.10.0 Decisions
+
+| # | Keputusan | Dampak |
+|---:|---|---|
+| 643 | Recharts dipilih sebagai satu-satunya chart library (sudah terinstall `^3.8.1`) | Tidak ada library chart tambahan — zero new dependency untuk semua chart. |
+| 644 | Semua chart dihitung client-side dari data yang sudah dimuat | Zero extra API call untuk analytics — data di-reuse dari query yang sudah ada. |
+| 645 | DonutGauge dan HorizontalBarChart dibuat sebagai reusable components | Chart bisa dipakai di semua halaman tanpa duplikasi recharts boilerplate. |
+| 646 | Chart panel muncul kondisional (hanya jika data > 0) | Tidak ada chart kosong/loading state — UX bersih tanpa error state tambahan. |
+| 647 | Kategori komplain dikodekan ke `comment` field sebagai `[Kategori] teks` | Backend tidak perlu perubahan schema — `complaintCategory` tidak perlu kolom baru. |
+| 648 | Rating ≤ 2 wajib pilih kategori, rating ≥ 4 opsional tag pujian | Komplain terstruktur tanpa memaksa user yang kasih rating netral/bagus. |
+| 649 | Panel alert admin muncul otomatis dari data yang sudah ada (avg rating, proof rate) | Admin dapat signal tanpa harus query endpoint baru — data reuse dari `fetchAdminStaffPerformance`. |
+| 650 | Modal "Buat Tiket Pekerjaan" menggunakan `POST /tickets` endpoint yang sudah ada | Tidak perlu endpoint baru — form hanya mengisi `category`, `title`, `description`, `assignedToId`. |
+| 651 | Detail movement (dari/ke/barang) dikodekan ke `description` field | Tidak perlu tabel `ticket_movement` baru di DB — cukup structured text untuk MVP. |
+| 652 | `TicketCategory` enum ditambah BARANG_PINDAH, AUDIT_INVENTARIS, PEMERIKSAAN di backend | Kategori baru divalidasi oleh DTO sehingga tidak ada string arbitrer yang masuk DB. |
+| 653 | `src/styles.css` dipecah menjadi 13 modul di `src/styles/` | AI dan editor tidak perlu load 538 KB sekaligus — setiap fitur punya file sendiri. |
+| 654 | `src/styles.css` tetap sebagai entry point dengan `@import` | `main.tsx` tidak perlu diubah — Vite resolve `@import` via postcss-import otomatis. |
+| 655 | Split point dicari di clean boundary (blank line / comment start) | Mencegah `Unclosed comment` error di postcss — semua 13 file balanced. |
+| 656 | CSS split verified dengan Vite production build (tidak hanya dev server) | Dev server mungkin toleran, production build harus pass sebelum commit. |
+
+<!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS_END -->
 
 <!-- KOST48_DOCS_SYNC_20260601_V599_BOOKING_EXPIRY_META_IMPORT -->
 ## 2026-05-31 — V5.9.8-A Room Readiness Flow Hardening Decisions
