@@ -1,11 +1,157 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Card, Form, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
 import StaffAuditModal from '../../components/admin/StaffAuditModal';
 import AdminSmartAuditPanel from '../../components/admin/AdminSmartAuditPanel';
+import DonutGauge from '../../components/charts/DonutGauge';
 import { fetchAdminStaffAuditSuggestions, fetchAdminStaffPerformance, type StaffPerformanceSummary } from '../../api/staffPerformance';
+
+const CATEGORY_COLORS: Record<string, string> = {
+  'Sangat Baik': '#16a34a',
+  'Baik': '#2563eb',
+  'Cukup': '#0ea5e9',
+  'Perlu Dibantu': '#f59e0b',
+  'Perlu Diawasi': '#ef4444',
+};
+
+function StaffAnalyticsPanel({ items, summary }: { items: StaffPerformanceSummary[]; summary: { totalStaff: number; veryGood: number; needWatch: number; negativeValue: number } }) {
+  const categoryData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach((item) => {
+      const label = item.category.label;
+      counts[label] = (counts[label] ?? 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([label, value]) => ({ label, value, color: CATEGORY_COLORS[label] ?? '#94a3b8' }))
+      .sort((a, b) => b.value - a.value);
+  }, [items]);
+
+  const kpiData = useMemo(() => {
+    const totals = { routineDone: 0, ticketsDone: 0, meterCount: 0, stockReports: 0, roomChecks: 0 };
+    items.forEach((item) => {
+      totals.routineDone += item.monthlyKpi.routineDone ?? 0;
+      totals.ticketsDone += item.monthlyKpi.ticketsDone ?? 0;
+      totals.meterCount += item.monthlyKpi.meterCount ?? 0;
+      totals.stockReports += item.monthlyKpi.stockReports ?? 0;
+      totals.roomChecks += item.monthlyKpi.roomChecks ?? 0;
+    });
+    return [
+      { label: 'Checklist', value: totals.routineDone, color: '#2563eb' },
+      { label: 'Tugas', value: totals.ticketsDone, color: '#16a34a' },
+      { label: 'Meter', value: totals.meterCount, color: '#0ea5e9' },
+      { label: 'Stok', value: totals.stockReports, color: '#7c3aed' },
+      { label: 'Cek Kamar', value: totals.roomChecks, color: '#f59e0b' },
+    ];
+  }, [items]);
+
+  const auditData = useMemo(() => {
+    let pass = 0, needsFix = 0, failed = 0;
+    items.forEach((item) => {
+      pass += item.monthlyKpi.auditPass ?? 0;
+      needsFix += item.monthlyKpi.auditNeedsFix ?? 0;
+      failed += item.monthlyKpi.auditFailed ?? 0;
+    });
+    return [
+      { name: 'Lulus', value: pass, color: '#16a34a' },
+      { name: 'Perlu Perbaikan', value: needsFix, color: '#f59e0b' },
+      { name: 'Gagal', value: failed, color: '#ef4444' },
+    ].filter((d) => d.value > 0);
+  }, [items]);
+
+  const avgScore = items.length ? Math.round(items.reduce((s, i) => s + (i.score.final ?? 0), 0) / items.length) : 0;
+  const auditTotal = auditData.reduce((s, d) => s + d.value, 0);
+  const auditPassRate = auditTotal ? Math.round((auditData[0]?.value ?? 0) / auditTotal * 100) : 0;
+
+  if (items.length === 0) return null;
+
+  return (
+    <Row className="g-3 mb-3 staff-analytics-row">
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Distribusi Kategori</div>
+            <div className="panel-subtitle mb-2">Komposisi kinerja tim bulan ini</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={categoryData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={110} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value) => [`${Number(value ?? 0)} staff`, '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {categoryData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Aktivitas Tim</div>
+            <div className="panel-subtitle mb-2">Total pekerjaan terdokumentasi bulan ini</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={kpiData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={72} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value) => [`${Number(value ?? 0)} kegiatan`, '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {kpiData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Skor & Audit</div>
+            <div className="panel-subtitle mb-2">Rata-rata skor dan hasil audit tim</div>
+            <div className="staff-score-audit-grid">
+              <DonutGauge
+                value={avgScore}
+                center={<><strong>{avgScore}</strong><small>/100</small></>}
+                ariaLabel={`Rata-rata skor tim: ${avgScore}/100`}
+                size={90}
+                innerRadius={30}
+                outerRadius={43}
+                color="#2563eb"
+                trackColor="rgba(37,99,235,0.10)"
+                className="staff-score-gauge-mini"
+              />
+              <div className="staff-audit-mini-legend">
+                <span className="staff-audit-label-head">Audit bulan ini</span>
+                {auditData.length > 0 ? auditData.map((d) => (
+                  <span key={d.name} className="staff-audit-legend-item">
+                    <i style={{ background: d.color }} />
+                    {d.name}: <strong>{d.value}</strong>
+                  </span>
+                )) : <span className="text-muted small">Belum ada audit</span>}
+                {auditTotal > 0 && <span className="staff-audit-pass-rate">Pass rate: <strong>{auditPassRate}%</strong></span>}
+              </div>
+            </div>
+            {auditData.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <ResponsiveContainer width="100%" height={48}>
+                  <PieChart>
+                    <Pie data={auditData} dataKey="value" cx="50%" cy="50%" innerRadius={14} outerRadius={22} startAngle={90} endAngle={-270} stroke="none">
+                      {auditData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+}
 
 function currentMonth() {
   const date = new Date();
@@ -47,6 +193,10 @@ export default function AdminStaffPerformancePage() {
           <Card className="border-0"><Card.Body><span>Sinyal negatif</span><strong>{query.data.summary.negativeValue}</strong><small>Audit gagal/bukti kurang</small></Card.Body></Card>
         </div>
       ) : null}
+
+      {query.data && items.length > 0 && (
+        <StaffAnalyticsPanel items={items} summary={query.data.summary} />
+      )}
 
       <AdminSmartAuditPanel data={suggestionsQuery.data} isLoading={suggestionsQuery.isLoading} isError={suggestionsQuery.isError} staffItems={items} onAudit={setSelected} />
 

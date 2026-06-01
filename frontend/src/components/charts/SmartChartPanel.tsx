@@ -1,6 +1,8 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Card, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import HorizontalBarChart from './HorizontalBarChart';
 
 export type SmartChartMode = 'summary' | 'donut' | 'bar' | 'table';
 export type SmartChartPoint = {
@@ -25,12 +27,18 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat('id-ID').format(Math.round(value || 0));
 }
 
+const CHART_COLORS = ['#2563eb', '#0ea5e9', '#f59e0b', '#ef4444', '#16a34a', '#7c3aed'];
+
 export default function SmartChartPanel({ title, subtitle, points, defaultMode = 'summary', availableModes = ['summary', 'donut', 'bar', 'table'], totalLabel = 'Total', ctaLabel, ctaTo }: SmartChartPanelProps) {
   const navigate = useNavigate();
   const [mode, setMode] = useState<SmartChartMode>(defaultMode);
   const total = points.reduce((sum, point) => sum + Math.max(0, Number(point.value || 0)), 0);
   const safeMode = availableModes.includes(mode) ? mode : availableModes[0];
   const topPoint = useMemo(() => [...points].sort((a, b) => b.value - a.value)[0], [points]);
+  const chartPoints = useMemo(
+    () => points.map((point, index) => ({ ...point, value: Math.max(0, Number(point.value || 0)), color: CHART_COLORS[index % CHART_COLORS.length] })),
+    [points],
+  );
 
   return (
     <Card className="content-card smart-chart-card border-0 h-100">
@@ -72,27 +80,36 @@ export default function SmartChartPanel({ title, subtitle, points, defaultMode =
 
         {safeMode === 'donut' && (
           <div className="smart-chart-donut-wrap">
-            <div className="smart-chart-donut" style={{ '--a': `${total ? (points[0]?.value ?? 0) / total * 100 : 0}%`, '--b': `${total ? ((points[0]?.value ?? 0) + (points[1]?.value ?? 0)) / total * 100 : 0}%` } as CSSProperties}>
-              <div><strong>{formatNumber(total)}</strong><span>{totalLabel}</span></div>
+            <div className="smart-chart-donut-stage" role="img" aria-label={`${title}: ${formatNumber(total)} ${totalLabel}`}>
+              {total > 0 ? (
+                <ResponsiveContainer width="100%" height={190}>
+                  <PieChart>
+                    <Pie data={chartPoints} dataKey="value" nameKey="label" cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={2} stroke="none">
+                      {chartPoints.map((point) => (
+                        <Cell key={point.label} fill={point.color} cursor={point.to ? 'pointer' : 'default'} onClick={() => point.to ? navigate(point.to) : undefined} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: unknown) => formatNumber(Number(Array.isArray(value) ? value[0] ?? 0 : value ?? 0))} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : <div className="smart-chart-empty">Belum ada data</div>}
+              <div className="smart-chart-donut-center"><strong>{formatNumber(total)}</strong><span>{totalLabel}</span></div>
             </div>
             <div className="smart-chart-legend">
-              {points.map((point, index) => <span key={point.label}><i className={`smart-tone-${index % 4}`} />{point.label}: {formatNumber(point.value)}</span>)}
+              {chartPoints.map((point) => <span key={point.label}><i style={{ background: point.color }} />{point.label}: {formatNumber(point.value)}</span>)}
             </div>
           </div>
         )}
 
         {safeMode === 'bar' && (
           <div className="smart-chart-bars">
-            {points.map((point) => {
-              const pct = total ? Math.max(3, (point.value / total) * 100) : 0;
-              return (
-                <button key={point.label} type="button" className="smart-chart-bar-row" onClick={() => point.to ? navigate(point.to) : undefined} disabled={!point.to}>
-                  <span>{point.label}</span>
-                  <div><i style={{ width: `${pct}%` }} /></div>
-                  <strong>{formatNumber(point.value)}</strong>
-                </button>
-              );
-            })}
+            <HorizontalBarChart
+              points={chartPoints}
+              ariaLabel={`${title} dalam diagram batang`}
+              valueFormatter={formatNumber}
+              onPointClick={(point) => point.to ? navigate(point.to) : undefined}
+              isPointClickable={(point) => Boolean(point.to)}
+            />
           </div>
         )}
 

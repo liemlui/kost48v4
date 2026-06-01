@@ -19,36 +19,35 @@ const ownerSections: NavigationSection[] = [
   {
     title: 'Dashboard',
     links: [
-      { to: '/owner-dashboard', label: 'Owner Dashboard', icon: '📈', hint: 'Business KPI, signals, and 6-month trends.' },
-      { to: '/stays', label: 'Stays & Tenants', icon: '🏠', hint: 'Active stays, bookings, renew, checkout, and tenant data.', activePaths: ['/stays', '/tenants'] },
-      { to: '/reports', label: 'Reports & Financials', icon: '📊', hint: 'Operations report, balance sheet, P&L, cash flow, ratios.' },
+      { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, sinyal risiko, dan tren 6 bulan.' },
+      { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Masa sewa aktif, booking, perpanjangan, keluar, dan data penghuni.', activePaths: ['/stays', '/tenants'] },
+      { to: '/reports', label: 'Laporan Bisnis', icon: '📊', hint: 'Operasional, laba rugi, arus kas, neraca, dan rasio.' },
     ],
   },
   {
     title: 'Finance',
     links: [
-      { to: '/invoices', label: 'Invoices & Receivables', icon: '🧾', hint: 'Monitor invoices, payments, overdue, and follow-ups.', activePaths: ['/invoices', '/payment-submissions/review'] },
-      { to: '/expenses', label: 'Expenses', icon: '💳', hint: 'Record and categorize operational expenses.' },
-      { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Voucher WiFi sales records.' },
-      { to: '/ancillary-revenue', label: 'Ancillary Revenue', icon: '➕', hint: 'Additional revenue sources (laundry, cleaning, etc).' },
+      { to: '/invoices', label: 'Tagihan & Piutang', icon: '🧾', hint: 'Pantau tagihan, pembayaran, keterlambatan, dan follow-up.', activePaths: ['/invoices', '/payment-submissions/review'] },
+      { to: '/expenses', label: 'Pengeluaran', icon: '💳', hint: 'Catat dan kategorikan biaya operasional.' },
+      { to: '/wifi-sales', label: 'Penjualan WiFi', icon: '📶', hint: 'Catatan penjualan voucher WiFi.' },
+      { to: '/ancillary-revenue', label: 'Pendapatan Tambahan', icon: '➕', hint: 'Sumber pendapatan tambahan seperti laundry, cleaning, dan layanan lain.' },
     ],
   },
   {
     title: 'Operations',
     links: [
-      { to: '/staff-performance', label: 'Staff Performance', icon: '📋', hint: 'Staff KPIs, audits, reviews, tickets, and routines.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
-      { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Create and manage tenant announcements.' },
+      { to: '/staff-performance', label: 'Kinerja Staff', icon: '📋', hint: 'KPI staff, audit, review, tiket, dan rutinitas kerja.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
+      { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Buat dan kelola pengumuman untuk penghuni.' },
     ],
   },
   {
     title: 'Settings',
     links: [
-      { to: '/rooms', label: 'Rooms & Inventory', icon: '🚪', hint: 'Room details, rates, facilities, room items, stock inventory.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
-      { to: '/finance/assets', label: 'Fixed Assets', icon: '🏗️', hint: 'Asset register, depreciation run, ledger alignment.' },
-      { to: '/finance/accounting-setup', label: 'Accounting Setup', icon: '📘', hint: 'Chart of accounts, periods, opening balance, journal entries.' },
-      { to: '/users', label: 'Users', icon: '👤', hint: 'Manage accounts: admin, staff, tenants.' },
-      { to: '/faqs', label: 'FAQ', icon: '❓', hint: 'Pertanyaan yang sering diajukan publik.' },
-      { to: '/settings', label: 'Settings', icon: '⚙️', hint: 'Public FAQ, room photos, guest page content.' },
+      { to: '/rooms', label: 'Kamar & Inventaris', icon: '🚪', hint: 'Detail kamar, tarif, fasilitas, barang kamar, dan stok inventaris.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
+      { to: '/finance/assets', label: 'Aset Tetap', icon: '🏗️', hint: 'Register aset, depresiasi, dan keselarasan ledger.' },
+      { to: '/finance/accounting-setup', label: 'Setup Akuntansi', icon: '📘', hint: 'Chart of accounts, periode, saldo awal, dan jurnal.' },
+      { to: '/users', label: 'Akun User', icon: '👤', hint: 'Kelola akun owner, admin, staff, dan penghuni.' },
+      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, dan konten halaman tamu.' },
     ],
   },
 ];

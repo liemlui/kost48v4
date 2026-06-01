@@ -1,6 +1,6 @@
-import type { CSSProperties } from 'react';
 import { Card } from 'react-bootstrap';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
+import DonutGauge from '../charts/DonutGauge';
 
 type Props = {
   performance?: StaffPerformanceSummary | null;
@@ -25,7 +25,6 @@ export default function StaffPerformanceCategoryCard({ performance, compact = fa
   const score = Math.min(100, Math.max(0, performance?.score.final ?? 0));
   const bonus = netKpi(performance?.score);
   const tone = toneClass(category?.tone);
-  const circleStyle = { '--staff-score': `${score}%` } as CSSProperties;
 
   return (
     <Card className={`staff-performance-category-card border-0 tone-${tone}${compact ? ' compact mini' : ''}`}>
@@ -40,10 +39,15 @@ export default function StaffPerformanceCategoryCard({ performance, compact = fa
               <span>Nilai kerja <strong>{bonus >= 0 ? '+' : ''}{bonus}</strong></span>
             </div>
           </div>
-          <div className="staff-performance-score-circle" style={circleStyle} aria-label={`Skor ${score} dari 100`}>
-            <strong>{score}</strong>
-            <small>/100</small>
-          </div>
+          <DonutGauge
+            value={score}
+            center={<><strong>{score}</strong><small>/100</small></>}
+            ariaLabel={`Skor ${score} dari 100`}
+            size={86}
+            innerRadius={29}
+            outerRadius={41}
+            className="staff-performance-score-circle"
+          />
         </div>
       </Card.Body>
     </Card>

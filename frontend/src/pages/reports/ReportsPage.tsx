@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { generateCsv, downloadCsv } from '../../utils/csv';
 import {
   fetchMonthlyIncome,
@@ -25,6 +26,8 @@ import UnlockedFormalReports from './UnlockedFormalReports';
 import { fetchBalanceSheetDraft, fetchFormalRatiosReadiness, type BalanceSheetDraft, type FinanceReadiness } from '../../api/finance';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
+import DonutGauge from '../../components/charts/DonutGauge';
+import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
 
 type HealthLevel = 'Baik' | 'Perlu Dipantau' | 'Buruk';
 type CashFlowStatus = 'Positif' | 'Netral' | 'Negatif';
@@ -163,9 +166,9 @@ export default function ReportsPage() {
     <Container fluid className="reports-command-page px-2 py-3">
       <section className="report-hero mb-3">
         <div>
-          <div className="report-eyebrow">BUSINESS FINANCIAL REPORTS</div>
-          <h1>Financial & Operations Report</h1>
-          <p>Complete overview: revenue, cash flow, overdue aging, deposit liability, occupancy, profit margin, and financial position.</p>
+          <div className="report-eyebrow">Laporan bisnis</div>
+          <h1>Keuangan dan Operasional</h1>
+          <p>Ringkasan pendapatan, arus kas, piutang, deposit, okupansi, margin laba, dan posisi keuangan.</p>
         </div>
         <div className="report-hero-controls">
           <div className="report-period-card">
@@ -216,7 +219,7 @@ export default function ReportsPage() {
             </div>
             <ReportKpiCard label="Total Pendapatan" value={formatCompactRupiah(profitLoss.data!.totalRevenueRupiah)} detail={`Invoice ${formatCompactRupiah(profitLoss.data!.invoiceRevenueRupiah)} + WiFi ${formatCompactRupiah(profitLoss.data!.wifiRevenueRupiah)}`} tone="blue" />
             <ReportKpiCard label="Arus Kas Bersih" value={formatCompactRupiah(cashFlow.data!.netCashFlowRupiah)} detail={`In ${formatCompactRupiah(cashFlow.data!.cashIn.totalRupiah)} / Out ${formatCompactRupiah(cashFlow.data!.cashOut.totalRupiah)}`} tone={cashFlow.data!.netCashFlowRupiah >= 0 ? 'green' : 'red'} />
-            <ReportKpiCard label="Belum Tertagih" value={formatCompactRupiah(monthlyIncome.data!.outstandingRupiah)} detail={`${monthlyIncome.data!.unpaidInvoiceCount} belum bayar · ${monthlyIncome.data!.partialInvoiceCount} partial`} tone={monthlyIncome.data!.outstandingRupiah > 0 ? 'orange' : 'green'} />
+            <ReportKpiCard label="Belum Tertagih" value={formatCompactRupiah(monthlyIncome.data!.outstandingRupiah)} detail={`${monthlyIncome.data!.unpaidInvoiceCount} belum bayar · ${monthlyIncome.data!.partialInvoiceCount} sebagian`} tone={monthlyIncome.data!.outstandingRupiah > 0 ? 'orange' : 'green'} />
             <ReportKpiCard label="Okupansi" value={`${occupancy.data!.occupancyRatePercent}%`} detail={`${occupancy.data!.occupiedRooms}/${occupancy.data!.totalOperableRooms} kamar terisi`} tone="cyan" />
           </section>
 
@@ -224,7 +227,7 @@ export default function ReportsPage() {
             <Col xl={5} lg={6}>
               <Card className="report-panel h-100">
                 <Card.Header>
-                  <span>Revenue Radar</span>
+                  <span>Pergerakan Pendapatan</span>
                   <Badge bg="primary">{monthLabel(ym)}</Badge>
                 </Card.Header>
                 <Card.Body>
@@ -234,7 +237,7 @@ export default function ReportsPage() {
             </Col>
             <Col xl={3} lg={6}>
               <Card className="report-panel h-100">
-                <Card.Header><span>Occupancy Core</span></Card.Header>
+                <Card.Header><span>Okupansi Kamar</span></Card.Header>
                 <Card.Body>
                   <RingGauge percent={occupancy.data!.occupancyRatePercent} label="Okupansi" sublabel={`${occupancy.data!.occupiedRooms} dari ${occupancy.data!.totalOperableRooms} kamar`} />
                 </Card.Body>
@@ -242,7 +245,7 @@ export default function ReportsPage() {
             </Col>
             <Col xl={4}>
               <Card className="report-panel h-100">
-                <Card.Header><span>Overdue Aging</span><Badge bg="danger">At Risk</Badge></Card.Header>
+                <Card.Header><span>Umur Tunggakan</span><Badge bg="danger">Risiko</Badge></Card.Header>
                 <Card.Body>
                   <OverdueHeatmap data={overdueAging.data!} />
                 </Card.Body>
@@ -256,13 +259,13 @@ export default function ReportsPage() {
             <Row className="g-3">
               <Col xl={7}>
                 <Card className="report-panel h-100">
-                  <Card.Header><span>Financial Health Matrix</span><Badge bg={overall?.color ?? 'secondary'}>{overall?.label}</Badge></Card.Header>
+                  <Card.Header><span>Matriks Kesehatan Keuangan</span><Badge bg={overall?.color ?? 'secondary'}>{overall?.label}</Badge></Card.Header>
                   <Card.Body className="p-0"><OwnerHealthMatrix financialRatios={financialRatios.data!} profitLoss={profitLoss.data!} occupancy={occupancy.data!} cashFlow={cashFlow.data!} /></Card.Body>
                 </Card>
               </Col>
               <Col xl={5}>
                 <Card className="report-panel h-100">
-                  <Card.Header><span>Executive Signal</span><Badge bg="info">AI-ready</Badge></Card.Header>
+                  <Card.Header><span>Sinyal Utama</span><Badge bg="info">Siap AI</Badge></Card.Header>
                   <Card.Body>
                     <InsightStack monthlyIncome={monthlyIncome.data!} cashFlow={cashFlow.data!} overdueAging={overdueAging.data!} occupancy={occupancy.data!} financialRatios={financialRatios.data!} />
                     <div className="mt-3">
@@ -297,22 +300,22 @@ export default function ReportsPage() {
             <Row className="g-3">
               <Col xl={6}><ReportSection title="Pendapatan Bulanan" badge={monthLabel(ym)}><MonthlyIncomeTable data={monthlyIncome.data!} /></ReportSection></Col>
               <Col xl={6}><ReportSection title="Arus Kas" badge={cashFlow.data!.netCashFlowRupiah >= 0 ? 'Positif' : 'Negatif'}><CashFlowTable data={cashFlow.data!} /></ReportSection></Col>
-              <Col xl={6}><ReportSection title="Profit & Loss" badge={`${profitLoss.data!.netProfitMarginPercent}% margin`}><ProfitLossTable data={profitLoss.data!} /></ReportSection></Col>
-              <Col xl={6}><ReportSection title="Expense Split" badge={`${expenseSummary.data!.categories.length} kategori`}><ExpenseSummaryVisual data={expenseSummary.data!} /></ReportSection></Col>
+              <Col xl={6}><ReportSection title="Laba Rugi" badge={`${profitLoss.data!.netProfitMarginPercent}% margin`}><ProfitLossTable data={profitLoss.data!} /></ReportSection></Col>
+              <Col xl={6}><ReportSection title="Rincian Pengeluaran" badge={`${expenseSummary.data!.categories.length} kategori`}><ExpenseSummaryVisual data={expenseSummary.data!} /></ReportSection></Col>
             </Row>
           )}
 
           {activeTab === 'aging' && (
             <Row className="g-3">
-              <Col xl={7}><ReportSection title="Aging Tunggakan" badge={`Per ${overdueAging.data!.asOf}`}><OverdueAgingTable data={overdueAging.data!} /></ReportSection></Col>
-              <Col xl={5}><ReportSection title="Liabilitas Deposit" badge={`${depositLiability.data!.activeStayCount} stay`}><DepositLiabilityVisual data={depositLiability.data!} /></ReportSection></Col>
+              <Col xl={7}><ReportSection title="Umur Tunggakan" badge={`Per ${overdueAging.data!.asOf}`}><OverdueAgingTable data={overdueAging.data!} /></ReportSection></Col>
+              <Col xl={5}><ReportSection title="Liabilitas Deposit" badge={`${depositLiability.data!.activeStayCount} masa sewa`}><DepositLiabilityVisual data={depositLiability.data!} /></ReportSection></Col>
             </Row>
           )}
 
           {activeTab === 'operations' && (
             <Row className="g-3">
               <Col xl={5}><ReportSection title="Okupansi & Pendapatan per Kamar" badge={`${occupancy.data!.occupancyRatePercent}%`}><OccupancyTable data={occupancy.data!} /></ReportSection></Col>
-              <Col xl={7}><ReportSection title="Ringkasan Operasional" badge="Snapshot"><OperationsBars occupancy={occupancy.data!} monthlyIncome={monthlyIncome.data!} depositLiability={depositLiability.data!} /></ReportSection></Col>
+              <Col xl={7}><ReportSection title="Ringkasan Operasional" badge="Terkini"><OperationsBars occupancy={occupancy.data!} monthlyIncome={monthlyIncome.data!} depositLiability={depositLiability.data!} /></ReportSection></Col>
             </Row>
           )}
 
@@ -335,11 +338,11 @@ function ReportKpiCard({ label, value, detail, tone }: { label: string; value: s
 
 function ReportTabs({ activeTab, onChange, counts }: { activeTab: ReportTab; onChange: (tab: ReportTab) => void; counts: { invoices: number; overdue: number; rooms: number } }) {
   const tabs: { key: ReportTab; label: string; badge?: number | string }[] = [
-    { key: 'command', label: 'Overview', badge: 'Live' },
-    { key: 'finance', label: 'Finance', badge: counts.invoices },
-    { key: 'aging', label: 'Aging & Deposit', badge: counts.overdue },
-    { key: 'operations', label: 'Operations', badge: counts.rooms },
-    { key: 'formal', label: 'Formal Reports', badge: 'New' },
+    { key: 'command', label: 'Ringkasan', badge: 'Aktual' },
+    { key: 'finance', label: 'Keuangan', badge: counts.invoices },
+    { key: 'aging', label: 'Tunggakan & Deposit', badge: counts.overdue },
+    { key: 'operations', label: 'Operasional', badge: counts.rooms },
+    { key: 'formal', label: 'Laporan Formal', badge: 'Baru' },
   ];
   return (
     <div className="report-tabbar mb-3">
@@ -369,9 +372,13 @@ function RingGauge({ percent, label, sublabel }: { percent: number; label: strin
   const p = clampPercent(percent);
   return (
     <div className="report-ring-wrap">
-      <div className="report-ring" style={{ background: `conic-gradient(#38bdf8 ${p}%, rgba(148, 163, 184, 0.18) 0)` }}>
-        <div className="report-ring-inner"><strong>{p}%</strong><span>{label}</span></div>
-      </div>
+      <DonutGauge
+        value={p}
+        center={<><strong>{p}%</strong><span>{label}</span></>}
+        ariaLabel={`${label}: ${p}%`}
+        className="report-ring"
+        centerClassName="report-ring-inner"
+      />
       <p className="mb-0 text-center text-muted small">{sublabel}</p>
     </div>
   );
@@ -379,43 +386,59 @@ function RingGauge({ percent, label, sublabel }: { percent: number; label: strin
 
 function RevenueRadar({ monthlyIncome, cashFlow, profitLoss }: { monthlyIncome: MonthlyIncome; cashFlow: CashFlow; profitLoss: ProfitLoss }) {
   const rows = [
-    { label: 'Tagihan', value: monthlyIncome.totalBilledRupiah, tone: 'blue' },
-    { label: 'Dibayar', value: monthlyIncome.totalPaidRupiah, tone: 'green' },
-    { label: 'WiFi', value: monthlyIncome.totalWifiRevenueRupiah, tone: 'cyan' },
-    { label: 'Expense', value: profitLoss.totalExpenseRupiah, tone: 'orange' },
-    { label: 'Net CF', value: Math.max(0, cashFlow.netCashFlowRupiah), tone: 'purple' },
+    { label: 'Tagihan', value: monthlyIncome.totalBilledRupiah, color: '#2563eb' },
+    { label: 'Dibayar', value: monthlyIncome.totalPaidRupiah, color: '#16a34a' },
+    { label: 'WiFi', value: monthlyIncome.totalWifiRevenueRupiah, color: '#0891b2' },
+    { label: 'Pengeluaran', value: profitLoss.totalExpenseRupiah, color: '#f97316' },
+    { label: 'Net CF', value: Math.max(0, cashFlow.netCashFlowRupiah), color: '#7c3aed' },
   ];
-  const max = Math.max(...rows.map((r) => r.value), 1);
-  return (
-    <div className="report-radar-bars">
-      {rows.map((row) => (
-        <div className="report-radar-row" key={row.label}>
-          <div><strong>{row.label}</strong><span>{formatCompactRupiah(row.value)}</span></div>
-          <div className="report-radar-track"><i className={`tone-${row.tone}`} style={{ width: `${Math.max(5, (row.value / max) * 100)}%` }} /></div>
-        </div>
-      ))}
-    </div>
-  );
+  return <HorizontalBarChart points={rows} ariaLabel="Perbandingan revenue dan cashflow" valueFormatter={formatCompactRupiah} height={242} leftWidth={72} />;
 }
 
 function OverdueHeatmap({ data }: { data: OverdueAging }) {
   const buckets = [
-    { label: 'Current', count: data.buckets.current.count, value: data.buckets.current.totalRupiah, tone: 'good' },
-    { label: '1–30', count: data.buckets.days1to30.count, value: data.buckets.days1to30.totalRupiah, tone: 'watch' },
-    { label: '31–60', count: data.buckets.days31to60.count, value: data.buckets.days31to60.totalRupiah, tone: 'watch' },
-    { label: '61–90', count: data.buckets.days61to90.count, value: data.buckets.days61to90.totalRupiah, tone: 'bad' },
-    { label: '91+', count: data.buckets.days91plus.count, value: data.buckets.days91plus.totalRupiah, tone: 'critical' },
+    { label: 'Lancar', count: data.buckets.current.count, value: data.buckets.current.totalRupiah, color: '#22c55e' },
+    { label: '1-30', count: data.buckets.days1to30.count, value: data.buckets.days1to30.totalRupiah, color: '#fbbf24' },
+    { label: '31-60', count: data.buckets.days31to60.count, value: data.buckets.days31to60.totalRupiah, color: '#f59e0b' },
+    { label: '61-90', count: data.buckets.days61to90.count, value: data.buckets.days61to90.totalRupiah, color: '#f97316' },
+    { label: '91+', count: data.buckets.days91plus.count, value: data.buckets.days91plus.totalRupiah, color: '#ef4444' },
   ];
-  const max = Math.max(...buckets.map((b) => b.value), 1);
   return (
-    <div className="report-heatmap">
-      {buckets.map((bucket) => (
-        <div key={bucket.label} className={`report-heat-cell heat-${bucket.tone}`} style={{ minHeight: `${70 + (bucket.value / max) * 80}px` }}>
-          <span>{bucket.label}</span>
-          <strong>{bucket.count}</strong>
-          <small>{formatCompactRupiah(bucket.value)}</small>
-        </div>
-      ))}
+    <div className="report-aging-chart" role="img" aria-label="Nilai invoice berdasarkan umur tunggakan">
+      <ResponsiveContainer width="100%" height={260}>
+        <BarChart data={buckets} margin={{ top: 26, right: 8, bottom: 8, left: 0 }}>
+          <CartesianGrid vertical={false} stroke="rgba(148, 163, 184, 0.22)" strokeDasharray="3 3" />
+          <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
+          <YAxis hide />
+          <Tooltip
+            cursor={{ fill: 'rgba(37, 99, 235, 0.05)' }}
+            content={({ active, payload }) => {
+              const bucket = payload?.[0]?.payload as typeof buckets[number] | undefined;
+              if (!active || !bucket) return null;
+              return <div className="recharts-tooltip"><strong>{bucket.label} hari</strong><span>{formatCompactRupiah(bucket.value)}</span><small>{bucket.count} invoice</small></div>;
+            }}
+          />
+          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+            {buckets.map((bucket) => <Cell key={bucket.label} fill={bucket.color} />)}
+            <LabelList dataKey="count" position="top" fill="#475569" fontSize={12} fontWeight={800} />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function InlinePercentBar({ value, color, ariaLabel }: { value: number; color: string; ariaLabel: string }) {
+  const safeValue = clampPercent(value);
+  return (
+    <div className="report-inline-percent-chart" role="img" aria-label={ariaLabel}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart layout="vertical" data={[{ label: ariaLabel, value: safeValue }]} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+          <XAxis type="number" domain={[0, 100]} hide />
+          <YAxis type="category" dataKey="label" hide />
+          <Bar dataKey="value" fill={color} radius={[0, 6, 6, 0]} background={{ fill: 'rgba(37, 99, 235, 0.10)' }} isAnimationActive />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -424,9 +447,9 @@ function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cashFlow }:
   const rows = [
     { label: 'Rasio Tertagih', value: financialRatios.collectionRatePercent, suffix: '%', note: 'Pembayaran / tagihan', meta: collectionRateLabel(financialRatios.collectionRatePercent) },
     { label: 'Margin Laba Bersih', value: profitLoss.netProfitMarginPercent, suffix: '%', note: 'Laba bersih / revenue', meta: netProfitMarginLabel(profitLoss.netProfitMarginPercent) },
-    { label: 'Expense Ratio', value: financialRatios.expenseRatioPercent, suffix: '%', note: 'Expense / revenue', meta: expenseRatioLabel(financialRatios.expenseRatioPercent) },
+    { label: 'Rasio Pengeluaran', value: financialRatios.expenseRatioPercent, suffix: '%', note: 'Pengeluaran / pendapatan', meta: expenseRatioLabel(financialRatios.expenseRatioPercent) },
     { label: 'Tingkat Okupansi', value: occupancy.occupancyRatePercent, suffix: '%', note: 'Kamar terisi', meta: occupancyRateLabel(occupancy.occupancyRatePercent) },
-    { label: 'Overdue Rate', value: financialRatios.overdueRateSnapshotPercent, suffix: '%', note: 'Tunggakan snapshot', meta: overdueRateLabel(financialRatios.overdueRateSnapshotPercent) },
+    { label: 'Rasio Tunggakan', value: financialRatios.overdueRateSnapshotPercent, suffix: '%', note: 'Posisi tunggakan terkini', meta: overdueRateLabel(financialRatios.overdueRateSnapshotPercent) },
   ];
   const cf = cashFlowLabel(cashFlow.netCashFlowRupiah);
   return (
@@ -434,13 +457,13 @@ function OwnerHealthMatrix({ financialRatios, profitLoss, occupancy, cashFlow }:
       {rows.map((row) => (
         <div className="report-matrix-row" key={row.label}>
           <div><strong>{row.label}</strong><span>{row.note}</span></div>
-          <div className="report-matrix-meter"><i className={`meter-${row.meta.tone}`} style={{ width: `${clampPercent(row.value)}%` }} /></div>
+          <InlinePercentBar value={row.value} color={row.meta.tone === 'good' ? '#22c55e' : row.meta.tone === 'watch' ? '#f59e0b' : '#ef4444'} ariaLabel={`${row.label}: ${row.value}${row.suffix}`} />
           <div className="report-matrix-value"><strong>{row.value}{row.suffix}</strong><Badge bg={row.meta.color}>{row.meta.label}</Badge></div>
         </div>
       ))}
       <div className="report-matrix-row">
         <div><strong>Arus Kas Bersih</strong><span>Kas masuk - kas keluar</span></div>
-        <div className="report-matrix-meter"><i className={`meter-${cf.tone}`} style={{ width: `${cashFlow.netCashFlowRupiah > 0 ? 100 : 35}%` }} /></div>
+        <InlinePercentBar value={cashFlow.netCashFlowRupiah > 0 ? 100 : 35} color={cf.tone === 'good' ? '#22c55e' : cf.tone === 'watch' ? '#f59e0b' : '#ef4444'} ariaLabel={`Arus kas bersih: ${formatCompactRupiah(cashFlow.netCashFlowRupiah)}`} />
         <div className="report-matrix-value"><strong>{formatCompactRupiah(cashFlow.netCashFlowRupiah)}</strong><Badge bg={cf.color}>{cf.label}</Badge></div>
       </div>
     </div>
@@ -460,8 +483,8 @@ function InsightStack({ monthlyIncome, cashFlow, overdueAging, occupancy, financ
       tone: cashFlow.netCashFlowRupiah >= 0 ? 'good' : 'bad',
     },
     {
-      title: overdueAging.totalOverdueCount > 0 ? 'Ada aging tunggakan' : 'Aging aman',
-      body: `${overdueAging.totalOverdueCount} invoice overdue senilai ${formatCompactRupiah(overdueAging.totalOverdueRupiah)}.`,
+      title: overdueAging.totalOverdueCount > 0 ? 'Ada tunggakan berjalan' : 'Tunggakan aman',
+      body: `${overdueAging.totalOverdueCount} tagihan terlambat senilai ${formatCompactRupiah(overdueAging.totalOverdueRupiah)}.`,
       tone: overdueAging.totalOverdueCount > 0 ? 'bad' : 'good',
     },
     {
@@ -474,19 +497,16 @@ function InsightStack({ monthlyIncome, cashFlow, overdueAging, occupancy, financ
 }
 
 function ExpenseSummaryVisual({ data }: { data: ExpenseSummary }) {
-  const max = Math.max(...data.categories.map((c) => c.totalRupiah), 1);
+  const points = data.categories.map((category) => ({
+    label: EXPENSE_CATEGORY_LABELS[category.category] ?? category.category,
+    value: category.totalRupiah,
+    detail: `${category.count} transaksi`,
+    color: '#f97316',
+  }));
   return (
     <>
       <div className="report-total-chip mb-3"><span>Total Pengeluaran</span><strong>{formatCompactRupiah(data.totalExpenseRupiah)}</strong></div>
-      <div className="report-split-list">
-        {data.categories.map((c) => (
-          <div key={c.category} className="report-split-row">
-            <div><strong>{EXPENSE_CATEGORY_LABELS[c.category] ?? c.category}</strong><span>{c.count} transaksi</span></div>
-            <div className="report-split-track"><i style={{ width: `${Math.max(4, (c.totalRupiah / max) * 100)}%` }} /></div>
-            <strong>{formatCompactRupiah(c.totalRupiah)}</strong>
-          </div>
-        ))}
-      </div>
+      <HorizontalBarChart points={points} ariaLabel="Pengeluaran berdasarkan kategori" valueFormatter={formatCompactRupiah} leftWidth={112} />
     </>
   );
 }
@@ -503,15 +523,11 @@ function DepositLiabilityVisual({ data }: { data: DepositLiability }) {
 
 function OperationsBars({ occupancy, monthlyIncome, depositLiability }: { occupancy: Occupancy; monthlyIncome: MonthlyIncome; depositLiability: DepositLiability }) {
   const rows = [
-    { label: 'Occupancy', value: occupancy.occupancyRatePercent, suffix: '%' },
-    { label: 'Tagihan Lunas', value: monthlyIncome.invoiceCount > 0 ? (monthlyIncome.paidInvoiceCount / monthlyIncome.invoiceCount) * 100 : 0, suffix: '%' },
-    { label: 'Dana Titipan Lunas', value: depositLiability.activeStayCount > 0 ? (depositLiability.fullyPaidCount / depositLiability.activeStayCount) * 100 : 0, suffix: '%' },
+    { label: 'Occupancy', value: occupancy.occupancyRatePercent, color: '#2563eb' },
+    { label: 'Tagihan Lunas', value: monthlyIncome.invoiceCount > 0 ? (monthlyIncome.paidInvoiceCount / monthlyIncome.invoiceCount) * 100 : 0, color: '#0ea5e9' },
+    { label: 'Dana Titipan', value: depositLiability.activeStayCount > 0 ? (depositLiability.fullyPaidCount / depositLiability.activeStayCount) * 100 : 0, color: '#16a34a' },
   ];
-  return (
-    <div className="report-operation-bars">
-      {rows.map((row) => <div key={row.label}><div className="d-flex justify-content-between"><strong>{row.label}</strong><span>{Math.round(row.value)}{row.suffix}</span></div><div className="report-radar-track"><i className="tone-blue" style={{ width: `${clampPercent(row.value)}%` }} /></div></div>)}
-    </div>
-  );
+  return <HorizontalBarChart points={rows} ariaLabel="Ringkasan operasional dalam persen" valueFormatter={(value) => `${Math.round(value)}%`} maxValue={100} leftWidth={112} height={180} />;
 }
 
 interface ReportQueryState { isLoading: boolean; isError: boolean; data?: unknown; }
@@ -536,10 +552,10 @@ function buildOwnerReportsCsv(params: { ym: { year: number; month: number }; mon
     ['Pendapatan Bulanan'], ['Total Tagihan', `Rp ${formatRupiah(monthlyIncome.totalBilledRupiah)}`], ['Total Dibayar', `Rp ${formatRupiah(monthlyIncome.totalPaidRupiah)}`], ['WiFi', `Rp ${formatRupiah(monthlyIncome.totalWifiRevenueRupiah)}`], ['Belum Tertagih', `Rp ${formatRupiah(monthlyIncome.outstandingRupiah)}`], ['']
   ]));
   lines.push(generateCsv([
-    ['Expense Summary'], ['Kategori', 'Jumlah', 'Rupiah'], ...expenseSummary.categories.map((c) => [EXPENSE_CATEGORY_LABELS[c.category] ?? c.category, String(c.count), `Rp ${formatRupiah(c.totalRupiah)}`]), ['Total', '', `Rp ${formatRupiah(expenseSummary.totalExpenseRupiah)}`], ['']
+    ['Ringkasan Pengeluaran'], ['Kategori', 'Jumlah', 'Rupiah'], ...expenseSummary.categories.map((c) => [EXPENSE_CATEGORY_LABELS[c.category] ?? c.category, String(c.count), `Rp ${formatRupiah(c.totalRupiah)}`]), ['Total', '', `Rp ${formatRupiah(expenseSummary.totalExpenseRupiah)}`], ['']
   ]));
   lines.push(generateCsv([
-    ['Aging Tunggakan'], ['Bucket', 'Count', 'Rupiah'], ['Current', String(overdueAging.buckets.current.count), `Rp ${formatRupiah(overdueAging.buckets.current.totalRupiah)}`], ['1-30', String(overdueAging.buckets.days1to30.count), `Rp ${formatRupiah(overdueAging.buckets.days1to30.totalRupiah)}`], ['31-60', String(overdueAging.buckets.days31to60.count), `Rp ${formatRupiah(overdueAging.buckets.days31to60.totalRupiah)}`], ['61-90', String(overdueAging.buckets.days61to90.count), `Rp ${formatRupiah(overdueAging.buckets.days61to90.totalRupiah)}`], ['91+', String(overdueAging.buckets.days91plus.count), `Rp ${formatRupiah(overdueAging.buckets.days91plus.totalRupiah)}`]
+    ['Umur Tunggakan'], ['Rentang', 'Jumlah', 'Rupiah'], ['Lancar', String(overdueAging.buckets.current.count), `Rp ${formatRupiah(overdueAging.buckets.current.totalRupiah)}`], ['1-30', String(overdueAging.buckets.days1to30.count), `Rp ${formatRupiah(overdueAging.buckets.days1to30.totalRupiah)}`], ['31-60', String(overdueAging.buckets.days31to60.count), `Rp ${formatRupiah(overdueAging.buckets.days31to60.totalRupiah)}`], ['61-90', String(overdueAging.buckets.days61to90.count), `Rp ${formatRupiah(overdueAging.buckets.days61to90.totalRupiah)}`], ['91+', String(overdueAging.buckets.days91plus.count), `Rp ${formatRupiah(overdueAging.buckets.days91plus.totalRupiah)}`]
   ]));
   return lines.join('\r\n');
 }

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
@@ -18,6 +20,110 @@ import { fetchAccountingReadiness } from '../../api/accounting';
 import { useAuth } from '../../context/AuthContext';
 import { getInvoiceTotalAmount } from '../../utils/invoiceTotals';
 import { buildCancelInvoiceSafety, buildIssueInvoiceSafety } from '../../utils/invoiceActionSafety';
+
+function fmtCompact(value: number): string {
+  const safe = Math.abs(value || 0);
+  if (safe >= 1_000_000_000) return `Rp ${(safe / 1_000_000_000).toFixed(1)} M`;
+  if (safe >= 1_000_000) return `Rp ${(safe / 1_000_000).toFixed(1)} jt`;
+  if (safe >= 1_000) return `Rp ${(safe / 1_000).toFixed(0)} rb`;
+  return `Rp ${new Intl.NumberFormat('id-ID').format(safe)}`;
+}
+
+function InvoiceAnalyticsPanel({ stats, allItems }: { stats: { total: number; draft: number; billing: number; paid: number; overdue: number; cancelled: number }; allItems: any[] }) {
+  const statusData = [
+    { name: 'Aktif', value: stats.billing, color: '#2563eb' },
+    { name: 'Overdue', value: stats.overdue, color: '#ef4444' },
+    { name: 'Lunas', value: stats.paid, color: '#16a34a' },
+    { name: 'Draft', value: stats.draft, color: '#f59e0b' },
+    { name: 'Batal', value: stats.cancelled, color: '#94a3b8' },
+  ].filter((d) => d.value > 0);
+
+  const revenueData = useMemo(() => {
+    const totalBilled = allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0);
+    const totalPaid = allItems.reduce((s, inv) => s + (Number(inv.paidAmountRupiah) || 0), 0);
+    const totalOverdue = allItems.filter((inv) => ['ISSUED', 'PARTIAL'].includes(inv.status) && inv.dueDate && new Date(inv.dueDate) < new Date()).reduce((s, inv) => s + (Number(inv.totalAmountRupiah) - Number(inv.paidAmountRupiah || 0)), 0);
+    return [
+      { label: 'Tagihan', value: totalBilled, color: '#2563eb' },
+      { label: 'Terkumpul', value: totalPaid, color: '#16a34a' },
+      { label: 'Overdue', value: totalOverdue, color: '#ef4444' },
+    ];
+  }, [allItems]);
+
+  const collectionRupiah = revenueData[1]?.value ?? 0;
+  const totalRupiah = revenueData[0]?.value ?? 0;
+  const collectionRate = totalRupiah > 0 ? Math.round((collectionRupiah / totalRupiah) * 100) : 0;
+
+  if (stats.total === 0) return null;
+
+  return (
+    <Row className="g-3 mb-3 invoice-analytics-row">
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Status Tagihan</div>
+            <div className="panel-subtitle mb-2">Komposisi tagihan saat ini</div>
+            <div className="stay-analytics-donut-wrap">
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart layout="vertical" data={statusData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                  <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={60} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(value) => [`${Number(value ?? 0)} tagihan`, '']} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                    {statusData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Rasio Penagihan</div>
+            <div className="panel-subtitle mb-2">Persentase pembayaran terkumpul</div>
+            <div className="invoice-collection-gauge-wrap">
+              <DonutGauge
+                value={collectionRate}
+                center={<><strong>{collectionRate}%</strong><span>Tertagih</span></>}
+                ariaLabel={`Rasio penagihan: ${collectionRate}%`}
+                size={130}
+                innerRadius={42}
+                outerRadius={58}
+                color={collectionRate >= 80 ? '#16a34a' : collectionRate >= 50 ? '#f59e0b' : '#ef4444'}
+                trackColor="rgba(148,163,184,0.15)"
+              />
+            </div>
+            <div className="invoice-gauge-labels">
+              <span>Terkumpul: <strong>{fmtCompact(collectionRupiah)}</strong></span>
+              <span>Total: <strong>{fmtCompact(totalRupiah)}</strong></span>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Ringkasan Rupiah</div>
+            <div className="panel-subtitle mb-2">Nilai tagihan, terkumpul, dan overdue</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={revenueData} margin={{ top: 4, right: 8, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={72} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value) => [fmtCompact(Number(value ?? 0)), '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {revenueData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+}
 
 function daysFromToday(targetDate: string | Date | null | undefined): number | null {
   if (!targetDate) return null;
@@ -275,7 +381,7 @@ export default function InvoicesPage() {
   ];
 
   const financeMenu = [
-    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Invoice sewa, deposit, utility, dan blocker checkout.', to: '/invoices', active: true },
+    { id: 'invoices', icon: '🧾', label: 'Tagihan', helper: 'Tagihan sewa, deposit, utilitas, dan penghambat proses keluar.', to: '/invoices', active: true },
     { id: 'review', icon: '✅', label: 'Review Pembayaran', helper: 'Bukti bayar yang perlu diverifikasi.', to: '/payment-submissions/review', count: undefined, active: false },
     { id: 'wifi', icon: '📶', label: 'Voucher WiFi', helper: 'Pendapatan tambahan dari penjualan voucher WiFi.', to: '/wifi-sales', count: undefined, active: false },
     { id: 'ancillary', icon: '🛒', label: 'Pendapatan Tambahan', helper: 'Laundry, galon, cleaning, parkir, dan add-on lain.', to: '/ancillary-revenue', count: undefined, active: false },
@@ -289,16 +395,16 @@ export default function InvoicesPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Finance Command Center"
-        title="Finance"
-        description="Tagihan kos tetap jadi pusat, tetapi Finance juga menampung voucher WiFi, pengeluaran, dan riwayat pembayaran sebagai arus uang operasional."
+        eyebrow="Keuangan"
+        title="Tagihan & Piutang"
+        description="Tagihan kos tetap menjadi pusat. Area ini juga memuat voucher WiFi, pengeluaran, dan riwayat pembayaran sebagai arus uang operasional."
         actionLabel={canManageFinance ? 'Buat Draft Tagihan' : undefined}
         onAction={canManageFinance ? () => { setError(''); setShowCreate(true); } : undefined}
       />
 
-      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Finance">
+      <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu keuangan">
         <div className="admin-area-internal-menu-head">
-          <span>Menu Finance</span>
+          <span>Menu Keuangan</span>
           <small>Tagihan, pembayaran, voucher WiFi, pendapatan tambahan, pengeluaran, dan riwayat tetap satu area.</small>
         </div>
         <div className="admin-area-internal-menu-scroll">
@@ -330,6 +436,8 @@ export default function InvoicesPage() {
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
         }))}
       />
+
+      {allItems.length > 0 && <InvoiceAnalyticsPanel stats={stats} allItems={allItems} />}
 
       <Card className="content-card border-0">
         <Card.Body>

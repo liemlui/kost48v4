@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Badge, Button, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
@@ -352,7 +353,7 @@ function RoomPhotoPanel() {
                     onChange={handleUpload}
                   />
                   <Button size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                    {uploading ? <><Spinner animation="border" size="sm" className="me-1" />Uploading...</> : '+ Upload Foto'}
+                    {uploading ? <><Spinner animation="border" size="sm" className="me-1" />Mengunggah...</> : '+ Unggah Foto'}
                   </Button>
                 </div>
               </div>
@@ -402,13 +403,24 @@ function RoomPhotoPanel() {
 /* ─── Main Page ────────────────────────────────────────────────────── */
 
 export default function OwnerSettingsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') === 'photos' ? 'photos' : 'faq';
+
   return (
     <div className="settings-page">
-      <div className="page-eyebrow mb-1">Owner · Settings</div>
+      <div className="page-eyebrow mb-1">Owner · Pengaturan</div>
       <h1 className="h3 mb-1">Pengaturan Aplikasi</h1>
-      <p className="text-muted mb-4">Kelola FAQ publik dan foto kamar yang tampil di halaman guest.</p>
+      <p className="text-muted mb-4">Kelola FAQ publik dan foto kamar yang tampil di halaman tamu.</p>
 
-      <Tabs defaultActiveKey="faq" className="command-tabs mb-4">
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(key) => {
+          const next = new URLSearchParams(searchParams);
+          next.set('tab', key === 'photos' ? 'photos' : 'faq');
+          setSearchParams(next, { replace: true });
+        }}
+        className="command-tabs mb-4"
+      >
         <Tab eventKey="faq" title="FAQ Publik">
           <FaqManagementPanel />
         </Tab>

@@ -113,7 +113,7 @@ export default function GlobalSearch({ role }: { role?: string }) {
   if (role === 'TENANT') return null;
 
   return (
-    <div className="position-relative" style={{ minWidth: 280, maxWidth: 420, width: '100%' }}>
+    <div className="global-search position-relative">
       <Form.Control
         type="search"
         value={keyword}

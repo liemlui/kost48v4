@@ -10,16 +10,26 @@ const ADMIN_TABS = [
   { id: 'rooms', label: 'Kamar & Stok', to: '/dashboard?area=rooms', match: (path: string, search: URLSearchParams) => ['/rooms', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) || (path === '/dashboard' && search.get('area') === 'rooms') },
 ];
 
+const OWNER_TABS = [
+  { id: 'overview', label: 'Ringkasan', to: '/owner-dashboard', match: (path: string) => path === '/owner-dashboard' },
+  { id: 'stays', label: 'Masa Sewa', to: '/stays', match: (path: string) => path.startsWith('/stays') || path.startsWith('/tenants') || path.startsWith('/renew-requests') },
+  { id: 'finance', label: 'Keuangan', to: '/invoices', match: (path: string) => ['/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue', '/finance'].some((prefix) => path.startsWith(prefix)) },
+  { id: 'reports', label: 'Laporan', to: '/reports', match: (path: string) => path.startsWith('/reports') },
+  { id: 'staff', label: 'Staff', to: '/staff-performance', match: (path: string) => path.startsWith('/staff') || path.startsWith('/tickets') },
+  { id: 'rooms', label: 'Kamar & Stok', to: '/rooms', match: (path: string) => ['/rooms', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) },
+  { id: 'settings', label: 'Pengaturan', to: '/settings', match: (path: string) => path.startsWith('/settings') || path.startsWith('/users') || path.startsWith('/announcements') },
+];
+
 export default function RoleWorkspaceTabs({ role }: { role?: string }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const tabs = role === 'ADMIN' ? ADMIN_TABS : [];
+  const tabs = role === 'ADMIN' ? ADMIN_TABS : role === 'OWNER' ? OWNER_TABS : [];
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   if (!tabs.length) return null;
 
   return (
-    <nav className="role-workspace-tabs" aria-label="Navigasi workspace admin">
+    <nav className="role-workspace-tabs" aria-label={`Navigasi workspace ${role === 'OWNER' ? 'owner' : 'admin'}`}>
       <span className="role-workspace-tabs-label">Menu area</span>
       {tabs.map((tab) => {
         const active = tab.match(location.pathname, searchParams);

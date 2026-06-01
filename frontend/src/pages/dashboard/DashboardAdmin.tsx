@@ -147,7 +147,7 @@ function AdminCommandHeader({ totalQueue, urgentCount, activeAreaLabel }: {
       <div>
         <div className="page-eyebrow mb-2"><span className="page-eyebrow-dot" /> Admin Command Center</div>
         <h1>{activeAreaLabel}</h1>
-        <p>{headline}. Data utama area ini tampil di depan; sub-menu area tetap tersedia sebagai chip kecil di atas table.</p>
+        <p>{headline}. Dashboard memuat data sesuai area kerja agar halaman lebih cepat; buka area lain dari chip atau sidebar.</p>
         <div className="admin-command-status-line">
           <span>{status}</span>
           <span>Terakhir update: {makeLastUpdatedLabel()}</span>
@@ -724,17 +724,26 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const activeArea: AdminQueueArea = normalizeAdminArea(new URLSearchParams(location.search).get('area'));
-  const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms'], queryFn: () => listResource<Room>('/rooms', { limit: 500 }) });
-  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items'], queryFn: () => listResource<any>('/inventory-items', { limit: 150 }), ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active'], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: 300 }) });
-  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices'], queryFn: () => listResource<Invoice>('/invoices', { limit: 500 }) });
-  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets'], queryFn: () => listResource<Ticket>('/tickets', { limit: 150 }) });
-  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests'], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending'], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), ...ACTION_QUERY_OPTIONS });
-  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved'], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), ...ACTION_QUERY_OPTIONS });
-  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review'], queryFn: () => listPaymentReviewQueue({ limit: 25 }), ...ACTION_QUERY_OPTIONS });
-  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance'], queryFn: () => fetchAdminStaffPerformance(), enabled: activeArea === 'staff', ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status'], queryFn: fetchAutoOpsStatus, ...ACTION_QUERY_OPTIONS });
+  const needsTodayData = activeArea === 'today';
+  const needsStaysData = needsTodayData || activeArea === 'stays';
+  const needsFinanceData = needsTodayData || activeArea === 'finance' || activeArea === 'stays';
+  const needsTicketData = needsTodayData || activeArea === 'tickets' || activeArea === 'staff';
+  const needsRoomData = needsTodayData || activeArea === 'rooms';
+  const needsInventoryData = needsTodayData || activeArea === 'rooms';
+  const needsAutoOpsData = needsTodayData || activeArea === 'stays' || activeArea === 'finance';
+  const needsStaffPerformanceData = activeArea === 'staff';
+
+  const roomsQuery = useQuery({ queryKey: ['dashboard-admin', 'rooms', activeArea], queryFn: () => listResource<Room>('/rooms', { limit: needsTodayData ? 500 : 120 }), enabled: needsRoomData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const inventoryItemsQuery = useQuery({ queryKey: ['dashboard-admin', 'inventory-items', activeArea], queryFn: () => listResource<any>('/inventory-items', { limit: needsTodayData ? 150 : 80 }), enabled: needsInventoryData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active', activeArea], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: needsTodayData ? 300 : 160 }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices', activeArea], queryFn: () => listResource<Invoice>('/invoices', { limit: needsTodayData ? 500 : 180 }), enabled: needsFinanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets', activeArea], queryFn: () => listResource<Ticket>('/tickets', { limit: needsTodayData ? 150 : 100 }), enabled: needsTicketData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests', activeArea], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
+  const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
+  const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: needsTodayData ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
+  const staffPerformanceQuery = useQuery({ queryKey: ['dashboard-admin', 'staff-performance', activeArea], queryFn: () => fetchAdminStaffPerformance(), enabled: needsStaffPerformanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const autoOpsQuery = useQuery({ queryKey: ['dashboard-admin', 'auto-ops-status', activeArea], queryFn: fetchAutoOpsStatus, enabled: needsAutoOpsData, ...ACTION_QUERY_OPTIONS });
 
   const rooms = roomsQuery.data?.items ?? [];
   const inventoryItems = inventoryItemsQuery.data?.items ?? [];
@@ -856,18 +865,21 @@ export default function AdminDashboard() {
   ] : [];
 
   const refreshDashboard = () => {
-    const refetches: Array<Promise<unknown>> = [
-      roomsQuery.refetch(), inventoryItemsQuery.refetch(), staysQuery.refetch(), invoicesQuery.refetch(), ticketsQuery.refetch(),
-      renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch(), paymentReviewQuery.refetch(), autoOpsQuery.refetch(),
-    ];
-    if (activeArea === 'staff') refetches.push(staffPerformanceQuery.refetch());
+    const refetches: Array<Promise<unknown>> = [];
+    if (needsRoomData) refetches.push(roomsQuery.refetch());
+    if (needsInventoryData) refetches.push(inventoryItemsQuery.refetch());
+    if (needsStaysData) refetches.push(staysQuery.refetch(), renewRequestsQuery.refetch(), checkoutRequestsPendingQuery.refetch(), checkoutRequestsApprovedQuery.refetch());
+    if (needsFinanceData) refetches.push(invoicesQuery.refetch(), paymentReviewQuery.refetch());
+    if (needsTicketData) refetches.push(ticketsQuery.refetch());
+    if (needsAutoOpsData) refetches.push(autoOpsQuery.refetch());
+    if (needsStaffPerformanceData) refetches.push(staffPerformanceQuery.refetch());
     void Promise.all(refetches);
   };
 
-  const coreQueriesLoading = roomsQuery.isLoading || staysQuery.isLoading || invoicesQuery.isLoading || ticketsQuery.isLoading;
-  const supportQueriesLoading = inventoryItemsQuery.isLoading || renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading || paymentReviewQuery.isLoading || autoOpsQuery.isLoading;
-  const coreQueriesError = roomsQuery.isError || staysQuery.isError || invoicesQuery.isError || ticketsQuery.isError;
-  const supportQueriesError = inventoryItemsQuery.isError || renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError || paymentReviewQuery.isError || autoOpsQuery.isError;
+  const coreQueriesLoading = (needsRoomData && roomsQuery.isLoading) || (needsStaysData && staysQuery.isLoading) || (needsFinanceData && invoicesQuery.isLoading) || (needsTicketData && ticketsQuery.isLoading);
+  const supportQueriesLoading = (needsInventoryData && inventoryItemsQuery.isLoading) || (needsStaysData && (renewRequestsQuery.isLoading || checkoutRequestsPendingQuery.isLoading || checkoutRequestsApprovedQuery.isLoading)) || (needsFinanceData && paymentReviewQuery.isLoading) || (needsAutoOpsData && autoOpsQuery.isLoading) || (needsStaffPerformanceData && staffPerformanceQuery.isLoading);
+  const coreQueriesError = (needsRoomData && roomsQuery.isError) || (needsStaysData && staysQuery.isError) || (needsFinanceData && invoicesQuery.isError) || (needsTicketData && ticketsQuery.isError);
+  const supportQueriesError = (needsInventoryData && inventoryItemsQuery.isError) || (needsStaysData && (renewRequestsQuery.isError || checkoutRequestsPendingQuery.isError || checkoutRequestsApprovedQuery.isError)) || (needsFinanceData && paymentReviewQuery.isError) || (needsAutoOpsData && autoOpsQuery.isError) || (needsStaffPerformanceData && staffPerformanceQuery.isError);
 
   if (coreQueriesLoading) return <LoadingDashboard />;
   if (coreQueriesError) return <Alert variant="danger">Gagal memuat command center admin.</Alert>;

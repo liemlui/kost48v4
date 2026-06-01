@@ -1,6 +1,7 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Card, Col, Row } from 'react-bootstrap';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
+import DonutGauge from '../charts/DonutGauge';
 
 type Props = { performance?: StaffPerformanceSummary | null };
 
@@ -10,10 +11,21 @@ function clampPercent(value: number) {
 }
 
 function CircleInfo({ label, value, helper, percent, tone = 'blue' }: { label: string; value: string; helper: string; percent: number; tone?: 'blue' | 'green' | 'amber' | 'red' }) {
-  const style = { '--staff-progress': `${clampPercent(percent)}%` } as CSSProperties;
+  const safePercent = clampPercent(percent);
+  const color = tone === 'green' ? '#22c55e' : tone === 'amber' ? '#f59e0b' : tone === 'red' ? '#ef4444' : '#2563eb';
   return (
     <div className={`staff-report-circle-card tone-${tone}`}>
-      <div className="staff-report-circle" style={style}><strong>{value}</strong></div>
+      <DonutGauge
+        value={safePercent}
+        center={<strong>{value}</strong>}
+        ariaLabel={`${label}: ${value}`}
+        size={76}
+        innerRadius={25}
+        outerRadius={36}
+        color={color}
+        trackColor="#e2e8f0"
+        className="staff-report-circle"
+      />
       <div>
         <span>{label}</span>
         <small>{helper}</small>

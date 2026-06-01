@@ -1,16 +1,21 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Alert, Badge, Button, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
-import { fetchOwnerDashboard, type OwnerDashboard, type OwnerDashboardTrendMonth } from '../../api/finance';
+import { fetchOwnerDashboard, type OwnerDashboardTrendMonth } from '../../api/finance';
 import { createBusinessNarrative } from '../../api/ai';
 import AiAssistButton from '../../components/ai/AiAssistButton';
-
-// ─── Helpers ────────────────────────────────────
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -36,48 +41,39 @@ function formatCompactRupiah(value: number): string {
   return `${sign}Rp ${formatRupiah(safe)}`;
 }
 
-function changeLabel(value: number | null): { label: string; color: string; icon: string } | null {
+type ChangeMeta = { label: string; color: string };
+
+function changeLabel(value: number | null): ChangeMeta | null {
   if (value === null || value === undefined) return null;
-  if (value > 0) return { label: `▲ ${value}%`, color: '#22c55e', icon: '📈' };
-  if (value < 0) return { label: `▼ ${Math.abs(value)}%`, color: '#ef4444', icon: '📉' };
-  return { label: '— 0%', color: '#6b7280', icon: '➡️' };
+  if (value > 0) return { label: `+${value}%`, color: '#15803d' };
+  if (value < 0) return { label: `-${Math.abs(value)}%`, color: '#dc2626' };
+  return { label: '0%', color: '#64748b' };
 }
 
-function gradeBadge(grade: string): { label: string; color: string; bg: string } {
+function gradeBadge(grade: string): { label: string; tone: string } {
   switch (grade) {
-    case 'SEHAT': return { label: 'SEHAT', color: '#fff', bg: '#166534' };
-    case 'PERHATIAN': return { label: 'PERHATIAN', color: '#fff', bg: '#b45309' };
-    case 'RISIKO': return { label: 'RISIKO', color: '#fff', bg: '#c2410c' };
-    default: return { label: 'KRITIS', color: '#fff', bg: '#b91c1c' };
+    case 'SEHAT': return { label: 'Sehat', tone: 'good' };
+    case 'PERHATIAN': return { label: 'Perhatian', tone: 'watch' };
+    case 'RISIKO': return { label: 'Risiko', tone: 'risk' };
+    default: return { label: 'Kritis', tone: 'critical' };
   }
 }
 
-// ─── Simple Linear Regression (best-fit line) ───
-
-function computeBestFitLine(data: OwnerDashboardTrendMonth[]): { slope: number; intercept: number; points: { x: number; y: number }[] } {
+function computeBestFitLine(data: OwnerDashboardTrendMonth[]): { points: { x: number; y: number }[] } {
   const n = data.length;
-  if (n < 2) return { slope: 0, intercept: 0, points: data.map((d, i) => ({ x: i, y: d.revenue })) };
+  if (n < 2) return { points: data.map((d, i) => ({ x: i, y: d.revenue })) };
 
   const xs = data.map((_, i) => i);
   const ys = data.map((d) => d.revenue);
-
   const sumX = xs.reduce((a, b) => a + b, 0);
   const sumY = ys.reduce((a, b) => a + b, 0);
   const sumXY = xs.reduce((a, _, i) => a + xs[i] * ys[i], 0);
   const sumX2 = xs.reduce((a, b) => a + b * b, 0);
-
   const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
   const intercept = (sumY - slope * sumX) / n;
 
-  const points = xs.map((x) => ({ x, y: Math.round(slope * x + intercept) }));
-  return { slope, intercept, points };
+  return { points: xs.map((x) => ({ x, y: Math.round(slope * x + intercept) })) };
 }
-
-// ─── Occupancy Pie Colors ──────────────────────
-
-const OCCUPANCY_COLORS = ['#22c55e', '#3b82f6', '#f97316', '#ef4444'];
-
-// ─── Trend Chart Component ─────────────────────
 
 type TrendChartMode = 'line' | 'bar';
 
@@ -85,14 +81,10 @@ function TrendChart({
   data,
   mode,
   showBestFit,
-  onToggleMode,
-  onToggleBestFit,
 }: {
   data: OwnerDashboardTrendMonth[];
   mode: TrendChartMode;
   showBestFit: boolean;
-  onToggleMode: () => void;
-  onToggleBestFit: () => void;
 }) {
   const bestFit = useMemo(() => computeBestFitLine(data), [data]);
   const chartData = useMemo(
@@ -103,23 +95,18 @@ function TrendChart({
       netProfit: d.netProfit,
       bestFit: bestFit.points[i]?.y ?? d.revenue,
     })),
-    [data, bestFit],
+    [bestFit, data],
   );
-
-  const revenueColor = '#3b82f6';
-  const expenseColor = '#f97316';
-  const netProfitColor = '#22c55e';
-  const bestFitColor = '#8b5cf6';
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;
     return (
-      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 12 }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>{label}</div>
+      <div className="owner-chart-tooltip">
+        <strong>{label}</strong>
         {payload.map((entry: any, idx: number) => (
-          <div key={idx} style={{ color: entry.color }}>
-            {entry.name}: Rp {formatCompactRupiah(entry.value)}
-          </div>
+          <span key={`${entry.name}-${idx}`} style={{ color: entry.color }}>
+            {entry.name}: {formatCompactRupiah(Number(entry.value) || 0)}
+          </span>
         ))}
       </div>
     );
@@ -127,75 +114,95 @@ function TrendChart({
 
   if (mode === 'bar') {
     return (
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCompactRupiah(v)} />
+          <YAxis width={76} tick={{ fontSize: 11 }} tickFormatter={(value: number) => formatCompactRupiah(value)} />
           <RechartsTooltip content={<CustomTooltip />} />
-          <Bar dataKey="revenue" fill={revenueColor} radius={[3, 3, 0, 0]} name="Revenue" />
-          <Bar dataKey="expense" fill={expenseColor} radius={[3, 3, 0, 0]} name="Expense" />
-          <Bar dataKey="netProfit" fill={netProfitColor} radius={[3, 3, 0, 0]} name="Net Profit" />
+          <Bar dataKey="revenue" fill="#2563eb" radius={[3, 3, 0, 0]} name="Pendapatan" />
+          <Bar dataKey="expense" fill="#f97316" radius={[3, 3, 0, 0]} name="Pengeluaran" />
+          <Bar dataKey="netProfit" fill="#16a34a" radius={[3, 3, 0, 0]} name="Laba Bersih" />
         </BarChart>
       </ResponsiveContainer>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={300}>
       <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-        <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCompactRupiah(v)} />
+        <YAxis width={76} tick={{ fontSize: 11 }} tickFormatter={(value: number) => formatCompactRupiah(value)} />
         <RechartsTooltip content={<CustomTooltip />} />
-        <Line type="monotone" dataKey="revenue" stroke={revenueColor} strokeWidth={2} dot={{ r: 3 }} name="Revenue" />
-        <Line type="monotone" dataKey="expense" stroke={expenseColor} strokeWidth={2} dot={{ r: 3 }} name="Expense" />
-        <Line type="monotone" dataKey="netProfit" stroke={netProfitColor} strokeWidth={2} dot={{ r: 3 }} name="Net Profit" />
-        {showBestFit && (
-          <Line type="monotone" dataKey="bestFit" stroke={bestFitColor} strokeWidth={2} strokeDasharray="6 3" dot={false} name="Trend (Revenue)" />
-        )}
+        <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} name="Pendapatan" />
+        <Line type="monotone" dataKey="expense" stroke="#f97316" strokeWidth={2} dot={{ r: 3 }} name="Pengeluaran" />
+        <Line type="monotone" dataKey="netProfit" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} name="Laba Bersih" />
+        {showBestFit ? (
+          <Line type="monotone" dataKey="bestFit" stroke="#7c3aed" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Tren Pendapatan" />
+        ) : null}
       </LineChart>
     </ResponsiveContainer>
   );
 }
 
-// ─── Occupancy Donut ───────────────────────────
-
-function OccupancyDonutChart({ occupied, available, reserved, maintenance }: { occupied: number; available: number; reserved: number; maintenance: number }) {
-  const data = [
-    { name: 'Terisi', value: occupied },
-    { name: 'Kosong', value: available },
-    { name: 'Dipesan', value: reserved },
-    { name: 'Perbaikan', value: maintenance },
-  ].filter((d) => d.value > 0);
-
-  if (data.length === 0) return <div className="text-muted text-center py-4">Tidak ada data kamar</div>;
-
+function OwnerKpiCard({
+  label,
+  value,
+  change,
+  detail,
+  tone,
+}: {
+  label: string;
+  value: string;
+  change: ChangeMeta | null;
+  detail?: ReactNode;
+  tone: string;
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-      <ResponsiveContainer width={140} height={140}>
-        <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={36} outerRadius={64} dataKey="value" paddingAngle={2}>
-            {data.map((entry, index) => (
-              <Cell key={entry.name} fill={OCCUPANCY_COLORS[index % OCCUPANCY_COLORS.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-      <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-        {data.map((d, i) => (
-          <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: OCCUPANCY_COLORS[i % OCCUPANCY_COLORS.length], display: 'inline-block' }} />
-            <span style={{ color: '#64748b' }}>{d.name}:</span>
-            <strong>{d.value}</strong>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card className={`owner-kpi-card owner-kpi-${tone} h-100`}>
+      <Card.Body>
+        <div className="owner-kpi-label">{label}</div>
+        <div className="owner-kpi-value">{value}</div>
+        <div className="owner-kpi-footer">
+          {change ? <span style={{ color: change.color }}>{change.label} dari bulan lalu</span> : <span>Belum ada pembanding</span>}
+          {detail ? <small>{detail}</small> : null}
+        </div>
+      </Card.Body>
+    </Card>
   );
 }
 
-// ─── Main Component ────────────────────────────
+function OwnerActionStrip({
+  signals,
+  onNavigate,
+}: {
+  signals: { type: string; count: number; route: string }[];
+  onNavigate: (route: string) => void;
+}) {
+  const signalByType = (type: string) => signals.find((signal) => signal.type === type);
+  const overdue = signalByType('overdue');
+  const pendingPayment = signalByType('pending_payment');
+  const outstanding = signalByType('outstanding');
+  const actions = [
+    { label: 'Review pembayaran', value: pendingPayment?.count ?? 0, helper: 'Bukti bayar menunggu keputusan', route: pendingPayment?.route ?? '/payment-submissions/review', tone: pendingPayment?.count ? 'watch' : 'good' },
+    { label: 'Tagihan overdue', value: overdue?.count ?? 0, helper: 'Piutang perlu ditindaklanjuti', route: overdue?.route ?? '/invoices', tone: overdue?.count ? 'risk' : 'good' },
+    { label: 'Tagihan outstanding', value: outstanding?.count ?? 0, helper: 'Pantau tagihan yang masih terbuka', route: outstanding?.route ?? '/invoices', tone: outstanding?.count ? 'watch' : 'good' },
+    { label: 'Masa sewa', value: 'Buka', helper: 'Booking, perpanjangan, dan keluar', route: '/stays', tone: 'info' },
+  ];
+
+  return (
+    <section className="owner-action-strip mb-3" aria-label="Aksi cepat owner">
+      {actions.map((action) => (
+        <button key={action.label} type="button" className={`owner-action-item owner-action-${action.tone}`} onClick={() => onNavigate(action.route)}>
+          <span>{action.label}</span>
+          <strong>{action.value}</strong>
+          <small>{action.helper}</small>
+        </button>
+      ))}
+    </section>
+  );
+}
 
 export default function OwnerDashboardPage() {
   const navigate = useNavigate();
@@ -212,386 +219,198 @@ export default function OwnerDashboardPage() {
   });
 
   const data = dashboard.data;
-  const isLoading = dashboard.isLoading;
-  const isError = dashboard.isError;
-
   const trendData = data?.trendMonths ?? data?.trend6Months ?? [];
   const grade = data ? gradeBadge(data.grade) : null;
-  const revenueChange = data ? changeLabel(data.kpi.totalRevenueChangePercent) : null;
-  const profitChange = data ? changeLabel(data.kpi.netProfitChangePercent) : null;
-  const occupancyChange = data ? changeLabel(data.kpi.occupancyRateChangePercent) : null;
-  const cashChange = data ? changeLabel(data.kpi.netCashFlowChangePercent) : null;
+  const selectedPeriodLabel = monthLabel(ym);
 
   const handleChange = (field: 'year' | 'month', val: string) => {
     const num = parseInt(val, 10);
     if (!isNaN(num)) setYm((prev) => ({ ...prev, [field]: num }));
   };
 
-  // Compute total rooms for occupancy donut
-  // We don't have totalRooms in ownerDashboard response, so estimate from occupancy rate
-  // Actually we can't compute donut without room counts. We'll show occupancy % as KPI card.
-  // For a real donut we'd need backend to return roomStatus counts. Let's use the occupancy summary endpoint instead.
-  // For now, show occupancy % in KPI card and donut just shows occupancy vs available approximation.
-
   return (
     <Container fluid className="owner-dashboard px-2 py-3">
-      <style>{`
-        .owner-dashboard .kpi-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          transition: box-shadow 0.2s;
-        }
-        .owner-dashboard .kpi-card:hover {
-          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .owner-dashboard .kpi-label {
-          font-size: 12px;
-          font-weight: 600;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 4px;
-        }
-        .owner-dashboard .kpi-value {
-          font-size: 24px;
-          font-weight: 700;
-          color: #0f172a;
-          line-height: 1.2;
-        }
-        .owner-dashboard .kpi-change {
-          font-size: 12px;
-          font-weight: 600;
-          margin-top: 4px;
-        }
-        .owner-dashboard .kpi-sub {
-          font-size: 11px;
-          color: #94a3b8;
-          margin-top: 2px;
-        }
-        .owner-dashboard .signal-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .owner-dashboard .signal-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px 12px;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background 0.15s;
-        }
-        .owner-dashboard .signal-item:hover {
-          background: #f8fafc;
-        }
-        .owner-dashboard .signal-icon {
-          font-size: 20px;
-          flex-shrink: 0;
-        }
-        .owner-dashboard .signal-content {
-          flex-grow: 1;
-        }
-        .owner-dashboard .signal-content strong {
-          display: block;
-          font-size: 13px;
-        }
-        .owner-dashboard .signal-content span {
-          font-size: 12px;
-          color: #64748b;
-        }
-        .owner-dashboard .signal-arrow {
-          font-size: 16px;
-          color: #94a3b8;
-          flex-shrink: 0;
-        }
-        .owner-dashboard .range-pills {
-          display: flex;
-          gap: 4px;
-        }
-        .owner-dashboard .range-pill {
-          padding: 4px 12px;
-          border-radius: 6px;
-          border: 1px solid #e2e8f0;
-          background: #fff;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s;
-          color: #64748b;
-        }
-        .owner-dashboard .range-pill.active {
-          background: #3b82f6;
-          color: #fff;
-          border-color: #3b82f6;
-        }
-        .owner-dashboard .range-pill:hover:not(.active) {
-          background: #f1f5f9;
-        }
-        .owner-dashboard .chart-toggle-btn {
-          padding: 4px 10px;
-          border-radius: 6px;
-          border: 1px solid #e2e8f0;
-          background: #fff;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s;
-          color: #64748b;
-        }
-        .owner-dashboard .chart-toggle-btn.active {
-          background: #3b82f6;
-          color: #fff;
-          border-color: #3b82f6;
-        }
-        .owner-dashboard .chart-toggle-btn:hover:not(.active) {
-          background: #f1f5f9;
-        }
-        .owner-dashboard .chart-controls {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-        .owner-dashboard .ai-narrative-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-        }
-      `}</style>
-
-      {/* Header */}
-      <section className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+      <section className="owner-workspace-head mb-3">
         <div>
-          <h1 className="mb-0" style={{ fontSize: '1.5rem', fontWeight: 700 }}>Dashboard Owner</h1>
-          <small className="text-muted">Ringkasan bisnis kost Anda</small>
+          <span className="owner-section-kicker">Kokpit bisnis</span>
+          <h1>Dashboard Owner</h1>
+          <p>Ringkasan kesehatan bisnis untuk {selectedPeriodLabel}.</p>
         </div>
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          <div className="d-flex align-items-center gap-1">
-            <Form.Label className="mb-0 small">Tahun</Form.Label>
-            <Form.Control type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} style={{ width: 80, height: 32, fontSize: 13 }} />
+        <div className="owner-toolbar">
+          <div className="owner-period-field">
+            <Form.Label htmlFor="owner-year">Tahun</Form.Label>
+            <Form.Control id="owner-year" type="number" value={ym.year} min={2020} max={2100} onChange={(e) => handleChange('year', e.target.value)} />
           </div>
-          <div className="d-flex align-items-center gap-1">
-            <Form.Label className="mb-0 small">Bulan</Form.Label>
-            <Form.Select value={ym.month} onChange={(e) => handleChange('month', e.target.value)} style={{ width: 120, height: 32, fontSize: 13 }}>
+          <div className="owner-period-field">
+            <Form.Label htmlFor="owner-month">Bulan</Form.Label>
+            <Form.Select id="owner-month" value={ym.month} onChange={(e) => handleChange('month', e.target.value)}>
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
               ))}
             </Form.Select>
           </div>
-          <Button variant="light" size="sm" onClick={() => navigate('/reports')}>📊 Laporan Lengkap</Button>
+          <Button size="sm" className="owner-report-button" onClick={() => navigate('/reports')}>Buka laporan</Button>
         </div>
       </section>
 
-      {/* Loading */}
-      {isLoading && (
-        <Card className="mb-3">
+      {dashboard.isLoading ? (
+        <Card className="owner-feedback-card mb-3">
           <Card.Body className="text-center py-4"><Spinner animation="border" size="sm" /> <span className="ms-2">Memuat dashboard...</span></Card.Body>
         </Card>
-      )}
+      ) : null}
 
-      {/* Error */}
-      {isError && (
+      {dashboard.isError ? (
         <Alert variant="warning" className="mb-3">
-          ⚠️ Dashboard gagal dimuat. Pastikan backend API berjalan dan data transaksi tersedia.
-          {dashboard.error && <div className="small mt-1">{(dashboard.error as any)?.message ?? ''}</div>}
+          Dashboard gagal dimuat. Pastikan backend API berjalan dan data transaksi tersedia.
+          {dashboard.error ? <div className="small mt-1">{(dashboard.error as any)?.message ?? ''}</div> : null}
         </Alert>
-      )}
+      ) : null}
 
-      {data && (
+      {data ? (
         <>
-          {/* Grade & Headline */}
-          {grade && (
-            <Card className="mb-3" style={{ border: 'none', background: grade.bg }}>
-              <Card.Body className="d-flex align-items-center gap-3 py-3">
-                <div style={{
-                  width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: grade.color, color: grade.bg, fontWeight: 700, fontSize: 13, lineHeight: 1.2, textAlign: 'center',
-                }}>
-                  {grade.label}
-                </div>
-                <div className="flex-grow-1">
-                  <div style={{ fontWeight: 600, fontSize: 15, color: grade.color }}>{data.headline}</div>
-                </div>
-                <small className="text-muted flex-shrink-0">{monthLabel(ym)}</small>
-              </Card.Body>
-            </Card>
-          )}
+          {grade ? (
+            <section className={`owner-status-strip owner-status-${grade.tone} mb-3`}>
+              <span className="owner-grade-badge">{grade.label}</span>
+              <div className="owner-status-copy">
+                <span>Kondisi bulan ini</span>
+                <strong>{data.headline}</strong>
+              </div>
+              <div className="owner-status-meta">
+                <span>Periode</span>
+                <strong>{selectedPeriodLabel}</strong>
+              </div>
+            </section>
+          ) : null}
 
-          {/* KPI Cards */}
+          <OwnerActionStrip signals={data.signals} onNavigate={navigate} />
+
           <Row className="g-3 mb-3">
-            <Col xs={6} xl={3}>
-              <Card className="kpi-card h-100">
-                <Card.Body>
-                  <div className="kpi-label">Pendapatan</div>
-                  <div className="kpi-value">{formatCompactRupiah(data.kpi.totalRevenueRupiah)}</div>
-                  {revenueChange && <div className="kpi-change" style={{ color: revenueChange.color }}>{revenueChange.icon} {revenueChange.label}</div>}
-                </Card.Body>
-              </Card>
+            <Col xs={12} sm={6} xl={3}>
+              <OwnerKpiCard label="Pendapatan" value={formatCompactRupiah(data.kpi.totalRevenueRupiah)} change={changeLabel(data.kpi.totalRevenueChangePercent)} tone="revenue" />
             </Col>
-            <Col xs={6} xl={3}>
-              <Card className="kpi-card h-100">
-                <Card.Body>
-                  <div className="kpi-label">Laba Bersih</div>
-                  <div className="kpi-value">{formatCompactRupiah(data.kpi.netProfitRupiah)}</div>
-                  {profitChange && <div className="kpi-change" style={{ color: profitChange.color }}>{profitChange.icon} {profitChange.label}</div>}
-                  <div className="kpi-sub">Margin {data.kpi.netProfitMarginPercent}%</div>
-                </Card.Body>
-              </Card>
+            <Col xs={12} sm={6} xl={3}>
+              <OwnerKpiCard label="Laba Bersih" value={formatCompactRupiah(data.kpi.netProfitRupiah)} change={changeLabel(data.kpi.netProfitChangePercent)} detail={`Margin ${data.kpi.netProfitMarginPercent}%`} tone="profit" />
             </Col>
-            <Col xs={6} xl={3}>
-              <Card className="kpi-card h-100">
-                <Card.Body>
-                  <div className="kpi-label">Okupansi</div>
-                  <div className="kpi-value">{data.kpi.occupancyRatePercent}%</div>
-                  {occupancyChange && <div className="kpi-change" style={{ color: occupancyChange.color }}>{occupancyChange.icon} {occupancyChange.label}</div>}
-                </Card.Body>
-              </Card>
+            <Col xs={12} sm={6} xl={3}>
+              <OwnerKpiCard label="Okupansi" value={`${data.kpi.occupancyRatePercent}%`} change={changeLabel(data.kpi.occupancyRateChangePercent)} tone="occupancy" />
             </Col>
-            <Col xs={6} xl={3}>
-              <Card className="kpi-card h-100">
-                <Card.Body>
-                  <div className="kpi-label">Kas Bersih</div>
-                  <div className="kpi-value">{formatCompactRupiah(data.kpi.netCashFlowRupiah)}</div>
-                  {cashChange && <div className="kpi-change" style={{ color: cashChange.color }}>{cashChange.icon} {cashChange.label}</div>}
-                </Card.Body>
-              </Card>
+            <Col xs={12} sm={6} xl={3}>
+              <OwnerKpiCard label="Kas Bersih" value={formatCompactRupiah(data.kpi.netCashFlowRupiah)} change={changeLabel(data.kpi.netCashFlowChangePercent)} tone="cash" />
             </Col>
           </Row>
 
-          {/* Signals + AI Widget */}
           <Row className="g-3 mb-3">
-            {/* Signals */}
-            <Col md={7}>
-              <Card className="h-100">
-                <Card.Header style={{ fontWeight: 600, fontSize: 14, background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  ⚠️ Butuh Perhatian
-                  {data.signals.length === 0 && <Badge bg="success" className="ms-2">Aman</Badge>}
-                </Card.Header>
-                <Card.Body>
+            <Col lg={7}>
+              <section className="owner-panel h-100">
+                <div className="owner-panel-heading">
+                  <div>
+                    <span className="owner-section-kicker">Prioritas</span>
+                    <h2>Butuh perhatian</h2>
+                  </div>
+                  <Badge bg={data.signals.length === 0 ? 'success' : 'warning'}>{data.signals.length === 0 ? 'Aman' : `${data.signals.length} sinyal`}</Badge>
+                </div>
+                <div className="owner-panel-body">
                   {data.signals.length === 0 ? (
-                    <div className="text-muted small py-2">Tidak ada yang perlu ditindaklanjuti. Bisnis Anda dalam kondisi baik.</div>
+                    <p className="owner-empty-state mb-0">Tidak ada tindak lanjut mendesak pada periode ini.</p>
                   ) : (
-                    <div className="signal-list">
-                      {data.signals.map((s, i) => (
-                        <div key={i} className="signal-item" onClick={() => navigate(s.route)}>
-                          <div className="signal-icon">
-                            {s.type === 'overdue' ? '🔴' : s.type === 'pending_payment' ? '🟡' : '🟠'}
-                          </div>
-                          <div className="signal-content">
-                            <strong>
-                              {s.type === 'overdue' ? 'Tagihan Overdue' : s.type === 'pending_payment' ? 'Pembayaran Pending' : 'Tagihan Outstanding'}
-                            </strong>
-                            <span>
-                              {s.count} item{s.totalRupiah ? ` — Rp ${formatRupiah(s.totalRupiah)}` : ''}
-                            </span>
-                          </div>
-                          <div className="signal-arrow">→</div>
-                        </div>
+                    <div className="owner-signal-list">
+                      {data.signals.map((signal, index) => (
+                        <button key={`${signal.type}-${index}`} type="button" className="owner-signal-item" onClick={() => navigate(signal.route)}>
+                          <span className={`owner-signal-dot owner-signal-${signal.type}`} aria-hidden="true" />
+                          <span className="owner-signal-content">
+                            <strong>{signal.type === 'overdue' ? 'Tagihan overdue' : signal.type === 'pending_payment' ? 'Pembayaran pending' : 'Tagihan outstanding'}</strong>
+                            <small>{signal.count} item{signal.totalRupiah ? ` - Rp ${formatRupiah(signal.totalRupiah)}` : ''}</small>
+                          </span>
+                          <span className="owner-signal-arrow" aria-hidden="true">&rsaquo;</span>
+                        </button>
                       ))}
                     </div>
                   )}
-                </Card.Body>
-              </Card>
+                </div>
+              </section>
             </Col>
 
-            {/* AI Widget */}
-            <Col md={5}>
-              <Card className="h-100">
-                <Card.Header style={{ fontWeight: 600, fontSize: 14, background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  🧠 Analisis AI
-                </Card.Header>
-                <Card.Body className="d-flex flex-column">
-                  <p className="text-muted small mb-2">Dapatkan narasi bisnis otomatis berdasarkan data bulan ini.</p>
-                  <div className="mt-auto">
-                    <AiAssistButton
-                      label="Buat Analisis"
-                      loadingLabel="Menganalisis..."
-                      run={() => createBusinessNarrative({
-                        period: monthLabel(ym),
-                        metrics: {
-                          score: data.score,
-                          overdueRupiah: data.signals.find((s) => s.type === 'overdue')?.totalRupiah ?? 0,
-                          pendingPaymentCount: data.signals.find((s) => s.type === 'pending_payment')?.count ?? 0,
-                          occupancyRatePercent: data.kpi.occupancyRatePercent,
-                        },
-                      })}
-                      renderResult={(result) => (
-                        <Alert variant="light" className="mb-0 small" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                          <div className="fw-semibold">{result.title}</div>
-                          <div>{result.summary}</div>
-                          {result.recommendations?.length > 0 && (
-                            <ul className="mb-0 mt-2 ps-3">
-                              {result.recommendations.map((item, idx) => <li key={idx}>{item}</li>)}
-                            </ul>
-                          )}
-                        </Alert>
-                      )}
-                    />
+            <Col lg={5}>
+              <section className="owner-panel h-100">
+                <div className="owner-panel-heading">
+                  <div>
+                    <span className="owner-section-kicker">Ringkasan otomatis</span>
+                    <h2>Analisis AI</h2>
                   </div>
-                </Card.Body>
-              </Card>
+                </div>
+                <div className="owner-panel-body owner-ai-body">
+                  <div className="owner-ai-context">
+                    <span>Skor bisnis<strong>{data.score}</strong></span>
+                    <span>Periode<strong>{selectedPeriodLabel}</strong></span>
+                  </div>
+                  <AiAssistButton
+                    label="Buat analisis"
+                    loadingLabel="Menganalisis..."
+                    run={() => createBusinessNarrative({
+                      period: selectedPeriodLabel,
+                      metrics: {
+                        score: data.score,
+                        overdueRupiah: data.signals.find((signal) => signal.type === 'overdue')?.totalRupiah ?? 0,
+                        pendingPaymentCount: data.signals.find((signal) => signal.type === 'pending_payment')?.count ?? 0,
+                        occupancyRatePercent: data.kpi.occupancyRatePercent,
+                      },
+                    })}
+                    renderResult={(result) => (
+                      <Alert variant="light" className="owner-ai-result mb-0 small">
+                        <div className="fw-semibold">{result.title}</div>
+                        <div>{result.summary}</div>
+                        {result.recommendations?.length > 0 ? (
+                          <ul className="mb-0 mt-2 ps-3">
+                            {result.recommendations.map((item, idx) => <li key={idx}>{item}</li>)}
+                          </ul>
+                        ) : null}
+                      </Alert>
+                    )}
+                  />
+                </div>
+              </section>
             </Col>
           </Row>
 
-          {/* Trend Chart with Controls */}
-          <Card className="mb-3">
-            <Card.Header style={{ fontWeight: 600, fontSize: 14, background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span>📈 Tren Revenue & Biaya</span>
-                <div className="chart-controls">
-                  <div className="range-pills">
-                    {[1, 3, 6, 12].map((n) => (
-                      <button
-                        key={n}
-                        className={`range-pill ${trendMonths === n ? 'active' : ''}`}
-                        onClick={() => setTrendMonths(n)}
-                      >
-                        {n === 1 ? '1B' : n === 3 ? '3B' : n === 6 ? '6B' : '1Y'}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    className={`chart-toggle-btn ${chartMode === 'line' ? 'active' : ''}`}
-                    onClick={() => setChartMode('line')}
-                  >
-                    Line
-                  </button>
-                  <button
-                    className={`chart-toggle-btn ${chartMode === 'bar' ? 'active' : ''}`}
-                    onClick={() => setChartMode('bar')}
-                  >
-                    Bar
-                  </button>
-                  <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={showBestFit} onChange={() => setShowBestFit(!showBestFit)} />
-                    Trend
-                  </label>
+          <section className="owner-panel owner-trend-panel mb-3">
+            <div className="owner-panel-heading owner-trend-heading">
+              <div>
+                <span className="owner-section-kicker">Analisis periode</span>
+                <h2>Tren pendapatan dan biaya</h2>
+              </div>
+              <div className="owner-chart-controls">
+                <div className="owner-segmented" aria-label="Rentang tren">
+                  {[1, 3, 6, 12].map((months) => (
+                    <button key={months} type="button" className={trendMonths === months ? 'active' : ''} aria-pressed={trendMonths === months} onClick={() => setTrendMonths(months)}>
+                      {months === 12 ? '1 thn' : `${months} bln`}
+                    </button>
+                  ))}
                 </div>
+                <div className="owner-segmented" aria-label="Tampilan grafik">
+                  <button type="button" className={chartMode === 'line' ? 'active' : ''} aria-pressed={chartMode === 'line'} onClick={() => setChartMode('line')}>Garis</button>
+                  <button type="button" className={chartMode === 'bar' ? 'active' : ''} aria-pressed={chartMode === 'bar'} onClick={() => setChartMode('bar')}>Batang</button>
+                </div>
+                <Form.Check type="switch" id="owner-best-fit" label="Garis tren" checked={showBestFit} onChange={() => setShowBestFit((current) => !current)} />
               </div>
-            </Card.Header>
-            <Card.Body>
+            </div>
+            <div className="owner-panel-body">
               {trendData.length === 0 ? (
-                <div className="text-muted text-center py-4">Data tren tidak tersedia</div>
+                <div className="owner-empty-state text-center py-4">Data tren tidak tersedia.</div>
               ) : (
-                <TrendChart
-                  data={trendData}
-                  mode={chartMode}
-                  showBestFit={showBestFit}
-                  onToggleMode={() => setChartMode(chartMode === 'line' ? 'bar' : 'line')}
-                  onToggleBestFit={() => setShowBestFit(!showBestFit)}
-                />
+                <div className="owner-chart-stage">
+                  <TrendChart data={trendData} mode={chartMode} showBestFit={showBestFit} />
+                </div>
               )}
-              <div className="d-flex gap-3 justify-content-center mt-2" style={{ fontSize: 12, color: '#64748b' }}>
-                <span><span style={{ color: '#3b82f6' }}>━</span> Revenue</span>
-                <span><span style={{ color: '#f97316' }}>━</span> Expense</span>
-                <span><span style={{ color: '#22c55e' }}>━</span> Laba Bersih</span>
-                {showBestFit && <span><span style={{ color: '#8b5cf6', borderTop: '2px dashed #8b5cf6', padding: '0 8px' }}>Trend</span></span>}
+              <div className="owner-chart-legend">
+                <span><i className="owner-swatch owner-swatch-revenue" />Pendapatan</span>
+                <span><i className="owner-swatch owner-swatch-expense" />Pengeluaran</span>
+                <span><i className="owner-swatch owner-swatch-profit" />Laba Bersih</span>
+                {showBestFit ? <span><i className="owner-swatch owner-swatch-trend" />Tren Pendapatan</span> : null}
               </div>
-            </Card.Body>
-          </Card>
+            </div>
+          </section>
         </>
-      )}
+      ) : null}
     </Container>
   );
 }

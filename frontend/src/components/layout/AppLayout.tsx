@@ -5,6 +5,8 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import NotificationBell from '../notifications/NotificationBell';
 import StaffTopWorkspaceNav from '../staff/StaffTopWorkspaceNav';
 import TenantWorkspaceTabs from '../tenant/TenantWorkspaceTabs';
+import RoleWorkspaceTabs from '../workspace/RoleWorkspaceTabs';
+import GlobalSearch from './GlobalSearch';
 import PaymentUrgencyChip from '../payment-urgency/PaymentUrgencyChip';
 import Kost48LogoMark from '../common/Kost48LogoMark';
 import {
@@ -214,6 +216,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
   const isStaff = user?.role === 'STAFF';
   const isTenant = user?.role === 'TENANT';
   const isAdmin = user?.role === 'ADMIN';
+  const isOwner = user?.role === 'OWNER';
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -319,6 +322,9 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
               </div>
 
               <div className="topbar-actions-simple">
+                <div className="d-none d-lg-block">
+                  <GlobalSearch role={user?.role} />
+                </div>
                 <NotificationBell />
                 {isAdmin ? (
                   <Button variant="outline-primary" size="sm" className="admin-icon-action" onClick={() => navigate('/announcements')} title="Buka pengumuman">
@@ -340,8 +346,12 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
                 </div>
               </div>
             </div>
+            <div className="d-lg-none mt-2">
+              <GlobalSearch role={user?.role} />
+            </div>
           </section>
 
+          {isAdmin || isOwner ? <RoleWorkspaceTabs role={user?.role} /> : null}
           {children ?? <Outlet />}
         </main>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listStays } from '../../api/stays';
 import { rejectBooking } from '../../api/bookings';
@@ -36,6 +37,109 @@ import {
 
 
 type StayViewFilter = 'ALL' | 'BOOKINGS' | 'ACTIVE';
+
+const STAY_CHART_COLORS = ['#2563eb', '#f59e0b', '#16a34a', '#ef4444', '#7c3aed', '#0ea5e9'];
+
+function StayAnalyticsPanel({ items, operationalActive, reservedBookings, checkoutDue, pendingApproval, waitingPayment }: {
+  items: any[];
+  operationalActive: any[];
+  reservedBookings: any[];
+  checkoutDue: any[];
+  pendingApproval: number;
+  waitingPayment: number;
+}) {
+  const statusData = [
+    { name: 'Aktif', value: operationalActive.length, color: '#16a34a' },
+    { name: 'Booking', value: reservedBookings.length, color: '#f59e0b' },
+    { name: 'Selesai', value: items.filter((s) => s.status === 'COMPLETED').length, color: '#2563eb' },
+    { name: 'Dibatalkan', value: items.filter((s) => s.status === 'CANCELLED').length, color: '#94a3b8' },
+  ].filter((d) => d.value > 0);
+
+  const flowData = [
+    { label: 'Perlu setujui', value: pendingApproval, color: '#ef4444' },
+    { label: 'Menunggu bayar', value: waitingPayment, color: '#f97316' },
+    { label: 'Aktif', value: operationalActive.length, color: '#16a34a' },
+    { label: 'Checkout dekat', value: checkoutDue.length, color: '#f59e0b' },
+  ];
+
+  const pricingData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach((s) => {
+      const term = s.pricingTerm ?? 'MONTHLY';
+      counts[term] = (counts[term] ?? 0) + 1;
+    });
+    const labels: Record<string, string> = { MONTHLY: 'Bulanan', WEEKLY: 'Mingguan', DAILY: 'Harian', BIWEEKLY: 'Dua minggu', SEMESTER: 'Semester', YEARLY: 'Tahunan' };
+    return Object.entries(counts).map(([key, value], i) => ({ label: labels[key] ?? key, value, color: STAY_CHART_COLORS[i % STAY_CHART_COLORS.length] }));
+  }, [items]);
+
+  const total = statusData.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return null;
+
+  return (
+    <Row className="g-3 mb-3 stay-analytics-row">
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Status Penghuni</div>
+            <div className="panel-subtitle mb-2">Komposisi masa sewa saat ini</div>
+            <div className="stay-analytics-donut-wrap">
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={70} paddingAngle={2} stroke="none">
+                    {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(value, name) => [`${Number(value ?? 0)} masa sewa`, String(name ?? '')]} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="stay-analytics-donut-center"><strong>{total}</strong><span>Total</span></div>
+            </div>
+            <div className="stay-analytics-legend">
+              {statusData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Booking Flow</div>
+            <div className="panel-subtitle mb-2">Jumlah di tiap tahap proses</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={flowData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={110} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value) => [`${Number(value ?? 0)}`, 'Jumlah']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {flowData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+      <Col md={4}>
+        <Card className="content-card border-0 h-100">
+          <Card.Body>
+            <div className="panel-title mb-1">Tipe Pembayaran</div>
+            <div className="panel-subtitle mb-2">Masa sewa berdasarkan periode harga</div>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart layout="vertical" data={pricingData} margin={{ top: 4, right: 48, bottom: 4, left: 4 }}>
+                <CartesianGrid horizontal={false} stroke="rgba(148,163,184,0.18)" strokeDasharray="3 3" />
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="label" width={90} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value) => [`${Number(value ?? 0)} masa sewa`, '']} />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]} background={{ fill: 'rgba(148,163,184,0.10)' }}>
+                  {pricingData.map((d) => <Cell key={d.label} fill={d.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+}
 
 export default function StaysPage() {
   const navigate = useNavigate();
@@ -340,6 +444,17 @@ export default function StaysPage() {
           tone: metric.status === 'DANGER' ? 'danger' : metric.status === 'WARNING' ? 'warning' : metric.status === 'SUCCESS' ? 'success' : 'info',
         }))}
       />
+
+      {items.length > 0 && (
+        <StayAnalyticsPanel
+          items={items}
+          operationalActive={operationalActive}
+          reservedBookings={reservedBookings}
+          checkoutDue={checkoutDue}
+          pendingApproval={pendingApprovalCount}
+          waitingPayment={waitingPaymentCount}
+        />
+      )}
 
       <Card className="content-card border-0">
         <Card.Body>
