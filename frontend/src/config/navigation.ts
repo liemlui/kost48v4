@@ -21,38 +21,34 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/owner-dashboard', label: 'Owner Dashboard', icon: '📈', hint: 'Business KPI, signals, and 6-month trends.' },
       { to: '/stays', label: 'Stays & Tenants', icon: '🏠', hint: 'Active stays, bookings, renew, checkout, and tenant data.', activePaths: ['/stays', '/tenants'] },
-      { to: '/rooms', label: 'Rooms & Inventory', icon: '🚪', hint: 'Room status, rates, facilities, inventory items.' },
+      { to: '/reports', label: 'Reports & Financials', icon: '📊', hint: 'Operations report, balance sheet, P&L, cash flow, ratios.' },
     ],
   },
   {
     title: 'Finance',
     links: [
       { to: '/invoices', label: 'Invoices & Receivables', icon: '🧾', hint: 'Monitor invoices, payments, overdue, and follow-ups.', activePaths: ['/invoices', '/payment-submissions/review'] },
-      { to: '/reports', label: 'Reports & Financials', icon: '📊', hint: 'Operations report, balance sheet, P&L, cash flow, ratios.' },
-      { to: '/finance/accounting-setup', label: 'Accounting Setup', icon: '📘', hint: 'Chart of accounts, periods, opening balance, journal entries.', activePaths: ['/finance/accounting-setup', '/finance/assets'] },
-      { to: '/finance/assets', label: 'Fixed Assets', icon: '🏗️', hint: 'Asset register, depreciation run, ledger alignment.' },
-    ],
-  },
-  {
-    title: 'Operations',
-    links: [
-      { to: '/staff-performance', label: 'Staff Performance', icon: '📋', hint: 'Staff KPIs, audits, reviews, tickets, and routines.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
       { to: '/expenses', label: 'Expenses', icon: '💳', hint: 'Record and categorize operational expenses.' },
       { to: '/wifi-sales', label: 'WiFi Sales', icon: '📶', hint: 'Voucher WiFi sales records.' },
       { to: '/ancillary-revenue', label: 'Ancillary Revenue', icon: '➕', hint: 'Additional revenue sources (laundry, cleaning, etc).' },
     ],
   },
   {
-    title: 'Administration',
+    title: 'Operations',
     links: [
-      { to: '/users', label: 'Users', icon: '👤', hint: 'Manage accounts: admin, staff, tenants.' },
-      { to: '/settings', label: 'Settings', icon: '⚙️', hint: 'Public FAQ, room photos, guest page content.' },
+      { to: '/staff-performance', label: 'Staff Performance', icon: '📋', hint: 'Staff KPIs, audits, reviews, tickets, and routines.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
+      { to: '/announcements', label: 'Announcements', icon: '📢', hint: 'Create and manage tenant announcements.' },
     ],
   },
   {
-    title: 'My Account',
+    title: 'Settings',
     links: [
-      { to: '/profile', label: 'My Profile', icon: '🙍', hint: 'View profile and change password.' },
+      { to: '/rooms', label: 'Rooms & Inventory', icon: '🚪', hint: 'Room details, rates, facilities, room items, stock inventory.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
+      { to: '/finance/assets', label: 'Fixed Assets', icon: '🏗️', hint: 'Asset register, depreciation run, ledger alignment.' },
+      { to: '/finance/accounting-setup', label: 'Accounting Setup', icon: '📘', hint: 'Chart of accounts, periods, opening balance, journal entries.' },
+      { to: '/users', label: 'Users', icon: '👤', hint: 'Manage accounts: admin, staff, tenants.' },
+      { to: '/faqs', label: 'FAQ', icon: '❓', hint: 'Pertanyaan yang sering diajukan publik.' },
+      { to: '/settings', label: 'Settings', icon: '⚙️', hint: 'Public FAQ, room photos, guest page content.' },
     ],
   },
 ];

@@ -1,4 +1,5 @@
 import { formatDateTimeWib } from '../../utils/dateTime';
+import { buildReferenceOptions, type ReferenceOption } from './resourceRelations';
 
 /**
  * Fungsi aman untuk memformat tanggal
@@ -158,4 +159,173 @@ export function buildInitialState(config: { fields: Array<{ name: string; type: 
     }
     return acc;
   }, {} as Record<string, any>);
+}
+
+export function asString(value: unknown) {
+  return String(value ?? '').toUpperCase();
+}
+
+export function getNested(item: Record<string, unknown>, path: string): unknown {
+  return path.split('.').reduce<unknown>((current, key) => {
+    if (!current || typeof current !== 'object') return undefined;
+    return (current as Record<string, unknown>)[key];
+  }, item);
+}
+
+export function isLowStock(item: Record<string, unknown>) {
+  const qty = Number(item.qtyOnHand ?? 0);
+  const min = Number(item.minQty ?? 0);
+  return min > 0 && qty <= min;
+}
+
+export function movementTypeLabel(value: unknown) {
+  switch (String(value ?? '')) {
+    case 'IN': return 'Barang Masuk';
+    case 'OUT': return 'Barang Keluar';
+    case 'ASSIGN_TO_ROOM': return 'Pasang ke Kamar';
+    case 'RETURN_FROM_ROOM': return 'Kembali dari Kamar';
+    default: return String(value ?? '-');
+  }
+}
+
+export function movementEffectLabel(value: unknown) {
+  switch (String(value ?? '')) {
+    case 'IN':
+    case 'RETURN_FROM_ROOM':
+      return 'Stok gudang bertambah otomatis';
+    case 'OUT':
+      return 'Stok gudang berkurang otomatis';
+    case 'ASSIGN_TO_ROOM':
+      return 'Stok gudang berkurang dan barang kamar bertambah otomatis';
+    default:
+      return 'Stok resmi berubah otomatis';
+  }
+}
+
+export function todayInputDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60_000).toISOString().slice(0, 10);
+}
+
+export function automatedMovementNote(type: string) {
+  switch (type) {
+    case 'ASSIGN_TO_ROOM': return 'Pasang barang ke kamar dari stok gudang';
+    case 'RETURN_FROM_ROOM': return 'Kembalikan barang dari kamar ke gudang';
+    case 'OUT': return 'Barang keluar dari stok gudang';
+    case 'IN': return 'Barang masuk ke stok gudang';
+    default: return 'Mutasi stok otomatis dari konteks halaman';
+  }
+}
+
+export function getResourceFilterDefinitions(configPath: string, items: Array<Record<string, unknown>>) {
+  const count = (predicate: (item: Record<string, unknown>) => boolean) => items.filter(predicate).length;
+  const statusCount = (status: string) => count((item) => asString(item.status) === status);
+  const movementCount = (type: string) => count((item) => asString(item.movementType) === type);
+  const publishedCount = (value: boolean) => count((item) => Boolean(item.isPublished) === value);
+  const activeCount = (value: boolean) => count((item) => Boolean(item.isActive) === value);
+
+  if (configPath === '/tenants') return [
+    { id: 'ALL', label: 'Semua Tenant', count: items.length, tone: 'info' as const },
+    { id: 'ACTIVE', label: 'Aktif', count: activeCount(true), tone: 'success' as const },
+    { id: 'WITH_STAY', label: 'Ada Masa Sewa', count: count((item) => Boolean(item.activeStayId || item.currentStay)), tone: 'success' as const },
+    { id: 'NO_STAY', label: 'Belum Menempati', count: count((item) => !item.activeStayId && !item.currentStay), tone: 'warning' as const },
+    { id: 'PORTAL_ACTIVE', label: 'Portal Aktif', count: count((item) => Boolean(getNested(item, 'portalUserSummary.portalIsActive'))), tone: 'info' as const },
+  ];
+  if (configPath === '/rooms') return [
+    { id: 'ALL', label: 'Semua Kamar', count: items.length, tone: 'info' as const },
+    { id: 'AVAILABLE', label: 'Tersedia', count: statusCount('AVAILABLE'), tone: 'success' as const },
+    { id: 'OCCUPIED', label: 'Terisi', count: statusCount('OCCUPIED'), tone: 'info' as const },
+    { id: 'RESERVED', label: 'Dipesan', count: statusCount('RESERVED'), tone: 'warning' as const },
+    { id: 'MAINTENANCE', label: 'Perlu Cek', count: count((item) => ['MAINTENANCE', 'INACTIVE'].includes(asString(item.status))), tone: 'danger' as const },
+  ];
+  if (configPath === '/room-items') return [
+    { id: 'ALL', label: 'Semua Barang', count: items.length, tone: 'info' as const },
+    { id: 'GOOD', label: 'Baik', count: statusCount('GOOD'), tone: 'success' as const },
+    { id: 'MAINTENANCE', label: 'Perlu Dicek', count: statusCount('MAINTENANCE'), tone: 'warning' as const },
+    { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
+    { id: 'MISSING', label: 'Hilang', count: statusCount('MISSING'), tone: 'danger' as const },
+  ];
+  if (configPath === '/inventory-items') return [
+    { id: 'ALL', label: 'Semua Stok', count: items.length, tone: 'info' as const },
+    { id: 'LOW_AUTO', label: 'Stok Menipis', count: count(isLowStock), tone: 'warning' as const },
+    { id: 'OUT_OF_STOCK', label: 'Habis', count: count((item) => Number(item.qtyOnHand ?? 0) <= 0), tone: 'danger' as const },
+    { id: 'GOOD', label: 'Aman', count: count((item) => asString(item.status) === 'GOOD' && !isLowStock(item)), tone: 'success' as const },
+    { id: 'DAMAGED', label: 'Rusak', count: statusCount('DAMAGED'), tone: 'danger' as const },
+  ];
+  if (configPath === '/inventory-movements') return [
+    { id: 'ALL', label: 'Semua Mutasi', count: items.length, tone: 'info' as const },
+    { id: 'IN', label: 'Masuk', count: movementCount('IN'), tone: 'success' as const },
+    { id: 'OUT', label: 'Keluar', count: movementCount('OUT'), tone: 'warning' as const },
+    { id: 'ASSIGN_TO_ROOM', label: 'Pasang ke Kamar', count: movementCount('ASSIGN_TO_ROOM'), tone: 'info' as const },
+    { id: 'RETURN_FROM_ROOM', label: 'Kembali', count: movementCount('RETURN_FROM_ROOM'), tone: 'neutral' as const },
+  ];
+  if (configPath === '/announcements') return [
+    { id: 'ALL', label: 'Semua', count: items.length, tone: 'info' as const },
+    { id: 'PUBLISHED', label: 'Published', count: publishedCount(true), tone: 'success' as const },
+    { id: 'DRAFT', label: 'Draft', count: publishedCount(false), tone: 'warning' as const },
+    { id: 'PINNED', label: 'Pinned', count: count((item) => Boolean(item.isPinned)), tone: 'info' as const },
+  ];
+  if (configPath === '/expenses') return [
+    { id: 'ALL', label: 'Semua Biaya', count: items.length, tone: 'info' as const },
+    { id: 'FIXED', label: 'Tetap', count: count((item) => asString(item.type) === 'FIXED'), tone: 'info' as const },
+    { id: 'VARIABLE', label: 'Variabel', count: count((item) => asString(item.type) === 'VARIABLE'), tone: 'warning' as const },
+    { id: 'MAINTENANCE', label: 'Perawatan', count: count((item) => asString(item.category) === 'MAINTENANCE'), tone: 'warning' as const },
+    { id: 'COGS_SERVICE', label: 'COGS Layanan', count: count((item) => ['INTERNET', 'CLEANING', 'SUPPLIES'].includes(asString(item.category))), tone: 'info' as const },
+    { id: 'ADMIN_COST', label: 'Admin/Platform', count: count((item) => ['TAX', 'MARKETING', 'OTHER'].includes(asString(item.category))), tone: 'neutral' as const },
+  ];
+  if (configPath === '/wifi-sales') return [
+    { id: 'ALL', label: 'Semua Voucher', count: items.length, tone: 'info' as const },
+    { id: 'DAILY', label: 'Harian', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('hari')), tone: 'success' as const },
+    { id: 'WEEKLY', label: 'Mingguan', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('minggu')), tone: 'info' as const },
+    { id: 'MONTHLY', label: 'Bulanan', count: count((item) => String(item.packageName ?? '').toLowerCase().includes('bulan')), tone: 'warning' as const },
+  ];
+  return [];
+}
+
+export function applyResourceFilter(configPath: string, item: Record<string, unknown>, filter: string) {
+  if (filter === 'ALL') return true;
+  if (configPath === '/tenants') {
+    if (filter === 'ACTIVE') return item.isActive !== false;
+    if (filter === 'WITH_STAY') return Boolean(item.activeStayId || item.currentStay);
+    if (filter === 'NO_STAY') return !item.activeStayId && !item.currentStay;
+    if (filter === 'PORTAL_ACTIVE') return Boolean(getNested(item, 'portalUserSummary.portalIsActive'));
+  }
+  if (configPath === '/rooms') {
+    if (filter === 'MAINTENANCE') return ['MAINTENANCE', 'INACTIVE'].includes(asString(item.status));
+    return asString(item.status) === filter;
+  }
+  if (configPath === '/room-items') return asString(item.status) === filter;
+  if (configPath === '/inventory-items') {
+    if (filter === 'LOW_AUTO') return isLowStock(item);
+    if (filter === 'GOOD') return asString(item.status) === 'GOOD' && !isLowStock(item);
+    if (filter === 'OUT_OF_STOCK') return Number(item.qtyOnHand ?? 0) <= 0;
+    return asString(item.status) === filter;
+  }
+  if (configPath === '/inventory-movements') return asString(item.movementType) === filter;
+  if (configPath === '/announcements') {
+    if (filter === 'PUBLISHED') return Boolean(item.isPublished);
+    if (filter === 'DRAFT') return !item.isPublished;
+    if (filter === 'PINNED') return Boolean(item.isPinned);
+  }
+  if (configPath === '/expenses') {
+    if (filter === 'MAINTENANCE') return asString(item.category) === 'MAINTENANCE';
+    if (filter === 'COGS_SERVICE') return ['INTERNET', 'CLEANING', 'SUPPLIES'].includes(asString(item.category));
+    if (filter === 'ADMIN_COST') return ['TAX', 'MARKETING', 'OTHER'].includes(asString(item.category));
+    return asString(item.type) === filter;
+  }
+  if (configPath === '/wifi-sales') {
+    const packageName = String(item.packageName ?? '').toLowerCase();
+    if (filter === 'DAILY') return packageName.includes('hari');
+    if (filter === 'WEEKLY') return packageName.includes('minggu');
+    if (filter === 'MONTHLY') return packageName.includes('bulan');
+  }
+  return true;
+}
+
+export function mapReferenceData(items: Array<Record<string, unknown>> = [], sourcePath: string) {
+  const options = buildReferenceOptions(items, sourcePath);
+  const map = new Map<string, ReferenceOption>();
+  options.forEach((option) => { map.set(String(option.value), option); });
+  return { options, map };
 }

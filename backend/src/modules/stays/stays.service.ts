@@ -43,6 +43,13 @@ import {
   calculateDueDate,
 } from "./stays.helpers";
 import { AccountingPostingService } from "../accounting/accounting-posting.service";
+import {
+  assertCoreLifecycleActor,
+  assertNoOpenInvoicesTx,
+  parseMeterDecimal,
+  createRenewUtilityCheckpointLineTx,
+  resolveDepositSettlementAmount,
+} from "./stays-service-helpers";
 import { DepositLedgerService } from "../deposit-ledger/deposit-ledger.service";
 import {
   endOfDay,
@@ -60,185 +67,6 @@ export class StaysService {
     private readonly accountingPosting: AccountingPostingService,
     private readonly depositLedger: DepositLedgerService,
   ) {}
-
-  private assertCoreLifecycleActor(
-    actor: CurrentUserPayload,
-    actionLabel: string,
-  ) {
-    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
-      throw new ForbiddenException(
-        `${actionLabel} hanya boleh dilakukan oleh owner/admin`,
-      );
-    }
-  }
-
-  private formatOpenInvoiceRefs(
-    invoices: Array<{
-      id: number;
-      invoiceNumber: string | null;
-      status: InvoiceStatus | string;
-    }>,
-  ) {
-    return invoices
-      .map(
-        (invoice) =>
-          `${invoice.invoiceNumber || `Tagihan #${invoice.id}`} (${invoice.status})`,
-      )
-      .join(", ");
-  }
-
-  private async assertNoOpenInvoicesTx(
-    tx: Prisma.TransactionClient,
-    stayId: number,
-    actionLabel: string,
-  ) {
-    const openInvoices = await tx.invoice.findMany({
-      where: {
-        stayId,
-        status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
-      },
-      select: { id: true, invoiceNumber: true, status: true },
-      orderBy: { id: "asc" },
-    });
-
-    if (openInvoices.length > 0) {
-      throw new ConflictException(
-        `${actionLabel} belum bisa diproses karena masih ada tagihan aktif: ${this.formatOpenInvoiceRefs(openInvoices)}. Selesaikan atau batalkan tagihan terlebih dahulu.`,
-      );
-    }
-  }
-
-  private parseMeterDecimal(value: string, label: string) {
-    try {
-      const decimalValue = new Prisma.Decimal(value);
-      if (decimalValue.lt(0)) {
-        throw new BadRequestException(
-          `Angka meter ${label} tidak boleh negatif`,
-        );
-      }
-      return decimalValue;
-    } catch (error) {
-      if (error instanceof BadRequestException) throw error;
-      throw new BadRequestException(`Angka meter ${label} tidak valid`);
-    }
-  }
-
-  private async createRenewUtilityCheckpointLineTx(
-    tx: Prisma.TransactionClient,
-    params: {
-      roomId: number;
-      invoiceId: number;
-      utilityType: UtilityType;
-      label: string;
-      unit: string;
-      newReadingValue: Prisma.Decimal;
-      readingAt: Date;
-      tariffRupiah: number;
-      actorId: number;
-      sortOrder: number;
-    },
-  ) {
-    const previousReading = await tx.meterReading.findFirst({
-      where: {
-        roomId: params.roomId,
-        utilityType: params.utilityType,
-        readingAt: { lt: params.readingAt },
-      },
-      orderBy: { readingAt: "desc" },
-    });
-
-    if (!previousReading) {
-      throw new ConflictException(
-        `Belum ada catatan meter ${params.label} sebelumnya. Catat meter awal dulu sebelum menyetujui perpanjangan.`,
-      );
-    }
-
-    const duplicateReading = await tx.meterReading.findFirst({
-      where: {
-        roomId: params.roomId,
-        utilityType: params.utilityType,
-        readingAt: { gte: params.readingAt, lte: endOfDay(params.readingAt) },
-      },
-      select: { id: true },
-    });
-    if (duplicateReading) {
-      throw new ConflictException(
-        `Catatan meter ${params.label} untuk tanggal ini sudah ada`,
-      );
-    }
-
-    const nextReading = await tx.meterReading.findFirst({
-      where: {
-        roomId: params.roomId,
-        utilityType: params.utilityType,
-        readingAt: { gt: params.readingAt },
-      },
-      orderBy: { readingAt: "asc" },
-    });
-
-    if (params.newReadingValue.lt(previousReading.readingValue)) {
-      throw new ConflictException(
-        `Angka meter ${params.label} tidak boleh lebih kecil dari catatan sebelumnya (${previousReading.readingValue.toString()})`,
-      );
-    }
-
-    if (nextReading && params.newReadingValue.gt(nextReading.readingValue)) {
-      throw new ConflictException(
-        `Angka meter ${params.label} tidak boleh lebih besar dari catatan setelahnya (${nextReading.readingValue.toString()})`,
-      );
-    }
-
-    const usageDelta = params.newReadingValue.minus(
-      previousReading.readingValue,
-    );
-    const billingQty = usageDelta.toDecimalPlaces(2);
-    const tariff = params.tariffRupiah ?? 0;
-
-    if (usageDelta.gt(0) && tariff <= 0) {
-      throw new ConflictException(
-        `Tarif ${params.label} belum diatur, tidak bisa menghitung tagihan perpanjangan`,
-      );
-    }
-
-    const lineAmount = Math.round(billingQty.toNumber() * tariff);
-
-    const reading = await tx.meterReading.create({
-      data: {
-        roomId: params.roomId,
-        utilityType: params.utilityType,
-        readingAt: params.readingAt,
-        readingValue: params.newReadingValue,
-        recordedById: params.actorId,
-        note: `Checkpoint perpanjangan masa sewa. Pemakaian ${params.label}: ${billingQty.toString()} ${params.unit}.`,
-      },
-    });
-
-    const line = await tx.invoiceLine.create({
-      data: {
-        invoiceId: params.invoiceId,
-        lineType: (params.utilityType === UtilityType.ELECTRICITY
-          ? InvoiceLineType.ELECTRICITY
-          : InvoiceLineType.WATER) as any,
-        utilityType: params.utilityType,
-        description: `Pemakaian ${params.label} periode sebelumnya: ${billingQty.toString()} ${params.unit}`,
-        qty: billingQty,
-        unit: params.unit,
-        unitPriceRupiah: tariff,
-        lineAmountRupiah: lineAmount,
-        sortOrder: params.sortOrder,
-      },
-    });
-
-    return {
-      reading,
-      line,
-      previousReadingValue: previousReading.readingValue,
-      readingValue: params.newReadingValue,
-      usageDelta,
-      tariffRupiah: tariff,
-      amountRupiah: lineAmount,
-    };
-  }
 
   async update(id: number, dto: UpdateStayDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.stay.findUnique({ where: { id } });
@@ -637,7 +465,7 @@ export class StaysService {
   }
 
   async complete(id: number, dto: CompleteStayDto, actor: CurrentUserPayload) {
-    this.assertCoreLifecycleActor(actor, "Final checkout");
+    assertCoreLifecycleActor(actor, "Final checkout");
     const actualCheckOutDate = parseJakartaDateOnly(
       dto.actualCheckOutDate,
       "Tanggal checkout final tidak valid",
@@ -786,7 +614,7 @@ export class StaysService {
   }
 
   async cancel(id: number, dto: CancelStayDto, actor: CurrentUserPayload) {
-    this.assertCoreLifecycleActor(actor, "Pembatalan stay");
+    assertCoreLifecycleActor(actor, "Pembatalan stay");
     const existing = await this.prisma.stay.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException("Stay tidak ditemukan");
     if (existing.status !== StayStatus.ACTIVE)
@@ -895,21 +723,12 @@ export class StaysService {
     });
   }
 
-  private resolveDepositSettlementAmount(stay: {
-    depositAmountRupiah: number | null;
-    depositPaidAmountRupiah?: number | null;
-  }) {
-    const paid = Number(stay.depositPaidAmountRupiah ?? 0);
-    const expected = Number(stay.depositAmountRupiah ?? 0);
-    return paid > 0 ? paid : expected;
-  }
-
   async processDeposit(
     id: number,
     dto: ProcessDepositDto,
     actor: CurrentUserPayload,
   ) {
-    this.assertCoreLifecycleActor(actor, "Proses deposit");
+    assertCoreLifecycleActor(actor, "Proses deposit");
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const stay = await tx.stay.findUnique({ where: { id } });
@@ -922,7 +741,7 @@ export class StaysService {
       if (stay.depositStatus !== DepositStatus.HELD)
         throw new ConflictException("Deposit sudah diproses sebelumnya");
 
-      const settlementAmount = this.resolveDepositSettlementAmount(stay);
+      const settlementAmount = resolveDepositSettlementAmount(stay);
       if (settlementAmount <= 0) {
         throw new ConflictException(
           "Deposit tidak dapat diproses karena nominal deposit yang diterima masih 0.",
@@ -1056,7 +875,7 @@ export class StaysService {
   }
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
-    this.assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
+    assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
     try {
       const result = await this.prisma.$transaction((tx) =>
         this.renewStayInTransaction(tx, id, dto, actor),
@@ -1095,7 +914,7 @@ export class StaysService {
     dto: RenewStayDto,
     actor: CurrentUserPayload,
   ) {
-    this.assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
+    assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
 
     const stay = await tx.stay.findUnique({
       where: { id },
@@ -1105,7 +924,7 @@ export class StaysService {
     if (stay.status !== StayStatus.ACTIVE)
       throw new ConflictException("Stay tidak aktif, tidak dapat diperpanjang");
 
-    await this.assertNoOpenInvoicesTx(tx, id, "Perpanjangan masa sewa");
+    await assertNoOpenInvoicesTx(tx, id, "Perpanjangan masa sewa");
 
     const effectivePricingTerm = dto.pricingTerm ?? stay.pricingTerm;
 
@@ -1114,11 +933,11 @@ export class StaysService {
       "Tanggal catat meter tidak valid",
     );
 
-    const electricityReadingValue = this.parseMeterDecimal(
+    const electricityReadingValue = parseMeterDecimal(
       dto.electricityReadingValue,
       "listrik",
     );
-    const waterReadingValue = this.parseMeterDecimal(
+    const waterReadingValue = parseMeterDecimal(
       dto.waterReadingValue,
       "air",
     );
@@ -1183,7 +1002,7 @@ export class StaysService {
       },
     });
 
-    const electricitySummary = await this.createRenewUtilityCheckpointLineTx(
+    const electricitySummary = await createRenewUtilityCheckpointLineTx(
       tx,
       {
         roomId: stay.roomId,
@@ -1199,7 +1018,7 @@ export class StaysService {
       },
     );
 
-    const waterSummary = await this.createRenewUtilityCheckpointLineTx(tx, {
+    const waterSummary = await createRenewUtilityCheckpointLineTx(tx, {
       roomId: stay.roomId,
       invoiceId: invoice.id,
       utilityType: UtilityType.WATER,

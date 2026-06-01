@@ -3,6 +3,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingReadinessService } from './accounting-readiness.service';
 import { TrialBalanceQueryDto } from './dto/journal-entry.dto';
 import { AccountingSchemaGuard } from './accounting-schema.guard';
+import {
+  formatJournalEntry,
+  mappedSourceIds,
+  buildDepositReconciliationSnapshot,
+  assetRegisterDisclosure,
+  resolveProfitLossPeriod,
+} from './accounting-report-helpers';
 
 function accountBalance(type: string, debit: number, credit: number) {
   if (type === 'ASSET' || type === 'EXPENSE' || type === 'COGS') return debit - credit;
@@ -22,7 +29,7 @@ export class AccountingReportsService {
     const asOf = query.asOf ? new Date(query.asOf) : new Date();
     asOf.setHours(23, 59, 59, 999);
 
-    const openingJournalSourceIds = await this.mappedSourceIds('OPENING_BALANCE');
+    const openingJournalSourceIds = await mappedSourceIds(this.prisma,'OPENING_BALANCE');
     const [accounts, journalSums, openingSums] = await Promise.all([
       (this.prisma as any).chartOfAccount.findMany({ where: { isActive: true }, orderBy: { code: 'asc' } }),
       (this.prisma as any).journalLine.groupBy({
@@ -90,11 +97,11 @@ export class AccountingReportsService {
   async unmappedTransactions() {
     await this.schemaGuard.assertReady();
     const [mappedInvoices, mappedPayments, mappedExpenses, mappedWifiSales, mappedDeposits] = await Promise.all([
-      this.mappedSourceIds('INVOICE'),
-      this.mappedSourceIds('INVOICE_PAYMENT'),
-      this.mappedSourceIds('EXPENSE'),
-      this.mappedSourceIds('WIFI_SALE'),
-      this.mappedSourceIds('DEPOSIT'),
+      mappedSourceIds(this.prisma,'INVOICE'),
+      mappedSourceIds(this.prisma,'INVOICE_PAYMENT'),
+      mappedSourceIds(this.prisma,'EXPENSE'),
+      mappedSourceIds(this.prisma,'WIFI_SALE'),
+      mappedSourceIds(this.prisma,'DEPOSIT'),
     ]);
 
     const [invoices, payments, expenses, wifiSales, deposits] = await Promise.all([
@@ -180,7 +187,7 @@ export class AccountingReportsService {
       ledgerBacked: true,
       sourceTypes: sourceTypes.length ? sourceTypes : ['INVOICE', 'INVOICE_PAYMENT', 'EXPENSE', 'WIFI_SALE'],
       limit,
-      items: entries.map((entry: any) => this.formatJournalEntry(entry)),
+      items: entries.map((entry: any) => formatJournalEntry(entry)),
       note: 'Aktivitas ini membantu UAT B3.1B: transaksi operasional baru harus muncul sebagai JournalEntry POSTED yang balance.',
     };
   }
@@ -212,14 +219,14 @@ export class AccountingReportsService {
       sourceType: String(query.sourceType).toUpperCase(),
       sourceId: String(query.sourceId),
       found: Boolean(entry),
-      item: entry ? this.formatJournalEntry(entry) : null,
+      item: entry ? formatJournalEntry(entry) : null,
       note: entry ? 'JournalEntry POSTED ditemukan untuk source ini.' : 'Belum ada JournalEntry POSTED untuk source ini. Cek readiness, period, COA, atau unmapped scanner.',
     };
   }
 
   async profitLoss(query: TrialBalanceQueryDto = {}) {
     await this.schemaGuard.assertReady();
-    const period = await this.resolveProfitLossPeriod(query);
+    const period = await resolveProfitLossPeriod(this.prisma, query);
     const accounts = await (this.prisma as any).chartOfAccount.findMany({
       where: { type: { in: ['REVENUE', 'COGS', 'EXPENSE'] as any }, isActive: true },
       orderBy: { code: 'asc' },
@@ -335,36 +342,6 @@ export class AccountingReportsService {
     };
   }
 
-  private async resolveProfitLossPeriod(query: TrialBalanceQueryDto = {}) {
-    const baseDate = query.asOf ? new Date(query.asOf) : new Date();
-    baseDate.setUTCHours(0, 0, 0, 0);
-    let period: any = null;
-    if (query.year && query.month) {
-      period = await (this.prisma as any).accountingPeriod.findUnique({ where: { year_month: { year: query.year, month: query.month } } });
-      const startDate = period ? new Date(period.startDate) : new Date(Date.UTC(query.year, query.month - 1, 1));
-      const endDate = period ? new Date(period.endDate) : new Date(Date.UTC(query.year, query.month, 0));
-      endDate.setUTCHours(23, 59, 59, 999);
-      return { year: query.year, month: query.month, key: `${query.year}-${String(query.month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: period };
-    }
-
-    period = await (this.prisma as any).accountingPeriod.findFirst({
-      where: { startDate: { lte: baseDate }, endDate: { gte: baseDate } },
-      orderBy: [{ year: 'desc' }, { month: 'desc' }],
-    });
-    if (period) {
-      const startDate = new Date(period.startDate);
-      const endDate = new Date(period.endDate);
-      endDate.setUTCHours(23, 59, 59, 999);
-      return { year: period.year, month: period.month, key: `${period.year}-${String(period.month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: period };
-    }
-
-    const year = baseDate.getUTCFullYear();
-    const month = baseDate.getUTCMonth() + 1;
-    const startDate = new Date(Date.UTC(year, month - 1, 1));
-    const endDate = new Date(Date.UTC(year, month, 0));
-    endDate.setUTCHours(23, 59, 59, 999);
-    return { year, month, key: `${year}-${String(month).padStart(2, '0')}`, startDate, endDate, accountingPeriod: null };
-  }
 
 
   async balanceSheet(query: TrialBalanceQueryDto = {}) {
@@ -435,7 +412,7 @@ export class AccountingReportsService {
     const difference = assets - liabilitiesAndEquity;
     const balanced = difference === 0;
     const guarded = !readiness.ready || !trial.isBalanced;
-    const assetRegisterDisclosure = await this.assetRegisterDisclosure(grossFixedAssets, accumulatedDepreciation, netFixedAssets);
+    const assetRegisterDisclosureData = await assetRegisterDisclosure(this.prisma, grossFixedAssets, accumulatedDepreciation, netFixedAssets);
     const asOf = new Date(trial.asOf);
     asOf.setUTCHours(23, 59, 59, 999);
     const latestClosedPeriod = await (this.prisma as any).accountingPeriod.findFirst({
@@ -492,7 +469,7 @@ export class AccountingReportsService {
         liabilities: liabilitiesLines,
         equity: equityLines,
       },
-      assetRegisterDisclosure,
+      assetRegisterDisclosure: assetRegisterDisclosureData,
       readinessNote: guarded
         ? 'Balance Sheet Lite guarded: pastikan accounting readiness siap dan Trial Balance balanced sebelum membaca laporan sebagai statement formal.'
         : balanced
@@ -504,50 +481,6 @@ export class AccountingReportsService {
   }
 
 
-  private async assetRegisterDisclosure(grossFixedAssets: number, accumulatedDepreciation: number, netFixedAssets: number) {
-    try {
-      const [assetAgg, assetCount] = await Promise.all([
-        (this.prisma as any).fixedAsset.aggregate({
-          _sum: { acquisitionCostRupiah: true, accumulatedDepreciationRupiah: true },
-        }),
-        (this.prisma as any).fixedAsset.count(),
-      ]);
-      const registerAcquisitionCost = Number(assetAgg?._sum?.acquisitionCostRupiah ?? 0);
-      const registerAccumulatedDepreciation = Number(assetAgg?._sum?.accumulatedDepreciationRupiah ?? 0);
-      const registerNetBookValue = Math.max(registerAcquisitionCost - registerAccumulatedDepreciation, 0);
-      const ledgerNetFixedAssets = netFixedAssets;
-
-      return {
-        basis: 'ASSET_REGISTER_DISCLOSURE_B5',
-        assetCount,
-        registerAcquisitionCostRupiah: registerAcquisitionCost,
-        registerAccumulatedDepreciationRupiah: registerAccumulatedDepreciation,
-        registerNetBookValueRupiah: registerNetBookValue,
-        ledgerGrossFixedAssetsRupiah: grossFixedAssets,
-        ledgerAccumulatedDepreciationRupiah: accumulatedDepreciation,
-        ledgerNetFixedAssetsRupiah: ledgerNetFixedAssets,
-        registerVsLedgerNetDifferenceRupiah: registerNetBookValue - ledgerNetFixedAssets,
-        aligned: registerNetBookValue === ledgerNetFixedAssets,
-        warning: registerNetBookValue === ledgerNetFixedAssets
-          ? 'Asset register dan ledger fixed asset sudah selaras.'
-          : 'Asset register adalah disclosure operasional. Untuk Balance Sheet formal, nilai perolehan aset harus masuk ledger Fixed Assets melalui opening balance/adjustment yang terkontrol, bukan acquisition journal otomatis.',
-      };
-    } catch (error) {
-      return {
-        basis: 'ASSET_REGISTER_DISCLOSURE_B5',
-        assetCount: 0,
-        registerAcquisitionCostRupiah: 0,
-        registerAccumulatedDepreciationRupiah: 0,
-        registerNetBookValueRupiah: 0,
-        ledgerGrossFixedAssetsRupiah: grossFixedAssets,
-        ledgerAccumulatedDepreciationRupiah: accumulatedDepreciation,
-        ledgerNetFixedAssetsRupiah: netFixedAssets,
-        registerVsLedgerNetDifferenceRupiah: 0 - netFixedAssets,
-        aligned: false,
-        warning: 'Asset register belum bisa dibaca untuk disclosure. Balance Sheet tetap memakai ledger sebagai source of truth.',
-      };
-    }
-  }
 
 
   async assetReadiness() {
@@ -704,7 +637,7 @@ export class AccountingReportsService {
 
 
   async depositPosition() {
-    const snapshot = await this.buildDepositReconciliationSnapshot(25);
+    const snapshot = await buildDepositReconciliationSnapshot(this.prisma, this.schemaGuard, 25);
     return {
       basis: 'DEPOSIT_LIABILITY_POSITION_B3_3R',
       ledgerBacked: true,
@@ -720,7 +653,7 @@ export class AccountingReportsService {
   }
 
   async depositReconciliation() {
-    const snapshot = await this.buildDepositReconciliationSnapshot(25);
+    const snapshot = await buildDepositReconciliationSnapshot(this.prisma, this.schemaGuard, 25);
     return {
       basis: 'DEPOSIT_RECONCILIATION_B3_3R',
       ledgerBacked: true,
@@ -745,220 +678,6 @@ export class AccountingReportsService {
       explanation: snapshot.explanation,
       note: 'B3.3R memisahkan deposit opening balance, auto journal DEPOSIT, dan ADJUSTMENT agar owner tidak melakukan backfill yang menggandakan liability.',
     };
-  }
-
-  private async buildDepositReconciliationSnapshot(limit = 25) {
-    await this.schemaGuard.assertReady();
-    const depositAccount = await (this.prisma as any).chartOfAccount.findFirst({
-      where: { code: '2000', isActive: true },
-      select: { id: true, code: true, name: true, type: true },
-    });
-
-    const [operationalAgg, settledAgg, operationalStays, mappedDepositIds] = await Promise.all([
-      (this.prisma as any).stay.aggregate({
-        _sum: { depositAmountRupiah: true, depositPaidAmountRupiah: true },
-        _count: { id: true },
-        where: { depositAmountRupiah: { gt: 0 } },
-      }),
-      (this.prisma as any).stay.aggregate({
-        _sum: { depositDeductionRupiah: true, depositRefundedRupiah: true },
-        where: { depositAmountRupiah: { gt: 0 }, depositStatus: { in: ['REFUNDED', 'FORFEITED', 'PARTIALLY_REFUNDED'] as any } },
-      }),
-      (this.prisma as any).stay.findMany({
-        where: { OR: [{ depositAmountRupiah: { gt: 0 } }, { depositPaidAmountRupiah: { gt: 0 } }] },
-        select: {
-          id: true,
-          tenantId: true,
-          roomId: true,
-          status: true,
-          depositAmountRupiah: true,
-          depositPaidAmountRupiah: true,
-          depositPaymentStatus: true,
-          depositStatus: true,
-          depositDeductionRupiah: true,
-          depositRefundedRupiah: true,
-          createdAt: true,
-          tenant: { select: { fullName: true } },
-          room: { select: { code: true, name: true } },
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limit,
-      }),
-      this.mappedSourceIds('DEPOSIT'),
-    ]);
-
-    const mappedDepositSet = new Set(mappedDepositIds);
-    const operationalPaid = Number(operationalAgg._sum.depositPaidAmountRupiah ?? 0);
-    const refunded = Number(settledAgg._sum.depositRefundedRupiah ?? 0);
-    const deducted = Number(settledAgg._sum.depositDeductionRupiah ?? 0);
-    const operationalHeld = Math.max(operationalPaid - refunded - deducted, 0);
-
-    const ledgerBreakdown = await this.depositLedgerBreakdown(depositAccount?.id ?? null);
-    const ledgerDebit = ledgerBreakdown.reduce((sum: number, row: any) => sum + Number(row.debitRupiah ?? 0), 0);
-    const ledgerCredit = ledgerBreakdown.reduce((sum: number, row: any) => sum + Number(row.creditRupiah ?? 0), 0);
-    const ledgerLiability = Math.max(ledgerCredit - ledgerDebit, 0);
-    const difference = ledgerLiability - operationalHeld;
-    const openingBalanceRupiah = ledgerBreakdown
-      .filter((row: any) => row.sourceType === 'OPENING_BALANCE' || row.sourceType === 'OPENING_BALANCE_FALLBACK')
-      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
-    const depositAutoJournalRupiah = ledgerBreakdown
-      .filter((row: any) => row.sourceType === 'DEPOSIT')
-      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
-    const adjustmentRupiah = ledgerBreakdown
-      .filter((row: any) => row.sourceType === 'ADJUSTMENT')
-      .reduce((sum: number, row: any) => sum + Number(row.liabilityRupiah ?? 0), 0);
-
-    const differenceDirection = difference === 0
-      ? 'MATCHED'
-      : difference > 0
-        ? 'LEDGER_HIGHER_THAN_OPERATIONAL'
-        : 'OPERATIONAL_HIGHER_THAN_LEDGER';
-
-    const candidateActions: Array<{ key: string; label: string; severity: string; action: string; note: string }> = [];
-    const warnings: string[] = [];
-    let status = 'MATCHED';
-    let explanation = 'Deposit ledger dan operational deposit sudah matched.';
-
-    if (difference > 0) {
-      status = openingBalanceRupiah >= difference ? 'OPENING_BALANCE_ONLY' : 'NEEDS_REVIEW';
-      explanation = openingBalanceRupiah >= difference
-        ? 'Ledger deposit lebih tinggi karena saldo awal/opening balance. Ini belum tentu error; jangan backfill deposit operasional jika depositPaid masih 0.'
-        : 'Ledger deposit lebih tinggi daripada operational held dan tidak seluruhnya dijelaskan oleh opening balance. Perlu review manual sebelum adjustment.';
-      candidateActions.push({
-        key: 'DISCLOSE_OPENING_BALANCE_DEPOSIT',
-        label: 'Disclosure saldo awal deposit',
-        severity: openingBalanceRupiah >= difference ? 'info' : 'warning',
-        action: 'Jangan membuat DEPOSIT journal tambahan sampai sumber opening balance/divergence dipastikan.',
-        note: explanation,
-      });
-      warnings.push(`Ledger deposit lebih tinggi ${difference.toLocaleString('id-ID')} dari operational held.`);
-    } else if (difference < 0) {
-      status = 'OPERATIONAL_HIGHER_THAN_LEDGER';
-      explanation = 'Operational paid deposit lebih tinggi daripada ledger liability. Deposit backfill dry-run dapat mencari kandidat yang aman.';
-      candidateActions.push({
-        key: 'RUN_DEPOSIT_BACKFILL_DRY_RUN',
-        label: 'Dry-run backfill deposit',
-        severity: 'warning',
-        action: 'Owner boleh menjalankan dry-run. Execute journal hanya setelah candidate source jelas dan tidak double-post.',
-        note: 'Backfill hanya untuk stay dengan depositPaidAmountRupiah > 0 yang belum punya DEPOSIT journal.',
-      });
-      warnings.push(`Operational deposit lebih tinggi ${Math.abs(difference).toLocaleString('id-ID')} dari ledger liability.`);
-    } else {
-      candidateActions.push({
-        key: 'NO_ACTION_REQUIRED',
-        label: 'Tidak perlu action',
-        severity: 'success',
-        action: 'Tidak ada backfill/adjustment deposit yang diperlukan.',
-        note: explanation,
-      });
-    }
-
-    const formattedOperationalStays = operationalStays.map((stay: any) => {
-      const paid = Number(stay.depositPaidAmountRupiah ?? 0);
-      const refund = Number(stay.depositRefundedRupiah ?? 0);
-      const deduction = Number(stay.depositDeductionRupiah ?? 0);
-      return {
-        stayId: stay.id,
-        tenantId: stay.tenantId,
-        tenantName: stay.tenant?.fullName ?? null,
-        roomId: stay.roomId,
-        roomCode: stay.room?.code ?? null,
-        status: stay.status,
-        depositAmountRupiah: Number(stay.depositAmountRupiah ?? 0),
-        depositPaidRupiah: paid,
-        depositRefundedRupiah: refund,
-        depositDeductedRupiah: deduction,
-        depositHeldRupiah: Math.max(paid - refund - deduction, 0),
-        depositPaymentStatus: stay.depositPaymentStatus,
-        depositStatus: stay.depositStatus,
-        hasDepositJournal: mappedDepositSet.has(stay.id),
-        backfillCandidate: paid > 0 && !mappedDepositSet.has(stay.id),
-      };
-    });
-
-    return {
-      account: depositAccount,
-      operational: {
-        stayCount: Number(operationalAgg._count?.id ?? 0),
-        depositAmountRupiah: Number(operationalAgg._sum.depositAmountRupiah ?? 0),
-        depositPaidRupiah: operationalPaid,
-        depositRefundedRupiah: refunded,
-        depositDeductedRupiah: deducted,
-        depositHeldRupiah: operationalHeld,
-      },
-      ledger: {
-        debitRupiah: ledgerDebit,
-        creditRupiah: ledgerCredit,
-        liabilityRupiah: ledgerLiability,
-      },
-      ledgerBreakdownSummary: { openingBalanceRupiah, depositAutoJournalRupiah, adjustmentRupiah },
-      ledgerBreakdown,
-      operationalStays: formattedOperationalStays,
-      differenceRupiah: difference,
-      reconciliation: { status, differenceDirection },
-      candidateActions,
-      warnings,
-      explanation,
-    };
-  }
-
-  private async depositLedgerBreakdown(depositAccountId: number | null) {
-    if (!depositAccountId) return [];
-    const [journalLines, openingJournalSourceIds] = await Promise.all([
-      (this.prisma as any).journalLine.findMany({
-        where: { chartOfAccountId: depositAccountId, journalEntry: { status: 'POSTED' as any } },
-        include: { journalEntry: { select: { id: true, entryNumber: true, sourceType: true, sourceId: true, memo: true, entryDate: true } } },
-        orderBy: { id: 'asc' },
-      }),
-      this.mappedSourceIds('OPENING_BALANCE'),
-    ]);
-
-    const buckets = new Map<string, any>();
-    const push = (sourceType: string, debit: number, credit: number, entry?: any) => {
-      const current = buckets.get(sourceType) ?? { sourceType, debitRupiah: 0, creditRupiah: 0, liabilityRupiah: 0, sourceCount: 0, sampleEntries: [] };
-      current.debitRupiah += debit;
-      current.creditRupiah += credit;
-      current.liabilityRupiah = Math.max(current.creditRupiah - current.debitRupiah, 0);
-      if (entry && current.sampleEntries.length < 10) current.sampleEntries.push(entry);
-      current.sourceCount += entry ? 1 : 0;
-      buckets.set(sourceType, current);
-    };
-
-    for (const line of journalLines) {
-      push(String(line.journalEntry?.sourceType ?? 'UNKNOWN'), Number(line.debitRupiah ?? 0), Number(line.creditRupiah ?? 0), {
-        id: line.journalEntry?.id,
-        entryNumber: line.journalEntry?.entryNumber,
-        sourceType: line.journalEntry?.sourceType,
-        sourceId: line.journalEntry?.sourceId,
-        memo: line.journalEntry?.memo,
-        entryDate: line.journalEntry?.entryDate,
-        debitRupiah: Number(line.debitRupiah ?? 0),
-        creditRupiah: Number(line.creditRupiah ?? 0),
-      });
-    }
-
-    const openingFallback = await (this.prisma as any).openingBalanceLine.findMany({
-      where: {
-        chartOfAccountId: depositAccountId,
-        batch: { status: 'POSTED' as any, id: { notIn: openingJournalSourceIds } },
-      },
-      include: { batch: { select: { id: true, batchNumber: true, cutoverDate: true, notes: true } } },
-      orderBy: { id: 'asc' },
-    });
-    for (const line of openingFallback) {
-      push('OPENING_BALANCE_FALLBACK', Number(line.debitRupiah ?? 0), Number(line.creditRupiah ?? 0), {
-        id: line.batch?.id,
-        entryNumber: line.batch?.batchNumber,
-        sourceType: 'OPENING_BALANCE_FALLBACK',
-        sourceId: String(line.batch?.id ?? ''),
-        memo: line.description ?? line.batch?.notes ?? 'Opening balance fallback',
-        entryDate: line.batch?.cutoverDate,
-        debitRupiah: Number(line.debitRupiah ?? 0),
-        creditRupiah: Number(line.creditRupiah ?? 0),
-      });
-    }
-
-    return Array.from(buckets.values()).sort((a: any, b: any) => String(a.sourceType).localeCompare(String(b.sourceType)));
   }
 
   async reversalWatch() {
@@ -1407,40 +1126,4 @@ export class AccountingReportsService {
     };
   }
 
-  private formatJournalEntry(entry: any) {
-    return {
-      id: entry.id,
-      entryNumber: entry.entryNumber,
-      entryDate: entry.entryDate,
-      accountingPeriod: entry.accountingPeriod ?? null,
-      status: entry.status,
-      sourceType: entry.sourceType,
-      sourceId: entry.sourceId,
-      memo: entry.memo,
-      totalDebitRupiah: Number(entry.totalDebitRupiah ?? 0),
-      totalCreditRupiah: Number(entry.totalCreditRupiah ?? 0),
-      isBalanced: Boolean(entry.isBalanced),
-      postedAt: entry.postedAt,
-      createdAt: entry.createdAt,
-      lines: (entry.lines ?? []).map((line: any) => ({
-        id: line.id,
-        chartOfAccountId: line.chartOfAccountId,
-        cashAccountId: line.cashAccountId,
-        description: line.description,
-        debitRupiah: Number(line.debitRupiah ?? 0),
-        creditRupiah: Number(line.creditRupiah ?? 0),
-        sortOrder: line.sortOrder,
-        chartOfAccount: line.chartOfAccount ?? null,
-        cashAccount: line.cashAccount ?? null,
-      })),
-    };
-  }
-
-  private async mappedSourceIds(sourceType: string) {
-    const rows = await (this.prisma as any).journalEntry.findMany({
-      where: { sourceType: sourceType as any, sourceId: { not: null }, status: 'POSTED' as any },
-      select: { sourceId: true },
-    });
-    return rows.map((row) => Number(row.sourceId)).filter((id) => Number.isFinite(id));
-  }
 }

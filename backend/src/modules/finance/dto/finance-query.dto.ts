@@ -15,4 +15,11 @@ export class FinancePeriodQueryDto {
   @Min(1)
   @Max(12)
   month?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  trendMonths?: number;
 }

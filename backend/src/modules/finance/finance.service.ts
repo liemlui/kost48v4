@@ -418,9 +418,10 @@ export class FinanceService {
       signals.push({ type: 'outstanding', count: outstandingCount, totalRupiah: outstanding, route: '/invoices' });
     }
 
-    // --- Trend 6 months ---
+    // --- Trend (dinamis berdasarkan query.trendMonths, default 6) ---
+    const trendCount = query.trendMonths ?? 6;
     const trendMonths: Array<{ year: number; month: number; revenue: number; expense: number; netProfit: number }> = [];
-    for (let i = 5; i >= 0; i--) {
+    for (let i = trendCount - 1; i >= 0; i--) {
       const m = month - i;
       let ty = year;
       let tm = m;
@@ -483,6 +484,7 @@ export class FinanceService {
         netCashFlowChangePercent: changePercent(netCashFlow, prevNetCashFlow),
       },
       signals,
+      trendMonths,
       trend6Months: trendMonths,
       generatedAt: new Date().toISOString(),
     };

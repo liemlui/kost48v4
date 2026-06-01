@@ -9,17 +9,14 @@ import {
 import { Prisma } from '../../generated/prisma';
 import {
   LeadSource,
-  PricingTerm,
   RoomStatus,
   StayStatus,
-  UserRole,
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
-import { calculateRentByPricingTerm } from './pricing.helper';
-import { addDays, startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
+import { startOfDay, endOfDay, parseDateOnly } from '../../common/utils/date.util';
 import { isBookingSchemaReady, isBookingSchemaDriftError } from './booking-schema.helper';
 import { CancelTenantBookingDto } from './dto/cancel-tenant-booking.dto';
 import { CreateTenantBookingDto } from './dto/create-tenant-booking.dto';
@@ -28,79 +25,21 @@ import { RejectBookingDto } from './dto/reject-booking.dto';
 import { TenantBookingsQueryDto } from './dto/tenant-bookings-query.dto';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
-import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
-
-interface RoomPricingSnapshot {
-  id: number;
-  code: string;
-  name: string | null;
-  floor: string | null;
-  status: string;
-  isActive: boolean;
-  dailyRateRupiah: number | null;
-  weeklyRateRupiah: number | null;
-  biWeeklyRateRupiah: number | null;
-  monthlyRateRupiah: number;
-  defaultDepositRupiah: number;
-  electricityTariffPerKwhRupiah: number;
-  waterTariffPerM3Rupiah: number;
-  notes: string | null;
-}
-
-interface BookingRow {
-  id: number;
-  tenantId: number;
-  roomId: number;
-  status: string;
-  pricingTerm: string;
-  agreedRentAmountRupiah: number;
-  checkInDate: Date;
-  plannedCheckOutDate: Date | null;
-  expiresAt: Date | null;
-  depositAmountRupiah: number;
-  depositPaidAmountRupiah?: number | null;
-  depositPaymentStatus?: string | null;
-  electricityTariffPerKwhRupiah: number;
-  waterTariffPerM3Rupiah: number;
-  bookingSource: string | null;
-  stayPurpose: string | null;
-  notes: string | null;
-  cancelReason?: string | null;
-  createdById: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  tenantFullName: string;
-  tenantPhone: string;
-  tenantEmail: string | null;
-  roomCode: string;
-  roomName: string | null;
-  roomFloor: string | null;
-  roomStatus: string;
-  invoiceCount?: number;
-  latestInvoiceId?: number | null;
-  latestInvoiceNumber?: string | null;
-  latestInvoiceStatus?: string | null;
-  invoiceTotalAmountRupiah?: number | null;
-  invoicePaidAmountRupiah?: number | null;
-  invoiceRemainingAmountRupiah?: number | null;
-}
-
-interface ApprovalBookingSnapshot {
-  stayId: number;
-  tenantId: number;
-  roomId: number;
-  stayStatus: string;
-  pricingTerm: string;
-  agreedRentAmountRupiah: number;
-  checkInDate: Date;
-  plannedCheckOutDate: Date | null;
-  expiresAt: Date | null;
-  bookingSource: string | null;
-  roomCode: string;
-  roomStatus: string;
-  roomIsActive: boolean;
-  tenantIsActive: boolean;
-}
+import {
+  type RoomPricingSnapshot,
+  type BookingRow,
+  type ApprovalBookingSnapshot,
+  lockApprovalBookingTx,
+  mapBookingRow,
+  findBookingByIdTx,
+  resolveRentFromSnapshot,
+  mapPricingTermToUnit,
+  addCalendarMonthsClamped,
+  calculatePeriodEndFromBooking,
+  calculateDueDateFromBooking,
+  calculateBookingExpiry,
+  resolveTenantPortalUser,
+} from './tenant-bookings-helpers';
 
 @Injectable()
 export class TenantBookingsService {
@@ -202,12 +141,12 @@ export class TenantBookingsService {
           throw new ConflictException('Kamar sedang ditempati. Pemesanan baru belum dibuka sampai kamar siap huni.');
         }
 
-        const agreedRentAmountRupiah = this.resolveRent(room, dto.pricingTerm);
+        const agreedRentAmountRupiah = resolveRentFromSnapshot(room, dto.pricingTerm);
         if (!agreedRentAmountRupiah || agreedRentAmountRupiah <= 0) {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
 
-        const expiresAt = this.calculateBookingExpiry(checkInDate);
+        const expiresAt = calculateBookingExpiry(checkInDate);
         const stayPurposeSql = dto.stayPurpose
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
           : Prisma.sql`NULL`;
@@ -240,7 +179,7 @@ export class TenantBookingsService {
         const bookingId = insertedRows[0]?.id;
         if (!bookingId) throw new ConflictException('Booking gagal dibuat');
 
-        const booking = await this.findBookingByIdTx(tx, bookingId, tenantId);
+        const booking = await findBookingByIdTx(tx, bookingId, tenantId);
         if (!booking) throw new NotFoundException('Booking yang baru dibuat tidak ditemukan');
 
         await tx.auditLog.create({
@@ -307,7 +246,7 @@ export class TenantBookingsService {
 
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
-        const booking = await this.lockApprovalBookingTx(tx, stayId);
+        const booking = await lockApprovalBookingTx(tx, stayId);
         if (!booking) throw new NotFoundException('Booking tidak ditemukan');
 
         if (booking.stayStatus !== StayStatus.ACTIVE) {
@@ -377,12 +316,12 @@ export class TenantBookingsService {
           },
         });
 
-        const periodEnd = this.calculatePeriodEnd(
+        const periodEnd = calculatePeriodEndFromBooking(
           new Date(booking.checkInDate),
           booking.pricingTerm,
           booking.plannedCheckOutDate ? new Date(booking.plannedCheckOutDate) : undefined,
         );
-        const dueDate = this.calculateDueDate(periodEnd);
+        const dueDate = calculateDueDateFromBooking(periodEnd);
         const invoiceNumber = `INV-${stayId}-A-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
         const invoice = await tx.invoice.create({
@@ -406,7 +345,7 @@ export class TenantBookingsService {
               lineType: 'RENT' as any,
               description: `Sewa kamar ${booking.roomCode} - ${booking.pricingTerm}`,
               qty: 1,
-              unit: this.mapPricingTermToUnit(booking.pricingTerm),
+              unit: mapPricingTermToUnit(booking.pricingTerm),
               unitPriceRupiah: dto.agreedRentAmountRupiah,
               lineAmountRupiah: dto.agreedRentAmountRupiah,
               sortOrder: 0,
@@ -502,7 +441,7 @@ export class TenantBookingsService {
         };
       });
 
-      const tenantUserId = await this.resolveTenantPortalUser(approved.stay.tenantId);
+      const tenantUserId = await resolveTenantPortalUser(this.prisma, approved.stay.tenantId);
       await this.notifyBookingApproved(tenantUserId, approved.stay.id);
 
       return serializePrismaResult(approved);
@@ -664,7 +603,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
         };
       });
 
-      const tenantUserId = await this.resolveTenantPortalUser(rejected.tenantId);
+      const tenantUserId = await resolveTenantPortalUser(this.prisma, rejected.tenantId);
       await this.notifyBookingRejected(tenantUserId, rejected.id, rejected.cancelReason);
 
       return serializePrismaResult(rejected);
@@ -948,7 +887,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
       const totalItems = Number(countRows[0]?.total ?? 0);
       return {
-        items: serializePrismaResult(items.map((item) => this.mapBookingRow(item))),
+        items: serializePrismaResult(items.map((item) => mapBookingRow(item))),
         meta: buildMeta(page, limit, totalItems),
       };
     } catch (error) {
@@ -960,184 +899,6 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
       }
       throw error;
     }
-  }
-
-  // =========================================================================
-  // PRIVATE HELPERS
-  // =========================================================================
-
-  private async lockApprovalBookingTx(tx: Prisma.TransactionClient, stayId: number) {
-    const rows = await tx.$queryRaw<ApprovalBookingSnapshot[]>(Prisma.sql`
-      SELECT
-        s.id AS "stayId", s."tenantId", s."roomId", s.status AS "stayStatus",
-        s."pricingTerm", s."agreedRentAmountRupiah", s."checkInDate",
-        s."plannedCheckOutDate", s."expiresAt", s."bookingSource",
-        r.code AS "roomCode", r.status AS "roomStatus", r."isActive" AS "roomIsActive",
-        t."isActive" AS "tenantIsActive"
-      FROM "Stay" s
-      INNER JOIN "Room" r ON r.id = s."roomId"
-      INNER JOIN "Tenant" t ON t.id = s."tenantId"
-      WHERE s.id = ${stayId}
-      FOR UPDATE OF s, r
-    `);
-    return rows[0] ?? null;
-  }
-
-  private async findBookingByIdTx(
-    tx: Prisma.TransactionClient,
-    bookingId: number,
-    tenantId: number,
-  ) {
-    const rows = await tx.$queryRaw<BookingRow[]>(Prisma.sql`
-      SELECT
-        s.id, s."tenantId", s."roomId", s.status, s."pricingTerm",
-        s."agreedRentAmountRupiah", s."checkInDate", s."plannedCheckOutDate",
-        s."expiresAt", s."depositAmountRupiah",
-        COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
-        COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
-        s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
-        s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
-        s."createdById", s."createdAt", s."updatedAt",
-        t."fullName" AS "tenantFullName",
-        t.phone AS "tenantPhone",
-        t.email AS "tenantEmail",
-        r.code AS "roomCode",
-        r.name AS "roomName",
-        r.floor AS "roomFloor",
-        r.status AS "roomStatus"
-      FROM "Stay" s
-      INNER JOIN "Tenant" t ON t.id = s."tenantId"
-      INNER JOIN "Room" r ON r.id = s."roomId"
-      WHERE s.id = ${bookingId} AND s."tenantId" = ${tenantId}
-      LIMIT 1
-    `);
-    if (rows.length === 0) return null;
-    return this.mapBookingRow(rows[0]);
-  }
-
-  private mapBookingRow(row: BookingRow) {
-    return {
-      id: row.id,
-      tenantId: row.tenantId,
-      roomId: row.roomId,
-      status: row.status,
-      pricingTerm: row.pricingTerm,
-      agreedRentAmountRupiah: row.agreedRentAmountRupiah,
-      checkInDate: row.checkInDate,
-      plannedCheckOutDate: row.plannedCheckOutDate,
-      expiresAt: row.expiresAt,
-      depositAmountRupiah: row.depositAmountRupiah,
-      depositPaidAmountRupiah: row.depositPaidAmountRupiah ?? 0,
-      depositPaymentStatus: row.depositPaymentStatus ?? 'UNPAID',
-      electricityTariffPerKwhRupiah: row.electricityTariffPerKwhRupiah,
-      waterTariffPerM3Rupiah: row.waterTariffPerM3Rupiah,
-      bookingSource: row.bookingSource,
-      stayPurpose: row.stayPurpose,
-      notes: row.notes,
-      cancelReason: row.cancelReason ?? null,
-      createdById: row.createdById,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      tenant: {
-        id: row.tenantId,
-        fullName: row.tenantFullName,
-        phone: row.tenantPhone,
-        email: row.tenantEmail,
-      },
-      room: {
-        id: row.roomId,
-        code: row.roomCode,
-        name: row.roomName,
-        floor: row.roomFloor,
-        status: row.roomStatus,
-      },
-      invoiceCount: Number(row.invoiceCount ?? 0),
-      latestInvoiceId: row.latestInvoiceId ?? null,
-      latestInvoiceNumber: row.latestInvoiceNumber ?? null,
-      latestInvoiceStatus: row.latestInvoiceStatus ?? null,
-      invoiceTotalAmountRupiah: row.invoiceTotalAmountRupiah ?? null,
-      invoicePaidAmountRupiah: row.invoicePaidAmountRupiah ?? null,
-      invoiceRemainingAmountRupiah: row.invoiceRemainingAmountRupiah ?? null,
-    };
-  }
-
-  private resolveRent(room: RoomPricingSnapshot, pricingTerm: PricingTerm): number {
-    const monthlyRate = Number(room.monthlyRateRupiah ?? 0);
-    if (!monthlyRate || monthlyRate <= 0) return 0;
-    return calculateRentByPricingTerm(monthlyRate, pricingTerm);
-  }
-
-  private mapPricingTermToUnit(pricingTerm: string): string {
-    switch (pricingTerm) {
-      case PricingTerm.DAILY:
-        return 'hari';
-      case PricingTerm.WEEKLY:
-        return 'minggu';
-      case PricingTerm.BIWEEKLY:
-        return '2 minggu';
-      case PricingTerm.MONTHLY:
-        return 'bulan';
-      case PricingTerm.SMESTERLY:
-        return 'semester';
-      case PricingTerm.YEARLY:
-        return 'tahun';
-      default:
-        return 'bulan';
-    }
-  }
-
-  private calculatePeriodEnd(
-    checkInDate: Date,
-    pricingTerm: string,
-    plannedCheckOutDate?: Date,
-  ): Date {
-    // periodStart is inclusive; periodEnd/plannedCheckOutDate is exclusive.
-    // Monthly terms use calendar-month math with end-of-month clamp.
-    if (plannedCheckOutDate) return startOfDay(plannedCheckOutDate);
-
-    const result = startOfDay(checkInDate);
-    switch (pricingTerm) {
-      case PricingTerm.DAILY:
-        return addDays(result, 1);
-      case PricingTerm.WEEKLY:
-        return addDays(result, 7);
-      case PricingTerm.BIWEEKLY:
-        return addDays(result, 14);
-      case PricingTerm.MONTHLY:
-        return this.addCalendarMonthsClamped(result, 1);
-      case PricingTerm.SMESTERLY:
-        return this.addCalendarMonthsClamped(result, 6);
-      case PricingTerm.YEARLY:
-        return this.addCalendarMonthsClamped(result, 12);
-      default:
-        return this.addCalendarMonthsClamped(result, 1);
-    }
-  }
-
-  private addCalendarMonthsClamped(value: Date, months: number): Date {
-    const normalized = startOfDay(value);
-    const day = normalized.getUTCDate();
-    const targetYear = normalized.getUTCFullYear();
-    const targetMonth = normalized.getUTCMonth() + months;
-    const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
-    return new Date(Date.UTC(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth)));
-  }
-
-  private calculateDueDate(_periodEnd: Date): Date {
-    // KOST48 no-debt rule: invoice is due from issue/create time, not from the rental period end.
-    return hoursAfter(new Date(), AUTO_OPS_DEADLINES.INVOICE_DUE_AFTER_HOURS);
-  }
-
-  private calculateBookingExpiry(_checkInDate: Date): Date {
-    return hoursFromNow(AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS);
-  }
-
-  private async resolveTenantPortalUser(tenantId: number): Promise<number | null> {
-    const user = await this.prisma.user.findFirst({
-      where: { role: UserRole.TENANT, tenantId, isActive: true },
-      select: { id: true },
-    });
-    return user?.id ?? null;
   }
 
   private async notifyBookingApproved(recipientUserId: number | null, stayId: number) {

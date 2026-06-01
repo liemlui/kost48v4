@@ -1,0 +1,150 @@
+const userRoles = [
+  { value: 'OWNER', label: 'Owner' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'STAFF', label: 'Staf' },
+  { value: 'TENANT', label: 'Penghuni Portal' },
+];
+
+export const peopleConfigs = {
+  users: {
+    title: 'Users & Akses',
+    supportsIsActiveFilter: true,
+    path: '/users',
+    columns: [
+      { key: 'id', label: 'ID' },
+      { key: 'fullName', label: 'Nama' },
+      { key: 'email', label: 'Email' },
+      { key: 'role', label: 'Role' },
+      { key: 'tenantId', label: 'Tenant Terkait' },
+      { key: 'isActive', label: 'Aktif' },
+    ],
+    fields: [
+      {
+        name: 'fullName',
+        label: 'Nama Lengkap',
+        type: 'text' as const,
+        placeholder: 'Nama lengkap user',
+        required: true,
+      },
+      {
+        name: 'email',
+        label: 'Email',
+        type: 'email' as const,
+        placeholder: 'email@contoh.com',
+        required: true,
+      },
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'password' as const,
+        placeholder: 'Password minimal 8 karakter',
+        required: true,
+      },
+      {
+        name: 'role',
+        label: 'Role',
+        type: 'select' as const,
+        options: userRoles,
+        required: true,
+      },
+      {
+        name: 'tenantId',
+        label: 'Tenant Terkait',
+        type: 'select' as const,
+        placeholder: 'Pilih tenant bila role = TENANT',
+      },
+      { name: 'isActive', label: 'Akun Aktif', type: 'checkbox' as const },
+    ],
+  },
+
+  tenants: {
+    title: 'Tenants & Portal Access',
+    supportsIsActiveFilter: true,
+    path: '/tenants',
+    columns: [
+      { key: 'fullName', label: 'Nama Tenant' },
+      { key: 'phone', label: 'HP' },
+      { key: 'email', label: 'Email' },
+      { key: 'portalAccess', label: 'Akses Portal' },
+      { key: 'isActive', label: 'Status' },
+      { key: 'originCity', label: 'Kota Asal' },
+    ],
+    fields: [
+      {
+        name: 'fullName',
+        label: 'Nama Lengkap',
+        type: 'text' as const,
+        placeholder: 'Nama lengkap tenant',
+        required: true,
+      },
+      {
+        name: 'phone',
+        label: 'No. HP',
+        type: 'text' as const,
+        placeholder: '08xxxxxxxxxx atau +628xxxxxxxxxx',
+        required: true,
+      },
+      {
+        name: 'identityNumber',
+        label: 'No. KTP',
+        type: 'text' as const,
+        placeholder: 'Nomor KTP tenant',
+        required: true,
+      },
+      {
+        name: 'emergencyContactName',
+        label: 'Nama Kontak Darurat',
+        type: 'text' as const,
+        placeholder: 'Nama kontak darurat',
+      },
+      {
+        name: 'emergencyContactPhone',
+        label: 'Telp Kontak Darurat',
+        type: 'text' as const,
+        placeholder: 'Nomor telepon kontak darurat',
+      },
+      {
+        name: 'email',
+        label: 'Email Tenant (untuk kontak)',
+        type: 'email' as const,
+        placeholder: 'email@contoh.com',
+      },
+      {
+        name: 'gender',
+        label: 'Jenis Kelamin',
+        type: 'select' as const,
+        options: [
+          { value: 'MALE', label: 'Laki-laki' },
+          { value: 'FEMALE', label: 'Perempuan' },
+          { value: 'OTHER', label: 'Lainnya' },
+        ],
+      },
+      { name: 'birthDate', label: 'Tanggal Lahir', type: 'date' as const },
+      {
+        name: 'originCity',
+        label: 'Kota Asal',
+        type: 'text' as const,
+        placeholder: 'Kota asal tenant',
+      },
+      {
+        name: 'occupation',
+        label: 'Pekerjaan',
+        type: 'text' as const,
+        placeholder: 'Pekerjaan tenant',
+      },
+      {
+        name: 'companyOrCampus',
+        label: 'Instansi / Kampus',
+        type: 'text' as const,
+        placeholder: 'Nama perusahaan atau kampus',
+      },
+      {
+        name: 'notes',
+        label: 'Catatan',
+        type: 'textarea' as const,
+        placeholder: 'Catatan tambahan tentang tenant',
+      },
+      { name: 'isActive', label: 'Tenant Aktif', type: 'checkbox' as const },
+    ],
+  },
+};

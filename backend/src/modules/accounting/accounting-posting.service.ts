@@ -1,13 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
+import {
+  type AutoSourceType,
+  dateOnly,
+  mappedDepositStaySourceIds,
+  mappedSourceIds,
+  findAccountingPeriodForPostingTx,
+  findAccountByCodeTx,
+  findDefaultCashAccountTx,
+  findCashAccountForPaymentMethodTx,
+  revenueCodeForInvoiceLine,
+  expenseCodeForCategory,
+} from './accounting-posting-helpers';
 
-const AUTO_SOURCE_TYPES = [
-  "INVOICE",
-  "INVOICE_PAYMENT",
-  "EXPENSE",
-  "WIFI_SALE",
-] as const;
-type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
 type AccountingJournalSourceType = AutoSourceType | "DEPOSIT" | "ADJUSTMENT" | "DEPRECIATION" | "CLOSING_ENTRY" | "CLOSING_REVERSAL";
 
 type JournalLineInput = {
@@ -35,11 +40,6 @@ function rupiah(value?: number | null) {
     : 0;
 }
 
-function dateOnly(value: Date | string) {
-  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-}
-
 function sourceEntryNumber(sourceType: string, sourceId: string) {
   const normalizedSourceType = sourceType.replace(/_/g, "-");
   const normalizedSourceId = String(sourceId)
@@ -58,7 +58,7 @@ export class AccountingPostingService {
     return {
       autoPostingEnabled: true,
       basis: "V5.28_B8_CLOSED_PERIOD_GOVERNANCE",
-      sourceTypes: [...AUTO_SOURCE_TYPES, "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY", "CLOSING_REVERSAL"],
+      sourceTypes: ["INVOICE", "INVOICE_PAYMENT", "EXPENSE", "WIFI_SALE", "DEPOSIT", "ADJUSTMENT", "DEPRECIATION", "CLOSING_ENTRY", "CLOSING_REVERSAL"],
       behavior:
         "Idempotent by sourceType/sourceId. Jika COA/cash/period belum siap atau periode sudah CLOSED, transaksi bisnis tetap aman dan journal auto-posting diskip dengan warning; koreksi periode closed harus lewat reopen/reversal Owner-only.",
       excluded: ["INVENTORY", "PAYMENT_REVERSAL"],
@@ -147,7 +147,7 @@ export class AccountingPostingService {
       );
     }
 
-    const fixedAsset = await this.findAccountByCodeTx(tx, "1500");
+    const fixedAsset = await findAccountByCodeTx(tx, "1500");
     if (!fixedAsset) {
       return this.skip(
         "ADJUSTMENT",
@@ -160,7 +160,7 @@ export class AccountingPostingService {
       input.method === "OWNER_CAPITAL_CONTRIBUTION"
         ? "3000"
         : input.creditAccountCode || "1010";
-    const creditAccount = await this.findAccountByCodeTx(tx, creditCode);
+    const creditAccount = await findAccountByCodeTx(tx, creditCode);
     if (!creditAccount) {
       return this.skip(
         "ADJUSTMENT",
@@ -217,7 +217,7 @@ export class AccountingPostingService {
       );
     }
 
-    const depreciationExpense = await this.findAccountByCodeTx(tx, "6700");
+    const depreciationExpense = await findAccountByCodeTx(tx, "6700");
     if (!depreciationExpense) {
       return this.skip(
         "DEPRECIATION",
@@ -226,7 +226,7 @@ export class AccountingPostingService {
       );
     }
 
-    const accumulatedDepreciation = await this.findAccountByCodeTx(tx, "1590");
+    const accumulatedDepreciation = await findAccountByCodeTx(tx, "1590");
     if (!accumulatedDepreciation) {
       return this.skip(
         "DEPRECIATION",
@@ -293,7 +293,7 @@ export class AccountingPostingService {
     if (receivableAmount <= 0)
       return this.skip("INVOICE", invoiceId, "Invoice total 0.");
 
-    const ar = await this.findAccountByCodeTx(tx, "1100");
+    const ar = await findAccountByCodeTx(tx, "1100");
     if (!ar)
       return this.skip(
         "INVOICE",
@@ -315,11 +315,11 @@ export class AccountingPostingService {
     for (const line of invoice.lines) {
       const amount = Number(line.lineAmountRupiah ?? 0);
       if (!Number.isFinite(amount) || amount === 0) continue;
-      const code = this.revenueCodeForInvoiceLine(
+      const code = revenueCodeForInvoiceLine(
         line.lineType,
         line.utilityType,
       );
-      const account = await this.findAccountByCodeTx(tx, code);
+      const account = await findAccountByCodeTx(tx, code);
       if (!account)
         return this.skip(
           "INVOICE",
@@ -372,7 +372,7 @@ export class AccountingPostingService {
         "Payment amount 0.",
       );
 
-    const cash = await this.findCashAccountForPaymentMethodTx(
+    const cash = await findCashAccountForPaymentMethodTx(
       tx,
       payment.method,
     );
@@ -383,7 +383,7 @@ export class AccountingPostingService {
         "Cash/bank account aktif belum tersedia.",
       );
 
-    const ar = await this.findAccountByCodeTx(tx, "1100");
+    const ar = await findAccountByCodeTx(tx, "1100");
     if (!ar)
       return this.skip(
         "INVOICE_PAYMENT",
@@ -426,9 +426,9 @@ export class AccountingPostingService {
     if (amount <= 0)
       return this.skip("EXPENSE", expenseId, "Expense amount 0.");
 
-    const expenseAccount = await this.findAccountByCodeTx(
+    const expenseAccount = await findAccountByCodeTx(
       tx,
-      this.expenseCodeForCategory(expense.category),
+      expenseCodeForCategory(expense.category),
     );
     if (!expenseAccount)
       return this.skip(
@@ -437,7 +437,7 @@ export class AccountingPostingService {
         "COA expense tujuan belum tersedia.",
       );
 
-    const cash = await this.findDefaultCashAccountTx(tx);
+    const cash = await findDefaultCashAccountTx(tx);
     if (!cash)
       return this.skip(
         "EXPENSE",
@@ -484,7 +484,7 @@ export class AccountingPostingService {
     if (amount <= 0)
       return this.skip("WIFI_SALE", wifiSaleId, "WiFi sale amount 0.");
 
-    const cash = await this.findDefaultCashAccountTx(tx);
+    const cash = await findDefaultCashAccountTx(tx);
     if (!cash)
       return this.skip(
         "WIFI_SALE",
@@ -492,7 +492,7 @@ export class AccountingPostingService {
         "Cash/bank account aktif belum tersedia.",
       );
 
-    const wifiRevenue = await this.findAccountByCodeTx(tx, "4200");
+    const wifiRevenue = await findAccountByCodeTx(tx, "4200");
     if (!wifiRevenue)
       return this.skip(
         "WIFI_SALE",
@@ -556,8 +556,8 @@ export class AccountingPostingService {
       );
 
     const cash = paymentMethod
-      ? await this.findCashAccountForPaymentMethodTx(tx, paymentMethod)
-      : await this.findDefaultCashAccountTx(tx);
+      ? await findCashAccountForPaymentMethodTx(tx, paymentMethod)
+      : await findDefaultCashAccountTx(tx);
     if (!cash)
       return this.skip(
         "DEPOSIT",
@@ -565,7 +565,7 @@ export class AccountingPostingService {
         "Cash/bank account aktif belum tersedia.",
       );
 
-    const depositLiability = await this.findAccountByCodeTx(tx, "2000");
+    const depositLiability = await findAccountByCodeTx(tx, "2000");
     if (!depositLiability)
       return this.skip(
         "DEPOSIT",
@@ -622,7 +622,7 @@ export class AccountingPostingService {
         "Tidak ada refund/deduction deposit untuk dijurnal.",
       );
 
-    const depositLiability = await this.findAccountByCodeTx(tx, "2000");
+    const depositLiability = await findAccountByCodeTx(tx, "2000");
     if (!depositLiability)
       return this.skip(
         "DEPOSIT",
@@ -642,7 +642,7 @@ export class AccountingPostingService {
 
     let sortOrder = 1;
     if (refunded > 0) {
-      const cash = await this.findDefaultCashAccountTx(tx);
+      const cash = await findDefaultCashAccountTx(tx);
       if (!cash)
         return this.skip(
           "DEPOSIT",
@@ -660,7 +660,7 @@ export class AccountingPostingService {
     }
 
     if (deduction > 0) {
-      const recoveryRevenue = await this.findAccountByCodeTx(tx, "4400");
+      const recoveryRevenue = await findAccountByCodeTx(tx, "4400");
       if (!recoveryRevenue)
         return this.skip(
           "DEPOSIT",
@@ -738,29 +738,9 @@ export class AccountingPostingService {
     });
   }
 
-  private async mappedDepositStaySourceIds() {
-    const entries = await (this.prisma as any).journalEntry.findMany({
-      where: {
-        sourceType: "DEPOSIT" as any,
-        status: "POSTED" as any,
-      },
-      select: { sourceId: true },
-    });
-
-    const mapped = new Set<number>();
-    for (const entry of entries ?? []) {
-      const sourceId = String(entry.sourceId ?? "");
-      // Deposit received journals use numeric stay ids. Settlement journals use
-      // prefixed ids such as SETTLEMENT:<stayId>, so they must not block
-      // received-deposit backfill candidates.
-      if (/^\d+$/.test(sourceId)) mapped.add(Number(sourceId));
-    }
-    return mapped;
-  }
-
   async dryRunDepositBackfill(dto: { limit?: number } = {}) {
     const limit = Math.min(Math.max(Number(dto.limit ?? 25), 1), 50);
-    const mappedDepositIds = await this.mappedDepositStaySourceIds();
+    const mappedDepositIds = await mappedDepositStaySourceIds(this.prisma);
     const stays = await (this.prisma as any).stay.findMany({
       where: { depositPaidAmountRupiah: { gt: 0 } },
       select: {
@@ -894,10 +874,11 @@ export class AccountingPostingService {
     dto: { sourceTypes?: string[]; limit?: number } = {},
     createdById?: number | null,
   ) {
+    const AUTO_SOURCE_TYPES_LIST = ["INVOICE", "INVOICE_PAYMENT", "EXPENSE", "WIFI_SALE"] as const;
     const sourceTypes = (
-      dto.sourceTypes?.length ? dto.sourceTypes : [...AUTO_SOURCE_TYPES]
+      dto.sourceTypes?.length ? dto.sourceTypes : [...AUTO_SOURCE_TYPES_LIST]
     ).filter((item): item is AutoSourceType =>
-      AUTO_SOURCE_TYPES.includes(item as AutoSourceType),
+      (AUTO_SOURCE_TYPES_LIST as readonly string[]).includes(item),
     );
     const limit = Math.min(Math.max(Number(dto.limit ?? 25), 1), 50);
     const items: Array<{
@@ -976,7 +957,7 @@ export class AccountingPostingService {
     sourceType: AutoSourceType,
     limit: number,
   ) {
-    const mapped = await this.mappedSourceIds(sourceType);
+    const mapped = await mappedSourceIds(this.prisma,sourceType);
     if (sourceType === "INVOICE") {
       const rows = await (this.prisma as any).invoice.findMany({
         where: {
@@ -1014,20 +995,6 @@ export class AccountingPostingService {
       take: limit,
     });
     return rows.map((row: any) => row.id);
-  }
-
-  private async mappedSourceIds(sourceType: AutoSourceType) {
-    const rows = await (this.prisma as any).journalEntry.findMany({
-      where: {
-        sourceType: sourceType as any,
-        sourceId: { not: null },
-        status: { not: "VOID" as any },
-      },
-      select: { sourceId: true },
-    });
-    return rows
-      .map((row: any) => Number(row.sourceId))
-      .filter((id: number) => Number.isFinite(id));
   }
 
   private async postBalancedJournalTx(tx: any, input: PostJournalInput) {
@@ -1086,7 +1053,7 @@ export class AccountingPostingService {
       );
     }
 
-    const period = await this.findAccountingPeriodForPostingTx(tx, input.entryDate);
+    const period = await findAccountingPeriodForPostingTx(tx, input.entryDate);
     if (!period)
       return this.skip(
         input.sourceType,
@@ -1136,83 +1103,6 @@ export class AccountingPostingService {
     });
 
     return { posted: true, skipped: false, journalEntry: journal };
-  }
-
-  private async findAccountingPeriodForPostingTx(tx: any, value: Date) {
-    const entryDate = dateOnly(value);
-    return tx.accountingPeriod.findFirst({
-      where: {
-        startDate: { lte: entryDate },
-        endDate: { gte: entryDate },
-      },
-      orderBy: [{ year: "desc" }, { month: "desc" }],
-    });
-  }
-
-  private async findAccountByCodeTx(tx: any, code: string) {
-    return tx.chartOfAccount.findFirst({ where: { code, isActive: true } });
-  }
-
-  private async findDefaultCashAccountTx(tx: any) {
-    const defaultCash = await tx.cashAccount.findFirst({
-      where: { isDefault: true, isActive: true },
-      orderBy: { id: "asc" },
-    });
-    if (defaultCash) return defaultCash;
-    return tx.cashAccount.findFirst({
-      where: { isActive: true },
-      orderBy: { id: "asc" },
-    });
-  }
-
-  private async findCashAccountForPaymentMethodTx(
-    tx: any,
-    method?: string | null,
-  ) {
-    const preferredType =
-      method === "QRIS"
-        ? "QRIS"
-        : method === "EWALLET"
-          ? "EWALLET"
-          : method === "CASH"
-            ? "CASH"
-            : "BANK";
-    const preferred = await tx.cashAccount.findFirst({
-      where: { accountType: preferredType as any, isActive: true },
-      orderBy: [{ isDefault: "desc" }, { id: "asc" }],
-    });
-    if (preferred) return preferred;
-    return this.findDefaultCashAccountTx(tx);
-  }
-
-  private revenueCodeForInvoiceLine(
-    lineType?: string | null,
-    utilityType?: string | null,
-  ) {
-    if (lineType === "RENT") return "4000";
-    if (lineType === "ELECTRICITY" || utilityType === "ELECTRICITY")
-      return "4100";
-    if (lineType === "WATER" || utilityType === "WATER") return "4110";
-    if (lineType === "WIFI") return "4200";
-    if (lineType === "PENALTY") return "4400";
-    return "4300";
-  }
-
-  private expenseCodeForCategory(category?: string | null) {
-    const mapping: Record<string, string> = {
-      SALARY: "6000",
-      ELECTRICITY: "6100",
-      WATER: "6110",
-      INTERNET: "6120",
-      MAINTENANCE: "6200",
-      CLEANING: "6210",
-      SUPPLIES: "6220",
-      MARKETING: "6300",
-      TAX: "6400",
-      OTHER: "6990",
-      RENT_BUILDING: "6990",
-    };
-    return mapping[String(category ?? "OTHER")] ?? "6990";
   }
 
   private skip(sourceType: string, sourceId: string | number, reason: string) {

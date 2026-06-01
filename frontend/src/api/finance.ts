@@ -99,12 +99,17 @@ export type OwnerDashboard = {
   headline: string;
   kpi: OwnerDashboardKpi;
   signals: OwnerDashboardSignal[];
+  trendMonths: OwnerDashboardTrendMonth[];
   trend6Months: OwnerDashboardTrendMonth[];
   generatedAt: string;
 };
 
-function params(year?: number, month?: number) {
-  return { ...(year ? { year } : {}), ...(month ? { month } : {}) };
+function params(year?: number, month?: number, trendMonths?: number) {
+  return {
+    ...(year ? { year } : {}),
+    ...(month ? { month } : {}),
+    ...(trendMonths ? { trendMonths } : {}),
+  };
 }
 
 export async function fetchBusinessHealth(year?: number, month?: number) {
@@ -127,7 +132,7 @@ export async function fetchBalanceSheetDraft(year?: number, month?: number) {
   return response.data.data;
 }
 
-export async function fetchOwnerDashboard(year?: number, month?: number) {
-  const response = await client.get<ApiEnvelope<OwnerDashboard>>('/finance/owner-dashboard', { params: params(year, month) });
+export async function fetchOwnerDashboard(year?: number, month?: number, trendMonths?: number) {
+  const response = await client.get<ApiEnvelope<OwnerDashboard>>('/finance/owner-dashboard', { params: params(year, month, trendMonths) });
   return response.data.data;
 }
