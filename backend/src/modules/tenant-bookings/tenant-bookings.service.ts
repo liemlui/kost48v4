@@ -146,6 +146,9 @@ export class TenantBookingsService {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
 
+        // DP 30% sesuai pricingTerm (G4=B): 30% × harga sewa sesuai durasi
+        const depositAmountRupiah = Math.round((agreedRentAmountRupiah * 30) / 100);
+
         const expiresAt = calculateBookingExpiry(checkInDate);
         const stayPurposeSql = dto.stayPurpose
           ? Prisma.sql`CAST(${dto.stayPurpose} AS "StayPurpose")`
@@ -168,7 +171,7 @@ export class TenantBookingsService {
             CAST(${StayStatus.ACTIVE} AS "StayStatus"),
             CAST(${dto.pricingTerm} AS "PricingTerm"),
             ${agreedRentAmountRupiah}, ${checkInDate}, ${plannedCheckOutDate}, ${expiresAt},
-            ${room.defaultDepositRupiah ?? 0},
+            ${depositAmountRupiah},
             ${room.electricityTariffPerKwhRupiah ?? 0}, ${room.waterTariffPerM3Rupiah ?? 0},
             CAST(${LeadSource.WEBSITE} AS "LeadSource"), ${stayPurposeSql}, ${dto.notes ?? null},
             ${user.id}, NOW(), NOW()
