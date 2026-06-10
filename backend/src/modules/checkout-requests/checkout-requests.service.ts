@@ -170,9 +170,22 @@ export class CheckoutRequestsService {
         );
       }
 
+      const stay = await tx.stay.findUnique({
+        where: { id: request.stayId },
+        select: { plannedCheckOutDate: true },
+      });
+      const requestedDate = new Date(request.requestedCheckOutDate);
+      const currentCheckOut = stay?.plannedCheckOutDate
+        ? new Date(stay.plannedCheckOutDate)
+        : null;
+      if (currentCheckOut && requestedDate > currentCheckOut) {
+        throw new ConflictException(
+          'Tanggal checkout tidak boleh melebihi tanggal kontrak saat ini. Untuk perpanjangan, silakan ajukan perpanjangan sewa (renewal).',
+        );
+      }
       await tx.stay.updateMany({
         where: { id: request.stayId, status: StayStatus.ACTIVE },
-        data: { plannedCheckOutDate: request.requestedCheckOutDate },
+        data: { plannedCheckOutDate: requestedDate },
       });
 
       return tx.checkoutRequest.findUniqueOrThrow({ where: { id } });

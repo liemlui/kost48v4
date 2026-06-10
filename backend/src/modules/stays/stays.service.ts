@@ -215,7 +215,7 @@ export class StaysService {
         }
       } else {
         portalStatus = "CREATED";
-        const rawPassword = `kost48-${String(Math.floor(1000 + Math.random() * 9000))}`;
+        const rawPassword = `kost48-${randomBytes(9).toString('base64url').slice(0, 12)}`;
         temporaryPassword = rawPassword;
         passwordHash = await bcrypt.hash(rawPassword, 10);
       }
@@ -223,6 +223,19 @@ export class StaysService {
 
     try {
       const created = await this.prisma.$transaction(async (tx) => {
+        // Lock + re-validasi: cegah race condition double occupancy
+        await tx.$queryRaw`SELECT id FROM "Room" WHERE id = ${dto.roomId} FOR UPDATE`;
+        const lockedRoom = await tx.room.findUnique({ where: { id: dto.roomId } });
+        if (!lockedRoom) throw new NotFoundException("Kamar tidak ditemukan");
+        if (lockedRoom.status === RoomStatus.OCCUPIED || lockedRoom.status === RoomStatus.RESERVED) {
+          throw new ConflictException("Kamar sudah ditempati stay aktif lain atau sedang dipesan");
+        }
+        const existingRoomStayLock = await tx.stay.findFirst({
+          where: { roomId: dto.roomId, status: StayStatus.ACTIVE },
+        });
+        if (existingRoomStayLock) {
+          throw new ConflictException("Kamar sudah ditempati stay aktif lain");
+        }
         const stay = await tx.stay.create({
           data: {
             tenantId: dto.tenantId,
@@ -447,7 +460,7 @@ export class StaysService {
           );
         }
         throw new ConflictException(
-          `Constraint database gagal: ${error.message}`,
+          'Gagal menyimpan data. Kesalahan integritas database.',
         );
       }
 
@@ -671,6 +684,16 @@ export class StaysService {
       });
 
       for (const invoice of invoicesToReverse) {
+        const postedJournal = await tx.journalEntry.findFirst({
+          where: {
+            sourceType: 'INVOICE' as any,
+            sourceId: String(invoice.id),
+            status: 'POSTED' as any,
+          },
+          select: { id: true },
+          orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+        });
+        if (!postedJournal) continue;
         const reversalResult =
           await this.accountingPosting.postInvoiceCancellationReversalTx(
             tx,
@@ -679,7 +702,7 @@ export class StaysService {
           );
         if (reversalResult?.skipped) {
           throw new ConflictException(
-            `Pembatalan stay gagal karena reversal accounting invoice #${invoice.id} tidak berhasil: ${reversalResult.reason ?? "alasan tidak diketahui"}`,
+            `Pembatalan stay gagal karena reversal accounting invoice #${invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
           );
         }
       }
@@ -901,7 +924,7 @@ export class StaysService {
     } catch (error: any) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         throw new ConflictException(
-          `Constraint database gagal: ${error.message}`,
+          'Gagal menyimpan data. Kesalahan integritas database.',
         );
       }
       throw error;
@@ -946,10 +969,14 @@ export class StaysService {
     const currentPlannedCheckOut = stay.plannedCheckOutDate
       ? startOfDay(stay.plannedCheckOutDate)
       : null;
+    // Kebijakan owner: tidak boleh ada tunggakan. Tolak renewal jika sudah lewat plannedCheckOut.
+    if (currentPlannedCheckOut && today > currentPlannedCheckOut) {
+      throw new ConflictException(
+        'Kontrak sewa sudah berakhir. Tidak dapat memperpanjang kontrak yang sudah lewat. Silakan melakukan check-in ulang (rebooking).',
+      );
+    }
     // periodEnd/plannedCheckOutDate is exclusive, so the renewal starts on the current periodEnd date.
-    const logicalPeriodStart = currentPlannedCheckOut
-      ? maxDate(currentPlannedCheckOut, today)
-      : today;
+    const logicalPeriodStart = currentPlannedCheckOut ?? today;
 
     const newPlannedCheckOut = dto.plannedCheckOutDate
       ? startOfDay(new Date(dto.plannedCheckOutDate))

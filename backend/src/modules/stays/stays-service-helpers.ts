@@ -146,7 +146,5 @@ export function resolveDepositSettlementAmount(stay: {
   depositAmountRupiah: number | null;
   depositPaidAmountRupiah?: number | null;
 }) {
-  const paid = Number(stay.depositPaidAmountRupiah ?? 0);
-  const expected = Number(stay.depositAmountRupiah ?? 0);
-  return paid > 0 ? paid : expected;
+  return Number(stay.depositPaidAmountRupiah ?? 0);
 }

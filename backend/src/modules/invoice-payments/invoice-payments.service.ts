@@ -112,25 +112,34 @@ export class InvoicePaymentsService {
 
   async create(dto: CreateInvoicePaymentDto, actor: CurrentUserPayload) {
     this.assertFinanceMutationAllowed(actor);
-    const invoice = await this.prisma.invoice.findUnique({
+    const invoiceSnapshot = await this.prisma.invoice.findUnique({
       where: { id: dto.invoiceId },
-      include: { lines: true, payments: true, stay: true },
+      select: { id: true, status: true, stay: { select: { tenantId: true, roomId: true } } },
     });
 
-    if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
-    if (invoice.status === InvoiceStatus.DRAFT) {
+    if (!invoiceSnapshot) throw new NotFoundException('Invoice tidak ditemukan');
+    if (invoiceSnapshot.status === InvoiceStatus.DRAFT) {
       throw new ConflictException('Invoice masih draft dan belum bisa dibayar. Terbitkan invoice terlebih dahulu.');
     }
-    if (invoice.status === InvoiceStatus.CANCELLED) {
+    if (invoiceSnapshot.status === InvoiceStatus.CANCELLED) {
       throw new ConflictException('Invoice sudah dibatalkan dan tidak bisa menerima pembayaran.');
     }
 
-    const totalPaid = invoice.payments.reduce((sum, item) => sum + item.amountRupiah, 0);
-    if (totalPaid + dto.amountRupiah > this.invoiceTotal(invoice)) {
-      throw new ConflictException('Pembayaran melebihi total invoice');
-    }
-
     const { payment: created, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${dto.invoiceId} FOR UPDATE`;
+      const agg = await tx.invoicePayment.aggregate({
+        where: { invoiceId: dto.invoiceId },
+        _sum: { amountRupiah: true },
+      });
+      const freshPaid = agg._sum.amountRupiah ?? 0;
+      const invoice = await tx.invoice.findUnique({
+        where: { id: dto.invoiceId },
+        include: { lines: true },
+      });
+      if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
+      if (freshPaid + dto.amountRupiah > this.invoiceTotal(invoice)) {
+        throw new ConflictException('Pembayaran melebihi total invoice');
+      }
       const payment = await tx.invoicePayment.create({
         data: {
           invoiceId: dto.invoiceId,

@@ -738,6 +738,38 @@ export class AccountingPostingService {
     });
   }
 
+  async postPaymentReversalTx(
+    tx: any,
+    invoicePaymentId: number,
+    createdById?: number | null,
+  ) {
+    const original = await tx.journalEntry.findFirst({
+      where: {
+        sourceType: 'INVOICE_PAYMENT' as any,
+        sourceId: String(invoicePaymentId),
+        status: 'POSTED' as any,
+      },
+      include: { lines: { orderBy: { sortOrder: 'asc' } } },
+    });
+    if (!original) return null;
+
+    return this.postBalancedJournalTx(tx, {
+      sourceType: 'ADJUSTMENT' as any,
+      sourceId: `INVOICE_PAYMENT_REVERSAL:${invoicePaymentId}`,
+      entryDate: dateOnly(new Date()),
+      memo: `Reversal pembayaran invoice payment #${invoicePaymentId}`,
+      createdById: createdById ?? null,
+      lines: (original.lines ?? []).map((line: any, index: number) => ({
+        chartOfAccountId: line.chartOfAccountId,
+        cashAccountId: line.cashAccountId ?? null,
+        memo: `Reversal: ${line.memo ?? ''}`,
+        debitRupiah: Number(line.creditRupiah ?? 0),
+        creditRupiah: Number(line.debitRupiah ?? 0),
+        sortOrder: index + 1,
+      })),
+    });
+  }
+
   async dryRunDepositBackfill(dto: { limit?: number } = {}) {
     const limit = Math.min(Math.max(Number(dto.limit ?? 25), 1), 50);
     const mappedDepositIds = await mappedDepositStaySourceIds(this.prisma);
@@ -999,7 +1031,7 @@ export class AccountingPostingService {
 
   private async postBalancedJournalTx(tx: any, input: PostJournalInput) {
     const existing = await tx.journalEntry.findFirst({
-      where: { sourceType: input.sourceType as any, sourceId: input.sourceId },
+      where: { sourceType: input.sourceType as any, sourceId: input.sourceId, status: { not: 'VOID' as any } },
       select: { id: true, entryNumber: true, status: true },
     });
     if (existing) {

@@ -367,9 +367,17 @@ export class PaymentSubmissionsService {
         let depositPortion = 0;
 
         if (isBookingPath) {
-          // Booking combined: rent + deposit; excess over invoice goes to deposit
           rentPortion = Math.min(submission.amountRupiah, invoiceRemaining);
-          depositPortion = Math.max(0, submission.amountRupiah - rentPortion);
+          const rawDeposit = Math.max(0, submission.amountRupiah - rentPortion);
+          const stayDepositAmount = submission.stayDepositAmountRupiah ?? 0;
+          const stayDepositPaidBefore = submission.stayDepositPaidAmountRupiah ?? 0;
+          const depositRemaining = Math.max(stayDepositAmount - stayDepositPaidBefore, 0);
+          depositPortion = Math.min(rawDeposit, depositRemaining);
+          if (rawDeposit > depositPortion) {
+            throw new ConflictException(
+              `Nominal melebihi sisa tagihan + deposit. Kelebihan: Rp ${(rawDeposit - depositPortion).toLocaleString('id-ID')}. Silakan koreksi bukti bayar.`,
+            );
+          }
         } else {
           // Invoice-only: must not exceed remaining
           if (submission.amountRupiah > invoiceRemaining) {
@@ -468,21 +476,27 @@ export class PaymentSubmissionsService {
           });
 
           if (depositPortion > 0) {
-            await this.depositLedger.recordDepositReceivedTx(tx, {
-              stayId: submission.stayId,
-              amountRupiah: depositPortion,
-              actorUserId: user.id,
-              paymentSubmissionId: submissionId,
-              invoicePaymentId,
-              occurredAt: new Date(submission.paidAt),
-              note: 'Deposit diterima dari approval pembayaran booking.',
-              metadata: {
-                paymentMethod: submission.paymentMethod,
-                referenceNumber: submission.referenceNumber,
-                rentPortion,
-                depositPortion,
-              },
-            }).catch(() => undefined);
+            try {
+              await this.depositLedger.recordDepositReceivedTx(tx, {
+                stayId: submission.stayId,
+                amountRupiah: depositPortion,
+                actorUserId: user.id,
+                paymentSubmissionId: submissionId,
+                invoicePaymentId,
+                occurredAt: new Date(submission.paidAt),
+                note: 'Deposit diterima dari approval pembayaran booking.',
+                metadata: {
+                  paymentMethod: submission.paymentMethod,
+                  referenceNumber: submission.referenceNumber,
+                  rentPortion,
+                  depositPortion,
+                },
+              });
+            } catch (err) {
+              this.logger.warn(
+                `Deposit ledger gagal saat approval (submission #${submissionId}, stay #${submission.stayId}): ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
             try {
               await this.accountingPosting.postDepositReceivedForStayTx(
                 tx,
@@ -683,7 +697,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     });
 
     for (const invoice of invoicesToReverse) {
-      await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, params.actorUserId).catch(() => undefined);
+      try {
+        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, params.actorUserId);
+      } catch (err) {
+        this.logger.warn(`Invoice cancellation reversal gagal (competing, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     await tx.paymentSubmission.updateMany({
@@ -841,7 +859,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         });
 
         for (const invoice of invoicesToReverse) {
-          await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user.id).catch(() => undefined);
+          try {
+            await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user.id);
+          } catch (err) {
+            this.logger.warn(`Invoice cancellation reversal gagal (expireBooking, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
+          }
         }
 
         await tx.stay.update({
@@ -941,7 +963,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           });
 
           for (const invoice of invoicesToReverse) {
-            await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user?.id ?? null).catch(() => undefined);
+            try {
+              await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user?.id ?? null);
+            } catch (err) {
+              this.logger.warn(`Invoice cancellation reversal gagal (runExpiryCheck, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
+            }
           }
 
           await tx.stay.update({
@@ -1028,7 +1054,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     });
 
     for (const invoice of invoicesToReverse) {
-      await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actorUserId).catch(() => undefined);
+      try {
+        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actorUserId);
+      } catch (err) {
+        this.logger.warn(`Invoice cancellation reversal gagal (autoCancelRejected, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
     await tx.stay.update({
       where: { id: stayId },
