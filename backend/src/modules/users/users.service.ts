@@ -86,7 +86,9 @@ export class UsersService {
       if (!tenant) throw new NotFoundException('Tenant terkait tidak ditemukan');
     }
 
-    const emailExists = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const emailExists = await this.prisma.user.findFirst({
+      where: { email: { equals: dto.email, mode: 'insensitive' } },
+    });
     if (emailExists) throw new ConflictException('Email sudah digunakan');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);

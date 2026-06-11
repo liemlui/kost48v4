@@ -61,20 +61,25 @@ export class TenantStaffReviewsService {
     if (!['DONE', 'CLOSED'].includes(ticket.status)) throw new ConflictException('Review hanya bisa diberikan setelah pekerjaan selesai');
     if (!ticket.assignedToId || ticket.assignedTo?.role !== 'STAFF') throw new ConflictException('Tiket belum memiliki staff yang bisa direview');
 
-    const existing = await this.prisma.staffReview.findFirst({ where: { tenantId: user.tenantId, ticketId: ticket.id } });
-    if (existing) throw new ConflictException('Review untuk pekerjaan ini sudah pernah dikirim');
-
-    const review = await this.prisma.staffReview.create({
-      data: {
-        staffId: ticket.assignedToId,
-        tenantId: user.tenantId,
-        ticketId: ticket.id,
-        rating: dto.rating,
-        comment: dto.comment?.trim() || null,
-        status: StaffReviewStatus.VISIBLE as any,
-      },
-      include: { staff: { select: { id: true, fullName: true, role: true } } },
-    });
+    let review: any;
+    try {
+      review = await this.prisma.staffReview.create({
+        data: {
+          staffId: ticket.assignedToId,
+          tenantId: user.tenantId,
+          ticketId: ticket.id,
+          rating: dto.rating,
+          comment: dto.comment?.trim() || null,
+          status: StaffReviewStatus.VISIBLE as any,
+        },
+        include: { staff: { select: { id: true, fullName: true, role: true } } },
+      });
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        throw new ConflictException('Review untuk pekerjaan ini sudah pernah dikirim.');
+      }
+      throw error;
+    }
 
     // Notify admin/owner if rating is low (≤2) — there's a complaint
     if (dto.rating <= 2) {

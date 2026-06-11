@@ -152,6 +152,9 @@ export class PaymentSubmissionsController {
     @Body() body: Record<string, any>,
     @CurrentUser() user: CurrentUserPayload,
   ) {
+    if (!file) {
+      throw new BadRequestException('File bukti pembayaran wajib diunggah');
+    }
     // ── Magic-byte verification ────────────────────────────────────────────
     const filePath = join(this.UPLOAD_DIR, file.filename);
     const detectedMime = detectImageMime(filePath);
