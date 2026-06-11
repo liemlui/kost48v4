@@ -956,6 +956,9 @@ export class StaysService {
   ) {
     assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
 
+    // Audit M-15: kunci stay agar dobel-renew / race dengan sweeper auto-ops
+    // tidak bisa membuat dua invoice perpanjangan untuk periode yang sama.
+    await tx.$queryRaw`SELECT id FROM "Stay" WHERE id = ${id} FOR UPDATE`;
     const stay = await tx.stay.findUnique({
       where: { id },
       include: { room: { select: { id: true, code: true } } },
