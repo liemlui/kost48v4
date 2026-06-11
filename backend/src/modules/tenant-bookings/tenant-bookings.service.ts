@@ -322,11 +322,26 @@ export class TenantBookingsService {
 
         const baselineDate = startOfDay(new Date(booking.checkInDate));
 
+        // Audit M-09: DP wajib tetap 30% dari tarif final. Bila DP sudah
+        // terbayar, tarif tidak boleh diubah lagi lewat approval ini.
+        const dpRow = await tx.stay.findUnique({
+          where: { id: stayId },
+          select: { downPaymentPaidRupiah: true, agreedRentAmountRupiah: true },
+        });
+        const dpPaidSoFar = Number(dpRow?.downPaymentPaidRupiah ?? 0);
+        if (dpPaidSoFar > 0 && dto.agreedRentAmountRupiah !== Number(dpRow?.agreedRentAmountRupiah ?? 0)) {
+          throw new ConflictException(
+            'DP sudah dibayar untuk tarif sebelumnya. Tarif tidak dapat diubah; batalkan booking bila perlu negosiasi ulang.',
+          );
+        }
         const updatedStay = await tx.stay.update({
           where: { id: stayId },
           data: {
             agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
             depositAmountRupiah: dto.depositAmountRupiah,
+            ...(dpPaidSoFar === 0
+              ? { downPaymentAmountRupiah: Math.round((dto.agreedRentAmountRupiah * 30) / 100) }
+              : {}),
           },
         });
 
