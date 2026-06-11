@@ -144,8 +144,13 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
     const expiredStayIds: number[] = [];
     for (const booking of expiredBookings) {
-      await this.expireBookingTx(booking.id, booking.roomId, options.actorUserId ?? null, options.source ?? 'AUTO_OPS_BOOKING_EXPIRY');
-      expiredStayIds.push(booking.id);
+      try {
+        await this.expireBookingTx(booking.id, booking.roomId, options.actorUserId ?? null, options.source ?? 'AUTO_OPS_BOOKING_EXPIRY');
+        expiredStayIds.push(booking.id);
+      } catch (err) {
+        // Audit M-22: satu stay gagal tidak boleh menghentikan job & job berikutnya.
+        this.logger.warn(`AutoOps booking-expiry gagal untuk stay #${booking.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     return { expiredStayIds, heldForPaymentReview };
@@ -181,13 +186,17 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
     const releasedRoomIds: number[] = [];
     for (const stay of staysToRelease) {
-      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
-        actorUserId: options.actorUserId ?? null,
-        source: options.source ?? 'AUTO_OPS_NOON_RELEASE',
-        action: 'AUTO_RELEASE_ROOM_NOON',
-        checkoutReason: 'Otomatis dilepas: pk 12:00 H-day, kontrak berakhir. Tenant tidak diperpanjang.',
-      });
-      if (cancelled) releasedRoomIds.push(stay.roomId);
+      try {
+        const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+          actorUserId: options.actorUserId ?? null,
+          source: options.source ?? 'AUTO_OPS_NOON_RELEASE',
+          action: 'AUTO_RELEASE_ROOM_NOON',
+          checkoutReason: 'Otomatis dilepas: pk 12:00 H-day, kontrak berakhir. Tenant tidak diperpanjang.',
+        });
+        if (cancelled) releasedRoomIds.push(stay.roomId);
+      } catch (err) {
+        this.logger.warn(`AutoOps noon-release gagal untuk stay #${stay.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     return { releasedRoomIds };
@@ -389,15 +398,19 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
     const forfeitedStayIds: number[] = [];
     for (const stay of candidates) {
-      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
-        actorUserId: options.actorUserId ?? null,
-        source: options.source ?? 'AUTO_OPS_DP_FORFEIT',
-        action: 'AUTO_CANCEL_DP_FORFEIT_HPLUS1',
-        checkoutReason:
-          'Gagal kontrak: pelunasan sisa sewa + deposit jaminan tidak masuk hingga H+1 pk 12:00 setelah check-in. DP hangus sesuai kebijakan.',
-        forfeitDownPayment: true,
-      });
-      if (cancelled) forfeitedStayIds.push(stay.id);
+      try {
+        const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+          actorUserId: options.actorUserId ?? null,
+          source: options.source ?? 'AUTO_OPS_DP_FORFEIT',
+          action: 'AUTO_CANCEL_DP_FORFEIT_HPLUS1',
+          checkoutReason:
+            'Gagal kontrak: pelunasan sisa sewa + deposit jaminan tidak masuk hingga H+1 pk 12:00 setelah check-in. DP hangus sesuai kebijakan.',
+          forfeitDownPayment: true,
+        });
+        if (cancelled) forfeitedStayIds.push(stay.id);
+      } catch (err) {
+        this.logger.warn(`AutoOps DP-forfeit gagal untuk stay #${stay.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     return { forfeitedStayIds };
@@ -511,8 +524,12 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
     const forcedCheckoutStayIds: number[] = [];
     for (const candidate of candidates) {
-      const done = await this.forceCheckoutOverstay(candidate.id, options, yesterday);
-      if (done) forcedCheckoutStayIds.push(candidate.id);
+      try {
+        const done = await this.forceCheckoutOverstay(candidate.id, options, yesterday);
+        if (done) forcedCheckoutStayIds.push(candidate.id);
+      } catch (err) {
+        this.logger.warn(`AutoOps forced-checkout gagal untuk stay #${candidate.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     return { forcedCheckoutStayIds };
@@ -828,13 +845,17 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
     const cancelledStayIds: number[] = [];
     for (const stay of expiredStays) {
-      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
-        actorUserId: options.actorUserId ?? null,
-        source: options.source ?? 'AUTO_OPS_HPLUS1_CANCEL',
-        action: 'AUTO_CANCEL_HPLUS1_NO_PAYMENT',
-        checkoutReason: 'Gagal kontrak: tidak melunasi hingga H+1. DP hangus sesuai kebijakan.',
-      });
-      if (cancelled) cancelledStayIds.push(stay.id);
+      try {
+        const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+          actorUserId: options.actorUserId ?? null,
+          source: options.source ?? 'AUTO_OPS_HPLUS1_CANCEL',
+          action: 'AUTO_CANCEL_HPLUS1_NO_PAYMENT',
+          checkoutReason: 'Gagal kontrak: tidak melunasi hingga H+1. DP hangus sesuai kebijakan.',
+        });
+        if (cancelled) cancelledStayIds.push(stay.id);
+      } catch (err) {
+        this.logger.warn(`AutoOps H+1 auto-cancel gagal untuk stay #${stay.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     return { cancelledStayIds };
