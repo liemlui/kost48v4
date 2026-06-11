@@ -516,6 +516,9 @@ export class PaymentSubmissionsService {
           await tx.stay.update({
             where: { id: submission.stayId },
             data: {
+              // Audit M-12: pembayaran pertama disetujui = kamar terkunci;
+              // matikan expiresAt struktural, bukan hanya lewat filter sweeper.
+              expiresAt: null,
               depositPaidAmountRupiah: stayDepositPaidAfter,
               depositPaymentStatus: stayDepositPaymentStatus,
               downPaymentPaidRupiah: stayDpPaidAfter,
