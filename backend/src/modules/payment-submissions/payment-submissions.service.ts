@@ -613,7 +613,9 @@ export class PaymentSubmissionsService {
               select: { checkInDate: true, roomId: true },
             });
 
-            if (stay && (hasElectricity || hasWater)) {
+            // Audit M-07: promosi stay TIDAK boleh bergantung pada ada/tidaknya
+            // snapshot meter; meter dibuat kondisional di dalam blok ini.
+            if (stay) {
               const readingAt = new Date(stay.checkInDate);
               readingAt.setUTCHours(0, 0, 0, 0);
 
