@@ -762,11 +762,89 @@ export class AccountingPostingService {
       lines: (original.lines ?? []).map((line: any, index: number) => ({
         chartOfAccountId: line.chartOfAccountId,
         cashAccountId: line.cashAccountId ?? null,
-        memo: `Reversal: ${line.memo ?? ''}`,
+        description: `Reversal: ${line.description ?? original.memo ?? `Payment #${invoicePaymentId}`}`,
         debitRupiah: Number(line.creditRupiah ?? 0),
         creditRupiah: Number(line.debitRupiah ?? 0),
-        sortOrder: index + 1,
+        sortOrder: index,
       })),
+    });
+  }
+
+  /**
+   * DP hangus (audit A18, kebijakan G2=A): debit 1100 AR, kredit 4400 Penalty/
+   * Admin Fee Revenue — menetralkan saldo AR yang tersisa setelah reversal
+   * invoice (kas DP tetap tercatat masuk, diakui sebagai pendapatan denda).
+   * Hanya diposting bila pembayaran DP-nya sendiri sudah terjurnal
+   * (INVOICE_PAYMENT POSTED); kalau belum, kas tidak pernah tercatat dan
+   * jurnal forfeit justru menciptakan piutang fiktif → skip benign.
+   */
+  async postDownPaymentForfeitTx(
+    tx: any,
+    stayId: number,
+    amountRupiah: number,
+    createdById?: number | null,
+  ) {
+    const sourceId = `DP_FORFEIT:${stayId}`;
+    const amount = rupiah(amountRupiah);
+    if (amount <= 0) {
+      return { ...this.skip("ADJUSTMENT", sourceId, "Nominal DP hangus 0."), benign: true };
+    }
+
+    const payments = await tx.invoicePayment.findMany({
+      where: { invoice: { stayId } },
+      select: { id: true },
+    });
+    const paymentIds = payments.map((payment: any) => String(payment.id));
+    const postedPaymentJournal = paymentIds.length
+      ? await tx.journalEntry.findFirst({
+          where: {
+            sourceType: "INVOICE_PAYMENT" as any,
+            sourceId: { in: paymentIds },
+            status: "POSTED" as any,
+          },
+          select: { id: true },
+        })
+      : null;
+    if (!postedPaymentJournal) {
+      return {
+        ...this.skip(
+          "ADJUSTMENT",
+          sourceId,
+          "Pembayaran DP belum pernah terjurnal; forfeit tidak diposting agar tidak membuat piutang fiktif.",
+        ),
+        benign: true,
+      };
+    }
+
+    const ar = await findAccountByCodeTx(tx, "1100");
+    if (!ar)
+      return this.skip("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
+    const penalty = await findAccountByCodeTx(tx, "4400");
+    if (!penalty)
+      return this.skip("ADJUSTMENT", sourceId, "COA 4400 Penalty/Admin Fee Revenue belum tersedia.");
+
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(new Date()),
+      memo: `DP hangus stay #${stayId} (gagal pelunasan H+1)`,
+      createdById: createdById ?? null,
+      lines: [
+        {
+          chartOfAccountId: ar.id,
+          description: `Netting piutang atas DP hangus stay #${stayId}`,
+          debitRupiah: amount,
+          creditRupiah: 0,
+          sortOrder: 0,
+        },
+        {
+          chartOfAccountId: penalty.id,
+          description: `Pendapatan DP hangus stay #${stayId}`,
+          debitRupiah: 0,
+          creditRupiah: amount,
+          sortOrder: 1,
+        },
+      ],
     });
   }
 

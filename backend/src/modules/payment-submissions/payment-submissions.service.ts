@@ -74,11 +74,23 @@ export class PaymentSubmissionsService {
 
       if (isBookingPath) {
         // ── Booking combined payment (RESERVED) ──────────────────────────
+        if (eligibility.invoiceStatus === InvoiceStatus.DRAFT) {
+          // Audit A10: tanpa guard ini bukti bayar bisa masuk untuk invoice DRAFT
+          // yang pasti gagal di-approve (:350) dan menggantung sampai expiry.
+          throw new ConflictException('Invoice ini masih dalam status draft dan belum dapat menerima pembayaran');
+        }
         if ([InvoiceStatus.PAID, InvoiceStatus.CANCELLED].includes(eligibility.invoiceStatus as InvoiceStatus)) {
           throw new ConflictException('Invoice ini tidak dapat menerima bukti pembayaran baru');
         }
 
-        if (eligibility.stayExpiresAt && new Date(eligibility.stayExpiresAt) < new Date()) {
+        // expiresAt (SLA 3 jam) hanya berlaku sebelum DP masuk; setelah DP
+        // disetujui, kamar terkunci sampai deadline pelunasan H+1 check-in (A18).
+        const dpPaidSoFar = eligibility.stayDownPaymentPaidRupiah ?? 0;
+        if (
+          dpPaidSoFar <= 0 &&
+          eligibility.stayExpiresAt &&
+          new Date(eligibility.stayExpiresAt) < new Date()
+        ) {
           throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat menerima bukti pembayaran');
         }
 
@@ -87,21 +99,39 @@ export class PaymentSubmissionsService {
           0,
         );
 
+        // Deposit = uang jaminan (refundable, dicek saat checkout).
         const depositRemaining = Math.max(
           (eligibility.stayDepositAmountRupiah ?? 0) - (eligibility.stayDepositPaidAmountRupiah ?? 0),
           0,
         );
 
-        const combinedRemaining = invoiceRemaining + depositRemaining;
+        // DP = uang muka pesan kamar (bagian harga sewa, non-refundable).
+        const downPaymentRemaining = Math.max(
+          (eligibility.stayDownPaymentAmountRupiah ?? 0) - (eligibility.stayDownPaymentPaidRupiah ?? 0),
+          0,
+        );
 
-        if (combinedRemaining <= 0) {
-          throw new ConflictException('Pembayaran awal (sewa + deposit) sudah lunas');
+        // Pelunasan = sisa sewa + jaminan. (Sebelum DP dibayar, ini = sewa penuh + jaminan.)
+        const settlementAmount = invoiceRemaining + depositRemaining;
+
+        if (settlementAmount <= 0) {
+          throw new ConflictException('Pembayaran awal (sewa + deposit jaminan) sudah lunas');
         }
 
-        if (dto.amountRupiah !== combinedRemaining) {
-          throw new ConflictException(
-            `Pembayaran harus tepat sebesar total yang tersisa: Rp ${combinedRemaining.toLocaleString('id-ID')}`,
-          );
+        // A18: dua nominal yang sah — DP 30% (kunci kamar) atau pelunasan sekaligus.
+        const isDownPaymentAmount = downPaymentRemaining > 0 && dto.amountRupiah === downPaymentRemaining;
+        const isSettlementAmount = dto.amountRupiah === settlementAmount;
+
+        if (!isDownPaymentAmount && !isSettlementAmount) {
+          const accepted = [
+            downPaymentRemaining > 0 && downPaymentRemaining !== settlementAmount
+              ? `DP Rp ${downPaymentRemaining.toLocaleString('id-ID')}`
+              : null,
+            `pelunasan Rp ${settlementAmount.toLocaleString('id-ID')} (sisa sewa + deposit jaminan)`,
+          ]
+            .filter(Boolean)
+            .join(' atau ');
+          throw new ConflictException(`Nominal pembayaran harus tepat: ${accepted}.`);
         }
       } else {
         // ── Invoice-only payment (OCCUPIED / manual check-in / renewal) ──
@@ -342,7 +372,13 @@ export class PaymentSubmissionsService {
           if (!submission.roomIsActive) {
             throw new ConflictException('Kamar tidak aktif untuk aktivasi booking');
           }
-          if (submission.stayExpiresAt && new Date(submission.stayExpiresAt) < new Date()) {
+          // expiresAt hanya berlaku sebelum DP masuk (A18) — setelah DP,
+          // deadline-nya adalah pelunasan H+1 check-in (sweeper DP forfeit).
+          if (
+            (submission.stayDownPaymentPaidRupiah ?? 0) <= 0 &&
+            submission.stayExpiresAt &&
+            new Date(submission.stayExpiresAt) < new Date()
+          ) {
             throw new ConflictException('Booking sudah kedaluwarsa dan tidak dapat disetujui');
           }
         }
@@ -470,11 +506,21 @@ export class PaymentSubmissionsService {
                 ? BookingDepositPaymentStatus.PARTIAL
                 : BookingDepositPaymentStatus.UNPAID;
 
+          // A18: DP (uang muka) = bagian dari pembayaran sewa (rentPortion),
+          // dicatat terpisah dari deposit jaminan.
+          const stayDpAmount = submission.stayDownPaymentAmountRupiah ?? 0;
+          const stayDpPaidBefore = submission.stayDownPaymentPaidRupiah ?? 0;
+          const stayDpPaidAfter = Math.min(stayDpAmount, stayDpPaidBefore + rentPortion);
+
           await tx.stay.update({
             where: { id: submission.stayId },
             data: {
               depositPaidAmountRupiah: stayDepositPaidAfter,
               depositPaymentStatus: stayDepositPaymentStatus,
+              downPaymentPaidRupiah: stayDpPaidAfter,
+              ...(stayDpPaidAfter > stayDpPaidBefore && stayDpPaidBefore === 0
+                ? { downPaymentPaidAt: new Date(submission.paidAt) }
+                : {}),
             },
           });
 
@@ -616,13 +662,17 @@ export class PaymentSubmissionsService {
               });
             }
 
-            await this.cancelCompetingUnpaidBookingsTx(tx, {
-              roomId: submission.roomId,
-              winningStayId: submission.stayId,
-              actorUserId: user.id,
-              paymentSubmissionId: submissionId,
-            });
           }
+
+          // A18: kamar terkunci sejak pembayaran pertama disetujui (DP maupun
+          // pelunasan) — booking pesaing yang belum bayar dibatalkan di sini,
+          // tidak menunggu invoice PAID.
+          await this.cancelCompetingUnpaidBookingsTx(tx, {
+            roomId: submission.roomId,
+            winningStayId: submission.stayId,
+            actorUserId: user.id,
+            paymentSubmissionId: submissionId,
+          });
         }
 
         await tx.auditLog.create({
@@ -688,7 +738,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         stayId: { in: competingStayIds },
         status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] },
       },
-      select: { id: true },
+      select: { id: true, invoiceNumber: true },
     });
 
     await tx.invoice.updateMany({
@@ -699,13 +749,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       data: { status: InvoiceStatus.CANCELLED, cancelReason },
     });
 
-    for (const invoice of invoicesToReverse) {
-      try {
-        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, params.actorUserId);
-      } catch (err) {
-        this.logger.warn(`Invoice cancellation reversal gagal (competing, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
+    await this.reverseCancelledInvoiceJournalsTx(tx, invoicesToReverse, params.actorUserId, 'pembatalan booking pesaing');
 
     await tx.paymentSubmission.updateMany({
       where: {
@@ -748,6 +792,44 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     });
 
     return { cancelledCount: competingStayIds.length, stayIds: competingStayIds };
+  }
+
+  /**
+   * Reversal jurnal invoice yang dibatalkan — kebijakan tunggal (audit A8):
+   * skip benign bila jurnal POSTED tidak ada; bila ada, reversal WAJIB sukses
+   * (invoice CANCELLED keluar dari readiness unmapped, jadi kegagalan di sini
+   * tidak akan pernah terdeteksi lagi → revenue overstated permanen).
+   * `skipped` dengan `journalEntry` berarti reversal sudah ada (idempotent) = OK.
+   */
+  private async reverseCancelledInvoiceJournalsTx(
+    tx: Prisma.TransactionClient,
+    invoices: Array<{ id: number; invoiceNumber?: string | null }>,
+    actorUserId: number | null,
+    context: string,
+  ) {
+    for (const invoice of invoices) {
+      const postedInvoiceJournal = await tx.journalEntry.findFirst({
+        where: {
+          sourceType: 'INVOICE' as any,
+          sourceId: String(invoice.id),
+          status: 'POSTED' as any,
+        },
+        select: { id: true },
+        orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+      });
+      if (!postedInvoiceJournal) continue;
+
+      const reversalResult = await this.accountingPosting.postInvoiceCancellationReversalTx(
+        tx,
+        invoice.id,
+        actorUserId,
+      );
+      if (reversalResult?.skipped && !(reversalResult as any)?.journalEntry) {
+        throw new ConflictException(
+          `Pembatalan gagal (${context}): reversal accounting tagihan ${invoice.invoiceNumber ?? invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}. Perbaiki kesiapan accounting (COA/periode) lalu ulangi.`,
+        );
+      }
+    }
   }
 
   async rejectSubmission(user: CurrentUserPayload, submissionId: number, reviewNotes: string) {
@@ -834,6 +916,45 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       }
 
       await this.prisma.$transaction(async (tx) => {
+        // Lock + re-cek (audit A2): pastikan booking belum berubah status oleh
+        // approval yang berjalan bersamaan sebelum membatalkan.
+        const lockedRows = await tx.$queryRaw<Array<{ status: string; roomStatus: string; promotedAt: Date | null }>>(Prisma.sql`
+          SELECT s.status, r.status AS "roomStatus", s."initialMetersPromotedAt" AS "promotedAt"
+          FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
+          WHERE s.id = ${stayId}
+          FOR UPDATE OF s, r`);
+        const current = lockedRows[0];
+        if (
+          !current ||
+          current.status !== StayStatus.ACTIVE ||
+          current.roomStatus !== RoomStatus.RESERVED ||
+          current.promotedAt
+        ) {
+          throw new ConflictException(
+            'Booking baru saja berubah status (kemungkinan pembayaran disetujui). Muat ulang halaman.',
+          );
+        }
+
+        const approvedSubmission = await tx.paymentSubmission.findFirst({
+          where: { stayId, status: PaymentSubmissionStatus.APPROVED },
+          select: { id: true },
+        });
+        if (approvedSubmission) {
+          throw new ConflictException(
+            'Booking sudah memiliki pembayaran yang disetujui dan tidak dapat dibatalkan lewat jalur expiry.',
+          );
+        }
+
+        const paidInvoice = await tx.invoice.findFirst({
+          where: { stayId, status: { in: [InvoiceStatus.PAID, InvoiceStatus.PARTIAL] } },
+          select: { id: true },
+        });
+        if (paidInvoice) {
+          throw new ConflictException(
+            'Booking memiliki invoice yang sudah dibayar sebagian/lunas. Gunakan pembatalan stay (dengan reversal) bila memang ingin membatalkan.',
+          );
+        }
+
         await tx.paymentSubmission.updateMany({
           where: {
             stayId,
@@ -847,7 +968,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             stayId,
             status: { in: ['ISSUED', 'PARTIAL'] as any },
           },
-          select: { id: true },
+          select: { id: true, invoiceNumber: true },
         });
 
         await tx.invoice.updateMany({
@@ -861,13 +982,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           },
         });
 
-        for (const invoice of invoicesToReverse) {
-          try {
-            await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user.id);
-          } catch (err) {
-            this.logger.warn(`Invoice cancellation reversal gagal (expireBooking, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
-          }
-        }
+        await this.reverseCancelledInvoiceJournalsTx(tx, invoicesToReverse, user.id, 'pembatalan booking manual');
 
         await tx.stay.update({
           where: { id: stayId },
@@ -937,7 +1052,39 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       const processedStayIds: number[] = [];
 
       for (const booking of expiredBookings) {
-        await this.prisma.$transaction(async (tx) => {
+        const processed = await this.prisma.$transaction(async (tx) => {
+          // Lock + re-cek (audit A2): kandidat dipilih di luar transaksi, jadi
+          // status bisa berubah (approval bersamaan). Skip senyap bila berubah.
+          const lockedRows = await tx.$queryRaw<Array<{ status: string; roomStatus: string; promotedAt: Date | null }>>(Prisma.sql`
+            SELECT s.status, r.status AS "roomStatus", s."initialMetersPromotedAt" AS "promotedAt"
+            FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
+            WHERE s.id = ${booking.id}
+            FOR UPDATE OF s, r`);
+          const current = lockedRows[0];
+          if (
+            !current ||
+            current.status !== StayStatus.ACTIVE ||
+            current.roomStatus !== RoomStatus.RESERVED ||
+            current.promotedAt
+          ) {
+            return false;
+          }
+
+          const freshSubmission = await tx.paymentSubmission.findFirst({
+            where: {
+              stayId: booking.id,
+              status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] },
+            },
+            select: { id: true },
+          });
+          if (freshSubmission) return false;
+
+          const paidInvoice = await tx.invoice.findFirst({
+            where: { stayId: booking.id, status: { in: [InvoiceStatus.PAID, InvoiceStatus.PARTIAL] } },
+            select: { id: true },
+          });
+          if (paidInvoice) return false;
+
           await tx.paymentSubmission.updateMany({
             where: {
               stayId: booking.id,
@@ -951,7 +1098,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
               stayId: booking.id,
               status: { in: ['ISSUED', 'PARTIAL'] as any },
             },
-            select: { id: true },
+            select: { id: true, invoiceNumber: true },
           });
 
           await tx.invoice.updateMany({
@@ -965,13 +1112,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             },
           });
 
-          for (const invoice of invoicesToReverse) {
-            try {
-              await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, user?.id ?? null);
-            } catch (err) {
-              this.logger.warn(`Invoice cancellation reversal gagal (runExpiryCheck, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
-            }
-          }
+          await this.reverseCancelledInvoiceJournalsTx(tx, invoicesToReverse, user?.id ?? null, 'sweep expiry booking');
 
           await tx.stay.update({
             where: { id: booking.id },
@@ -1002,9 +1143,11 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
               } as unknown as Prisma.InputJsonValue,
             },
           });
+
+          return true;
         });
 
-        processedStayIds.push(booking.id);
+        if (processed) processedStayIds.push(booking.id);
       }
 
       return {
@@ -1043,9 +1186,16 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     });
     if (!booking) return;
 
+    // Uang sudah masuk (mis. pembayaran manual) = jangan auto-cancel (audit A1).
+    const paidInvoice = await tx.invoice.findFirst({
+      where: { stayId, status: { in: ['PAID', 'PARTIAL'] as any } },
+      select: { id: true },
+    });
+    if (paidInvoice) return;
+
     const invoicesToReverse = await tx.invoice.findMany({
       where: { stayId, status: { in: ['ISSUED', 'PARTIAL'] as any } },
-      select: { id: true },
+      select: { id: true, invoiceNumber: true },
     });
 
     await tx.invoice.updateMany({
@@ -1056,13 +1206,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       },
     });
 
-    for (const invoice of invoicesToReverse) {
-      try {
-        await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, actorUserId);
-      } catch (err) {
-        this.logger.warn(`Invoice cancellation reversal gagal (autoCancelRejected, invoice #${invoice.id}): ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
+    await this.reverseCancelledInvoiceJournalsTx(tx, invoicesToReverse, actorUserId, 'auto-cancel booking setelah reject');
     await tx.stay.update({
       where: { id: stayId },
       data: {
@@ -1102,6 +1246,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         depositAmountRupiah: true,
         depositPaidAmountRupiah: true,
         depositPaymentStatus: true,
+        downPaymentAmountRupiah: true,
+        downPaymentPaidRupiah: true,
         roomId: true,
         room: { select: { id: true, code: true, name: true, status: true } },
         tenant: { select: { id: true, fullName: true } },
@@ -1148,6 +1294,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       stayDepositAmountRupiah: stay.depositAmountRupiah,
       stayDepositPaidAmountRupiah: stay.depositPaidAmountRupiah,
       stayDepositPaymentStatus: stay.depositPaymentStatus,
+      stayDownPaymentAmountRupiah: stay.downPaymentAmountRupiah,
+      stayDownPaymentPaidRupiah: stay.downPaymentPaidRupiah,
     };
   }
 
@@ -1185,6 +1333,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         s.status AS "stayStatus",
         s."depositAmountRupiah" AS "stayDepositAmountRupiah",
         s."depositPaidAmountRupiah" AS "stayDepositPaidAmountRupiah",
+        COALESCE(s."downPaymentAmountRupiah", 0) AS "stayDownPaymentAmountRupiah",
+        COALESCE(s."downPaymentPaidRupiah", 0) AS "stayDownPaymentPaidRupiah",
         s."expiresAt" AS "stayExpiresAt",
         s."initialElectricityKwhPending" AS "stayInitialElectricityKwhPending",
         s."initialWaterM3Pending" AS "stayInitialWaterM3Pending",

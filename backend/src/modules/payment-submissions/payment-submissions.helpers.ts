@@ -76,6 +76,8 @@ export interface SubmissionLockRow {
   stayStatus: string;
   stayDepositAmountRupiah: number;
   stayDepositPaidAmountRupiah: number;
+  stayDownPaymentAmountRupiah: number;
+  stayDownPaymentPaidRupiah: number;
   stayExpiresAt: Date | null;
   stayInitialElectricityKwhPending: number | null;
   stayInitialWaterM3Pending: number | null;

@@ -128,12 +128,13 @@ export class StaysService {
       throw new ConflictException("Tenant masih memiliki stay aktif");
     }
 
-    if (
-      room.status === RoomStatus.OCCUPIED ||
-      room.status === RoomStatus.RESERVED
-    ) {
+    if (room.status !== RoomStatus.AVAILABLE) {
+      // Audit A9: MAINTENANCE (belum lolos inspeksi checkout) dan INACTIVE
+      // juga tidak boleh di-check-in, bukan hanya OCCUPIED/RESERVED.
       throw new ConflictException(
-        "Kamar sudah ditempati stay aktif lain atau sedang dipesan",
+        room.status === RoomStatus.MAINTENANCE
+          ? "Kamar masih berstatus Perlu Dicek (belum lolos inspeksi checkout). Selesaikan tiket inspeksi sampai kamar AVAILABLE sebelum check-in."
+          : "Kamar tidak tersedia untuk check-in (sedang ditempati, dipesan, atau nonaktif)",
       );
     }
 
@@ -227,8 +228,8 @@ export class StaysService {
         await tx.$queryRaw`SELECT id FROM "Room" WHERE id = ${dto.roomId} FOR UPDATE`;
         const lockedRoom = await tx.room.findUnique({ where: { id: dto.roomId } });
         if (!lockedRoom) throw new NotFoundException("Kamar tidak ditemukan");
-        if (lockedRoom.status === RoomStatus.OCCUPIED || lockedRoom.status === RoomStatus.RESERVED) {
-          throw new ConflictException("Kamar sudah ditempati stay aktif lain atau sedang dipesan");
+        if (lockedRoom.status !== RoomStatus.AVAILABLE) {
+          throw new ConflictException("Kamar tidak tersedia untuk check-in (sedang ditempati, dipesan, perlu dicek, atau nonaktif)");
         }
         const existingRoomStayLock = await tx.stay.findFirst({
           where: { roomId: dto.roomId, status: StayStatus.ACTIVE },

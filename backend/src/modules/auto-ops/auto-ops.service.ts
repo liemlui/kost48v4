@@ -87,14 +87,16 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     }
     this.running = true;
     try {
-      const [bookingResult, roomResult, noonResult, overstayResult, autoCancelResult, accountingAutoClose] = await Promise.all([
-        this.runBookingExpiry(options),
-        this.runRoomHealer(options),
-        this.runRoomReleaseAtNoon(options),
-        this.runOverstayEnforcement(options),
-        this.runPostCheckoutAutoCancel(options),
-        this.runAccountingAutoClose(options),
-      ]);
+      // Sequential (audit A4): job-job ini menyentuh tabel Stay/Room yang sama;
+      // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
+      const bookingResult = await this.runBookingExpiry(options);
+      const dpForfeitResult = await this.runDownPaymentForfeit(options);
+      void dpForfeitResult;
+      const autoCancelResult = await this.runPostCheckoutAutoCancel(options);
+      const noonResult = await this.runRoomReleaseAtNoon(options);
+      const roomResult = await this.runRoomHealer(options);
+      const overstayResult = await this.runOverstayEnforcement(options);
+      const accountingAutoClose = await this.runAccountingAutoClose(options);
       return {
         expiredBookings: bookingResult.expiredStayIds.length,
         heldForPaymentReview: bookingResult.heldForPaymentReview,
@@ -163,82 +165,268 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         status: StayStatus.ACTIVE,
         plannedCheckOutDate: { not: null, lte: today },
         initialMetersPromotedAt: null,
+        paymentSubmissions: {
+          none: { status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] } },
+        },
       },
-      select: { id: true, roomId: true, tenantId: true },
+      select: { id: true, roomId: true },
+      take: 100,
     });
 
     const releasedRoomIds: number[] = [];
     for (const stay of staysToRelease) {
-      await this.prisma.$transaction(async (tx) => {
-        await tx.stay.update({
-          where: { id: stay.id },
-          data: {
-            status: StayStatus.CANCELLED,
-            checkoutReason: 'Otomatis dilepas: pk 12:00 H-day, kontrak berakhir. Tenant tidak diperpanjang.',
-            initialElectricityKwhPending: null,
-            initialWaterM3Pending: null,
-            initialMetersRecordedAt: null,
-            initialMetersRecordedById: null,
-          },
-        });
-        await tx.room.update({
-          where: { id: stay.roomId },
-          data: { status: RoomStatus.AVAILABLE },
-        });
-        await tx.auditLog.create({
-          data: {
-            actorUserId: options.actorUserId ?? null,
-            action: 'AUTO_RELEASE_ROOM_NOON',
-            entityType: 'Stay',
-            entityId: String(stay.id),
-            meta: { roomId: stay.roomId, tenantId: stay.tenantId, source: options.source ?? 'AUTO_OPS_NOON_RELEASE' } as unknown as Prisma.InputJsonValue,
-          },
-        });
+      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+        actorUserId: options.actorUserId ?? null,
+        source: options.source ?? 'AUTO_OPS_NOON_RELEASE',
+        action: 'AUTO_RELEASE_ROOM_NOON',
+        checkoutReason: 'Otomatis dilepas: pk 12:00 H-day, kontrak berakhir. Tenant tidak diperpanjang.',
       });
-      releasedRoomIds.push(stay.roomId);
+      if (cancelled) releasedRoomIds.push(stay.roomId);
     }
 
     return { releasedRoomIds };
   }
 
   /**
-   * Overstay enforcement (G1=B): jika tenant lama belum checkout dan sudah ada tenant baru
-   * yang DP/lunas di kamar tersebut, auto-create tiket EVICT_OVERSTAY untuk staf.
-   * Cek: room OCCUPIED oleh stay lama, dan ada stay baru RESERVED/APPROVED di room sama.
+   * Satu pintu pembatalan stay yang kontraknya berakhir tanpa pembayaran valid (audit A4).
+   * Dipakai noon-release dan H+1 auto-cancel agar kebijakan identik:
+   * lock FOR UPDATE + re-cek status, skip bila ada submission PENDING/APPROVED
+   * atau invoice PAID/PARTIAL (uang sudah masuk = wajib keputusan manusia),
+   * batalkan invoice DRAFT/ISSUED (dengan reversal jurnal POSTED),
+   * forfeit dana DP/jaminan yang sudah dibayar sesuai kebijakan G2=A,
+   * dan lepas kamar hanya jika tidak ada stay ACTIVE lain.
    */
-  async runOverstayEnforcement(options: { actorUserId?: number | null; source?: string } = {}) {
-    const rooms = await this.prisma.room.findMany({
-      where: { status: RoomStatus.OCCUPIED },
-      select: {
-        id: true,
-        stays: {
-          where: { status: StayStatus.ACTIVE, initialMetersPromotedAt: { not: null } },
-          select: { id: true, tenantId: true, roomId: true },
-          take: 1,
+  private async cancelEndedUnpaidStay(
+    stayId: number,
+    params: {
+      actorUserId: number | null;
+      source: string;
+      action: string;
+      checkoutReason: string;
+      /**
+       * Mode DP hangus (A18/G2=A): izinkan stay ber-submission APPROVED dan
+       * invoice PARTIAL (DP sudah masuk), batalkan invoice-nya, dan hanguskan
+       * DP terbayar dengan jurnal forfeit. Mode normal melewati stay seperti itu.
+       */
+      forfeitDownPayment?: boolean;
+    },
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRaw<
+        Array<{ status: string; roomId: number; tenantId: number; promotedAt: Date | null; depositPaid: number; dpPaid: number }>
+      >(Prisma.sql`
+        SELECT s.status, s."roomId", s."tenantId",
+               s."initialMetersPromotedAt" AS "promotedAt",
+               COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaid",
+               COALESCE(s."downPaymentPaidRupiah", 0) AS "dpPaid"
+        FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
+        WHERE s.id = ${stayId}
+        FOR UPDATE OF s, r`);
+      const current = rows[0];
+      if (!current || current.status !== 'ACTIVE' || current.promotedAt) {
+        return false;
+      }
+
+      const blockedSubmissionStatuses = params.forfeitDownPayment
+        ? [PaymentSubmissionStatus.PENDING_REVIEW]
+        : [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED];
+      const activeSubmission = await tx.paymentSubmission.findFirst({
+        where: { stayId, status: { in: blockedSubmissionStatuses as any } },
+        select: { id: true },
+      });
+      if (activeSubmission) return false;
+
+      const blockedInvoiceStatuses = params.forfeitDownPayment
+        ? [InvoiceStatus.PAID]
+        : [InvoiceStatus.PAID, InvoiceStatus.PARTIAL];
+      const paidInvoice = await tx.invoice.findFirst({
+        where: { stayId, status: { in: blockedInvoiceStatuses as any } },
+        select: { id: true },
+      });
+      if (paidInvoice) return false;
+
+      const reversibleStatuses = params.forfeitDownPayment
+        ? [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL]
+        : [InvoiceStatus.ISSUED];
+      const invoicesToReverse = await tx.invoice.findMany({
+        where: { stayId, status: { in: reversibleStatuses as any } },
+        select: { id: true, invoiceNumber: true },
+      });
+
+      await tx.invoice.updateMany({
+        where: { stayId, status: { in: [InvoiceStatus.DRAFT, ...reversibleStatuses] as any } },
+        data: {
+          status: InvoiceStatus.CANCELLED as any,
+          cancelReason: params.checkoutReason,
+        },
+      });
+
+      for (const invoice of invoicesToReverse) {
+        const postedInvoiceJournal = await tx.journalEntry.findFirst({
+          where: { sourceType: 'INVOICE' as any, sourceId: String(invoice.id), status: 'POSTED' as any },
+          select: { id: true },
+          orderBy: [{ postedAt: 'desc' }, { id: 'desc' }],
+        });
+        if (!postedInvoiceJournal) continue;
+        const reversalResult = await this.accountingPosting.postInvoiceCancellationReversalTx(tx, invoice.id, params.actorUserId);
+        if (reversalResult?.skipped) {
+          throw new ConflictException(
+            `AutoOps gagal membatalkan stay karena reversal accounting tagihan ${invoice.invoiceNumber ?? invoice.id} tidak berhasil: ${reversalResult.reason ?? 'alasan tidak diketahui'}`,
+          );
+        }
+      }
+
+      // DP hangus (uang muka, non-refundable) — jurnal forfeit wajib sukses
+      // bila pembayaran DP-nya terjurnal (pola A8); skip benign diizinkan.
+      const dpForfeited = params.forfeitDownPayment ? current.dpPaid : 0;
+      if (dpForfeited > 0) {
+        const forfeitResult = await this.accountingPosting.postDownPaymentForfeitTx(
+          tx,
+          stayId,
+          dpForfeited,
+          params.actorUserId,
+        );
+        if (forfeitResult?.skipped && !(forfeitResult as any)?.journalEntry && !(forfeitResult as any)?.benign) {
+          throw new ConflictException(
+            `AutoOps gagal menghanguskan DP stay #${stayId}: jurnal forfeit tidak berhasil (${(forfeitResult as any)?.reason ?? 'alasan tidak diketahui'}).`,
+          );
+        }
+      }
+
+      // Legacy: deposit jaminan yang sempat terbayar (data pra-A18) tetap
+      // di-forfeit seperti kebijakan lama.
+      const paid = current.depositPaid;
+      await tx.stay.update({
+        where: { id: stayId },
+        data: {
+          status: StayStatus.CANCELLED,
+          checkoutReason: params.checkoutReason,
+          ...(paid > 0
+            ? { depositStatus: 'FORFEITED' as any, depositDeductionRupiah: paid }
+            : {}),
+          ...(dpForfeited > 0 ? { downPaymentForfeitedAt: new Date() } : {}),
+          initialElectricityKwhPending: null,
+          initialWaterM3Pending: null,
+          initialMetersRecordedAt: null,
+          initialMetersRecordedById: null,
+        },
+      });
+
+      const otherActive = await tx.stay.count({
+        where: { roomId: current.roomId, status: StayStatus.ACTIVE, id: { not: stayId } },
+      });
+      if (otherActive === 0) {
+        await tx.room.updateMany({
+          where: { id: current.roomId, status: { in: [RoomStatus.RESERVED, RoomStatus.OCCUPIED] as any } },
+          data: { status: RoomStatus.AVAILABLE },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          actorUserId: params.actorUserId,
+          action: params.action,
+          entityType: 'Stay',
+          entityId: String(stayId),
+          meta: {
+            roomId: current.roomId,
+            tenantId: current.tenantId,
+            depositForfeited: paid,
+            downPaymentForfeited: dpForfeited,
+            source: params.source,
+          } as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      return true;
+    });
+  }
+
+  /**
+   * A18 + G2=A: DP hangus bila pelunasan (sisa sewa + deposit jaminan) tidak
+   * masuk hingga H+1 pukul 12:00 WIB setelah tanggal check-in. Hanya menyasar
+   * stay yang DP-nya sudah dibayar tetapi belum promoted; booking tanpa DP
+   * ditangani sweeper expiry 3 jam.
+   */
+  async runDownPaymentForfeit(options: { actorUserId?: number | null; source?: string } = {}) {
+    const now = new Date();
+    const jakartaHour = (now.getUTCHours() + 7) % 24;
+    if (jakartaHour < 12) {
+      return { forfeitedStayIds: [] as number[] };
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setUTCHours(0, 0, 0, 0);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+
+    const candidates = await this.prisma.stay.findMany({
+      where: {
+        status: StayStatus.ACTIVE,
+        initialMetersPromotedAt: null,
+        checkInDate: { lte: yesterday },
+        downPaymentPaidRupiah: { gt: 0 },
+        paymentSubmissions: {
+          none: { status: PaymentSubmissionStatus.PENDING_REVIEW },
         },
       },
+      select: { id: true },
+      take: 100,
+    });
+
+    const forfeitedStayIds: number[] = [];
+    for (const stay of candidates) {
+      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+        actorUserId: options.actorUserId ?? null,
+        source: options.source ?? 'AUTO_OPS_DP_FORFEIT',
+        action: 'AUTO_CANCEL_DP_FORFEIT_HPLUS1',
+        checkoutReason:
+          'Gagal kontrak: pelunasan sisa sewa + deposit jaminan tidak masuk hingga H+1 pk 12:00 setelah check-in. DP hangus sesuai kebijakan.',
+        forfeitDownPayment: true,
+      });
+      if (cancelled) forfeitedStayIds.push(stay.id);
+    }
+
+    return { forfeitedStayIds };
+  }
+
+  /**
+   * Overstay enforcement (A5, keputusan owner 2026-06-11): tenant aktif (sudah
+   * promoted/huni) yang kontraknya berakhir (plannedCheckOutDate <= hari ini)
+   * dan belum checkout final → auto-create tiket EVICT_OVERSTAY untuk staf
+   * setelah pukul 12:00 WIB H-day, tanpa perlu ada tenant baru.
+   * (Definisi lama mensyaratkan tenant baru yang sudah bayar di kamar OCCUPIED —
+   * kondisi itu tidak mungkin terbentuk karena booking di kamar OCCUPIED diblokir.)
+   */
+  async runOverstayEnforcement(options: { actorUserId?: number | null; source?: string } = {}) {
+    const now = new Date();
+    const jakartaHour = (now.getUTCHours() + 7) % 24;
+    if (jakartaHour < 12) {
+      return { evictedRoomIds: [] as number[] };
+    }
+
+    const today = new Date(now);
+    today.setUTCHours(0, 0, 0, 0);
+
+    const overstays = await this.prisma.stay.findMany({
+      where: {
+        status: StayStatus.ACTIVE,
+        initialMetersPromotedAt: { not: null },
+        plannedCheckOutDate: { not: null, lte: today },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        roomId: true,
+        plannedCheckOutDate: true,
+        room: { select: { code: true, name: true } },
+      },
+      take: 100,
     });
 
     const evictedRoomIds: number[] = [];
-    for (const room of rooms) {
-      const currentStay = room.stays[0];
-      if (!currentStay) continue;
-
-      const newTenantBooked = await this.prisma.stay.findFirst({
-        where: {
-          roomId: room.id,
-          status: StayStatus.ACTIVE,
-          id: { not: currentStay.id },
-          paymentSubmissions: {
-            some: { status: PaymentSubmissionStatus.APPROVED },
-          },
-        },
-        select: { id: true },
-      });
-      if (!newTenantBooked) continue;
-
+    for (const stay of overstays) {
       const existingTicket = await this.prisma.ticket.findFirst({
-        where: { roomId: room.id, category: 'EVICT_OVERSTAY', status: { notIn: ['DONE', 'CLOSED', 'CANCELLED'] } },
+        where: { roomId: stay.roomId, category: 'EVICT_OVERSTAY', status: { notIn: ['DONE', 'CLOSED', 'CANCELLED'] } },
         select: { id: true },
       });
       if (existingTicket) continue;
@@ -249,8 +437,9 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         select: { id: true },
       });
 
+      const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.roomId}`;
       await this.prisma.$transaction(async (tx) => {
-        const baseTic = `TIC-${new Date().getFullYear()}-EV-${currentStay.id}`;
+        const baseTic = `TIC-${new Date().getFullYear()}-EV-${stay.id}`;
         let ticketNumber = baseTic;
         let suffix = 1;
         while (await tx.ticket.findUnique({ where: { ticketNumber }, select: { id: true } })) {
@@ -261,14 +450,14 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         await tx.ticket.create({
           data: {
             ticketNumber,
-            tenantId: currentStay.tenantId,
-            roomId: room.id,
-            stayId: currentStay.id,
-            title: `Penggusuran tenant overstay - Kamar ${room.id}`,
+            tenantId: stay.tenantId,
+            roomId: stay.roomId,
+            stayId: stay.id,
+            title: `Tenant overstay - ${roomLabel}`,
             description: [
-              `Tenant gagal checkout tepat waktu dan kamar sudah dibooking tenant baru yang sudah DP/lunas.`,
-              `Tenant lama stay #${currentStay.id} wajib dikeluarkan.`,
-              `Tindakan staf: cek kamar, bantu pindahkan barang, ganti kunci, laporkan kondisi kamar.`,
+              `Kontrak sewa stay #${stay.id} berakhir ${stay.plannedCheckOutDate?.toISOString().slice(0, 10) ?? '-'} dan tenant belum checkout final hingga lewat pk 12:00 WIB.`,
+              `Tindakan staf: hubungi/temui tenant, pastikan proses checkout atau perpanjangan, bantu pindahkan barang bila perlu, laporkan kondisi kamar.`,
+              `Admin: jika tenant memperpanjang, proses renewal; jika keluar, jalankan checkout final.`,
             ].join('\n'),
             category: 'EVICT_OVERSTAY',
             assignedToId: staffAssignee?.id ?? null,
@@ -281,12 +470,16 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
             actorUserId: options.actorUserId ?? null,
             action: 'AUTO_CREATE_EVICT_TICKET',
             entityType: 'Room',
-            entityId: String(room.id),
-            meta: { stayId: currentStay.id, source: options.source ?? 'AUTO_OPS_OVERSTAY' } as unknown as Prisma.InputJsonValue,
+            entityId: String(stay.roomId),
+            meta: {
+              stayId: stay.id,
+              plannedCheckOutDate: stay.plannedCheckOutDate,
+              source: options.source ?? 'AUTO_OPS_OVERSTAY',
+            } as unknown as Prisma.InputJsonValue,
           },
         });
       });
-      evictedRoomIds.push(room.id);
+      evictedRoomIds.push(stay.roomId);
     }
 
     return { evictedRoomIds };
@@ -308,51 +501,22 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         plannedCheckOutDate: { not: null, lte: hPlus1 },
         initialMetersPromotedAt: null,
         paymentSubmissions: {
-          none: { status: PaymentSubmissionStatus.APPROVED },
+          none: { status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] } },
         },
       },
-      select: { id: true, roomId: true, tenantId: true, depositPaidAmountRupiah: true, depositAmountRupiah: true },
+      select: { id: true },
+      take: 100,
     });
 
     const cancelledStayIds: number[] = [];
     for (const stay of expiredStays) {
-      await this.prisma.$transaction(async (tx) => {
-        const paid = stay.depositPaidAmountRupiah ?? 0;
-
-        await tx.stay.update({
-          where: { id: stay.id },
-          data: {
-            status: StayStatus.CANCELLED,
-            checkoutReason: 'Gagal kontrak: tidak melunasi hingga H+1. DP hangus sesuai kebijakan.',
-            depositStatus: paid > 0 ? 'FORFEITED' : 'HELD',
-            depositDeductionRupiah: paid,
-            initialElectricityKwhPending: null,
-            initialWaterM3Pending: null,
-            initialMetersRecordedAt: null,
-            initialMetersRecordedById: null,
-          },
-        });
-
-        await tx.room.update({
-          where: { id: stay.roomId },
-          data: { status: RoomStatus.AVAILABLE },
-        });
-
-        await tx.auditLog.create({
-          data: {
-            actorUserId: options.actorUserId ?? null,
-            action: 'AUTO_CANCEL_HPLUS1_NO_PAYMENT',
-            entityType: 'Stay',
-            entityId: String(stay.id),
-            meta: {
-              roomId: stay.roomId,
-              depositForfeited: paid,
-              source: options.source ?? 'AUTO_OPS_HPLUS1_CANCEL',
-            } as unknown as Prisma.InputJsonValue,
-          },
-        });
+      const cancelled = await this.cancelEndedUnpaidStay(stay.id, {
+        actorUserId: options.actorUserId ?? null,
+        source: options.source ?? 'AUTO_OPS_HPLUS1_CANCEL',
+        action: 'AUTO_CANCEL_HPLUS1_NO_PAYMENT',
+        checkoutReason: 'Gagal kontrak: tidak melunasi hingga H+1. DP hangus sesuai kebijakan.',
       });
-      cancelledStayIds.push(stay.id);
+      if (cancelled) cancelledStayIds.push(stay.id);
     }
 
     return { cancelledStayIds };
@@ -421,6 +585,14 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         select: { id: true },
       });
       if (freshSubmission) return;
+
+      // Uang sudah masuk (mis. pembayaran manual) = jangan pernah auto-cancel;
+      // wajib keputusan manusia lewat pembatalan stay (audit A1/A4).
+      const paidInvoice = await tx.invoice.findFirst({
+        where: { stayId, status: { in: [InvoiceStatus.PAID, InvoiceStatus.PARTIAL] as any } },
+        select: { id: true },
+      });
+      if (paidInvoice) return;
 
       const invoicesToReverse = await tx.invoice.findMany({
         where: {

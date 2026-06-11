@@ -704,4 +704,10 @@ CREATE UNIQUE INDEX payment_submission_one_pending_per_target_uidx
 ON "PaymentSubmission" ("targetType", "targetId")
 WHERE status = 'PENDING_REVIEW';
 
+-- A18: DP (uang muka pesan kamar) terpisah dari deposit (jaminan checkout)
+ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentAmountRupiah" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidRupiah" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidAt" TIMESTAMP(3);
+ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentForfeitedAt" TIMESTAMP(3);
+
 COMMIT;

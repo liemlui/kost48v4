@@ -581,6 +581,14 @@ model Stay {
   depositRefundedAt       DateTime?
   depositNote             String?
 
+  // DP (uang muka pesan kamar, bagian harga sewa, non-refundable, hangus bila
+  // gagal lunas) — BERBEDA dari deposit* di atas (uang jaminan, dicek saat
+  // checkout, refundable). Ketetapan owner 2026-06-11, audit A18.
+  downPaymentAmountRupiah Int       @default(0)
+  downPaymentPaidRupiah   Int       @default(0)
+  downPaymentPaidAt       DateTime?
+  downPaymentForfeitedAt  DateTime?
+
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
 
@@ -588,6 +596,7 @@ model Stay {
   bookingSourceDetail String?
   stayPurpose         StayPurpose?
   checkoutReason      String?
+  cancelReason        String?
 
   notes       String?
   createdById Int?
@@ -1146,9 +1155,9 @@ model RenewRequest {
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
 
-  stay       Stay    @relation(fields: [stayId], references: [id], onDelete: Cascade)
-  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  reviewedBy User?   @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  stay       Stay   @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  reviewedBy User?  @relation("RenewRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([stayId])
   @@index([tenantId])

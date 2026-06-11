@@ -35,6 +35,8 @@ export interface BookingRow {
   depositAmountRupiah: number;
   depositPaidAmountRupiah?: number | null;
   depositPaymentStatus?: string | null;
+  downPaymentAmountRupiah?: number | null;
+  downPaymentPaidRupiah?: number | null;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
   bookingSource: string | null;
@@ -108,6 +110,8 @@ export function mapBookingRow(row: BookingRow) {
     depositAmountRupiah: row.depositAmountRupiah,
     depositPaidAmountRupiah: row.depositPaidAmountRupiah ?? 0,
     depositPaymentStatus: row.depositPaymentStatus ?? 'UNPAID',
+    downPaymentAmountRupiah: row.downPaymentAmountRupiah ?? 0,
+    downPaymentPaidRupiah: row.downPaymentPaidRupiah ?? 0,
     electricityTariffPerKwhRupiah: row.electricityTariffPerKwhRupiah,
     waterTariffPerM3Rupiah: row.waterTariffPerM3Rupiah,
     bookingSource: row.bookingSource,
@@ -137,6 +141,8 @@ export async function findBookingByIdTx(tx: Prisma.TransactionClient, bookingId:
       s."expiresAt", s."depositAmountRupiah",
       COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
       COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
+      COALESCE(s."downPaymentAmountRupiah", 0) AS "downPaymentAmountRupiah",
+      COALESCE(s."downPaymentPaidRupiah", 0) AS "downPaymentPaidRupiah",
       s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
       s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
       s."createdById", s."createdAt", s."updatedAt",

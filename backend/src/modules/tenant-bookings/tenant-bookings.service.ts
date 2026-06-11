@@ -146,8 +146,11 @@ export class TenantBookingsService {
           throw new ConflictException('Tarif kamar untuk term ini belum tersedia');
         }
 
-        // DP 30% sesuai pricingTerm (G4=B): 30% × harga sewa sesuai durasi
-        const depositAmountRupiah = Math.round((agreedRentAmountRupiah * 30) / 100);
+        // A18: DP (uang muka pesan kamar) = 30% × sewa sesuai pricingTerm (G4=B),
+        // non-refundable, bagian dari harga sewa. TERPISAH dari deposit jaminan.
+        const downPaymentAmountRupiah = Math.round((agreedRentAmountRupiah * 30) / 100);
+        // Deposit jaminan (refundable, dicek saat checkout) dari konfigurasi kamar.
+        const depositAmountRupiah = room.defaultDepositRupiah ?? 0;
 
         const expiresAt = calculateBookingExpiry(checkInDate);
         const stayPurposeSql = dto.stayPurpose
@@ -164,6 +167,7 @@ export class TenantBookingsService {
           INSERT INTO "Stay" (
             "tenantId", "roomId", status, "pricingTerm", "agreedRentAmountRupiah",
             "checkInDate", "plannedCheckOutDate", "expiresAt", "depositAmountRupiah",
+            "downPaymentAmountRupiah",
             "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah",
             "bookingSource", "stayPurpose", notes, "createdById", "createdAt", "updatedAt"
           ) VALUES (
@@ -172,6 +176,7 @@ export class TenantBookingsService {
             CAST(${dto.pricingTerm} AS "PricingTerm"),
             ${agreedRentAmountRupiah}, ${checkInDate}, ${plannedCheckOutDate}, ${expiresAt},
             ${depositAmountRupiah},
+            ${downPaymentAmountRupiah},
             ${room.electricityTariffPerKwhRupiah ?? 0}, ${room.waterTariffPerM3Rupiah ?? 0},
             CAST(${LeadSource.WEBSITE} AS "LeadSource"), ${stayPurposeSql}, ${dto.notes ?? null},
             ${user.id}, NOW(), NOW()
@@ -833,6 +838,8 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           s."expiresAt", s."depositAmountRupiah",
           COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaidAmountRupiah",
           COALESCE(CAST(s."depositPaymentStatus" AS text), 'UNPAID') AS "depositPaymentStatus",
+          COALESCE(s."downPaymentAmountRupiah", 0) AS "downPaymentAmountRupiah",
+          COALESCE(s."downPaymentPaidRupiah", 0) AS "downPaymentPaidRupiah",
           s."electricityTariffPerKwhRupiah", s."waterTariffPerM3Rupiah",
           s."bookingSource", s."stayPurpose", s.notes, s."cancelReason",
           s."createdById", s."createdAt", s."updatedAt",

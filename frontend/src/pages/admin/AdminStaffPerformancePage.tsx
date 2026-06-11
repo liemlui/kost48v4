@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
@@ -159,6 +160,7 @@ function currentMonth() {
 }
 
 export default function AdminStaffPerformancePage() {
+  const navigate = useNavigate();
   const [month, setMonth] = useState(currentMonth());
   const [selected, setSelected] = useState<StaffPerformanceSummary | null>(null);
   const [page, setPage] = useState(1);
@@ -227,6 +229,7 @@ export default function AdminStaffPerformancePage() {
                       <div key={item.staff.id} className="staff-alert-chip danger">
                         <strong>{item.staff.fullName}</strong>
                         <span>Avg: {Number(item.tenantReviews?.averageRating ?? 0).toFixed(1)}/5 · {item.tenantReviews?.count ?? 0} review</span>
+                        <button type="button" onClick={() => navigate(`/tickets`)} title="Buat tiket follow-up">Tiket →</button>
                         <button type="button" onClick={() => setSelected(item)}>Audit →</button>
                       </div>
                     ))}

@@ -1,5 +1,76 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-11 V5.11.0 — Audit Fix, DP 30% Model, Auto-Ops Room Release, Security Headers
+**Versi:** 2026-06-11 V5.12.0 — Pemisahan DP vs Deposit Jaminan (A18) + Overstay Baru (A5)
+
+<!-- KOST48_DOCS_SYNC_20260611_A18_DP_VS_DEPOSIT -->
+## 2026-06-11 — V5.12.0 DP (Uang Muka) vs Deposit (Jaminan) + Overstay Enforcement Baru
+
+### Type
+Backend + schema additive (`prisma db push` sudah dijalankan ke kost48_v3_pro). TypeScript PASS.
+Keputusan owner: jaminan = `Room.defaultDepositRupiah`; pelunasan paling lambat saat check-in (H+1 pk 12:00 = hangus); DP via jalur upload bukti yang sama; overstay = kontrak lewat + belum checkout final.
+
+### Schema (additive)
+- `Stay.downPaymentAmountRupiah` (DP 30% × sewa), `downPaymentPaidRupiah`, `downPaymentPaidAt`, `downPaymentForfeitedAt`.
+- `Stay.depositAmountRupiah` kini KONSISTEN = jaminan (refundable): portal booking memakai `Room.defaultDepositRupiah` (sebelumnya 30% sewa), sama dengan booking publik & check-in manual.
+- `sql/bootstrap.sql` + ALTER idempotent.
+
+### Alur booking baru (A18)
+1. Booking dibuat: DP = 30% sewa; jaminan = defaultDepositRupiah; SLA bayar DP = 3 jam (`expiresAt`).
+2. Tenant upload bukti — dua nominal sah: **DP 30%** atau **pelunasan penuh** (sisa sewa + jaminan).
+3. DP disetujui → invoice PARTIAL, `downPaymentPaid*` terisi, **kamar terkunci** (booking pesaing dibatalkan saat itu juga, tidak menunggu lunas), guard `expiresAt` mati.
+4. Pelunasan disetujui → invoice PAID → kamar OCCUPIED, jaminan masuk deposit ledger + jurnal liability, meter dipromote (alur lama).
+5. Tidak lunas hingga **H+1 pk 12:00 WIB setelah check-in** → job baru `runDownPaymentForfeit`: stay CANCELLED, invoice dibatalkan + reversal, **DP hangus** (`downPaymentForfeitedAt`), jurnal forfeit `DP_FORFEIT:{stayId}` (debit 1100 AR, kredit 4400 Penalty) — hanya diposting bila pembayaran DP terjurnal (hindari piutang fiktif), jaminan tidak tersentuh (belum dibayar).
+
+### Overstay enforcement baru (A5)
+- `runOverstayEnforcement` ditulis ulang: tenant promoted dengan `plannedCheckOutDate` lewat + belum checkout final → tiket `EVICT_OVERSTAY` otomatis setelah pk 12:00 WIB (dedupe per kamar). Definisi lama (perlu tenant baru yang bayar di kamar OCCUPIED) terbukti unreachable.
+
+### Files
+`schema.prisma`, `sql/bootstrap.sql`, `tenant-bookings.service.ts`, `tenant-bookings-helpers.ts`, `public-bookings.service.ts`, `payment-submissions.service.ts`, `payment-submissions.helpers.ts`, `accounting-posting.service.ts` (+`postDownPaymentForfeitTx`), `auto-ops.service.ts` (+`runDownPaymentForfeit`).
+
+### Follow-up frontend (belum dikerjakan)
+- Portal MyBookings: tampilkan dua opsi nominal (DP 30% / pelunasan) + status DP + deadline pelunasan; sekarang pesan error backend yang memandu nominal.
+- Admin booking approval: label "Deposit" → "Deposit Jaminan"; tampilkan kolom DP di antrean review pembayaran.
+
+<!-- KOST48_DOCS_SYNC_20260611_AUDIT_PASS_AB_FIX1 -->
+## 2026-06-11 — V5.11.1 Audit Pass A/B — Fix Paket 1
+
+### Type
+Backend hardening only. No schema change. No DB reset. TypeScript PASS.
+Referensi temuan: `docs/06_AUDIT_PASS_AB_2026-06-11.md` (flow map: `docs/05_FLOW_MAP.md`).
+
+### Fixed
+| Temuan | Perbaikan | File |
+|---|---|---|
+| A1 | Pembayaran manual ditolak untuk invoice booking belum aktif (room RESERVED + belum promoted) — wajib lewat Review Pembayaran agar aktivasi kamar/jaminan/meter berjalan | `invoice-payments.service.ts` (create) |
+| A1 | Semua sweeper kini skip stay yang punya invoice PAID/PARTIAL ("uang masuk = keputusan manusia") | `auto-ops.service.ts` (expireBookingTx), `payment-submissions.service.ts` (expireBooking, runExpiryCheck, autoCancelRejectedExpiredBookingTx) |
+| A2 | `expireBooking` & `runExpiryCheck` kini lock `FOR UPDATE OF s, r` + re-cek status/submission dalam transaksi (pola fix #3) — race vs approve tertutup | `payment-submissions.service.ts` |
+| A4 | Job auto-ops jalan **sequential** (bukan `Promise.all`) | `auto-ops.service.ts` (runAll) |
+| A4 | Noon-release & H+1 auto-cancel digabung ke satu metode `cancelEndedUnpaidStay`: lock + re-cek, skip bila ada pembayaran, batalkan invoice DRAFT/ISSUED dengan reversal blocking, forfeit dana terbayar (G2=A), lepas kamar hanya bila tidak ada stay ACTIVE lain | `auto-ops.service.ts` |
+
+### Terminologi (ketetapan owner)
+- **DP** = uang muka pesan kamar (bagian harga sewa, hangus bila gagal).
+- **Deposit** = uang jaminan, dicek saat checkout, refundable.
+- Temuan arsitektur **A18**: `Stay.depositAmountRupiah` saat ini mencampur keduanya — menunggu keputusan owner (lihat docs/06 §A18).
+
+### Fixed — Paket 2 (P2 terisolasi)
+| Temuan | Perbaikan | File |
+|---|---|---|
+| A6 | `update`/`remove` payment: lock `FOR UPDATE` invoice + cek jurnal & overpayment dipindah ke dalam transaksi | `invoice-payments.service.ts` |
+| A7 | Line jurnal reversal payment kini berisi `description` (sebelumnya salah field `memo` → kosong); sortOrder mulai 0 | `accounting-posting.service.ts` |
+| A9 | Check-in manual hanya boleh ke kamar AVAILABLE (MAINTENANCE/INACTIVE kini ditolak, bukan cuma OCCUPIED/RESERVED) | `stays.service.ts` |
+| A10 | Booking path `createSubmission` menolak invoice DRAFT (konsisten dengan jalur invoice-only) | `payment-submissions.service.ts` |
+| A12 | `syncInvoiceStatus` menulis `paidAt` = tanggal pembayaran terakhir, bukan `now()` | `invoice-payments.service.ts` |
+| A16 | Copy error CANCELLED pada update payment diperbaiki | `invoice-payments.service.ts` |
+
+### Fixed — Paket 3 (konsistensi accounting)
+| Temuan | Perbaikan | File |
+|---|---|---|
+| A8 | Helper tunggal `reverseCancelledInvoiceJournalsTx`: pre-check jurnal POSTED → reversal **wajib sukses** (skip idempotent = OK) — dipakai di 4 jalur cancel yang sebelumnya warn-only (competing-cancel, expire manual, sweep expiry, auto-cancel pasca-reject) | `payment-submissions.service.ts` |
+| A11 | Diverifikasi: auto-close SUDAH diblokir readiness `unmapped-operational` (hitung penuh, bukan sample) bila ada invoice/payment/expense/wifi tanpa jurnal. Celah tersisa (invoice CANCELLED lolos dari hitungan unmapped) ditutup oleh A8 | (tanpa perubahan kode) |
+
+### Open (menunggu keputusan owner)
+- A18 (pemisahan DP vs deposit jaminan + alur DP-only payment) — termasuk fakta baru: check-in manual masih pakai `defaultDepositRupiah`, portal pakai 30% sewa (dua rumus, satu field)
+- A5 (definisi ulang trigger EVICT_OVERSTAY)
+- A13–A15, A17 (P3, catatan ringan)
 
 <!-- KOST48_DOCS_SYNC_20260611_AUDIT_FIX -->
 ## 2026-06-11 — V5.11.0 Audit Hardening & Business Logic Fixes

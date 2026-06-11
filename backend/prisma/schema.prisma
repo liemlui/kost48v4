@@ -583,6 +583,14 @@ model Stay {
   depositRefundedAt       DateTime?
   depositNote             String?
 
+  // DP (uang muka pesan kamar, bagian harga sewa, non-refundable, hangus bila
+  // gagal lunas) — BERBEDA dari deposit* di atas (uang jaminan, dicek saat
+  // checkout, refundable). Ketetapan owner 2026-06-11, audit A18.
+  downPaymentAmountRupiah Int       @default(0)
+  downPaymentPaidRupiah   Int       @default(0)
+  downPaymentPaidAt       DateTime?
+  downPaymentForfeitedAt  DateTime?
+
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
 

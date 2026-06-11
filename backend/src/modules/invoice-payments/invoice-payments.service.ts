@@ -6,7 +6,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateInvoicePaymentDto, UpdateInvoicePaymentDto } from './dto/invoice-payment.dto';
 import { InvoicePaymentsQueryDto } from './dto/invoice-payments-query.dto';
-import { InvoiceStatus, PaymentMethod, UserRole } from '../../common/enums/app.enums';
+import { InvoiceStatus, PaymentMethod, RoomStatus, UserRole } from '../../common/enums/app.enums';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 
 @Injectable()
@@ -114,7 +114,18 @@ export class InvoicePaymentsService {
     this.assertFinanceMutationAllowed(actor);
     const invoiceSnapshot = await this.prisma.invoice.findUnique({
       where: { id: dto.invoiceId },
-      select: { id: true, status: true, stay: { select: { tenantId: true, roomId: true } } },
+      select: {
+        id: true,
+        status: true,
+        stay: {
+          select: {
+            tenantId: true,
+            roomId: true,
+            initialMetersPromotedAt: true,
+            room: { select: { status: true } },
+          },
+        },
+      },
     });
 
     if (!invoiceSnapshot) throw new NotFoundException('Invoice tidak ditemukan');
@@ -123,6 +134,19 @@ export class InvoicePaymentsService {
     }
     if (invoiceSnapshot.status === InvoiceStatus.CANCELLED) {
       throw new ConflictException('Invoice sudah dibatalkan dan tidak bisa menerima pembayaran.');
+    }
+    // Pembayaran booking wajib lewat approve bukti bayar (payment submission).
+    // Jalur manual tidak menjalankan aktivasi kamar/deposit/promosi meter, sehingga
+    // booking yang lunas manual tetap dianggap "belum bayar" oleh auto-ops dan bisa
+    // dibatalkan otomatis (temuan audit A1).
+    if (
+      invoiceSnapshot.stay &&
+      invoiceSnapshot.stay.room?.status === RoomStatus.RESERVED &&
+      !invoiceSnapshot.stay.initialMetersPromotedAt
+    ) {
+      throw new ConflictException(
+        'Invoice ini milik booking yang belum aktif. Catat pembayaran lewat Review Pembayaran (approve bukti bayar tenant) agar kamar aktif, deposit tercatat, dan booking tidak dibatalkan otomatis.',
+      );
     }
 
     const { payment: created, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -167,25 +191,29 @@ export class InvoicePaymentsService {
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
 
-    this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id));
-
-    const invoice = await this.prisma.invoice.findUnique({
-      where: { id: existing.invoiceId },
-      include: { lines: true, payments: true },
-    });
-    if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
-    if (invoice.status === InvoiceStatus.DRAFT) {
-      throw new ConflictException('Invoice masih draft dan pembayaran belum boleh diubah. Terbitkan invoice terlebih dahulu.');
-    }
-    if (invoice.status === InvoiceStatus.CANCELLED) throw new ConflictException('Update menyebabkan overpayment atau invoice CANCELLED');
-
-    const otherPaid = invoice.payments.filter((p) => p.id !== id).reduce((sum, p) => sum + p.amountRupiah, 0);
-    const nextAmount = dto.amountRupiah ?? existing.amountRupiah;
-    if (otherPaid + nextAmount > this.invoiceTotal(invoice)) {
-      throw new ConflictException('Pembayaran melebihi total invoice');
-    }
-
     const { payment: updated, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Lock + validasi dalam transaksi (audit A6) — pola sama dengan create (fix #7).
+      await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${existing.invoiceId} FOR UPDATE`;
+      this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id, tx));
+
+      const invoice = await tx.invoice.findUnique({
+        where: { id: existing.invoiceId },
+        include: { lines: true, payments: true },
+      });
+      if (!invoice) throw new NotFoundException('Invoice tidak ditemukan');
+      if (invoice.status === InvoiceStatus.DRAFT) {
+        throw new ConflictException('Invoice masih draft dan pembayaran belum boleh diubah. Terbitkan invoice terlebih dahulu.');
+      }
+      if (invoice.status === InvoiceStatus.CANCELLED) {
+        throw new ConflictException('Invoice sudah dibatalkan; pembayarannya tidak boleh diubah.');
+      }
+
+      const otherPaid = invoice.payments.filter((p) => p.id !== id).reduce((sum, p) => sum + p.amountRupiah, 0);
+      const nextAmount = dto.amountRupiah ?? existing.amountRupiah;
+      if (otherPaid + nextAmount > this.invoiceTotal(invoice)) {
+        throw new ConflictException('Pembayaran melebihi total invoice');
+      }
+
       const payment = await tx.invoicePayment.update({
         where: { id },
         data: {
@@ -211,9 +239,10 @@ export class InvoicePaymentsService {
     const existing = await this.prisma.invoicePayment.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Pembayaran tidak ditemukan');
 
-    this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id));
-
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Lock + cek jurnal dalam transaksi (audit A6).
+      await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${existing.invoiceId} FOR UPDATE`;
+      this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id, tx));
       await tx.invoicePayment.delete({ where: { id } });
       await this.syncInvoiceStatus(tx, existing.invoiceId);
       return tx.invoice.findUnique({ where: { id: existing.invoiceId } });
@@ -241,7 +270,12 @@ export class InvoicePaymentsService {
       status = InvoiceStatus.PARTIAL;
     } else {
       status = InvoiceStatus.PAID;
-      paidAt = new Date();
+      // Audit A12: pakai tanggal pembayaran terakhir, bukan waktu sinkronisasi,
+      // agar konsisten dengan jalur approve submission dan laporan tanggal lunas.
+      paidAt = invoice.payments.reduce<Date | null>(
+        (latest, payment) => (!latest || payment.paymentDate > latest ? payment.paymentDate : latest),
+        null,
+      ) ?? new Date();
     }
 
     await tx.invoice.update({ where: { id: invoiceId }, data: { status, paidAt } });
