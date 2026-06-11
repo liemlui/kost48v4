@@ -1,5 +1,32 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-11 V5.12.0 — Pemisahan DP vs Deposit Jaminan (A18) + Overstay Baru (A5)
+**Versi:** 2026-06-11 V5.12.1 — Overstay Lifecycle Penuh: Pengingat, Forced Checkout H+1, Kamar Kotor Bisa Dipesan
+
+<!-- KOST48_DOCS_SYNC_20260611_OVERSTAY_LIFECYCLE -->
+## 2026-06-11 — V5.12.1 Overstay Lifecycle (Keputusan Owner)
+
+### Type
+Backend + schema additive (`Room.allowBookingWhileCleaning`, db push OK). TypeScript PASS.
+Keputusan owner: forced checkout otomatis penuh; kamar kotor bisa dipesan, huni tunggu bersih; pengingat H-7/H-3/H-1/H-day; biaya overstay dipotong dari deposit jaminan saat settlement.
+
+### Siklus overstay lengkap (auto-ops, urutan sequential)
+1. **Pengingat** — `runContractEndReminders`: notifikasi in-app ke tenant pada H-7, H-3, H-1, dan H-day (dedupe per gelombang). Isi: perpanjang atau checkout sebelum pk 12:00; peringatan checkout paksa H+1.
+2. **H-day pk 12:00** — `runOverstayEnforcement` (V5.12.0): tiket `EVICT_OVERSTAY` untuk staf menemui tenant.
+3. **H+1 pk 12:00** — `runOverstayForcedCheckout` (BARU): stay → COMPLETED otomatis, kamar → MAINTENANCE + `allowBookingWhileCleaning=true` (kotor tapi bisa dipesan), tiket pembersihan `CHECKOUT_INSPECTION` untuk staf (keluarkan barang, bersihkan, foto), notifikasi ke tenant. **Pengecualian:** masih ada tagihan belum lunas → TIDAK auto-checkout; admin/owner dapat notifikasi 🚨 (dedupe harian) karena uang harus diputuskan manusia.
+4. **Kamar kotor bisa dipesan** — katalog publik menampilkan "Bisa dipesan — sedang dibersihkan" (`canBook=true`); booking + DP diterima (portal & publik). **Aktivasi/huni diblokir** sampai tiket pembersihan ditutup: pelunasan tidak bisa di-approve, check-in manual ditolak.
+5. **Tiket pembersihan ditutup** — gate baru: booking baru di kamar itu TIDAK memblokir penutupan tiket (yang memblokir hanya penghuni promoted); kamar → AVAILABLE (atau tetap RESERVED bila sudah dipesan), flag kotor direset → pelunasan boleh di-approve.
+6. **Biaya overstay** — dipotong dari deposit jaminan tenant lama saat settlement (`processDeposit`, manual oleh admin; tercantum di deskripsi tiket).
+
+### Konsistensi tambahan
+- Semua jalur pelepas kamar (expiry sweep, expire manual, auto-cancel pasca-reject, cancelEndedUnpaidStay, room healer) kini memakai `releaseRoomAfterBookingCancelTx`: bila masih ada tiket pembersihan terbuka, kamar kembali ke MAINTENANCE (tetap bisa dipesan) — bukan AVAILABLE — agar check-in manual tidak masuk kamar kotor.
+- `stays.create` (check-in manual) menolak kamar dengan tiket pembersihan terbuka.
+- Aktivasi booking (pelunasan PAID) mereset `allowBookingWhileCleaning`.
+
+### Files
+`schema.prisma` + `sql/bootstrap.sql` (Room.allowBookingWhileCleaning), `auto-ops.service.ts`/`auto-ops.module.ts` (2 job baru + notifikasi), `payment-submissions.service.ts`, `tenant-bookings.service.ts`/`-helpers.ts`, `public-bookings.service.ts`, `tickets.service.ts`, `stays.service.ts`, `marketing-public-rooms.service.ts`.
+
+### Follow-up frontend
+- Katalog publik: render `availabilityNote` "sedang dibersihkan" (data sudah dikirim backend).
+- Portal: tampilkan pengingat kontrak (notifikasi in-app sudah masuk bell icon yang ada).
 
 <!-- KOST48_DOCS_SYNC_20260611_A18_DP_VS_DEPOSIT -->
 ## 2026-06-11 — V5.12.0 DP (Uang Muka) vs Deposit (Jaminan) + Overstay Enforcement Baru

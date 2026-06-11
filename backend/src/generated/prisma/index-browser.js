@@ -169,6 +169,7 @@ exports.Prisma.RoomScalarFieldEnum = {
   images: 'images',
   notes: 'notes',
   isActive: 'isActive',
+  allowBookingWhileCleaning: 'allowBookingWhileCleaning',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

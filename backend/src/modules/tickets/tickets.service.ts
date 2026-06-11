@@ -619,10 +619,22 @@ export class TicketsService {
         }
 
         if (ticket.category === "CHECKOUT_INSPECTION" && ticket.roomId) {
-          const otherActiveStays = await tx.stay.count({
+          // Bedakan penghuni aktif (promoted) dari booking baru yang belum huni:
+          // kamar bekas overstay boleh dipesan saat masih dibersihkan, jadi
+          // adanya booking TIDAK memblokir penutupan tiket pembersihan.
+          const otherPromotedStays = await tx.stay.count({
             where: {
               roomId: ticket.roomId,
               status: "ACTIVE" as any,
+              initialMetersPromotedAt: { not: null },
+              id: ticket.stayId ? { not: ticket.stayId } : undefined,
+            },
+          });
+          const otherBookingStays = await tx.stay.count({
+            where: {
+              roomId: ticket.roomId,
+              status: "ACTIVE" as any,
+              initialMetersPromotedAt: null,
               id: ticket.stayId ? { not: ticket.stayId } : undefined,
             },
           });
@@ -630,14 +642,24 @@ export class TicketsService {
             (dto.finalRoomItemStatus && dto.finalRoomItemStatus !== "GOOD") ||
             (dto.finalInventoryItemStatus && dto.finalInventoryItemStatus !== "GOOD");
 
-          if (otherActiveStays > 0) {
+          if (otherPromotedStays > 0) {
             roomReadyBlockedReason = "ACTIVE_STAY_EXISTS";
           } else if (hasProblemFinalStatus) {
             roomReadyBlockedReason = "FINAL_ITEM_STATUS_NOT_READY";
+          } else if (otherBookingStays > 0) {
+            // Kamar sudah dipesan selama pembersihan: status biarkan RESERVED
+            // (mengikuti booking), cukup matikan flag kotor — pelunasan booking
+            // kini bisa disetujui (gate aktivasi terbuka).
+            await tx.room.update({
+              where: { id: ticket.roomId },
+              data: { allowBookingWhileCleaning: false },
+            });
+            roomMarkedReady = true;
+            roomReadyBlockedReason = "ROOM_BOOKED_DURING_CLEANING_NOW_READY";
           } else {
             const readyResult = await tx.room.updateMany({
               where: { id: ticket.roomId, status: "MAINTENANCE" as any },
-              data: { status: "AVAILABLE" as any },
+              data: { status: "AVAILABLE" as any, allowBookingWhileCleaning: false },
             });
             roomMarkedReady = readyResult.count === 1;
             if (!roomMarkedReady) {

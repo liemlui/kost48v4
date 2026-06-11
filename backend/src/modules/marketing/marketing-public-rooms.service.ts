@@ -21,6 +21,7 @@ const PUBLIC_ROOM_SELECT = {
   biWeeklyRateRupiah: true,
   monthlyRateRupiah: true,
   defaultDepositRupiah: true,
+  allowBookingWhileCleaning: true,
   electricityTariffPerKwhRupiah: true,
   waterTariffPerM3Rupiah: true,
 } satisfies Prisma.RoomSelect;
@@ -209,14 +210,22 @@ export class MarketingPublicRoomsService {
       highlightedPricingTerm,
       highlightedRateRupiah: this.resolveRent(room, highlightedPricingTerm),
       availablePricingTerms: this.getAvailablePricingTerms(room),
-      isAvailable: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
-      canBook: room.status === RoomStatus.AVAILABLE || room.status === RoomStatus.RESERVED,
+      isAvailable:
+        room.status === RoomStatus.AVAILABLE ||
+        room.status === RoomStatus.RESERVED ||
+        (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
+      canBook:
+        room.status === RoomStatus.AVAILABLE ||
+        room.status === RoomStatus.RESERVED ||
+        (room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)),
       availabilityNote:
         room.status === RoomStatus.RESERVED
           ? 'Sudah ada peminat, tetapi belum terkunci sebelum pembayaran valid disetujui.'
-          : room.status === RoomStatus.MAINTENANCE
-            ? 'Kamar kosong, tetapi sedang dicek sebelum dibuka untuk booking.'
-            : null,
+          : room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning)
+            ? 'Bisa dipesan sekarang — kamar sedang dibersihkan staf dan siap dihuni setelah pembersihan selesai.'
+            : room.status === RoomStatus.MAINTENANCE
+              ? 'Kamar kosong, tetapi sedang dicek sebelum dibuka untuk booking.'
+              : null,
       facilities,
     };
   }

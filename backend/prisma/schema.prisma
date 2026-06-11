@@ -522,6 +522,12 @@ model Room {
   images    String[] @default([])
   notes     String?
   isActive  Boolean  @default(true)
+
+  // Kamar bekas overstay/forced-checkout: masih MAINTENANCE (kotor, dibersihkan
+  // staf) tetapi sudah boleh DIPESAN (booking + DP); aktivasi/huni menunggu
+  // tiket pembersihan ditutup. Keputusan owner 2026-06-11.
+  allowBookingWhileCleaning Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

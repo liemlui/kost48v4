@@ -5,6 +5,7 @@ import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { AppNotificationService } from '../notifications/app-notification.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -25,6 +26,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly accountingPeriodCloseService: AccountingPeriodCloseService,
     private readonly accountingPosting: AccountingPostingService,
+    private readonly appNotification: AppNotificationService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -90,8 +92,10 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       // Sequential (audit A4): job-job ini menyentuh tabel Stay/Room yang sama;
       // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
       const bookingResult = await this.runBookingExpiry(options);
+      await this.runContractEndReminders(options);
       const dpForfeitResult = await this.runDownPaymentForfeit(options);
       void dpForfeitResult;
+      await this.runOverstayForcedCheckout(options);
       const autoCancelResult = await this.runPostCheckoutAutoCancel(options);
       const noonResult = await this.runRoomReleaseAtNoon(options);
       const roomResult = await this.runRoomHealer(options);
@@ -316,10 +320,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         where: { roomId: current.roomId, status: StayStatus.ACTIVE, id: { not: stayId } },
       });
       if (otherActive === 0) {
-        await tx.room.updateMany({
-          where: { id: current.roomId, status: { in: [RoomStatus.RESERVED, RoomStatus.OCCUPIED] as any } },
-          data: { status: RoomStatus.AVAILABLE },
-        });
+        await this.releaseRoomAfterBookingCancelTx(tx, current.roomId);
       }
 
       await tx.auditLog.create({
@@ -387,6 +388,310 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     }
 
     return { forfeitedStayIds };
+  }
+
+  /**
+   * Pengingat kontrak berakhir (keputusan owner: H-7, H-3, H-1, H-day).
+   * Notifikasi in-app ke tenant promoted yang plannedCheckOutDate-nya mendekat,
+   * dedupe per stay per gelombang lewat judul notifikasi.
+   */
+  async runContractEndReminders(options: { actorUserId?: number | null; source?: string } = {}) {
+    void options;
+    const now = new Date();
+    const jakartaNow = new Date(now.getTime() + 7 * 3600 * 1000);
+    const todayWib = new Date(Date.UTC(jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()));
+    const horizon = new Date(todayWib);
+    horizon.setUTCDate(horizon.getUTCDate() + 7);
+
+    const stays = await this.prisma.stay.findMany({
+      where: {
+        status: StayStatus.ACTIVE,
+        initialMetersPromotedAt: { not: null },
+        plannedCheckOutDate: { not: null, gte: todayWib, lte: horizon },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        plannedCheckOutDate: true,
+        room: { select: { code: true, name: true } },
+      },
+      take: 200,
+    });
+
+    const REMINDER_DAYS = [7, 3, 1, 0];
+    let sent = 0;
+    for (const stay of stays) {
+      const planned = new Date(stay.plannedCheckOutDate as Date);
+      planned.setUTCHours(0, 0, 0, 0);
+      const daysLeft = Math.round((planned.getTime() - todayWib.getTime()) / 86_400_000);
+      if (!REMINDER_DAYS.includes(daysLeft)) continue;
+
+      const tenantUser = await this.prisma.user.findFirst({
+        where: { tenantId: stay.tenantId, role: 'TENANT' as any, isActive: true },
+        select: { id: true },
+      });
+      if (!tenantUser) continue;
+
+      const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.id}`;
+      const title =
+        daysLeft === 0
+          ? `⏰ Kontrak ${roomLabel} berakhir HARI INI`
+          : `⏰ Kontrak ${roomLabel} berakhir ${daysLeft} hari lagi`;
+
+      const existing = await (this.prisma as any).appNotification.findFirst({
+        where: {
+          recipientUserId: tenantUser.id,
+          entityType: 'Stay',
+          entityId: String(stay.id),
+          title,
+        },
+        select: { id: true },
+      });
+      if (existing) continue;
+
+      await this.appNotification.create({
+        recipientUserId: tenantUser.id,
+        title,
+        body:
+          daysLeft === 0
+            ? `Kontrak sewa kamar ${roomLabel} berakhir hari ini. Segera ajukan perpanjangan atau checkout sebelum pk 12:00 WIB. Jika tidak ada tindakan hingga besok pk 12:00, sistem akan melakukan checkout otomatis dan barang Anda dikeluarkan oleh staf.`
+            : `Kontrak sewa kamar ${roomLabel} berakhir ${daysLeft} hari lagi (${planned.toISOString().slice(0, 10)}). Silakan ajukan perpanjangan lewat portal, atau ajukan checkout. Tanpa tindakan, kamar dilepas otomatis pk 12:00 di hari berakhirnya kontrak.`,
+        linkTo: '/portal/my-stay',
+        entityType: 'Stay',
+        entityId: String(stay.id),
+      });
+      sent += 1;
+    }
+
+    return { remindersSent: sent };
+  }
+
+  /**
+   * Forced checkout overstay H+1 pk 12:00 WIB (keputusan owner): tenant yang
+   * mengabaikan semua pengingat sampai H+1 di-checkout otomatis.
+   * - Masih ada tagihan belum lunas → TIDAK auto-checkout (uang harus diputuskan
+   *   manusia); admin/owner dapat notifikasi merah (dedupe harian).
+   * - Sukses: stay COMPLETED, kamar → MAINTENANCE + allowBookingWhileCleaning
+   *   (kotor tapi sudah bisa dipesan), tiket CHECKOUT_INSPECTION utk staf,
+   *   biaya overstay dipotong dari deposit jaminan saat settlement (manual).
+   */
+  async runOverstayForcedCheckout(options: { actorUserId?: number | null; source?: string } = {}) {
+    const now = new Date();
+    const jakartaHour = (now.getUTCHours() + 7) % 24;
+    if (jakartaHour < 12) {
+      return { forcedCheckoutStayIds: [] as number[] };
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setUTCHours(0, 0, 0, 0);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+
+    const candidates = await this.prisma.stay.findMany({
+      where: {
+        status: StayStatus.ACTIVE,
+        initialMetersPromotedAt: { not: null },
+        plannedCheckOutDate: { not: null, lte: yesterday },
+      },
+      select: { id: true },
+      take: 50,
+    });
+
+    const forcedCheckoutStayIds: number[] = [];
+    for (const candidate of candidates) {
+      const done = await this.forceCheckoutOverstay(candidate.id, options, yesterday);
+      if (done) forcedCheckoutStayIds.push(candidate.id);
+    }
+
+    return { forcedCheckoutStayIds };
+  }
+
+  private async forceCheckoutOverstay(
+    stayId: number,
+    options: { actorUserId?: number | null; source?: string },
+    cutoffDate: Date,
+  ): Promise<boolean> {
+    // Tagihan terbuka = blokir auto-checkout, eskalasi ke admin/owner (di luar tx; tidak ada mutasi).
+    const openInvoices = await this.prisma.invoice.findMany({
+      where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
+      select: { id: true, invoiceNumber: true, status: true },
+    });
+    if (openInvoices.length > 0) {
+      await this.notifyAdminsForcedCheckoutBlocked(stayId, openInvoices);
+      return false;
+    }
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRaw<
+        Array<{ status: string; roomId: number; tenantId: number; promotedAt: Date | null; plannedCheckOutDate: Date | null }>
+      >(Prisma.sql`
+        SELECT s.status, s."roomId", s."tenantId",
+               s."initialMetersPromotedAt" AS "promotedAt",
+               s."plannedCheckOutDate"
+        FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
+        WHERE s.id = ${stayId}
+        FOR UPDATE OF s, r`);
+      const current = rows[0];
+      if (
+        !current ||
+        current.status !== 'ACTIVE' ||
+        !current.promotedAt ||
+        !current.plannedCheckOutDate ||
+        new Date(current.plannedCheckOutDate) > cutoffDate
+      ) {
+        return null;
+      }
+
+      // Re-cek tagihan dalam tx (race: pembayaran/invoice baru sesaat sebelum lock).
+      const freshOpenInvoice = await tx.invoice.findFirst({
+        where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
+        select: { id: true },
+      });
+      if (freshOpenInvoice) return null;
+
+      await tx.stay.update({
+        where: { id: stayId },
+        data: {
+          status: 'COMPLETED' as any,
+          actualCheckOutDate: new Date(),
+          checkoutReason:
+            'Forced checkout otomatis: kontrak berakhir dan tenant tidak memperpanjang/checkout hingga H+1 pk 12:00 WIB meski sudah diberi pengingat berkala.',
+        },
+      });
+
+      const otherActive = await tx.stay.count({
+        where: { roomId: current.roomId, status: StayStatus.ACTIVE, id: { not: stayId } },
+      });
+
+      if (otherActive === 0) {
+        await tx.room.update({
+          where: { id: current.roomId },
+          data: { status: RoomStatus.MAINTENANCE, allowBookingWhileCleaning: true },
+        });
+
+        const existingInspection = await tx.ticket.findFirst({
+          where: { stayId, roomId: current.roomId, category: 'CHECKOUT_INSPECTION' },
+          select: { id: true },
+        });
+        if (!existingInspection) {
+          const staffAssignee = await tx.user.findFirst({
+            where: { role: 'STAFF' as any, isActive: true },
+            orderBy: { id: 'asc' },
+            select: { id: true },
+          });
+          const room = await tx.room.findUnique({ where: { id: current.roomId }, select: { code: true, name: true } });
+          const roomLabel = room?.code || room?.name || `Kamar #${current.roomId}`;
+          const baseTicketNumber = `TIC-${new Date().getFullYear()}-CHK-${stayId}`;
+          let ticketNumber = baseTicketNumber;
+          let suffix = 1;
+          while (await tx.ticket.findUnique({ where: { ticketNumber }, select: { id: true } })) {
+            suffix += 1;
+            ticketNumber = `${baseTicketNumber}-${suffix}`;
+          }
+          await tx.ticket.create({
+            data: {
+              ticketNumber,
+              tenantId: current.tenantId,
+              roomId: current.roomId,
+              stayId,
+              title: `Bersihkan kamar bekas overstay - ${roomLabel}`,
+              description: [
+                `Kamar ${roomLabel} di-checkout paksa otomatis karena tenant overstay (H+1 lewat pk 12:00).`,
+                'Tindakan staf: keluarkan dan amankan barang tenant, bersihkan kamar, cek inventaris & kerusakan, foto kondisi akhir.',
+                'Kamar SUDAH bisa dipesan calon tenant baru selama pembersihan; aktivasi penghuni baru menunggu tiket ini ditutup.',
+                'Admin: biaya overstay/pembersihan dipotong dari deposit jaminan tenant lama saat settlement (Proses Deposit).',
+              ].join('\n'),
+              category: 'CHECKOUT_INSPECTION',
+              assignedToId: staffAssignee?.id ?? null,
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          actorUserId: options.actorUserId ?? null,
+          action: 'AUTO_FORCED_CHECKOUT_OVERSTAY',
+          entityType: 'Stay',
+          entityId: String(stayId),
+          meta: {
+            roomId: current.roomId,
+            tenantId: current.tenantId,
+            plannedCheckOutDate: current.plannedCheckOutDate,
+            source: options.source ?? 'AUTO_OPS_FORCED_CHECKOUT',
+          } as unknown as Prisma.InputJsonValue,
+        },
+      });
+
+      return { tenantId: current.tenantId, roomId: current.roomId };
+    });
+
+    if (!result) return false;
+
+    // Notifikasi tenant di luar tx (agar tidak terkirim bila tx rollback).
+    try {
+      const tenantUser = await this.prisma.user.findFirst({
+        where: { tenantId: result.tenantId, role: 'TENANT' as any, isActive: true },
+        select: { id: true },
+      });
+      if (tenantUser) {
+        await this.appNotification.create({
+          recipientUserId: tenantUser.id,
+          title: '🚪 Anda telah di-checkout otomatis (overstay)',
+          body: 'Kontrak sewa Anda berakhir dan tidak ada perpanjangan/checkout hingga H+1 pk 12:00 WIB. Sistem melakukan checkout otomatis; barang Anda diamankan staf. Deposit jaminan diproses setelah pemeriksaan kamar (biaya overstay/pembersihan dapat dipotong). Hubungi pengelola untuk pengambilan barang.',
+          linkTo: '/portal/my-stay',
+          entityType: 'Stay',
+          entityId: String(stayId),
+        });
+      }
+    } catch (err) {
+      this.logger.warn(`Notifikasi forced checkout gagal (stay #${stayId}): ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    return true;
+  }
+
+  private async notifyAdminsForcedCheckoutBlocked(
+    stayId: number,
+    openInvoices: Array<{ id: number; invoiceNumber: string | null; status: string }>,
+  ) {
+    const now = new Date();
+    const jakartaNow = new Date(now.getTime() + 7 * 3600 * 1000);
+    const todayWib = new Date(Date.UTC(jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()));
+    const title = `🚨 Overstay stay #${stayId} tidak bisa di-checkout otomatis`;
+    const invoiceRefs = openInvoices
+      .map((invoice) => `${invoice.invoiceNumber ?? `#${invoice.id}`} (${invoice.status})`)
+      .join(', ');
+
+    const admins = await this.prisma.user.findMany({
+      where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true },
+      select: { id: true },
+    });
+
+    for (const admin of admins) {
+      const existing = await (this.prisma as any).appNotification.findFirst({
+        where: {
+          recipientUserId: admin.id,
+          entityType: 'Stay',
+          entityId: String(stayId),
+          title,
+          createdAt: { gte: todayWib },
+        },
+        select: { id: true },
+      });
+      if (existing) continue;
+      try {
+        await this.appNotification.create({
+          recipientUserId: admin.id,
+          title,
+          body: `Tenant overstay (H+1 lewat) masih punya tagihan aktif: ${invoiceRefs}. Sistem tidak berani checkout otomatis selama ada uang yang harus diputuskan. Selesaikan/batalkan tagihan lalu jalankan checkout final, atau tunggu sweep berikutnya.`,
+          linkTo: '/stays',
+          entityType: 'Stay',
+          entityId: String(stayId),
+        });
+      } catch (err) {
+        this.logger.warn(`Notifikasi admin overstay-blocked gagal (stay #${stayId}): ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
   /**
@@ -535,7 +840,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const releasedRoomIds: number[] = [];
     for (const room of rooms) {
       await this.prisma.$transaction(async (tx) => {
-        await tx.room.update({ where: { id: room.id }, data: { status: RoomStatus.AVAILABLE } });
+        await this.releaseRoomAfterBookingCancelTx(tx, room.id);
         await tx.auditLog.create({
           data: {
             actorUserId: options.actorUserId ?? null,
@@ -550,6 +855,24 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     }
 
     return { releasedRoomIds };
+  }
+
+
+  /**
+   * Lepas kamar setelah booking batal: bila masih ada tiket pembersihan/inspeksi
+   * terbuka (kamar kotor bekas overstay), kembalikan ke MAINTENANCE (tetap bisa
+   * dipesan via allowBookingWhileCleaning) — bukan AVAILABLE, agar check-in
+   * manual tidak masuk kamar kotor.
+   */
+  private async releaseRoomAfterBookingCancelTx(tx: Prisma.TransactionClient, roomId: number) {
+    const openCleaning = await tx.ticket.findFirst({
+      where: { roomId, category: 'CHECKOUT_INSPECTION' as any, status: { notIn: ['CLOSED', 'CANCELLED'] as any } },
+      select: { id: true },
+    });
+    await tx.room.update({
+      where: { id: roomId },
+      data: openCleaning ? { status: RoomStatus.MAINTENANCE } : { status: RoomStatus.AVAILABLE },
+    });
   }
 
   private expiredBookingWhere(hasPendingReview: boolean): Prisma.StayWhereInput {
@@ -650,7 +973,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         },
       });
 
-      await tx.room.update({ where: { id: roomId }, data: { status: RoomStatus.AVAILABLE as any } });
+      await this.releaseRoomAfterBookingCancelTx(tx, roomId);
       await tx.auditLog.create({
         data: {
           actorUserId,

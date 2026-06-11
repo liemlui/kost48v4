@@ -231,6 +231,19 @@ export class StaysService {
         if (lockedRoom.status !== RoomStatus.AVAILABLE) {
           throw new ConflictException("Kamar tidak tersedia untuk check-in (sedang ditempati, dipesan, perlu dicek, atau nonaktif)");
         }
+        const openCleaningTicket = await tx.ticket.findFirst({
+          where: {
+            roomId: dto.roomId,
+            category: "CHECKOUT_INSPECTION" as any,
+            status: { notIn: ["CLOSED", "CANCELLED"] as any },
+          },
+          select: { id: true, ticketNumber: true },
+        });
+        if (openCleaningTicket) {
+          throw new ConflictException(
+            `Kamar masih dalam proses pembersihan/inspeksi (tiket ${openCleaningTicket.ticketNumber}). Tutup tiket tersebut sebelum check-in.`,
+          );
+        }
         const existingRoomStayLock = await tx.stay.findFirst({
           where: { roomId: dto.roomId, status: StayStatus.ACTIVE },
         });

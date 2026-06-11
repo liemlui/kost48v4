@@ -710,4 +710,7 @@ ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidRupiah" INTEGER NOT 
 ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidAt" TIMESTAMP(3);
 ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentForfeitedAt" TIMESTAMP(3);
 
+-- A5 follow-up: kamar kotor pasca forced-checkout boleh dipesan
+ALTER TABLE "Room" ADD COLUMN IF NOT EXISTS "allowBookingWhileCleaning" BOOLEAN NOT NULL DEFAULT FALSE;
+
 COMMIT;

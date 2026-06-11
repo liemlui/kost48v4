@@ -113,6 +113,7 @@ export class TenantBookingsService {
             id, code, name, floor, status, "isActive",
             "dailyRateRupiah", "weeklyRateRupiah", "biWeeklyRateRupiah",
             "monthlyRateRupiah", "defaultDepositRupiah",
+            "allowBookingWhileCleaning",
             "electricityTariffPerKwhRupiah", "waterTariffPerM3Rupiah", notes
           FROM "Room"
           WHERE id = ${dto.roomId}
@@ -122,7 +123,12 @@ export class TenantBookingsService {
         const room = lockedRooms[0];
         if (!room) throw new NotFoundException('Kamar tidak ditemukan');
         if (!room.isActive) throw new ConflictException('Kamar tidak aktif untuk pemesanan');
-        if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
+        const bookableWhileCleaning =
+          room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
+        if (
+          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          !bookableWhileCleaning
+        ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia');
         }
 

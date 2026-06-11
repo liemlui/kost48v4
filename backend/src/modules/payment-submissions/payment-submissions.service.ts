@@ -563,9 +563,26 @@ export class PaymentSubmissionsService {
           }
 
           if (nextInvoiceStatus === InvoiceStatus.PAID) {
+            // Kamar bekas overstay: huni baru menunggu pembersihan selesai.
+            // DP boleh masuk kapan saja; pelunasan (yang memicu aktivasi) baru
+            // boleh disetujui setelah tiket pembersihan/inspeksi ditutup.
+            const openCleaningTicket = await tx.ticket.findFirst({
+              where: {
+                roomId: submission.roomId,
+                category: 'CHECKOUT_INSPECTION' as any,
+                status: { notIn: ['CLOSED', 'CANCELLED'] as any },
+              },
+              select: { id: true, ticketNumber: true },
+            });
+            if (openCleaningTicket) {
+              throw new ConflictException(
+                `Kamar masih dalam proses pembersihan/inspeksi (tiket ${openCleaningTicket.ticketNumber}). Tutup tiket tersebut terlebih dahulu, lalu setujui pelunasan untuk mengaktifkan hunian.`,
+              );
+            }
+
             await tx.room.update({
               where: { id: submission.roomId },
-              data: { status: RoomStatus.OCCUPIED },
+              data: { status: RoomStatus.OCCUPIED, allowBookingWhileCleaning: false },
             });
 
             const activationStay = await tx.stay.findUnique({
@@ -794,6 +811,23 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     return { cancelledCount: competingStayIds.length, stayIds: competingStayIds };
   }
 
+
+  /**
+   * Lepas kamar setelah booking batal: bila masih ada tiket pembersihan/inspeksi
+   * terbuka (kamar kotor bekas overstay), kembalikan ke MAINTENANCE (tetap bisa
+   * dipesan) — bukan AVAILABLE.
+   */
+  private async releaseRoomAfterBookingCancelTx(tx: Prisma.TransactionClient, roomId: number) {
+    const openCleaning = await tx.ticket.findFirst({
+      where: { roomId, category: 'CHECKOUT_INSPECTION' as any, status: { notIn: ['CLOSED', 'CANCELLED'] as any } },
+      select: { id: true },
+    });
+    await tx.room.update({
+      where: { id: roomId },
+      data: openCleaning ? { status: RoomStatus.MAINTENANCE } : { status: RoomStatus.AVAILABLE },
+    });
+  }
+
   /**
    * Reversal jurnal invoice yang dibatalkan — kebijakan tunggal (audit A8):
    * skip benign bila jurnal POSTED tidak ada; bila ada, reversal WAJIB sukses
@@ -996,10 +1030,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           },
         });
 
-        await tx.room.update({
-          where: { id: booking.roomId },
-          data: { status: RoomStatus.AVAILABLE },
-        });
+        await this.releaseRoomAfterBookingCancelTx(tx, booking.roomId);
 
         await tx.auditLog.create({
           data: {
@@ -1126,10 +1157,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             },
           });
 
-          await tx.room.update({
-            where: { id: booking.roomId },
-            data: { status: RoomStatus.AVAILABLE },
-          });
+          await this.releaseRoomAfterBookingCancelTx(tx, booking.roomId);
 
           await tx.auditLog.create({
             data: {
@@ -1218,7 +1246,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         initialMetersRecordedById: null,
       },
     });
-    await tx.room.update({ where: { id: roomId }, data: { status: RoomStatus.AVAILABLE as any } });
+    await this.releaseRoomAfterBookingCancelTx(tx, roomId);
     await tx.auditLog.create({
       data: {
         actorUserId,

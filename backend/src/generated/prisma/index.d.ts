@@ -9978,6 +9978,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah: number | null
     notes: string | null
     isActive: boolean | null
+    allowBookingWhileCleaning: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -9997,6 +9998,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah: number | null
     notes: string | null
     isActive: boolean | null
+    allowBookingWhileCleaning: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10017,6 +10019,7 @@ export namespace Prisma {
     images: number
     notes: number
     isActive: number
+    allowBookingWhileCleaning: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10060,6 +10063,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: true
     notes?: true
     isActive?: true
+    allowBookingWhileCleaning?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10079,6 +10083,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: true
     notes?: true
     isActive?: true
+    allowBookingWhileCleaning?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10099,6 +10104,7 @@ export namespace Prisma {
     images?: true
     notes?: true
     isActive?: true
+    allowBookingWhileCleaning?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10206,6 +10212,7 @@ export namespace Prisma {
     images: string[]
     notes: string | null
     isActive: boolean
+    allowBookingWhileCleaning: boolean
     createdAt: Date
     updatedAt: Date
     _count: RoomCountAggregateOutputType | null
@@ -10245,6 +10252,7 @@ export namespace Prisma {
     images?: boolean
     notes?: boolean
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stays?: boolean | Room$staysArgs<ExtArgs>
@@ -10278,6 +10286,7 @@ export namespace Prisma {
     images?: boolean
     notes?: boolean
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -10298,6 +10307,7 @@ export namespace Prisma {
     images?: boolean
     notes?: boolean
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -10318,11 +10328,12 @@ export namespace Prisma {
     images?: boolean
     notes?: boolean
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | Room$staysArgs<ExtArgs>
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
@@ -10373,6 +10384,7 @@ export namespace Prisma {
       images: string[]
       notes: string | null
       isActive: boolean
+      allowBookingWhileCleaning: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["room"]>
@@ -10825,6 +10837,7 @@ export namespace Prisma {
     readonly images: FieldRef<"Room", 'String[]'>
     readonly notes: FieldRef<"Room", 'String'>
     readonly isActive: FieldRef<"Room", 'Boolean'>
+    readonly allowBookingWhileCleaning: FieldRef<"Room", 'Boolean'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly updatedAt: FieldRef<"Room", 'DateTime'>
   }
@@ -60781,6 +60794,7 @@ export namespace Prisma {
     images: 'images',
     notes: 'notes',
     isActive: 'isActive',
+    allowBookingWhileCleaning: 'allowBookingWhileCleaning',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -62727,6 +62741,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Room">
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
+    allowBookingWhileCleaning?: BoolFilter<"Room"> | boolean
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -62759,6 +62774,7 @@ export namespace Prisma {
     images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    allowBookingWhileCleaning?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stays?: StayOrderByRelationAggregateInput
@@ -62794,6 +62810,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Room">
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
+    allowBookingWhileCleaning?: BoolFilter<"Room"> | boolean
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -62826,6 +62843,7 @@ export namespace Prisma {
     images?: SortOrder
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    allowBookingWhileCleaning?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoomCountOrderByAggregateInput
@@ -62854,6 +62872,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"Room">
     notes?: StringNullableWithAggregatesFilter<"Room"> | string | null
     isActive?: BoolWithAggregatesFilter<"Room"> | boolean
+    allowBookingWhileCleaning?: BoolWithAggregatesFilter<"Room"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
   }
@@ -67387,6 +67406,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -67419,6 +67439,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -67450,6 +67471,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -67482,6 +67504,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -67514,6 +67537,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -67533,6 +67557,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -67553,6 +67578,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -72680,6 +72706,7 @@ export namespace Prisma {
     images?: SortOrder
     notes?: SortOrder
     isActive?: SortOrder
+    allowBookingWhileCleaning?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -72710,6 +72737,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: SortOrder
     notes?: SortOrder
     isActive?: SortOrder
+    allowBookingWhileCleaning?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -72729,6 +72757,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: SortOrder
     notes?: SortOrder
     isActive?: SortOrder
+    allowBookingWhileCleaning?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87162,6 +87191,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -87193,6 +87223,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -87239,6 +87270,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -87270,6 +87302,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -87354,6 +87387,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
@@ -87385,6 +87419,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
@@ -88024,6 +88059,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
@@ -88055,6 +88091,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
@@ -88541,6 +88578,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -88572,6 +88610,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -88872,6 +88911,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -88903,6 +88943,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -89029,6 +89070,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -89060,6 +89102,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -89196,6 +89239,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -89227,6 +89271,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -91336,6 +91381,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -91367,6 +91413,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -91796,6 +91843,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -91827,6 +91875,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -92575,6 +92624,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -92606,6 +92656,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -92831,6 +92882,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -92862,6 +92914,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -93062,6 +93115,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -93093,6 +93147,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -93311,6 +93366,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -93342,6 +93398,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -95044,6 +95101,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -95075,6 +95133,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -95386,6 +95445,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -95417,6 +95477,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -95593,6 +95654,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -95624,6 +95686,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -95871,6 +95934,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -95902,6 +95966,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -96114,6 +96179,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -96145,6 +96211,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -96597,6 +96664,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -96628,6 +96696,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -98100,6 +98169,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -98131,6 +98201,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -98450,6 +98521,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -98481,6 +98553,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -98727,6 +98800,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -98758,6 +98832,7 @@ export namespace Prisma {
     images?: RoomCreateimagesInput | string[]
     notes?: string | null
     isActive?: boolean
+    allowBookingWhileCleaning?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -99125,6 +99200,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -99156,6 +99232,7 @@ export namespace Prisma {
     images?: RoomUpdateimagesInput | string[]
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput

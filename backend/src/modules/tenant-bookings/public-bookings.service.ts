@@ -30,6 +30,7 @@ interface RoomPricingSnapshot {
   biWeeklyRateRupiah: number | null;
   monthlyRateRupiah: number;
   defaultDepositRupiah: number;
+  allowBookingWhileCleaning?: boolean | null;
   electricityTariffPerKwhRupiah: number;
   waterTariffPerM3Rupiah: number;
   notes: string | null;
@@ -172,6 +173,7 @@ export class PublicBookingsService {
             "biWeeklyRateRupiah",
             "monthlyRateRupiah",
             "defaultDepositRupiah",
+            "allowBookingWhileCleaning",
             "electricityTariffPerKwhRupiah",
             "waterTariffPerM3Rupiah",
             notes
@@ -187,7 +189,12 @@ export class PublicBookingsService {
         if (!room.isActive) {
           throw new ConflictException('Kamar ini sudah tidak tersedia untuk booking.');
         }
-        if (![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus)) {
+        const bookableWhileCleaning =
+          room.status === RoomStatus.MAINTENANCE && Boolean(room.allowBookingWhileCleaning);
+        if (
+          ![RoomStatus.AVAILABLE, RoomStatus.RESERVED].includes(room.status as RoomStatus) &&
+          !bookableWhileCleaning
+        ) {
           throw new ConflictException('Kamar belum bisa dipesan karena sudah aktif ditempati atau sedang tidak tersedia.');
         }
 

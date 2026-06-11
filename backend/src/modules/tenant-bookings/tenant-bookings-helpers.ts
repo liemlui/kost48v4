@@ -6,6 +6,7 @@ import { addDays, startOfDay } from '../../common/utils/date.util';
 import { AUTO_OPS_DEADLINES, hoursFromNow, hoursAfter } from '../../common/business/auto-ops.constants';
 
 export interface RoomPricingSnapshot {
+  allowBookingWhileCleaning?: boolean | null;
   id: number;
   code: string;
   name: string | null;
