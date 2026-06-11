@@ -580,9 +580,21 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           },
           select: { id: true },
         });
+        // Audit M-17: kamar dengan tiket pembersihan terbuka kembali ke
+        // MAINTENANCE (tetap bisa dipesan), bukan AVAILABLE.
+        const openCleaningTicket = await tx.ticket.findFirst({
+          where: {
+            roomId: row.roomId,
+            category: 'CHECKOUT_INSPECTION' as any,
+            status: { notIn: ['CLOSED', 'CANCELLED'] as any },
+          },
+          select: { id: true },
+        });
         const nextRoomStatus = otherActiveReservedBooking
           ? RoomStatus.RESERVED
-          : RoomStatus.AVAILABLE;
+          : openCleaningTicket
+            ? RoomStatus.MAINTENANCE
+            : RoomStatus.AVAILABLE;
 
         await tx.$executeRaw(Prisma.sql`
           UPDATE "Room"
@@ -765,9 +777,21 @@ if (error instanceof Prisma.PrismaClientKnownRequestError) {
           },
           select: { id: true },
         });
+        // Audit M-17: kamar dengan tiket pembersihan terbuka kembali ke
+        // MAINTENANCE (tetap bisa dipesan), bukan AVAILABLE.
+        const openCleaningTicket = await tx.ticket.findFirst({
+          where: {
+            roomId: row.roomId,
+            category: 'CHECKOUT_INSPECTION' as any,
+            status: { notIn: ['CLOSED', 'CANCELLED'] as any },
+          },
+          select: { id: true },
+        });
         const nextRoomStatus = otherActiveReservedBooking
           ? RoomStatus.RESERVED
-          : RoomStatus.AVAILABLE;
+          : openCleaningTicket
+            ? RoomStatus.MAINTENANCE
+            : RoomStatus.AVAILABLE;
 
         await tx.$executeRaw(Prisma.sql`
           UPDATE "Room"
