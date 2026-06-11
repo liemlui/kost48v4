@@ -308,7 +308,8 @@ export class InvoicesService {
       let totalAmountRupiah = 0;
       for (let index = 0; index < dto.lines.length; index += 1) {
         const lineData = this.buildLineData(created.id, dto.lines[index], index);
-        totalAmountRupiah += Number(lineData.lineAmountRupiah ?? 0);
+        const lineSign = String(dto.lines[index].lineType) === 'DISCOUNT' ? -1 : 1;
+        totalAmountRupiah += lineSign * Number(lineData.lineAmountRupiah ?? 0);
         await tx.invoiceLine.create({ data: lineData });
       }
 
@@ -420,13 +421,23 @@ export class InvoicesService {
   }
 
   private async recalculateInvoiceTotal(invoiceId: number) {
-    const aggregate = await this.prisma.invoiceLine.aggregate({
+    // Audit M-08: DISCOUNT adalah pengurang - harus identik dengan trigger DB
+    // recalc_invoice_total, kalau tidak guard DB menolak update total.
+    const lines = await this.prisma.invoiceLine.findMany({
       where: { invoiceId },
-      _sum: { lineAmountRupiah: true },
+      select: { lineType: true, lineAmountRupiah: true },
     });
+    const total = lines.reduce(
+      (sum, line) =>
+        sum +
+        (String(line.lineType) === 'DISCOUNT'
+          ? -Number(line.lineAmountRupiah ?? 0)
+          : Number(line.lineAmountRupiah ?? 0)),
+      0,
+    );
     await this.prisma.invoice.update({
       where: { id: invoiceId },
-      data: { totalAmountRupiah: Number(aggregate._sum.lineAmountRupiah ?? 0) },
+      data: { totalAmountRupiah: total },
     });
   }
 
