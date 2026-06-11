@@ -228,11 +228,12 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   ): Promise<boolean> {
     return this.prisma.$transaction(async (tx) => {
       const rows = await tx.$queryRaw<
-        Array<{ status: string; roomId: number; tenantId: number; promotedAt: Date | null; depositPaid: number; dpPaid: number }>
+        Array<{ status: string; roomId: number; tenantId: number; promotedAt: Date | null; depositPaid: number; depositAmount: number; dpPaid: number }>
       >(Prisma.sql`
         SELECT s.status, s."roomId", s."tenantId",
                s."initialMetersPromotedAt" AS "promotedAt",
                COALESCE(s."depositPaidAmountRupiah", 0) AS "depositPaid",
+               COALESCE(s."depositAmountRupiah", 0) AS "depositAmount",
                COALESCE(s."downPaymentPaidRupiah", 0) AS "dpPaid"
         FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
         WHERE s.id = ${stayId}
@@ -311,12 +312,15 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       // Legacy: deposit jaminan yang sempat terbayar (data pra-A18) tetap
       // di-forfeit seperti kebijakan lama.
       const paid = current.depositPaid;
+      // Audit M-24: constraint DB menuntut FORFEITED => deduction = depositAmount.
+      // Deposit terbayar parsial (data legacy) dibiarkan HELD untuk diproses manual.
+      const canForfeitDeposit = paid > 0 && Number(current.depositAmount ?? 0) === paid;
       await tx.stay.update({
         where: { id: stayId },
         data: {
           status: StayStatus.CANCELLED,
           checkoutReason: params.checkoutReason,
-          ...(paid > 0
+          ...(canForfeitDeposit
             ? { depositStatus: 'FORFEITED' as any, depositDeductionRupiah: paid }
             : {}),
           ...(dpForfeited > 0 ? { downPaymentForfeitedAt: new Date() } : {}),
@@ -329,7 +333,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
       // Pass C: forfeit deposit jaminan legacy juga dicatat di ledger agar
       // reconciliationLite tidak mendeteksi selisih (FORFEIT entry idempotent).
-      if (paid > 0) {
+      if (canForfeitDeposit) {
         await this.depositLedger.recordDepositSettlementTx(tx, {
           stayId,
           actorUserId: params.actorUserId,
