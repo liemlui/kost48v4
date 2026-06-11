@@ -151,8 +151,11 @@ export class ReportsService {
    */
   async depositLiability() {
     const stays = await this.prisma.stay.findMany({
+      // Audit M-36: liability = semua jaminan berstatus HELD, termasuk stay
+      // yang sudah selesai tetapi depositnya belum di-settle.
       where: {
-        status: 'ACTIVE' as any,
+        depositStatus: 'HELD' as any,
+        OR: [{ status: 'ACTIVE' as any }, { depositPaidAmountRupiah: { gt: 0 } }],
         depositAmountRupiah: { gt: 0 },
       },
       select: {
@@ -432,8 +435,9 @@ export class ReportsService {
           status: { notIn: ['MAINTENANCE', 'INACTIVE'] as any },
         },
       }),
+      // Audit M-35: hanya stay promoted (benar-benar huni) yang dihitung okupansi.
       this.prisma.stay.count({
-        where: { status: 'ACTIVE' as any },
+        where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
       }),
     ]);
     const occupancyRate = operableCount > 0
@@ -471,8 +475,9 @@ export class ReportsService {
           status: { notIn: ['MAINTENANCE', 'INACTIVE'] as any },
         },
       }),
+      // Audit M-35: hanya stay promoted (benar-benar huni) yang dihitung okupansi.
       this.prisma.stay.count({
-        where: { status: 'ACTIVE' as any },
+        where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } },
       }),
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
