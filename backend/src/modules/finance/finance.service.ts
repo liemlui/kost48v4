@@ -59,7 +59,7 @@ export class FinanceService {
       depositAgg,
     ] = await Promise.all([
       this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
-      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any, initialMetersPromotedAt: { not: null } } }),
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         _count: { id: true },
@@ -180,7 +180,7 @@ export class FinanceService {
     const { year, month, start, end } = monthWindow(query);
     const [roomGroups, activeStayCount, invoiceAgg, openTickets] = await Promise.all([
       this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
-      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any, initialMetersPromotedAt: { not: null } } }),
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: start, lt: end } },
@@ -302,7 +302,7 @@ export class FinanceService {
       pendingPaymentCount,
     ] = await Promise.all([
       this.prisma.room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
-      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any } }),
+      this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any, initialMetersPromotedAt: { not: null } } }),
       // Current month invoice
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
