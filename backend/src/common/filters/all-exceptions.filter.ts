@@ -15,7 +15,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     else if (exceptionResponse && typeof exceptionResponse === 'object') {
       const resp: any = exceptionResponse;
       message = resp.message ?? resp.error ?? message;
-    } else if (exception instanceof Error) {
+    } else if (exception instanceof Error && process.env.NODE_ENV !== 'production') {
+      // Audit M-02: pesan error internal (Prisma/driver) tidak boleh bocor di production.
       message = exception.message;
     }
 
