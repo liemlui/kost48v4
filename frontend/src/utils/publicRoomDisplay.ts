@@ -49,16 +49,12 @@ export function getPublicRoomCoolingSentence(room: PublicRoom) {
 }
 
 export function getPublicRoomRate(room: PublicRoom, term: PricingTerm = "MONTHLY") {
-  if (term === "DAILY") return Number(room.pricing?.dailyRateRupiah ?? 0);
-  if (term === "WEEKLY") return Number(room.pricing?.weeklyRateRupiah ?? 0);
-  if (term === "BIWEEKLY") {
-    return Number(room.pricing?.biWeeklyRateRupiah ?? 0) ||
-      (room.pricing?.monthlyRateRupiah ? calculateRentByPricingTerm(Number(room.pricing.monthlyRateRupiah), term) : 0);
-  }
-  if (term === "MONTHLY") return Number(room.pricing?.monthlyRateRupiah ?? room.highlightedRateRupiah ?? 0);
-
+  // Audit M-40: harga tampil harus sama dengan harga yang DITAGIH backend —
+  // semua term diturunkan dari tarif bulanan via formula resmi.
   const monthly = Number(room.pricing?.monthlyRateRupiah ?? 0);
-  return monthly > 0 ? calculateRentByPricingTerm(monthly, term) : Number(room.highlightedRateRupiah ?? 0);
+  if (term === "MONTHLY") return monthly || Number(room.highlightedRateRupiah ?? 0);
+  if (monthly > 0) return calculateRentByPricingTerm(monthly, term);
+  return Number(room.highlightedRateRupiah ?? 0);
 }
 
 export function getBestPublicRoomRate(room: PublicRoom, term: PricingTerm = "MONTHLY") {
