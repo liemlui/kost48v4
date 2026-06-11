@@ -238,6 +238,11 @@ let assignment = null as null | { id: number; templateId: number; staffUserId: n
       },
     });
 
+    // Audit M-28: pekerjaan yang sudah DONE tidak boleh ditimpa (anti polish KPI).
+    if (existing?.status === StaffRoutineStatus.DONE) {
+      throw new ConflictException('Pekerjaan ini sudah selesai dan tidak dapat diubah lagi.');
+    }
+
     const data = {
       status,
       completedAt: status === StaffRoutineStatus.DONE ? new Date() : null,
