@@ -373,6 +373,10 @@ export class TicketsService {
   async assign(id: number, dto: AssignTicketDto, actor: CurrentUserPayload) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+    // Audit M-27: tiket final tidak boleh dipindah-tangankan lagi.
+    if (["CLOSED", "CANCELLED"].includes(String(ticket.status))) {
+      throw new ConflictException("Tiket yang sudah ditutup/dibatalkan tidak dapat di-assign ulang");
+    }
 
     const assignee = await this.prisma.user.findUnique({
       where: { id: dto.assignedToId },
@@ -459,6 +463,11 @@ export class TicketsService {
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
     if (ticket.status !== "IN_PROGRESS")
       throw new ConflictException("Transisi status tidak valid");
+    // Audit M-26: guard yang sama dengan start() — staf bukan assignee tidak
+    // boleh menyelesaikan tiket staf lain.
+    if (actor.role === "STAFF" && ticket.assignedToId !== actor.id) {
+      throw new ConflictException("Tiket ini bukan tugas akun ini");
+    }
 
     const updated = await this.prisma.ticket.update({
       where: { id },
