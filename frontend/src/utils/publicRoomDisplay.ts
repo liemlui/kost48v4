@@ -149,6 +149,18 @@ export function getPublicRoomAvailabilityDisplay(room: PublicRoom): PublicRoomAv
     };
   }
 
+  if (status === "MAINTENANCE") {
+    // Kamar bekas checkout/overstay yang sudah dibuka untuk booking (canBook=true
+    // dari backend) tetapi masih dibersihkan staf.
+    return {
+      label: "Bisa dipesan · dibersihkan",
+      tone: "is-limited",
+      shortCopy: "Kamar sedang dibersihkan staf. Booking & DP bisa diajukan sekarang.",
+      detailCopy: "Kamar baru dikosongkan dan sedang dibersihkan. Anda bisa booking dan bayar DP sekarang — kamar terkunci untuk Anda, check-in dilakukan setelah pembersihan selesai.",
+      canBook: true,
+    };
+  }
+
   if (status === "RESERVED") {
     return {
       label: "Kosong",

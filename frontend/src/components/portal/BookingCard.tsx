@@ -50,6 +50,9 @@ export default function BookingCard({
   const depositAmount = Number(booking.depositAmountRupiah ?? 0);
   const depositPaidAmount = Number(booking.depositPaidAmountRupiah ?? 0);
   const depositRemainingAmount = Math.max(depositAmount - depositPaidAmount, 0);
+  const downPaymentAmount = Number(booking.downPaymentAmountRupiah ?? 0);
+  const downPaymentPaidAmount = Number(booking.downPaymentPaidRupiah ?? 0);
+  const isDownPaymentPaid = downPaymentPaidAmount > 0;
   const totalInitialAmount = Number(booking.agreedRentAmountRupiah ?? 0) + depositAmount;
   const totalRemainingAmount = invoiceRemainingAmount + depositRemainingAmount;
   const cancelable = canCancelBooking(booking);
@@ -168,8 +171,16 @@ export default function BookingCard({
                 <CurrencyDisplay amount={booking.agreedRentAmountRupiah} />
               </strong>
             </div>
+            {downPaymentAmount > 0 ? (
+              <div>
+                <span>DP 30% {isDownPaymentPaid ? '(sudah dibayar ✓)' : '(pesan kamar)'}</span>
+                <strong>
+                  <CurrencyDisplay amount={downPaymentAmount} showZero={false} />
+                </strong>
+              </div>
+            ) : null}
             <div>
-              <span>Deposit awal</span>
+              <span>Deposit jaminan</span>
               <strong>
                 <CurrencyDisplay amount={depositAmount} showZero={false} />
               </strong>

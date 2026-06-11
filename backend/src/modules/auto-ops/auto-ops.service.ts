@@ -6,6 +6,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -27,6 +28,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly accountingPeriodCloseService: AccountingPeriodCloseService,
     private readonly accountingPosting: AccountingPostingService,
     private readonly appNotification: AppNotificationService,
+    private readonly depositLedger: DepositLedgerService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -315,6 +317,17 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           initialMetersRecordedById: null,
         },
       });
+
+      // Pass C: forfeit deposit jaminan legacy juga dicatat di ledger agar
+      // reconciliationLite tidak mendeteksi selisih (FORFEIT entry idempotent).
+      if (paid > 0) {
+        await this.depositLedger.recordDepositSettlementTx(tx, {
+          stayId,
+          actorUserId: params.actorUserId,
+          note: params.checkoutReason,
+          metadata: { source: params.source, action: params.action },
+        });
+      }
 
       const otherActive = await tx.stay.count({
         where: { roomId: current.roomId, status: StayStatus.ACTIVE, id: { not: stayId } },

@@ -53,13 +53,30 @@ export function getPaymentRemainingAmount(item: PaymentSubmission | null | undef
     : asPaymentNumber(item.invoice?.remainingAmountRupiah ?? item.invoice?.totalAmountRupiah);
 }
 
+/**
+ * Nominal yang sama persis dengan sisa DP 30% pada stay booking adalah
+ * pembayaran DP yang sah (A18) — bukan "parsial" yang mencurigakan.
+ */
+export function isDownPaymentExactAmount(item: PaymentSubmission | null | undefined): boolean {
+  if (!item) return false;
+  const stay = (item as { stay?: { downPaymentAmountRupiah?: number | null; downPaymentPaidRupiah?: number | null } }).stay;
+  const dpRemaining = Math.max(
+    asPaymentNumber(stay?.downPaymentAmountRupiah) - asPaymentNumber(stay?.downPaymentPaidRupiah),
+    0,
+  );
+  return dpRemaining > 0 && asPaymentNumber(item.amountRupiah) === dpRemaining;
+}
+
 export function getPaymentAmountTone(item: PaymentSubmission | null | undefined): PaymentAmountTone {
   if (!item) return 'UNKNOWN';
   const remaining = getPaymentRemainingAmount(item);
   const submitted = asPaymentNumber(item.amountRupiah);
   if (remaining <= 0 || submitted <= 0) return 'UNKNOWN';
   if (submitted === remaining) return 'EXACT';
-  if (submitted < remaining) return 'PARTIAL';
+  if (submitted < remaining) {
+    if (isDownPaymentExactAmount(item)) return 'EXACT';
+    return 'PARTIAL';
+  }
   return 'OVERPAY';
 }
 
@@ -81,6 +98,9 @@ function getAmountImpact(item: PaymentSubmission, amountTone: PaymentAmountTone)
     return 'Nominal lebih. Sistem bisa menolak.';
   }
   if (amountTone === 'EXACT') {
+    if (isDownPaymentExactAmount(item)) {
+      return 'DP 30%: kamar terkunci untuk tenant ini; pelunasan menyusul paling lambat saat check-in.';
+    }
     return 'Jika lunas, blocker bisa terbuka.';
   }
   return 'Sisa belum jelas. Cek manual.';

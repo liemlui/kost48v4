@@ -241,7 +241,7 @@ export default function ApproveBookingModal({
 
         <Form.Group className="mb-3">
           <Form.Label>
-            Deposit <span className="text-danger">*</span>
+            Deposit Jaminan <span className="text-danger">*</span>
           </Form.Label>
           <Form.Control
             type="text"
@@ -250,7 +250,7 @@ export default function ApproveBookingModal({
             onChange={(e) =>
               setDepositAmountRupiah(formatMoneyRaw(e.target.value))
             }
-            placeholder="Otomatis mengikuti deposit booking, bisa diubah bila perlu"
+            placeholder="Otomatis mengikuti jaminan kamar (defaultDepositRupiah), bisa diubah bila perlu"
           />
           {formatMoneyPreview(depositAmountRupiah) && (
             <Form.Text className="d-block fw-semibold text-success">
@@ -258,7 +258,7 @@ export default function ApproveBookingModal({
             </Form.Text>
           )}
           <Form.Text muted>
-            Deposit tetap dana titipan, bukan omzet.
+            Deposit jaminan = dana titipan yang dikembalikan saat checkout (setelah dipotong kerusakan/overstay bila ada) — bukan omzet, dan BERBEDA dari DP 30% yang merupakan bagian harga sewa.
           </Form.Text>
         </Form.Group>
 

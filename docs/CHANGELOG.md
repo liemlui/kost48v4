@@ -1,5 +1,39 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-11 V5.12.1 — Overstay Lifecycle Penuh: Pengingat, Forced Checkout H+1, Kamar Kotor Bisa Dipesan
+**Versi:** 2026-06-11 V5.12.2 — Frontend DP/Jaminan, Rate Limiting, Audit Pass C/E + P3
+
+<!-- KOST48_DOCS_SYNC_20260611_V5122_FRONTEND_RATELIMIT_PASSCE -->
+## 2026-06-11 — V5.12.2 Frontend DP/Jaminan + Rate Limiting + Audit Pass C/E/P3
+
+### Type
+Frontend + backend hardening. No schema change. TypeScript PASS (backend & frontend).
+
+### Frontend (fitur V5.12.x kini terlihat pengguna)
+- **SubmitPaymentModal (portal):** pilihan radio "DP 30%" vs "Bayar Lunas" dengan rincian dan copy kebijakan (DP kunci kamar, hangus bila gagal lunas; pelunasan paling lambat saat check-in). Fase pelunasan punya copy deadline H+1 pk 12:00.
+- **BookingCard (portal):** baris "DP 30%" (dengan tanda ✓ bila terbayar) + label "Deposit jaminan" menggantikan "Deposit awal".
+- **Katalog publik:** kamar MAINTENANCE yang `canBook=true` tampil "Bisa dipesan · dibersihkan" dengan copy lengkap (booking & DP sekarang, huni setelah bersih).
+- **Admin ApproveBookingModal:** label "Deposit Jaminan" + penjelasan beda DP vs jaminan.
+- **Admin Review Pembayaran:** nominal yang tepat sama dengan sisa DP 30% dinilai "Pas" (bukan "Parsial mencurigakan") dengan dampak approve yang menjelaskan kunci kamar (`paymentReviewSafety.ts`).
+- Types: `downPaymentAmountRupiah`/`downPaymentPaidRupiah` di `Stay` & `TenantBooking`.
+
+### Pass E — Rate limiting (sebelumnya TIDAK ADA throttling)
+- `common/middleware/rate-limit.middleware.ts` — limiter in-memory tanpa dependensi (selaras keputusan tanpa-Helmet).
+- Global `/api`: 300 req/menit/IP (env `RATE_LIMIT_GLOBAL_PER_MINUTE`).
+- `/api/auth/login|forgot-password|reset-password`: 10 req/15 menit/IP (env `RATE_LIMIT_AUTH_PER_15MIN`) — menahan brute-force & enumerasi.
+- Catatan: state per-proses; bila kelak multi-instance perlu store bersama.
+
+### Pass C — Deposit jaminan end-to-end
+- Ledger (`deposit-ledger.service.ts`) diverifikasi sehat: entri idempotent per (stay, type, source), settlement mencatat DEDUCTION/FORFEIT/REFUND, `reconciliationLite` tersedia sebagai alat audit data.
+- **Fix:** forfeit deposit legacy di sweeper (`cancelEndedUnpaidStay`) kini menulis entri FORFEIT ke ledger via `recordDepositSettlementTx` — sebelumnya hanya mengubah status stay sehingga rekonsiliasi akan selisih.
+- Catatan (P3): `recordDepositReceivedTx` fallback sourceId ke stayId bila tanpa submissionId — risiko dedupe-collision teoretis, biarkan.
+
+### P3 fixes
+- **A14:** `invoices.cancel` kini lock `FOR UPDATE` + re-validasi status/pembayaran di dalam transaksi.
+- **A17:** tenant yang kalah first-paid-wins kini menerima notifikasi in-app berisi alasan & ajakan pilih kamar lain (dikirim setelah transaksi approve sukses, best-effort).
+
+### Pass D/F/G — status verifikasi
+- **Pass D (tutup buku):** sudah diverifikasi di V5.11.1 — auto-close di-gate readiness `unmapped-operational` (hitung penuh) + depresiasi + asset alignment + trial balance; celah invoice CANCELLED ditutup A8. Sisa pekerjaan: cross-check angka `reports/*` (raw SQL) vs trial balance accounting per periode — perlu data produksi, jadwalkan saat UAT.
+- **Pass F (operasional fisik):** sinkronisasi qty barang punya 3 jalur (movement, field report, ticket close) dengan lock `lockInventoryQtyTx` di movement; risiko double-apply tersisa di kombinasi field-report→ticket-close (status saja, bukan qty) — risiko rendah, pantau lewat `ensureOpeningStockSyncedTx`/`ensureInventoryQtySyncedTx` yang sudah self-healing.
+- **Pass G (data lama):** alat sudah tersedia & terhubung: `GET /api/deposit-ledger/reconciliation-lite`, `deposit-ledger/backfill-dry-run`, `accounting/backfill-auto-journal`, `accounting/deposit-backfill-dry-run`. Jalankan berurutan di UAT/produksi setelah deploy V5.12.x, perbaiki temuan via backfill sebelum tutup buku bulan berjalan.
 
 <!-- KOST48_DOCS_SYNC_20260611_OVERSTAY_LIFECYCLE -->
 ## 2026-06-11 — V5.12.1 Overstay Lifecycle (Keputusan Owner)

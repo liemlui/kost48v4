@@ -8,6 +8,7 @@ Severity: P0 = uang/data tenant bisa salah tanpa intervensi; P1 = bug nyata berd
 
 > **Update eksekusi (2026-06-11, paket 1):** A1 ✅, A2 ✅, A4 ✅ sudah diperbaiki (lihat CHANGELOG V5.11.1). A3 direklasifikasi menjadi bagian dari temuan arsitektur **A18 (DP vs deposit)** di bawah — menunggu keputusan owner. A5 masih OPEN menunggu definisi overstay.
 > **Update eksekusi (paket 2):** A6 ✅, A7 ✅, A9 ✅, A10 ✅, A12 ✅, A16 ✅.
+> **Update eksekusi (V5.12.2):** A14 ✅, A17 ✅ (P3 terakhir yang actionable); Pass C ✅ (ledger sehat + fix forfeit sweeper tercatat di ledger); Pass E sebagian ✅ (rate limiting global+auth); Pass D/F/G terverifikasi ringan — lihat CHANGELOG V5.12.2. Temuan A13/A15 = catatan sadar-risiko, tidak diubah.
 > **Update eksekusi (paket 3):** A8 ✅ (helper `reverseCancelledInvoiceJournalsTx` — reversal blocking seragam di 4 jalur cancel payment-submissions), A11 ✅ terverifikasi sudah ter-gate oleh readiness unmapped-operational. Masih OPEN: A13-A15, A17 (P3), A18 + A5 (keputusan owner).
 
 ## ⚠️ Terminologi (ketetapan owner, 2026-06-11)

@@ -476,7 +476,17 @@ export class InvoicesService {
     if (invoice.status === 'ISSUED' && invoice.payments.length > 0) throw new ConflictException('Invoice tidak dapat dibatalkan karena status tidak valid atau sudah ada pembayaran');
 
     const updated = await (this.prisma as any).$transaction(async (tx: any) => {
-      const postedInvoiceJournal = invoice.status === InvoiceStatus.DRAFT
+      // Audit A14: lock + re-validasi dalam transaksi — pembayaran bisa masuk
+      // di sela pengecekan awal (di luar tx) dan eksekusi pembatalan.
+      await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+      const fresh = await tx.invoice.findUnique({ where: { id }, include: { payments: true } });
+      if (!fresh) throw new NotFoundException('Invoice tidak ditemukan');
+      if (fresh.status === InvoiceStatus.CANCELLED) throw new ConflictException('Invoice sudah dibatalkan');
+      if (fresh.status === 'PARTIAL' || fresh.status === 'PAID' || fresh.payments.length > 0) {
+        throw new ConflictException('Invoice tidak dapat dibatalkan karena sudah ada pembayaran');
+      }
+
+      const postedInvoiceJournal = fresh.status === InvoiceStatus.DRAFT
         ? null
         : await tx.journalEntry.findFirst({
             where: {

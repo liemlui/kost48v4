@@ -10,6 +10,7 @@ import { RequestIdInterceptor } from './common/interceptors/request-id.intercept
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor';
 import { PrismaService } from './prisma/prisma.service';
 import express, { NextFunction, Request, Response } from 'express';
+import { createRateLimiter } from './common/middleware/rate-limit.middleware';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -48,6 +49,24 @@ async function bootstrap() {
 
   // ── Security headers (avoid Helmet dependency) ──────────────────────────────
   app.set('trust proxy', 1);
+
+  // ── Rate limiting (audit Pass E; in-memory, tanpa dependensi) ───────────────
+  // Global longgar: lindungi dari flood kasar tanpa mengganggu pemakaian normal.
+  app.use('/api', createRateLimiter({
+    name: 'global',
+    windowMs: 60_000,
+    max: Number(process.env.RATE_LIMIT_GLOBAL_PER_MINUTE ?? 300),
+  }));
+  // Endpoint kredensial ketat: tahan brute-force login & enumerasi reset password.
+  const authLimiter = createRateLimiter({
+    name: 'auth',
+    windowMs: 15 * 60_000,
+    max: Number(process.env.RATE_LIMIT_AUTH_PER_15MIN ?? 10),
+    message: 'Terlalu banyak percobaan. Tunggu 15 menit sebelum mencoba lagi.',
+  });
+  app.use('/api/auth/login', authLimiter);
+  app.use('/api/auth/forgot-password', authLimiter);
+  app.use('/api/auth/reset-password', authLimiter);
   app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');

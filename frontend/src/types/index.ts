@@ -150,6 +150,8 @@ export type Stay = {
   depositAmountRupiah?: number | null;
   depositPaidAmountRupiah?: number | null;
   depositPaymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
+  downPaymentAmountRupiah?: number | null;
+  downPaymentPaidRupiah?: number | null;
   depositDeductionRupiah?: number | null;
   depositRefundedRupiah?: number | null;
   depositStatus?: DepositStatus;
@@ -432,6 +434,8 @@ export type TenantBooking = {
   depositAmountRupiah?: number | null;
   depositPaidAmountRupiah?: number | null;
   depositPaymentStatus?: 'UNPAID' | 'PARTIAL' | 'PAID' | string;
+  downPaymentAmountRupiah?: number | null;
+  downPaymentPaidRupiah?: number | null;
   electricityTariffPerKwhRupiah?: number | null;
   waterTariffPerM3Rupiah?: number | null;
   bookingSource?: string | null;

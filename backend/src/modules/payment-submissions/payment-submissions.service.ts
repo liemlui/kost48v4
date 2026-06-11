@@ -351,6 +351,7 @@ export class PaymentSubmissionsService {
   }
 
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
+    let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
         const submission = await this.lockSubmissionTx(tx, submissionId);
@@ -684,12 +685,13 @@ export class PaymentSubmissionsService {
           // A18: kamar terkunci sejak pembayaran pertama disetujui (DP maupun
           // pelunasan) — booking pesaing yang belum bayar dibatalkan di sini,
           // tidak menunggu invoice PAID.
-          await this.cancelCompetingUnpaidBookingsTx(tx, {
+          const competingResult = await this.cancelCompetingUnpaidBookingsTx(tx, {
             roomId: submission.roomId,
             winningStayId: submission.stayId,
             actorUserId: user.id,
             paymentSubmissionId: submissionId,
           });
+          losingTenants = competingResult.losingTenants;
         }
 
         await tx.auditLog.create({
@@ -713,6 +715,9 @@ export class PaymentSubmissionsService {
 
       const result = serializePrismaResult(approved);
       this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
+      if (losingTenants.length > 0) {
+        this.notifyLosingTenants(losingTenants).catch(() => {});
+      }
       return result;
     } catch (error) {
 if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -739,12 +744,12 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         id: { not: params.winningStayId },
         initialMetersPromotedAt: null,
       },
-      select: { id: true },
+      select: { id: true, tenantId: true },
     });
 
     const competingStayIds = competingBookings.map((stay) => stay.id);
     if (competingStayIds.length === 0) {
-      return { cancelledCount: 0, stayIds: [] as number[] };
+      return { cancelledCount: 0, stayIds: [] as number[], losingTenants: [] as Array<{ stayId: number; tenantId: number }> };
     }
 
     const cancelReason =
@@ -808,7 +813,37 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       },
     });
 
-    return { cancelledCount: competingStayIds.length, stayIds: competingStayIds };
+    return {
+      cancelledCount: competingStayIds.length,
+      stayIds: competingStayIds,
+      losingTenants: competingBookings.map((stay) => ({ stayId: stay.id, tenantId: stay.tenantId })),
+    };
+  }
+
+  /**
+   * Audit A17: tenant yang kalah first-paid-wins berhak tahu nasib bookingnya.
+   * Dipanggil SETELAH transaksi approve sukses (best-effort, tidak memblokir).
+   */
+  private async notifyLosingTenants(losingTenants: Array<{ stayId: number; tenantId: number }>) {
+    for (const loser of losingTenants) {
+      try {
+        const tenantUser = await this.prisma.user.findFirst({
+          where: { tenantId: loser.tenantId, role: UserRole.TENANT, isActive: true },
+          select: { id: true },
+        });
+        if (!tenantUser) continue;
+        await this.appNotificationService.create({
+          recipientUserId: tenantUser.id,
+          title: 'Booking dibatalkan: kamar diamankan tenant lain',
+          body: 'Kamar yang Anda pesan sudah diamankan oleh pembayaran tenant lain yang disetujui lebih dulu (kebijakan first-paid-wins). Tidak ada dana yang terpotong dari Anda. Silakan pilih kamar lain di katalog.',
+          linkTo: '/rooms',
+          entityType: 'Stay',
+          entityId: String(loser.stayId),
+        });
+      } catch (err) {
+        this.logger.warn(`Notifikasi tenant kalah gagal (stay #${loser.stayId}): ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
 

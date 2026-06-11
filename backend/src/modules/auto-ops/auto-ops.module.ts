@@ -3,9 +3,10 @@ import { AutoOpsController } from './auto-ops.controller';
 import { AutoOpsService } from './auto-ops.service';
 import { AccountingModule } from '../accounting/accounting.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
 
 @Module({
-  imports: [AccountingModule, NotificationsModule],
+  imports: [AccountingModule, NotificationsModule, DepositLedgerModule],
   controllers: [AutoOpsController],
   providers: [AutoOpsService],
   exports: [AutoOpsService],

@@ -46,6 +46,15 @@ export default function SubmitPaymentModal({
   const depositRemaining = Math.max(depositAmount - depositPaid, 0);
   const combinedTotal = invoiceRemaining + depositRemaining;
 
+  // DP (uang muka pesan kamar, 30% sewa) — terpisah dari deposit jaminan.
+  const downPaymentAmount = Number(booking?.downPaymentAmountRupiah ?? 0);
+  const downPaymentPaid = Number(booking?.downPaymentPaidRupiah ?? 0);
+  const downPaymentRemaining = Math.max(downPaymentAmount - downPaymentPaid, 0);
+  const canChooseDownPayment =
+    downPaymentRemaining > 0 && downPaymentRemaining < combinedTotal;
+  const isSettlementPhase = downPaymentPaid > 0 && combinedTotal > 0;
+
+  const [paymentOption, setPaymentOption] = useState<'DP' | 'FULL'>('FULL');
   const [paidAt, setPaidAt] = useState<string>(todayValue());
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('TRANSFER');
   const [senderName, setSenderName] = useState('');
@@ -67,6 +76,7 @@ export default function SubmitPaymentModal({
 
   useEffect(() => {
     if (!show || !booking) return;
+    setPaymentOption(canChooseDownPayment ? 'DP' : 'FULL');
     setPaidAt(todayValue());
     setPaymentMethod('TRANSFER');
     setSenderName('');
@@ -90,12 +100,15 @@ export default function SubmitPaymentModal({
       return 'Bukti diperiksa. Tidak perlu upload ulang.';
     }
     if (isFullyPaid) {
-      return 'Pembayaran awal (sewa + deposit) sudah lunas. Tidak ada tagihan tersisa.';
+      return 'Pembayaran awal (sewa + deposit jaminan) sudah lunas. Tidak ada tagihan tersisa.';
+    }
+    if (isSettlementPhase) {
+      return 'DP sudah diterima — kamar terkunci untuk Anda. Lunasi sisa sewa + deposit jaminan paling lambat saat check-in. Jika tidak lunas hingga H+1 pk 12:00 setelah tanggal check-in, DP hangus dan kamar dilepas.';
     }
     return booking.expiresAt
-      ? `Bayar dan kirim bukti sebelum ${paymentDeadline.absoluteLabel}. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran disetujui admin.`
+      ? `Bayar dan kirim bukti sebelum ${paymentDeadline.absoluteLabel}. Pemesanan saja belum mengunci kamar; kamar baru aman setelah pembayaran (DP atau pelunasan) disetujui admin.`
       : 'Bayar + kirim bukti. Aman setelah admin setujui.';
-  }, [booking, isPendingBlocked, isFullyPaid, paymentDeadline.absoluteLabel]);
+  }, [booking, isPendingBlocked, isFullyPaid, isSettlementPhase, paymentDeadline.absoluteLabel]);
 
   const handleClose = () => {
     if (!submittingRef.current) onHide();
@@ -134,6 +147,9 @@ export default function SubmitPaymentModal({
       return;
     }
 
+    const amountToPay =
+      paymentOption === 'DP' && canChooseDownPayment ? downPaymentRemaining : combinedTotal;
+
     if (!paidAt) {
       setValidationError('Tanggal bayar wajib diisi.');
       return;
@@ -161,7 +177,7 @@ export default function SubmitPaymentModal({
         stayId: booking.id,
         invoiceId: booking.latestInvoiceId,
         targetType: 'INVOICE',
-        amountRupiah: combinedTotal,
+        amountRupiah: amountToPay,
         paidAt,
         paymentMethod,
         senderName: senderName.trim() || undefined,
@@ -201,25 +217,69 @@ export default function SubmitPaymentModal({
             {validationError ? <Alert variant="danger">{validationError}</Alert> : null}
             {errorMessage ? <Alert variant="danger">{errorMessage}</Alert> : null}
 
+            {canChooseDownPayment && !isPendingBlocked && !isFullyPaid ? (
+              <div className="bg-light rounded-3 p-3 mb-3 border">
+                <div className="small text-muted mb-2 fw-semibold">Pilih Cara Bayar</div>
+                <Form.Check
+                  type="radio"
+                  id="pay-option-dp"
+                  name="pay-option"
+                  className="mb-2"
+                  checked={paymentOption === 'DP'}
+                  onChange={() => setPaymentOption('DP')}
+                  label={(
+                    <span>
+                      <strong>DP 30% — <CurrencyDisplay amount={downPaymentRemaining} /></strong>
+                      <span className="d-block small text-muted">Kamar langsung terkunci untuk Anda. Sisa sewa + deposit jaminan dilunasi paling lambat saat check-in. DP hangus jika gagal melunasi.</span>
+                    </span>
+                  )}
+                />
+                <Form.Check
+                  type="radio"
+                  id="pay-option-full"
+                  name="pay-option"
+                  checked={paymentOption === 'FULL'}
+                  onChange={() => setPaymentOption('FULL')}
+                  label={(
+                    <span>
+                      <strong>Bayar Lunas — <CurrencyDisplay amount={combinedTotal} /></strong>
+                      <span className="d-block small text-muted">Sewa penuh + deposit jaminan sekaligus. Kamar terkunci dan langsung siap aktivasi.</span>
+                    </span>
+                  )}
+                />
+              </div>
+            ) : null}
+
             <div className="bg-light rounded-3 p-3 mb-3 border">
               <div className="small text-muted mb-1">Rincian Pembayaran</div>
-              <div className="d-flex justify-content-between gap-3 mb-1">
-                <span>Sewa pertama</span>
-                <strong><CurrencyDisplay amount={invoiceRemaining} /></strong>
-              </div>
-              <div className="d-flex justify-content-between gap-3 mb-1">
-                <span>Deposit</span>
-                <strong><CurrencyDisplay amount={depositRemaining} /></strong>
-              </div>
+              {paymentOption === 'DP' && canChooseDownPayment ? (
+                <div className="d-flex justify-content-between gap-3 mb-1">
+                  <span>DP 30% (uang muka, bagian dari sewa)</span>
+                  <strong><CurrencyDisplay amount={downPaymentRemaining} /></strong>
+                </div>
+              ) : (
+                <>
+                  <div className="d-flex justify-content-between gap-3 mb-1">
+                    <span>{isSettlementPhase ? 'Sisa sewa (setelah DP)' : 'Sewa pertama'}</span>
+                    <strong><CurrencyDisplay amount={invoiceRemaining} /></strong>
+                  </div>
+                  <div className="d-flex justify-content-between gap-3 mb-1">
+                    <span>Deposit jaminan (dikembalikan saat checkout)</span>
+                    <strong><CurrencyDisplay amount={depositRemaining} /></strong>
+                  </div>
+                </>
+              )}
               <hr className="my-2" />
               <div className="d-flex justify-content-between gap-3 fs-5">
                 <span className="fw-semibold">Total yang harus dibayar</span>
-                <span className="fw-bold"><CurrencyDisplay amount={combinedTotal} /></span>
+                <span className="fw-bold">
+                  <CurrencyDisplay amount={paymentOption === 'DP' && canChooseDownPayment ? downPaymentRemaining : combinedTotal} />
+                </span>
               </div>
             </div>
 
             <Alert variant="warning" className="small mb-3">
-              Pembayaran harus <strong>tepat sebesar total di atas</strong> dan bukti wajib dikirim di modal ini. Pembayaran sebagian tidak diterima untuk pembayaran awal booking.
+              Pembayaran harus <strong>tepat sebesar total di atas</strong> dan bukti wajib dikirim di modal ini. Nominal lain akan ditolak otomatis.
             </Alert>
 
             <Form.Group className="mb-3">
