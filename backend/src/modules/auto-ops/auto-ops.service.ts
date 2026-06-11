@@ -406,6 +406,22 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
 
   private async expireBookingTx(stayId: number, roomId: number, actorUserId: number | null, source: string) {
     await this.prisma.$transaction(async (tx) => {
+      // Lock + re-cek: pastikan stay masih ACTIVE, room masih RESERVED, tidak promoted
+      const rows = await tx.$queryRaw<Array<{ status: string; roomStatus: string; promotedAt: Date | null }>>(Prisma.sql`
+        SELECT s.status, r.status AS "roomStatus", s."initialMetersPromotedAt" AS "promotedAt"
+        FROM "Stay" s JOIN "Room" r ON r.id = s."roomId"
+        WHERE s.id = ${stayId} FOR UPDATE OF s, r`);
+      const cur = rows[0];
+      if (!cur || cur.status !== 'ACTIVE' || cur.roomStatus !== 'RESERVED' || cur.promotedAt) {
+        return; // sudah berubah status — skip cancel
+      }
+      // Re-cek submission: pastikan tidak ada APPROVED baru
+      const freshSubmission = await tx.paymentSubmission.findFirst({
+        where: { stayId, status: { in: ['PENDING_REVIEW', 'APPROVED'] as any } },
+        select: { id: true },
+      });
+      if (freshSubmission) return;
+
       const invoicesToReverse = await tx.invoice.findMany({
         where: {
           stayId,

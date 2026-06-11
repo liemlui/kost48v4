@@ -189,7 +189,10 @@ export class PaymentSubmissionsService {
       });
 
       return serializePrismaResult(created);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        throw new ConflictException('Masih ada bukti pembayaran menunggu review untuk invoice ini.');
+      }
       this.handleSchemaError(error);
       throw error;
     }
