@@ -486,7 +486,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           daysLeft === 0
             ? `Kontrak sewa kamar ${roomLabel} berakhir hari ini. Segera ajukan perpanjangan atau checkout sebelum pk 12:00 WIB. Jika tidak ada tindakan hingga besok pk 12:00, sistem akan melakukan checkout otomatis dan barang Anda dikeluarkan oleh staf.`
             : `Kontrak sewa kamar ${roomLabel} berakhir ${daysLeft} hari lagi (${planned.toISOString().slice(0, 10)}). Silakan ajukan perpanjangan lewat portal, atau ajukan checkout. Tanpa tindakan, kamar dilepas otomatis pk 12:00 di hari berakhirnya kontrak.`,
-        linkTo: '/portal/my-stay',
+        linkTo: '/portal/stay',
         entityType: 'Stay',
         entityId: String(stay.id),
       });
@@ -672,7 +672,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           recipientUserId: tenantUser.id,
           title: '🚪 Anda telah di-checkout otomatis (overstay)',
           body: 'Kontrak sewa Anda berakhir dan tidak ada perpanjangan/checkout hingga H+1 pk 12:00 WIB. Sistem melakukan checkout otomatis; barang Anda diamankan staf. Deposit jaminan diproses setelah pemeriksaan kamar (biaya overstay/pembersihan dapat dipotong). Hubungi pengelola untuk pengambilan barang.',
-          linkTo: '/portal/my-stay',
+          linkTo: '/portal/stay',
           entityType: 'Stay',
           entityId: String(stayId),
         });
