@@ -81,10 +81,10 @@ export class TenantBookingsService {
     }
 
     const isSameDayCheckIn = checkInDate.getTime() === today.getTime();
-    const minimumBookingWindowMs = 3 * 60 * 60 * 1000;
-    if (isSameDayCheckIn && (endOfDay(checkInDate).getTime() - now.getTime()) < minimumBookingWindowMs) {
+    const jakartaHour = (now.getUTCHours() + 7) % 24;
+    if (isSameDayCheckIn && jakartaHour >= 21) {
       throw new BadRequestException(
-        'Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir. Silakan pilih tanggal check-in mulai besok. Jam operasional booking hari ini: 08.00–21.00 WIB.',
+        'Booking untuk hari ini sudah ditutup karena jam operasional sudah berakhir (pk 21.00 WIB). Silakan pilih tanggal check-in mulai besok.',
       );
     }
 
