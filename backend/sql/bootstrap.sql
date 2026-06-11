@@ -710,6 +710,16 @@ ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidRupiah" INTEGER NOT 
 ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentPaidAt" TIMESTAMP(3);
 ALTER TABLE "Stay" ADD COLUMN IF NOT EXISTS "downPaymentForfeitedAt" TIMESTAMP(3);
 
+-- Audit M-01: pagar DP setara pagar deposit jaminan (paid tidak boleh negatif
+-- atau melebihi kewajiban DP).
+ALTER TABLE "Stay" DROP CONSTRAINT IF EXISTS stay_down_payment_amount_chk;
+ALTER TABLE "Stay" ADD CONSTRAINT stay_down_payment_amount_chk
+CHECK (
+  "downPaymentAmountRupiah" >= 0
+  AND "downPaymentPaidRupiah" >= 0
+  AND "downPaymentPaidRupiah" <= "downPaymentAmountRupiah"
+);
+
 -- A5 follow-up: kamar kotor pasca forced-checkout boleh dipesan
 ALTER TABLE "Room" ADD COLUMN IF NOT EXISTS "allowBookingWhileCleaning" BOOLEAN NOT NULL DEFAULT FALSE;
 
