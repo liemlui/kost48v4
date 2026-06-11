@@ -204,7 +204,7 @@ export class ReminderPreviewService {
       amountRupiah: r.amountRupiah,
       dueDate: r.dueDate,
       daysOverdue: this.daysBetween(r.dueDate, new Date()),
-      messagePreview: `Halo ${r.tenantName}, tagihan ${r.invoiceNumber ?? '-'} untuk kamar ${r.roomCode ?? '-'} sudah melewati jatuh tempo pada ${this.formatDate(r.dueDate)}. Mohon segera lakukan pembayaran untuk menghindari denda.`,
+      messagePreview: `Halo ${r.tenantName}, tagihan ${r.invoiceNumber ?? '-'} untuk kamar ${r.roomCode ?? '-'} sudah melewati jatuh tempo pada ${this.formatDate(r.dueDate)}. Mohon segera lakukan pembayaran agar masa sewa Anda tidak dibatalkan sesuai ketentuan.`,
     }));
   }
 

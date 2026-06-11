@@ -1,6 +1,6 @@
 # KOST48 V5 — Flow Map (Peta Alur Kode Krusial)
-**Versi:** 2026-06-11 — Baseline V5.11.0 (pasca audit-fix #1–#16 + keputusan owner G1–G5)
-**Tujuan:** Satu sumber navigasi untuk audit mendalam. Setiap flow krusial dipetakan ke `file:baris` aktual, transisi status, side-effect, dan invarian yang harus dijaga. Dokumen ini dibuat dari pembacaan kode langsung (bukan dari docs lama — `00_GROUND_STATE.md` diketahui drift, lihat §13).
+**Versi:** 2026-06-11 — Baseline V5.11.0 (pasca audit-fix #1–#16 + keputusan owner G1–G5). Dahulu `05_FLOW_MAP.md`. Catatan: sebagian nomor baris bergeser akibat fix V5.11.1–V5.12.2 — pakai sebagai titik mulai pencarian, bukan kebenaran mutlak.
+**Tujuan:** Satu sumber navigasi untuk audit mendalam. Setiap flow krusial dipetakan ke `file:baris` aktual, transisi status, side-effect, dan invarian yang harus dijaga. Dokumen ini dibuat dari pembacaan kode langsung. (§13 mencatat drift `00_GROUND_STATE.md` versi LAMA V5.10.0 — sudah ditulis ulang 2026-06-11; §13 dipertahankan sebagai jejak saja.)
 
 <!-- KOST48_DOCS_SYNC_20260611_FLOW_MAP -->
 
