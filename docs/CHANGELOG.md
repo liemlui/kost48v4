@@ -1,5 +1,68 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-02 V5.10.0 — Analytics Charts, Review Komplain, Tiket Pekerjaan, CSS Split
+**Versi:** 2026-06-11 V5.11.0 — Audit Fix, DP 30% Model, Auto-Ops Room Release, Security Headers
+
+<!-- KOST48_DOCS_SYNC_20260611_AUDIT_FIX -->
+## 2026-06-11 — V5.11.0 Audit Hardening & Business Logic Fixes
+
+### Type
+Backend refactor + schema additive + auto-ops expansion + security headers.
+Schema: added `Stay.cancelReason` + fixed `RenewRequest.tenant` relation. No DB reset.
+
+### Commits (5)
+```
+7bdcca3 fix: P2-20 trust proxy, P2-21 CSP header
+cb43471 fix: #3 expiry race FOR UPDATE, #8 P2002 catch createSubmission
+e030956 feat: auto-ops room release pk 12:00, forced checkout tiket staf, auto-cancel H+1 forfeit DP
+73085b2 feat: DP 30% model - depositAmountRupiah = 30% × agreedRent sesuai pricingTerm
+4cab5ee fix: terapkan audit fix ACT-1 s.d ACT-5 (11 temuan) + docs
+```
+
+### Audit Fix (11 temuan)
+| # | Temuan | Perbaikan |
+|---|--------|-----------|
+| #1 | Stay.cancelReason schema drift | +field di schema.prisma + db push |
+| #2 | Cancel stay skip accounting blocking | Pre-check journal POSTED sebelum reversal |
+| #4 | Refund deposit fiktif | Hapus fallback ke depositAmount |
+| #5 | DepositPortion tanpa cap | Cap ke depositRemaining |
+| #6 | catch dalam transaksi | 5 lokasi → try/catch + logger.warn |
+| #7 | Race overpayment manual | FOR UPDATE + validasi dalam transaksi |
+| #9 | INVOICE_PAYMENT reversal | Method baru `postPaymentReversalTx` |
+| #12 | Jurnal VOID blocking | Filter `status: { not: 'VOID' }` |
+| #15 | RenewRequest.tenant relation | `Tenant` (not `Tenant?`) + Restrict |
+| #16 | TOCTOU check-in manual | FOR UPDATE + re-validasi dalam transaksi |
+| #3 | Expiry race TOCTOU | FOR UPDATE + re-cek submission sebelum cancel |
+
+### Business Logic (Keputusan Owner G1-G5)
+| Gap | Keputusan | Implementasi |
+|-----|-----------|-------------|
+| DP 30% | 30% × pricingTerm (G4=B) | depositAmountRupiah di createBooking |
+| DP non-refundable | Hangus 100% jika gagal (G2=A) | auto-cancel H+1 forfeit |
+| DP tidak pindah | Hangus total saat rebooking (G3=A) | depositStatus = FORFEITED |
+| Room release | Pk 12:00 batas keras (G5=A) | runRoomReleaseAtNoon |
+| Forced checkout | Sistem + tiket staf (G1=B) | runOverstayEnforcement → tiket EVICT_OVERSTAY |
+
+### Auto-Ops Baru
+- `runRoomReleaseAtNoon` — pk 12:00 WIB, lepas stay RESERVED yang overdue
+- `runOverstayEnforcement` — auto-create tiket EVICT_OVERSTAY untuk staf
+- `runPostCheckoutAutoCancel` — H+1 cancel + DP forfeit
+
+### Security
+- Trust proxy setting (`app.set('trust proxy', 1)`)
+- Content-Security-Policy header
+- PasswordHash stripped from AuditLog
+- CSPRNG password generator (randomBytes)
+- Generic Prisma error messages (no table/column leak)
+
+### Docs
+- `docs/06` s.d `09` + `05_BMI` → archived to `docs/archieve/`
+- `docs/03_DECISIONS_LOG.md` — updated with G1-G5 decisions
+- `docs/CHANGELOG.md` — this entry
+
+### Files Changed (cumulative)
+```
+15 backend source files + 1 schema.prisma + 1 main.ts + db push
+Total: +1.500 lines, 0 TypeScript errors
+```
 
 <!-- KOST48_DOCS_SYNC_20260602_V5100_CHARTS_REVIEW_TICKETS_CSS -->
 ## 2026-06-02 — V5.10.0 Analytics Dashboard, Review Komplain, Tiket Operasional, Refactor CSS
