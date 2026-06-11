@@ -269,6 +269,9 @@ export class StaysService {
             stayPurpose: dto.stayPurpose as StayPurpose,
             notes: dto.notes,
             createdById: actor.id,
+            // Audit M-14: check-in manual = langsung resmi huni; tanpa ini stay
+            // dianggap "unpromoted" dan tersisih dari seluruh lifecycle overstay.
+            initialMetersPromotedAt: new Date(),
           },
         });
 
