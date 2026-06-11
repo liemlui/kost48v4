@@ -1,6 +1,11 @@
 # KOST48 V5 — Active Checklist
-**Versi:** 2026-06-11 — pasca V5.12.2. Versi lama (V5.10.0, basi) diarsipkan di `archieve/CHECKLIST_V5100_STALE.md`.
+**Versi:** 2026-06-12 — pasca Audit Mega. Versi lama (V5.10.0, basi) diarsipkan di `archieve/CHECKLIST_V5100_STALE.md`.
 **Aturan:** file ini hanya berisi pekerjaan AKTIF. Item selesai dipindah ke `CHANGELOG.md`, bukan ditumpuk di sini.
+
+## Prioritas #0 — Eksekusi hasil Audit Mega (BARU, 2026-06-12)
+- [ ] Serahkan `docs/04_FIX_INSTRUCTIONS.md` ke AI eksekutor → kerjakan FIX-01..22, 25, 26 (1 FIX = 1 commit, tsc 0 error per FIX)
+- [ ] Review hasil eksekutor (laporan FIX sukses/dilewati) → push setelah disetujui owner
+- [ ] Eskalasi E-1..E-9 (lihat `03_AUDIT_MEGA_2026-06.md`) — dikerjakan Fable/owner; minimal E-2 (backfill promotedAt check-in manual) WAJIB setelah FIX-01 sebelum UAT overstay
 
 <!-- KOST48_DOCS_SYNC_20260611_CHECKLIST_REWRITE -->
 

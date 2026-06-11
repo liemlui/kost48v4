@@ -1,6 +1,25 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-11 — Docs Compaction + Keputusan Owner D1–D4. Entri < V5.11.0 dipindah ke `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-12 — Audit Mega Full-Sweep + Instruksi Perbaikan untuk AI Eksekutor. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
+<!-- KOST48_DOCS_SYNC_20260612_AUDIT_MEGA_FIX_INSTRUCTIONS -->
+## 2026-06-12 — Audit Mega Full-Sweep (docs only, tanpa perubahan kode aplikasi)
+
+### Type
+Audit read-only oleh Fable 5 atas SEMUA lini: schema/bootstrap, main/common/auth, 33 modul backend, frontend terarah. 2 dokumen baru.
+
+### Deliverables
+- `docs/03_AUDIT_MEGA_2026-06.md` — 42 temuan M-01..M-42 (5×P1, 11×P2, sisanya P3/INFO) + 9 batch verifikasi SEHAT + daftar ESKALASI E-1..E-9 + pemetaan temuan→tindakan.
+- `docs/04_FIX_INSTRUCTIONS.md` — 24 FIX patch verbatim (CARI/GANTI persis) untuk AI eksekutor; QC otomatis: 42/42 blok CARI match tepat 1× di file target; aturan emas + kriteria BERHENTI + pesan commit per FIX.
+
+### Temuan P1 (inti)
+- M-14 check-in manual tidak pernah "promoted" → tersisih dari seluruh lifecycle overstay/pengingat/okupansi (FIX-01 + backfill E-2).
+- M-15 renew tanpa lock → dobel-renew/race sweeper (FIX-02).
+- M-16 cancel stay penghuni melepas kamar tanpa gate inspeksi (FIX-03).
+- M-22 auto-ops tanpa try/catch per item → satu stay beracun menghentikan semua job (FIX-04).
+- M-33 edit/hapus expense & wifi-sale meninggalkan jurnal yatim (FIX-14/15).
+
+### Koreksi pemahaman penting (sehat, docs lama salah)
+- Suspend user MEMUTUS sesi seketika (jwt.strategy validasi DB per request + klaim pwdAt); email reset password nyata via Brevo; double-apply qty inventory TIDAK terjadi (trigger DB + sync self-healing); app-notification tanpa RolesGuard AMAN (scoped per user).
 <!-- KOST48_DOCS_SYNC_20260611_DOCS_COMPACTION_D1D4 -->
 ## 2026-06-11 — Docs Compaction + Keputusan Owner D1–D4 (tanpa perubahan logika, 1 copy fix)
 
