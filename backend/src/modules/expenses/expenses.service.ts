@@ -57,6 +57,12 @@ export class ExpensesService {
   async update(id: number, dto: UpdateExpenseDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.expense.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Expense tidak ditemukan');
+    // Audit M-33: data finansial yang sudah terjurnal tidak boleh berubah senyap.
+    const changingFinancials =
+      (dto.amountRupiah !== undefined && dto.amountRupiah !== existing.amountRupiah) ||
+      (dto.expenseDate !== undefined && new Date(dto.expenseDate).getTime() !== new Date(existing.expenseDate).getTime()) ||
+      (dto.category !== undefined && dto.category !== existing.category);
+    await this.assertExpenseJournalAllowsChange(id, changingFinancials);
     await this.validateRelations(dto.roomId ?? existing.roomId ?? undefined, dto.stayId ?? existing.stayId ?? undefined);
     const updated = await this.prisma.expense.update({ where: { id }, data: { ...dto, expenseDate: dto.expenseDate ? new Date(dto.expenseDate) : undefined } });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Expense', entityId: String(updated.id), oldData: existing, newData: updated });
@@ -66,9 +72,23 @@ export class ExpensesService {
   async remove(id: number, actor: CurrentUserPayload) {
     const existing = await this.prisma.expense.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Expense tidak ditemukan');
+    await this.assertExpenseJournalAllowsChange(id, true);
     await this.prisma.expense.delete({ where: { id } });
     await this.audit.log({ actorUserId: actor.id, action: 'DELETE', entityType: 'Expense', entityId: String(existing.id), oldData: existing });
     return { deletedId: existing.id };
+  }
+
+  private async assertExpenseJournalAllowsChange(expenseId: number, changingFinancials: boolean) {
+    if (!changingFinancials) return;
+    const journal = await this.prisma.journalEntry.findFirst({
+      where: { sourceType: 'EXPENSE' as any, sourceId: String(expenseId), status: { not: 'VOID' as any } },
+      select: { id: true, entryNumber: true },
+    });
+    if (journal) {
+      throw new ConflictException(
+        `Expense sudah terjurnal (${journal.entryNumber}). Nominal/tanggal/kategori tidak boleh diubah dan data tidak boleh dihapus; gunakan jurnal koreksi atau void resmi di accounting.`,
+      );
+    }
   }
 
   private async validateRelations(roomId?: number, stayId?: number) {
