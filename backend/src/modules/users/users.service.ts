@@ -133,7 +133,10 @@ export class UsersService {
     }
 
     if (dto.email && dto.email !== existing.email) {
-      const emailExists = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      // Audit M-39: samakan dengan create() — pengecekan email case-insensitive.
+      const emailExists = await this.prisma.user.findFirst({
+        where: { email: { equals: dto.email, mode: 'insensitive' }, id: { not: id } },
+      });
       if (emailExists) throw new ConflictException('Email sudah digunakan');
     }
 
