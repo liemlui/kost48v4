@@ -737,9 +737,26 @@ export class StaysService {
         },
       });
       if (otherActive === 0) {
+        // Audit M-16: kamar bekas dihuni (promoted) wajib lewat inspeksi
+        // (MAINTENANCE); kamar dengan tiket pembersihan terbuka juga tidak
+        // boleh kembali AVAILABLE.
+        const wasPromoted = Boolean(existing.initialMetersPromotedAt);
+        const openCleaningTicket = await tx.ticket.findFirst({
+          where: {
+            roomId: existing.roomId,
+            category: "CHECKOUT_INSPECTION",
+            status: { notIn: ["CLOSED", "CANCELLED"] as any },
+          },
+          select: { id: true },
+        });
         await tx.room.update({
           where: { id: existing.roomId },
-          data: { status: RoomStatus.AVAILABLE },
+          data: {
+            status:
+              wasPromoted || openCleaningTicket
+                ? RoomStatus.MAINTENANCE
+                : RoomStatus.AVAILABLE,
+          },
         });
       }
 
@@ -759,7 +776,7 @@ export class StaysService {
     });
     return normalizeStayForResponse({
       ...updated,
-      roomStatusAfterSync: "AVAILABLE",
+      roomStatusAfterSync: existing.initialMetersPromotedAt ? "MAINTENANCE" : "AVAILABLE",
     });
   }
 
