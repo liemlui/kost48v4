@@ -1503,7 +1503,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       await this.appNotificationService.create({
         recipientUserId,
         title,
-        body: 'Pembayaran Anda telah diverifikasi. Hunian Anda sudah aktif.',
+        body: 'Pembayaran Anda telah diverifikasi. Silakan cek status hunian/booking Anda di portal.',
         entityType,
         entityId,
         linkTo: '/portal/stay',
@@ -1556,7 +1556,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       where: {
         tenantId,
         fileKey,
-        status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED, PaymentSubmissionStatus.REJECTED] },
+        status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED, PaymentSubmissionStatus.REJECTED, PaymentSubmissionStatus.EXPIRED] },
       },
     });
     return count > 0;
