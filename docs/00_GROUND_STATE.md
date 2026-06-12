@@ -1,5 +1,5 @@
 # KOST48 V5 — Ground State (Ringkas)
-**Versi:** 2026-06-11 — baseline V5.12.2. Ditulis ulang dari nol (versi lama V5.10.0 drift berat → diarsipkan di `archieve/00_GROUND_STATE_V5100_STALE.md`, JANGAN dipakai sebagai referensi).
+**Versi:** 2026-06-12 — pasca Audit Mega + eksekusi 24 FIX + UAT runtime penuh (baseline kode `a5c8477`). Versi V5.10.0 lama diarsipkan di `archieve/00_GROUND_STATE_V5100_STALE.md`, JANGAN dipakai sebagai referensi.
 **Aturan:** file ini hanya memuat fakta yang sudah diverifikasi dari kode. Detail per-flow ada di `01_FLOW_MAP.md` (peta `file:baris`). Riwayat perubahan di `CHANGELOG.md` (entri V5.11.0+; lebih lama di `archieve/CHANGELOG_PRE_V5110.md`).
 
 <!-- KOST48_DOCS_SYNC_20260611_GROUND_STATE_REWRITE -->
@@ -26,9 +26,11 @@
 - **Akuntansi Auto Journal Lite:** jurnal otomatis idempotent per (sourceType, sourceId); auto-close bulanan ter-gate readiness (unmapped-operational menghitung penuh). Reversal cancel invoice kini blocking di semua jalur (fix A8).
 - **Room readiness gate:** kamar tidak pernah AVAILABLE tanpa tiket CHECKOUT_INSPECTION ditutup.
 
-## 3. Status audit (per 2026-06-11)
-- Pass A (uang masuk) ✅, B (auto-ops) ✅, C (deposit end-to-end) ✅, E (rate limiting) sebagian ✅, D/F/G verifikasi ringan. Temuan A1–A18 selesai kecuali A13/A15 (catatan sadar-risiko; detail di `archieve/06_AUDIT_PASS_AB_2026-06-11.md`).
-- **Belum fokus kuat:** UAT runtime + rekonsiliasi data (prioritas D3), flow Renew, flow Tiket/staf, cross-check laporan vs trial balance, sisa keamanan (refresh token, matriks @Roles). Detail & rencana: `02_FOCUS_PLAN.md`.
+## 3. Status audit & pengujian (per 2026-06-12)
+- **Audit Mega full-sweep selesai** (`03_AUDIT_MEGA_2026-06.md`): 42 temuan, 24 FIX dieksekusi & diverifikasi (commit e4a8c31..f9d10ac), 8 quick-win UI/UX terpasang (`05_UIUX_AUDIT_2026-06-12.md`).
+- **UAT runtime PASS (DB UAT, 2026-06-12):** siklus DP→pelunasan (M-09 recalc DP, M-12 expiresAt mati, M-07 promoted) · siklus overstay penuh (pengingat H-3/H-day → tiket EVICT → forced checkout H+1 → kamar kotor-bisa-dipesan → settlement deposit berjurnal+ledger → gate room-ready) · renew penuh (invoice sewa+meter, periode menyambung) · rekonsiliasi deposit **mismatch=0** · trial balance **seimbang**; selisih P&L ledger vs operasional terjelaskan 100%.
+- **E-2 backfill DONE di UAT** (11 stay manual di-promote; ulangi di PRODUKSI saat deploy bersama bootstrap.sql).
+- Catatan sadar-risiko tersisa: A13/A15; eskalasi terbuka: E-1 (guard global), E-3 (jaminan check-in manual), E-4 (saldo kas dari jurnal), E-5..E-9. Belum direproduksi runtime (lulus regresi kode saja): first-paid-wins live, expiry 3 jam, DP-forfeit H+1, guard pembayaran manual A1, aktivasi-diblokir-saat-kamar-kotor.
 
 ## 4. Akun default & perintah
 - admin@kost48.com/admin123 · staff@kost48.com/staff123 · tenant.g2@kost48.com/tenant123 · liem.lui@gmail.com/admin123 (OWNER).

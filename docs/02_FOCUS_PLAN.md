@@ -59,12 +59,12 @@ Skala: 🟢 KUAT (sudah audit pass mendalam + fix), 🟡 SEDANG (diverifikasi ri
 | **8 Tiket & staf** | 🔴 | Dipetakan di flow map | **Belum pernah ada audit pass khusus.** Parsing regex deskripsi tiket rapuh; auto-assign selalu ke staf id terkecil (beban timpang); guard role markDone vs close belum diverifikasi |
 | **12 Pelaporan & notifikasi** | 🔴 | Reports tersedia; reminder in-app jalan | **Angka reports (raw SQL) belum pernah di-cross-check vs trial balance accounting**; endpoint AI belum diaudit (akses, biaya, input); jangkauan notifikasi → keputusan D2 |
 
-### Kesimpulan: 5 area fokus terlemah (urutan prioritas)
-1. **Verifikasi runtime & data (Pass G)** — semua fix V5.11–V5.12 baru terbukti di level kode, belum di data nyata. Ini bukan satu flow, tapi payung di atas semuanya. → diputuskan D3 sebagai prioritas berikutnya.
-2. **Flow 5 Renew** — satu-satunya flow uang yang belum pernah diaudit khusus, padahal menyentuh invoice + periode + race dengan auto-ops.
-3. **Flow 8 Tiket & staf** — gerbang MAINTENANCE→AVAILABLE bergantung padanya; belum diaudit.
-4. **Flow 12 cross-check laporan** — owner mengambil keputusan dari angka yang belum pernah diuji silang dengan jurnal.
-5. **Kedalaman keamanan (sisa Pass E)** — refresh token, invalidasi sesi, matriks role.
+### Kesimpulan: 5 area fokus terlemah — **SEMUA TERTANGANI per 2026-06-12** ✅
+1. ~~Verifikasi runtime & data (Pass G)~~ → **TUNTAS**: UAT §4.1–4.4 PASS + E-2 backfill + rekonsiliasi mismatch=0 (lihat §4 & CHANGELOG).
+2. ~~Flow 5 Renew~~ → diaudit di Audit Mega (M-15 FIX-02) + UAT renew penuh PASS.
+3. ~~Flow 8 Tiket & staf~~ → diaudit Batch 4 Audit Mega (M-26..M-28 FIXED) + gate room-ready teruji runtime.
+4. ~~Flow 12 cross-check laporan~~ → M-35/M-36 FIXED + cross-check P&L vs trial balance PASS (selisih terjelaskan 100%).
+5. **Kedalaman keamanan (sisa)** — temuan baru: suspend & ganti-password TERBUKTI memutus sesi (koreksi catatan lama); sisa nyata: refresh token (kenyamanan, bukan lubang) + E-1 guard global. Satu-satunya area yang masih terbuka.
 
 ---
 
@@ -79,7 +79,11 @@ Skala: 🟢 KUAT (sudah audit pass mendalam + fix), 🟡 SEDANG (diverifikasi ri
 
 ---
 
-## 4. Rencana UAT + Rekonsiliasi (eksekusi D3) — checklist siap pakai
+## 4. Rencana UAT + Rekonsiliasi (eksekusi D3) — **STATUS: TUNTAS 2026-06-12** ✅
+
+> **Hasil (bukti rinci di CHANGELOG 2026-06-12):** §4.1 inti PASS (DP recalc M-09, kunci kamar + expiresAt mati M-12, pelunasan → promoted M-07, approve ulang 409) · §4.2 PASS PENUH (pengingat H-3/H-day, tiket EVICT, forced checkout H+1, kamar MAINTENANCE+bisa-dipesan, settlement berjurnal `JE-AUTO-DEPOSIT-SETTLEMENT-15` + ledger seimbang→0, gate room-ready) · §4.3 PASS (renew: invoice 1.794.250 sewa+meter, periode menyambung tanpa gap) · §4.4 PASS (reconciliation-lite mismatch=0; trial balance seimbang 104.494.250; selisih P&L ledger vs ops = tepat 100rb pendapatan potongan deposit, by design).
+> **Belum direproduksi runtime** (lulus regresi kode Batch 1/3, uji saat ada kesempatan): first-paid-wins dua pembayar, expiry 3 jam live, DP-forfeit H+1 (sweeper #4), penolakan pembayaran manual booking (A1), aktivasi-diblokir saat kamar kotor masih dibersihkan.
+> Checklist di bawah dipertahankan sebagai prosedur baku UAT pra-rilis berikutnya.
 
 Urutan disarankan (jalankan di UAT `kost48_v3_pro` port 5433 dulu):
 
