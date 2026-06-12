@@ -1,5 +1,18 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-12 — Eksekusi 24 FIX selesai (terverifikasi) + Audit UI/UX visual. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-12 — E-2 backfill + UAT M-07/M-09 PASS + Quick Wins UI/UX. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+
+<!-- KOST48_DOCS_SYNC_20260612_E2_UAT_PASS -->
+## 2026-06-12 (sore) — E-2 Backfill (DB UAT) + UAT M-07/M-09 PASS Penuh
+
+### E-2 — Backfill `initialMetersPromotedAt` (data fix, DB UAT 5433)
+- 11 stay penghuni nyata (kamar OCCUPIED, jaminan terbayar) diisi `initialMetersPromotedAt = checkInDate` via SQL bertransaksi; 1 booking fase RESERVED dikecualikan. Pre-state tersimpan: `scripts/uat/E2_BACKFILL_PRESTATE_2026-06-12.txt`.
+- Efek terverifikasi langsung: okupansi finance 0% → **55% (11/20)**; ke-11 penghuni kini masuk lifecycle pengingat/overstay/forced-checkout.
+- ⚠️ Backfill yang sama WAJIB diulang di DB produksi saat deploy (SQL di pre-state file / CHANGELOG ini).
+
+### UAT M-07/M-09 — PASS SEMUA (`scripts/uat/UAT_M07_M09_CLEAN.ps1`)
+Siklus uang penuh pada data bersih (tenant baru via booking publik):
+booking publik → approve admin tarif 2jt → **DP recalc 600rb (30% tarif final) ✓ M-09** → DP dibayar & disetujui (**dpPaid tercatat; expiresAt mati ✓ M-12**) → approve ulang ditolak 409 ✓ → pelunasan 1,9jt → **stay promoted ✓ M-07**, kamar OCCUPIED, jaminan 500rb tercatat.
+Catatan: skrip eksekutor lama (`scripts/UAT_M07_M09.ps1`) punya 3 cacat (akun tenant.g2 tak ada, enum BANK_TRANSFER tak sah, kamar/meter hard-coded) — varian CLEAN menggantikannya. Artefak tes: stay #15; booking sisa #14 dibiarkan auto-expire sweeper.
 
 <!-- KOST48_DOCS_SYNC_20260612_FIX_EXECUTION_UIUX -->
 ## 2026-06-12 — Eksekusi FIX-01..26 oleh AI eksekutor (VERIFIED) + Audit UI/UX Visual
