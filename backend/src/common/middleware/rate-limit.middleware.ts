@@ -39,6 +39,13 @@ export function createRateLimiter(options: {
 
     const entry = buckets.get(key);
     if (!entry || entry.resetAt <= now) {
+      // Audit E-9/M-03: hard cap — saat Map penuh oleh IP unik aktif (flood),
+      // request baru diloloskan tanpa tracking (fail-open) demi melindungi
+      // memori; entri lama yang masih aktif tetap dibatasi.
+      if (!entry && buckets.size >= MAX_TRACKED_KEYS) {
+        next();
+        return;
+      }
       buckets.set(key, { count: 1, resetAt: now + windowMs });
       next();
       return;

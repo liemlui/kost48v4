@@ -1,5 +1,22 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-12 — UAT siklus overstay PASS PENUH + rekonsiliasi mismatch=0. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-12 — SIAP PRODUKSI: eskalasi E-1..E-5/E-9 + 5 skenario residual PASS + runbook deploy. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+
+<!-- KOST48_DOCS_SYNC_20260612_PRODUCTION_READY -->
+## 2026-06-12 (larut) — Eskalasi Tuntas + 5 Skenario Residual PASS + Runbook Deploy → SIAP PRODUKSI
+
+### Eskalasi diimplementasikan & diverifikasi runtime
+- **E-1 Guard global (default-deny):** `APP_GUARD` JwtAuthGuard+RolesGuard + decorator `@Public()` (login/forgot/reset, public/bookings, public/rooms, faqs/public). Controller baru yang lupa guard kini otomatis 401, bukan bocor publik. Smoke: publik 200 tanpa token, terproteksi 401, login normal. (Bukti hidup: saat rebuild, katalog publik sempat 401 sebelum ditandai @Public.)
+- **E-3 Jaminan check-in manual:** dto `depositCollected` + checkbox wizard → depositPaid=PAID + ledger `PAYMENT_RECEIVED` + jurnal liability POSTED (verifikasi stay #21: paid 1jt, `JE-AUTO-DEPOSIT-21`). Artefak dibersihkan via FULL_REFUND — rekonsiliasi tetap 0.
+- **E-4 Saldo kas laporan dari JURNAL:** cashflow report kini menghitung saldo per cash account = opening + Σ(debit−kredit line POSTED); field manual hanya referensi (`manualBalanceRupiah`).
+- **E-5 Finance deposit liability = HELD** (termasuk stay selesai belum settle) di businessHealth & balance-sheet draft — selaras fix M-36 reports.
+- **E-9:** hard-cap fail-open map limiter (M-03) + hapus kode mati `rooms.findPublicOne` (M-31).
+
+### 5 skenario residual — PASS runtime semua (`scripts/uat/UAT_RUNTIME_RESIDUAL.ps1`, `UAT_S5_DIRTY_ROOM.ps1`)
+S1 guard A1: pembayaran manual pada invoice booking → 409 ✓ · S2 first-paid-wins: pesaing CANCELLED + notif A17 ✓ · S3 expiry live: sweeper cancel + kamar lepas ✓ (catatan: kolom expiresAt = UTC; skrip uji harus pakai kerangka UTC) · S4 DP-forfeit H+1: CANCELLED + `downPaymentForfeitedAt` + jurnal `DP_FORFEIT` POSTED + jaminan utuh ✓ · S5 kamar kotor: bisa dipesan, aktivasi DIBLOKIR 409 sampai tiket ditutup ✓.
+
+### Siap produksi
+- `docs/06_DEPLOY_RUNBOOK.md` — backup, build, bootstrap.sql (constraint DP), **backfill E-2 produksi (SQL siap pakai)**, smoke E-1, baseline rekonsiliasi, rollback.
+- Rekonsiliasi akhir UAT: **21 stay, mismatch=0**. Ditunda sadar (bukan blocker): E-6 timezone staf (mitigasi: TZ server Asia/Jakarta), E-7 round-robin, E-8 unit test.
 
 <!-- KOST48_DOCS_SYNC_20260612_OVERSTAY_UAT_PASS -->
 ## 2026-06-12 (malam) — UAT Siklus Overstay V5.12.1 PASS PENUH + Rekonsiliasi Bersih

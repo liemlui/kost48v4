@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { CreatePublicBookingDto } from './dto/create-public-booking.dto';
@@ -11,6 +12,7 @@ export class PublicBookingsController {
   constructor(private readonly publicBookingsService: PublicBookingsService) {}
 
   @Post()
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(RateLimitGuard)
   @RateLimit('publicBooking')

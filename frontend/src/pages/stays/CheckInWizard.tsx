@@ -277,6 +277,8 @@ export default function CheckInWizard({ show: _show = true, onHide }: CheckInWiz
         stayPurpose: values.stayPurpose || undefined,
         bookingSource: values.bookingSource || undefined,
         notes: values.notes || undefined,
+        // Audit E-3: jaminan tunai yang diterima saat check-in dicatat resmi di backend.
+        depositCollected: Boolean((values as any).depositCollected),
       } as any;
       // Meter readings passed as strings (DTO expects @IsNumberString)
       (payload as any).initialElectricityKwh = values.initialElectricityKwh;

@@ -19,4 +19,6 @@ export type WizardFormValues = {
   notes: string;
   initialElectricityKwh: string;
   initialWaterM3: string;
+  // Audit E-3: jaminan diterima tunai saat check-in.
+  depositCollected?: boolean;
 };

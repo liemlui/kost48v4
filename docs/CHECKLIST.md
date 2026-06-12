@@ -10,8 +10,15 @@
 - [x] **Rekonsiliasi §4.4:** `reconciliation-lite` → ready=True, 15 stay, **mismatch=0**; ledger-backfill dry-run wouldCreate=0. Catatan by-design: 11 deposit demo lama belum punya jurnal liability (deposit sengaja dikecualikan dari auto-backfill agar tidak double-posting) + invoice demo #4 total 0 — keduanya PR data demo, bukan bug.
 - [x] **UAT renew penuh §4.3 PASS** (stay #1 Andi): request tenant → approve admin → invoice ISSUED 1.794.250 (RENT 1,7jt + 50 kWh×1.445 + 4 m³×5.500), periode menyambung 30 Jun→30 Jul tanpa gap, planned bergeser, approve ulang 409. Artefak: invoice INV-1-R-570953 (tunggakan wajar Andi).
 - [x] **Cross-check P&L vs trial balance PASS:** trial balance seimbang (104.494.250 = 104.494.250); P&L ledger Juni 3.894.250 vs operasional 3.794.250 — selisih tepat 100rb = pendapatan potongan deposit (4400) non-invoice, by design. Semua angka teruji sampai ke rupiah.
-- [ ] Eskalasi tersisa: E-1 (guard global), E-3 (jaminan check-in manual), E-4 (saldo kas dari jurnal), E-5..E-9 (`03_AUDIT_MEGA_2026-06.md`)
-- [ ] Saat deploy produksi: ulangi E-2 backfill + jalankan bootstrap.sql (constraint DP)
+- [x] **Eskalasi E-1/E-3/E-4/E-5/E-9 DIIMPLEMENTASIKAN + verifikasi runtime** (2026-06-12 larut; lihat CHANGELOG): guard global default-deny, jaminan check-in manual (ledger+jurnal), saldo kas dari jurnal, finance HELD, map cap + hapus kode mati.
+- [x] **5 skenario residual PASS runtime** (S1 A1-guard, S2 first-paid-wins+notif, S3 expiry live, S4 DP-forfeit H+1+jurnal, S5 kamar kotor blokir aktivasi) — `scripts/uat/UAT_RUNTIME_RESIDUAL.ps1` + `UAT_S5_DIRTY_ROOM.ps1`. Rekonsiliasi akhir: 21 stay mismatch=0.
+
+## DEPLOY PRODUKSI — ikuti `06_DEPLOY_RUNBOOK.md`
+- [ ] Backup pg_dump → build → `prisma db push` + `bootstrap.sql` → **backfill E-2 produksi** → restart → smoke E-1 → baseline reconciliation → buat CashAccount
+- [ ] Set TZ server Asia/Jakarta (mitigasi E-6)
+
+## Ditunda sadar (bukan blocker)
+- [ ] E-6 timezone WIB modul staf · E-7 round-robin tiket · E-8 rangka unit test backend
 
 ## Prioritas #1b — Quick Wins UI/UX (BARU, 2026-06-12; detail `05_UIUX_AUDIT_2026-06-12.md`)
 - [ ] QW-1..QW-8 (filter default tagihan admin, H1 detail kamar, copy DP 30% di booking publik, lazy-load foto katalog, badge "Menunggu Pembayaran" portal, section home kosong, empty-state chart owner, sinkron angka Tagihan Saya)

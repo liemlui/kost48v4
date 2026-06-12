@@ -30,7 +30,7 @@
 - **Audit Mega full-sweep selesai** (`03_AUDIT_MEGA_2026-06.md`): 42 temuan, 24 FIX dieksekusi & diverifikasi (commit e4a8c31..f9d10ac), 8 quick-win UI/UX terpasang (`05_UIUX_AUDIT_2026-06-12.md`).
 - **UAT runtime PASS (DB UAT, 2026-06-12):** siklus DP→pelunasan (M-09 recalc DP, M-12 expiresAt mati, M-07 promoted) · siklus overstay penuh (pengingat H-3/H-day → tiket EVICT → forced checkout H+1 → kamar kotor-bisa-dipesan → settlement deposit berjurnal+ledger → gate room-ready) · renew penuh (invoice sewa+meter, periode menyambung) · rekonsiliasi deposit **mismatch=0** · trial balance **seimbang**; selisih P&L ledger vs operasional terjelaskan 100%.
 - **E-2 backfill DONE di UAT** (11 stay manual di-promote; ulangi di PRODUKSI saat deploy bersama bootstrap.sql).
-- Catatan sadar-risiko tersisa: A13/A15; eskalasi terbuka: E-1 (guard global), E-3 (jaminan check-in manual), E-4 (saldo kas dari jurnal), E-5..E-9. Belum direproduksi runtime (lulus regresi kode saja): first-paid-wins live, expiry 3 jam, DP-forfeit H+1, guard pembayaran manual A1, aktivasi-diblokir-saat-kamar-kotor.
+- **SIAP PRODUKSI (2026-06-12 larut):** E-1 guard global default-deny (+@Public), E-3 jaminan check-in manual (ledger+jurnal), E-4 saldo kas dari jurnal, E-5 liability HELD, E-9 hardening — semua terverifikasi runtime. 5 skenario residual PASS (A1-guard, first-paid-wins, expiry live, DP-forfeit H+1, blokir-aktivasi-kamar-kotor). Rekonsiliasi akhir 21 stay mismatch=0. Deploy: ikuti `06_DEPLOY_RUNBOOK.md`. Sisa sadar-risiko: A13/A15; ditunda: E-6 (mitigasi: TZ server Asia/Jakarta), E-7, E-8.
 
 ## 4. Akun default & perintah
 - admin@kost48.com/admin123 · staff@kost48.com/staff123 · tenant.g2@kost48.com/tenant123 · liem.lui@gmail.com/admin123 (OWNER).

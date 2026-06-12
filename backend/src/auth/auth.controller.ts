@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+﻿import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { CurrentUserPayload } from '../common/interfaces/current-user.interface';
@@ -16,6 +17,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @Public()
   @UseGuards(RateLimitGuard)
   async login(@Body() dto: LoginDto) {
     const data = await this.authService.login(dto);
@@ -32,6 +34,7 @@ export class AuthController {
 
 
   @Post('forgot-password')
+  @Public()
   @UseGuards(RateLimitGuard)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     const data = await this.authService.forgotPassword(dto);
@@ -39,6 +42,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @Public()
   @UseGuards(RateLimitGuard)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     const data = await this.authService.resetPassword(dto);

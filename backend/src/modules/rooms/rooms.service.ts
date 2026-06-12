@@ -155,54 +155,8 @@ export class RoomsService {
 
 
 
-  async findPublicOne(id: number) {
-    const room = await this.prisma.room.findUnique({
-      where: { id },
-    });
-
-    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
-    if (!room.isActive) throw new NotFoundException('Kamar tidak tersedia');
-
-    const pricingTerms = this.getAvailablePricingTerms(room);
-
-    const publicFacilities = await this.prisma.roomFacility.findMany({
-      where: { roomId: id, publicVisible: true },
-      select: {
-        id: true,
-        roomId: true,
-        name: true,
-        quantity: true,
-        category: true,
-        condition: true,
-        note: true,
-      },
-      orderBy: { id: 'asc' },
-    });
-
-    return {
-      id: room.id,
-      code: room.code,
-      name: room.name,
-      floor: room.floor,
-      status: room.status,
-      isAvailable: room.status === 'AVAILABLE',
-      notes: room.notes,
-      images: (room.images as unknown as Array<Record<string, unknown>>) ?? [],
-      pricing: {
-        dailyRateRupiah: room.dailyRateRupiah,
-        weeklyRateRupiah: room.weeklyRateRupiah,
-        biWeeklyRateRupiah: room.biWeeklyRateRupiah,
-        monthlyRateRupiah: room.monthlyRateRupiah,
-      },
-      defaultDepositRupiah: room.defaultDepositRupiah,
-      electricityTariffPerKwhRupiah: room.electricityTariffPerKwhRupiah,
-      waterTariffPerM3Rupiah: room.waterTariffPerM3Rupiah,
-      availablePricingTerms: pricingTerms,
-      highlightedPricingTerm: pricingTerms[0] ?? 'MONTHLY',
-      highlightedRateRupiah: this.resolveRent(room, (pricingTerms[0] ?? 'MONTHLY') as PricingTerm),
-      facilities: publicFacilities,
-    };
-  }
+  // Audit E-9/M-31: findPublicOne (jalur harga kedua berbasis kolom per-term)
+  // DIHAPUS — kode mati tanpa route; katalog publik resmi = modules/marketing.
 
   async create(dto: CreateRoomDto, actor: CurrentUserPayload) {
     this.assertOwnerOrAdmin(actor);
@@ -385,42 +339,6 @@ export class RoomsService {
   private assertOwnerOrAdmin(actor: CurrentUserPayload) {
     if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
       throw new ForbiddenException('Staff hanya boleh melihat data kamar. Perubahan kamar/fasilitas hanya boleh dilakukan Owner/Admin.');
-    }
-  }
-
-  private getAvailablePricingTerms(room: {
-    dailyRateRupiah: number | null;
-    weeklyRateRupiah: number | null;
-    biWeeklyRateRupiah: number | null;
-    monthlyRateRupiah: number | null;
-  }) {
-    const terms: string[] = [];
-    if (room.dailyRateRupiah && room.dailyRateRupiah > 0) terms.push('DAILY');
-    if (room.weeklyRateRupiah && room.weeklyRateRupiah > 0) terms.push('WEEKLY');
-    if (room.biWeeklyRateRupiah && room.biWeeklyRateRupiah > 0) terms.push('BIWEEKLY');
-    if (room.monthlyRateRupiah && room.monthlyRateRupiah > 0) terms.push('MONTHLY');
-    return terms;
-  }
-
-  private resolveRent(
-    room: {
-      dailyRateRupiah: number | null;
-      weeklyRateRupiah: number | null;
-      biWeeklyRateRupiah: number | null;
-      monthlyRateRupiah: number | null;
-    },
-    pricingTerm: string,
-  ) {
-    switch (pricingTerm) {
-      case 'DAILY':
-        return room.dailyRateRupiah ?? room.monthlyRateRupiah ?? 0;
-      case 'WEEKLY':
-        return room.weeklyRateRupiah ?? room.monthlyRateRupiah ?? 0;
-      case 'BIWEEKLY':
-        return room.biWeeklyRateRupiah ?? room.monthlyRateRupiah ?? 0;
-      case 'MONTHLY':
-      default:
-        return room.monthlyRateRupiah ?? 0;
     }
   }
 

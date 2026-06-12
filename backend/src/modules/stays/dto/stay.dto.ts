@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
 import { LeadSource, PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
 export class CreateStayDto {
@@ -26,6 +26,12 @@ export class CreateStayDto {
   @IsInt()
   @Min(0)
   depositAmountRupiah?: number;
+
+  // Audit E-3: jaminan diterima tunai saat check-in manual — bila true,
+  // depositPaid langsung tercatat + masuk ledger & jurnal liability.
+  @IsOptional()
+  @IsBoolean()
+  depositCollected?: boolean;
 
   @IsOptional()
   @IsInt()

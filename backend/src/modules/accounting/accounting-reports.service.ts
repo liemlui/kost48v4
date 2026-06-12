@@ -831,14 +831,33 @@ export class AccountingReportsService {
       }
     }
 
-    // Get cash account balances
-    const cashAccountBalances = cashAccounts.map((ca: any) => ({
-      id: ca.id,
-      name: ca.name,
-      accountType: ca.accountType,
-      currentBalanceRupiah: Number(ca.currentBalanceRupiah ?? 0),
-      openingBalanceRupiah: Number(ca.openingBalanceRupiah ?? 0),
-    }));
+    // Audit E-4: saldo kas dihitung dari JURNAL (opening + Σ debit−kredit line
+    // ber-cashAccountId pada entry POSTED), bukan field manual
+    // CashAccount.currentBalanceRupiah yang tidak pernah di-update posting.
+    const cashLineSums = await (this.prisma as any).journalLine.groupBy({
+      by: ['cashAccountId'],
+      where: { cashAccountId: { not: null }, journalEntry: { status: 'POSTED' as any } },
+      _sum: { debitRupiah: true, creditRupiah: true },
+    });
+    const ledgerDeltaByCashId = new Map<number, number>(
+      cashLineSums.map((row: any) => [
+        Number(row.cashAccountId),
+        Number(row._sum?.debitRupiah ?? 0) - Number(row._sum?.creditRupiah ?? 0),
+      ]),
+    );
+    const cashAccountBalances = cashAccounts.map((ca: any) => {
+      const opening = Number(ca.openingBalanceRupiah ?? 0);
+      const ledgerDelta = ledgerDeltaByCashId.get(Number(ca.id)) ?? 0;
+      return {
+        id: ca.id,
+        name: ca.name,
+        accountType: ca.accountType,
+        currentBalanceRupiah: opening + ledgerDelta,
+        ledgerDeltaRupiah: ledgerDelta,
+        manualBalanceRupiah: Number(ca.currentBalanceRupiah ?? 0),
+        openingBalanceRupiah: opening,
+      };
+    });
     const totalCashOpening = cashAccountBalances.reduce((sum: number, ca: any) => sum + ca.openingBalanceRupiah, 0);
     const totalCashCurrent = cashAccountBalances.reduce((sum: number, ca: any) => sum + ca.currentBalanceRupiah, 0);
 

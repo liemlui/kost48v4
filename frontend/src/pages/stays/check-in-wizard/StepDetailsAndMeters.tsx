@@ -124,6 +124,14 @@ export default function StepDetailsAndMeters({
               {form.formState.errors.depositAmountRupiah ? (
                 <div className="text-danger small mt-2">{String(form.formState.errors.depositAmountRupiah.message)}</div>
               ) : null}
+              {/* Audit E-3: jaminan tunai yang diterima saat check-in harus tercatat resmi */}
+              <Form.Check
+                type="checkbox"
+                id="check-in-deposit-collected"
+                className="mt-2"
+                label="Jaminan sudah diterima saat check-in (dicatat ke ledger & jurnal)"
+                {...form.register('depositCollected')}
+              />
             </Form.Group>
           </Col>
           <Col md={6}>

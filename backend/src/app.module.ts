@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { AuthModule } from './auth/auth.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -75,6 +78,12 @@ import { FaqsModule } from './modules/faqs/faqs.module';
     AssetsModule,
     DepositLedgerModule,
     FaqsModule,
+  ],
+  providers: [
+    // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().
+    // RolesGuard global aman: tanpa metadata @Roles ia meloloskan request.
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

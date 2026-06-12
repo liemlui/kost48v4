@@ -250,6 +250,8 @@ export class StaysService {
         if (existingRoomStayLock) {
           throw new ConflictException("Kamar sudah ditempati stay aktif lain");
         }
+        // Audit E-3: jaminan tunai yang diterima saat check-in dicatat resmi.
+        const depositCollected = Boolean(dto.depositCollected) && deposit > 0;
         const stay = await tx.stay.create({
           data: {
             tenantId: dto.tenantId,
@@ -262,6 +264,12 @@ export class StaysService {
               ? new Date(dto.plannedCheckOutDate)
               : calculatePeriodEnd(new Date(dto.checkInDate), dto.pricingTerm),
             depositAmountRupiah: deposit,
+            ...(depositCollected
+              ? {
+                  depositPaidAmountRupiah: deposit,
+                  depositPaymentStatus: "PAID" as any,
+                }
+              : {}),
             electricityTariffPerKwhRupiah: electricity,
             waterTariffPerM3Rupiah: water,
             bookingSource: dto.bookingSource as LeadSource,
@@ -274,6 +282,27 @@ export class StaysService {
             initialMetersPromotedAt: new Date(),
           },
         });
+
+        if (depositCollected) {
+          // Ledger wajib sukses (sumber kebenaran riwayat jaminan);
+          // jurnal liability best-effort (paritas dengan jalur booking,
+          // readiness unmapped akan menandai bila gagal).
+          await this.depositLedger.recordDepositReceivedTx(tx, {
+            stayId: stay.id,
+            amountRupiah: deposit,
+            actorUserId: actor.id,
+            occurredAt: new Date(dto.checkInDate),
+            note: "Jaminan diterima tunai saat check-in manual.",
+            metadata: { source: "MANUAL_CHECKIN" },
+          });
+          await this.accountingPosting
+            .postDepositReceivedForStayTx(tx, stay.id, actor.id, "CASH", new Date(dto.checkInDate))
+            .catch((err) => {
+              this.logger.warn(
+                `Jurnal deposit (liability) gagal saat check-in manual stay #${stay.id}: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            });
+        }
 
         await tx.room.update({
           where: { id: dto.roomId },

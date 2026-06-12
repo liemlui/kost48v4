@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CheckoutRequestStatus, InvoiceStatus, PaymentSubmissionStatus, RenewRequestStatus, RoomStatus, StayStatus, TicketStatus } from '../../common/enums/app.enums';
 import { FinancePeriodQueryDto } from './dto/finance-query.dto';
@@ -94,7 +94,8 @@ export class FinanceService {
       this.prisma.stay.aggregate({
         _sum: { depositPaidAmountRupiah: true, depositAmountRupiah: true },
         _count: { id: true },
-        where: { status: StayStatus.ACTIVE as any, depositAmountRupiah: { gt: 0 } },
+        // Audit E-5: liability = semua jaminan HELD (termasuk stay selesai yang belum di-settle).
+        where: { depositStatus: 'HELD' as any, OR: [{ status: StayStatus.ACTIVE as any }, { depositPaidAmountRupiah: { gt: 0 } }], depositAmountRupiah: { gt: 0 } },
       }),
     ]);
 
@@ -242,7 +243,8 @@ export class FinanceService {
       this.prisma.stay.aggregate({
         _sum: { depositPaidAmountRupiah: true, depositAmountRupiah: true },
         _count: { id: true },
-        where: { status: StayStatus.ACTIVE as any, depositAmountRupiah: { gt: 0 } },
+        // Audit E-5: liability = semua jaminan HELD (termasuk stay selesai yang belum di-settle).
+        where: { depositStatus: 'HELD' as any, OR: [{ status: StayStatus.ACTIVE as any }, { depositPaidAmountRupiah: { gt: 0 } }], depositAmountRupiah: { gt: 0 } },
       }),
     ]);
 
