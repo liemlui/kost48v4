@@ -1,6 +1,37 @@
 # KOST48 V5 — Changelog
 **Versi:** 2026-06-12 — SIAP PRODUKSI: eskalasi E-1..E-5/E-9 + 5 skenario residual PASS + runbook deploy. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
+<!-- KOST48_DOCS_SYNC_20260612_DOCS_SIMPLIFICATION_V2 -->
+## 2026-06-12 — Simplifikasi & Update Docs — FLOW_MAP V2 + 6 Flow Baru + Arsip
+
+### Update besar `docs/01_FLOW_MAP.md` (V2)
+- **Koreksi 5 bagian basi:**
+  - §0.1: "TANPA rate-limit" → rate-limit SUDAH ADA (V5.12.2)
+  - §3.2: PARTIAL payment ditandai sebagai GAP #1, cross-ref ke §15
+  - §3.3: Tambah catatan refund DP manual (GAP #4)
+  - §7: Job #4 → `runDownPaymentForfeit`, Job #5 → `runContractEndReminders`, Job #6 → `runOverstayEnforcement`, Job #7 → `runOverstayForcedCheckout` (update nama aktual)
+  - §1 fokus audit: coret "brute-force tanpa rate-limit" — sudah ditangani
+- **Tulis ulang §5 Renew** — deskripsi flow bisnis asli dari owner: H-7 tanya perpanjang → YA/DP 30% → verify → aman. TIDAK → kamar bisa dipesan per tanggal checkout. Jika belum transfer → kamar muncul di katalog publik. Grace H+7.
+- **6 flow baru ditambahkan:**
+  - §9 Flow Inventaris & Barang Kamar (detail: master, movement, room items, sinkronisasi)
+  - §10 Flow Keuangan Operasional (Expense, WiFi, Aset)
+  - §12 Flow Dashboard Finance & Laporan (Balance Sheet, P&L, Cashflow, Rasio)
+  - §13 Flow Analisis Strategis (SWOT, PESTLE, BCG, Porter, 7P + AI Deepseek sebagai konektor)
+  - §14 Flow Notifikasi, Pengumuman & PWA
+  - §16 Frontend Surface Map (ringkas)
+- **Update §15 Gap Bisnis** — GAP #4 diubah: refund MANUAL via admin (bukan auto-refund), sesuai keputusan owner.
+- **Renumber** sections: 17 total (V1 hanya 15).
+
+### Update `docs/02_FOCUS_PLAN.md`
+- §2: "SEMUA TERTANGANI" → "99% TERTANGANI, 3 minor ditunda (E-6/E-7/E-8)"
+- Tambah catatan GAP #1 & #2 sebagai item terbuka
+
+### Arsip
+- `docs/04_FIX_INSTRUCTIONS.md` → `docs/archieve/04_FIX_INSTRUCTIONS.md` (24/24 FIX sudah applied & verified)
+
+### Status
+Semua file docs kini sinkron. Gap bisnis #1-4 masih perlu perbaikan kode.
+
 <!-- KOST48_DOCS_SYNC_20260612_PRODUCTION_READY -->
 ## 2026-06-12 (larut) — Eskalasi Tuntas + 5 Skenario Residual PASS + Runbook Deploy → SIAP PRODUKSI
 

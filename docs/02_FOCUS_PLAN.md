@@ -59,12 +59,18 @@ Skala: 🟢 KUAT (sudah audit pass mendalam + fix), 🟡 SEDANG (diverifikasi ri
 | **8 Tiket & staf** | 🔴 | Dipetakan di flow map | **Belum pernah ada audit pass khusus.** Parsing regex deskripsi tiket rapuh; auto-assign selalu ke staf id terkecil (beban timpang); guard role markDone vs close belum diverifikasi |
 | **12 Pelaporan & notifikasi** | 🔴 | Reports tersedia; reminder in-app jalan | **Angka reports (raw SQL) belum pernah di-cross-check vs trial balance accounting**; endpoint AI belum diaudit (akses, biaya, input); jangkauan notifikasi → keputusan D2 |
 
-### Kesimpulan: 5 area fokus terlemah — **SEMUA TERTANGANI per 2026-06-12** ✅
+### Kesimpulan: 5 area fokus terlemah — **99% TERTANGANI, 3 minor ditunda** ✅
 1. ~~Verifikasi runtime & data (Pass G)~~ → **TUNTAS**: UAT §4.1–4.4 PASS + E-2 backfill + rekonsiliasi mismatch=0 (lihat §4 & CHANGELOG).
-2. ~~Flow 5 Renew~~ → diaudit di Audit Mega (M-15 FIX-02) + UAT renew penuh PASS.
+2. ~~Flow 5 Renew~~ → diaudit di Audit Mega (M-15 FIX-02) + UAT renew penuh PASS. **Catatan: GAP #2 (DP renewal belum aman) BELUM diimplementasikan** — lihat `01_FLOW_MAP.md §15 GAP #2`.
 3. ~~Flow 8 Tiket & staf~~ → diaudit Batch 4 Audit Mega (M-26..M-28 FIXED) + gate room-ready teruji runtime.
 4. ~~Flow 12 cross-check laporan~~ → M-35/M-36 FIXED + cross-check P&L vs trial balance PASS (selisih terjelaskan 100%).
-5. **Kedalaman keamanan (sisa)** — temuan baru: suspend & ganti-password TERBUKTI memutus sesi (koreksi catatan lama); sisa nyata: refresh token (kenyamanan, bukan lubang) + E-1 guard global. Satu-satunya area yang masih terbuka.
+5. **Kedalaman keamanan (sisa)** — temuan baru: suspend & ganti-password TERBUKTI memutus sesi (koreksi catatan lama); sisa nyata: refresh token (kenyamanan, bukan lubang) + E-1 guard global.
+
+### Item ditunda (bukan blocker per 2026-06-12)
+- **E-6 Timezone staf** — mitigasi: TZ server Asia/Jakarta. Lihat `07_NEXT_WORK_INSTRUCTIONS.md` W-05.
+- **E-7 Round-robin assignment** — beban staf masih merata ke id terkecil. Lihat W-04.
+- **E-8 Unit tests** — belum ada automated test suite. Lihat W-07.
+- **GAP #1 & #2 bisnis (partial payment, renewal DP)** — kode masih perlu disesuaikan dengan aturan owner.
 
 ---
 
