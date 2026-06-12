@@ -165,7 +165,8 @@ export default function InvoicesPage() {
   const [formState, setFormState] = useState(initialForm);
   const [error, setError] = useState('');
   const [accountingNotice, setAccountingNotice] = useState('');
-  const [activeTab, setActiveTab] = useState<StatusTab>('BILLING');
+  // Audit U-05: default "Semua" agar landing tidak empty-state saat tidak ada tagihan aktif.
+  const [activeTab, setActiveTab] = useState<StatusTab>('ALL');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;

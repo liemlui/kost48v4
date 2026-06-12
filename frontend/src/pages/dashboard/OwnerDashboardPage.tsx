@@ -112,6 +112,21 @@ function TrendChart({
     );
   };
 
+  // Audit U-10: bidang chart kosong tanpa pesan terlihat seperti halaman rusak.
+  const hasAnyValue = chartData.some(
+    (d) => (d.revenue || 0) !== 0 || (d.expense || 0) !== 0 || (d.netProfit || 0) !== 0,
+  );
+  if (chartData.length === 0 || !hasAnyValue) {
+    return (
+      <div
+        className="text-center text-muted"
+        style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        Belum ada data pendapatan/biaya untuk rentang ini.
+      </div>
+    );
+  }
+
   if (mode === 'bar') {
     return (
       <ResponsiveContainer width="100%" height={300}>

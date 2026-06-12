@@ -250,7 +250,7 @@ export default function PublicRoomDetailPage() {
         <div className="room-detail-topline mb-4">
           <div>
             <div className="page-eyebrow">Detail Kamar — KOST48 Surabaya</div>
-            <h1 className="mb-1">{room?.code ?? 'Detail kamar'}</h1>
+            <h1 className="mb-1">{room ? (room.name?.trim() || `Kamar ${room.code}`) : 'Detail kamar'}</h1>
             <div className="text-muted">Lihat foto, fasilitas, term sewa, dan deposit sebelum mengajukan pemesanan.</div>
           </div>
           <div className="d-flex gap-2 flex-wrap">

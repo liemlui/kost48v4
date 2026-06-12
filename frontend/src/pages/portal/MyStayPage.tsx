@@ -359,7 +359,13 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
               <div className="command-eyebrow">Kamar Saya</div>
               <div className="tenant-room-dossier-title-row">
                 <h3 className="tenant-room-dossier-name">Kamar {stay.room?.code ?? stay.roomId}</h3>
-                <StatusBadge status={stay.status} tone="tenant" domain="stay" />
+                {/* Audit U-03: fase booking (kamar RESERVED) jangan tampil "Masa Sewa Aktif" —
+                    kamar belum terkunci sebelum pembayaran disetujui (first-paid-wins). */}
+                {stay.room?.status === 'RESERVED' ? (
+                  <span className="badge text-bg-warning">Menunggu Pembayaran — kamar belum terkunci</span>
+                ) : (
+                  <StatusBadge status={stay.status} tone="tenant" domain="stay" />
+                )}
               </div>
               <div className="tenant-room-dossier-room-meta">{roomSummary.roomInfo}</div>
               <div className={`tenant-room-dossier-end-date${nearEnd ? ' near-end' : ''}`}>
@@ -394,8 +400,12 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             </button>
             <div className="tenant-stay-fact-chip tone-info" role="status" aria-label="Dana titipan">
               <span className="fact-label">Dana titipan</span>
-              <strong><CurrencyDisplay amount={stay.depositAmountRupiah} /></strong>
-              <small>Titipan</small>
+              {/* Audit U-03: tampilkan yang BENAR-BENAR disetor vs target, bukan target saja. */}
+              <strong>
+                <CurrencyDisplay amount={stay.depositPaidAmountRupiah ?? 0} showZero />
+                <span className="text-muted"> / <CurrencyDisplay amount={stay.depositAmountRupiah} /></span>
+              </strong>
+              <small>{Number(stay.depositPaidAmountRupiah ?? 0) > 0 ? 'Titipan' : 'Belum disetor'}</small>
             </div>
           </div>
 

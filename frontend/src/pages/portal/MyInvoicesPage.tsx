@@ -26,7 +26,17 @@ function fmtC(v: number) {
 
 function TenantInvoiceSnapshot({ allItems, paidCount, unpaidCount, overdueCount }: { allItems: any[]; paidCount: number; unpaidCount: number; overdueCount: number }) {
   const totalBilled = useMemo(() => allItems.reduce((s, inv) => s + (Number(inv.totalAmountRupiah) || 0), 0), [allItems]);
-  const totalPaid = useMemo(() => allItems.reduce((s, inv) => s + (Number(inv.paidAmountRupiah) || 0), 0), [allItems]);
+  // Audit U-04: invoice berstatus PAID dihitung lunas penuh meski riwayat
+  // pembayarannya kosong (data lama) — agar gauge konsisten dengan tab "Selesai".
+  const totalPaid = useMemo(
+    () =>
+      allItems.reduce(
+        (s, inv) =>
+          s + (inv.status === 'PAID' ? (Number(inv.totalAmountRupiah) || 0) : (Number(inv.paidAmountRupiah) || 0)),
+        0,
+      ),
+    [allItems],
+  );
   const outstanding = Math.max(0, totalBilled - totalPaid);
   const paidRate = totalBilled > 0 ? Math.round((totalPaid / totalBilled) * 100) : 0;
 
@@ -178,7 +188,16 @@ export default function MyInvoicesPage() {
             </div>
           </div>
 
-          {allItems.length > 0 && <TenantInvoiceSnapshot allItems={allItems} paidCount={paidCount} unpaidCount={unpaidCount} overdueCount={overdueCount} />}
+          {/* Audit U-04: gauge tidak boleh menghitung DRAFT/CANCELLED — angka harus
+              konsisten dengan tab (DRAFT belum ditagihkan, CANCELLED bukan kewajiban). */}
+          {allItems.length > 0 && (
+            <TenantInvoiceSnapshot
+              allItems={allItems.filter((item: any) => !['DRAFT', 'CANCELLED'].includes(item.status))}
+              paidCount={paidCount}
+              unpaidCount={unpaidCount}
+              overdueCount={overdueCount}
+            />
+          )}
 
           {overdueCount > 0 ? (
             <Alert variant="warning" className="tenant-short-alert mb-3">

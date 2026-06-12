@@ -83,6 +83,8 @@ function RoomCardImage({ room }: { room: PublicRoom }) {
           src={active}
           alt={`Foto kamar ${room.code}`}
           className="rm-card-img"
+          loading="lazy"
+          decoding="async"
           onError={() => markFailed(active)}
         />
       ) : (

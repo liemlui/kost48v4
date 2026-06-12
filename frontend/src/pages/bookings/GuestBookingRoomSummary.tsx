@@ -110,7 +110,13 @@ export default function GuestBookingRoomSummary({ room, form, selectedRate, init
           <div className="fs-4 fw-bold"><CurrencyDisplay amount={initialTotal || initialCost.total} /></div>
           <div className="booking-room-estimate-lines">
             <span>Sewa pertama <strong><CurrencyDisplay amount={selectedRate || initialCost.rent} showZero={false} /></strong></span>
-            <span>Deposit awal <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
+            <span>Deposit jaminan <strong><CurrencyDisplay amount={room.defaultDepositRupiah} showZero={false} /></strong></span>
+          </div>
+          {/* Audit U-09: kebijakan DP 30% (A18) — kamar bisa diamankan tanpa dana penuh. */}
+          <div className="small text-success mt-2">
+            Amankan kamar cukup dengan DP 30%:{' '}
+            <strong><CurrencyDisplay amount={Math.round(Number(selectedRate || initialCost.rent) * 0.3)} showZero={false} /></strong>
+            {' '}— pelunasan sisa sewa + jaminan saat check-in.
           </div>
         </div>
 

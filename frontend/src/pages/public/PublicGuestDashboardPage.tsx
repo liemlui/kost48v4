@@ -177,6 +177,9 @@ export default function PublicGuestDashboardPage() {
   const [scrolled, setScrolled] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [faqFilter, setFaqFilter] = useState<string>('Semua');
+  // Audit U-06: gambar brosur yang gagal dimuat jangan menyisakan kartu kosong.
+  const [galleryBroken, setGalleryBroken] = useState<Record<string, boolean>>({});
+  const visibleGalleryItems = GALLERY_ITEMS.filter((item) => !galleryBroken[item.id]);
   const closeLightbox = useCallback(() => setLightboxSrc(null), []);
 
   useEffect(() => {
@@ -433,29 +436,37 @@ export default function PublicGuestDashboardPage() {
       </section>
 
       {/* ══ BROSUR & SPANDUK ══ */}
-      <section className="gx-gallery-section">
-        <Container fluid="xl">
-          <div className="gx-section-head">
-            <div className="gx-label">Brosur & Spanduk</div>
-            <h2>Informasi lengkap KOST48.</h2>
-            <p>Klik gambar untuk melihat dalam ukuran penuh.</p>
-          </div>
-          <div className="gx-gallery-grid">
-            {GALLERY_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                className="gx-gallery-item"
-                onClick={() => setLightboxSrc(item.src)}
-                aria-label={`Buka ${item.label} ukuran penuh`}
-              >
-                <img src={item.src} alt={item.label} className="gx-gallery-img" loading="lazy" />
-                <div className="gx-gallery-overlay"><span>🔍 Lihat ukuran penuh</span></div>
-                <div className="gx-gallery-label">{item.label}</div>
-              </button>
-            ))}
-          </div>
-        </Container>
-      </section>
+      {visibleGalleryItems.length > 0 ? (
+        <section className="gx-gallery-section">
+          <Container fluid="xl">
+            <div className="gx-section-head">
+              <div className="gx-label">Brosur & Spanduk</div>
+              <h2>Informasi lengkap KOST48.</h2>
+              <p>Klik gambar untuk melihat dalam ukuran penuh.</p>
+            </div>
+            <div className="gx-gallery-grid">
+              {visibleGalleryItems.map((item) => (
+                <button
+                  key={item.id}
+                  className="gx-gallery-item"
+                  onClick={() => setLightboxSrc(item.src)}
+                  aria-label={`Buka ${item.label} ukuran penuh`}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    className="gx-gallery-img"
+                    loading="lazy"
+                    onError={() => setGalleryBroken((prev) => ({ ...prev, [item.id]: true }))}
+                  />
+                  <div className="gx-gallery-overlay"><span>🔍 Lihat ukuran penuh</span></div>
+                  <div className="gx-gallery-label">{item.label}</div>
+                </button>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
       {/* ══ FAQ dengan filter ══ */}
       <section className="gx-faq-section" id="faq">
