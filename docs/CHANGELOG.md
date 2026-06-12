@@ -1,5 +1,23 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-12 — E-2 backfill + UAT M-07/M-09 PASS + Quick Wins UI/UX. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-12 — UAT siklus overstay PASS PENUH + rekonsiliasi mismatch=0. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+
+<!-- KOST48_DOCS_SYNC_20260612_OVERSTAY_UAT_PASS -->
+## 2026-06-12 (malam) — UAT Siklus Overstay V5.12.1 PASS PENUH + Rekonsiliasi Bersih
+
+### UAT overstay end-to-end (stay tes #15, kamar G2-003 — manipulasi tanggal via SQL UAT, eksekusi via `POST /auto-ops/run`)
+1. H-3: notifikasi "⏰ Kontrak berakhir 3 hari lagi" terkirim ✓
+2. H-day: pengingat "berakhir HARI INI" + tiket `EVICT_OVERSTAY` (TIC-2026-EV-15) untuk staf ✓
+3. H+1: **forced checkout otomatis** — stay COMPLETED, kamar MAINTENANCE + `allowBookingWhileCleaning=true`, tiket pembersihan TIC-2026-CHK-15, notifikasi 🚪 ke tenant ✓
+4. Settlement deposit PARTIAL_REFUND (potong 100rb biaya overstay + refund 400rb): jurnal **POSTED** `JE-AUTO-DEPOSIT-SETTLEMENT-15` (blocking ✓), ledger 3 entri seimbang (PAYMENT_RECEIVED 500rb → DEDUCTION 100rb → REFUND 400rb, saldo akhir 0) ✓
+5. Tutup tiket pembersihan → kamar **AVAILABLE** + flag kotor direset (gate room-ready) ✓
+
+### Rekonsiliasi (§4.4)
+- `deposit-ledger/reconciliation-lite`: ready=True, 15 stay diperiksa, **mismatch=0**; `backfill/dry-run`: wouldCreate=0.
+- `accounting/auto-journal/backfill`: 0 dibuat (sumber operasional sudah terjurnal); catatan by-design: 11 deposit demo lama tanpa jurnal liability (deposit dikecualikan dari auto-backfill anti-double-posting) + invoice demo #4 bertotal 0 — PR data demo, bukan bug. `formalStatementReady=True`.
+
+### Catatan operasional
+- Pengingat H-7/H-3/H-1/H-day & semua job noon terbukti aktif >pk 12:00 WIB; copy notifikasi pembayaran baru (M-10) terverifikasi terkirim.
+- Sisa antrean: UAT renew penuh, cross-check P&L vs trial balance, eskalasi E-1/E-3/E-4; saat deploy produksi: bootstrap.sql + E-2 backfill produksi.
 
 <!-- KOST48_DOCS_SYNC_20260612_E2_UAT_PASS -->
 ## 2026-06-12 (sore) — E-2 Backfill (DB UAT) + UAT M-07/M-09 PASS Penuh

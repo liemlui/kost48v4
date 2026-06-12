@@ -6,8 +6,11 @@
 - [x] 24/24 FIX diterapkan AI eksekutor & diverifikasi Fable — commit e4a8c31..f9d10ac (PUSHED)
 - [x] **E-2 backfill DONE (DB UAT 5433):** 11 stay penghuni nyata (kamar OCCUPIED) diisi `initialMetersPromotedAt = checkInDate`; 1 booking RESERVED dikecualikan. Pre-state: `scripts/uat/E2_BACKFILL_PRESTATE_2026-06-12.txt`. Efek terverifikasi: okupansi finance 0% → 55% (11/20). ⚠️ Ulangi backfill yang sama di PRODUKSI saat deploy.
 - [x] **UAT M-07/M-09 PASS SEMUA** via `scripts/uat/UAT_M07_M09_CLEAN.ps1` (booking publik → tenant baru → approve tarif 2jt → DP recalc 600rb ✓M-09 → DP approved + expiresAt mati ✓M-12 → approve ulang 409 ✓ → pelunasan → promoted ✓M-07 + kamar OCCUPIED + jaminan 500rb). Artefak tes: stay #15 (kamar G2-003); stay #14 (booking sisa) dibiarkan auto-expire sweeper.
+- [x] **UAT siklus overstay §4.2 PASS PENUH** (stay tes #15, 2026-06-12 sore): pengingat H-3 ✓ → H-day (pengingat "HARI INI" + tiket EVICT_OVERSTAY) ✓ → H+1 forced checkout otomatis (COMPLETED, kamar MAINTENANCE + allowBookingWhileCleaning, tiket pembersihan, notif 🚪 tenant) ✓ → settlement PARTIAL_REFUND (potong 100rb + refund 400rb; jurnal POSTED `JE-AUTO-DEPOSIT-SETTLEMENT-15`; ledger 3 entri seimbang → saldo 0) ✓ → tutup tiket pembersihan → kamar AVAILABLE + flag reset ✓
+- [x] **Rekonsiliasi §4.4:** `reconciliation-lite` → ready=True, 15 stay, **mismatch=0**; ledger-backfill dry-run wouldCreate=0. Catatan by-design: 11 deposit demo lama belum punya jurnal liability (deposit sengaja dikecualikan dari auto-backfill agar tidak double-posting) + invoice demo #4 total 0 — keduanya PR data demo, bukan bug.
+- [ ] UAT renew penuh (§4.3: invoice meter+sewa, periode menyambung) + cross-check P&L vs trial balance
 - [ ] Eskalasi tersisa: E-1 (guard global), E-3 (jaminan check-in manual), E-4 (saldo kas dari jurnal), E-5..E-9 (`03_AUDIT_MEGA_2026-06.md`)
-- [ ] UAT lanjutan sesuai `02_FOCUS_PLAN.md` §4.2–4.4: siklus overstay (reminder H-7..H-day, forced checkout H+1), renew, rekonsiliasi deposit-ledger & accounting backfill
+- [ ] Saat deploy produksi: ulangi E-2 backfill + jalankan bootstrap.sql (constraint DP)
 
 ## Prioritas #1b — Quick Wins UI/UX (BARU, 2026-06-12; detail `05_UIUX_AUDIT_2026-06-12.md`)
 - [ ] QW-1..QW-8 (filter default tagihan admin, H1 detail kamar, copy DP 30% di booking publik, lazy-load foto katalog, badge "Menunggu Pembayaran" portal, section home kosong, empty-state chart owner, sinkron angka Tagihan Saya)
