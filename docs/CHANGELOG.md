@@ -1,5 +1,16 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-12 — Audit Mega Full-Sweep + Instruksi Perbaikan untuk AI Eksekutor. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-12 — Eksekusi 24 FIX selesai (terverifikasi) + Audit UI/UX visual. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+
+<!-- KOST48_DOCS_SYNC_20260612_FIX_EXECUTION_UIUX -->
+## 2026-06-12 — Eksekusi FIX-01..26 oleh AI eksekutor (VERIFIED) + Audit UI/UX Visual
+
+### Eksekusi audit mega (kode)
+- AI eksekutor menerapkan **24/24 FIX** dari `04_FIX_INSTRUCTIONS.md` (commit e4a8c31..f9d10ac, 1 commit per FIX; M-26/M-27 digabung 1 commit — deviasi minor diterima).
+- **Verifikasi independen Fable:** diff a8ac9af..HEAD = tepat 15 file FIX + 3 skrip UAT (tanpa file liar); spot-check patch kunci (M-14/M-07/M-22/M-08/M-33/M-12) semua terpasang persis; `tsc --noEmit` backend & frontend 0 error. Constraint M-01 sudah dijalankan owner ke DB UAT.
+- UAT eksekutor: M-14 PASS, M-16 PASS, M-07/M-09 code-OK (terblokir data tes). Sisa: jalankan `scripts/UAT_M07_M09.ps1` pada data bersih + **E-2 backfill `initialMetersPromotedAt`** untuk stay manual lama (lihat CHECKLIST).
+
+### Audit UI/UX visual (docs only)
+- `docs/05_UIUX_AUDIT_2026-06-12.md` — 104 screenshot, 5 surface × 2 viewport via Playwright/Chrome (read-only). 0 BLOCKER; 4 MAJOR (spinner detail kamar 5–8 dtk; katalog 48 kamar tanpa pagination; booking belum bayar tampil "Masa Sewa Aktif"; angka Tagihan Saya kontradiktif), 6 MINOR, 8 Quick Wins siap eksekusi. Mobile: 52 capture tanpa satu pun layout rusak. Bukti di `_uiux_audit_2026-06-12\` (tidak di-commit).
 
 <!-- KOST48_DOCS_SYNC_20260612_AUDIT_MEGA_FIX_INSTRUCTIONS -->
 ## 2026-06-12 — Audit Mega Full-Sweep (docs only, tanpa perubahan kode aplikasi)
