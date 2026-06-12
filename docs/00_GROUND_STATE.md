@@ -1,6 +1,6 @@
 # KOST48 V5 — Ground State (Ringkas)
-**Versi:** 2026-06-12 — pasca Audit Mega + eksekusi 24 FIX + UAT runtime penuh (baseline kode `a5c8477`). Versi V5.10.0 lama diarsipkan di `archieve/00_GROUND_STATE_V5100_STALE.md`, JANGAN dipakai sebagai referensi.
-**Aturan:** file ini hanya memuat fakta yang sudah diverifikasi dari kode. Detail per-flow ada di `01_FLOW_MAP.md` (peta `file:baris`). Riwayat perubahan di `CHANGELOG.md` (entri V5.11.0+; lebih lama di `archieve/CHANGELOG_PRE_V5110.md`).
+**Versi:** 2026-06-12 — pasca Simplifikasi Docs V2 (commit `45237ba`). Baseline kode: `3e7890c` + docs update. Versi V5.10.0 lama diarsipkan di `archieve/00_GROUND_STATE_V5100_STALE.md`, JANGAN dipakai sebagai referensi.
+**Aturan:** file ini hanya memuat fakta yang sudah diverifikasi dari kode. Detail per-flow ada di `01_FLOW_MAP.md` (peta `file:baris`). Riwayat perubahan di `CHANGELOG.md` (entri V5.11.0+; lebih lama di `archieve/CHANGELOG_PRE_V5110.md`). **Commit docs terakhir: `45237ba`**
 
 <!-- KOST48_DOCS_SYNC_20260611_GROUND_STATE_REWRITE -->
 
