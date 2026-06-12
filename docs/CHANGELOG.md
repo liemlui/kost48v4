@@ -15,9 +15,14 @@
 - `deposit-ledger/reconciliation-lite`: ready=True, 15 stay diperiksa, **mismatch=0**; `backfill/dry-run`: wouldCreate=0.
 - `accounting/auto-journal/backfill`: 0 dibuat (sumber operasional sudah terjurnal); catatan by-design: 11 deposit demo lama tanpa jurnal liability (deposit dikecualikan dari auto-backfill anti-double-posting) + invoice demo #4 bertotal 0 — PR data demo, bukan bug. `formalStatementReady=True`.
 
+### UAT renew penuh (§4.3) + cross-check P&L (§4.4) — PASS
+- Renew stay #1: request tenant → approve admin → invoice ISSUED **1.794.250** (RENT 1,7jt + listrik 50 kWh×1.445 = 72.250 + air 4 m³×5.500 = 22.000), periode menyambung 30 Jun→30 Jul (exclusive, tanpa gap/overlap), `plannedCheckOutDate` bergeser, approve ulang ditolak 409 (lock M-15 hidup).
+- Cross-check: **trial balance seimbang** (Σdebit = Σkredit = 104.494.250). P&L ledger Juni 3.894.250 vs operasional 3.794.250 — selisih **tepat 100rb = pendapatan potongan deposit overstay (akun 4400)** yang memang non-invoice. Rincian ledger: 4000 Rent 3,7jt · 4100 Listrik 72.250 · 4110 Air 22.000 · 4400 Penalty 100rb. Setiap rupiah teridentifikasi.
+- Dengan ini SELURUH rencana UAT `02_FOCUS_PLAN.md` §4.1–§4.4 TUNTAS.
+
 ### Catatan operasional
 - Pengingat H-7/H-3/H-1/H-day & semua job noon terbukti aktif >pk 12:00 WIB; copy notifikasi pembayaran baru (M-10) terverifikasi terkirim.
-- Sisa antrean: UAT renew penuh, cross-check P&L vs trial balance, eskalasi E-1/E-3/E-4; saat deploy produksi: bootstrap.sql + E-2 backfill produksi.
+- Sisa antrean: eskalasi E-1/E-3/E-4 (desain); saat deploy produksi: bootstrap.sql + E-2 backfill produksi.
 
 <!-- KOST48_DOCS_SYNC_20260612_E2_UAT_PASS -->
 ## 2026-06-12 (sore) — E-2 Backfill (DB UAT) + UAT M-07/M-09 PASS Penuh
