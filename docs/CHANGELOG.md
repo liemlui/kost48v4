@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-1 inc.3: sweeper auto-ops renewal HIBRIDA (EXPIRED_PRIORITY + FORFEITED, UAT LULUS)
+
+Sweeper baru di `auto-ops.service.ts` (wired ke `runAll`, jalan tiap 5 menit) — **kebijakan HIBRIDA** (keputusan owner 2026-06-13):
+- **`runRenewalPriorityExpiry` (OTOMATIS):** `AWAITING_DP` yang lewat hari-H (`downPaymentDueDate`) tanpa DP lunas → `EXPIRED_PRIORITY`. Membatalkan invoice DP 30% belum-bayar (DRAFT/ISSUED → CANCELLED + **reversal jurnal** `postInvoiceCancellationReversalTx` bila sudah POSTED) + notif tenant. Bila invoice DP ternyata `PAID`/`PARTIAL` (admin belum confirm) → **DILEWATI** (keputusan manusia). Kamar tak disentuh — ketersediaan booking tak pernah dikunci RenewRequest; kamar terbuka lewat flow checkout normal.
+- **`runRenewalSettlementForfeit` (DITANDAI saja):** `DP_SECURED` yang gagal lunas s/d H+7 (`settlementDueDate`) → `FORFEITED` + notif admin. Tenant masih huni → **forced checkout + potong deposit dilakukan admin MANUAL** (flow checkout normal, keputusan owner). DP yang sudah dibayar = hangus (tetap revenue invoice DP PAID). Stay & deposit **tidak disentuh** sweeper.
+- Endpoint manual (UAT/ops): admin `POST /auto-ops/run/renewal-expiry`, `POST /auto-ops/run/renewal-forfeit`.
+- **UAT runtime LULUS** (DB UAT, stay 11): EXPIRED → request `EXPIRED_PRIORITY` + invoice DP `CANCELLED` + jurnal reversal pair net-nol (38 issuance 420rb ↔ 39 `INVOICE_REVERSAL:21` 420rb) + notif tenant; FORFEITED → request `FORFEITED` + stay TETAP (`ACTIVE`/deposit `HELD`/deduction 0) + DP tetap `PAID` + notif 3 admin. Trial-balance **balanced**. Gate: `tsc` 0 · unit 13/13.
+- **Sisa F2-1:** inc.4 notif renew end-to-end (F2-2) + 6 UAT skenario sisa (dossier 11 §5).
+
 ## 2026-06-13 — F2-1 inc.2b: invoice DP TERPISAH + rent-line pelunasan dikurangi (UAT runtime LULUS)
 
 Model "DP invoice terpisah" (keputusan owner inc.2b): DP 30% = **invoice sendiri yang dibayar penuh** sebelum kamar diamankan; pelunasan = invoice renewal untuk **sisa (rent − DP) + meter**. Tidak ada perubahan validasi booking — kamar dibuka via **flow checkout normal** (keputusan owner #2).

@@ -38,4 +38,17 @@ export class AutoOpsController {
   async runRoomHealer(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps room healer berhasil dijalankan', data: await this.autoOpsService.runRoomHealer({ actorUserId: user.id, source: 'MANUAL_ROOM_HEALER_RUN' }) };
   }
+
+  // F2-1 inc.3: trigger manual sweeper renewal (UAT/ops).
+  @Post('run/renewal-expiry')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runRenewalExpiry(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps renewal expiry berhasil dijalankan', data: await this.autoOpsService.runRenewalPriorityExpiry({ actorUserId: user.id, source: 'MANUAL_RENEWAL_EXPIRY_RUN' }) };
+  }
+
+  @Post('run/renewal-forfeit')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runRenewalForfeit(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps renewal forfeit berhasil dijalankan', data: await this.autoOpsService.runRenewalSettlementForfeit({ actorUserId: user.id, source: 'MANUAL_RENEWAL_FORFEIT_RUN' }) };
+  }
 }
