@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -205,8 +205,12 @@ export class AccountingController {
   }
 
   @Post('journal-entries/draft')
-  async createJournalDraft(@Body() dto: CreateJournalDraftDto, @CurrentUser() user: CurrentUserPayload) {
-    return { message: 'Draft journal entry berhasil dibuat', data: await this.accountingService.createJournalDraft(dto, user) };
+  async createJournalDraft(@Body() _dto: CreateJournalDraftDto, @CurrentUser() _user: CurrentUserPayload) {
+    // F2-8 (F-22/F-23, D-05): pembuatan jurnal draft manual DINONAKTIFKAN.
+    // Auto Journal Lite menangani semua jurnal operasional; saldo awal punya jalur Opening Balance terpisah & terkontrol.
+    throw new ForbiddenException(
+      'Pembuatan jurnal draft manual dinonaktifkan. Jurnal dibuat otomatis (Auto Journal Lite); untuk saldo awal gunakan Opening Balance.',
+    );
   }
 
   @Get('trial-balance')

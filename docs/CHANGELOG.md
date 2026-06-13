@@ -2,6 +2,16 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-8: Nonaktifkan Endpoint Draft Jurnal Manual (F-22/F-23/D-05)
+
+- **`accounting.controller.ts`**: route `POST /accounting/journal-entries/draft` (`createJournalDraft`) kini melempar `ForbiddenException` (403) — pembuatan jurnal draft manual dimatikan. Auto Journal Lite menangani jurnal operasional.
+- Opening Balance draft (jalur terpisah & terkontrol via OpeningBalanceWizard) TETAP berfungsi.
+- FE: tidak ada tombol untuk endpoint ini (grep frontend hanya menemukan OpeningBalanceWizard) → tak ada UI yang perlu disembunyikan.
+- Gate: `tsc --noEmit` 0 · `test:unit` 13/13 hijau.
+
+Status: perubahan kode (disable route); tanpa schema/DB.
+**Fase 1 (kode) SELESAI** — sisa hanya F1-12 (deploy bersih, langkah owner).
+
 ## 2026-06-13 — F1-10: Kunci Deposit = Room.defaultDepositRupiah (C3/D-05)
 
 - **`stays.service.ts` create**: `deposit = dto.depositAmountRupiah ?? room.defaultDepositRupiah` → `room.defaultDepositRupiah ?? 0` (abaikan override dto).
