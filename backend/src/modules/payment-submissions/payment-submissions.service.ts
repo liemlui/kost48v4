@@ -872,10 +872,21 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           select: { id: true },
         });
         if (!tenantUser) continue;
+        // F2-3 (A17 dua-varian): loser yang SUDAH transfer (pernah upload bukti bayar atau
+        // DP-nya tercatat terbayar) butuh pesan REFUND; yang belum cukup diarahkan pilih kamar lain.
+        const [submission, stay] = await Promise.all([
+          this.prisma.paymentSubmission.findFirst({ where: { stayId: loser.stayId }, select: { id: true } }),
+          this.prisma.stay.findUnique({ where: { id: loser.stayId }, select: { downPaymentPaidRupiah: true } }),
+        ]);
+        const hasTransferred = !!submission || Number(stay?.downPaymentPaidRupiah ?? 0) > 0;
         await this.appNotificationService.create({
           recipientUserId: tenantUser.id,
-          title: 'Booking dibatalkan: kamar diamankan tenant lain',
-          body: 'Kamar yang Anda pesan sudah diamankan oleh pembayaran tenant lain yang disetujui lebih dulu (kebijakan first-paid-wins). Tidak ada dana yang terpotong dari Anda. Silakan pilih kamar lain di katalog.',
+          title: hasTransferred
+            ? 'Booking dibatalkan: dana Anda akan direfund'
+            : 'Booking dibatalkan: kamar diamankan tenant lain',
+          body: hasTransferred
+            ? 'Kamar yang Anda pesan sudah diamankan oleh pembayaran tenant lain yang disetujui lebih dulu (kebijakan first-paid-wins). Karena Anda sudah melakukan transfer, dana Anda akan DIKEMBALIKAN (refund) — admin akan menghubungi Anda untuk memprosesnya. Anda juga dapat memilih kamar lain di katalog.'
+            : 'Kamar yang Anda pesan sudah diamankan oleh pembayaran tenant lain yang disetujui lebih dulu (kebijakan first-paid-wins). Tidak ada dana yang terpotong dari Anda. Silakan pilih kamar lain di katalog.',
           linkTo: '/rooms',
           entityType: 'Stay',
           entityId: String(loser.stayId),

@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-3: copy notif A17 dua-varian (kalah first-paid: sudah/belum transfer)
+
+`payment-submissions.notifyLosingTenants`: tenant yang kalah first-paid-wins kini menerima pesan sesuai kondisinya — `hasTransferred` (punya `PaymentSubmission` ATAU `downPaymentPaidRupiah > 0`):
+- **Sudah transfer** → "Booking dibatalkan: dana Anda akan direfund" (admin akan menghubungi untuk proses refund).
+- **Belum transfer** → "Booking dibatalkan: kamar diamankan tenant lain" (tak ada dana terpotong, pilih kamar lain).
+Best-effort, di luar transaksi approve. `tsc` 0.
+
 ## 2026-06-14 — F2-14: timezone WIB untuk bucketing tanggal (F-25/E-6, sebagian)
 
 - **`accounting-posting-helpers.dateOnly` → WIB (UTC+7):** entryDate jurnal kini dibucket per tanggal kalender WIB (dulu komponen UTC) → transaksi dini hari WIB (00:00–07:00) tak lagi jatuh ke tanggal/bulan kemarin. Hasil = UTC-midnight dari tanggal WIB, konsisten dengan batas periode laporan akuntansi (`Date.UTC(y,m,1)`). Saldo per-entry tak berubah → **trial-balance tetap balanced** (terverifikasi runtime).
