@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Target publish cPanel DIKONFIRMASI + rencana (04_DEPLOY §D)
+
+- Owner konfirmasi host cPanel **mampu**: Node.js App (versi dukung) · PostgreSQL · SSH · build-on-server · AutoSSL. Resource upgrade bila kurang. Belum pasti: Passenger always-on vs idle-sleep.
+- **Arsitektur diputuskan: combined single-server** (backend serve `frontend/dist` + API, 1 proses/port/domain, tanpa CORS) — dependency-free (`useStaticAssets` sudah dipakai untuk foto kamar); entry Passenger `dist/main.js`. **Build "nanti"** (owner defer).
+- **Auto-ops di cPanel:** `setInterval` in-process (gated `AUTO_OPS_ENABLED`) hanya jalan saat proses hidup; `POST /api/auto-ops/run` butuh auth. Jika idle-sleep → TODO endpoint cron ber-secret + cPanel Cron ~10 menit.
+- Runbook cPanel langkah-demi-langkah ditambah di `04_DEPLOY §D` (DB+seed via SSH, env, AutoSSL, smoke). Catatan: stack PostgreSQL — host MySQL-only tak cocok.
+
+Status: docs/keputusan arsitektur deploy; tanpa perubahan kode.
+
 ## 2026-06-13 — Go-live SATU PERINTAH: `npm run golive` (root) + port tetap dijamin
 
 - **Root `package.json` + `scripts/golive-all.mjs`** (zero-dependency): `npm run golive` dari `final_bundle/` → (1) **pastikan port 3000+5173 bebas** (deteksi via netstat/lsof + auto-kill proses nyangkut → port SELALU sesuai), (2) `frontend npm run build:lan`, (3) jalankan backend + frontend **bersamaan** (Ctrl+C menutup keduanya). `npm run golive:fast` = tanpa rebuild.

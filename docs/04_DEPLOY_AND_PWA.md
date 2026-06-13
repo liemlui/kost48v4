@@ -202,3 +202,26 @@ New-NetFirewallRule -DisplayName "KOST48 LAN backend 3000" -Direction Inbound -A
 New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5173
 ```
 **Akses HP:** WiFi kos → `http://<ip-lan>:5173` (mis. `http://192.168.1.200:5173`). **Persistensi:** biarkan 2 terminal terbuka, atau pakai PM2. **Catatan:** PWA install/offline butuh HTTPS (non-localhost) → pakai mkcert bila perlu; set IP statis/DHCP-reservation agar URL tetap (kalau IP ganti, ulangi `build:lan`); ganti password OWNER `admin123`.
+
+---
+
+## Bagian D — Publish ke cPanel (host owner — DIKONFIRMASI MAMPU 2026-06-13)
+
+**Kesiapan host (owner cek 2026-06-13):** Node.js App ✅ (versi dukung) · PostgreSQL ✅ · SSH ✅ · build di server ✅ · AutoSSL ✅. Resource: upgrade bila kurang (ideal RAM ≥512MB-1GB). **Belum dipastikan:** #4 apakah Node app **always-on** atau **idle-sleep** (Passenger).
+
+**Prasyarat kode (TODO sebelum deploy cPanel):**
+- **Combined single-server** (backend serve `frontend/dist` + API, 1 proses) → entry Passenger = `dist/main.js` (`start:prod`). Belum dibangun (owner: "buat nanti").
+- **Auto-ops di idle-sleep:** in-process `setInterval` hanya jalan saat proses hidup. Jika Passenger tidur saat idle → tambah endpoint cron ber-secret (`POST /api/auto-ops/run-cron`, header `x-cron-secret`) lalu cPanel **Cron Job** panggil tiap ~10 menit. Jika always-on → cukup `AUTO_OPS_ENABLED=true`.
+
+**Runbook cPanel (dieksekusi "nanti", via SSH):**
+1. **PostgreSQL**: buat DB `kost48_v3` + user (cPanel → PostgreSQL Databases). Catat host/port/user/pass.
+2. **Upload kode** (git clone / file manager) ke folder app; `npm ci` (Node Selector).
+3. **Build**: `npm run build` (backend) + `npm run build` (frontend) → combined mode serve `frontend/dist`.
+4. **Env** (cPanel Node App "Environment Variables"): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin combined → boleh domain saja), `AUTO_OPS_ENABLED=true`, `PORT`(diatur Passenger).
+5. **Schema+seed (SSH)**: `npx prisma db push` → `psql -f sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` → seed **OWNER** (INSERT bcryptjs) → seed COA/periode OPEN/CashAccount via API atau script. (Lihat §2 + Bagian A.)
+6. **Entry**: Passenger startup file = `dist/main.js`. Restart app.
+7. **AutoSSL** domain → HTTPS (PWA penuh aktif).
+8. **Auto-ops**: pastikan always-on, atau pasang cron (lihat di atas).
+9. Smoke: `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0.
+
+⚠️ **Ganti password OWNER** dari `admin123`. ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS.
