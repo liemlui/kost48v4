@@ -164,6 +164,12 @@ export class InvoicePaymentsService {
       if (freshPaid + dto.amountRupiah > this.invoiceTotal(invoice)) {
         throw new ConflictException('Pembayaran melebihi total invoice');
       }
+      // F1-1R (D-02): pembayaran manual wajib MELUNASI tagihan penuh — tidak ada cicilan/partial.
+      if (freshPaid + dto.amountRupiah !== this.invoiceTotal(invoice)) {
+        throw new ConflictException(
+          `Pembayaran manual harus melunasi tagihan penuh Rp ${(this.invoiceTotal(invoice) - freshPaid).toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`,
+        );
+      }
       const payment = await tx.invoicePayment.create({
         data: {
           invoiceId: dto.invoiceId,
@@ -212,6 +218,12 @@ export class InvoicePaymentsService {
       const nextAmount = dto.amountRupiah ?? existing.amountRupiah;
       if (otherPaid + nextAmount > this.invoiceTotal(invoice)) {
         throw new ConflictException('Pembayaran melebihi total invoice');
+      }
+      // F1-1R (D-02): pembayaran manual wajib MELUNASI tagihan penuh — tidak ada cicilan/partial.
+      if (otherPaid + nextAmount !== this.invoiceTotal(invoice)) {
+        throw new ConflictException(
+          `Pembayaran manual harus melunasi tagihan penuh Rp ${(this.invoiceTotal(invoice) - otherPaid).toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`,
+        );
       }
 
       const payment = await tx.invoicePayment.update({

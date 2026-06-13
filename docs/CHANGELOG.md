@@ -2,6 +2,17 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-1R: No-Partial Menyeluruh (D-02 / GAP #1 / B-01)
+
+- **`payment-submissions.service.ts` `approveSubmission`** — tambah gate re-validasi dua nominal sah (sebelumnya hanya blokir overpay → bisa approve PARTIAL liar): booking hanya terima **DP-persis** atau **pelunasan-persis** (sisa sewa + deposit jaminan); selain itu 409.
+- **`approveSubmission` invoice-only** (renewal/utilitas/manual) — wajib `amount === invoiceRemaining` (lunas penuh), bukan sekadar `≤`.
+- **`createSubmission` invoice-only** — dari `> invoiceRemaining` (izinkan partial) menjadi `!== invoiceRemaining` (lunas penuh) → 409.
+- **`invoice-payments.service.ts` create + update (manual admin)** — tambah guard wajib melunasi tagihan penuh (`!== invoiceTotal`) → tidak ada cicilan; booking tetap diblokir dari jalur manual (A1).
+- Gate: `tsc --noEmit` 0 · `npm run test:unit` 6/6 hijau · logika dicocokkan manual vs skenario emas `05 §5` (DP 510rb → pelunasan 1.690rb). LARANGAN V1 lama (tolak `< invoice+deposit`) TIDAK dipakai — DP sah tetap lolos.
+- ⏳ Runtime rekonsiliasi/golden-scenario (`05 §4-5`) = gate pra-deploy (F1-12), belum dijalankan (sistem belum publish, DB UAT tak di-seed di sesi ini).
+
+Status: perubahan kode finance (payment approval); tanpa perubahan schema/DB.
+
 ## 2026-06-13 — F1-T: Sabuk Pengaman Unit Test Finance (baseline terkunci)
 
 - **F1-T SELESAI** — pasang harness unit test zero-dependency (Node built-in `node --test`, tanpa npm install):

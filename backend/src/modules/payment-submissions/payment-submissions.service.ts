@@ -152,9 +152,10 @@ export class PaymentSubmissionsService {
           throw new ConflictException('Tagihan ini sudah lunas');
         }
 
-        if (dto.amountRupiah > invoiceRemaining) {
+        // F1-1R (D-02): invoice-only (renewal/utilitas/manual) wajib LUNAS penuh — tidak ada cicilan.
+        if (dto.amountRupiah !== invoiceRemaining) {
           throw new ConflictException(
-            `Jumlah pembayaran melebihi sisa tagihan sebesar Rp ${invoiceRemaining.toLocaleString('id-ID')}`,
+            `Pembayaran harus melunasi tagihan penuh Rp ${invoiceRemaining.toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`,
           );
         }
       }
@@ -402,6 +403,40 @@ export class PaymentSubmissionsService {
           submission.invoiceTotalAmountRupiah - freshPaidAmount,
           0,
         );
+
+        // ── F1-1R (D-02): NO-PARTIAL — tegakkan ulang dua nominal sah di titik approve.
+        // Submission lama/race bisa lolos meski gate createSubmission (:121-160) berubah; cegah invoice PARTIAL liar.
+        if (isBookingPath) {
+          const depositRemainingGate = Math.max(
+            (submission.stayDepositAmountRupiah ?? 0) - (submission.stayDepositPaidAmountRupiah ?? 0),
+            0,
+          );
+          const downPaymentRemainingGate = Math.max(
+            (submission.stayDownPaymentAmountRupiah ?? 0) - (submission.stayDownPaymentPaidRupiah ?? 0),
+            0,
+          );
+          const settlementAmountGate = invoiceRemaining + depositRemainingGate;
+          const isDownPaymentAmount = downPaymentRemainingGate > 0 && submission.amountRupiah === downPaymentRemainingGate;
+          const isSettlementAmount = submission.amountRupiah === settlementAmountGate;
+          if (!isDownPaymentAmount && !isSettlementAmount) {
+            const accepted = [
+              downPaymentRemainingGate > 0 && downPaymentRemainingGate !== settlementAmountGate
+                ? `DP Rp ${downPaymentRemainingGate.toLocaleString('id-ID')}`
+                : null,
+              `pelunasan Rp ${settlementAmountGate.toLocaleString('id-ID')} (sisa sewa + deposit jaminan)`,
+            ]
+              .filter(Boolean)
+              .join(' atau ');
+            throw new ConflictException(`Nominal pembayaran harus tepat: ${accepted}. Tidak ada pembayaran sebagian (no-partial).`);
+          }
+        } else {
+          // Invoice-only (renewal/utilitas/manual check-in): wajib LUNAS penuh, tanpa cicilan.
+          if (submission.amountRupiah !== invoiceRemaining) {
+            throw new ConflictException(
+              `Pembayaran harus melunasi tagihan penuh Rp ${invoiceRemaining.toLocaleString('id-ID')} (tidak ada pembayaran sebagian).`,
+            );
+          }
+        }
 
         let rentPortion = 0;
         let depositPortion = 0;
