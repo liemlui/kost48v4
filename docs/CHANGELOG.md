@@ -2,6 +2,20 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-1 inc.4: notif siklus renewal end-to-end (F2-1 & F2-2 SELESAI, UAT LULUS)
+
+`renew-requests.service` kini menerbitkan notifikasi in-app di tiap transisi (pola `app-notification.service`, mirror checkout-requests; best-effort di luar jalur error):
+- **create** → OWNER/ADMIN ("🔁 Permintaan perpanjangan baru" + nominal DP).
+- **decide YA** → tenant ("💳 Bayar DP perpanjangan" + nomor invoice DP).
+- **decide TIDAK** → OWNER/ADMIN ("🚪 Tenant tidak memperpanjang" — turnover kamar).
+- **confirm-dp** → tenant ("✅ DP diterima — kamar aman", lunasi ≤ H+7).
+- **approve** → tenant ("🎉 Perpanjangan disetujui" + tanggal akhir baru).
+- **reject** → tenant ("❌ Perpanjangan ditolak" + catatan).
+- (Sweeper inc.3: EXPIRED→tenant, FORFEITED→admin.)
+- `RenewRequestsModule` impor `NotificationsModule`; `RenewRequestsService` injeksi `AppNotificationService` + `Logger`.
+- **UAT LULUS** (DB UAT, stay 11, req 7/8/9): 3 path (reject / TIDAK / happy-path penuh) → semua notif terbentuk ke penerima benar (tenant 4 jenis ×1; admin fan-out ke seluruh OWNER/ADMIN). tsc 0 · unit 13/13.
+- **F2-1 (Renewal DP penuh, GAP #2) SELESAI** (inc.1–4) & **F2-2 (Notif renew) SELESAI**. Sisa minor F2-2: fallback antrean admin utk tenant tanpa akun portal (kini di-skip + dicatat log).
+
 ## 2026-06-14 — Auto-ops cron eksternal (cPanel/Passenger idle-sleep) — endpoint token-protected
 
 Host owner (IDwebhost) konfirmasi: shared hosting **Passenger TIDAK always-on** (proses Node di-idle/restart saat sepi; tak ada keep-alive/min-instances), tapi **Cron Job didukung**. `setInterval` in-process auto-ops jadi tak andal di sana → digerakkan cron eksternal.

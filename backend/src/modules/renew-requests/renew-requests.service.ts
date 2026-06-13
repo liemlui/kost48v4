@@ -1,7 +1,8 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+import { AppNotificationService } from '../notifications/app-notification.service';
 import { StaysService } from '../stays/stays.service';
 import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
@@ -13,10 +14,13 @@ import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, Invoic
 
 @Injectable()
 export class RenewRequestsService {
+  private readonly logger = new Logger(RenewRequestsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly staysService: StaysService,
     private readonly audit: AuditLogService,
+    private readonly appNotification: AppNotificationService,
   ) {}
 
   /** Tenant creates a renew request for their active stay. */
@@ -83,6 +87,13 @@ export class RenewRequestsService {
       },
     });
 
+    const ctx = await this.loadStayNotifContext(stay.id);
+    await this.notifyAdminsRenew(
+      request.id,
+      '🔁 Permintaan perpanjangan baru',
+      `${ctx.tenantName} mengajukan perpanjangan ${ctx.roomLabel}. Menunggu keputusan tenant (YA/TIDAK). DP 30% = Rp ${downPaymentAmountRupiah.toLocaleString('id-ID')}.`,
+    );
+
     return request;
   }
 
@@ -109,6 +120,12 @@ export class RenewRequestsService {
         data: { status: RenewRequestStatus.REJECTED_BY_TENANT, requestNotes: dto.notes ?? request.requestNotes },
       });
       await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_NO', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: rejected });
+      const ctxNo = await this.loadStayNotifContext(request.stayId);
+      await this.notifyAdminsRenew(
+        rejected.id,
+        '🚪 Tenant tidak memperpanjang',
+        `${ctxNo.tenantName} memutuskan TIDAK memperpanjang ${ctxNo.roomLabel}. Kamar akan dibuka via flow checkout normal saat masa sewa berakhir.`,
+      );
       return rejected;
     }
 
@@ -124,6 +141,12 @@ export class RenewRequestsService {
       return { updated: upd, dpInvoice: inv };
     });
     await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_YES', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: updated });
+    await this.notifyTenantRenew(
+      request.stayId,
+      updated.id,
+      '💳 Bayar DP perpanjangan',
+      `Perpanjangan disetujui dari sisi Anda. Silakan bayar DP 30% sebesar Rp ${dpAmount.toLocaleString('id-ID')} (invoice ${dpInvoice.invoiceNumber}) sebelum hari-H untuk mengamankan kamar.`,
+    );
     return { ...updated, downPaymentInvoice: { id: dpInvoice.id, invoiceNumber: dpInvoice.invoiceNumber, totalAmountRupiah: dpInvoice.totalAmountRupiah } };
   }
 
@@ -172,6 +195,12 @@ export class RenewRequestsService {
       oldData: request,
       newData: updated,
     });
+    await this.notifyTenantRenew(
+      request.stayId,
+      updated.id,
+      '✅ DP diterima — kamar aman',
+      `DP perpanjangan Anda sudah diterima dan kamar aman untuk Anda. Lunasi sisa pembayaran paling lambat ${settlementDueDate.toISOString().slice(0, 10)} (H+7) agar perpanjangan final.`,
+    );
     return updated;
   }
 
@@ -247,6 +276,16 @@ export class RenewRequestsService {
       newData: result.invoice,
     });
 
+    const outStr = result.stay.plannedCheckOutDate
+      ? new Date(result.stay.plannedCheckOutDate).toISOString().slice(0, 10)
+      : '-';
+    await this.notifyTenantRenew(
+      result.request.stayId,
+      result.request.id,
+      '🎉 Perpanjangan disetujui',
+      `Perpanjangan masa sewa Anda telah disetujui dan final. Masa sewa kini berlaku sampai ${outStr}. Terima kasih.`,
+    );
+
     return { request: result.request, stay: result.stay, invoice: result.invoice, meterSummary: result.meterSummary };
   }
 
@@ -268,6 +307,15 @@ export class RenewRequestsService {
         reviewedAt: new Date(),
       },
     });
+
+    await this.notifyTenantRenew(
+      request.stayId,
+      updated.id,
+      '❌ Perpanjangan ditolak',
+      dto.reviewNotes
+        ? `Permintaan perpanjangan Anda ditolak. Catatan: ${dto.reviewNotes}`
+        : 'Permintaan perpanjangan Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.',
+    );
 
     return updated;
   }
@@ -298,5 +346,64 @@ export class RenewRequestsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // ── F2-1 inc.4: notifikasi in-app siklus renewal (best-effort, tak menggagalkan transaksi) ──
+
+  private async loadStayNotifContext(stayId: number) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id: stayId },
+      select: {
+        tenant: { select: { fullName: true, user: { select: { id: true } } } },
+        room: { select: { code: true, name: true } },
+      },
+    });
+    const roomLabel = stay?.room?.code
+      ? `${stay.room.code}${stay.room.name ? ` - ${stay.room.name}` : ''}`
+      : `kamar (stay #${stayId})`;
+    return { tenantUserId: stay?.tenant?.user?.id ?? null, tenantName: stay?.tenant?.fullName ?? 'Tenant', roomLabel };
+  }
+
+  private async notifyTenantRenew(stayId: number, requestId: number, title: string, body: string) {
+    try {
+      const ctx = await this.loadStayNotifContext(stayId);
+      if (!ctx.tenantUserId) {
+        this.logger.warn(`Notif renew dilewati: user portal tenant stay #${stayId} tidak ditemukan`);
+        return;
+      }
+      await this.appNotification.create({
+        recipientUserId: ctx.tenantUserId,
+        title,
+        body,
+        linkTo: '/portal/stay',
+        entityType: 'RenewRequest',
+        entityId: String(requestId),
+      });
+    } catch (err) {
+      this.logger.warn(`Notif renew tenant gagal (req #${requestId}): ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private async notifyAdminsRenew(requestId: number, title: string, body: string) {
+    try {
+      const admins = await this.prisma.user.findMany({
+        where: { role: { in: [UserRole.OWNER, UserRole.ADMIN] }, isActive: true },
+        select: { id: true },
+      });
+      await Promise.allSettled(
+        admins.map((admin) =>
+          this.appNotification.create({
+            recipientUserId: admin.id,
+            title,
+            body,
+            linkTo: '/stays',
+            entityType: 'RenewRequest',
+            entityId: String(requestId),
+          }),
+        ),
+      );
+    } catch (err) {
+      this.logger.warn(`Notif renew admin gagal (req #${requestId}): ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 }
