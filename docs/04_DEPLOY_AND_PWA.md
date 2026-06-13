@@ -178,7 +178,14 @@ Draft tiket/laporan staf setelah Phase 0-3 stabil. Wajib: IndexedDB, idempotency
 
 Untuk kos 1 lokasi tanpa VPS: jalankan stack di PC kos, akses dari HP via WiFi kos. **Prasyarat:** DB `kost48_v3` sudah di-provision + seed (lihat Bagian A / dijalankan 2026-06-13 di server lokal).
 
-**Perintah (zero-dependency, IP LAN auto-deteksi):**
+**⭐ SATU PERINTAH (rekomendasi) — dari root `final_bundle/`:**
+```bash
+npm run golive        # pastikan port 3000+5173 bebas (auto-kill yg nyangkut) -> build:lan -> jalankan backend+frontend bareng
+npm run golive:fast   # sama tapi tanpa rebuild frontend (restart cepat)
+```
+Port **tetap**: backend 3000, frontend 5173 (dijamin — proses lama di port itu dihentikan dulu, frontend `--strictPort`). Ctrl+C menutup keduanya. Zero-dependency (root `package.json` tak perlu `npm install`).
+
+**Atau manual per-paket (zero-dependency, IP LAN auto-deteksi):**
 ```bash
 # Backend (mode produksi, DB kost48_v3, CORS LAN auto, auto-ops on)
 cd backend && npm run golive          # = scripts/golive.mjs -> npm run start

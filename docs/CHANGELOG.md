@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Go-live SATU PERINTAH: `npm run golive` (root) + port tetap dijamin
+
+- **Root `package.json` + `scripts/golive-all.mjs`** (zero-dependency): `npm run golive` dari `final_bundle/` → (1) **pastikan port 3000+5173 bebas** (deteksi via netstat/lsof + auto-kill proses nyangkut → port SELALU sesuai), (2) `frontend npm run build:lan`, (3) jalankan backend + frontend **bersamaan** (Ctrl+C menutup keduanya). `npm run golive:fast` = tanpa rebuild.
+- Frontend `golive` ditambah `--strictPort` (gagal jelas, tak geser port).
+- Deteksi port diuji terhadap instance live (3000→PID, 5173→PID terdeteksi benar). Detail di `04_DEPLOY §C`.
+
+Status: tooling deploy (orchestrator) + docs; tanpa perubahan logika aplikasi.
+
 ## 2026-06-13 — Go-live LAN: npm script `golive` + `build:lan` (self-host WiFi kos)
 
 Owner pilih go-live di localhost/LAN (kos 1 lokasi). Ditambah tooling konvenien **zero-dependency**:
