@@ -1,5 +1,5 @@
 # KOST48 V5 — Deploy Produksi & PWA Hardening
-**Versi:** 2026-06-13 — merge `06_DEPLOY_RUNBOOK.md` + `08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md`.
+**Versi:** 2026-06-13 — konsolidasi dari `archieve/_DEPRECATED_06_DEPLOY_RUNBOOK.md` dan `archieve/_DEPRECATED_08_PWA_AUDIT_AND_HARDENING_PLAN_2026-06-12.md`.
 **Target:** VPS produksi, DB `kost48_v3` port 5432. JANGAN jalankan langkah DB di luar jendela deploy.
 
 <!-- KOST48_DOCS_SYNC_20260612_DEPLOY_PWA -->
@@ -10,7 +10,8 @@
 
 ### 0. Pra-syarat
 - [ ] Semua commit di `origin/main`; `npx tsc --noEmit` backend & frontend = 0 error.
-- [ ] Backup: `pg_dump -h <host> -p 5432 -U postgres -Fc kost48_v3 > backup_pre_$(Get-Date -Format yyyyMMdd).dump`
+- [ ] Fase 1 di `08_CHECKLIST.md` selesai, termasuk harness finance dan rekonsiliasi.
+- [ ] Owner mengonfirmasi database target masih kosong/testing dan menyetujui pembuatan ulang. Snapshot `pg_dump` boleh dibuat sebagai pengaman, tetapi **tidak untuk dimigrasikan** ke produksi baru.
 - [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`, `AUTO_OPS_ENABLED=true`, `AUTO_OPS_INTERVAL_MINUTES`.
 - [ ] Canonical frontend: `https://app.kost48surabaya.com`. `CORS_ORIGIN` dan `FRONTEND_URL` pakai host ini.
 
@@ -20,7 +21,9 @@ cd backend;  npm ci; npm run build      # prisma generate + nest build
 cd ../frontend; npm ci; npm run build   # tsc + vite build -> dist/
 ```
 
-### 2. Skema & Pagar DB
+### 2. Database Bersih, Skema & Pagar DB
+Provision database produksi kosong `kost48_v3`. Bila database bernama sama sudah berisi data, berhenti dan minta persetujuan owner sebelum drop/recreate.
+
 ```powershell
 cd backend
 npx prisma db push
@@ -28,21 +31,13 @@ psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap.sql
 ```
 bootstrap.sql idempotent (DROP IF EXISTS lalu CREATE).
 
-### 3. Backfill Wajib (E-2) — Penghuni check-in manual
-```sql
-BEGIN;
--- Pratinjau:
-SELECT s.id, t."fullName", r.code FROM "Stay" s
-JOIN "Room" r ON r.id = s."roomId" JOIN "Tenant" t ON t.id = s."tenantId"
-WHERE s.status='ACTIVE' AND s."initialMetersPromotedAt" IS NULL AND r.status='OCCUPIED';
--- Eksekusi:
-UPDATE "Stay" s SET "initialMetersPromotedAt" = s."checkInDate"::timestamp
-FROM "Room" r WHERE r.id = s."roomId"
-  AND s.status='ACTIVE' AND s."initialMetersPromotedAt" IS NULL AND r.status='OCCUPIED';
-COMMIT;
-```
+**Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
-### 4. Restart & Smoke
+- [ ] Seed COA.
+- [ ] Buat periode OPEN dan opening balance produksi.
+- [ ] Buat `CashAccount` Cash (1000) dan Bank (1010).
+
+### 3. Restart & Smoke
 1. Restart backend (PM2/systemd). Tunggu log "AutoOps aktif".
 2. Smoke API:
    - `GET /api/public/rooms?limit=1` → 200
@@ -60,13 +55,12 @@ COMMIT;
 4. `GET /api/deposit-ledger/reconciliation-lite` → catat baseline.
 5. `GET /api/accounting/readiness` → formalStatementReady; trial-balance → isBalanced=true.
 
-### 5. Pasca-Deploy
-- [ ] Buat `CashAccount` di accounting.
+### 4. Pasca-Deploy
 - [ ] Jalankan `POST /api/auto-ops/run` sekali; amati hasil.
-- [ ] Spot-check 1 penghuni nyata di portal.
-- [ ] Arsipkan: hasil backfill, reconciliation, commit SHA.
+- [ ] Spot-check onboarding penghuni pertama ketika data produksi pertama tersedia.
+- [ ] Arsipkan: hasil smoke, reconciliation, opening balance, dan commit SHA.
 
-### 6. Rollback
+### 5. Rollback
 - Kode: `git checkout <sebelumnya>` + build + restart (perubahan DB additive — aman).
 - Data: restore `pg_restore` hanya bila korupsi nyata.
 - PWA: rollback `index.html`, manifest, `sw.js` sebagai satu set.
@@ -74,7 +68,7 @@ COMMIT;
 ### Catatan Ditunda
 - E-6 TZ WIB staf: set TZ server Asia/Jakarta.
 - E-7 Round-robin tiket.
-- E-8 Unit tests.
+- E-8 test suite luas; harness finance minimum F1-T tetap wajib sebelum deploy.
 
 ---
 

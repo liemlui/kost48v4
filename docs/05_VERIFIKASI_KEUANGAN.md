@@ -105,6 +105,6 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 - [ ] `tsc --noEmit` 0 error.
 - [ ] `node --test test/` semua PASS (kalau task menyentuh fungsi ber-test).
 - [ ] 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
-- [ ] Angka harapan task terpenuhi (lihat "selesai bila" di CHECKLIST / dossier 13).
+- [ ] Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13).
 - [ ] Tidak menyentuh kode di DO-NOT-TOUCH §2.
 - Kalau ada yang ✗ → JANGAN commit; perbaiki atau STOP & lapor.

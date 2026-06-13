@@ -5,7 +5,7 @@
 
 ---
 ## 1. Aturan bisnis
-- **Tiket lifecycle:** OPEN → IN_PROGRESS → RESOLVED / CLOSED.
+- **Tiket lifecycle aktual:** OPEN → IN_PROGRESS → DONE → CLOSED, dengan CANCELLED dari kondisi yang diizinkan.
 - **Kategori:** CHECKOUT_INSPECTION, EVICT_OVERSTAY, BARANG_PINDAH, AUDIT_INVENTARIS, PEMERIKSAAN, MAINTENANCE, KEBERSIHAN, KUNCI, INVENTARIS, KERUSAKAN.
 - **Auto-created:** CHECKOUT_INSPECTION (setelah final checkout), EVICT_OVERSTAY (H-day overstay).
 - **Staff boleh close** tiket CHECKOUT_INSPECTION → room MAINTENANCE → AVAILABLE (guard keselamatan tetap).
@@ -24,21 +24,23 @@
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
-| K-1 | 🟠 P2 | Ticket resolved time dihitung dari `createdAt` bukan `assignedAt` — idle time in queue masuk KPI staf → unfair. | `tickets.service.ts` | **F3-3**: gunakan assignedAt |
-| K-2 | 🟡 P3 | SLA monitoring belum ada — tidak ada alert/escalation untuk ticket overdue. | — | **F3-4** |
-| K-3 | 🟡 P3 | Staff performance dashboard mencampur SEMUA kategori tiket — CHECKOUT_INSPECTION (auto) vs MAINTENANCE (manual) tidak bisa dibandingkan. | Frontend KPI dashboard | **F3-5**: filter by category |
+| K-1 | 🟠 P2 | Ticket resolved time dihitung dari `createdAt` bukan `assignedAt` — idle time in queue masuk KPI staf. | `staff-performance.service.ts` | bagian **F3-19** |
+| K-2 | 🟡 P3 | SLA monitoring belum ada. | — | **F3-19** |
+| K-3 | 🟡 P3 | Dashboard mencampur kategori tiket yang tidak sebanding. | Frontend KPI dashboard | bagian **F3-19** |
 | K-4 | 🟡 P3 | Review tenant ≤2⭐ wajib kategori komplain — verified OK (V5.10.0). | `TenantStaffReviewPrompt` | pertahankan |
-| K-5 | 🟡 P3 | **MonthRange menggunakan UTC/server time, bukan WIB** — laporan bulanan staf bisa salah hari (off-by-1 untuk jam 00:00-06:59 WIB). Contoh: tiket closed 30 Juni 23:30 WIB = 1 Juli 04:30 UTC → masuk laporan Juli, bukan Juni. | `tickets.service.ts` monthRange filter | **F2-14**: konversi ke WIB (Asia/Jakarta) untuk monthRange |
-| K-6 | 🟡 P3 | Ticket BARANG_PINDAH closed → penerima notif salah (tenant, bukan staff yang melapor). | `tickets.service.ts` notif | **F3-2**: fix recipient |
+| K-5 | 🟡 P3 | **MonthRange menggunakan UTC/server time, bukan WIB** sehingga laporan bulanan bisa bergeser hari. | `staff-performance.service.ts`/rutinitas | **F2-14** |
+| K-6 | 🟡 P3 | Ticket BARANG_PINDAH closed → penerima notif salah. | `tickets.service.ts` notif | **F3-1** |
 | K-7 | 🟡 P3 | Admin alert rating < 3 → auto panel merah — verified OK (V5.10.0). | Frontend | pertahankan |
-| K-8 | 🟡 P3 | Ticket-closed BARANG_PINDAH notification penerima salah (cross-ref K-6). | `tickets.service.ts` | **F3-2**: fix recipient |
+| K-8 | 🟡 P3 | Ticket-closed BARANG_PINDAH notification penerima salah (cross-ref K-6). | `tickets.service.ts` | **F3-1** |
 
 ## 4. Task
-- **F3-3 · FASE 3:** KPI resolved time dari `assignedAt`, bukan `createdAt`. (K-1)
-- **F3-4 · FASE 3:** SLA monitoring + escalation. (K-2)
-- **F3-5 · FASE 3:** KPI filter by ticket category. (K-3)
+- **F2-9 · FASE 2:** hilangkan double-count ticketsDone; dasar hitung = `resolvedAt` dalam bulan.
 - **F2-14 · FASE 2:** monthRange WIB timezone fix. (K-5)
-- **F3-2 · FASE 3:** fix notification recipient untuk ticket BARANG_PINDAH. (K-6/K-8)
+- **F2-18 · FASE 2:** model tenant-pengawas dan staff boleh close inspeksi dengan guard keselamatan.
+- **F3-1 · FASE 3:** fix notification recipient untuk ticket BARANG_PINDAH. (K-6/K-8)
+- **F3-19 · FASE 3:** resolved time dari `assignedAt`, breakdown kategori, SLA, dan escalation.
+- **F3-20 · FASE 3:** prompt review tenant setelah tiket tenant ditutup.
+- **F2-10/F3-5 · DITUNDA:** round-robin dan leaderboard antar-staf selama staf hanya satu.
 
 ## 5. Invarian & UAT
 - **Invarian:** tiket inspeksi dedupe per stay/room; staff close hanya CHECKOUT_INSPECTION; room tidak AVAILABLE tanpa close safe.

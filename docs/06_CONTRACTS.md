@@ -8,10 +8,11 @@
 ### Role Hierarchy
 ```text
 OWNER > ADMIN > STAFF > TENANT
-Permissions cascade down kecuali TENANT yang terisolasi.
+Matrix eksplisit di bawah mengalahkan asumsi cascade, terutama untuk area OWNER-only.
 ```
 
 ### Permission Matrix per Domain
+Matrix ini memuat kontrak target keputusan owner. Area bertanda OWNER-only belum semuanya dipaksa oleh kode sampai F2-16 selesai.
 
 | Domain | OWNER | ADMIN | STAFF | TENANT |
 |--------|-------|-------|-------|--------|
@@ -32,10 +33,12 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 | **Room Items** — read own room | ✅ | ✅ | ✅ | ✅ (own room) |
 | **Tickets** — create/assign/close | ✅ | ✅ | ✅ (operational) | ❌ |
 | **Tickets** — view own | ✅ | ✅ | ✅ | ✅ |
-| **Deposit Settlement** — execute | ✅ | ✅ | ❌ | ❌ |
-| **Accounting Journals** — view/manage | ✅ | ✅ | ❌ | ❌ |
+| **Deposit Settlement** — execute | ✅ | ❌ | ❌ | ❌ |
+| **Accounting Journals** — view | ✅ | ✅ | ❌ | ❌ |
+| **Accounting Period / manual journal mutation** | ✅ | ❌ | ❌ | ❌ |
 | **Finance Reports** | ✅ | ✅ | ❌ | ❌ |
 | **Expenses** — create/manage | ✅ | ✅ | ❌ | ❌ |
+| **Room settings & pricing** — mutate | ✅ | ❌ | ❌ | ❌ |
 | **Public Endpoints** | Public | Public | Public | Public |
 | **Announcements** — create/manage | ✅ | ✅ | ❌ | ❌ |
 | **Announcements** — view | ✅ | ✅ | ✅ | ✅ |
@@ -50,13 +53,14 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 - Huni = promoted (`initialMetersPromotedAt` terisi) + Room `OCCUPIED`.
 - **DP ≠ Deposit**: DP 30% sewa (hangus bila gagal lunas, jurnal `DP_FORFEIT`). Deposit jaminan refundable.
 - **First paid wins**: multi-booking RESERVED pada 1 kamar diizinkan sampai ada yang bayar.
-- Batas waktu bayar: `expiresAt` — jika belum lunas, booking hangus.
+- `expiresAt` adalah batas pembayaran awal/DP. Setelah DP disetujui, expiry awal dimatikan; sisa pelunasan mengikuti deadline check-in/H+1.
 - Public booking: honeypot field `website` harus selalu kosong (anti-bot, tolak request jika terisi).
 
 ### 2.2 Admin Approval
 - Booking RESERVED muncul di antrean admin.
 - Approval membuat invoice (initial invoice).
-- Setelah LUNAS → booking jadi ACTIVE, Room OCCUPIED.
+- DP 30% yang disetujui mengunci kamar dan membatalkan pesaing yang belum membayar.
+- Setelah sisa sewa + deposit jaminan lunas → Room OCCUPIED dan meter dipromosikan.
 
 ### 2.3 Manual Check-in
 - Check-in manual membuat Stay ACTIVE + Room OCCUPIED langsung.
@@ -74,7 +78,9 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 
 ### 3.1 Payment Submission
 - Tenant upload bukti bayar → `PENDING_REVIEW` → admin review → `APPROVED` / `REJECTED`.
-- Approval mengubah status invoice menjadi `PAID`.
+- Nominal booking yang sah hanya DP 30% tepat atau pelunasan penuh tepat. Invoice-only wajib lunas penuh.
+- Approval DP dapat membuat status teknis invoice `PARTIAL`; ini bukan izin cicilan nominal bebas.
+- Approval pelunasan mengubah invoice menjadi `PAID`.
 - Payment submission approval harus lock rows untuk safe decision (room, stay, invoice, payment submission).
 - **HIGH-RISK:** `PaymentSubmissionsService.approveSubmission()` — do not move/patch casually.
 
@@ -87,6 +93,7 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 - Line invoice `PENALTY` hanya untuk potongan manual (tanpa denda keterlambatan otomatis — keputusan owner D1).
 
 ### 3.3 Pembayaran Invoice
+- Pembayaran manual admin untuk invoice non-booking juga wajib lunas penuh; nominal parsial bebas tidak sah.
 - Pelunasan paling lambat saat check-in.
 - Gagal lunas H+1 pk 12:00 → DP hangus, stay batal.
 - Rp0 / problem invoices harus diframe sebagai `perlu dicek admin`, bukan push payment action.
@@ -104,7 +111,8 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 ### 4.2 Final Checkout
 - Final checkout date harus dinormalisasi sebagai Jakarta business date.
 - Harus menggunakan conditional update pada stay ACTIVE (anti double-click/race).
-- **Blokir oleh semua open invoice** (termasuk DRAFT).
+- Checkout normal diblokir semua open invoice, termasuk DRAFT.
+- Forced checkout merupakan pengecualian target D-03: DRAFT di-auto-cancel dan tidak memblokir; invoice ISSUED/PARTIAL tetap memblokir keputusan otomatis.
 - Setelah final checkout:
   - Room → `MAINTENANCE` / `Perlu dicek` (readiness gate)
   - Tiket `CHECKOUT_INSPECTION` dibuat (dedupe per stay/room/category)
@@ -124,8 +132,11 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 ## 5. Renew Contracts
 
 ### 5.1 Renew Request
-- Tenant ajukan perpanjangan → admin approve → eksekusi perpanjangan.
-- Renew invoice dibuat: sewa + meter (listrik, air) dengan periode menyambung.
+- **Kode saat ini:** tenant ajukan → admin approve → stay langsung diperpanjang.
+- **Kontrak target mengikat:** tenant lama mendapat prioritas eksklusif sampai hari-H tanpa DP; prompt H-10; DP 30% mengamankan renewal; pelunasan maksimal H+7 dari DP.
+- Jika hari-H belum ada DP, prioritas berakhir dan kamar dibuka publik. Jika H+7 setelah DP belum lunas, DP hangus dan forced checkout berlaku.
+- Rent-loyalty: harga renewal tidak naik selama kontrak tidak putus.
+- Renew invoice mencakup sewa + meter dengan periode menyambung tanpa gap/overlap.
 - **HIGH-RISK:** `StaysService.renewStay()` — do not move/patch casually.
 
 ---
@@ -177,7 +188,7 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 ## 8. Ticket Contracts
 
 ### 8.1 Ticket Lifecycle
-- `OPEN` → `IN_PROGRESS` → `RESOLVED` / `CLOSED`.
+- `OPEN` → `IN_PROGRESS` → `DONE` → `CLOSED`; `CANCELLED` tersedia dari kondisi yang diizinkan.
 - Kategori: `CHECKOUT_INSPECTION`, `EVICT_OVERSTAY`, `BARANG_PINDAH`, `AUDIT_INVENTARIS`, `PEMERIKSAAN`, dll.
 - Auto-created tickets: `CHECKOUT_INSPECTION` (setelah final checkout), `EVICT_OVERSTAY` (H-day overstay).
 
@@ -225,7 +236,7 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 ## 11. Overstay & Auto-Ops Contracts
 
 ### 11.1 Overstay Lifecycle
-- Pengingat: H-7, H-3, H-1, H-day.
+- Kode saat ini mengirim H-7, H-3, H-1, H-day. Target keputusan owner menambah H-10.
 - H-day pk 12:00: kamar dibuka publik + tiket `EVICT_OVERSTAY`.
 - H+1 pk 12:00: forced checkout otomatis.
 - Kamar → `MAINTENANCE` + `allowBookingWhileCleaning=true`.
@@ -233,13 +244,13 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 
 ### 11.2 Auto-Ops Jobs (9 sequential)
 1. `bookingExpiry`
-2. `roomHealer`
-3. `roomReleaseAtNoon`
-4. `downPaymentForfeit`
-5. `contractEndReminders`
-6. `overstayEnforcement`
-7. `overstayForcedCheckout`
-8. `postCheckoutAutoCancel`
+2. `contractEndReminders`
+3. `downPaymentForfeit`
+4. `overstayForcedCheckout`
+5. `postCheckoutAutoCancel`
+6. `roomReleaseAtNoon`
+7. `roomHealer`
+8. `overstayEnforcement`
 9. `accountingAutoClose`
 
 ---
@@ -285,7 +296,7 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 ### 13.2 Payment Safety
 - Lock rows during payment approval (payment submission, room, stay, invoice).
 - Anti double-processing pada deposit settlement (conditional HELD).
-- Invoice open blocking untuk checkout final (termasuk DRAFT).
+- Invoice open blocking untuk checkout normal; forced checkout mengikuti pengecualian D-03.
 
 ### 13.3 Inventory Safety
 - Staff 403 untuk official movement.
@@ -324,11 +335,11 @@ Permissions cascade down kecuali TENANT yang terisolasi.
 | No refresh token | Deferred | 24 jam JWT |
 | No email/WA delivery | Deferred | PWA push planned |
 | No damage/penalty model | Deferred | B5 future batch |
-| No deposit ledger (full) | Deferred | B4 future batch |
-| No asset/depreciation | Deferred | Future |
+| Deposit ledger | Active | Reconciliation tersedia; source-id edge case masih perlu hardening |
+| Fixed asset/depreciation | Active manual | Otomasi depresiasi bulanan masih future |
 | No round-robin ticket assignment | Deferred | 1 staf, ditunda |
 | No WIB timezone handling | Deferred | F2-14 |
-| No unit tests | Deferred | E-8 |
+| Baseline finance tests belum ada | Fase 1 | F1-T, zero-dependency `node --test` |
 
 ---
 

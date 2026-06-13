@@ -9,8 +9,8 @@
 - **Movement tak boleh diedit** (wajib mutasi koreksi); catatan ≥8 char; ADJUSTMENT ditolak.
 - **RoomItem create/ubah-qty langsung DIBLOKIR** — hanya via movement ASSIGN/RETURN.
 - **Staf** hanya boleh LAPOR status (DAMAGED/MAINTENANCE/MISSING) + wajib catatan/foto; status final menunggu admin.
-- **Status barang saat ASSIGN ditentukan admin** (D-08), bukan auto-GOOD (samakan kedua jalur).
-- **Riwayat barang ditarik (qty 0): hapus saja** (D-16) — jejak cukup di AuditLog+tiket.
+- **Status barang saat ASSIGN ditentukan admin**, bukan auto-GOOD.
+- **Riwayat barang ditarik (qty 0): hapus record RoomItem**; jejak tetap ada di movement, AuditLog, dan tiket.
 
 ## 2. Peta kode (3 jalur sinkron qty)
 | Jalur | Lokasi | Lock | Validasi RETURN | Status |
@@ -23,15 +23,15 @@
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | I-02 | 🔴 P2 | adminReview buat movement TANPA lock + TANPA validasi qty-kamar RETURN → bisa ghost-stock (kamar 1 kasur, RETURN qty 3 → gudang +2 fiktif). Satu-satunya vektor ghost-stock nyata. | `staff-field-reports.service.ts:478-505,563-597` | **F2-5** pakai util movement resmi (lock+validasi) |
-| I-03 | 🟡 P3 | Dua salinan syncRoomItem beda kebijakan status (review set GOOD, resmi tidak). Owner: admin tentukan status (D-08). | `staff-field-reports.service.ts:629-632` | **F2-5** satukan; admin pilih status |
+| I-03 | 🟡 P3 | Dua salinan syncRoomItem beda kebijakan status (review set GOOD, resmi tidak). | `staff-field-reports.service.ts:629-632` | **F2-5** satukan; admin pilih status |
 | I-01 | 🟡 P3 | Dedupe tiket laporan barang fuzzy match by-nama → barang mirip ("Kasur"/"Kasur Busa") tiketnya tercampur. | `room-items.service.ts:170-183` | prioritaskan `linkedRoomItemId` saja |
 | I-05 | 🟡 P3 | Admin update status barang tanpa wajib catatan (staf justru wajib) — keadilan jejak. | `room-items.service.ts:103-113` | wajibkan note ≥8 char admin |
 | X-01 | 🟡 P3 | `syncRoomItem`/`generateTicketNumber`/`releaseRoomAfterBookingCancelTx` ada 2-3 salinan → kebijakan mulai drift. | beberapa file | **F2-5** konsolidasi util bersama |
-| I-04/I-06/I-07 | INFO | RoomItem delete saat qty 0 (owner: hapus saja D-16); movementDate bebas; generateTicketNumber duplikat. | — | sadar/ikut F2-5 |
+| I-04/I-06/I-07 | INFO | RoomItem delete saat qty 0; movementDate bebas; generateTicketNumber duplikat. | — | sadar/ikut F2-5 |
 | (sehat) | ✅ | trigger DB single-writer + edit-movement diblokir = inventaris lebih disiplin dari kebanyakan sistem kos. | — | pertahankan |
 
 ## 4. Task
-- **F2-5 · FASE 2 🔴:** tutup ghost-stock — ekstrak `lockInventoryQtyTx`+`assertRoomItemQtyAvailableTx`+`ensureInventoryQtySyncedTx`+`syncRoomItem` ke util bersama; `adminReview` pakai util sama (lock dlm tx, validasi RETURN, status oleh admin per D-08). Sekalian konsolidasi `generateTicketNumber` + `releaseRoomAfterBookingCancelTx`. Kriteria: RETURN qty>kamar via adminReview → 409; race 2 admin → 1 sukses 1 konflik.
+- **F2-5 · FASE 2 🔴:** tutup ghost-stock — ekstrak `lockInventoryQtyTx`+`assertRoomItemQtyAvailableTx`+`ensureInventoryQtySyncedTx`+`syncRoomItem` ke util bersama; `adminReview` pakai util sama. Sekalian konsolidasi `generateTicketNumber` + `releaseRoomAfterBookingCancelTx`. Kriteria: RETURN qty>kamar via adminReview → 409; race 2 admin → 1 sukses 1 konflik.
 - I-01/I-05 menumpang sesi F2-5 (file sama).
 
 ## 5. Invarian, verifikasi, tools

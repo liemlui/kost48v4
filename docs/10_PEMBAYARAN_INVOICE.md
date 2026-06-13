@@ -8,7 +8,7 @@
 - **NO-PARTIAL MENYELURUH (D-02):** nominal pembayaran yang sah HANYA: (a) DP 30% persis, atau (b) pelunasan penuh = sisa invoice + sisa deposit. Jalur invoice-only (renewal/utilitas) wajib LUNAS penuh. Tidak ada cicilan di mana pun.
 - **Gate dua-nominal-sah A18** sudah ada di `createSubmission:122-135`; WAJIB direplikasi di `approveSubmission` (lihat task F1-1R).
 - **Admin tak boleh hapus/ubah payment kamar OCCUPIED (GAP #3):** payment berjurnal sudah diblokir; payment tanpa-jurnal masih bisa dihapus saat promoted → harus diberi guard.
-- Invoice status: **DRAFT → ISSUED → PARTIAL → PAID / CANCELLED**. Line type aktual: `RENT, ELECTRICITY, WATER, WIFI, PENALTY, DISCOUNT, OTHER` (DISCOUNT mengurangi total).
+- Invoice status teknis tetap **DRAFT → ISSUED → PARTIAL → PAID / CANCELLED**. `PARTIAL` sah hanya sebagai hasil DP 30% yang tepat; cicilan dengan nominal bebas dilarang.
 - Pembayaran booking WAJIB lewat approve bukti (bukan pembayaran manual) — guard A1 di `invoice-payments.create:142-150`.
 - Reversal jurnal saat cancel = BLOCKING (pola A8) di semua jalur.
 
@@ -24,7 +24,7 @@
 ## 3. Temuan audit (semua, dua-lapis: dampak bisnis + lokasi/fix)
 | ID | Sev | Dampak bisnis | Lokasi kode | Fix / Task |
 |---|---|---|---|---|
-| B-01 | 🔴 P1 | GAP #1 sebagian tertutup; tapi approve TIDAK re-validasi nominal → submission lama/race bisa di-approve dgn nominal "kurang". Aturan owner: no-partial. | `payment-submissions.service.ts:406-430` (booking) + `:146-159` (invoice-only) | **F1-1R**: replikasi gate dua-nominal-sah di approve + jalur invoice-only wajib lunas penuh |
+| B-01 | 🔴 P1 | GAP #1 sebagian tertutup; approve tidak re-validasi nominal dan pembayaran manual admin masih dapat mencatat nominal parsial. | `payment-submissions.service.ts` approve + `invoice-payments.service.ts` create/update | **F1-1R**: gate dua nominal booking; invoice-only/manual wajib lunas penuh |
 | GAP#3/B-04 | 🟠 P2 | Admin bisa hapus payment kamar yang sudah ditempati bila jurnalnya gagal/skip → occupancy vs uang inkonsisten tanpa jejak. | `invoice-payments.service.ts:237` remove, :189 update | **F1-2**: 409 bila stay promoted / room OCCUPIED |
 | F-09 | 🟠 P2 | Invoice DRAFT ikut dihitung pendapatan di laporan → revenue overstated. (Detail di `13_AKUNTANSI_LAPORAN`.) | reports/finance agregat | **F1-7** (lihat dossier 13) |
 | B-09 | 🟡 P3 | Kebijakan posting jurnal tak konsisten: issue MELEMPAR bila gagal, tapi check-in/renew MENELAN error → invoice gagal-jurnal hanya tertangkap readiness. | `invoices.service.ts:136-137` vs `stays.service.ts:361-368` | Satukan pakai `resolveInvoiceAccountingMetadata` |
@@ -35,9 +35,9 @@
 
 ## 4. Task (urutan & spec lengkap)
 ### F1-1R · 🔴 FASE 1 · No-partial menyeluruh
-- **File:** `payment-submissions.service.ts` — approve booking (:406-430) + invoice-only (:146-159, :421-430).
-- **Spec:** (a) booking: replikasi gate createSubmission (:122-135) di approve — tolak bila amount ≠ sisa-DP-persis DAN ≠ (sisa invoice + sisa deposit); (b) invoice-only: tolak bila amount ≠ sisa tagihan PENUH. Throw ConflictException copy jelas.
-- **Kriteria selesai:** DP persis ✅; pelunasan persis ✅; renewal lunas ✅; nominal kurang → 409; tsc 0.
+- **File:** `payment-submissions.service.ts` approve booking/invoice-only; `invoice-payments.service.ts` create/update pembayaran manual.
+- **Spec:** (a) booking: replikasi gate createSubmission di approve — tolak bila amount bukan sisa DP tepat dan bukan pelunasan penuh; (b) submission invoice-only wajib sama dengan sisa tagihan; (c) pembayaran manual non-booking wajib melunasi sisa invoice, bukan membuat cicilan bebas.
+- **Kriteria selesai:** DP tepat ✅; pelunasan tepat ✅; renewal/utilitas/manual lunas ✅; semua nominal kurang/aneh → 409; tsc 0.
 - **Larangan:** JANGAN pakai spek V1 lama ("tolak bila < invoice+deposit") — itu menolak DP sah. **Stop:** struktur isBookingPath berubah → STOP.
 ### F1-2 · 🟠 FASE 1 · Guard remove/update payment OCCUPIED
 - **File:** `invoice-payments.service.ts:189, :237`.
@@ -46,5 +46,5 @@
 
 ## 5. Invarian & UAT
 - **Invarian:** total pembayaran ≤ invoice + sisa deposit; promosi meter & OCCUPIED hanya saat invoice PAID; satu pemenang per kamar; uang masuk = otomatisasi berhenti.
-- **UAT:** (1) submit 600rb saat sisa DP 510rb & pelunasan 1.69jt → 409; (2) approve submission lama bernominal aneh → 409 (pasca F1-1R); (3) DP persis → kamar terkunci, expiresAt mati; (4) pelunasan persis → OCCUPIED + meter promoted; (5) hapus payment stay promoted tanpa jurnal → 409 (pasca F1-2); (6) first-paid-wins + notif tenant kalah.
+- **UAT:** (1) submit 600rb saat sisa DP 510rb & pelunasan 1.69jt → 409; (2) approve submission lama bernominal aneh → 409; (3) pembayaran manual 50% invoice non-booking → 409; (4) DP tepat → kamar terkunci; (5) pelunasan tepat → OCCUPIED + meter promoted; (6) hapus payment stay promoted tanpa jurnal → 409; (7) first-paid-wins + notif tenant kalah.
 - **Prasyarat:** kerjakan SEBELUM deploy (Fase 1). Terkait deposit → dossier 12; akuntansi → dossier 13.

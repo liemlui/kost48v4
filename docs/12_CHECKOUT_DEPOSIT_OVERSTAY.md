@@ -11,8 +11,8 @@
 - **Keluar lebih awal (K-e):** sewa yang sudah dibayar HANGUS (no refund pro-rata); deposit dikembalikan normal.
 - **Overstay (Auto-Ops):** reminder H-10..H-day → H-day pk 12:00 kamar publik + tiket EVICT → H+1 pk 12:00 forced checkout → kamar MAINTENANCE + `allowBookingWhileCleaning`. Tagihan belum lunas → TIDAK auto-checkout, admin dapat alert.
 - **Tenant kabur (B2):** admin tandai manual bila **nunggak X hari + tak bisa dihubungi** (X konfig, mis. 7) → checkout dini + potong deposit.
-- **Forced checkout nunggak (B4):** admin boleh PAKSA checkout + potong sisa dari deposit; **deposit tidak cukup → sisa jadi PIUTANG** tenant (AR), bukan write-off (O3).
-- **Barang ditinggal (B3):** batas ambil **30 hari** → status ABANDONED + notif; tindakan fisik manual (O2).
+- **Forced checkout nunggak (B4):** admin boleh PAKSA checkout + potong sisa dari deposit; **deposit tidak cukup → sisa jadi PIUTANG** tenant (AR), bukan write-off.
+- **Barang ditinggal (B3):** batas ambil **30 hari** → status ABANDONED + notif; tindakan fisik manual.
 
 ## 2. Peta kode
 | Aksi | Lokasi |
@@ -43,7 +43,7 @@
 - **F3-13 · FASE 3:** B-07 (exclude+auto-cancel DRAFT saat forced checkout), B-06 (copy/meta).
 - **F3-14 · FASE 3 (BARU):** tombol admin "tenant kabur" → checkout dini + potong deposit. Pemicu: nunggak X hari + tak terhubung. Field `Stay.fledMarkedAt`+reason+konfig X. (B2)
 - **F3-15 · FASE 3 (BARU):** lacak `Stay.belongingsDeadline = checkout+30 hari` → status ABANDONED + notif; tindakan fisik manual. (B3)
-- **F3-16 · FASE 3 (BARU):** admin paksa-checkout overstay nunggak + potong sisa dari deposit; **deposit kurang → buat AR (piutang) atas tenant** (O3). Jurnal: 2000 menutup sebagian, sisa tetap AR 1100.
+- **F3-16 · FASE 3 (BARU):** admin paksa-checkout overstay nunggak + potong sisa dari deposit; **deposit kurang → buat AR (piutang) atas tenant**. Jurnal: 2000 menutup sebagian, sisa tetap AR 1100.
 
 ## 5. Invarian & UAT
 - **Invarian:** kamar tak pernah AVAILABLE tanpa tiket inspeksi ditutup (KECUALI lubang B-08 — diperbaiki F2-6); deposit diproses tepat 1× (blocking); Σ ledger = paid − refund − deduction; selama grace renewal sah, tenant lama tak kena overstay enforcement.

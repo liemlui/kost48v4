@@ -35,5 +35,5 @@
 
 ## Cross-Reference Rules
 - Setiap temuan di dossier HARUS mencantumkan kode asli (B-01, F-10, dst) untuk traceability
-- File `_DEPRECATED_AUDIT_00_INDEX.md` adalah master index audit V3
+- File `archieve/_DEPRECATED_AUDIT_00_INDEX.md` adalah master index audit V3
 - Jika dossier di-renumber, update matrix ini juga

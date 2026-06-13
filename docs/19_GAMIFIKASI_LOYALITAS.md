@@ -4,7 +4,7 @@
 **Tujuan:** retensi (CLV ↑) + kumpulkan data marketing sukarela ("kayak game biar happy") + onboarding minimal (nama+HP+KTP, sisanya via quest).
 
 ---
-## 1. Aturan bisnis (ide owner K-b + spesifikasi M1-M4)
+## 1. Aturan bisnis
 - **Poin tidak dapat dipindahtangankan**, hanya tenant ber-stay aktif.
 - **Reward DICATAT AKURAT di akuntansi** (M4) — bukan promosi siluman; laporan tetap jujur.
 - **Penukaran WAJIB konfirmasi admin/owner** (M3), terutama diskon sewa (dampak pendapatan).

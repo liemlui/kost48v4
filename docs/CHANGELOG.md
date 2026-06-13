@@ -2,6 +2,32 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Audit Traceability Root Docs + Router `_PETA_AI` + Penomoran 06-09 (docs-only)
+
+- **Buat `_PETA_AI.md`** — router 22 file root: §1 tabel "baca saat" + status akurasi, §2 anchor `file:baris` TERVERIFIKASI vs kode (`3c7ffe2`), §3 status defek, **§4 panduan EKSEKUSI OTONOM (YOLO)**: set file minimum + apa yang boleh jalan tanpa persetujuan vs hard-gate (schema/owner/push/install).
+- **Audit mendalam 22 file root → perbaiki 4 defek traceability:**
+  - D1: `02_FLOW_MAP.md` — sinkronkan SEMUA anchor metode ke kode (approveSubmission 323→353, stays.complete 480→526, processDeposit 749→812, renewStayInTransaction 934→997, tickets.close 489→530, postBalancedJournalTx 1032→1110, dll) + banner "sub-baris indikatif, sumber baris terverifikasi = `_PETA_AI §2`/dossier".
+  - D2: nama file inti dossier 13 dikoreksi ke `accounting-reports.service.ts` (jamak).
+  - D3: `01_GROUND_STATE` — ref dossier `06-15`→`10-19`; §1.2 ditulis ulang ke **33 modul nyata** (buang `inventory`/`deposits`/`public`/`dashboard`/`me`/`maintenance` fiktif); §1.4 = **41 model** nyata.
+  - D4: ID task dossier 15 diselaraskan ke checklist (KPI `F2-9`, SLA `F3-19`, prompt review `F3-20`).
+- **Penomoran root dirapikan** (sekuens 00-09 lintas-domain lengkap): `CONTRACTS`→`06_CONTRACTS`, `PLAN`→`07_PLAN`, `CHECKLIST`→`08_CHECKLIST`, `TRACEABILITY`→`09_TRACEABILITY` (via `git mv`); semua referensi di docs aktif + `CLAUDE.md` diperbarui (broken-ref aktif = 0).
+- `CLAUDE.md` menunjuk `_PETA_AI.md` sebagai router + anchor terverifikasi (tetap <3KB).
+- Fakta terverifikasi: 33 modul, 41 model, bug F-01 di `accounting-reports.service.ts:794` (`code.startsWith('11')` PIUTANG dianggap kas).
+
+Status: docs-only; tidak ada perubahan kode aplikasi atau database.
+
+## 2026-06-13 — Normalisasi Logic dan Referensi Root Docs
+
+- Rename fisik dossier `06`-`15` menjadi `10`-`19` agar sesuai heading, blueprint, checklist, dan tab kerja.
+- Tetapkan hierarki sumber kebenaran: keputusan owner untuk aturan bisnis, kode untuk perilaku aktual, checklist untuk ID/urutan task.
+- Hilangkan benturan task: `F1-9` = deposit cashflow, `F1-12` = deploy bersih; task staf mengikuti `F2-9`, `F3-19`, `F3-20`.
+- Sinkronkan fakta kode: 41 model Prisma, ticket status `DONE`, urutan Auto-Ops aktual, expiry booking 3 jam sudah selesai.
+- Perbaiki runbook fresh deploy tanpa backfill UAT, OWNER-only D-17, renewal H-10/prioritas hari-H, no-partial seluruh jalur, serta referensi arsip.
+- Rewrite `PLAN.md` agar prioritas produksi dimulai dari Fase 1 uang/laporan; multi-app menjadi rencana lanjutan.
+- Verifikasi: 20 file kanonik hadir, 53 task ID unik, active missing reference = 0, `git diff --check` bersih.
+
+Status: docs-only; tidak ada perubahan kode aplikasi atau database.
+
 ## 2026-06-13 — Audit Forensik V3 + 84 Keputusan Owner + Restruktur Docs Domain-Dossier (READ-ONLY, belum sentuh kode aplikasi)
 
 ### Audit forensik V3 (Fable 5, baca kode penuh per-baris)

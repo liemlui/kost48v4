@@ -6,8 +6,8 @@
 ---
 ## 1. Aturan bisnis
 ### Booking
-- **DP 30%** × sewa periode (sesuai pricingTerm), non-refundable, hangus bila gagal lunas H+1. Deposit jaminan = `Room.defaultDepositRupiah`, **SELALU tetap** (D-08/C3 — admin tak boleh override; lihat task F1-10).
-- **Booking expiry 3 JAM FLAT** semua jalur (D2/J-b) — bukan cutoff 21:00 WIB. Booking malam berlaku 3 jam berikutnya.
+- **DP 30%** × sewa periode (sesuai pricingTerm), non-refundable, hangus bila gagal lunas H+1. Deposit jaminan = `Room.defaultDepositRupiah`, **SELALU tetap** (D-05; admin tak boleh override).
+- **Booking expiry 3 JAM FLAT** semua jalur (D-04) — sudah diterapkan melalui `AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`.
 - **First-paid-wins**: multi-booking RESERVED tak dibatasi (D4); pembayaran pertama disetujui (DP pun) mengunci kamar + batalkan pesaing.
 - Harga per term (owner-confirmed C1): Harian 13% · Mingguan 45% · 2-Mingguan 75% · Bulanan 100% · Semester 5,5× · Tahunan 10× dari tarif bulanan. Utilitas term pendek all-in; bulanan+ meter (C2).
 - **KTP wajib** sebelum aktivasi (E1 — detail di dossier 18).
@@ -31,13 +31,13 @@
 | GAP #2 / B-03 | 🔴 P1 | Renewal approve LANGSUNG perpanjang tanpa fase DP/prioritas/grace → kamar bisa "terjual dua kali", vacancy tak termonetisasi, churn risk. | `renew-requests.service.ts:77` | **F2-1** (desain §5 SIAP) |
 | Renew notif / B-03 | 🔴 P1 | NOL notifikasi di seluruh renew (request/approve/reject) — tenant tak tahu nasib perpanjangan = vacancy risk. | `renew-requests.service.ts` (tak ada import AppNotification) | **F2-2** salin pola checkout-requests |
 | C3 | 🟠 P2 | Admin bisa override nominal deposit saat approve booking/check-in — owner: deposit SELALU tetap. | `tenant-bookings.service.ts:341` + `stays.create:159` | **F1-10** kunci ke `Room.defaultDepositRupiah` |
-| B-10 | 🟡 P3 | Expiry publik 3 jam flat vs portal cutoff WIB — owner putuskan 3 jam flat SEMUA (D2). | `public-bookings.service.ts:292` vs `calculateBookingExpiry` | **F1-11** seragamkan 3 jam flat |
+| B-10 | ✅ SELESAI | Expiry publik dan portal sama-sama memakai helper 3 jam flat. | dua helper `calculateBookingExpiry` | **F1-11 selesai** |
 | M-08 | 🟡 P3 | Booking publik hardcode bookingSource=WEBSITE → kanal akuisisi tak terukur (CAC). | `public-bookings.service.ts:187` | **F3-11** dropdown lead source (detail dossier 17) |
-| B-15 | 🟡 INFO | Pengingat kontrak/perpanjangan (H-10) HANYA terkirim ke tenant yang punya user portal aktif → tenant check-in manual tanpa email TIDAK PERNAH terima reminder (in-app only by design D2; dampak: hanya tahu dari staf). | `auto-ops.service.ts:459-463` | **F2-2** sertakan: fallback prompt manual oleh admin untuk tenant tanpa user portal |
+| B-15 | 🟡 P3 | Kode saat ini baru mengirim H-7/H-3/H-1/H-day dan hanya ke tenant dengan akun portal aktif. | `auto-ops.service.ts:451-463` | **F2-2** tambah H-10 dan fallback antrean admin |
 
 ## 4. Task
 - **F1-10 · FASE 1:** kunci deposit = `Room.defaultDepositRupiah`; abaikan `dto.depositAmountRupiah` di approveBooking + stays.create. (C3)
-- **F1-11 · FASE 1:** `calculateBookingExpiry` → 3 jam flat murni semua jalur; buang cutoff 21:00 WIB. (D2)
+- **F1-11 · SELESAI:** expiry 3 jam flat sudah dipakai portal dan publik.
 - **F2-1 · FASE 2 (PRIORITAS retensi):** implementasi renewal DP penuh per desain §5. Prasyarat: Fase 1 + F1-1R selesai. Schema additive owner-approve. **Termasuk rent-loyalty D-16: harga tidak naik saat renew tanpa putus kontrak.**
 - **F2-2 · FASE 2:** notif renew (request→admin, approve/reject→tenant + prompt H-10 "perpanjang?") — salin `checkout-requests.service.ts:294-422`.
 

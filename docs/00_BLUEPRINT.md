@@ -1,5 +1,5 @@
 # BLUEPRINT SISTEM KOST48 — Peta Tunggal & Indeks Dossier
-**Tanggal:** 2026-06-13 · **PINTU MASUK.** Baca ini dulu untuk gambaran utuh, lalu buka dossier domain yang relevan. Struktur docs domain-dossier: tiap dossier (10-19) MANDIRI berisi aturan+peta kode+temuan+task+desain+UAT domainnya — minim baca silang (hemat token saat eksekusi).
+**Tanggal:** 2026-06-13 · **PINTU MASUK.** Baca ini dulu untuk gambaran utuh, lalu buka dossier domain yang relevan. Tiap dossier `10`-`19` mandiri dan berisi aturan, peta kode, temuan, task, desain, serta UAT domainnya.
 
 ## 1. Identitas & model bisnis
 - **KOST48** — kost eksklusif pria, **48 kamar** (33 reguler/10 eksklusif/5 VIP), **Jl. Hikmah V No. 48, Surabaya Barat** (dekat Pakuwon Mall/PTC; bukan Ngagel — D-01).
@@ -25,15 +25,17 @@
 | `17_PUBLIK_MARKETING_UIUX` | katalog/SEO/UI/chart (flow 2-publik) | 🟢 UX/🔴 SEO | SEO (F3-3), social proof (F3-4), perf publik (F2-11) |
 | `18_AUTH_FONDASI_ONBOARDING` | auth/role/KTP (flow 1) | 🟢 | OWNER-only (F2-16), KTP gate (F3-17) |
 | `19_GAMIFIKASI_LOYALITAS` | poin/reward tenant (BARU) | 📅 Fase 4 | F4-9 (desain lengkap di dossier) |
-**Inti lintas-domain:** `01_GROUND_STATE` (fakta) · `02_FLOW_MAP` (peta kode dalam) · `03_KEPUTUSAN_OWNER` (84 keputusan, SUMBER KEBENARAN) · `04_DEPLOY_AND_PWA` · **`05_VERIFIKASI_KEUANGAN` (harness wajib tiap task uang: invarian + unit test zero-dep + rekonsiliasi + skenario emas + DO-NOT-TOUCH)**. **Detail forensik 97 temuan diarsipkan** (`archieve/_DEPRECATED_AUDIT_*`) — ringkasannya sudah tersebar ke dossier.
+**Hierarki sumber kebenaran:** `03_KEPUTUSAN_OWNER` (aturan bisnis mengikat) → `01_GROUND_STATE` dan `02_FLOW_MAP` (fakta kode saat ini) → dossier domain (temuan dan desain target) → `08_CHECKLIST` (urutan eksekusi). `04_DEPLOY_AND_PWA` adalah runbook operasi. **`05_VERIFIKASI_KEUANGAN` wajib untuk setiap task uang.** Detail forensik 97 temuan diarsipkan di `archieve/_DEPRECATED_AUDIT_*`.
 
 ## 4. PETA EKSEKUSI (urutan fase — task ada di dossier masing-masing)
 ```
 FASE 1 (SEBELUM publish — uang & laporan benar):
-  F1-0 alamat✓ → F1-1R no-partial[D10] → F1-2 guard-payment[D10] →
+  F1-0 alamat✓ → F1-T harness finance[D05] → F1-1R no-partial[D10] →
+  F1-2 guard-payment[D10] →
   F1-3 cashflow[D13] → F1-4/5/6 rasio[D13] → F1-7 DRAFT-revenue[D13] →
-  F1-8 settlement-guard[D13] → F1-10 deposit-lock[D11] → F1-11 expiry-3jam[D11] →
-  F2-8 matikan-draft-jurnal[D13] → F1-9 DEPLOY BERSIH[D04]
+  F1-8 settlement-guard[D13] → F1-9 deposit-cashflow[D13] →
+  F1-10 deposit-lock[D11] → F1-11 expiry-3jam[D11] →
+  F2-8 matikan-draft-jurnal[D13] → F1-12 DEPLOY BERSIH[D04]
 FASE 2 (pasca publish — flow & model):
   F2-1 RENEWAL[D11] → F2-2 notif-renew[D16] → F2-3+3b refund[D16/D10] →
   F2-5 ghost-stock[D14] → F2-6 cancel-tiket[D12] → F2-9 KPI-fix[D15] →
@@ -47,7 +49,7 @@ FASE 3 (operasional & visibilitas):
 FASE 4 (future): F4-1 unearned-rev[D13] · F4-9 GAMIFIKASI[D19] · F4-2 PWA-push[D16] · F4-7 pruning · F4-8 pindah-kamar
 DITUNDA (1 staf): F2-10 round-robin · F3-5 leaderboard antar-staf [D15]
 ```
-**Prioritas mutlak (bila waktu terbatas):** F1-0 · F1-1R · F1-2 · F1-3 · F1-7 · F1-8 · F2-3(copy A17) · F2-5(ghost-stock) → tutup semua P1 uang/kepercayaan/integritas. Lalu GAP #2 renewal (retensi).
+**Prioritas mutlak (bila waktu terbatas):** F1-T · F1-1R · F1-2 · F1-3 · F1-7 · F1-8 · F1-9 · F2-3 (copy A17) · F2-5 (ghost-stock). Setelah itu kerjakan GAP #2 renewal.
 
 ## 5. AUTO-OPS ENGINE (lintas-domain, "jam biologis") — 9 job sequential
 Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit ④forcedCheckout ⑤postCheckoutAutoCancel ⑥noonRelease ⑦roomHealer ⑧overstayEnforcement ⑨accountingAutoClose. Lock FOR UPDATE + re-cek; **uang masuk (submission PENDING/APPROVED, invoice PAID/PARTIAL) = STOP otomatisasi**; reversal jurnal blocking; gerbang WIB pk 12:00. Satu pintu cancel `cancelEndedUnpaidStay`. Job→dossier: ①③→D11/D12, ④⑤⑥⑧→D12, ②→D16, ⑨→D13. Tambahan: reminder H-10 (D16), depresiasi job #10 (D13), 2 sweeper renewal (D11), TZ WIB (D13). **Tangguh** (try/catch per item, take limit) — 9 check reliability lulus.
@@ -64,11 +66,11 @@ Mutex `running`; urutan: ①bookingExpiry ②contractEndReminders ③DP-forfeit 
 - **Visualisasi:** Tufte/Colorbrewer/Sparkline/Bullet/Treemap/Waterfall/Heatmap ✅ (D17); Sankey ❌ (ditolak, funnel linier).
 - **Hukum:** UU PDP (KTP/social-proof) ✅ (D17/D18); Perlindungan Konsumen (copy A17) ✅ (D16); Perdata (no-partial=kontrak, barang abandoned 30hr) ✅ (D10/D12); UU ITE ❌ (audit trail sudah memadai).
 
-## 9. Risiko, dependensi & estimasi (lintas-domain)
+## 8. Risiko, dependensi & estimasi (lintas-domain)
 **Dependensi kunci:** Fase 1 (uang/laporan benar) → DEPLOY bersih → Fase 2+. `F1-1R` no-partial → prasyarat renewal (`F2-1`, pakai jalur payment sama). `F1-3..F1-6` fix laporan → prasyarat chart finansial (`F3-12`) & analitik. `F2-5` util bersama → `F2-6`. `F2-9`+round-robin → leaderboard (ditunda 1 staf). N-04 pruning → PWA push (`F4-2`).
-**Risiko tertinggi:** `F1-1R` (tolak pembayaran sah edge — uji 4 skenario DP/pelunasan/renewal/manual); `F1-3` (salah identifikasi line kas — cross-check manual 1 bln); `F2-1` renewal (race vs booking publik — pakai lock first-paid teruji); `F2-5` (refactor 4 file panas — per-fungsi, jangan ubah signature); `F2-16` OWNER-only (audit @Roles menyeluruh, jangan kunci yang sah); `F2-14` TZ WIB (KPI/jurnal geser sehari — jalankan awal bulan). Backup 6-bulanan (K-c) = ⚠️ advisory risiko data tinggi (owner dipersilakan tinjau ke harian).
+**Risiko tertinggi:** `F1-1R` (tolak pembayaran sah edge — uji DP/pelunasan/renewal/manual); `F1-3` (salah identifikasi line kas — cross-check manual 1 bulan); `F2-1` renewal (race vs booking publik); `F2-5` (refactor file panas); `F2-16` OWNER-only (audit `@Roles` menyeluruh); `F2-14` TZ WIB (KPI/jurnal dapat bergeser sehari). Kebijakan backup 6-bulanan berisiko terlalu jarang dan sebaiknya ditinjau owner.
 **Estimasi:** ~30-38 sesi AI eksekutor (Fase 1: 7-9 · Fase 2: 11-13 · Fase 3: 8-10 · Fase 4+desain: 4-6). Regression harness gratis tiap akhir kerja uang: `reconciliation-lite` + `deposit-reconciliation` + `trial-balance`.
 **Aturan eksekutor:** 1 task = `tsc --noEmit` 0 = 1 commit (Indonesia); STOP condition per task = lewati+catat+lanjut; JANGAN tambah npm deps / ubah schema-sql / push / sentuh file yang sedang M oleh AI lain (cek `git status` dulu). Schema additive (renewal/KTP/gamifikasi/refund) WAJIB owner-approve dulu.
 
-## 8. Statistik
-97 temuan forensik · 84 keputusan owner (`03_KEPUTUSAN_OWNER`, 8 bagian) · 44+ task (peta §4) · 10 dossier domain + 4 desain fitur (tersebar di dossier 11/12/15/19). Sistem inti (uang/jurnal/auto-ops) KUAT secara arsitektur; pekerjaan tersisa = (a) perbaiki laporan (Fase 1), (b) implementasi flow yang owner mau tapi belum ada (renewal, tenant-pengawas, KTP, gamifikasi), (c) deploy bersih. Belum publish = momen ideal tuntaskan sebelum data hidup.
+## 9. Statistik
+97 temuan forensik · keputusan owner terkonsolidasi di `03_KEPUTUSAN_OWNER` · 44+ task · 10 dossier domain + 4 desain fitur. Sistem inti uang, jurnal, dan Auto-Ops kuat secara arsitektur; pekerjaan tersisa adalah memperbaiki laporan, menutup aturan bisnis yang belum diterapkan, lalu deploy bersih.

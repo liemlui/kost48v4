@@ -28,9 +28,8 @@
 | B-14 | 🟡 P3 | Reminder exact-match daysLeft → downtime di hari gelombang = gelombang hilang. | `auto-ops.service.ts:451-457` | **F3-13** window `<=` + dedupe gelombang |
 
 ## 4. Task
-- **F2-2 · FASE 2:** notif renew (request→admin, approve/reject→tenant, prompt H-7) — pola checkout-requests.
+- **F2-2 · FASE 2:** notif renew (request→admin, approve/reject→tenant, prompt H-10) + fallback antrean admin untuk tenant tanpa portal.
 - **F2-3 · FASE 2:** copy A17 dua varian (loser sudah-transfer vs belum). **F2-3b:** field bukti refund di sistem (lihat dossier 10/12).
-- **F2-15 · FASE 2:** tambah reminder H-10 (`REMINDER_DAYS [7,3,1,0]→[10,7,3,1,0]`).
 - **F2-17 · FASE 2:** notif booking-dibatalkan-sweeper + alasan.
 - **F3-1 · FASE 3:** coverage 5 event (ticket-assign+K-8 penerima, wifi, room-ready, sweeper) best-effort+dedupe. **F3-2:** inbox admin payment-submitted (pola notifyOwnerAdminOnCreate).
 - **F3-13:** N-02 + B-14. **F4-7:** pruning. **F4-2 (Phase 3):** push 4 kelompok (J-d) via outbox.
