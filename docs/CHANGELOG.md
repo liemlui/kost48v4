@@ -2,6 +2,18 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-T: Sabuk Pengaman Unit Test Finance (baseline terkunci)
+
+- **F1-T SELESAI** — pasang harness unit test zero-dependency (Node built-in `node --test`, tanpa npm install):
+  - `backend/test/unit/pricing.test.js` — `calculateRentByPricingTerm` (multiplier 13/45/75/100/550/1000% + pembulatan naik 5.000), `roundUpToNearest`, `isUtilitiesIncludedForPricingTerm`.
+  - `backend/test/unit/periode.test.js` — `calculatePeriodEnd` (end eksklusif) + clamp akhir bulan (31 Jan +1bln → 28 Feb).
+  - Nilai assertion DIVERIFIKASI vs implementasi (`pricing.helper.ts`, `stays.helpers.ts`) sebelum ditulis.
+- Tambah script `package.json` → `test:unit`: `node --test "test/**/*.test.js"`. **Hasil: 6/6 PASS** via `npm run build && npm run test:unit`.
+- **Koreksi command:** `node --test test/` GAGAL di Node 22/Windows (dianggap modul) → semua docs (`05`, `07`, `08`) + script diganti ke pola glob `node --test "test/**/*.test.js"`.
+- Baseline finance terkunci sebelum F1-1R dst menyentuh kode uang.
+
+Status: tambah test + script + perbaikan docs; tidak mengubah kode aplikasi/DB.
+
 ## 2026-06-13 — Audit Traceability Root Docs + Router `_PETA_AI` + Penomoran 06-09 (docs-only)
 
 - **Buat `_PETA_AI.md`** — router 22 file root: §1 tabel "baca saat" + status akurasi, §2 anchor `file:baris` TERVERIFIKASI vs kode (`3c7ffe2`), §3 status defek, **§4 panduan EKSEKUSI OTONOM (YOLO)**: set file minimum + apa yang boleh jalan tanpa persetujuan vs hard-gate (schema/owner/push/install).

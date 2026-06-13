@@ -25,8 +25,8 @@
 
 ## 3. UNIT TEST (zero-dependency — pakai test runner BAWAAN Node, TANPA npm install)
 > Proyek belum punya jest. JANGAN install. Pakai `node --test` (Node ≥18) terhadap hasil build `dist/`. Test = file CommonJS di `backend/test/unit/`.
-**Cara jalankan:** `cd backend && npm run build && node --test test/` → harus semua PASS (hijau).
-**Tambah script (opsional, bukan dependensi):** di `package.json` → `"scripts": { "test:unit": "node --test test/" }`.
+**Cara jalankan:** `cd backend && npm run build && node --test "test/**/*.test.js"` → harus semua PASS (hijau). (Catatan: `node --test test/` GAGAL di Node 22/Windows — pakai pola glob ini.)
+**Script siap-pakai (sudah ditambahkan):** di `package.json` → `"test:unit": "node --test \"test/**/*.test.js\""` → jalankan `npm run test:unit`.
 
 ### File 1 — `backend/test/unit/pricing.test.js` (SIAP PAKAI — angka sudah diverifikasi dari kode)
 ```js
@@ -103,7 +103,7 @@ Di DB bersih + COA seeded + CashAccount Cash(1000)+Bank(1010) + periode OPEN:
 
 ## 6. GATE PER-TASK (centang sebelum commit task finance)
 - [ ] `tsc --noEmit` 0 error.
-- [ ] `node --test test/` semua PASS (kalau task menyentuh fungsi ber-test).
+- [ ] `npm run test:unit` (`node --test "test/**/*.test.js"`) semua PASS (kalau task menyentuh fungsi ber-test).
 - [ ] 5 invarian §1 yang relevan tetap true (cek via §4 endpoint).
 - [ ] Angka harapan task terpenuhi (lihat "selesai bila" di `08_CHECKLIST` / dossier 13).
 - [ ] Tidak menyentuh kode di DO-NOT-TOUCH §2.

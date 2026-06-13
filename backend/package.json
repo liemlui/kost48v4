@@ -15,6 +15,7 @@
     "start:debug": "npm run prisma:generate && npx nest start --debug --watch",
     "build": "npm run clean && npm run prisma:generate && npx tsc -p tsconfig.build.json && node -e \"const fs=require('fs');const p=require('path');const src='src/generated';const dst='dist/generated';if(fs.existsSync(src)){fs.cpSync(src,dst,{recursive:true})}\"",
     "build:local": "npm run build",
+    "test:unit": "node --test \"test/**/*.test.js\"",
     "start:prod": "node --max-old-space-size=256 dist/main.js",
     "build:prod": "npm ci && npm run build",
     "install:prod": "npm ci --omit=dev",

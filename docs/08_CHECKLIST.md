@@ -6,7 +6,7 @@
 1. Baca `00_BLUEPRINT.md` (orientasi) → navigasi via **`_PETA_AI.md`** (router + anchor terverifikasi §2; **eksekusi otonom/YOLO + hard-gate ada di §4**) → buka **dossier** yang ditunjuk task → baca Temuan + Task + UAT domain itu.
 2. **ANCHOR = PETUNJUK AWAL, bukan kebenaran.** `file:baris` di task ini bergeser tiap commit — **WAJIB konfirmasi dulu via grep nama fungsi/simbol**, baru edit. JANGAN edit baris secara buta. Anchor terverifikasi terakhir: `_PETA_AI §2`.
 3. Kerjakan **1 task = 1 commit**. Backend: `cd backend; npx tsc --noEmit` = 0 error. Frontend: `cd frontend; npm run build` (tsc+vite) pass.
-3b. **Task KEUANGAN (dossier 10/12/13) WAJIB lewati gate `05_VERIFIKASI_KEUANGAN.md`** sebelum commit: jalankan `node --test test/` (hijau) + cek invarian + angka harapan. `tsc 0` SAJA TIDAK CUKUP untuk finance.
+3b. **Task KEUANGAN (dossier 10/12/13) WAJIB lewati gate `05_VERIFIKASI_KEUANGAN.md`** sebelum commit: jalankan `node --test "test/**/*.test.js"` (hijau) + cek invarian + angka harapan. `tsc 0` SAJA TIDAK CUKUP untuk finance.
 4. Commit Bahasa Indonesia: `fix:`/`feat:`/`perf:`/`ui:`/`ops:`/`test:`. Lalu centang `[x]` di sini + tulis 1 baris di CHANGELOG.
 5. **Boleh jalan terus tanpa tanya** untuk task TANPA marker 🧬/[SCHEMA]/🧑 (semua sudah jelas di dossier). **STOP & lapor (jangan tebak)** HANYA bila: simbol/fungsi target tak ditemukan via grep / error tetap setelah 2× coba / butuh `npm install` / task ber-marker 🧬/[SCHEMA] (schema belum di-approve owner) / langkah 🧑 owner / file sedang dimodifikasi AI lain (`git status` dulu).
 
@@ -23,7 +23,7 @@
 ---
 ## FASE 1 — SEBELUM DEPLOY (uang & laporan benar) — WAJIB tuntas dulu
 - [x] **F1-0** Koreksi alamat docs → Surabaya Barat (SELESAI 2026-06-13).
-- [ ] **F1-T** 🛡️ PASANG SABUK PENGAMAN DULU — harness **05** · buat `backend/test/unit/pricing.test.js` + `periode.test.js` (kode SIAP-PAKAI di `05_VERIFIKASI_KEUANGAN.md §3`), `npm run build` lalu `node --test test/` → semua hijau. Zero npm install (pakai `node --test` bawaan). Selesai: test hijau = baseline finance terkunci sebelum sentuh kode.
+- [x] **F1-T** 🛡️ SABUK PENGAMAN TERPASANG (SELESAI 2026-06-13) — `backend/test/unit/pricing.test.js` + `periode.test.js` dibuat (kode dari `05 §3`, nilai diverifikasi vs kode), script `test:unit` ditambah. **6/6 test hijau** via `npm run build && npm run test:unit`. Baseline finance terkunci. Catatan: `node --test test/` GAGAL di Node 22/Windows → pakai `node --test "test/**/*.test.js"`.
 - [ ] **F1-1R** No-partial menyeluruh — dossier **10** · `payment-submissions.service.ts` approve booking/invoice-only + `invoice-payments.service.ts` create/update manual · DP atau pelunasan tepat saja; invoice-only/manual wajib lunas · nominal kurang→409, tsc 0.
 - [ ] **F1-2** Guard remove/update payment OCCUPIED — dossier **10** · `invoice-payments.service.ts:189,237` · 409 bila stay promoted/room OCCUPIED · selesai: remove stay promoted→409, booking RESERVED tetap bisa.
 - [ ] **F1-3** Perbaikan cashflow (F-01/05/19/20) — dossier **13 §6** (PECAH 4 sub-langkah F1-3a..d, before→after kode ada) · `accounting-reports.service.ts:731-915` · F1-3a deteksi kas via `cashAccountId!=null` · F1-3b opening filter '10' · F1-3c klasifikasi sekali (buang dead FIXED_ASSET) · F1-3d beginning=saldo akhir bln lalu · TIRU blok E-4 :837-862 (DO-NOT-TOUCH) · selesai: skenario emas harness §5 (operating-in=Σ kas-masuk, bukan AR; beginning+net=ending). Ekstrak classifier → `cashflow-classifier.test.js`.

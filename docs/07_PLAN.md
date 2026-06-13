@@ -29,7 +29,7 @@ Build dan verification gate:
 ```powershell
 Set-Location backend
 npm run build
-node --test test/
+node --test "test/**/*.test.js"
 
 Set-Location ../frontend
 npm run build
