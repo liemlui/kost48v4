@@ -1,48 +1,87 @@
-# KOST48 V5 — Active Checklist
-**Versi:** 2026-06-12 — pasca Audit Mega. Versi lama (V5.10.0, basi) diarsipkan di `archieve/CHECKLIST_V5100_STALE.md`.
-**Aturan:** file ini hanya berisi pekerjaan AKTIF. Item selesai dipindah ke `CHANGELOG.md`, bukan ditumpuk di sini.
+# KOST48 V5 — Checklist Eksekusi (untuk AI eksekutor)
+**Versi:** 2026-06-13 — pasca audit V3 + 84 keputusan owner + restruktur domain-dossier. Versi lama → `archieve/CHECKLIST_V5100_STALE.md`.
+**Cara pakai:** kerjakan task BERURUTAN dari atas. Tiap task tunjuk **dossier** tempat spesifikasi LENGKAP (aturan + lokasi kode + cara fix + UAT). Centang `[x]` saat selesai + verifikasi.
 
-## Prioritas #0 — Pasca-eksekusi Audit Mega (update 2026-06-12 sore)
-- [x] 24/24 FIX diterapkan AI eksekutor & diverifikasi Fable — commit e4a8c31..f9d10ac (PUSHED)
-- [x] **E-2 backfill DONE (DB UAT 5433):** 11 stay penghuni nyata (kamar OCCUPIED) diisi `initialMetersPromotedAt = checkInDate`; 1 booking RESERVED dikecualikan. Pre-state: `scripts/uat/E2_BACKFILL_PRESTATE_2026-06-12.txt`. Efek terverifikasi: okupansi finance 0% → 55% (11/20). ⚠️ Ulangi backfill yang sama di PRODUKSI saat deploy.
-- [x] **UAT M-07/M-09 PASS SEMUA** via `scripts/uat/UAT_M07_M09_CLEAN.ps1` (booking publik → tenant baru → approve tarif 2jt → DP recalc 600rb ✓M-09 → DP approved + expiresAt mati ✓M-12 → approve ulang 409 ✓ → pelunasan → promoted ✓M-07 + kamar OCCUPIED + jaminan 500rb). Artefak tes: stay #15 (kamar G2-003); stay #14 (booking sisa) dibiarkan auto-expire sweeper.
-- [x] **UAT siklus overstay §4.2 PASS PENUH** (stay tes #15, 2026-06-12 sore): pengingat H-3 ✓ → H-day (pengingat "HARI INI" + tiket EVICT_OVERSTAY) ✓ → H+1 forced checkout otomatis (COMPLETED, kamar MAINTENANCE + allowBookingWhileCleaning, tiket pembersihan, notif 🚪 tenant) ✓ → settlement PARTIAL_REFUND (potong 100rb + refund 400rb; jurnal POSTED `JE-AUTO-DEPOSIT-SETTLEMENT-15`; ledger 3 entri seimbang → saldo 0) ✓ → tutup tiket pembersihan → kamar AVAILABLE + flag reset ✓
-- [x] **Rekonsiliasi §4.4:** `reconciliation-lite` → ready=True, 15 stay, **mismatch=0**; ledger-backfill dry-run wouldCreate=0. Catatan by-design: 11 deposit demo lama belum punya jurnal liability (deposit sengaja dikecualikan dari auto-backfill agar tidak double-posting) + invoice demo #4 total 0 — keduanya PR data demo, bukan bug.
-- [x] **UAT renew penuh §4.3 PASS** (stay #1 Andi): request tenant → approve admin → invoice ISSUED 1.794.250 (RENT 1,7jt + 50 kWh×1.445 + 4 m³×5.500), periode menyambung 30 Jun→30 Jul tanpa gap, planned bergeser, approve ulang 409. Artefak: invoice INV-1-R-570953 (tunggakan wajar Andi).
-- [x] **Cross-check P&L vs trial balance PASS:** trial balance seimbang (104.494.250 = 104.494.250); P&L ledger Juni 3.894.250 vs operasional 3.794.250 — selisih tepat 100rb = pendapatan potongan deposit (4400) non-invoice, by design. Semua angka teruji sampai ke rupiah.
-- [x] **Eskalasi E-1/E-3/E-4/E-5/E-9 DIIMPLEMENTASIKAN + verifikasi runtime** (2026-06-12 larut; lihat CHANGELOG): guard global default-deny, jaminan check-in manual (ledger+jurnal), saldo kas dari jurnal, finance HELD, map cap + hapus kode mati.
-- [x] **5 skenario residual PASS runtime** (S1 A1-guard, S2 first-paid-wins+notif, S3 expiry live, S4 DP-forfeit H+1+jurnal, S5 kamar kotor blokir aktivasi) — `scripts/uat/UAT_RUNTIME_RESIDUAL.ps1` + `UAT_S5_DIRTY_ROOM.ps1`. Rekonsiliasi akhir: 21 stay mismatch=0.
+## 🤖 PROTOKOL AI EKSEKUTOR (baca tiap mulai)
+1. Baca `00_BLUEPRINT.md` (orientasi) → buka **dossier** yang ditunjuk task → baca bagian Temuan + Task + UAT domain itu.
+2. Kerjakan **1 task = 1 commit**. Backend: `cd backend; npx tsc --noEmit` = 0 error. Frontend: `cd frontend; npm run build` (tsc+vite) pass.
+2b. **Task KEUANGAN (dossier 10/12/13) WAJIB lewati gate `05_VERIFIKASI_KEUANGAN.md`** sebelum commit: jalankan `node --test test/` (hijau) + cek invarian + angka harapan. `tsc 0` SAJA TIDAK CUKUP untuk finance.
+3. Commit Bahasa Indonesia: `fix:`/`feat:`/`perf:`/`ui:`/`ops:`/`test:`. Lalu centang `[x]` di sini + tulis 1 baris di CHANGELOG.
+4. **STOP & lapor (jangan tebak)** bila: file tak ditemukan / posisi baris bergeser jauh / error setelah 2× coba / butuh `npm install` / butuh perubahan schema yang belum di-approve owner / file sedang dimodifikasi AI lain.
 
-## DEPLOY PRODUKSI — ikuti `06_DEPLOY_RUNBOOK.md`
-- [ ] Backup pg_dump → build → `prisma db push` + `bootstrap.sql` → **backfill E-2 produksi** → restart → smoke E-1 → baseline reconciliation → buat CashAccount
-- [ ] Set TZ server Asia/Jakarta (mitigasi E-6)
+## 🚫 LARANGAN MUTLAK
+- JANGAN tambah dependensi npm. JANGAN ubah `schema.prisma`/`sql/` TANPA approval owner (task ber-tanda [SCHEMA] perlu schema). JANGAN `git push` (owner yang push). JANGAN sentuh file yang muncul di `git status` sebagai milik AI lain — cek dulu.
+- JANGAN pakai PowerShell `Get-Content`/`Set-Content -Encoding utf8` untuk edit docs massal (merusak UTF-8). Pakai Edit tool.
+- JANGAN ubah logika payment/auto-ops/accounting di luar yang diminta task.
 
-## Ditunda sadar (bukan blocker)
-- [ ] E-6 timezone WIB modul staf · E-7 round-robin tiket · E-8 rangka unit test backend
+## ⚠️ KONTEKS PENTING
+- **Sistem BELUM publish** (DB = data testing, boleh dihapus). Deploy = FRESH, bukan migrasi. Semua tugas "perbaiki data lama" GUGUR.
+- **1 staf** → round-robin & leaderboard antar-staf DITUNDA. **Tenant = pengawas staf.** Bayar tunai+transfer. Lokasi: Surabaya Barat.
+- Keputusan owner mengikat: `03_KEPUTUSAN_OWNER.md`. Aturan bisnis = sumber kebenaran.
 
-## Prioritas #1b — Quick Wins UI/UX (BARU, 2026-06-12; detail `05_UIUX_AUDIT_2026-06-12.md`)
-- [ ] QW-1..QW-8 (filter default tagihan admin, H1 detail kamar, copy DP 30% di booking publik, lazy-load foto katalog, badge "Menunggu Pembayaran" portal, section home kosong, empty-state chart owner, sinkron angka Tagihan Saya)
-- [ ] Pekerjaan lebih besar: U-01 code-split API publik + skeleton; U-02 pagination katalog; U-08 keputusan IA /portal/bookings vs /portal/stay
+---
+## FASE 1 — SEBELUM DEPLOY (uang & laporan benar) — WAJIB tuntas dulu
+- [x] **F1-0** Koreksi alamat docs → Surabaya Barat (SELESAI 2026-06-13).
+- [ ] **F1-T** 🛡️ PASANG SABUK PENGAMAN DULU — harness **05** · buat `backend/test/unit/pricing.test.js` + `periode.test.js` (kode SIAP-PAKAI di `05_VERIFIKASI_KEUANGAN.md §3`), `npm run build` lalu `node --test test/` → semua hijau. Zero npm install (pakai `node --test` bawaan). Selesai: test hijau = baseline finance terkunci sebelum sentuh kode.
+- [ ] **F1-1R** No-partial menyeluruh — dossier **10** · `payment-submissions.service.ts` approve(:406-430)+invoice-only(:146-159) · replikasi gate dua-nominal-sah · selesai: DP/pelunasan/renewal-lunas OK, nominal kurang→409, tsc 0. STOP: struktur isBookingPath berubah.
+- [ ] **F1-2** Guard remove/update payment OCCUPIED — dossier **10** · `invoice-payments.service.ts:189,237` · 409 bila stay promoted/room OCCUPIED · selesai: remove stay promoted→409, booking RESERVED tetap bisa.
+- [ ] **F1-3** Perbaikan cashflow (F-01/05/19/20) — dossier **13 §6** (PECAH 4 sub-langkah F1-3a..d, before→after kode ada) · `accounting-reports.service.ts:731-915` · F1-3a deteksi kas via `cashAccountId!=null` · F1-3b opening filter '10' · F1-3c klasifikasi sekali (buang dead FIXED_ASSET) · F1-3d beginning=saldo akhir bln lalu · TIRU blok E-4 :837-862 (DO-NOT-TOUCH) · selesai: skenario emas harness §5 (operating-in=Σ kas-masuk, bukan AR; beginning+net=ending). Ekstrak classifier → `cashflow-classifier.test.js`.
+- [ ] **F1-4** Rasio (F-02 presedensi + F-18 kas/inventory) — dossier **13 §6** (before→after kode) · `:961,965,978,932-934` · kurung expenseRatio; kas→prefix'10'; inventory→'12'; currentLiab prefix 20-23 · selesai: beban1jt/rev4jt→**25** (bukan 1e8).
+- [ ] **F1-5** Deposit = kewajiban lancar (F-03) — dossier **13** · `:932-934` · prefix `['20','21','22','23']` · selesai: currentRatio turun wajar saat ada deposit HELD.
+- [ ] **F1-6** Occupancy rasio (F-04) — dossier **13** · `:979` · hitung inline (room operable vs stay promoted) · selesai: occupancyRatePercent>0 saat ada penghuni.
+- [ ] **F1-7** DRAFT bukan revenue (F-09) — dossier **13** · `reports.service.ts:31,45,309,377,485`+`finance.service.ts:66,187,311,316,436` · `status:{notIn:[DRAFT,CANCELLED]}` · LARANGAN: jangan ubah openInvoice/guard checkout.
+- [ ] **F1-8** Guard settlement deposit (F-24) — dossier **13 §6** (snippet siap) · `accounting-posting.service.ts:602` · TAMBAH cek receipt journal POSTED di awal, skip benign bila tak ada (JANGAN ubah jurnalnya) · selesai: akun 2000 tak bisa saldo debit; `deposit-reconciliation` MATCHED.
+- [ ] **F1-10** Kunci deposit = `Room.defaultDepositRupiah` (C3) — dossier **11** · `tenant-bookings.service.ts:341`+`stays.create:159` · abaikan override `dto.depositAmountRupiah`.
+- [ ] **F1-11** Booking expiry 3 jam flat (D2) — dossier **11** · `calculateBookingExpiry` · 3 jam murni dari createdAt, buang cutoff 21:00 WIB, samakan publik+portal.
+- [ ] **F2-8** Matikan endpoint draft jurnal manual (F-22/F-23, D-05) — dossier **13** · `accounting.controller.ts:207` · nonaktifkan/403 route draft + sembunyikan tombol UI.
+- [ ] **F1-9** 🧑 DEPLOY BERSIH (owner+AI pendamping) — dossier **04** · drop DB testing→migrate→bootstrap.sql→seed COA→periode OPEN→opening balance→CashAccount Cash(1000)+Bank(1010)→smoke E-1→baseline reconciliation. TANPA backfill data lama.
 
-<!-- KOST48_DOCS_SYNC_20260611_CHECKLIST_REWRITE -->
+## FASE 2 — PASCA DEPLOY (flow & model)
+- [ ] **F2-1** [BESAR][SCHEMA] Renewal DP penuh (GAP #2) — dossier **11 §5** (desain+state machine+7 UAT) · schema RenewRequest +5 status (owner-approve) + sweeper auto-ops · PRASYARAT: Fase 1 + F1-1R. STOP: schema belum approve.
+- [ ] **F2-2** Notif renew (request→admin, approve/reject→tenant, prompt H-7) — dossier **16** · salin pola `checkout-requests.service.ts:294-422`.
+- [ ] **F2-3** Copy A17 dua-varian (loser sudah-transfer vs belum) — dossier **16** · `payment-submissions.service.ts:840-847`.
+- [ ] **F2-3b** 🧬 Catat refund kalah-cepat di sistem (D-07) — dossier **10/16** · field bukti transfer + status + UI admin (schema owner-approve).
+- [ ] **F2-5** Tutup ghost-stock + konsolidasi util (I-02) — dossier **14** · `staff-field-reports.service.ts:478-505` pakai util lock+validasi dari `inventory-movements` · selesai: RETURN qty>kamar via adminReview→409.
+- [ ] **F2-6** Auto-tiket inspeksi saat cancel stay promoted (B-08) — dossier **12** · `stays.service.ts:768-790` salin blok dari `complete`.
+- [ ] **F2-9** KPI tiket double-count (K-6) — dossier **15** · `staff-performance.service.ts:174-184,209` · dasar ticketsDone=`resolvedAt` dlm bulan.
+- [ ] **F2-16** Perketat OWNER-only (D3) — dossier **18** · audit `@Roles` semua controller · OWNER-only: tutup/buka periode, user/staf mgmt, setelan kamar & harga, deposit/refund · ADMIN→403.
+- [ ] **F2-18** Model tenant-pengawas — dossier **15** · longgarkan `tickets.close` (staf boleh tutup, termasuk inspeksi→kamar siap, guard keselamatan tetap) + `StaffReview.status`+=PENDING_VERIFICATION (≤2 gate owner) + cakupan staf/fasilitas/admin (schema owner-approve).
+- [ ] **F2-11** Performa publik (V-1+W-02+W-03+UD-05) — dossier **17** · `App.tsx:13` lazy PublicGuestDashboard / CSS ring + skeleton detail + pagination 12 katalog + sticky CTA.
+- [ ] **F2-12** Sinyal tiket + aging (F-21/F-27) — dossier **13** · `finance.service.ts:93` kategori nyata+buang catch; aging `:73`/`reports:115` total−Σpayments.
+- [ ] **F2-14** Timezone WIB (F-25/E-6) — dossier **13** · `accounting-posting-helpers.ts:6-9` dateOnly WIB + `staff-performance`/`staff-routines` monthRange WIB. Jalankan awal bulan.
+- [ ] **F2-17** Notif booking-dibatalkan-sweeper (E3) — dossier **16** · `cancelEndedUnpaidStay`/`expireBookingTx` best-effort di LUAR tx.
 
-## Prioritas #1 — UAT end-to-end + rekonsiliasi data (keputusan owner D3)
-Checklist lengkap & detail langkah: `02_FOCUS_PLAN.md` §4.
+## FASE 3 — OPERASIONAL & VISIBILITAS
+- [ ] **F3-3** SEO dasar — dossier **17** · `index.html` OG+JSON-LD LodgingBusiness (alamat Surabaya Barat)+canonical + `public/robots.txt`+`sitemap.xml`. Target Lighthouse SEO ≥90.
+- [ ] **F3-4** Social proof home (D-09) — dossier **17** · endpoint publik agregat StaffReview rating≥4 (inisial) + count penghuni.
+- [ ] **F3-7** Occupancy heatmap (D-15: historis+berjalan+depan) — dossier **17** · komponen CSS grid + endpoint `/api/reports/occupancy-daily?from&to`.
+- [ ] **F3-14** 🧬 Tombol admin "tenant kabur" (B2) — dossier **12** · nunggak X hari+tak terhubung → checkout+potong deposit.
+- [ ] **F3-15** 🧬 Lacak barang abandoned 30 hari (B3) — dossier **12** · field `belongingsDeadline`+status ABANDONED+notif.
+- [ ] **F3-16** Paksa-checkout overstay nunggak (B4/O3) — dossier **12** · potong deposit; deposit kurang→sisa jadi PIUTANG (AR 1100).
+- [ ] **F3-17** 🧬 Upload+verifikasi KTP (E1) — dossier **18** · field KTP foto terproteksi + gate aktivasi kamar + hapus saat keluar (UU PDP).
+- [ ] **F3-18** Expense rutin auto-draft (G-c) — dossier **13** · job awal bulan buat DRAFT (gaji/listrik/air/internet/sewa/pajak) untuk konfirmasi admin.
+- [ ] **F3-19** SLA tiket + eskalasi (Q3/Q4) — dossier **15** · `Ticket.dueAt` per kategori (24j/3h/7h) + job eskalasi staf→admin→owner.
+- [ ] **F3-20** Auto-prompt review tenant→staf (I-b) — dossier **15** · trigger saat tiket tenant ditutup (`TenantStaffReviewPrompt` FE sudah ada).
+- [ ] **F3-21** Depresiasi otomatis bulanan (I-c) — dossier **13** · pindah dari manual ke auto-ops/auto-close.
+- [ ] **F3-1** Notif coverage 5 event + K-8 penerima — dossier **16** · ticket-assign, wifi, room-ready, sweeper-cancel, BARANG_PINDAH→assignee.
+- [ ] **F3-2** Inbox admin payment-submitted — dossier **16** · pola notifyOwnerAdminOnCreate.
+- [ ] **F3-9** Hierarki laporan (F-11/F-12/F-31) — dossier **13** · badge Formal/Estimasi + samakan filter unmapped.
+- [ ] **F3-10** Higiene jurnal (F-13/F-08/F-28) — dossier **13** · forfeit entryDate kejadian; entryNumber suffix VOID; race P2002 as-already-posted.
+- [ ] **F3-11** Lead source dropdown + foto via config (M-08/M-04) — dossier **17**.
+- [ ] **F3-12** Paket chart (V-2/UD-04/V-5/V-7) — dossier **17** · n<5 count, all-zero empty-state, palet Okabe-Ito.
+- [ ] **F3-13** Ops-hardening (B-06/B-07/B-11/B-12/B-14/N-02) — dossier **12/13/16** · forced-checkout cancel DRAFT, copy job, reminder window, dll.
 
-- [ ] 4.1 Siklus DP → pelunasan (6 skenario, termasuk regresi A1 dan DP forfeit H+1)
-- [ ] 4.2 Siklus kontrak habis → overstay (5 skenario, termasuk kamar kotor bisa dipesan)
-- [ ] 4.3 Renew & checkout normal (3 skenario, termasuk race renew vs noon-release)
-- [ ] 4.4 Rekonsiliasi data: deposit-ledger reconciliation-lite, backfill dry-run, auto-journal backfill, cross-check P&L vs trial balance
-- [ ] Temuan UAT dicatat → fix → baru izinkan auto-close tutup buku bulan berjalan
+## FASE 4 — FUTURE
+- [ ] **F4-1** 🧬 Unearned revenue PSAK 72 (F-15, sewa panjang) — dossier **13** · desain dulu.
+- [ ] **F4-9** 🧬 Gamifikasi/loyalitas tenant — dossier **19** (desain lengkap) · schema TenantPoint/RewardCatalog/Redemption · bangun setelah inti sehat.
+- [ ] **F4-2** PWA Web Push (4 kelompok event J-d) — dossier **16** · outbox+VAPID.
+- [ ] **F4-7** Pruning notifikasi >90 hari (N-04) — dossier **16**.
+- [ ] **F4-8** 🧬 Flow pindah kamar resmi (E4) — desain dulu.
 
-## Antrean berikutnya (setelah UAT lulus)
-- [ ] Pass H — audit flow Renew (race noon-release, interaksi model DP)
-- [ ] Pass I — audit flow Tiket & staf (guard role markDone/close, auto-assign, regex parsing)
-- [ ] Pass J — cross-check laporan + audit endpoint AI
-- [ ] Sisa Pass E — refresh token, invalidasi sesi saat suspend, matriks @Roles per endpoint
-- [ ] PWA + push notification (keputusan D2 — jangka menengah)
+## ⏸️ DITUNDA (1 staf — aktifkan saat staf ≥ 2)
+- [ ] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15**.
+- [ ] **F3-5** Leaderboard antar-staf (kartu rumus skor TETAP jalan) — dossier **15**.
 
-## Selesai hari ini (2026-06-11, ringkas)
-- [x] Dokumen peta fokus flow bisnis: `02_FOCUS_PLAN.md` (12 flow + 9 job, matriks kuat/lemah, keputusan D1–D4)
-- [x] D1: copy "denda" dihapus dari reminder overdue (`reminder-preview.service.ts`)
-- [x] D4: docs dipadatkan jadi 5 file aktif (00_GROUND_STATE, 01_FLOW_MAP, 02_FOCUS_PLAN, CHECKLIST, CHANGELOG ≈60 KB); contracts/plan/decisions/journal pra-audit + changelog lama → `archieve/`; `CLAUDE.md` dibuat
+> Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
+
+<!-- KOST48_DOCS_SYNC_20260613_CHECKLIST_DOSSIER -->

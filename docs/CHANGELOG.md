@@ -1,10 +1,34 @@
 # KOST48 V5 — Changelog
-**Versi:** 2026-06-12 — SIAP PRODUKSI: eskalasi E-1..E-5/E-9 + 5 skenario residual PASS + runbook deploy. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+**Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
+
+<!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Audit Forensik V3 + 84 Keputusan Owner + Restruktur Docs Domain-Dossier (READ-ONLY, belum sentuh kode aplikasi)
+
+### Audit forensik V3 (Fable 5, baca kode penuh per-baris)
+- **97 temuan** di atas 53 temuan V1: finance F-17..F-34 (cashflow salah-akun F-01 + kembarannya F-18 yang LOLOS fix V1, rasio, BS-MoM 0%, settlement deposit bisa liability negatif F-24, draft jurnal dead-end F-22/23), flow B-01..B-15, inventaris I-01..I-07 (ghost-stock admin-review I-02), KPI K-6..K-8, notif N-01..N-04 (copy A17 menyangkal dana N-01), marketing/UIUX M/UD, fondasi X.
+- **Koreksi atas V1:** COA 17→**38 akun**; GAP #1 ternyata SEBAGIAN tertutup gate A18 (rencana fix V1 berbahaya → diganti F1-1R); W-01 code-split sudah terpasang; M-25 round-robin BELUM fix (V1 keliru tandai FIX); M-19 jaminan check-in SUDAH fix (E-3).
+- **Temuan data-truth:** alamat — frontend "Jl. Hikmah V, Surabaya Barat (Pakuwon/PTC)" vs docs "Ngagel" → owner konfirmasi **Surabaya Barat benar**, docs dikoreksi (D-01).
+
+### 84 keputusan owner (wawancara 2026-06-13) → `03_KEPUTUSAN_OWNER.md` (8 bagian)
+- **TERBESAR: sistem BELUM publish** (DB = data testing) → deploy = FRESH bersih, bukan migrasi; semua tugas "perbaiki data lama" (F-24 historis, E-2 backfill) GUGUR.
+- No-partial menyeluruh · deposit selalu tetap · booking expiry 3 jam flat · OWNER-only 4 area · **1 staf** (round-robin/leaderboard ditunda) · **tenant = pengawas staf** (staf tutup tiket sendiri, tenant menilai, owner menindak) · bayar tunai+transfer · reminder H-10 · KTP gate aktivasi · tenant-kabur · barang abandoned 30 hari · expense rutin auto-draft · SLA tiket 24j/3h/7h · depresiasi otomatis · kapitalisasi >500rb · push 4 event · keluar-awal sewa hangus · **gamifikasi/loyalitas tenant** (poin→reward, dicatat akurat).
+- Renewal (GAP #2) berspesifikasi penuh: tenant lama prioritas s/d hari-H tanpa wajib DP; di hari-H belum DP → kamar dibuka first-paid; DP 30% → grace H+7.
+
+### Restruktur docs → DOMAIN-DOSSIER (lebih mudah dipahami AI eksekutor, hemat token)
+- **Struktur final:** 5 inti (`00_BLUEPRINT` pintu masuk + indeks/peta-eksekusi/auto-ops/matrix-teori · `01_GROUND_STATE` · `02_FLOW_MAP` · `03_KEPUTUSAN_OWNER` sumber-kebenaran · `04_DEPLOY_AND_PWA`) + **10 dossier domain MANDIRI** (`10_PEMBAYARAN_INVOICE` … `19_GAMIFIKASI_LOYALITAS`; tiap dossier = aturan+peta kode+temuan+task+desain+UAT domain itu) + CHANGELOG/CHECKLIST.
+- Dibubarkan ke dossier lalu diarsipkan ke `archieve/_DEPRECATED_*`: 11 file audit forensik, ACTION_PLAN, 3 desain, CONTRACTS, + 5 docs lama (WORK_PLAN, AUDIT_REPORT, DECISIONS_LOG, JOURNAL, BMI_PLAN).
+- `CHECKLIST.md` ditulis ulang sebagai **daftar eksekusi berurutan untuk AI lemah** (protokol kerja + larangan + tiap task: dossier rujukan·file·aksi·kriteria selesai·STOP). `CLAUDE.md` + `01_GROUND_STATE` diperbarui ke struktur baru.
+- Perbaikan teknis: encoding UTF-8 dinormalisasi (perbaiki mojibake+BOM yang sempat muncul dari tooling PowerShell, termasuk CHANGELOG lama yang sudah corrupt).
+
+### Status
+Kode aplikasi BELUM disentuh (audit read-only). Rencana eksekusi siap di CHECKLIST + dossier. Prioritas: Fase 1 (uang & laporan benar) → deploy bersih → Fase 2+. Tidak ada commit/push.
+
+
 
 <!-- KOST48_DOCS_SYNC_20260612_DOCS_SIMPLIFICATION_V2 -->
 ## 2026-06-12 — Simplifikasi & Update Docs — FLOW_MAP V2 + 6 Flow Baru + Arsip
 
-### Update besar `docs/01_FLOW_MAP.md` (V2)
+### Update besar `docs/02_FLOW_MAP.md` (V2)
 - **Koreksi 5 bagian basi:**
   - §0.1: "TANPA rate-limit" → rate-limit SUDAH ADA (V5.12.2)
   - §3.2: PARTIAL payment ditandai sebagai GAP #1, cross-ref ke §15
@@ -125,7 +149,7 @@ Dokumentasi + 1 string copy. No schema change. TypeScript backend PASS.
 - **D1:** Tanpa denda keterlambatan → kata "denda" dihapus dari reminder overdue (`reminder-preview.service.ts`). Line `PENALTY` tetap untuk potongan manual.
 - **D2:** Notifikasi in-app saja; arah jangka menengah PWA push.
 - **D3:** Prioritas berikutnya = UAT end-to-end + rekonsiliasi data (checklist `02_FOCUS_PLAN.md` §4).
-- **D4:** Docs dipadatkan: aktif kini hanya 5 file ±60 KB — `00_GROUND_STATE.md` (ditulis ulang ringkas), `01_FLOW_MAP.md` (eks 05), `02_FOCUS_PLAN.md` (eks 07, baru: 12 flow + matriks fokus + strategi token), `CHECKLIST.md` (ditulis ulang), `CHANGELOG.md` (entri V5.11.0+). Diarsipkan ke `archieve/`: 01_CONTRACTS, 02_PLAN, 03_DECISIONS_LOG, 04_JOURNAL, 06_AUDIT_PASS_AB, GROUND_STATE/CHECKLIST basi V5.10.0, CHANGELOG lama. `CLAUDE.md` root dibuat sebagai pintu masuk sesi.
+- **D4:** Docs dipadatkan: aktif kini hanya 5 file ±60 KB — `01_GROUND_STATE.md` (ditulis ulang ringkas), `02_FLOW_MAP.md` (eks 05), `02_FOCUS_PLAN.md` (eks 07, baru: 12 flow + matriks fokus + strategi token), `CHECKLIST.md` (ditulis ulang), `CHANGELOG.md` (entri V5.11.0+). Diarsipkan ke `archieve/`: 01_CONTRACTS, 02_PLAN, 03_DECISIONS_LOG, 04_JOURNAL, 06_AUDIT_PASS_AB, GROUND_STATE/CHECKLIST basi V5.10.0, CHANGELOG lama. `CLAUDE.md` root dibuat sebagai pintu masuk sesi.
 
 <!-- KOST48_DOCS_SYNC_20260611_V5122_FRONTEND_RATELIMIT_PASSCE -->
 ## 2026-06-11 — V5.12.2 Frontend DP/Jaminan + Rate Limiting + Audit Pass C/E/P3
