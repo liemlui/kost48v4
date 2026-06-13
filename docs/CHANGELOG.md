@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-14: timezone WIB untuk bucketing tanggal (F-25/E-6, sebagian)
+
+- **`accounting-posting-helpers.dateOnly` → WIB (UTC+7):** entryDate jurnal kini dibucket per tanggal kalender WIB (dulu komponen UTC) → transaksi dini hari WIB (00:00–07:00) tak lagi jatuh ke tanggal/bulan kemarin. Hasil = UTC-midnight dari tanggal WIB, konsisten dengan batas periode laporan akuntansi (`Date.UTC(y,m,1)`). Saldo per-entry tak berubah → **trial-balance tetap balanced** (terverifikasi runtime).
+- **`staff-performance.monthRange` → batas WIB-instant:** bebas timezone server (di server UTC/cPanel perhitungan local lama meleset ±7 jam di tepi bulan). No-op di server WIB.
+- **Sisa (ditunda):** `staff-routines.startOfLocalDate` (penentuan "hari ini" untuk rutin) belum di-WIB-kan — perlu analisis semantik perbandingan field `@db.Date` agar penjadwalan rutin tak rusak. Aman selama server WIB.
+- Gate: `tsc` 0 · unit 13/13 · trial-balance balanced.
+
 ## 2026-06-14 — F2-12: sinyal tiket hidup lagi + aging pakai sisa tagihan (F-21/F-27, UAT LULUS)
 
 `finance.service.ts`:

@@ -5,7 +5,11 @@ export type AutoSourceType = (typeof AUTO_SOURCE_TYPES)[number];
 
 export function dateOnly(value: Date | string) {
   const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  // F2-14 (F-25/E-6): bucket per TANGGAL WIB (UTC+7), bukan komponen UTC — agar transaksi
+  // dini hari WIB (00:00–07:00) tak jatuh ke tanggal/bulan kemarin. Hasil = UTC-midnight dari
+  // tanggal kalender WIB, konsisten dengan batas periode laporan akuntansi (Date.UTC(y,m,1)).
+  const wib = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return new Date(Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth(), wib.getUTCDate()));
 }
 
 export async function mappedDepositStaySourceIds(prisma: PrismaService): Promise<Set<number>> {

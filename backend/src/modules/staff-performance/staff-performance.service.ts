@@ -7,16 +7,25 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateStaffWorkAuditDto } from './dto/staff-performance.dto';
 
 function monthRange(month?: string) {
-  const source = month && /^\d{4}-\d{2}$/.test(month) ? `${month}-01T00:00:00` : undefined;
-  const start = source ? new Date(source) : new Date();
-  if (!source) start.setDate(1);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setMonth(end.getMonth() + 1);
+  // F2-14 (E-6): batas bulan dihitung dalam WIB (UTC+7), bebas dari timezone server
+  // (di server UTC seperti cPanel, perhitungan local lama salah ±7 jam di tepi bulan).
+  let year: number;
+  let mon0: number; // 0-based
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    year = Number(month.slice(0, 4));
+    mon0 = Number(month.slice(5, 7)) - 1;
+  } else {
+    const wibNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    year = wibNow.getUTCFullYear();
+    mon0 = wibNow.getUTCMonth();
+  }
+  // WIB 00:00 tanggal-1 sebagai instant UTC = Date.UTC(...) − 7 jam.
+  const start = new Date(Date.UTC(year, mon0, 1) - 7 * 60 * 60 * 1000);
+  const end = new Date(Date.UTC(year, mon0 + 1, 1) - 7 * 60 * 60 * 1000);
   return {
     start,
     end,
-    key: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`,
+    key: `${year}-${String(mon0 + 1).padStart(2, '0')}`,
   };
 }
 
