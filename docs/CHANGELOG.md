@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — Auto-ops cron eksternal (cPanel/Passenger idle-sleep) — endpoint token-protected
+
+Host owner (IDwebhost) konfirmasi: shared hosting **Passenger TIDAK always-on** (proses Node di-idle/restart saat sepi; tak ada keep-alive/min-instances), tapi **Cron Job didukung**. `setInterval` in-process auto-ops jadi tak andal di sana → digerakkan cron eksternal.
+- **`GET /api/auto-ops/cron`** baru (`@Public`, tanpa JWT): validasi token rahasia `process.env.AUTO_OPS_CRON_TOKEN` via header `X-Cron-Token` ATAU query `?token=`; salah/kosong → **403**. Sukses → `runAll` (membangunkan app sekaligus). Endpoint admin `POST /api/auto-ops/run` (JWT) tetap untuk manual.
+- **Deploy shared hosting:** set `AUTO_OPS_ENABLED=false` (matikan timer) + `AUTO_OPS_CRON_TOKEN=<rahasia>`, pasang cPanel **Cron** tiap 5–10 mnt: `curl -fsS -H "X-Cron-Token: <token>" https://domain/api/auto-ops/cron`. (VPS/always-on: `AUTO_OPS_ENABLED=true`, cron opsional.)
+- Docs `04_DEPLOY_AND_PWA.md §D` (#4 terjawab) + `scripts/make-deploy.mjs` (`.env.example` + README-DEPLOY) diperbarui.
+- **UAT lokal LULUS:** tanpa/ salah token → 403; header & query benar → 200 + `runAll`; `AUTO_OPS_ENABLED=false` → timer in-process OFF (cron jadi penggerak tunggal). `tsc` 0.
+
 ## 2026-06-13 — F2-1 inc.3: sweeper auto-ops renewal HIBRIDA (EXPIRED_PRIORITY + FORFEITED, UAT LULUS)
 
 Sweeper baru di `auto-ops.service.ts` (wired ke `runAll`, jalan tiap 5 menit) — **kebijakan HIBRIDA** (keputusan owner 2026-06-13):

@@ -12,7 +12,7 @@
 - [ ] Semua commit di `origin/main`; `npx tsc --noEmit` backend & frontend = 0 error.
 - [ ] Fase 1 di `08_CHECKLIST.md` selesai, termasuk harness finance dan rekonsiliasi.
 - [ ] Owner mengonfirmasi database target masih kosong/testing dan menyetujui pembuatan ulang. Snapshot `pg_dump` boleh dibuat sebagai pengaman, tetapi **tidak untuk dimigrasikan** ke produksi baru.
-- [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`, `AUTO_OPS_ENABLED=true`, `AUTO_OPS_INTERVAL_MINUTES`.
+- [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `GET /api/auto-ops/cron` (Bagian D).
 - [ ] Canonical frontend: `https://app.kost48surabaya.com`. `CORS_ORIGIN` dan `FRONTEND_URL` pakai host ini.
 
 ### 1. Build
@@ -214,10 +214,12 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 
 ## Bagian D — Publish ke cPanel (host owner — DIKONFIRMASI MAMPU 2026-06-13)
 
-**Kesiapan host (owner cek 2026-06-13):** Node.js App ✅ (versi dukung) · PostgreSQL ✅ · SSH ✅ · build di server ✅ · AutoSSL ✅. Resource: upgrade bila kurang (ideal RAM ≥512MB-1GB). **Belum dipastikan:** #4 apakah Node app **always-on** atau **idle-sleep** (Passenger).
+**Kesiapan host (owner cek 2026-06-13):** Node.js App ✅ (versi dukung) · PostgreSQL ✅ · SSH ✅ · build di server ✅ · AutoSSL ✅. Resource: upgrade bila kurang (ideal RAM ≥512MB-1GB). **#4 TERJAWAB (IDwebhost 2026-06-14):** shared hosting Passenger **TIDAK always-on** (proses Node di-idle/restart saat sepi; tak ada minimum-instances/keep-alive). **Cron Job DIDUKUNG** via cPanel menu "Cron Jobs". → Auto-ops WAJIB digerakkan cron eksternal (in-process timer tak andal di idle-sleep).
 
-**Status kode:** ✅ Combined single-server SUDAH dibangun (entry `dist/main.js` serve `client/` + API). ✅ Paket deploy ramping & script cPanel tersedia.
-- **Auto-ops di idle-sleep:** in-process `setInterval` hanya jalan saat proses hidup. Jika Passenger tidur saat idle → (TODO) tambah endpoint cron ber-secret (`POST /api/auto-ops/run-cron`, `x-cron-secret`) + cPanel **Cron Job** ~10 menit. Jika always-on → cukup `AUTO_OPS_ENABLED=true`.
+**Status kode:** ✅ Combined single-server SUDAH dibangun (entry `dist/main.js` serve `client/` + API). ✅ Paket deploy ramping & script cPanel tersedia. ✅ **Endpoint cron auto-ops SUDAH dibuat.**
+- **Auto-ops via cron (SELESAI):** di shared hosting set **`AUTO_OPS_ENABLED=false`** (matikan setInterval in-process yang tak andal) + **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. Endpoint publik token-protected: **`GET /api/auto-ops/cron`** dengan header `X-Cron-Token: <rahasia>` (atau query `?token=<rahasia>`). Panggilan ini sekaligus membangunkan app + menjalankan `runAll`. cPanel **Cron Jobs** tiap 5–10 menit:
+  `curl -fsS -H "X-Cron-Token: <rahasia>" https://domain/api/auto-ops/cron >/dev/null 2>&1` (fallback wget: `wget -q -O /dev/null "https://domain/api/auto-ops/cron?token=<rahasia>"`).
+  Token salah/kosong → 403. (Di VPS/always-on boleh sebaliknya: `AUTO_OPS_ENABLED=true`, cron opsional.)
 
 **Runbook cPanel (combined, RAMPING):**
 1. **LOKAL:** `npm run make-deploy` → hasil folder `deploy/` (backend source + frontend prebuilt `client/`, TANPA node_modules; + `kost48-deploy.tgz`). Frontend tak perlu dibangun di server.
@@ -225,10 +227,10 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 3. **Upload** isi `deploy/` ke folder app cPanel (File Manager extract `kost48-deploy.tgz`, atau git).
 4. **Setup Node.js App**: pilih versi Node, set **Application startup file = `dist/main.js`**.
 5. **SSH (di Node venv): `npm run cpanel:setup`** → `npm ci` + build (prisma generate engine Linux + tsc) + `prune --omit=dev` (ramping). `frontend/node_modules` TIDAK perlu di server.
-6. **Env** (cPanel "Environment Variables"): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), `AUTO_OPS_ENABLED=true`. (PORT diatur Passenger.)
+6. **Env** (cPanel "Environment Variables"): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), **`AUTO_OPS_ENABLED=false`** (shared hosting: digerakkan cron, bukan setInterval), **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. (PORT diatur Passenger.)
 7. **Schema+seed (SSH, sekali): `npm run cpanel:migrate`** (= `prisma db push`) → `psql "<DATABASE_URL>" -f sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` → seed **OWNER** (INSERT bcryptjs) → login OWNER lalu seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount.
 8. **Restart App** (Passenger pakai `dist/main.js`). **AutoSSL** domain → HTTPS (PWA penuh).
-9. **Auto-ops**: pastikan always-on, atau pasang cron (lihat di atas).
+9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `GET /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0.
 
 ⚠️ **Ganti password OWNER** dari `admin123`. ⚠️ Jika host ternyata MySQL-only / no-SSH → cPanel batal, pakai VPS. (README ringkas juga ada di dalam paket: `deploy/README-DEPLOY.md`.)

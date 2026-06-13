@@ -36,7 +36,10 @@ writeFileSync(OUT + '/.env.example', [
   'JWT_SECRET="ganti-dengan-secret-acak-kuat-min-32-char"',
   'NODE_ENV=production',
   'CORS_ORIGIN="https://domain-anda"   # combined same-origin: cukup domainnya',
+  '# Auto-ops: VPS/always-on -> AUTO_OPS_ENABLED=true. Shared hosting/Passenger (idle-sleep)',
+  '# -> AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel Cron panggil GET /api/auto-ops/cron.',
   'AUTO_OPS_ENABLED=true',
+  'AUTO_OPS_CRON_TOKEN="ganti-token-cron-acak-panjang"   # wajib bila pakai cron (shared hosting)',
   '# PORT: cPanel/Passenger mengatur sendiri. VPS: set mis. PORT=3000.',
   '# FRONTEND_DIST_PATH opsional (default <backend>/client sudah benar).',
   '',
@@ -75,7 +78,9 @@ psql "<DATABASE_URL>" -f sql/bootstrap_v4_addendum.sql
 ## Setelah jalan
 - Buka https://domain-anda (frontend) — API di /api (same-origin, tanpa CORS).
 - AutoSSL/Let's Encrypt untuk HTTPS (PWA penuh).
-- **Auto-ops:** jika Node app "tidur saat idle" (Passenger), pasang cron panggil endpoint auto-ops; jika always-on cukup AUTO_OPS_ENABLED=true.
+- **Auto-ops (shared hosting/Passenger idle-sleep):** set AUTO_OPS_ENABLED=false + AUTO_OPS_CRON_TOKEN, lalu cPanel **Cron Jobs** tiap 5-10 menit:
+  \`curl -fsS -H "X-Cron-Token: <token>" https://domain-anda/api/auto-ops/cron >/dev/null 2>&1\`
+  (Always-on/VPS: cukup AUTO_OPS_ENABLED=true, cron opsional.)
 - **Yang TIDAK perlu di server:** \`frontend/node_modules\` (frontend sudah di-build di \`client/\`).
 `);
 
