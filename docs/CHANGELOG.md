@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-17: notif tenant saat booking/stay dibatalkan sweeper (E3, UAT LULUS)
+
+Saat auto-ops membatalkan booking/stay, tenant kini diberi tahu in-app — best-effort & **DI LUAR transaksi** (kegagalan notif tak me-rollback pembatalan; tak menotif bila tx gagal):
+- `cancelEndedUnpaidStay` (noon-release/H+1 auto-cancel/DP-forfeit) di-refactor: hasil tx ditangkap ke `cancelled`, lalu bila `true` panggil `notifyTenantStayCancelled` **setelah** commit. Logika pembatalan tak berubah.
+- `runBookingExpiry`: setelah `expireBookingTx` sukses, kirim notif "booking kedaluwarsa".
+- Helper `notifyTenantStayCancelled(stayId, reason)` baca `stay→tenant.user`+room; tenant tanpa akun portal di-skip (best-effort).
+- **UAT LULUS** (stay manufaktur 22, tenant berakun): kandidat ACTIVE+RESERVED+non-promoted+expired → sweeper batalkan → stay CANCELLED + room AVAILABLE + tenant terima "⚠️ Booking dibatalkan otomatis". `tsc` 0.
+
 ## 2026-06-14 — F2-16: perketat OWNER-only 4 area (D-17), ADMIN→403 (UAT LULUS)
 
 Audit `@Roles` + perketat 4 area sensitif jadi OWNER-only (ADMIN ditolak 403); operasi baca (GET) tetap untuk ADMIN/STAFF sesuai sebelumnya:

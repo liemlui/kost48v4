@@ -150,6 +150,13 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.expireBookingTx(booking.id, booking.roomId, options.actorUserId ?? null, options.source ?? 'AUTO_OPS_BOOKING_EXPIRY');
         expiredStayIds.push(booking.id);
+        // F2-17 (E3): notif tenant booking kedaluwarsa (belum bayar) — best-effort, DI LUAR tx.
+        await this.notifyTenantStayCancelled(
+          booking.id,
+          'Booking kedaluwarsa karena pembayaran tidak diterima dalam batas waktu.',
+        ).catch((err) =>
+          this.logger.warn(`Notif booking-expiry gagal (stay #${booking.id}): ${err instanceof Error ? err.message : String(err)}`),
+        );
       } catch (err) {
         // Audit M-22: satu stay gagal tidak boleh menghentikan job & job berikutnya.
         this.logger.warn(`AutoOps booking-expiry gagal untuk stay #${booking.id}: ${err instanceof Error ? err.message : String(err)}`);
@@ -229,7 +236,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       forfeitDownPayment?: boolean;
     },
   ): Promise<boolean> {
-    return this.prisma.$transaction(async (tx) => {
+    const cancelled = await this.prisma.$transaction(async (tx) => {
       const rows = await tx.$queryRaw<
         Array<{ status: string; roomId: number; tenantId: number; promotedAt: Date | null; depositPaid: number; depositAmount: number; dpPaid: number }>
       >(Prisma.sql`
@@ -369,6 +376,43 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       });
 
       return true;
+    });
+
+    // F2-17 (E3): notif tenant booking/stay dibatalkan sweeper — best-effort, DI LUAR tx
+    // (kegagalan notif tak boleh me-rollback pembatalan; tak menotif bila tx gagal).
+    if (cancelled) {
+      await this.notifyTenantStayCancelled(stayId, params.checkoutReason).catch((err) =>
+        this.logger.warn(`Notif booking-dibatalkan gagal (stay #${stayId}): ${err instanceof Error ? err.message : String(err)}`),
+      );
+    }
+    return cancelled;
+  }
+
+  /**
+   * F2-17 (E3): beri tahu tenant bahwa booking/stay-nya dibatalkan otomatis oleh sistem.
+   * Dipanggil DI LUAR transaksi pembatalan (best-effort). Stay sudah CANCELLED tetapi
+   * baris-nya tetap ada (tenantId/roomId masih bisa dibaca untuk menyusun pesan).
+   */
+  private async notifyTenantStayCancelled(stayId: number, reason: string) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id: stayId },
+      select: {
+        tenant: { select: { user: { select: { id: true } } } },
+        room: { select: { code: true, name: true } },
+      },
+    });
+    const tenantUserId = stay?.tenant?.user?.id;
+    if (!tenantUserId) return; // tenant tanpa akun portal → dilewati (tercatat di pemanggil bila perlu)
+    const roomLabel = stay?.room?.code
+      ? `${stay.room.code}${stay.room.name ? ` - ${stay.room.name}` : ''}`
+      : `kamar (stay #${stayId})`;
+    await this.appNotification.create({
+      recipientUserId: tenantUserId,
+      title: '⚠️ Booking dibatalkan otomatis',
+      body: `Booking/sewa Anda untuk ${roomLabel} dibatalkan oleh sistem. Alasan: ${reason} Bila ini keliru atau Anda ingin memesan kembali, silakan hubungi admin atau ajukan booking baru.`,
+      linkTo: '/portal/stay',
+      entityType: 'Stay',
+      entityId: String(stayId),
     });
   }
 

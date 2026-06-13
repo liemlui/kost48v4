@@ -59,7 +59,7 @@
 - [ ] **F2-11** Performa publik (V-1+W-02+W-03+UD-05) — dossier **17** · `App.tsx:13` lazy PublicGuestDashboard / CSS ring + skeleton detail + pagination 12 katalog + sticky CTA.
 - [ ] **F2-12** Sinyal tiket + aging (F-21/F-27) — dossier **13** · `finance.service.ts:93` kategori nyata+buang catch; aging `:73`/`reports:115` total−Σpayments.
 - [ ] **F2-14** Timezone WIB (F-25/E-6) — dossier **13** · `accounting-posting-helpers.ts:6-9` dateOnly WIB + `staff-performance`/`staff-routines` monthRange WIB. Jalankan awal bulan.
-- [ ] **F2-17** Notif booking-dibatalkan-sweeper (E3) — dossier **16** · `cancelEndedUnpaidStay`/`expireBookingTx` best-effort di LUAR tx.
+- [x] **F2-17** Notif booking-dibatalkan-sweeper (E3) (SELESAI 2026-06-14) — `auto-ops`: helper `notifyTenantStayCancelled` dipanggil **DI LUAR tx** (best-effort) setelah pembatalan sukses di `cancelEndedUnpaidStay` (noon-release/H+1/DP-forfeit) & `expireBookingTx` (booking-expiry). Tenant tanpa akun portal → di-skip. **✅ UAT LULUS** (stay manufaktur 22): sweeper batalkan → stay CANCELLED + room AVAILABLE + tenant terima "Booking dibatalkan otomatis". tsc 0.
 
 ## FASE 3 — OPERASIONAL & VISIBILITAS
 - [ ] **F3-3** SEO dasar — dossier **17** · `index.html` OG+JSON-LD LodgingBusiness (alamat Surabaya Barat)+canonical + `public/robots.txt`+`sitemap.xml`. Target Lighthouse SEO ≥90.
