@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-1 inc.2a UAT runtime LULUS (rent-loyalty terbukti)
+
+Diuji end-to-end vs DB UAT (backend kode-baru :3002, stay 5 / tenant.gita, rent 850rb):
+- CREATE → `PENDING_DECISION`, DP=**255.000** (30%), downPaymentDueDate=**2026-06-30** (hari-H).
+- DECIDE YA → `AWAITING_DP`. CONFIRM-DP → `DP_SECURED`, settlementDueDate=**2026-06-20** (DP+7).
+- APPROVE → `COMPLETED` + invoice renewal terbit, periode → 2026-07-30.
+- **Rent-loyalty D-16 TERBUKTI:** admin sengaja kirim `agreedRentAmountRupiah=2.000.000` → hasil sewa tetap **850.000** (kenaikan diabaikan).
+Backend UAT distop & dibersihkan; combined :3000 (LAN demo) tetap jalan.
+
 ## 2026-06-13 — F2-1 inc.2a: State Machine Renewal DP (CORE, admin-verified)
 
 - **`renew-requests.service.ts`** dibangun ulang ke state machine GAP #2:
