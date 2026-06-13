@@ -2,6 +2,10 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-9: KPI tiket berhenti dobel-hitung lintas bulan (K-6)
+
+`staff-performance.service.ts`: `ticketsDone` (basis skor KPI) kini disaring **`resolvedAt` ∈ bulan** + status DONE/CLOSED, bukan sekadar status pada query ber-OR (resolvedAt/updatedAt/createdAt). Akibatnya tiket yang diselesaikan bulan lalu tetapi sekadar di-update bulan ini **tidak lagi terhitung selesai dua kali**. Konsisten berdampak ke `positiveValue`, `proofRequired`, `missingTicketProof`, dan field `monthlyKpi.ticketsDone`. Query daftar/laporan (stockReports/roomChecks) tetap apa adanya. `tsc` 0 · unit 13/13.
+
 ## 2026-06-14 — F2-17: notif tenant saat booking/stay dibatalkan sweeper (E3, UAT LULUS)
 
 Saat auto-ops membatalkan booking/stay, tenant kini diberi tahu in-app — best-effort & **DI LUAR transaksi** (kegagalan notif tak me-rollback pembatalan; tak menotif bila tx gagal):

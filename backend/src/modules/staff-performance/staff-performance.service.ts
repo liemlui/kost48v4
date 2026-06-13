@@ -206,7 +206,17 @@ export class StaffPerformanceService {
 
     const routineDone = routines.filter((item) => item.status === StaffRoutineStatus.DONE);
     const routineNeedHelp = routines.filter((item) => item.status === StaffRoutineStatus.NEED_HELP);
-    const ticketsDone = tickets.filter((item) => ['DONE', 'CLOSED'].includes(item.status));
+    // F2-9 (K-6): tiket "selesai bulan ini" = DONE/CLOSED yang resolvedAt-nya jatuh di bulan ini.
+    // Query tickets ber-OR (resolvedAt/updatedAt/createdAt) untuk daftar & laporan; tapi basis KPI
+    // ticketsDone HARUS resolvedAt-in-month agar tak dobel-hitung lintas bulan (tiket lama yg sekadar
+    // di-update bulan ini tidak ikut terhitung selesai lagi).
+    const ticketsDone = tickets.filter(
+      (item) =>
+        ['DONE', 'CLOSED'].includes(item.status) &&
+        item.resolvedAt != null &&
+        item.resolvedAt >= range.start &&
+        item.resolvedAt < range.end,
+    );
     const stockReports = tickets.filter((item) => String(item.category ?? '').toUpperCase().includes('STOK'));
     const roomChecks = tickets.filter((item) => String(item.category ?? '').toUpperCase().includes('CEK_KAMAR'));
     const missingRoutineProof = routineDone.filter((item) => item.template.requiresPhoto && !item.photoUrl).length;
