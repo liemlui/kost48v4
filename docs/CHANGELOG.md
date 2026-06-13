@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-12: sinyal tiket hidup lagi + aging pakai sisa tagihan (F-21/F-27, UAT LULUS)
+
+`finance.service.ts`:
+- **F-21 (sinyal tiket):** `highSignalTickets` dulu memakai kategori `['URGENT','HIGH','EMERGENCY']` — `URGENT`/`HIGH` BUKAN `TicketCategory` valid → query selalu error & ditelan `.catch(()=>0)` (sinyal mati permanen). Kini pakai kategori nyata `['EMERGENCY','SECURITY']` + **catch dibuang** (error tak lagi disembunyikan).
+- **F-27 (aging/overdue):** di `businessHealth` & `ownerDashboard`, overdue tak lagi menjumlah `totalAmountRupiah` kotor; kini `$queryRaw` menghitung **sisa = total − Σ pembayaran** (invoice `PARTIAL` yang sudah dibayar sebagian tidak dihitung penuh). Konsisten dipakai utk nominal + count + skor + signal.
+- **UAT runtime LULUS:** `business-health` & `owner-dashboard` 200; sisipkan 1 tiket `EMERGENCY` OPEN → alert `ticket-high-signal` count=1 (terbukti aktif, sebelumnya selalu 0); owner-dashboard overdue 6 tagihan/Rp994.250. `tsc` 0 · unit 13/13.
+
 ## 2026-06-14 — F2-9: KPI tiket berhenti dobel-hitung lintas bulan (K-6)
 
 `staff-performance.service.ts`: `ticketsDone` (basis skor KPI) kini disaring **`resolvedAt` ∈ bulan** + status DONE/CLOSED, bukan sekadar status pada query ber-OR (resolvedAt/updatedAt/createdAt). Akibatnya tiket yang diselesaikan bulan lalu tetapi sekadar di-update bulan ini **tidak lagi terhitung selesai dua kali**. Konsisten berdampak ke `positiveValue`, `proofRequired`, `missingTicketProof`, dan field `monthlyKpi.ticketsDone`. Query daftar/laporan (stockReports/roomChecks) tetap apa adanya. `tsc` 0 · unit 13/13.

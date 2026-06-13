@@ -47,7 +47,7 @@ export class FinanceService {
       activeStayCount,
       invoiceAgg,
       openInvoiceAgg,
-      overdueAgg,
+      overdueRows,
       paymentAgg,
       expenseAgg,
       pendingPaymentCount,
@@ -70,11 +70,17 @@ export class FinanceService {
         _count: { id: true },
         where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
       }),
-      this.prisma.invoice.aggregate({
-        _sum: { totalAmountRupiah: true },
-        _count: { id: true },
-        where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] as any }, dueDate: { lt: today } },
-      }),
+      // F2-12 (F-27): aging/overdue = SISA tagihan (total − Σ pembayaran), bukan total kotor —
+      // invoice PARTIAL yang sudah dibayar sebagian tak lagi dihitung penuh.
+      this.prisma.$queryRaw<Array<{ overdue: bigint | null; cnt: bigint }>>`
+        SELECT COALESCE(SUM(i."totalAmountRupiah" - COALESCE(p.paid, 0)), 0)::bigint AS overdue,
+               COUNT(*)::bigint AS cnt
+        FROM "Invoice" i
+        LEFT JOIN (
+          SELECT "invoiceId", SUM("amountRupiah") AS paid FROM "InvoicePayment" GROUP BY "invoiceId"
+        ) p ON p."invoiceId" = i.id
+        WHERE i.status IN ('ISSUED', 'PARTIAL') AND i."dueDate" < ${today}
+      `,
       this.prisma.invoicePayment.aggregate({
         _sum: { amountRupiah: true },
         _count: { id: true },
@@ -90,7 +96,9 @@ export class FinanceService {
       this.prisma.checkoutRequest.count({ where: { status: CheckoutRequestStatus.PENDING as any } }),
       this.prisma.checkoutRequest.count({ where: { status: CheckoutRequestStatus.APPROVED as any } }),
       this.prisma.ticket.count({ where: { status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] as any } } }),
-      this.prisma.ticket.count({ where: { status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] as any }, category: { in: ['URGENT', 'HIGH', 'EMERGENCY'] as any } } }).catch(() => 0),
+      // F2-12 (F-21): kategori nyata (EMERGENCY/SECURITY) — 'URGENT'/'HIGH' bukan TicketCategory
+      // valid → query lama selalu error & ditelan .catch(()=>0) (sinyal mati). Catch dibuang.
+      this.prisma.ticket.count({ where: { status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] as any }, category: { in: ['EMERGENCY', 'SECURITY'] } } }),
       this.prisma.stay.aggregate({
         _sum: { depositPaidAmountRupiah: true, depositAmountRupiah: true },
         _count: { id: true },
@@ -112,7 +120,8 @@ export class FinanceService {
     const paidRupiah = Number(paymentAgg._sum.amountRupiah ?? 0);
     const expenseRupiah = Number(expenseAgg._sum.amountRupiah ?? 0);
     const openInvoiceRupiah = Number(openInvoiceAgg._sum.totalAmountRupiah ?? 0);
-    const overdueRupiah = Number(overdueAgg._sum.totalAmountRupiah ?? 0);
+    const overdueRupiah = Number(overdueRows[0]?.overdue ?? 0);
+    const overdueCount = Number(overdueRows[0]?.cnt ?? 0);
     const collectionRate = billedRupiah > 0 ? roundPercent((paidRupiah / billedRupiah) * 100) : 0;
     const expenseRatio = billedRupiah > 0 ? roundPercent((expenseRupiah / billedRupiah) * 100) : 0;
     const netCashFlowRupiah = paidRupiah - expenseRupiah;
@@ -120,7 +129,7 @@ export class FinanceService {
 
     let score = 100;
     if (pendingPaymentCount > 0) score -= Math.min(18, pendingPaymentCount * 3);
-    if (Number(overdueAgg._count.id ?? 0) > 0) score -= Math.min(25, Number(overdueAgg._count.id) * 4);
+    if (overdueCount > 0) score -= Math.min(25, overdueCount * 4);
     if (occupancyRate < 60) score -= 18;
     else if (occupancyRate < 80) score -= 8;
     if (collectionRate > 0 && collectionRate < 70) score -= 15;
@@ -131,7 +140,7 @@ export class FinanceService {
 
     const signals = [
       ...(pendingPaymentCount ? [{ severity: 'HIGH' as Severity, ruleId: 'payment-review', title: 'Pembayaran menunggu verifikasi', message: `${pendingPaymentCount} bukti pembayaran menahan cashflow/aktivasi.`, count: pendingPaymentCount, actionRoute: '/payment-submissions/review' }] : []),
-      ...(Number(overdueAgg._count.id ?? 0) ? [{ severity: 'HIGH' as Severity, ruleId: 'invoice-overdue', title: 'Tagihan overdue', message: `${Number(overdueAgg._count.id)} tagihan melewati jatuh tempo senilai Rp ${overdueRupiah.toLocaleString('id-ID')}.`, count: Number(overdueAgg._count.id), actionRoute: '/invoices' }] : []),
+      ...(overdueCount ? [{ severity: 'HIGH' as Severity, ruleId: 'invoice-overdue', title: 'Tagihan overdue', message: `${overdueCount} tagihan melewati jatuh tempo senilai Rp ${overdueRupiah.toLocaleString('id-ID')}.`, count: overdueCount, actionRoute: '/invoices' }] : []),
       ...(approvedCheckoutCount ? [{ severity: 'BLOCKER' as Severity, ruleId: 'checkout-approved-final', title: 'Checkout disetujui belum final', message: `${approvedCheckoutCount} checkout sudah disetujui dan perlu finalisasi terpisah.`, count: approvedCheckoutCount, actionRoute: '/stays' }] : []),
       ...(pendingRenewCount ? [{ severity: 'MEDIUM' as Severity, ruleId: 'renew-pending', title: 'Renew pending', message: `${pendingRenewCount} permintaan perpanjangan menunggu review.`, count: pendingRenewCount, actionRoute: '/renew-requests' }] : []),
       ...(pendingCheckoutCount ? [{ severity: 'MEDIUM' as Severity, ruleId: 'checkout-pending', title: 'Checkout request pending', message: `${pendingCheckoutCount} pengajuan keluar perlu review admin.`, count: pendingCheckoutCount, actionRoute: '/stays?status=BOOKINGS' }] : []),
@@ -298,7 +307,7 @@ export class FinanceService {
       expenseAgg,
       prevExpenseAgg,
       openInvoiceAgg,
-      overdueAgg,
+      overdueRows,
       wifiAgg,
       prevWifiAgg,
       pendingPaymentCount,
@@ -341,12 +350,16 @@ export class FinanceService {
         _count: { id: true },
         where: { status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
       }),
-      // Overdue
-      this.prisma.invoice.aggregate({
-        _sum: { totalAmountRupiah: true },
-        _count: { id: true },
-        where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] as any }, dueDate: { lt: today } },
-      }),
+      // Overdue — F2-12 (F-27): SISA tagihan (total − Σ pembayaran), bukan total kotor.
+      this.prisma.$queryRaw<Array<{ overdue: bigint | null; cnt: bigint }>>`
+        SELECT COALESCE(SUM(i."totalAmountRupiah" - COALESCE(p.paid, 0)), 0)::bigint AS overdue,
+               COUNT(*)::bigint AS cnt
+        FROM "Invoice" i
+        LEFT JOIN (
+          SELECT "invoiceId", SUM("amountRupiah") AS paid FROM "InvoicePayment" GROUP BY "invoiceId"
+        ) p ON p."invoiceId" = i.id
+        WHERE i.status IN ('ISSUED', 'PARTIAL') AND i."dueDate" < ${today}
+      `,
       // Current month WiFi
       this.prisma.wifiSale.aggregate({
         _sum: { soldPriceRupiah: true },
@@ -401,15 +414,17 @@ export class FinanceService {
     const occupancyScore = occupancyRate >= 85 ? 25 : occupancyRate >= 60 ? 20 : 10;
     const profitScore = netProfitMargin >= 30 ? 25 : netProfitMargin >= 10 ? 15 : 5;
     const cashScore = netCashFlow >= 0 ? 25 : 10;
-    const overduePenalty = Number(overdueAgg._count.id ?? 0) * 4;
+    const overdueCount = Number(overdueRows[0]?.cnt ?? 0);
+    const overdueRupiah = Number(overdueRows[0]?.overdue ?? 0);
+    const overduePenalty = overdueCount * 4;
     const pendingPenalty = pendingPaymentCount * 2;
     const score = Math.max(0, Math.min(100, occupancyScore + profitScore + cashScore + 25 - overduePenalty - pendingPenalty));
     const gradeMap = score >= 80 ? 'SEHAT' : score >= 60 ? 'PERHATIAN' : score >= 40 ? 'RISIKO' : 'KRITIS';
 
     // --- Signals ---
     const signals: Array<{ type: string; count: number; totalRupiah?: number; route: string }> = [];
-    if (Number(overdueAgg._count.id ?? 0) > 0) {
-      signals.push({ type: 'overdue', count: Number(overdueAgg._count.id), totalRupiah: Number(overdueAgg._sum.totalAmountRupiah ?? 0), route: '/invoices' });
+    if (overdueCount > 0) {
+      signals.push({ type: 'overdue', count: overdueCount, totalRupiah: overdueRupiah, route: '/invoices' });
     }
     if (pendingPaymentCount > 0) {
       signals.push({ type: 'pending_payment', count: pendingPaymentCount, route: '/payment-submissions/review' });
