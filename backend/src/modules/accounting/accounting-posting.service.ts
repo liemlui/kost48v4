@@ -622,6 +622,20 @@ export class AccountingPostingService {
         "Tidak ada refund/deduction deposit untuk dijurnal.",
       );
 
+    // F1-8 (F-24): jangan debit liability 2000 bila TIDAK ada jurnal PENERIMAAN deposit
+    // (credit 2000) untuk stay ini. Tanpa cek ini, settlement bisa membuat akun 2000
+    // bersaldo DEBIT (uang titipan "hilang" dari buku). Hanya MENAMBAH cek — jurnal tidak diubah.
+    const depositReceiptJournal = await tx.journalEntry.findFirst({
+      where: { sourceType: "DEPOSIT" as any, sourceId: String(stayId), status: "POSTED" as any },
+      select: { id: true },
+    });
+    if (!depositReceiptJournal)
+      return this.skip(
+        "DEPOSIT",
+        `SETTLEMENT:${stayId}`,
+        "Belum ada jurnal penerimaan deposit (akun 2000 tak pernah dikredit) untuk stay ini — settlement dilewati agar 2000 tidak jadi saldo debit (F-24).",
+      );
+
     const depositLiability = await findAccountByCodeTx(tx, "2000");
     if (!depositLiability)
       return this.skip(

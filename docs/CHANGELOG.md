@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-8: Guard Settlement Deposit (F-24)
+
+- **`accounting-posting.service.ts` `postDepositSettlementTx`**: TAMBAH pra-cek — sebelum men-debit liability 2000, pastikan ada jurnal PENERIMAAN deposit POSTED untuk stay (sourceType `DEPOSIT`, sourceId `String(stayId)`). Bila tak ada → `skip()` benign.
+- Menutup F-24: tanpa cek, settlement bisa men-debit 2000 tanpa kredit sebelumnya → akun liability 2000 bersaldo DEBIT (uang titipan "hilang" dari buku). Receipt yang sempat skip best-effort bisa di-backfill, lalu settlement jalan.
+- **Jurnal settlement TIDAK diubah** (patuh DO-NOT-TOUCH `05 §2` — hanya menambah CEK). Idempotensi & balance tetap.
+- Gate: `tsc --noEmit` 0 · `npm run test:unit` 13/13 hijau. ⏳ runtime (`deposit-reconciliation` MATCHED, 2000 tak debit) = gate pra-deploy F1-12.
+
+Status: perubahan kode finance (guard posting); tanpa schema/DB/perubahan jurnal.
+
 ## 2026-06-13 — F1-7: Invoice DRAFT Bukan Revenue (F-09)
 
 - **`reports.service.ts` (4 agregat revenue/billed)** + **`finance.service.ts` (5 agregat revenue ber-periodStart)**: filter `status: { not: CANCELLED }` → `status: { notIn: [DRAFT, CANCELLED] }` → DRAFT (belum diterbitkan) tidak lagi dihitung sebagai pendapatan/tagihan.
