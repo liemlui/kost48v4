@@ -9,6 +9,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
 import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
+import { ConfirmDownPaymentDto } from './dto/confirm-down-payment.dto';
 import { RenewRequestsService } from './renew-requests.service';
 
 @ApiTags('admin/renew-requests')
@@ -32,10 +33,18 @@ export class RenewRequestsAdminController {
     };
   }
 
+  @Post(':id/confirm-dp')
+  async confirmDp(@Param('id', ParseIntPipe) id: number, @Body() dto: ConfirmDownPaymentDto, @CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'DP perpanjangan dikonfirmasi; kamar aman untuk tenant lama, pelunasan maksimal H+7',
+      data: await this.renewRequestsService.confirmDownPayment(id, dto, user),
+    };
+  }
+
   @Post(':id/approve')
   async approve(@Param('id', ParseIntPipe) id: number, @Body() dto: ApproveRenewRequestDto, @CurrentUser() user: CurrentUserPayload) {
     return {
-      message: 'Permintaan perpanjangan disetujui, meter dicatat, dan tagihan perpanjangan diterbitkan',
+      message: 'Pelunasan diverifikasi, perpanjangan dieksekusi (meter dicatat, tagihan diterbitkan)',
       data: await this.renewRequestsService.approveRequest(id, dto, user),
     };
   }

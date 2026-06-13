@@ -7,6 +7,8 @@ import { RenewStayDto } from '../stays/dto/stay.dto';
 import { CreateRenewRequestDto } from './dto/create-renew-request.dto';
 import { ApproveRenewRequestDto } from './dto/approve-renew-request.dto';
 import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
+import { DecideRenewRequestDto } from './dto/decide-renew-request.dto';
+import { ConfirmDownPaymentDto } from './dto/confirm-down-payment.dto';
 import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus, PricingTerm } from '../../common/enums/app.enums';
 
 @Injectable()
@@ -53,12 +55,19 @@ export class RenewRequestsService {
       throw new ConflictException(`Selesaikan tagihan aktif sebelum mengajukan perpanjangan: ${refs}`);
     }
 
-    const existingPending = await this.prisma.renewRequest.findFirst({
-      where: { stayId: dto.stayId, status: RenewRequestStatus.PENDING },
+    const existingActive = await this.prisma.renewRequest.findFirst({
+      where: {
+        stayId: dto.stayId,
+        status: { in: [RenewRequestStatus.PENDING, RenewRequestStatus.PENDING_DECISION, RenewRequestStatus.AWAITING_DP, RenewRequestStatus.DP_SECURED] },
+      },
     });
-    if (existingPending) {
-      throw new ConflictException('Masih ada permintaan perpanjangan yang menunggu persetujuan');
+    if (existingActive) {
+      throw new ConflictException('Masih ada permintaan perpanjangan yang sedang berjalan');
     }
+
+    // F2-1: DP 30% perpanjangan = 30% × sewa SAAT INI (rent-loyalty D-16: tak naik saat renew).
+    const renewalRentRupiah = stay.agreedRentAmountRupiah ?? 0;
+    const downPaymentAmountRupiah = Math.round((renewalRentRupiah * 30) / 100);
 
     const request = await this.prisma.renewRequest.create({
       data: {
@@ -67,10 +76,83 @@ export class RenewRequestsService {
         requestedTerm: dto.requestedTerm,
         requestedCheckOutDate: dto.requestedCheckOutDate ? new Date(dto.requestedCheckOutDate) : undefined,
         requestNotes: dto.requestNotes,
+        // F2-1 state machine: mulai dari keputusan tenant (perpanjang atau tidak).
+        status: RenewRequestStatus.PENDING_DECISION,
+        downPaymentAmountRupiah,
+        downPaymentDueDate: stay.plannedCheckOutDate ?? undefined, // hari-H = batas prioritas tenant lama
       },
     });
 
     return request;
+  }
+
+  /**
+   * F2-1: tenant menjawab prompt perpanjangan (YA/TIDAK).
+   * YA → AWAITING_DP (prioritas tenant lama s/d hari-H, tunggu DP 30%).
+   * TIDAK → REJECTED_BY_TENANT (kamar dibuka publik mulai tanggal checkout — room-publication inc.2b).
+   */
+  async decideByTenant(id: number, dto: DecideRenewRequestDto, actor: CurrentUserPayload) {
+    if (actor.role !== UserRole.TENANT) {
+      throw new ForbiddenException('Hanya tenant yang dapat menjawab prompt perpanjangan');
+    }
+    const request = await this.prisma.renewRequest.findUnique({ where: { id } });
+    if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
+    if (request.tenantId !== actor.tenantId) throw new ForbiddenException('Anda bukan pemilik permintaan ini');
+    if (request.status !== RenewRequestStatus.PENDING_DECISION) {
+      throw new ConflictException('Permintaan perpanjangan ini sudah melewati tahap keputusan');
+    }
+
+    const nextStatus = dto.decision === 'YA' ? RenewRequestStatus.AWAITING_DP : RenewRequestStatus.REJECTED_BY_TENANT;
+    const updated = await this.prisma.renewRequest.update({
+      where: { id },
+      data: { status: nextStatus, requestNotes: dto.notes ?? request.requestNotes },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: dto.decision === 'YA' ? 'RENEW_DECIDE_YES' : 'RENEW_DECIDE_NO',
+      entityType: 'RenewRequest',
+      entityId: String(id),
+      oldData: request,
+      newData: updated,
+    });
+    return updated;
+  }
+
+  /**
+   * F2-1: admin verifikasi DP 30% perpanjangan sudah masuk (≤ hari-H) → DP_SECURED.
+   * Kamar aman untuk tenant lama; pelunasan paling lambat H+7 dari DP (settlementDueDate).
+   * (Pembatalan booking baru belum-bayar + jurnal DP = inc.2b.)
+   */
+  async confirmDownPayment(id: number, dto: ConfirmDownPaymentDto, actor: CurrentUserPayload) {
+    const request = await this.prisma.renewRequest.findUnique({ where: { id } });
+    if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
+    if (request.status !== RenewRequestStatus.AWAITING_DP) {
+      throw new ConflictException('DP hanya dapat dikonfirmasi saat status menunggu DP (AWAITING_DP)');
+    }
+    const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
+    const settlementDueDate = new Date(paidAt);
+    settlementDueDate.setUTCDate(settlementDueDate.getUTCDate() + 7); // pelunasan maks H+7 dari DP (R2)
+
+    const updated = await this.prisma.renewRequest.update({
+      where: { id },
+      data: {
+        status: RenewRequestStatus.DP_SECURED,
+        downPaymentPaidAt: paidAt,
+        settlementDueDate,
+        reviewNotes: dto.notes ?? request.reviewNotes,
+        reviewedById: actor.id,
+        reviewedAt: new Date(),
+      },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'RENEW_DP_SECURED',
+      entityType: 'RenewRequest',
+      entityId: String(id),
+      oldData: request,
+      newData: updated,
+    });
+    return updated;
   }
 
   /** Admin/owner approves a pending renew request and executes the renewal. */
@@ -85,9 +167,12 @@ export class RenewRequestsService {
 
       const request = await tx.renewRequest.findUnique({ where: { id } });
       if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
-      if (request.status !== RenewRequestStatus.PENDING) {
-        throw new ConflictException('Permintaan perpanjangan sudah diproses sebelumnya');
+      if (request.status !== RenewRequestStatus.DP_SECURED) {
+        throw new ConflictException('Pelunasan perpanjangan hanya dapat diproses setelah DP diamankan (status DP_SECURED).');
       }
+
+      // F2-1 rent-loyalty (D-16): harga sewa renewal = sewa SAAT INI (tak naik). Abaikan kenaikan via dto.
+      const currentStay = await tx.stay.findUnique({ where: { id: request.stayId }, select: { agreedRentAmountRupiah: true } });
 
       const finalPlannedCheckOutDate = dto.plannedCheckOutDate
         ?? (request.requestedCheckOutDate ? request.requestedCheckOutDate.toISOString() : undefined);
@@ -95,7 +180,7 @@ export class RenewRequestsService {
       const renewDto: RenewStayDto = {
         pricingTerm: request.requestedTerm as PricingTerm,
         plannedCheckOutDate: finalPlannedCheckOutDate,
-        agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
+        agreedRentAmountRupiah: currentStay?.agreedRentAmountRupiah ?? dto.agreedRentAmountRupiah,
         electricityReadingValue: dto.electricityReadingValue,
         waterReadingValue: dto.waterReadingValue,
         meterReadingAt: dto.meterReadingAt,
@@ -106,7 +191,7 @@ export class RenewRequestsService {
       const updated = await tx.renewRequest.update({
         where: { id },
         data: {
-          status: RenewRequestStatus.APPROVED,
+          status: RenewRequestStatus.COMPLETED,
           requestedCheckOutDate: finalPlannedCheckOutDate ? new Date(finalPlannedCheckOutDate) : request.requestedCheckOutDate,
           reviewNotes: dto.reviewNotes ?? null,
           reviewedById: actor.id,
@@ -147,8 +232,9 @@ export class RenewRequestsService {
   async rejectRequest(id: number, dto: RejectRenewRequestDto, actor: CurrentUserPayload) {
     const request = await this.prisma.renewRequest.findUnique({ where: { id } });
     if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
-    if (request.status !== RenewRequestStatus.PENDING) {
-      throw new ConflictException('Permintaan perpanjangan sudah diproses sebelumnya');
+    const rejectable = [RenewRequestStatus.PENDING, RenewRequestStatus.PENDING_DECISION, RenewRequestStatus.AWAITING_DP, RenewRequestStatus.DP_SECURED];
+    if (!rejectable.includes(request.status as RenewRequestStatus)) {
+      throw new ConflictException('Permintaan perpanjangan sudah final dan tidak dapat ditolak.');
     }
 
     const updated = await this.prisma.renewRequest.update({

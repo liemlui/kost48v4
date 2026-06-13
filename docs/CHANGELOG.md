@@ -2,6 +2,19 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-1 inc.2a: State Machine Renewal DP (CORE, admin-verified)
+
+- **`renew-requests.service.ts`** dibangun ulang ke state machine GAP #2:
+  - `createRequest` → `PENDING_DECISION` + set `downPaymentAmountRupiah` (30% × sewa SAAT INI — rent-loyalty D-16) + `downPaymentDueDate` = `plannedCheckOutDate` (hari-H).
+  - **tenant** `POST /tenant/renew-requests/:id/decide` (`DecideRenewRequestDto` YA/TIDAK): YA→`AWAITING_DP`; TIDAK→`REJECTED_BY_TENANT`.
+  - **admin** `POST /admin/renew-requests/:id/confirm-dp` (`ConfirmDownPaymentDto`): `AWAITING_DP`→`DP_SECURED` + `downPaymentPaidAt` + `settlementDueDate`=DP+7 (R2).
+  - **admin** `approve` kini gate `DP_SECURED` → `renewStayInTransaction` → `COMPLETED`; **rent-loyalty D-16 ditegakkan** (agreedRent = sewa saat ini, abaikan kenaikan via dto). `reject` dari state aktif → `REJECTED`.
+- `RenewRequestStatus` (TS enum `app.enums.ts`) ditambah 7 status (mirror schema inc.1).
+- Gate: `tsc --noEmit` 0 · unit 13/13. ⏳ **UAT 7 skenario (dossier 11 §5)** menyusul.
+- **Sisa (inc.2b/3/4):** room dibuka publik saat TIDAK/EXPIRED + batalkan booking baru + invoice DP terpisah & jurnal + hook payment-submission (DP via bukti bayar); sweeper auto-ops (EXPIRED_PRIORITY/FORFEITED); notif (F2-2).
+
+Status: fitur renewal (state machine inti, admin-verified); schema sudah di inc.1. Tanpa perubahan flow payment/accounting (DP/settlement masih admin-verify manual di tahap ini).
+
 ## 2026-06-13 — Paket deploy RAMPING + script cPanel (`make-deploy`, `cpanel:setup`)
 
 - **`npm run make-deploy`** (root, `scripts/make-deploy.mjs`): build frontend combined → folder **`deploy/`** = backend SOURCE (tanpa `node_modules`/`dist`/`src/generated`) + frontend prebuilt **`client/`** + `.env.example` + `README-DEPLOY.md` (+ `kost48-deploy.tgz`). **`frontend/node_modules` tak ikut ke server** (frontend sudah jadi).

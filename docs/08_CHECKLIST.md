@@ -44,7 +44,8 @@
 ## FASE 2 — PASCA DEPLOY (flow & model)
 - [ ] **F2-1** [BESAR][SCHEMA] Renewal DP penuh (GAP #2) — dossier **11 §5** · **schema approved S-1 (2026-06-13)**. ⏳ IN PROGRESS:
   - [x] **inc.1 schema** — RenewRequestStatus +7 status + RenewRequest +4 field (downPaymentAmountRupiah/PaidAt/DueDate/settlementDueDate); `prisma db push` UAT sync, tsc 0.
-  - [ ] **inc.2 service state machine** — createRequest→PENDING_DECISION; YA→AWAITING_DP+invoice DP 30%; DP≤hari-H→DP_SECURED; pelunasan≤H+7→`renewStayInTransaction` (rent-loyalty D-16: harga tetap); TIDAK→REJECTED_BY_TENANT.
+  - [x] **inc.2a service state machine CORE** (SELESAI 2026-06-13) — `renew-requests.service`: createRequest→`PENDING_DECISION` (+DP 30% & downPaymentDueDate=hari-H); tenant `POST :id/decide` YA→`AWAITING_DP`/TIDAK→`REJECTED_BY_TENANT`; admin `POST :id/confirm-dp`→`DP_SECURED` (+settlementDueDate=DP+7); admin `approve` (gate `DP_SECURED`)→`renewStayInTransaction`→`COMPLETED` (**rent-loyalty D-16: agreedRent=sewa saat ini**, abaikan kenaikan); reject dari state aktif. tsc 0. ⏳ UAT 7 skenario.
+  - [ ] **inc.2b** — room dibuka publik saat TIDAK/EXPIRED + batalkan booking baru belum-bayar + invoice DP 30% terpisah & jurnal + hook payment-submission (DP/settlement via bukti bayar, bukan admin-manual).
   - [ ] **inc.3 sweeper auto-ops** — AWAITING_DP lewat hari-H→EXPIRED_PRIORITY (buka publik); DP_SECURED gagal lunas H+7→FORFEITED (forced checkout+DP hangus+potong deposit).
   - [ ] **inc.4 notif (F2-2)** + 7 UAT skenario (dossier 11 §5).
 - [ ] **F2-2** Notif renew (request→admin, approve/reject→tenant, prompt H-10) — dossier **16** · salin pola `checkout-requests.service.ts:294-422`; sertakan fallback antrean admin untuk tenant tanpa akun portal.
