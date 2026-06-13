@@ -44,7 +44,7 @@
 - [ ] **F2-3** Copy A17 dua-varian (loser sudah-transfer vs belum) — dossier **16** · `payment-submissions.service.ts:840-847`.
 - [ ] **F2-3b** 🧬 Catat refund kalah-cepat di sistem — dossier **10/16** · field bukti transfer + status + UI admin (schema owner-approve).
 - [ ] **F2-5** Tutup ghost-stock + konsolidasi util (I-02) — dossier **14** · `staff-field-reports.service.ts:478-505` pakai util lock+validasi dari `inventory-movements` · selesai: RETURN qty>kamar via adminReview→409.
-- [ ] **F2-6** Auto-tiket inspeksi saat cancel stay promoted (B-08) — dossier **12** · `stays.service.ts:768-790` salin blok dari `complete`.
+- [x] **F2-6** Auto-tiket inspeksi saat cancel stay promoted (B-08) (SELESAI 2026-06-13) — `stays.cancel()`: bila `wasPromoted` & tak ada tiket inspeksi terbuka → buat CHECKOUT_INSPECTION (salin pola `complete()`), dedupe via openCleaningTicket. Kamar promoted tak lagi nyangkut MAINTENANCE. tsc 0. ⏳ UAT: cancel stay promoted → tiket muncul.
 - [ ] **F2-9** KPI tiket double-count (K-6) — dossier **15** · `staff-performance.service.ts:174-184,209` · dasar ticketsDone=`resolvedAt` dlm bulan.
 - [ ] **F2-16** Perketat OWNER-only (D-17) — dossier **18** · audit `@Roles` semua controller · OWNER-only: tutup/buka periode, user/staf mgmt, setelan kamar & harga, deposit/refund · ADMIN→403.
 - [ ] **F2-18** Model tenant-pengawas — dossier **15** · longgarkan `tickets.close` (staf boleh tutup, termasuk inspeksi→kamar siap, guard keselamatan tetap) + `StaffReview.status`+=PENDING_VERIFICATION (≤2 gate owner) + cakupan staf/fasilitas/admin (schema owner-approve).

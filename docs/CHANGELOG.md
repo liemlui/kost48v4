@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-6: Auto-tiket Inspeksi saat Cancel Stay Promoted (B-08)
+
+- **`stays.service.ts` `cancel()`**: ketika stay yang dibatalkan `wasPromoted` (sudah dihuni) dan kamar → MAINTENANCE, kini otomatis membuat tiket `CHECKOUT_INSPECTION` (pola sama dengan `complete()`), dedupe via `openCleaningTicket`.
+- Menutup B-08: sebelumnya cancel stay promoted menaruh kamar di MAINTENANCE TANPA tiket → kamar nyangkut selamanya (gate room-ready hanya buka lewat penutupan tiket inspeksi).
+- Booking RESERVED yang dibatalkan tetap → AVAILABLE tanpa tiket (tidak terpengaruh).
+- Gate: `tsc --noEmit` 0. ⏳ UAT: cancel stay promoted → tiket inspeksi muncul + kamar bisa di-ready-kan setelah tutup tiket.
+
+Status: perubahan kode lifecycle (tambah tiket); tanpa schema/DB.
+
 ## 2026-06-13 — GATE RUNTIME FASE 1: LULUS (backend dev + DB UAT 5433)
 
 Verifikasi `05 §4-5` dijalankan terhadap data UAT (`kost48_v3_pro`), backend `npm run start:dev`:

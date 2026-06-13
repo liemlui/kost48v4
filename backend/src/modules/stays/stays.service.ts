@@ -788,6 +788,50 @@ export class StaysService {
                 : RoomStatus.AVAILABLE,
           },
         });
+
+        // F2-6 (B-08): stay PROMOTED (sudah dihuni) yang dibatalkan → kamar MAINTENANCE
+        // WAJIB punya tiket CHECKOUT_INSPECTION (seperti complete()). Tanpa ini kamar
+        // nyangkut MAINTENANCE selamanya (gate room-ready hanya buka via tutup tiket inspeksi).
+        if (wasPromoted && !openCleaningTicket) {
+          const staffAssignee = await tx.user.findFirst({
+            where: { role: UserRole.STAFF, isActive: true },
+            orderBy: { id: "asc" },
+            select: { id: true },
+          });
+          const roomInfo = await tx.room.findUnique({
+            where: { id: existing.roomId },
+            select: { code: true, name: true },
+          });
+          const roomLabel = roomInfo?.code || roomInfo?.name || `Kamar #${existing.roomId}`;
+          const baseTicketNumber = `TIC-${new Date().getFullYear()}-CHK-${id}`;
+          let ticketNumber = baseTicketNumber;
+          let suffix = 1;
+          while (
+            await tx.ticket.findUnique({
+              where: { ticketNumber },
+              select: { id: true },
+            })
+          ) {
+            suffix += 1;
+            ticketNumber = `${baseTicketNumber}-${suffix}`;
+          }
+          await tx.ticket.create({
+            data: {
+              ticketNumber,
+              tenantId: existing.tenantId,
+              roomId: existing.roomId,
+              stayId: id,
+              title: `Cek kamar setelah pembatalan penghuni - ${roomLabel}`,
+              description: [
+                `Kamar ${roomLabel} dibatalkan saat sudah dihuni dan perlu dicek sebelum ditawarkan lagi.`,
+                "Cek kebersihan, kunci, barang tertinggal, inventaris kamar, kerusakan, dan foto kondisi akhir.",
+                "Jika semua aman, tandai pekerjaan selesai agar admin bisa menjadikan kamar siap ditempati kembali.",
+              ].join("\n"),
+              category: "CHECKOUT_INSPECTION",
+              assignedToId: staffAssignee?.id,
+            },
+          });
+        }
       }
 
       return {
