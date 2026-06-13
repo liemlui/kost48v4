@@ -2,6 +2,19 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-4: Rasio Keuangan Benar (F-02 presedensi + F-18 kas/AR)
+
+- **`financial-ratios.helper.ts` (baru, pure)** + `backend/test/unit/financial-ratios.helper.test.js` (12/12 hijau total).
+- **`accounting-reports.service.ts` `financialRatios()`**:
+  - F-02: `expenseRatio` presedensi `expense ?? 0 / revenue` (→ `expense × 100`, "1e8") diperbaiki ke `(expense/revenue)×100`. **Beban 1jt / rev 4jt = 25%.**
+  - F-18: `cashAndBank` `startsWith('11')` (AR/piutang) → prefix `'10'` (kas 1000/1010/1020).
+  - Inventory `startsWith('14')` (tak ada akun 14xx → selalu 0) → `'12'` (COA 1200).
+  - `currentLiabilities` `startsWith('21')` (melewatkan deposit 2000) → `['20','21','22','23']` → current/quick/cash ratio benar.
+- COA diverifikasi dari `constants/default-coa.ts` sebelum ubah prefix. Spec before→after → `13_AKUNTANSI §7`.
+- Gate: `tsc --noEmit` 0 · `npm run test:unit` 12/12 hijau. ⏳ runtime = gate pra-deploy F1-12.
+
+Status: perubahan kode finance (rasio) + helper + test; tanpa schema/DB.
+
 ## 2026-06-13 — F1-3: Perbaikan Cashflow (F-01/05/19/20) + classifier teruji
 
 - **Tulis `13_AKUNTANSI_LAPORAN §6`** — spec before→after 4 sub-langkah (sebelumnya checklist menunjuk §6 yang belum ada).

@@ -11,6 +11,13 @@ import {
   resolveProfitLossPeriod,
 } from './accounting-report-helpers';
 import { classifyCashflow, type CashflowLineInput } from './cashflow-classifier';
+import {
+  sumLinesByPrefix,
+  expenseRatioPercent,
+  CASH_PREFIXES,
+  INVENTORY_PREFIXES,
+  CURRENT_LIABILITY_PREFIXES,
+} from './financial-ratios.helper';
 
 function accountBalance(type: string, debit: number, credit: number) {
   if (type === 'ASSET' || type === 'EXPENSE' || type === 'COGS') return debit - credit;
@@ -902,10 +909,9 @@ export class AccountingReportsService {
     const currentAssets = lines
       .filter((l) => l.type === 'ASSET' && !String(l.code).startsWith('15'))
       .reduce((sum, l) => sum + l.balanceRupiah, 0);
-    // Current liabilities (LIABILITY type, code starts with 21)
-    const currentLiabilities = lines
-      .filter((l) => l.type === 'LIABILITY' && String(l.code).startsWith('21'))
-      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // F1-4 (F-03): kewajiban lancar = 2000(deposit)/2100/2200/2300, bukan hanya '21'
+    // (versi lama melewatkan deposit liability 2000 → semua liquidity ratio salah).
+    const currentLiabilities = sumLinesByPrefix(lines, 'LIABILITY', CURRENT_LIABILITY_PREFIXES);
     // Total liabilities
     const totalLiabilities = lines
       .filter((l) => l.type === 'LIABILITY')
@@ -930,14 +936,10 @@ export class AccountingReportsService {
     // Net profit from P&L
     const netProfit = pnl.totals?.netProfitRupiah ?? 0;
     const netProfitMargin = pnl.totals?.netProfitMarginPercent ?? 0;
-    // Cash & bank (ASSET code 1100-1199)
-    const cashAndBank = lines
-      .filter((l) => l.type === 'ASSET' && String(l.code).startsWith('11'))
-      .reduce((sum, l) => sum + l.balanceRupiah, 0);
-    // Inventory (ASSET code 14xx)
-    const inventory = lines
-      .filter((l) => l.type === 'ASSET' && String(l.code).startsWith('14'))
-      .reduce((sum, l) => sum + l.balanceRupiah, 0);
+    // F1-4 (F-18): Kas & bank = prefix '10' (1000/1010/1020), BUKAN '11' (1100=PIUTANG/AR).
+    const cashAndBank = sumLinesByPrefix(lines, 'ASSET', CASH_PREFIXES);
+    // F1-4: Persediaan = COA 1200 (prefix '12'); kode lama '14' tak pernah cocok → selalu 0.
+    const inventory = sumLinesByPrefix(lines, 'ASSET', INVENTORY_PREFIXES);
 
     const currentRatio = currentLiabilities > 0 ? Math.round((currentAssets / currentLiabilities) * 100) / 100 : 0;
     const quickRatio = currentLiabilities > 0 ? Math.round(((currentAssets - inventory) / currentLiabilities) * 100) / 100 : 0;
@@ -949,7 +951,8 @@ export class AccountingReportsService {
     const roce = (totalAssets - currentLiabilities) > 0
       ? Math.round((netProfit / (totalAssets - currentLiabilities)) * 10000) / 100
       : 0;
-    const expenseRatio = totalRevenue > 0 ? Math.round((pnl.totals?.expenseRupiah ?? 0 / totalRevenue) * 10000) / 100 : 0;
+    // F1-4 (F-02): perbaiki presedensi — (expense / revenue) × 100, bukan expense × 100.
+    const expenseRatio = expenseRatioPercent(pnl.totals?.expenseRupiah ?? 0, totalRevenue);
     const occupancyRate = bs.statement?.occupancyRate ?? 0;
 
     return {

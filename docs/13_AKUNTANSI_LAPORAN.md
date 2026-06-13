@@ -71,4 +71,13 @@ Lokasi: `accounting-reports.service.ts` fungsi `cashflow()` (anchor metode :731 
 - **DO-NOT-TOUCH:** blok saldo-kas E-4 `:838-847` (groupBy `cashAccountId`) — F1-3d MENIRU pola ini untuk prior-delta, jangan ubah.
 - **Verifikasi:** `backend/test/unit/cashflow-classifier.test.js` 10/10 hijau (F-01 terbukti: AR 1100 ≠ kas). ⏳ runtime skenario emas `05 §5` (operating-in = Σ kas, bukan AR; beginning+net=ending) → gate pra-deploy F1-12.
 
+## 7. F1-4 rasio — spec before→after (SELESAI 2026-06-13)
+Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financialRatios`). Helper murni: `financial-ratios.helper.ts`.
+- **F-02 expenseRatio (presedensi):** *before* `Math.round((pnl.totals?.expenseRupiah ?? 0 / totalRevenue) * 10000)/100` → `/` mengikat lebih kuat dari `??` ⇒ praktis `expense × 100` (beban 1jt → 1e8). *after* `expenseRatioPercent(expense, revenue)` = `(expense/revenue)×100`. **Selesai: beban 1jt / rev 4jt = 25.**
+- **F-18 cashAndBank:** *before* `code.startsWith('11')` (1100=AR dihitung kas) → *after* `CASH_PREFIXES=['10']` (1000/1010/1020).
+- **Inventory:** *before* `startsWith('14')` (tak ada akun 14xx → selalu 0) → *after* `INVENTORY_PREFIXES=['12']` (COA 1200).
+- **Current liabilities:** *before* `startsWith('21')` (lewatkan deposit 2000) → *after* `CURRENT_LIABILITY_PREFIXES=['20','21','22','23']` → semua liquidity ratio (current/quick/cash) benar.
+- **Verifikasi:** `financial-ratios.helper.test.js` (expenseRatio→25; kas 10≠AR 11; inventory 12; currentLiab termasuk deposit 2000). 12/12 hijau total. ⏳ runtime → gate pra-deploy F1-12.
+- COA acuan (`constants/default-coa.ts`): kas 1000/1010/1020 · AR 1100 · inventory 1200 · fixed 1500/1590 · liab 2000/2100/2200/2300.
+
 **Lintas-dossier:** jurnal booking/payment → dossier 10; jurnal deposit → dossier 12; keputusan owner → `03_KEPUTUSAN_OWNER.md`.
