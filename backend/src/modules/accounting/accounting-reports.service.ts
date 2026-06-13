@@ -792,6 +792,8 @@ export class AccountingReportsService {
       investingCashOut,
       financingCashIn,
       financingCashOut,
+      depositLiabilityIn,
+      depositLiabilityOut,
       operatingInTotal,
       operatingOutTotal,
     } = classified;
@@ -835,7 +837,9 @@ export class AccountingReportsService {
     const netOperating = operatingInTotal - operatingOutTotal;
     const netInvesting = investingCashIn - investingCashOut;
     const netFinancing = financingCashIn - financingCashOut;
-    const netCashflow = netOperating + netInvesting + netFinancing;
+    // F1-9 (F-10): perubahan liabilitas titipan (deposit) — di luar operating, tapi mempengaruhi kas.
+    const netDeposit = depositLiabilityIn - depositLiabilityOut;
+    const netCashflow = netOperating + netInvesting + netFinancing + netDeposit;
 
     // F1-3d: saldo awal periode = saldo akhir bulan lalu = opening CashAccount + Σ mutasi kas
     // POSTED SEBELUM periodStart. Lalu ending = beginning + netCashflow → invarian beginning+net=ending.
@@ -884,6 +888,13 @@ export class AccountingReportsService {
         totalInRupiah: financingCashIn,
         totalOutRupiah: financingCashOut,
         netRupiah: netFinancing,
+      },
+      depositLiability: {
+        // F1-9 (F-10): dana titipan (deposit jaminan) = perubahan liabilitas, BUKAN pendapatan operasional.
+        totalInRupiah: depositLiabilityIn,
+        totalOutRupiah: depositLiabilityOut,
+        netRupiah: netDeposit,
+        note: 'Dana titipan tenant (deposit jaminan). Bukan kas operasional yang bisa dipakai; perubahan liabilitas.',
       },
       totals: {
         netCashflowRupiah: netCashflow,

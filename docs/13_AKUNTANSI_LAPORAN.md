@@ -69,7 +69,8 @@ Lokasi: `accounting-reports.service.ts` fungsi `cashflow()` (anchor metode :731 
 - **F1-3c classify once (F-19/F-20):** *before* semua cash-line masuk `operatingInTotal/Out` LALU investing/financing ditambah lagi (double-count) + dead `cashCOACodes`(→null). *after* `classifyCashflow()` mengklasifikasi tiap `sourceType` SEKALI ke operating/investing/financing berbasis net debit−kredit; operating total hanya dari sumber operating.
 - **F1-3d beginning = akhir bln lalu:** *before* `cashBeginning = totalCashOpening || openingJournal`; `cashEnding = totalCashCurrent || …` → saldo all-time, `beginning+net ≠ ending`. *after* `cashBeginning = opening + Σ(mutasi kas POSTED entryDate < periodStart)`; `cashEnding = cashBeginning + netCashflow` → invarian **beginning+net=ending**.
 - **DO-NOT-TOUCH:** blok saldo-kas E-4 `:838-847` (groupBy `cashAccountId`) — F1-3d MENIRU pola ini untuk prior-delta, jangan ubah.
-- **Verifikasi:** `backend/test/unit/cashflow-classifier.test.js` 10/10 hijau (F-01 terbukti: AR 1100 ≠ kas). ⏳ runtime skenario emas `05 §5` (operating-in = Σ kas, bukan AR; beginning+net=ending) → gate pra-deploy F1-12.
+- **F1-9 (F-10) deposit bukan operating:** sourceType `DEPOSIT` dipisah ke section `depositLiability` (perubahan liabilitas titipan), keluar dari operating; `netCashflow` tetap memuat deposit (mempengaruhi kas). Skenario emas: sewa 1,7jt = operating-in; deposit 500rb = depositLiability-in.
+- **Verifikasi:** `backend/test/unit/cashflow-classifier.test.js` (F-01: AR 1100 ≠ kas; F1-9: DEPOSIT ≠ operating). Total `test:unit` 13/13 hijau. ⏳ runtime skenario emas `05 §5` (operating-in = Σ kas, bukan AR/deposit; beginning+net=ending) → gate pra-deploy F1-12.
 
 ## 7. F1-4 rasio — spec before→after (SELESAI 2026-06-13)
 Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financialRatios`). Helper murni: `financial-ratios.helper.ts`.

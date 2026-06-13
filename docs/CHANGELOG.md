@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-9: Deposit Bukan Operating Cashflow (F-10)
+
+- **`cashflow-classifier.ts`**: sourceType `DEPOSIT` (dana titipan) tidak lagi masuk operating (fallback) → kategori baru `depositLiabilityIn/Out` (perubahan liabilitas titipan). `netRupiah` tetap memuat deposit (mempengaruhi kas).
+- **`accounting-reports.service.ts` `cashflow()`**: tambah section `depositLiability` (totalIn/Out/net + catatan "bukan kas operasional yang bisa dipakai"); `netCashflow` kini = operating + investing + financing + deposit.
+- Koreksi test: sourceType nyata = `DEPOSIT` (bukan `DEPOSIT_RECEIVED`); test menegaskan deposit → `depositLiabilityIn`, `operatingInTotal` tidak terpengaruh.
+- Gate: `tsc --noEmit` 0 · `npm run test:unit` 13/13 hijau. ⏳ runtime skenario emas `05 §5` (sewa 1,7jt operating-in; deposit 500rb perubahan liabilitas) = gate pra-deploy F1-12.
+
+Status: perubahan kode finance (klasifikasi cashflow) + test; tanpa schema/DB.
+
 ## 2026-06-13 — F1-8: Guard Settlement Deposit (F-24)
 
 - **`accounting-posting.service.ts` `postDepositSettlementTx`**: TAMBAH pra-cek — sebelum men-debit liability 2000, pastikan ada jurnal PENERIMAAN deposit POSTED untuk stay (sourceType `DEPOSIT`, sourceId `String(stayId)`). Bila tak ada → `skip()` benign.

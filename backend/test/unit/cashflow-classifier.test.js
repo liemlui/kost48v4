@@ -37,10 +37,12 @@ test('classifyCashflow — kategori distinct tanpa double-count [F-19/F-20]', ()
   assert.strictEqual(r.netRupiah, 400000);          // 1.000.000-300.000-500.000+200.000
 });
 
-test('classifyCashflow — deposit titipan sementara operating (sampai F1-9)', () => {
+test('classifyCashflow — deposit (titipan) = perubahan liabilitas, BUKAN operating [F1-9/F-10]', () => {
   const r = C.classifyCashflow([
-    { sourceType: 'DEPOSIT_RECEIVED', coaCode: '1010', cashAccountId: 1, debitRupiah: 500000, creditRupiah: 0 },
+    { sourceType: 'INVOICE_PAYMENT', coaCode: '1010', cashAccountId: 1, debitRupiah: 1700000, creditRupiah: 0 }, // sewa
+    { sourceType: 'DEPOSIT',         coaCode: '1010', cashAccountId: 1, debitRupiah: 500000,  creditRupiah: 0 }, // titipan
   ]);
-  assert.strictEqual(r.operatingInTotal, 500000);
-  assert.strictEqual(r.netRupiah, 500000);
+  assert.strictEqual(r.operatingInTotal, 1700000);     // sewa 1,7jt = operating-in
+  assert.strictEqual(r.depositLiabilityIn, 500000);    // deposit 500rb = perubahan liabilitas (skenario emas 05 sec5)
+  assert.strictEqual(r.netRupiah, 2200000);            // keduanya tetap mempengaruhi kas
 });

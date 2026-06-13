@@ -23,9 +23,12 @@ export interface CashflowClassification {
   investingCashOut: number;
   financingCashIn: number;
   financingCashOut: number;
+  // F1-9 (F-10): deposit = dana titipan/liability, BUKAN operating. Section terpisah.
+  depositLiabilityIn: number;
+  depositLiabilityOut: number;
   operatingInTotal: number;
   operatingOutTotal: number;
-  netRupiah: number; // = total mutasi kas periode ini (operating+investing+financing)
+  netRupiah: number; // = total mutasi kas periode (operating+investing+financing+deposit)
 }
 
 /**
@@ -40,6 +43,8 @@ export function isCashLine(coaCode: string | null, cashAccountId: number | null)
 
 const INVESTING_SOURCES = new Set(['FIXED_ASSET', 'DEPRECIATION']);
 const FINANCING_SOURCES = new Set(['OPENING_BALANCE']);
+// F1-9 (F-10): deposit jaminan = perubahan liabilitas titipan, dipisah dari operating.
+const DEPOSIT_SOURCES = new Set(['DEPOSIT']);
 
 /**
  * F1-3c: klasifikasikan setiap sumber SEKALI ke satu kategori (operating/investing/financing)
@@ -67,6 +72,8 @@ export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassifica
   let investingCashOut = 0;
   let financingCashIn = 0;
   let financingCashOut = 0;
+  let depositLiabilityIn = 0;
+  let depositLiabilityOut = 0;
   let operatingInTotal = 0;
   let operatingOutTotal = 0;
 
@@ -78,8 +85,12 @@ export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassifica
     } else if (FINANCING_SOURCES.has(sourceType)) {
       if (data.net >= 0) financingCashIn += abs;
       else financingCashOut += abs;
+    } else if (DEPOSIT_SOURCES.has(sourceType)) {
+      // F1-9 (F-10): dana titipan — perubahan liabilitas, BUKAN operating.
+      if (data.net >= 0) depositLiabilityIn += abs;
+      else depositLiabilityOut += abs;
     } else {
-      // Operating: INVOICE_PAYMENT, WIFI_SALE, EXPENSE, DEPOSIT_* (sampai F1-9), fallback.
+      // Operating: INVOICE_PAYMENT, WIFI_SALE, EXPENSE, fallback.
       if (data.net >= 0) {
         operatingCashIn.push({ sourceType, amountRupiah: abs, count: data.count });
         operatingInTotal += abs;
@@ -91,7 +102,10 @@ export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassifica
   }
 
   const netRupiah =
-    operatingInTotal - operatingOutTotal + (investingCashIn - investingCashOut) + (financingCashIn - financingCashOut);
+    operatingInTotal - operatingOutTotal +
+    (investingCashIn - investingCashOut) +
+    (financingCashIn - financingCashOut) +
+    (depositLiabilityIn - depositLiabilityOut);
 
   return {
     operatingCashIn,
@@ -100,6 +114,8 @@ export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassifica
     investingCashOut,
     financingCashIn,
     financingCashOut,
+    depositLiabilityIn,
+    depositLiabilityOut,
     operatingInTotal,
     operatingOutTotal,
     netRupiah,
