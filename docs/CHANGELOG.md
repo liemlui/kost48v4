@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-12 rehearsal: Runbook Fresh-Deploy Schema+Bootstrap LULUS
+
+- Rehearsal di DB throwaway `kost48_v3_deploy_rehearsal` (5433): `prisma db push` → **41 tabel** (=41 model) · `sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` apply **BERSIH** (hanya NOTICE idempotent, 0 error) · terbentuk 2 unique index (`stay_one_active_per_room/tenant_uidx`), 7 check constraint, 8 trigger, 231 index. DB throwaway di-drop; **UAT utuh** (COA=37).
+- **Temuan F1-12:** DB fresh TIDAK punya user (bootstrap.sql tak buat User, tak ada seed script) → endpoint seed butuh auth admin. `04_DEPLOY §2` ditambah PRASYARAT langkah #0: buat OWNER pertama (INSERT bcrypt / seed script) + jalankan `bootstrap_v4_addendum.sql`.
+- F1-12 (deploy produksi nyata) tetap [ ] — menunggu owner + env produksi 5432/VPS. Runbook schema+bootstrap kini tervalidasi aman.
+
+Status: verifikasi runbook (DB throwaway, dibuang) + dokumentasi; tanpa perubahan kode aplikasi.
+
 ## 2026-06-13 — F2-1 inc.1: Schema Renewal DP (owner-approved S-1)
 
 - **Owner approval S-1** (`03_KEPUTUSAN_OWNER §S`): seluruh perubahan schema ADDITIVE disetujui (F2-1, F2-3b, F2-18, F3-14/15/17, F4-9).

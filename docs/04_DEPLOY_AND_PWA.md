@@ -28,10 +28,13 @@ Provision database produksi kosong `kost48_v3`. Bila database bernama sama sudah
 cd backend
 npx prisma db push
 psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap.sql
+psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
 ```
-bootstrap.sql idempotent (DROP IF EXISTS lalu CREATE).
+bootstrap.sql idempotent (DROP IF EXISTS lalu CREATE). **Rehearsal 2026-06-13 (DB throwaway 5433): `prisma db push`→41 tabel + `bootstrap.sql`+addendum apply BERSIH (0 error), 2 unique index + 7 check constraint + 8 trigger + 231 index terbentuk.** Aman dijalankan di produksi.
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
+
+> ⚠️ **PRASYARAT seed (temuan rehearsal F1-12): DB fresh TIDAK punya user.** `bootstrap.sql` tidak membuat User dan belum ada seed script. Endpoint seed (COA/period/opening/cashaccount) butuh auth ADMIN/OWNER. Maka langkah #0 sebelum seed: **buat user OWNER pertama** — INSERT manual ke tabel `"User"` (password bcrypt) ATAU sediakan seed script. Tanpa ini, runbook seed via API tidak bisa jalan. (Rekomendasi: tambahkan `prisma/seed.ts` minimal OWNER untuk produksi.)
 
 - [ ] Seed COA.
 - [ ] Buat periode OPEN dan opening balance produksi.
