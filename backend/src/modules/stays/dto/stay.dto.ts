@@ -146,6 +146,13 @@ export class RenewStayDto {
   @Min(0)
   agreedRentAmountRupiah?: number;
 
+  // F2-1 inc.2b: DP 30% sudah ditagih via invoice terpisah → kurangi rent-line invoice renewal
+  // sebesar ini (hindari dobel-charge). Stay.agreedRentAmountRupiah tetap penuh (rent-loyalty).
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  priorDownPaymentRupiah?: number;
+
   @IsNotEmpty({ message: 'Meter listrik terbaru wajib diisi sebelum perpanjangan disetujui' })
   @IsNumberString({}, { message: 'Meter listrik terbaru harus berupa angka' })
   electricityReadingValue!: string;

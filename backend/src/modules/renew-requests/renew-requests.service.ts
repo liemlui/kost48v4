@@ -102,20 +102,29 @@ export class RenewRequestsService {
       throw new ConflictException('Permintaan perpanjangan ini sudah melewati tahap keputusan');
     }
 
-    const nextStatus = dto.decision === 'YA' ? RenewRequestStatus.AWAITING_DP : RenewRequestStatus.REJECTED_BY_TENANT;
-    const updated = await this.prisma.renewRequest.update({
-      where: { id },
-      data: { status: nextStatus, requestNotes: dto.notes ?? request.requestNotes },
+    // TIDAK → REJECTED_BY_TENANT (kamar ikut flow checkout normal — keputusan owner #2 inc.2b).
+    if (dto.decision !== 'YA') {
+      const rejected = await this.prisma.renewRequest.update({
+        where: { id },
+        data: { status: RenewRequestStatus.REJECTED_BY_TENANT, requestNotes: dto.notes ?? request.requestNotes },
+      });
+      await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_NO', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: rejected });
+      return rejected;
+    }
+
+    // YA → terbitkan invoice DP 30% TERPISAH (inc.2b) + status AWAITING_DP. DP dibayar penuh via bukti.
+    const dpAmount = request.downPaymentAmountRupiah ?? 0;
+    if (!(dpAmount > 0)) throw new ConflictException('Nominal DP perpanjangan belum tersedia');
+    const { updated, dpInvoice } = await this.prisma.$transaction(async (tx) => {
+      const inv = await this.staysService.issueRenewalDownPaymentInvoiceTx(tx, request.stayId, dpAmount, actor);
+      const upd = await tx.renewRequest.update({
+        where: { id },
+        data: { status: RenewRequestStatus.AWAITING_DP, downPaymentInvoiceId: inv.id, requestNotes: dto.notes ?? request.requestNotes },
+      });
+      return { updated: upd, dpInvoice: inv };
     });
-    await this.audit.log({
-      actorUserId: actor.id,
-      action: dto.decision === 'YA' ? 'RENEW_DECIDE_YES' : 'RENEW_DECIDE_NO',
-      entityType: 'RenewRequest',
-      entityId: String(id),
-      oldData: request,
-      newData: updated,
-    });
-    return updated;
+    await this.audit.log({ actorUserId: actor.id, action: 'RENEW_DECIDE_YES', entityType: 'RenewRequest', entityId: String(id), oldData: request, newData: updated });
+    return { ...updated, downPaymentInvoice: { id: dpInvoice.id, invoiceNumber: dpInvoice.invoiceNumber, totalAmountRupiah: dpInvoice.totalAmountRupiah } };
   }
 
   /**
@@ -128,6 +137,17 @@ export class RenewRequestsService {
     if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
     if (request.status !== RenewRequestStatus.AWAITING_DP) {
       throw new ConflictException('DP hanya dapat dikonfirmasi saat status menunggu DP (AWAITING_DP)');
+    }
+    // inc.2b: DP wajib LUNAS via invoice terpisah (bukti pembayaran sudah di-approve → status PAID).
+    if (!request.downPaymentInvoiceId) {
+      throw new ConflictException('Invoice DP belum diterbitkan untuk permintaan ini.');
+    }
+    const dpInvoice = await this.prisma.invoice.findUnique({
+      where: { id: request.downPaymentInvoiceId },
+      select: { status: true },
+    });
+    if (!dpInvoice || dpInvoice.status !== InvoiceStatus.PAID) {
+      throw new ConflictException('DP belum lunas. Setujui dulu bukti pembayaran DP (invoice harus PAID) sebelum mengamankan kamar.');
     }
     const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
     const settlementDueDate = new Date(paidAt);
@@ -181,6 +201,8 @@ export class RenewRequestsService {
         pricingTerm: request.requestedTerm as PricingTerm,
         plannedCheckOutDate: finalPlannedCheckOutDate,
         agreedRentAmountRupiah: currentStay?.agreedRentAmountRupiah ?? dto.agreedRentAmountRupiah,
+        // inc.2b: DP 30% sudah ditagih invoice terpisah & lunas → kurangi rent-line invoice pelunasan.
+        priorDownPaymentRupiah: request.downPaymentAmountRupiah ?? 0,
         electricityReadingValue: dto.electricityReadingValue,
         waterReadingValue: dto.waterReadingValue,
         meterReadingAt: dto.meterReadingAt,

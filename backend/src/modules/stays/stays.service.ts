@@ -1039,6 +1039,61 @@ export class StaysService {
     }
   }
 
+  /**
+   * F2-1 inc.2b: terbitkan invoice DP 30% perpanjangan TERPISAH (ISSUED + jurnal).
+   * Dibayar PENUH via bukti bayar (no-partial); confirm-dp memverifikasi PAID sebelum DP_SECURED.
+   */
+  async issueRenewalDownPaymentInvoiceTx(
+    tx: Prisma.TransactionClient,
+    stayId: number,
+    downPaymentRupiah: number,
+    actor: CurrentUserPayload,
+  ) {
+    const stay = await tx.stay.findUnique({ where: { id: stayId } });
+    if (!stay) throw new NotFoundException("Stay tidak ditemukan");
+    if (stay.status !== StayStatus.ACTIVE) throw new ConflictException("Stay tidak aktif");
+    if (!(downPaymentRupiah > 0)) throw new ConflictException("Nominal DP perpanjangan tidak valid");
+
+    const invoiceNumber = `INV-${stay.id}-RDP-${Date.now().toString().slice(-6)}`;
+    const periodStart = startOfDay(new Date());
+    const periodEnd = stay.plannedCheckOutDate ? startOfDay(stay.plannedCheckOutDate) : periodStart;
+    const invoice = await tx.invoice.create({
+      data: {
+        invoiceNumber,
+        stayId: stay.id,
+        status: InvoiceStatus.DRAFT,
+        periodStart,
+        periodEnd,
+        dueDate: calculateDueDate(periodEnd),
+        notes: "DP 30% perpanjangan kontrak (dibayar penuh sebelum kamar diamankan).",
+        createdById: actor.id,
+      },
+    });
+    await tx.invoiceLine.create({
+      data: {
+        invoiceId: invoice.id,
+        lineType: InvoiceLineType.RENT as any,
+        description: "DP 30% perpanjangan masa sewa",
+        qty: 1,
+        unit: "paket",
+        unitPriceRupiah: downPaymentRupiah,
+        lineAmountRupiah: downPaymentRupiah,
+        sortOrder: 0,
+      },
+    });
+    const issued = await tx.invoice.update({
+      where: { id: invoice.id },
+      data: { totalAmountRupiah: downPaymentRupiah, status: InvoiceStatus.ISSUED, issuedAt: new Date() },
+    });
+    await this.accountingPosting.postInvoiceIssuedTx(tx, issued.id, actor.id).catch((err) => {
+      this.logger.warn(
+        `Auto Journal Lite gagal untuk invoice DP renewal #${issued.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return undefined;
+    });
+    return issued;
+  }
+
   async renewStayInTransaction(
     tx: Prisma.TransactionClient,
     id: number,
@@ -1105,6 +1160,10 @@ export class StaysService {
 
     const rentAmount =
       dto.agreedRentAmountRupiah ?? stay.agreedRentAmountRupiah;
+    // F2-1 inc.2b: bila DP 30% sudah ditagih via invoice terpisah, rent-line invoice renewal
+    // = sisa (rent − DP). Stay.agreedRentAmountRupiah tetap penuh (di update bawah).
+    const priorDownPayment = Math.max(0, Number(dto.priorDownPaymentRupiah ?? 0));
+    const settlementRentLine = Math.max(0, Number(rentAmount ?? 0) - priorDownPayment);
 
     const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
     const periodStart = logicalPeriodStart;
@@ -1131,11 +1190,13 @@ export class StaysService {
       data: {
         invoiceId: invoice.id,
         lineType: InvoiceLineType.RENT as any,
-        description: `Perpanjangan masa sewa ${effectivePricingTerm}`,
+        description: priorDownPayment > 0
+          ? `Perpanjangan masa sewa ${effectivePricingTerm} (sisa setelah DP Rp ${priorDownPayment.toLocaleString('id-ID')})`
+          : `Perpanjangan masa sewa ${effectivePricingTerm}`,
         qty: 1,
         unit,
-        unitPriceRupiah: rentAmount,
-        lineAmountRupiah: rentAmount,
+        unitPriceRupiah: settlementRentLine,
+        lineAmountRupiah: settlementRentLine,
         sortOrder: 0,
       },
     });
@@ -1170,7 +1231,7 @@ export class StaysService {
     });
 
     const renewalTotalAmountRupiah =
-      Number(rentAmount ?? 0) +
+      Number(settlementRentLine) +
       Number(electricitySummary.amountRupiah ?? 0) +
       Number(waterSummary.amountRupiah ?? 0);
 

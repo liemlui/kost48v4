@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-1 inc.2b: invoice DP TERPISAH + rent-line pelunasan dikurangi (UAT runtime LULUS)
+
+Model "DP invoice terpisah" (keputusan owner inc.2b): DP 30% = **invoice sendiri yang dibayar penuh** sebelum kamar diamankan; pelunasan = invoice renewal untuk **sisa (rent − DP) + meter**. Tidak ada perubahan validasi booking — kamar dibuka via **flow checkout normal** (keputusan owner #2).
+- **`stays.service.ts`** `issueRenewalDownPaymentInvoiceTx(tx,…)` baru: terbitkan invoice DP 30% (DRAFT→ISSUED + Auto Journal Lite). `renewStayInTransaction` kini terima `priorDownPaymentRupiah` → rent-line pelunasan = `max(0, rent − DP)`; **`Stay.agreedRentAmountRupiah` tetap PENUH** (rent-loyalty utuh, DP cuma pisah timing bayar).
+- **`renew-requests.service.ts`**: `decideByTenant` **YA** → transaksi terbitkan invoice DP + set `downPaymentInvoiceId` + `AWAITING_DP`; `confirmDownPayment` kini **wajib invoice DP `PAID`** (gagal 409 bila belum lunas) sebelum `DP_SECURED`; `approveRequest` teruskan `priorDownPaymentRupiah` ke renewal.
+- Schema: `RenewRequest.downPaymentInvoiceId Int?` (di-`db push` ke UAT 5433; produksi via deploy bersih F1-12).
+- **UAT end-to-end LULUS** (stay 8/tenant.joko, rent 1,6jt): DP=**480.000** (invoice INV-8-RDP, dibayar penuh) → confirm-dp **blokir 409 sebelum lunas, lolos sesudah** → settlement rent-line=**1.120.000** (=rent−DP) + listrik 86.700 + air 27.500 → stay rent **tetap 1.600.000**, periode → 2026-07-30. Trial-balance **balanced**. Gate: `tsc` 0 · unit 13/13.
+- **Sisa F2-1:** inc.3 sweeper auto-ops (`AWAITING_DP` lewat hari-H→`EXPIRED_PRIORITY`; `DP_SECURED` gagal H+7→`FORFEITED`); inc.4 notif (F2-2) + 6 UAT skenario sisa.
+
 ## 2026-06-13 — F2-1 inc.2a UAT runtime LULUS (rent-loyalty terbukti)
 
 Diuji end-to-end vs DB UAT (backend kode-baru :3002, stay 5 / tenant.gita, rent 850rb):
