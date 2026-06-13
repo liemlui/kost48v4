@@ -171,3 +171,27 @@ Draft tiket/laporan staf setelah Phase 0-3 stabil. Wajib: IndexedDB, idempotency
 3. Upload orphan file — tambahkan cleanup job sebelum skala besar.
 4. Rate limiter in-memory — multi-replica perlu Redis.
 5. Entry JS di atas target 250 KiB.
+
+---
+
+## Bagian C — Go-live Lokal/LAN (self-host, WiFi kos)
+
+Untuk kos 1 lokasi tanpa VPS: jalankan stack di PC kos, akses dari HP via WiFi kos. **Prasyarat:** DB `kost48_v3` sudah di-provision + seed (lihat Bagian A / dijalankan 2026-06-13 di server lokal).
+
+**Perintah (zero-dependency, IP LAN auto-deteksi):**
+```bash
+# Backend (mode produksi, DB kost48_v3, CORS LAN auto, auto-ops on)
+cd backend && npm run golive          # = scripts/golive.mjs -> npm run start
+
+# Frontend (build menuju IP LAN, lalu serve di 0.0.0.0:5173)
+cd frontend && npm run build:lan && npm run golive
+```
+- `backend npm run golive`: set `NODE_ENV=production`, `DATABASE_URL` (derive `.env` → `kost48_v3`), `CORS_ORIGIN` dari semua IPv4 LAN terdeteksi `:5173`, `PORT=3000`, `AUTO_OPS_ENABLED=true`.
+- `frontend npm run build:lan`: deteksi IP LAN → tulis `.env.production.local` (`VITE_API_BASE_URL=http://<ip>:3000/api`, gitignored) → build. `golive`: `vite preview --host 0.0.0.0 --port 5173`.
+
+**Firewall (sekali, sebagai Administrator):**
+```powershell
+New-NetFirewallRule -DisplayName "KOST48 LAN backend 3000" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3000
+New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5173
+```
+**Akses HP:** WiFi kos → `http://<ip-lan>:5173` (mis. `http://192.168.1.200:5173`). **Persistensi:** biarkan 2 terminal terbuka, atau pakai PM2. **Catatan:** PWA install/offline butuh HTTPS (non-localhost) → pakai mkcert bila perlu; set IP statis/DHCP-reservation agar URL tetap (kalau IP ganti, ulangi `build:lan`); ganti password OWNER `admin123`.

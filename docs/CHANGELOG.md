@@ -2,6 +2,17 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Go-live LAN: npm script `golive` + `build:lan` (self-host WiFi kos)
+
+Owner pilih go-live di localhost/LAN (kos 1 lokasi). Ditambah tooling konvenien **zero-dependency**:
+- **`backend/scripts/golive.mjs`** + script `npm run golive`: set `NODE_ENV=production`, `DATABASE_URL`→`kost48_v3` (derive dari `.env`), `CORS_ORIGIN` auto dari semua IPv4 LAN terdeteksi (`:5173`), `PORT=3000`, `AUTO_OPS_ENABLED=true`, lalu `npm run start`.
+- **`frontend/scripts/golive-build.mjs`** + `npm run build:lan`: auto-deteksi IP LAN → tulis `.env.production.local` (`VITE_API_BASE_URL=http://<ip>:3000/api`, gitignored via `.env.*`) → build. `npm run golive` → `vite preview --host 0.0.0.0 --port 5173`.
+- **Workflow:** BE `cd backend && npm run golive` · FE `cd frontend && npm run build:lan && npm run golive`. Akses HP: `http://<ip-lan>:5173` (buka firewall inbound 3000+5173 sbg Admin). Detail di `04_DEPLOY §C`.
+- **Diuji LIVE** (192.168.1.200): frontend 200 · API 200 · CORS preflight Allow-Origin LAN + credentials · login OWNER · prod-mode (`/api/docs`=404).
+- Catatan: PWA install/offline butuh HTTPS non-localhost (mkcert opsional); ganti password OWNER `admin123`; set IP statis biar URL tetap.
+
+Status: tooling deploy + docs; tanpa perubahan logika aplikasi.
+
 ## 2026-06-13 — F1-12: DB Produksi `kost48_v3` Diprovisikan + Di-seed (lokal-as-prod 5433)
 
 Karena Postgres produksi 5432/VPS tak tersedia di sesi ini, owner memilih deploy DB produksi `kost48_v3` di server 5433 (sama mesin; pra-publish, port immaterial — saat go-live `pg_dump`→restore ke 5432 asli).
