@@ -200,6 +200,7 @@ export class InvoicePaymentsService {
     const { payment: updated, accountingResult } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Lock + validasi dalam transaksi (audit A6) — pola sama dengan create (fix #7).
       await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${existing.invoiceId} FOR UPDATE`;
+      await this.assertStayNotOccupiedForPaymentMutationTx(tx, existing.invoiceId);
       this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id, tx));
 
       const invoice = await tx.invoice.findUnique({
@@ -254,6 +255,7 @@ export class InvoicePaymentsService {
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Lock + cek jurnal dalam transaksi (audit A6).
       await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${existing.invoiceId} FOR UPDATE`;
+      await this.assertStayNotOccupiedForPaymentMutationTx(tx, existing.invoiceId);
       this.assertNoActivePaymentJournal(id, await this.findActivePaymentJournal(id, tx));
       await tx.invoicePayment.delete({ where: { id } });
       await this.syncInvoiceStatus(tx, existing.invoiceId);
@@ -262,6 +264,18 @@ export class InvoicePaymentsService {
 
     await this.audit.log({ actorUserId: actor.id, action: 'DELETE', entityType: 'InvoicePayment', entityId: String(existing.id), oldData: existing });
     return { deletedPaymentId: existing.id, invoiceId: existing.invoiceId, invoiceStatusAfterSync: result?.status, invoicePaidAt: result?.paidAt };
+  }
+
+  private async assertStayNotOccupiedForPaymentMutationTx(tx: Prisma.TransactionClient, invoiceId: number) {
+    // F1-2 (GAP #3/B-04): pembayaran kamar yang SUDAH DITEMPATI (stay promoted / room OCCUPIED)
+    // tak boleh diubah/dihapus — walau jurnalnya belum ada — agar occupancy & uang tetap konsisten.
+    const inv = await tx.invoice.findUnique({
+      where: { id: invoiceId },
+      select: { stay: { select: { initialMetersPromotedAt: true, room: { select: { status: true } } } } },
+    });
+    if (inv?.stay && (inv.stay.initialMetersPromotedAt || inv.stay.room?.status === RoomStatus.OCCUPIED)) {
+      throw new ConflictException('Tidak dapat mengubah/menghapus pembayaran kamar yang sudah ditempati.');
+    }
   }
 
   private async syncInvoiceStatus(tx: Prisma.TransactionClient, invoiceId: number) {

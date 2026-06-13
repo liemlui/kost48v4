@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-2: Guard Hapus/Ubah Pembayaran Kamar OCCUPIED (D-17 / GAP #3 / B-04)
+
+- **`invoice-payments.service.ts`** — tambah helper `assertStayNotOccupiedForPaymentMutationTx`, dipanggil di `update` + `remove` (dalam tx, sesudah `FOR UPDATE`): tolak 409 bila stay `initialMetersPromotedAt != null` ATAU `room.status == OCCUPIED`.
+- Menutup lubang: pembayaran TANPA jurnal (best-effort skip) sebelumnya masih bisa dihapus saat kamar sudah ditempati → occupancy vs uang inkonsisten. Booking RESERVED tetap bisa dikoreksi.
+- Gate: `tsc --noEmit` 0. (Guard occupancy, bukan perubahan perhitungan.)
+
+Status: perubahan kode finance (guard); tanpa schema/DB.
+
 ## 2026-06-13 — F1-1R: No-Partial Menyeluruh (D-02 / GAP #1 / B-01)
 
 - **`payment-submissions.service.ts` `approveSubmission`** — tambah gate re-validasi dua nominal sah (sebelumnya hanya blokir overpay → bisa approve PARTIAL liar): booking hanya terima **DP-persis** atau **pelunasan-persis** (sisa sewa + deposit jaminan); selain itu 409.
