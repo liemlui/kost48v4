@@ -5,6 +5,8 @@
   "description": "Orchestrator go-live KOST48 (backend + frontend, port tetap 3000/5173).",
   "scripts": {
     "golive": "node scripts/golive-all.mjs",
-    "golive:fast": "node scripts/golive-all.mjs --no-build"
+    "golive:fast": "node scripts/golive-all.mjs --no-build",
+    "golive:1": "node scripts/golive-combined.mjs",
+    "golive:1:fast": "node scripts/golive-combined.mjs --no-build"
   }
 }

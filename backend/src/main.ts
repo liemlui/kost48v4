@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
+import { existsSync } from 'fs';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
@@ -89,6 +90,22 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api/docs', app, document);
+  }
+
+  // ── Combined single-server: sajikan frontend build (SPA) bila tersedia ──────
+  // 1 proses/port/origin (tanpa CORS). Default: <backend>/client (hasil copy frontend/dist).
+  // Override path via FRONTEND_DIST_PATH. Build frontend dgn VITE_API_BASE_URL=/api (relatif).
+  const frontendDir = process.env.FRONTEND_DIST_PATH || join(__dirname, '..', 'client');
+  if (existsSync(join(frontendDir, 'index.html'))) {
+    app.useStaticAssets(frontendDir);
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+      if (req.path.startsWith('/api')) return next();
+      if (req.path.includes('.')) return next(); // aset hilang -> biarkan 404, jangan kirim index.html
+      res.sendFile(join(frontendDir, 'index.html'));
+    });
+    // eslint-disable-next-line no-console
+    console.log('[combined] Frontend SPA disajikan dari ' + frontendDir);
   }
 
   await app.listen(Number(process.env.PORT || 3000));

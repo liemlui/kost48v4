@@ -2,6 +2,16 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — COMBINED single-server: 1 proses serve frontend + API (`npm run golive:1`)
+
+Owner pilih arsitektur "1 server". Diimplementasi **dependency-free**:
+- **`backend/src/main.ts`**: serve `frontend/dist` (copy → `backend/client`, env `FRONTEND_DIST_PATH`, default `<backend>/client`) via `useStaticAssets` + **fallback SPA** (GET non-`/api` tanpa titik → `index.html`; aset hilang tetap 404). Pola sama dgn static foto kamar; tanpa `@nestjs/serve-static`.
+- **`scripts/golive-combined.mjs`** + root script `npm run golive:1` (& `golive:1:fast`): bebaskan port 3000 → build frontend dgn **`VITE_API_BASE_URL=/api`** (relatif, host-agnostic) → copy `frontend/dist`→`backend/client` → build backend → jalankan `node dist/main.js` (1 proses, port 3000, prod, DB kost48_v3, CORS auto, auto-ops on).
+- **Diuji LIVE (port 3000, localhost + LAN 192.168.1.200):** `/`=200 HTML · `/api/public/rooms`=200 · deep-link `/portal/stay`=200→index.html · `/api/docs`=404 (prod) · aset-hilang=404 · login OWNER tanpa CORS · aset nyata=200.
+- Keuntungan: 1 port (firewall cukup 3000), tanpa CORS, frontend tak perlu rebuild saat ganti host/IP/domain (API relatif). **Fondasi langsung untuk cPanel/Passenger** (entry `dist/main.js`). `backend/client` di-gitignore.
+
+Status: fitur arsitektur (combined server) + tooling + docs; logika bisnis tak berubah (tsc 0, smoke live PASS).
+
 ## 2026-06-13 — Target publish cPanel DIKONFIRMASI + rencana (04_DEPLOY §D)
 
 - Owner konfirmasi host cPanel **mampu**: Node.js App (versi dukung) · PostgreSQL · SSH · build-on-server · AutoSSL. Resource upgrade bila kurang. Belum pasti: Passenger always-on vs idle-sleep.

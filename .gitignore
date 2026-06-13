@@ -6,6 +6,7 @@ dist/
 coverage/
 .nest/
 *.tsbuildinfo
+backend/client/
 
 # Generated sources
 src/generated/

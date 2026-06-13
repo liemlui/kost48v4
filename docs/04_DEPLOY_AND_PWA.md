@@ -178,12 +178,19 @@ Draft tiket/laporan staf setelah Phase 0-3 stabil. Wajib: IndexedDB, idempotency
 
 Untuk kos 1 lokasi tanpa VPS: jalankan stack di PC kos, akses dari HP via WiFi kos. **Prasyarat:** DB `kost48_v3` sudah di-provision + seed (lihat Bagian A / dijalankan 2026-06-13 di server lokal).
 
-**⭐ SATU PERINTAH (rekomendasi) — dari root `final_bundle/`:**
+**⭐⭐ PALING SIMPEL — COMBINED 1 SERVER, 1 PORT (rekomendasi) — dari root `final_bundle/`:**
 ```bash
-npm run golive        # pastikan port 3000+5173 bebas (auto-kill yg nyangkut) -> build:lan -> jalankan backend+frontend bareng
-npm run golive:fast   # sama tapi tanpa rebuild frontend (restart cepat)
+npm run golive:1        # 1 proses di port 3000 yg serve frontend+API; build relatif /api (host-agnostic)
+npm run golive:1:fast   # jalankan saja, tanpa rebuild
 ```
-Port **tetap**: backend 3000, frontend 5173 (dijamin — proses lama di port itu dihentikan dulu, frontend `--strictPort`). Ctrl+C menutup keduanya. Zero-dependency (root `package.json` tak perlu `npm install`).
+Backend menyajikan frontend (`backend/client`) + API di **1 port (3000)** → **firewall cukup 3000**, **tanpa CORS**, frontend **tak perlu rebuild** saat ganti IP/host/domain. Akses: `http://<ip-lan>:3000`. Ini juga **fondasi deploy cPanel** (entry `dist/main.js`). Diuji live ✓.
+
+**⭐ ALTERNATIF — 2 proses terpisah (backend 3000 + frontend 5173):**
+```bash
+npm run golive        # pastikan port 3000+5173 bebas (auto-kill) -> build:lan -> jalankan backend+frontend bareng
+npm run golive:fast   # tanpa rebuild frontend
+```
+Port **tetap** 3000/5173 (proses lama dihentikan, `--strictPort`). Ctrl+C menutup keduanya. Zero-dependency.
 
 **Atau manual per-paket (zero-dependency, IP LAN auto-deteksi):**
 ```bash
