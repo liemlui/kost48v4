@@ -39,7 +39,11 @@
 - [ ] **F1-12** 🧑 DEPLOY BERSIH (owner+AI pendamping) — dossier **04** · provision DB produksi kosong→`prisma db push`→`bootstrap.sql`→seed COA→periode OPEN→opening balance→CashAccount Cash(1000)+Bank(1010)→smoke E-1→baseline reconciliation. TANPA backfill/migrasi data UAT.
 
 ## FASE 2 — PASCA DEPLOY (flow & model)
-- [ ] **F2-1** [BESAR][SCHEMA] Renewal DP penuh (GAP #2) — dossier **11 §5** (desain+state machine+7 UAT) · schema RenewRequest +5 status (owner-approve) + sweeper auto-ops · PRASYARAT: Fase 1 + F1-1R. STOP: schema belum approve.
+- [ ] **F2-1** [BESAR][SCHEMA] Renewal DP penuh (GAP #2) — dossier **11 §5** · **schema approved S-1 (2026-06-13)**. ⏳ IN PROGRESS:
+  - [x] **inc.1 schema** — RenewRequestStatus +7 status + RenewRequest +4 field (downPaymentAmountRupiah/PaidAt/DueDate/settlementDueDate); `prisma db push` UAT sync, tsc 0.
+  - [ ] **inc.2 service state machine** — createRequest→PENDING_DECISION; YA→AWAITING_DP+invoice DP 30%; DP≤hari-H→DP_SECURED; pelunasan≤H+7→`renewStayInTransaction` (rent-loyalty D-16: harga tetap); TIDAK→REJECTED_BY_TENANT.
+  - [ ] **inc.3 sweeper auto-ops** — AWAITING_DP lewat hari-H→EXPIRED_PRIORITY (buka publik); DP_SECURED gagal lunas H+7→FORFEITED (forced checkout+DP hangus+potong deposit).
+  - [ ] **inc.4 notif (F2-2)** + 7 UAT skenario (dossier 11 §5).
 - [ ] **F2-2** Notif renew (request→admin, approve/reject→tenant, prompt H-10) — dossier **16** · salin pola `checkout-requests.service.ts:294-422`; sertakan fallback antrean admin untuk tenant tanpa akun portal.
 - [ ] **F2-3** Copy A17 dua-varian (loser sudah-transfer vs belum) — dossier **16** · `payment-submissions.service.ts:840-847`.
 - [ ] **F2-3b** 🧬 Catat refund kalah-cepat di sistem — dossier **10/16** · field bukti transfer + status + UI admin (schema owner-approve).

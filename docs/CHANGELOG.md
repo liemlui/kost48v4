@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F2-1 inc.1: Schema Renewal DP (owner-approved S-1)
+
+- **Owner approval S-1** (`03_KEPUTUSAN_OWNER §S`): seluruh perubahan schema ADDITIVE disetujui (F2-1, F2-3b, F2-18, F3-14/15/17, F4-9).
+- **`schema.prisma`** (additive): `RenewRequestStatus` +7 status (`PENDING_DECISION`, `AWAITING_DP`, `DP_SECURED`, `COMPLETED`, `REJECTED_BY_TENANT`, `EXPIRED_PRIORITY`, `FORFEITED` — lama PENDING/APPROVED/REJECTED tetap); `RenewRequest` +`downPaymentAmountRupiah`, `downPaymentPaidAt`, `downPaymentDueDate`(=hari-H), `settlementDueDate`(=DP+7).
+- `prisma validate` OK · `prisma db push` UAT 5433 **in sync** (additive, tanpa data loss) · generate + `tsc` 0.
+- Increment berikutnya: service state machine (inc.2) → sweeper auto-ops (inc.3) → notif+UAT (inc.4).
+
+Status: schema + generated client (generated TIDAK di-commit); service belum.
+
 ## 2026-06-13 — F2-6: Auto-tiket Inspeksi saat Cancel Stay Promoted (B-08)
 
 - **`stays.service.ts` `cancel()`**: ketika stay yang dibatalkan `wasPromoted` (sudah dihuni) dan kamar → MAINTENANCE, kini otomatis membuat tiket `CHECKOUT_INSPECTION` (pola sama dengan `complete()`), dedupe via `openCleaningTicket`.

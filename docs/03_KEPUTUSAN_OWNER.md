@@ -88,6 +88,10 @@
 
 - **D-16:** Rent-loyalty — no rent hike while renewing (cross-ref D-16 di atas).
 
+## S — APPROVAL SCHEMA (2026-06-13)
+
+- **S-1: Owner MENYETUJUI seluruh perubahan schema ADDITIVE** untuk task ber-marker 🧬/[SCHEMA]: F2-1 (RenewRequest +status/+field), F2-3b (bukti refund), F2-18 (StaffReview.status), F3-14 (Stay.fledMarkedAt), F3-15 (Stay.belongingsDeadline+ABANDONED), F3-17 (Tenant.ktp*), F4-9 (LoyaltyPoint/Reward/Redemption). Dikerjakan berurutan sesuai prioritas `08_CHECKLIST`. **Hanya additive** (tambah enum value/kolom nullable); tak menghapus/mengubah kolom lama. Deploy fresh → schema masuk `schema.prisma` (+ `sql/bootstrap.sql` bila perlu constraint).
+
 ---
 
 **Akhir dokumen.** Semua keputusan di atas mengikat. Detail implementasi & kode spesifik → dossier domain `10`-`19`. Peta fase → `00_BLUEPRINT.md §4`.

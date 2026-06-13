@@ -122,6 +122,14 @@ enum RenewRequestStatus {
   PENDING
   APPROVED
   REJECTED
+  // F2-1 (GAP #2) state machine renewal DP penuh — owner-approved S-1 (2026-06-13, additive).
+  PENDING_DECISION   // H-10..H-day: tenant ditanya perpanjang?
+  AWAITING_DP        // tenant jawab YA → tunggu DP 30% (prioritas s/d hari-H)
+  DP_SECURED         // DP 30% diterima ≤ hari-H → kamar aman, tunggu pelunasan ≤ H+7
+  COMPLETED          // pelunasan ≤ H+7 → stay diperpanjang (renewStayInTransaction)
+  REJECTED_BY_TENANT // tenant jawab TIDAK → kamar dibuka publik
+  EXPIRED_PRIORITY   // hari-H lewat tanpa DP → prioritas hilang, kamar dibuka first-paid
+  FORFEITED          // gagal lunas H+7 → forced checkout + DP hangus + potong deposit
 }
 
 enum CheckoutRequestStatus {
@@ -1162,6 +1170,11 @@ model RenewRequest {
   reviewNotes            String?
   reviewedById           Int?
   reviewedAt             DateTime?
+  // F2-1 (GAP #2) — owner-approved S-1, additive. DP 30% perpanjangan + grace H+7.
+  downPaymentAmountRupiah Int?
+  downPaymentPaidAt       DateTime?
+  downPaymentDueDate      DateTime?         @db.Date // = hari-H (plannedCheckOutDate lama)
+  settlementDueDate       DateTime?         @db.Date // = downPaymentPaidAt + 7 hari
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
