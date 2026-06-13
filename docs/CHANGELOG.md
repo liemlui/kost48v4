@@ -2,6 +2,16 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-16: perketat OWNER-only 4 area (D-17), ADMIN→403 (UAT LULUS)
+
+Audit `@Roles` + perketat 4 area sensitif jadi OWNER-only (ADMIN ditolak 403); operasi baca (GET) tetap untuk ADMIN/STAFF sesuai sebelumnya:
+- **(a) Periode akuntansi** — sudah OWNER (create/update/`reopen`/`period-close/post`/`auto-run`/opening-balance post/void/draft); tak ada perubahan.
+- **(b) User & staf** — `users` `@Post`/`@Patch(:id)` → **OWNER** (sebelumnya OWNER+ADMIN). Mencegah ADMIN menonaktifkan user (`isActive`) **dan eskalasi privilege** (`role` di `UpdateUserDto`/`CreateUserDto`).
+- **(c) Setelan kamar & harga** — `rooms` create/update + fasilitas (create/update/delete) + upload-image → **OWNER** (rent/deposit/tarif & konfig kamar).
+- **(d) Deposit & refund settlement** — `stays` `:id/deposit/process` (PARTIAL/FULL/FORFEIT) → **OWNER**.
+- **UAT LULUS:** ADMIN→403 pada 7 endpoint (b/c/d + periode), OWNER lolos guard (400/404 validasi). `tsc` 0.
+- **Scoping:** `tenants :id/portal-access/status` (suspend portal TENANT) sengaja dibiarkan OWNER+ADMIN (moderasi tenant level-rendah, bukan akun ber-privilege; tak ada risiko eskalasi). `deposit-ledger` hanya baca + dry-run (tak perlu dikunci).
+
 ## 2026-06-14 — F2-1 inc.4: notif siklus renewal end-to-end (F2-1 & F2-2 SELESAI, UAT LULUS)
 
 `renew-requests.service` kini menerbitkan notifikasi in-app di tiap transisi (pola `app-notification.service`, mirror checkout-requests; best-effort di luar jalur error):

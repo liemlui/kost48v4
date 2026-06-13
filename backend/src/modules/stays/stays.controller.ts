@@ -72,8 +72,9 @@ export class StaysController {
     return { message: 'Stay berhasil dibatalkan', data: await this.staysService.cancel(id, dto, user) };
   }
 
+  // F2-16 (D-17): proses deposit & refund settlement (PARTIAL/FULL/FORFEIT) — OWNER-only.
   @Post(':id/deposit/process')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async processDeposit(@Param('id', ParseIntPipe) id: number, @Body() dto: ProcessDepositDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Deposit berhasil diproses', data: await this.staysService.processDeposit(id, dto, user) };
   }

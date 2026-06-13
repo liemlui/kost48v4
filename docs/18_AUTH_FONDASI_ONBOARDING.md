@@ -25,7 +25,7 @@
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
-| D-17 OWNER-only | 🟠 P2 (BARU) | Banyak aksi sensitif kini OWNER+ADMIN; owner menetapkan OWNER-only untuk 4 area. | seluruh controller @Roles | **F2-16** audit @Roles + perketat |
+| D-17 OWNER-only | ✅ SELESAI (2026-06-14) | 4 area kini OWNER-only (ADMIN→403): periode, user/staf (+role/isActive), setelan kamar & harga, deposit/refund. UAT lulus. | `users`/`rooms`/`stays`/`accounting` controller @Roles | **F2-16 ✅** |
 | E1 KTP | 🟠 P2 (BARU) | Belum ada verifikasi identitas → risiko keamanan kos pria. | onboarding/stays.create | **F3-17** field KTP foto + gate aktivasi + hapus saat keluar |
 | X-01 | 🟡 P3 | Util keselamatan tersebar (releaseRoom/generateTicketNumber/syncRoomItem 2-3 salinan). | lintas-modul | konsolidasi (ikut F2-5 dossier 14) |
 | X-02 | 🟡 P3 | 76 nama foto kamar hardcoded di service. | marketing service | **F3-11** (dossier 17) |
@@ -35,7 +35,7 @@
 | Rate limit | INFO | In-memory per-proses; multi-replica perlu Redis. | middleware | tunda sampai skala |
 
 ## 4. Task
-- **F2-16 · FASE 2:** audit menyeluruh `@Roles` semua controller; perketat ke OWNER-only untuk 4 area D-17. Tolak ADMIN.
+- **F2-16 · FASE 2 ✅ SELESAI (2026-06-14):** perketat OWNER-only 4 area D-17 (ADMIN→403): periode (sudah OWNER); `users` create/update (cegah nonaktif + eskalasi role); `rooms` create/update/fasilitas/upload-image; `stays :id/deposit/process`. UAT: ADMIN 403, OWNER lolos. Scoping: `tenants portal-access/status` dibiarkan OWNER+ADMIN (moderasi tenant).
 - **F2-5 · FASE 2:** konsolidasi helpers terduplikasi ke `common/utils/` — `generateTicketNumber`, `releaseRoom`, `syncRoomItem`. (X-01, X-03, cross-ref dossier 14 I-02)
 - **F3-17 · FASE 3 (BARU):** KTP — field `Tenant.ktpFileKey`+`ktpVerifiedAt`+`ktpVerifiedById`; endpoint upload terproteksi (pola bukti bayar); gate aktivasi kamar (tak OCCUPIED tanpa verified); hapus file saat checkout permanen. Foto saja (tidak baca NIK). UU PDP.
 

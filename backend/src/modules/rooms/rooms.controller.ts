@@ -8,8 +8,12 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import { existsSync, mkdirSync, renameSync } from 'fs';
+import { randomBytes } from 'crypto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { deleteFileSafe, detectImageMime, MIME_TO_EXT } from '../../common/utils/file-signature.util';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
 import { CreateRoomFacilityDto, UpdateRoomFacilityDto } from './dto/room-facility.dto';
 import { RoomsQueryDto } from './dto/rooms-query.dto';
@@ -35,8 +39,11 @@ export class RoomsController {
   }
 
 
+  // F2-16 (D-17): unggah gambar = bagian setelan kamar — OWNER-only.
   @Post('upload-image')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
+  @UseGuards(RateLimitGuard)
+  @RateLimit('imageUpload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -46,46 +53,49 @@ export class RoomsController {
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, file, cb) => {
-          const safeBase = (file.originalname || 'room-image')
-            .replace(/\.[^/.]+$/, '')
-            .replace(/[^a-zA-Z0-9-_]+/g, '-')
-            .slice(0, 60) || 'room-image';
-          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        filename: (_req, _file, cb) => {
+          cb(null, `tmp_${Date.now()}_${randomBytes(8).toString('hex')}.bin`);
         },
       }),
-      fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Galeri kamar hanya menerima JPG, PNG, atau WebP'), false);
-        }
-        cb(null, true);
-      },
+      fileFilter: (_req, _file, cb) => cb(null, true),
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
   async uploadImage(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('File gambar kamar wajib dipilih');
+
+    const uploadDir = join(process.cwd(), 'uploads', 'room-images');
+    const temporaryPath = join(uploadDir, file.filename);
+    const detectedMime = detectImageMime(temporaryPath);
+    if (!detectedMime) {
+      deleteFileSafe(temporaryPath);
+      throw new BadRequestException('Galeri kamar hanya menerima JPG, PNG, atau WebP yang valid');
+    }
+
+    const secureName = `${Date.now()}-${randomBytes(16).toString('hex')}${MIME_TO_EXT[detectedMime]}`;
+    renameSync(temporaryPath, join(uploadDir, secureName));
+
     return {
       message: 'Gambar kamar berhasil diunggah',
       data: {
-        fileKey: file.filename,
-        fileUrl: `/uploads/room-images/${file.filename}`,
+        fileKey: secureName,
+        fileUrl: `/uploads/room-images/${secureName}`,
         originalFilename: file.originalname,
-        mimeType: file.mimetype,
+        mimeType: detectedMime,
         fileSizeBytes: file.size,
       },
     };
   }
 
+  // F2-16 (D-17): setelan kamar & harga (rent/deposit/tarif) — OWNER-only.
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async create(@Body() dto: CreateRoomDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Kamar berhasil dibuat', data: await this.roomsService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoomDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Kamar berhasil diperbarui', data: await this.roomsService.update(id, dto, user) };
   }
@@ -96,20 +106,21 @@ export class RoomsController {
     return { message: 'Daftar fasilitas kamar berhasil diambil', data: await this.roomsService.findFacilities(roomId) };
   }
 
+  // F2-16 (D-17): fasilitas = bagian setelan kamar — OWNER-only.
   @Post(':roomId/facilities')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async createFacility(@Param('roomId', ParseIntPipe) roomId: number, @Body() dto: CreateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Fasilitas kamar berhasil dibuat', data: await this.roomsService.createFacility(roomId, dto, user) };
   }
 
   @Patch(':roomId/facilities/:facilityId')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async updateFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @Body() dto: UpdateRoomFacilityDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Fasilitas kamar berhasil diperbarui', data: await this.roomsService.updateFacility(roomId, facilityId, dto, user) };
   }
 
   @Delete(':roomId/facilities/:facilityId')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async deleteFacility(@Param('roomId', ParseIntPipe) roomId: number, @Param('facilityId', ParseIntPipe) facilityId: number, @CurrentUser() user: CurrentUserPayload) {
     await this.roomsService.deleteFacility(roomId, facilityId, user);
     return { message: 'Fasilitas kamar berhasil dihapus' };

@@ -29,14 +29,15 @@ export class UsersController {
     return { message: 'Detail user berhasil diambil', data: await this.usersService.findOne(id) };
   }
 
+  // F2-16 (D-17): buat/ubah user — termasuk ubah role (eskalasi privilege) & nonaktifkan (isActive) — OWNER-only.
   @Post()
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async create(@Body() dto: CreateUserDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'User berhasil dibuat', data: await this.usersService.create(dto, user) };
   }
 
   @Patch(':id')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER)
   async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'User berhasil diperbarui', data: await this.usersService.update(id, dto, user) };
   }
