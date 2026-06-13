@@ -24,6 +24,7 @@ const RenewRequestsAdminPage = lazy(() => import('./pages/renew-requests/RenewRe
 const InvoiceDetailPage = lazy(() => import('./pages/invoices/InvoiceDetailPage'));
 const InvoicesPage = lazy(() => import('./pages/invoices/InvoicesPage'));
 const AncillaryRevenuePage = lazy(() => import('./pages/finance/AncillaryRevenuePage'));
+const LossRefundsPage = lazy(() => import('./pages/finance/LossRefundsPage'));
 const AccountingSetupPage = lazy(() => import('./pages/finance/AccountingSetupPage'));
 const AssetRegisterPage = lazy(() => import('./pages/finance/AssetRegisterPage'));
 const PaymentReviewPage = lazy(() => import('./pages/payments/PaymentReviewPage'));
@@ -132,6 +133,7 @@ export default function App() {
           />
 
           <Route path="/renew-requests" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><RenewRequestsAdminPage /></RequireRoles>} />
+          <Route path="/loss-refunds" element={<RequireRoles allowed={['OWNER']}><LossRefundsPage /></RequireRoles>} />
           <Route path="/users" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="users" /></RequireRoles>} />
           <Route path="/tenants" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><ConfiguredResourcePage resource="tenants" /></RequireRoles>} />
           <Route path="/rooms/:id" element={<RequireRoles allowed={['OWNER', 'ADMIN', 'STAFF']}><RoomDetailPage /></RequireRoles>} />

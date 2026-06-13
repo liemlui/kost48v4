@@ -2,6 +2,23 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — Audit ulang checklist terhadap kode aktual
+
+- Mengembalikan `F2-1`, `F2-2`, `F2-5`, `F2-6`, `F2-18`, `F2-11`, dan `F2-14` ke `[ ]` karena lingkup task belum lengkap atau verifikasinya belum selesai.
+- Temuan kritis: jalur `staff-field-reports.adminReview` masih dapat RETURN melebihi qty kamar tanpa lock/409; `syncRoomItemTx` hanya menghapus RoomItem saat qty menjadi negatif/nol, sehingga ghost-stock belum tertutup.
+- Renewal belum memenuhi R3/R5: deadline tidak digate di command service, FORFEITED belum forced checkout + potong deposit, dan prompt H-10/fallback tenant tanpa portal belum ada.
+- `tickets.close` saat ini memberi STAFF akses seluruh kategori, bertentangan dengan dossier 15 yang membatasi STAFF ke `CHECKOUT_INSPECTION`.
+- Verifikasi terbaru: backend build lulus dan unit test **13/13 hijau**. Frontend build ulang terhalang pembatasan akses filesystem esbuild pada environment audit; ini bukan bukti kegagalan TypeScript/aplikasi.
+
+## 2026-06-14 — F2-3b: catat refund kalah-cepat di sistem (full-stack, UAT LULUS)
+
+Refund untuk tenant yang KALAH first-paid-wins padahal sudah transfer kini tercatat & terlacak (lanjutan F2-3 yang memberi tahu loser "dana akan direfund").
+- **Schema (owner-approved):** enum `RefundStatus { NONE, PENDING, COMPLETED }` + 7 field `Stay.lossRefund*` (status/amount/proofUrl/proofFileKey/note/processedAt/processedById). db push UAT + prod-lokal.
+- **Backend:** `cancelCompetingUnpaidBookingsTx` auto-set `lossRefundStatus=PENDING` + nominal (DP terbayar atau jumlah submission) untuk loser yang sudah transfer — **atomik** dgn pembatalan. Endpoint OWNER: `GET /stays/loss-refunds/pending` (baca OWNER/ADMIN) + `POST /stays/:id/loss-refund/process` (OWNER-only D-17; COMPLETED + bukti; 409 bila bukan PENDING).
+- **Frontend:** halaman OWNER **`/loss-refunds`** (tabel pending + modal "tandai sudah direfund") + nav Finance + route lazy.
+- **UAT runtime:** list tampil; ADMIN proses → 403; OWNER proses → COMPLETED (processedBy/At terisi); re-proses → 409; `npm run build` LULUS (94 chunk). `tsc` 0 · unit 13/13.
+- Auto-record race first-paid: code-complete + tsc; simulasi race penuh tak dijalankan (sama caveat F2-3).
+
 ## 2026-06-14 — F2-11 (V-1): code-split halaman publik (bundle utama lebih ramping)
 
 `frontend/src/App.tsx`: empat halaman publik — `PublicGuestDashboardPage`, `RoomsRouteEntry` (katalog), `PublicRoomDetailPage`, `GuestBookingPage` — diubah dari import eager menjadi **`lazy()`** (code-split). Semua dirender di dalam `<Suspense fallback>` yang sudah ada (RootEntry lewat route `/`, sisanya lewat route masing-masing), jadi ada fallback spinner saat chunk dimuat. Bundle utama mengecil; chunk publik dimuat on-demand. `npm run build` LULUS (93 chunk, initial-js gzip ~141 KiB) + PWA verify lulus.

@@ -132,6 +132,21 @@ export class ProcessDepositDto {
   depositNote?: string;
 }
 
+// F2-3b: proses refund kalah-cepat (OWNER tandai sudah dikembalikan + bukti).
+export class ProcessLossRefundDto {
+  @IsOptional()
+  @IsString()
+  proofUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  proofFileKey?: string;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
+
 export class RenewStayDto {
   @IsOptional()
   @IsEnum(PricingTerm)

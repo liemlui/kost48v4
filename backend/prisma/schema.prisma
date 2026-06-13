@@ -51,6 +51,13 @@ enum DepositStatus {
   FORFEITED
 }
 
+// F2-3b: status refund untuk tenant yang KALAH first-paid-wins padahal sudah transfer.
+enum RefundStatus {
+  NONE // tidak ada kewajiban refund (default)
+  PENDING // wajib direfund, menunggu admin proses + bukti transfer balik
+  COMPLETED // sudah direfund (bukti tercatat)
+}
+
 enum UtilityType {
   ELECTRICITY
   WATER
@@ -605,6 +612,17 @@ model Stay {
   downPaymentPaidRupiah   Int       @default(0)
   downPaymentPaidAt       DateTime?
   downPaymentForfeitedAt  DateTime?
+
+  // F2-3b: refund tenant yang KALAH first-paid-wins padahal sudah transfer (BEDA dari
+  // deposit refund jaminan & DP forfeit). Auto-set PENDING saat booking loser dibatalkan;
+  // OWNER memproses + unggah bukti transfer balik → COMPLETED.
+  lossRefundStatus        RefundStatus @default(NONE)
+  lossRefundAmountRupiah  Int          @default(0)
+  lossRefundProofUrl      String?
+  lossRefundProofFileKey  String?
+  lossRefundNote          String?
+  lossRefundProcessedAt   DateTime?
+  lossRefundProcessedById Int?
 
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)

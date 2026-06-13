@@ -839,6 +839,33 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       },
     });
 
+    // F2-3b: catat kewajiban refund untuk loser yang SUDAH transfer (DP tercatat ATAU
+    // ada bukti bayar) → lossRefundStatus PENDING + nominal, agar admin tak lupa
+    // mengembalikan dana. Atomik dgn pembatalan; loser yang belum transfer dilewati.
+    const refundCandidates = await tx.stay.findMany({
+      where: { id: { in: competingStayIds } },
+      select: {
+        id: true,
+        downPaymentPaidRupiah: true,
+        paymentSubmissions: { select: { amountRupiah: true }, orderBy: { id: 'desc' }, take: 1 },
+      },
+    });
+    for (const s of refundCandidates) {
+      const submitted = Number(s.paymentSubmissions[0]?.amountRupiah ?? 0);
+      const dpPaid = Number(s.downPaymentPaidRupiah ?? 0);
+      const refundAmount = dpPaid > 0 ? dpPaid : submitted;
+      if (refundAmount > 0) {
+        await tx.stay.update({
+          where: { id: s.id },
+          data: {
+            lossRefundStatus: 'PENDING' as any,
+            lossRefundAmountRupiah: refundAmount,
+            lossRefundNote: 'Auto: kalah first-paid-wins padahal dana sudah ditransfer → wajib refund.',
+          },
+        });
+      }
+    }
+
     await tx.auditLog.create({
       data: {
         actorUserId: params.actorUserId,

@@ -6,7 +6,7 @@ import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
+import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, ProcessLossRefundDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
 import { StaysQueryDto } from './dto/stays-query.dto';
 import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
@@ -37,6 +37,13 @@ export class StaysController {
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async create(@Body() dto: CreateStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil dibuat', data: await this.staysService.create(dto, user) };
+  }
+
+  // F2-3b: daftar refund kalah-cepat menunggu proses (rute statik SEBELUM :id).
+  @Get('loss-refunds/pending')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async pendingLossRefunds() {
+    return { message: 'Daftar refund kalah-cepat berhasil diambil', data: await this.staysService.listPendingLossRefunds() };
   }
 
   @Get(':id')
@@ -77,6 +84,13 @@ export class StaysController {
   @Roles(UserRole.OWNER)
   async processDeposit(@Param('id', ParseIntPipe) id: number, @Body() dto: ProcessDepositDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Deposit berhasil diproses', data: await this.staysService.processDeposit(id, dto, user) };
+  }
+
+  // F2-3b: proses refund kalah-cepat (tandai sudah dikembalikan + bukti) — OWNER-only (D-17).
+  @Post(':id/loss-refund/process')
+  @Roles(UserRole.OWNER)
+  async processLossRefund(@Param('id', ParseIntPipe) id: number, @Body() dto: ProcessLossRefundDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Refund kalah-cepat berhasil diproses', data: await this.staysService.processLossRefund(id, dto, user) };
   }
 
   @Post(':id/renew')

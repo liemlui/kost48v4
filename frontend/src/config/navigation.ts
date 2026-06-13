@@ -31,6 +31,7 @@ const ownerSections: NavigationSection[] = [
       { to: '/expenses', label: 'Pengeluaran', icon: '💳', hint: 'Catat dan kategorikan biaya operasional.' },
       { to: '/wifi-sales', label: 'Penjualan WiFi', icon: '📶', hint: 'Catatan penjualan voucher WiFi.' },
       { to: '/ancillary-revenue', label: 'Pendapatan Tambahan', icon: '➕', hint: 'Sumber pendapatan tambahan seperti laundry, cleaning, dan layanan lain.' },
+      { to: '/loss-refunds', label: 'Refund Kalah-Cepat', icon: '↩️', hint: 'Kembalikan dana tenant yang kalah first-paid-wins padahal sudah transfer.' },
     ],
   },
   {

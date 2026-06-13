@@ -29,6 +29,7 @@ import {
   CompleteStayDto,
   CreateStayDto,
   ProcessDepositDto,
+  ProcessLossRefundDto,
   RenewStayDto,
   UpdateStayDto,
 } from "./dto/stay.dto";
@@ -1276,5 +1277,56 @@ export class StaysService {
         water: waterSummary,
       },
     };
+  }
+
+  /** F2-3b: daftar refund kalah-cepat (loser sudah-transfer) yang menunggu diproses. */
+  async listPendingLossRefunds() {
+    return this.prisma.stay.findMany({
+      where: { lossRefundStatus: "PENDING" as any },
+      select: {
+        id: true,
+        lossRefundAmountRupiah: true,
+        lossRefundNote: true,
+        cancelReason: true,
+        updatedAt: true,
+        room: { select: { code: true, name: true } },
+        tenant: { select: { id: true, fullName: true, phone: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  /**
+   * F2-3b: proses refund kalah-cepat — OWNER tandai COMPLETED + bukti transfer balik.
+   * Hanya valid saat status PENDING (idempotensi: tak bisa diproses dua kali).
+   */
+  async processLossRefund(id: number, dto: ProcessLossRefundDto, actor: CurrentUserPayload) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id },
+      select: { id: true, lossRefundStatus: true, lossRefundAmountRupiah: true },
+    });
+    if (!stay) throw new NotFoundException("Stay tidak ditemukan");
+    if (stay.lossRefundStatus !== "PENDING") {
+      throw new ConflictException("Refund hanya dapat diproses saat berstatus PENDING.");
+    }
+    const updated = await this.prisma.stay.update({
+      where: { id },
+      data: {
+        lossRefundStatus: "COMPLETED" as any,
+        lossRefundProofUrl: dto.proofUrl ?? null,
+        lossRefundProofFileKey: dto.proofFileKey ?? null,
+        lossRefundNote: dto.note ?? undefined,
+        lossRefundProcessedAt: new Date(),
+        lossRefundProcessedById: actor.id,
+      },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: "PROCESS_LOSS_REFUND",
+      entityType: "Stay",
+      entityId: String(id),
+      newData: { lossRefundStatus: "COMPLETED", lossRefundAmountRupiah: stay.lossRefundAmountRupiah },
+    });
+    return updated;
   }
 }
