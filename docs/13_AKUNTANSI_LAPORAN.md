@@ -62,4 +62,13 @@
 - **Invarian:** trial balance seimbang; jurnal idempotent per sourceType+sourceId; DRAFT tidak masuk laporan; deposit excluded dari operating cashflow.
 - **UAT:** (1) TB seimbang pasca siklus booking→checkout; (2) P&L show revenue tanpa DRAFT; (3) cashflow tidak hitung deposit sebagai inflow; (4) balance sheet A=L+E; (5) settlement ditolak tanpa receipt journal (pasca F1-8).
 
+## 6. F1-3 cashflow — spec before→after (4 sub-langkah, SELESAI 2026-06-13)
+Lokasi: `accounting-reports.service.ts` fungsi `cashflow()` (anchor metode :731 — grep `async cashflow`).
+- **F1-3a deteksi kas (F-01):** *before* `isCashAccount = code.startsWith('11')` → 1100 (PIUTANG/AR) dihitung kas. *after* kas = `cashAccountId != null` ATAU `code.startsWith('10')`. Diekstrak ke `cashflow-classifier.ts::isCashLine` (pure, teruji).
+- **F1-3b opening filter:** *before* `openingBalanceLine` where COA `code startsWith '11'`. *after* `'10'` (saldo awal KAS, bukan AR).
+- **F1-3c classify once (F-19/F-20):** *before* semua cash-line masuk `operatingInTotal/Out` LALU investing/financing ditambah lagi (double-count) + dead `cashCOACodes`(→null). *after* `classifyCashflow()` mengklasifikasi tiap `sourceType` SEKALI ke operating/investing/financing berbasis net debit−kredit; operating total hanya dari sumber operating.
+- **F1-3d beginning = akhir bln lalu:** *before* `cashBeginning = totalCashOpening || openingJournal`; `cashEnding = totalCashCurrent || …` → saldo all-time, `beginning+net ≠ ending`. *after* `cashBeginning = opening + Σ(mutasi kas POSTED entryDate < periodStart)`; `cashEnding = cashBeginning + netCashflow` → invarian **beginning+net=ending**.
+- **DO-NOT-TOUCH:** blok saldo-kas E-4 `:838-847` (groupBy `cashAccountId`) — F1-3d MENIRU pola ini untuk prior-delta, jangan ubah.
+- **Verifikasi:** `backend/test/unit/cashflow-classifier.test.js` 10/10 hijau (F-01 terbukti: AR 1100 ≠ kas). ⏳ runtime skenario emas `05 §5` (operating-in = Σ kas, bukan AR; beginning+net=ending) → gate pra-deploy F1-12.
+
 **Lintas-dossier:** jurnal booking/payment → dossier 10; jurnal deposit → dossier 12; keputusan owner → `03_KEPUTUSAN_OWNER.md`.

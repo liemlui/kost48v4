@@ -10,6 +10,7 @@ import {
   assetRegisterDisclosure,
   resolveProfitLossPeriod,
 } from './accounting-report-helpers';
+import { classifyCashflow, type CashflowLineInput } from './cashflow-classifier';
 
 function accountBalance(type: string, debit: number, credit: number) {
   if (type === 'ASSET' || type === 'EXPENSE' || type === 'COGS') return debit - credit;
@@ -757,79 +758,35 @@ export class AccountingReportsService {
       (this.prisma as any).openingBalanceLine.findMany({
         where: {
           batch: { status: 'POSTED' as any },
-          chartOfAccount: { type: 'ASSET' as any, code: { startsWith: '11' } },
+          // F1-3b (F-01): saldo awal KAS = prefix '10' (1000/1010/1020), bukan '11' (1100=PIUTANG).
+          chartOfAccount: { type: 'ASSET' as any, code: { startsWith: '10' } },
         },
         select: { chartOfAccountId: true, debitRupiah: true, creditRupiah: true },
       }),
     ]);
 
-    // Classify cash accounts
-    const cashAccountIds = new Set(cashAccounts.map((ca: any) => ca.chartOfAccountId));
-    const cashCOACodes = new Set(cashAccounts.map((ca: any) => {
-      // find COA code from journal lines
-      return null;
+    // F1-3a/c (F-01/19/20): klasifikasi arus kas via classifier MURNI & teruji
+    // (cashflow-classifier.ts). Kas = line ber-cashAccountId ATAU akun prefix '10'
+    // (BUKAN '11'=PIUTANG). Tiap sourceType diklasifikasi SEKALI (operating/investing/
+    // financing) berbasis net debit−kredit — menghapus double-count versi lama.
+    const cashflowLines: CashflowLineInput[] = journalLines.map((line: any) => ({
+      sourceType: line.journalEntry?.sourceType ?? 'UNKNOWN',
+      coaCode: line.chartOfAccount?.code ?? null,
+      cashAccountId: line.cashAccountId ?? null,
+      debitRupiah: Number(line.debitRupiah ?? 0),
+      creditRupiah: Number(line.creditRupiah ?? 0),
     }));
-
-    // Build operating/investing/financing classification
-    const operatingCashIn: Array<{ sourceType: string; amountRupiah: number; count: number }> = [];
-    const operatingCashOut: Array<{ sourceType: string; amountRupiah: number; count: number }> = [];
-    let investingCashIn = 0;
-    let investingCashOut = 0;
-    let financingCashIn = 0;
-    let financingCashOut = 0;
-    let operatingInTotal = 0;
-    let operatingOutTotal = 0;
-
-    // Group by source type for operating classification
-    const sourceBuckets = new Map<string, { amount: number; count: number }>();
-    const sourceTypeSet = new Set<string>();
-
-    for (const line of journalLines) {
-      const sourceType = String(line.journalEntry?.sourceType ?? 'UNKNOWN');
-      const coaType = String(line.chartOfAccount?.type ?? '');
-      const debit = Number(line.debitRupiah ?? 0);
-      const credit = Number(line.creditRupiah ?? 0);
-
-      // Only cash-related accounts (ASSET type with code starting with 11)
-      const isCashAccount = line.chartOfAccount?.code && String(line.chartOfAccount.code).startsWith('11');
-      if (!isCashAccount) continue;
-
-      // Cash in: debit on cash account
-      if (debit > 0) {
-        sourceTypeSet.add(sourceType);
-        const current = sourceBuckets.get(sourceType) ?? { amount: 0, count: 0 };
-        current.amount += debit;
-        current.count += 1;
-        sourceBuckets.set(sourceType, current);
-        operatingInTotal += debit;
-      }
-      // Cash out: credit on cash account
-      if (credit > 0) {
-        const current = sourceBuckets.get(sourceType) ?? { amount: 0, count: 0 };
-        current.amount -= credit;
-        current.count += 1;
-        sourceBuckets.set(sourceType, current);
-        operatingOutTotal += credit;
-      }
-    }
-
-    // Classify source types
-    for (const [sourceType, data] of sourceBuckets) {
-      const absAmount = Math.abs(data.amount);
-      if (sourceType === 'INVOICE_PAYMENT' || sourceType === 'WIFI_SALE') {
-        operatingCashIn.push({ sourceType, amountRupiah: absAmount, count: data.count });
-      } else if (sourceType === 'EXPENSE') {
-        operatingCashOut.push({ sourceType, amountRupiah: absAmount, count: data.count });
-      } else if (sourceType === 'FIXED_ASSET' || sourceType === 'DEPRECIATION') {
-        investingCashOut += absAmount;
-      } else if (sourceType === 'OPENING_BALANCE') {
-        financingCashIn += absAmount;
-      } else {
-        // fallback to operating
-        if (data.amount > 0) operatingCashIn.push({ sourceType, amountRupiah: absAmount, count: data.count });
-        else operatingCashOut.push({ sourceType, amountRupiah: absAmount, count: data.count });
-      }
-    }
+    const classified = classifyCashflow(cashflowLines);
+    const {
+      operatingCashIn,
+      operatingCashOut,
+      investingCashIn,
+      investingCashOut,
+      financingCashIn,
+      financingCashOut,
+      operatingInTotal,
+      operatingOutTotal,
+    } = classified;
 
     // Audit E-4: saldo kas dihitung dari JURNAL (opening + Σ debit−kredit line
     // ber-cashAccountId pada entry POSTED), bukan field manual
@@ -871,8 +828,25 @@ export class AccountingReportsService {
     const netInvesting = investingCashIn - investingCashOut;
     const netFinancing = financingCashIn - financingCashOut;
     const netCashflow = netOperating + netInvesting + netFinancing;
-    const cashBeginning = totalCashOpening || openingBalanceFromJournal;
-    const cashEnding = totalCashCurrent || (cashBeginning + operatingInTotal - operatingOutTotal);
+
+    // F1-3d: saldo awal periode = saldo akhir bulan lalu = opening CashAccount + Σ mutasi kas
+    // POSTED SEBELUM periodStart. Lalu ending = beginning + netCashflow → invarian beginning+net=ending.
+    const priorCashSums = await (this.prisma as any).journalLine.groupBy({
+      by: ['cashAccountId'],
+      where: {
+        cashAccountId: { not: null },
+        journalEntry: { status: 'POSTED' as any, entryDate: { lt: periodStart } },
+      },
+      _sum: { debitRupiah: true, creditRupiah: true },
+    });
+    const priorCashDelta = priorCashSums.reduce(
+      (sum: number, row: any) => sum + Number(row._sum?.debitRupiah ?? 0) - Number(row._sum?.creditRupiah ?? 0),
+      0,
+    );
+    const cashBeginning = cashAccounts.length > 0
+      ? totalCashOpening + priorCashDelta
+      : openingBalanceFromJournal;
+    const cashEnding = cashBeginning + netCashflow;
 
     return {
       asOf: asOf.toISOString().slice(0, 10),
@@ -909,8 +883,8 @@ export class AccountingReportsService {
         cashEndingRupiah: cashEnding,
       },
       note: cashAccounts.length > 0
-        ? 'Cashflow menggunakan CashAccount balance untuk saldo awal/akhir. Operating terklasifikasi via source type journal.'
-        : 'Belum ada CashAccount. Cashflow hanya membaca journal line pada akun tipe ASSET kode 11xx. Buat CashAccount untuk saldo formal.',
+        ? 'Saldo awal = opening CashAccount + mutasi kas POSTED sebelum periode; ending = awal + arus bersih. Kas = line ber-cashAccountId atau akun prefix 10 (bukan 11=piutang). Operating terklasifikasi via source type journal.'
+        : 'Belum ada CashAccount. Cashflow membaca journal line kas (akun prefix 10/ber-cashAccountId). Buat CashAccount untuk saldo formal.',
     };
   }
 

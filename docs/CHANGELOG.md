@@ -2,6 +2,20 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-3: Perbaikan Cashflow (F-01/05/19/20) + classifier teruji
+
+- **Tulis `13_AKUNTANSI_LAPORAN §6`** — spec before→after 4 sub-langkah (sebelumnya checklist menunjuk §6 yang belum ada).
+- **`cashflow-classifier.ts` (baru, pure)** + `backend/test/unit/cashflow-classifier.test.js` (10/10 hijau total): klasifikasi arus kas terverifikasi zero-dependency.
+- **`accounting-reports.service.ts` `cashflow()`**:
+  - F1-3a (F-01): deteksi kas `code.startsWith('11')` (AR/PIUTANG dihitung kas!) → `cashAccountId != null` ATAU prefix `'10'`.
+  - F1-3b: opening balance filter `'11'` → `'10'` (saldo awal kas, bukan AR).
+  - F1-3c (F-19/20): hapus double-count (semua line → operating LALU investing/financing ditambah lagi) + dead `cashCOACodes`; tiap sourceType diklasifikasi SEKALI berbasis net.
+  - F1-3d: `cashBeginning = opening + Σ mutasi kas POSTED sebelum periode`; `cashEnding = beginning + netCashflow` → invarian **beginning+net=ending** (sebelumnya pakai saldo all-time).
+  - DO-NOT-TOUCH blok E-4 (`:838-847`) ditiru untuk prior-delta, tidak diubah.
+- Gate: `tsc --noEmit` 0 · `npm run test:unit` 10/10 hijau. ⏳ runtime skenario emas `05 §5` = gate pra-deploy F1-12.
+
+Status: perubahan kode finance (laporan cashflow) + helper baru + test; tanpa schema/DB.
+
 ## 2026-06-13 — F1-2: Guard Hapus/Ubah Pembayaran Kamar OCCUPIED (D-17 / GAP #3 / B-04)
 
 - **`invoice-payments.service.ts`** — tambah helper `assertStayNotOccupiedForPaymentMutationTx`, dipanggil di `update` + `remove` (dalam tx, sesudah `FOR UPDATE`): tolak 409 bila stay `initialMetersPromotedAt != null` ATAU `room.status == OCCUPIED`.
