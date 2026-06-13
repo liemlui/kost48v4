@@ -17,6 +17,8 @@
     "build:local": "npm run build",
     "test:unit": "node --test \"test/**/*.test.js\"",
     "golive": "node scripts/golive.mjs",
+    "cpanel:setup": "npm ci && npm run build && npm prune --omit=dev",
+    "cpanel:migrate": "prisma db push",
     "start:prod": "node --max-old-space-size=256 dist/main.js",
     "build:prod": "npm ci && npm run build",
     "install:prod": "npm ci --omit=dev",

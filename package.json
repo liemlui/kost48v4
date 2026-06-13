@@ -7,6 +7,7 @@
     "golive": "node scripts/golive-all.mjs",
     "golive:fast": "node scripts/golive-all.mjs --no-build",
     "golive:1": "node scripts/golive-combined.mjs",
-    "golive:1:fast": "node scripts/golive-combined.mjs --no-build"
+    "golive:1:fast": "node scripts/golive-combined.mjs --no-build",
+    "make-deploy": "node scripts/make-deploy.mjs"
   }
 }

@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — Paket deploy RAMPING + script cPanel (`make-deploy`, `cpanel:setup`)
+
+- **`npm run make-deploy`** (root, `scripts/make-deploy.mjs`): build frontend combined → folder **`deploy/`** = backend SOURCE (tanpa `node_modules`/`dist`/`src/generated`) + frontend prebuilt **`client/`** + `.env.example` + `README-DEPLOY.md` (+ `kost48-deploy.tgz`). **`frontend/node_modules` tak ikut ke server** (frontend sudah jadi).
+- **Backend script cPanel** (`backend/package.json`): **`cpanel:setup`** = `npm ci && npm run build && npm prune --omit=dev` (build prisma engine Linux + tsc, lalu buang devDeps → ramping); **`cpanel:migrate`** = `prisma db push`. Runtime = `start:prod`/entry Passenger `dist/main.js`.
+- **Alur cPanel:** lokal `make-deploy` → upload isi `deploy/` → Setup Node.js App (startup `dist/main.js`) → SSH `npm run cpanel:setup` → env → `cpanel:migrate` + `bootstrap.sql` + seed OWNER/COA → restart + AutoSSL. Runbook lengkap `04_DEPLOY §D` + `deploy/README-DEPLOY.md`.
+- Diverifikasi: `deploy/` berisi `client/index.html` + src/prisma/sql + package.json (cpanel scripts), TANPA node_modules/dist/generated. `deploy/` & `.tgz` gitignored.
+
+Status: tooling deploy; tanpa perubahan logika aplikasi.
+
 ## 2026-06-13 — COMBINED single-server: 1 proses serve frontend + API (`npm run golive:1`)
 
 Owner pilih arsitektur "1 server". Diimplementasi **dependency-free**:
