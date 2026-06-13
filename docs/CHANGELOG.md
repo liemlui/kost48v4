@@ -2,6 +2,19 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — GATE RUNTIME FASE 1: LULUS (backend dev + DB UAT 5433)
+
+Verifikasi `05 §4-5` dijalankan terhadap data UAT (`kost48_v3_pro`), backend `npm run start:dev`:
+- **trial-balance**: `isBalanced=true` (debit=kredit=119.694.250). Invarian #6 ✓
+- **deposit-ledger/reconciliation-lite**: `mismatchCount=0` (21/21 MATCH). Invarian #7 ✓
+- **accounting/deposit-reconciliation** (F1-8): `OPENING_BALANCE_ONLY` (akun 2000 sumber DEPOSIT debit=kredit=1.500.000 berpasangan; **tak ada orphan debit**). Selisih 3,2jt = artefak opening balance seed UAT (ditandai disclosure, bukan error). ✓
+- **accounting/cashflow** (F1-3/F1-9): `beginning(800.000)+net(2.700.000)=ending(3.500.000)` ✓; `operating.cashIn` = `INVOICE_PAYMENT` saja (AR 11xx TIDAK dihitung kas — F-01 terbukti fixed); section `depositLiability` terpisah (net 100.000, bukan operating — F1-9 terbukti). ✓
+- **accounting/financial-ratios** (F1-4/F1-6): `expenseRatioPercent` waras (bukan 1e8); `occupancyRatePercent=57.89` (sebelumnya selalu 0 — F1-6 terbukti); currentRatio 10.47, cashRatio 6.69. ✓
+
+Kesimpulan: fix Fase 1 (F1-3..F1-10) terbukti benar di runtime, bukan hanya tsc/unit. Sisa F1-12 = deploy bersih (owner). Untuk deploy FRESH, opening balance diset benar sehingga divergence deposit UAT tak muncul.
+
+Status: verifikasi runtime (read-only) — tanpa perubahan kode/DB.
+
 ## 2026-06-13 — F2-8: Nonaktifkan Endpoint Draft Jurnal Manual (F-22/F-23/D-05)
 
 - **`accounting.controller.ts`**: route `POST /accounting/journal-entries/draft` (`createJournalDraft`) kini melempar `ForbiddenException` (403) — pembuatan jurnal draft manual dimatikan. Auto Journal Lite menangani jurnal operasional.
