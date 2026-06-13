@@ -156,7 +156,8 @@ export class StaysService {
 
     const agreed =
       dto.agreedRentAmountRupiah ?? resolveRent(room, dto.pricingTerm);
-    const deposit = dto.depositAmountRupiah ?? room.defaultDepositRupiah;
+    // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah; admin tak boleh override via dto.
+    const deposit = room.defaultDepositRupiah ?? 0;
     const electricity =
       dto.electricityTariffPerKwhRupiah ?? room.electricityTariffPerKwhRupiah;
     const water = dto.waterTariffPerM3Rupiah ?? room.waterTariffPerM3Rupiah;

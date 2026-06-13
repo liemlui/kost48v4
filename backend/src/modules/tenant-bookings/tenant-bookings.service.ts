@@ -338,7 +338,8 @@ export class TenantBookingsService {
           where: { id: stayId },
           data: {
             agreedRentAmountRupiah: dto.agreedRentAmountRupiah,
-            depositAmountRupiah: dto.depositAmountRupiah,
+            // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah (di-snapshot saat
+            // booking dibuat, tenant-bookings.create:159). Admin tak boleh override → abaikan dto.depositAmountRupiah.
             ...(dpPaidSoFar === 0
               ? { downPaymentAmountRupiah: Math.round((dto.agreedRentAmountRupiah * 30) / 100) }
               : {}),
