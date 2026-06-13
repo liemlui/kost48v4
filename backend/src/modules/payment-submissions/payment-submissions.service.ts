@@ -27,6 +27,7 @@ import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
+import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
 import { CreatePaymentSubmissionDto } from './dto/create-payment-submission.dto';
 import { ReviewQueueQueryDto } from './dto/review-queue-query.dto';
 import {
@@ -899,22 +900,6 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
 
 
   /**
-   * Lepas kamar setelah booking batal: bila masih ada tiket pembersihan/inspeksi
-   * terbuka (kamar kotor bekas overstay), kembalikan ke MAINTENANCE (tetap bisa
-   * dipesan) — bukan AVAILABLE.
-   */
-  private async releaseRoomAfterBookingCancelTx(tx: Prisma.TransactionClient, roomId: number) {
-    const openCleaning = await tx.ticket.findFirst({
-      where: { roomId, category: 'CHECKOUT_INSPECTION' as any, status: { notIn: ['CLOSED', 'CANCELLED'] as any } },
-      select: { id: true },
-    });
-    await tx.room.update({
-      where: { id: roomId },
-      data: openCleaning ? { status: RoomStatus.MAINTENANCE } : { status: RoomStatus.AVAILABLE },
-    });
-  }
-
-  /**
    * Reversal jurnal invoice yang dibatalkan — kebijakan tunggal (audit A8):
    * skip benign bila jurnal POSTED tidak ada; bila ada, reversal WAJIB sukses
    * (invoice CANCELLED keluar dari readiness unmapped, jadi kegagalan di sini
@@ -1116,7 +1101,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
           },
         });
 
-        await this.releaseRoomAfterBookingCancelTx(tx, booking.roomId);
+        await releaseRoomAfterBookingCancelTx(tx, booking.roomId);
 
         await tx.auditLog.create({
           data: {
@@ -1243,7 +1228,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
             },
           });
 
-          await this.releaseRoomAfterBookingCancelTx(tx, booking.roomId);
+          await releaseRoomAfterBookingCancelTx(tx, booking.roomId);
 
           await tx.auditLog.create({
             data: {
@@ -1332,7 +1317,7 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         initialMetersRecordedById: null,
       },
     });
-    await this.releaseRoomAfterBookingCancelTx(tx, roomId);
+    await releaseRoomAfterBookingCancelTx(tx, roomId);
     await tx.auditLog.create({
       data: {
         actorUserId,

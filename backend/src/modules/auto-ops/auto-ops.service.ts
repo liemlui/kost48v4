@@ -7,6 +7,7 @@ import { AccountingPeriodCloseService } from '../accounting/accounting-period-cl
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
+import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -356,7 +357,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         where: { roomId: current.roomId, status: StayStatus.ACTIVE, id: { not: stayId } },
       });
       if (otherActive === 0) {
-        await this.releaseRoomAfterBookingCancelTx(tx, current.roomId);
+        await releaseRoomAfterBookingCancelTx(tx, current.roomId);
       }
 
       await tx.auditLog.create({
@@ -1121,7 +1122,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const releasedRoomIds: number[] = [];
     for (const room of rooms) {
       await this.prisma.$transaction(async (tx) => {
-        await this.releaseRoomAfterBookingCancelTx(tx, room.id);
+        await releaseRoomAfterBookingCancelTx(tx, room.id);
         await tx.auditLog.create({
           data: {
             actorUserId: options.actorUserId ?? null,
@@ -1138,23 +1139,6 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     return { releasedRoomIds };
   }
 
-
-  /**
-   * Lepas kamar setelah booking batal: bila masih ada tiket pembersihan/inspeksi
-   * terbuka (kamar kotor bekas overstay), kembalikan ke MAINTENANCE (tetap bisa
-   * dipesan via allowBookingWhileCleaning) — bukan AVAILABLE, agar check-in
-   * manual tidak masuk kamar kotor.
-   */
-  private async releaseRoomAfterBookingCancelTx(tx: Prisma.TransactionClient, roomId: number) {
-    const openCleaning = await tx.ticket.findFirst({
-      where: { roomId, category: 'CHECKOUT_INSPECTION' as any, status: { notIn: ['CLOSED', 'CANCELLED'] as any } },
-      select: { id: true },
-    });
-    await tx.room.update({
-      where: { id: roomId },
-      data: openCleaning ? { status: RoomStatus.MAINTENANCE } : { status: RoomStatus.AVAILABLE },
-    });
-  }
 
   private expiredBookingWhere(hasPendingReview: boolean): Prisma.StayWhereInput {
     return {
@@ -1254,7 +1238,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         },
       });
 
-      await this.releaseRoomAfterBookingCancelTx(tx, roomId);
+      await releaseRoomAfterBookingCancelTx(tx, roomId);
       await tx.auditLog.create({
         data: {
           actorUserId,

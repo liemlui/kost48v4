@@ -8,6 +8,7 @@ import { Prisma } from "../../generated/prisma";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { AdminDecision, UserRole } from "../../common/enums/app.enums";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
+import { syncRoomItemTx } from "../../common/utils/room-booking.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
   AdminReviewStaffFieldReportDto,
@@ -495,7 +496,7 @@ export class StaffFieldReportsService {
             createdById: actor.id,
           },
         });
-        await this.syncRoomItem(
+        await syncRoomItemTx(
           tx,
           movement.itemId,
           movement.roomId ?? undefined,
@@ -593,45 +594,6 @@ Movement stok #${movement.id} sudah dicatat.`
     if (roomId) {
       const room = await this.prisma.room.findUnique({ where: { id: roomId } });
       if (!room) throw new NotFoundException("Kamar tidak ditemukan");
-    }
-  }
-
-  private async syncRoomItem(
-    tx: any,
-    itemId: number,
-    roomId: number | undefined,
-    movementType: string,
-    qty: any,
-  ) {
-    if (
-      !roomId ||
-      !["ASSIGN_TO_ROOM", "RETURN_FROM_ROOM"].includes(movementType)
-    )
-      return;
-    const numericQty = Number(qty);
-    const delta = movementType === "ASSIGN_TO_ROOM" ? numericQty : -numericQty;
-    const existing = await tx.roomItem.findFirst({ where: { itemId, roomId } });
-    if (!existing) {
-      if (delta > 0)
-        await tx.roomItem.create({
-          data: { itemId, roomId, qty: String(delta), status: "GOOD" as any },
-        });
-      return;
-    }
-    const nextQty = Number(existing.qty) + delta;
-    if (nextQty <= 0) {
-      await tx.roomItem.delete({ where: { id: existing.id } });
-    } else {
-      await tx.roomItem.update({
-        where: { id: existing.id },
-        data: {
-          qty: String(nextQty),
-          status:
-            movementType === "ASSIGN_TO_ROOM"
-              ? ("GOOD" as any)
-              : existing.status,
-        },
-      });
     }
   }
 

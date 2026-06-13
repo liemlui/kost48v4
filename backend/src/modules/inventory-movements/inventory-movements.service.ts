@@ -4,6 +4,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { InventoryMovementType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { syncRoomItemTx } from '../../common/utils/room-booking.util';
 import { CreateInventoryMovementDto, UpdateInventoryMovementDto } from './dto/inventory-movement.dto';
 import { InventoryMovementsQueryDto } from './dto/inventory-movements-query.dto';
 
@@ -60,7 +61,7 @@ export class InventoryMovementsService {
           createdById: actor.id,
         },
       });
-      await this.syncRoomItem(tx, movement.itemId, movement.roomId ?? undefined, movement.movementType, movement.qty);
+      await syncRoomItemTx(tx, movement.itemId, movement.roomId ?? undefined, movement.movementType, movement.qty);
       await this.ensureInventoryQtySyncedTx(tx, movement.itemId, beforeQty + this.movementDelta(movement.movementType, movement.qty));
       return movement;
     });
@@ -153,23 +154,4 @@ export class InventoryMovementsService {
     }
   }
 
-  private async syncRoomItem(tx: any, itemId: number, roomId: number | undefined, movementType: string, qty: any, reverse = false) {
-    if (!roomId || !['ASSIGN_TO_ROOM', 'RETURN_FROM_ROOM'].includes(movementType)) return;
-    const numericQty = Number(qty);
-    const sign = movementType === 'ASSIGN_TO_ROOM' ? 1 : -1;
-    const delta = sign * numericQty;
-    const existing = await tx.roomItem.findFirst({ where: { itemId, roomId } });
-    if (!existing) {
-      if (delta > 0) {
-        await tx.roomItem.create({ data: { itemId, roomId, qty: String(delta) } });
-      }
-      return;
-    }
-    const nextQty = Number(existing.qty) + delta;
-    if (nextQty <= 0) {
-      await tx.roomItem.delete({ where: { id: existing.id } });
-    } else {
-      await tx.roomItem.update({ where: { id: existing.id }, data: { qty: String(nextQty) } });
-    }
-  }
 }

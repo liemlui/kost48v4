@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-5: konsolidasi util terduplikasi ke common/utils (X-03, sebagian)
+
+`backend/src/common/utils/room-booking.util.ts` (baru) menyatukan helper yang sebelumnya disalin lintas service:
+- **`releaseRoomAfterBookingCancelTx`** — 2 salinan IDENTIK (auto-ops + payment-submissions) → satu sumber. Behavior tetap.
+- **`syncRoomItemTx`** — 2 salinan yang sudah DRIFT (inventory-movements vs staff-field-reports) → disatukan ke perilaku **kanonik (keputusan owner 2026-06-14):** `ASSIGN_TO_ROOM` menambah qty + set `status: GOOD`; `RETURN_FROM_ROOM` mengurangi qty + pertahankan status; qty≤0 hapus baris. Param `reverse` yang mati dibuang. (inventory-movements kini ikut set status GOOD saat assign — sebelumnya tidak.)
+- 5 file memakai util (import), method privat duplikat dihapus.
+- **UAT runtime:** ASSIGN item#5→kamar#11 (semula MAINTENANCE/qty1) → **GOOD/qty2** (kanonik terbukti). `tsc` 0 · unit 13/13.
+- **Sisa (ditunda):** `generateTicketNumber` punya 4 salinan beda signature (tickets.service tanpa-tx vs inventory-items/room-items/staff-field-reports ber-tx, sebagian dgn fallback tabrakan) — unifikasi butuh UAT pembuatan tiket lintas-jalur.
+
 ## 2026-06-14 — F2-3: copy notif A17 dua-varian (kalah first-paid: sudah/belum transfer)
 
 `payment-submissions.notifyLosingTenants`: tenant yang kalah first-paid-wins kini menerima pesan sesuai kondisinya — `hasTransferred` (punya `PaymentSubmission` ATAU `downPaymentPaidRupiah > 0`):
