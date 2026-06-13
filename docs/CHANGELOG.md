@@ -10,6 +10,11 @@
 - `tickets.close` saat ini memberi STAFF akses seluruh kategori, bertentangan dengan dossier 15 yang membatasi STAFF ke `CHECKOUT_INSPECTION`.
 - Verifikasi terbaru: backend build lulus dan unit test **13/13 hijau**. Frontend build ulang terhalang pembatasan akses filesystem esbuild pada environment audit; ini bukan bukti kegagalan TypeScript/aplikasi.
 
+## 2026-06-14 — fix(F2-18): STAFF close dibatasi ke CHECKOUT_INSPECTION (invarian dossier 15)
+
+Tindak lanjut temuan audit: setelah F2-18 mengizinkan STAFF menutup tiket, STAFF sempat bisa menutup **semua kategori**. `tickets.service.close()` kini menolak STAFF untuk kategori ≠ `CHECKOUT_INSPECTION` (`ForbiddenException`) sesuai invarian dossier 15; OWNER/ADMIN tetap bebas. Guard keselamatan room-ready tidak berubah.
+- **UAT runtime:** STAFF close #1 (non-inspeksi) → 403; STAFF close #13 (CHECKOUT_INSPECTION) → 409 (guard kategori lolos, status OPEN≠DONE); OWNER close #1 → 409 (tak dibatasi). `tsc` 0.
+
 ## 2026-06-14 — F2-3b: catat refund kalah-cepat di sistem (full-stack, UAT LULUS)
 
 Refund untuk tenant yang KALAH first-paid-wins padahal sudah transfer kini tercatat & terlacak (lanjutan F2-3 yang memberi tahu loser "dana akan direfund").

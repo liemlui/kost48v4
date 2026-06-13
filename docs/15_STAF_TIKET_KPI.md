@@ -1,6 +1,6 @@
 # DOSSIER 15 — STAF, TIKET & KPI
 **Domain:** manajemen tiket operasional, work queue staf, staff performance KPI, round-robin assignment. **Flow 11.**
-**Status:** 🟢 Tiket sehat (CHECKOUT_INSPECTION gate, EVICT_OVERSTAY auto). 🟡 KPI: formula terverifikasi, monthRange TZ unresolved.
+**Status:** 🟡 Tiket/KPI parsial — monthRange KPI sudah WIB, tetapi rutinitas masih timezone-server. STAFF close kini **sudah dibatasi ke CHECKOUT_INSPECTION** (guard kategori di `close()`, 2026-06-14, UAT lulus). Sisa: workflow verifikasi `StaffReview` PENDING_VERIFICATION + cakupan review.
 **File inti:** `tickets.service.ts` (assign/close/auto-create), `tickets.controller.ts`, KPI data dari `reviews` + `tickets`.
 
 ---

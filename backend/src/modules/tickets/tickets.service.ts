@@ -9,7 +9,7 @@ import { AuditLogService } from "../../audit-log/audit-log.service";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
 import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
-import { STAFF_FIELD_CATEGORY_SET } from "../../common/enums/app.enums";
+import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums";
 import { AppNotificationService } from "../notifications/app-notification.service";
 import {
   AssignTicketDto,
@@ -262,6 +262,38 @@ export class TicketsService {
     return ticket;
   }
 
+  async canAccessImage(fileKey: string, user: CurrentUserPayload) {
+    const ticket = await this.prisma.ticket.findFirst({
+      where: {
+        OR: [
+          { issueImageFileKey: fileKey },
+          { resolutionImageFileKey: fileKey },
+          { issueImageUrl: { endsWith: `/${fileKey}` } },
+          { resolutionImageUrl: { endsWith: `/${fileKey}` } },
+        ],
+      },
+      select: {
+        tenantId: true,
+        assignedToId: true,
+        staffFieldReports: {
+          where: { reportedByStaffId: user.id },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    });
+
+    // Routine evidence is stored outside Ticket. It remains protected by
+    // authentication plus an unguessable random filename.
+    if (!ticket) return true;
+    if (user.role === "OWNER" || user.role === "ADMIN") return true;
+    if (user.role === "TENANT") return ticket.tenantId === user.tenantId;
+    if (user.role === "STAFF") {
+      return ticket.assignedToId === user.id || ticket.staffFieldReports.length > 0;
+    }
+    return false;
+  }
+
   async createBackoffice(
     dto: CreateBackofficeTicketDto,
     actor: CurrentUserPayload,
@@ -506,6 +538,14 @@ export class TicketsService {
       },
     });
     if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+
+    // F2-18 (invarian dossier 15): STAFF HANYA boleh menutup tiket CHECKOUT_INSPECTION.
+    // Kategori lain (admin/keuangan/dll) tetap ditutup OWNER/ADMIN.
+    if (actor.role === UserRole.STAFF && ticket.category !== "CHECKOUT_INSPECTION") {
+      throw new ForbiddenException(
+        "Staf hanya dapat menutup tiket inspeksi checkout (CHECKOUT_INSPECTION). Tiket kategori lain ditutup admin/owner.",
+      );
+    }
 
     if (dto.action === "CLOSE") {
       if (ticket.status !== "DONE")
