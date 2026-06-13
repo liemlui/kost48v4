@@ -2,6 +2,17 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-12: DB Produksi `kost48_v3` Diprovisikan + Di-seed (lokal-as-prod 5433)
+
+Karena Postgres produksi 5432/VPS tak tersedia di sesi ini, owner memilih deploy DB produksi `kost48_v3` di server 5433 (sama mesin; pra-publish, port immaterial — saat go-live `pg_dump`→restore ke 5432 asli).
+- **DB bersih:** `CREATE DATABASE kost48_v3` → `prisma db push` (41 tabel) → `bootstrap.sql` + `bootstrap_v4_addendum.sql` (bersih).
+- **Seed fondasi (owner-driven):** OWNER `liem.lui@gmail.com` (bcryptjs, role OWNER) · COA **37 akun** (DEFAULT_COA) · AccountingPeriod 2026-06 **OPEN** · CashAccount **Cash (1000)** + **Bank (1010)**, opening 0.
+- **Opening balance: NOL** (kos baru, belum ada saldo) → tidak diposting (jujur, tak mengarang). Gate `openingBalance.posted` + `journal.exists` sengaja pending → readiness **75**, akan otomatis hijau saat opening balance/transaksi pertama.
+- **Smoke LULUS:** login OWNER ok · `public/rooms` 200 · trial-balance balanced (0=0) · reconciliation-lite mismatch=0 · cashflow punya section `depositLiability` (F1-9 live). Backend verifikasi (port 3001) di-stop & dibersihkan.
+- **Catatan:** COA aktual **37** akun (DEFAULT_COA), bukan 38 seperti klaim docs lama — perlu koreksi minor. OWNER password = `admin123` (UAT) → **WAJIB ganti sebelum publish**.
+
+**Sisa untuk go-live nyata (belum, butuh infra):** jalankan backend di server produksi (5432/VPS, `NODE_ENV=production`, domain+HTTPS, env penuh) atau `pg_dump kost48_v3`→restore ke 5432; set opening balance bila ada modal awal; ganti password OWNER.
+
 ## 2026-06-13 — F1-12 rehearsal: Runbook Fresh-Deploy Schema+Bootstrap LULUS
 
 - Rehearsal di DB throwaway `kost48_v3_deploy_rehearsal` (5433): `prisma db push` → **41 tabel** (=41 model) · `sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` apply **BERSIH** (hanya NOTICE idempotent, 0 error) · terbentuk 2 unique index (`stay_one_active_per_room/tenant_uidx`), 7 check constraint, 8 trigger, 231 index. DB throwaway di-drop; **UAT utuh** (COA=37).
