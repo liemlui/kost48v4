@@ -2,6 +2,11 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-11 (V-1): code-split halaman publik (bundle utama lebih ramping)
+
+`frontend/src/App.tsx`: empat halaman publik — `PublicGuestDashboardPage`, `RoomsRouteEntry` (katalog), `PublicRoomDetailPage`, `GuestBookingPage` — diubah dari import eager menjadi **`lazy()`** (code-split). Semua dirender di dalam `<Suspense fallback>` yang sudah ada (RootEntry lewat route `/`, sisanya lewat route masing-masing), jadi ada fallback spinner saat chunk dimuat. Bundle utama mengecil; chunk publik dimuat on-demand. `npm run build` LULUS (93 chunk, initial-js gzip ~141 KiB) + PWA verify lulus.
+- **Sisa F2-11 (UI polish):** W-02 skeleton detail + CSS ring, W-03 pagination 12 katalog, UD-05 sticky CTA — perlu iterasi visual.
+
 ## 2026-06-14 — F2-18: tenant-pengawas — STAFF boleh tutup tiket (guard keselamatan tetap), enum PENDING_VERIFICATION
 
 - **`tickets POST :id/close` kini izinkan STAFF** (sebelumnya OWNER/ADMIN). Mendukung model tenant-pengawas: staf menutup tiket pekerjaannya sendiri termasuk `CHECKOUT_INSPECTION` (menandai kamar siap). **Guard keselamatan TETAP** di `tickets.service.close()`: kamar baru jadi `AVAILABLE` HANYA bila status akhir barang `GOOD` & tak ada stay aktif (else `roomReadyBlockedReason`); jadi staf tak bisa melepas kamar yang barangnya rusak/masih dihuni.
