@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F2-18: tenant-pengawas — STAFF boleh tutup tiket (guard keselamatan tetap), enum PENDING_VERIFICATION
+
+- **`tickets POST :id/close` kini izinkan STAFF** (sebelumnya OWNER/ADMIN). Mendukung model tenant-pengawas: staf menutup tiket pekerjaannya sendiri termasuk `CHECKOUT_INSPECTION` (menandai kamar siap). **Guard keselamatan TETAP** di `tickets.service.close()`: kamar baru jadi `AVAILABLE` HANYA bila status akhir barang `GOOD` & tak ada stay aktif (else `roomReadyBlockedReason`); jadi staf tak bisa melepas kamar yang barangnya rusak/masih dihuni.
+- **`StaffReviewStatus` += `PENDING_VERIFICATION`** (enum app + schema, db push UAT & prod-lokal) sebagai prasarana model "tenant sebagai pengawas kualitas" (review menunggu verifikasi owner).
+- **UAT runtime:** STAFF close tiket → 400 (validasi; guard role lolos, sebelumnya 403); STAFF buat user → 403 (kontrol OWNER-only F2-16 tetap utuh). `tsc` 0.
+- **Sisa (butuh spek owner):** workflow verifikasi `PENDING_VERIFICATION` (alur "≤2 gate owner") + perluasan cakupan review (staf/fasilitas/admin).
+
 ## 2026-06-14 — F2-5: konsolidasi util terduplikasi ke common/utils (X-03, sebagian)
 
 `backend/src/common/utils/room-booking.util.ts` (baru) menyatukan helper yang sebelumnya disalin lintas service:

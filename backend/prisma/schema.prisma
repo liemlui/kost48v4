@@ -244,6 +244,7 @@ enum StaffReviewStatus {
   VISIBLE
   HIDDEN
   FLAGGED
+  PENDING_VERIFICATION // F2-18: review tenant menunggu verifikasi owner sebelum tampil (workflow menyusul)
 }
 
 enum StaffPerformanceEventType {

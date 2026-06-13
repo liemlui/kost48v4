@@ -1,11 +1,39 @@
-import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { randomBytes } from 'crypto';
+import { Response } from 'express';
+import { createReadStream, existsSync, mkdirSync, renameSync } from 'fs';
+import { basename, extname, join } from 'path';
+import { diskStorage } from 'multer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import {
+  deleteFileSafe,
+  detectImageMime,
+  MIME_TO_EXT,
+} from '../../common/utils/file-signature.util';
 import {
   AssignTicketDto,
   CloseTicketDto,
@@ -15,16 +43,14 @@ import {
 } from './dto/ticket.dto';
 import { TicketsQueryDto } from './dto/tickets-query.dto';
 import { TicketsService } from './tickets.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 
 @ApiTags('tickets')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tickets')
 export class TicketsController {
+  private readonly uploadDir = join(process.cwd(), 'uploads', 'ticket-images');
+
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Get()
@@ -39,9 +65,10 @@ export class TicketsController {
     return { message: 'Daftar tiket saya berhasil diambil', data: await this.ticketsService.findMine(user, query) };
   }
 
-
   @Post('upload-image')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
+  @UseGuards(RateLimitGuard)
+  @RateLimit('imageUpload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -51,36 +78,71 @@ export class TicketsController {
           if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
           cb(null, targetDir);
         },
-        filename: (_req, file, cb) => {
-          const safeBase = (file.originalname || 'ticket-image')
-            .replace(/\.[^/.]+$/, '')
-            .replace(/[^a-zA-Z0-9-_]+/g, '-')
-            .slice(0, 60) || 'ticket-image';
-          cb(null, `${Date.now()}-${safeBase}${extname(file.originalname || '.jpg')}`);
+        filename: (_req, _file, cb) => {
+          cb(null, `tmp_${Date.now()}_${randomBytes(8).toString('hex')}.bin`);
         },
       }),
-      fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Foto tiket hanya menerima JPG, PNG, atau WebP'), false);
-        }
-        cb(null, true);
-      },
+      fileFilter: (_req, _file, cb) => cb(null, true),
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
   async uploadImage(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('Foto tiket wajib dipilih');
+
+    const temporaryPath = join(this.uploadDir, file.filename);
+    const detectedMime = detectImageMime(temporaryPath);
+    if (!detectedMime) {
+      deleteFileSafe(temporaryPath);
+      throw new BadRequestException('Foto tiket harus berupa JPG, PNG, atau WebP yang valid');
+    }
+
+    const secureName = `${Date.now()}-${randomBytes(16).toString('hex')}${MIME_TO_EXT[detectedMime]}`;
+    renameSync(temporaryPath, join(this.uploadDir, secureName));
+
     return {
       message: 'Foto tiket berhasil diunggah',
       data: {
-        fileKey: file.filename,
-        fileUrl: `/uploads/ticket-images/${file.filename}`,
+        fileKey: secureName,
+        fileUrl: `/api/tickets/images/${secureName}`,
         originalFilename: file.originalname,
-        mimeType: file.mimetype,
+        mimeType: detectedMime,
         fileSizeBytes: file.size,
       },
     };
+  }
+
+  @Get('images/:filename')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
+  async getImage(
+    @Param('filename') filename: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const safe = basename(filename);
+    if (
+      safe !== filename
+      || !/^[a-zA-Z0-9._-]+\.(jpg|jpeg|png|webp)$/i.test(safe)
+    ) {
+      throw new BadRequestException('Nama file foto tidak valid');
+    }
+
+    const filePath = join(this.uploadDir, safe);
+    if (!existsSync(filePath) || !(await this.ticketsService.canAccessImage(safe, user))) {
+      throw new NotFoundException('Foto tiket tidak ditemukan');
+    }
+
+    const mimeMap: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+    };
+
+    res.setHeader('Content-Type', mimeMap[extname(safe).toLowerCase()] ?? 'application/octet-stream');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Vary', 'Authorization');
+    return new StreamableFile(createReadStream(filePath));
   }
 
   @Get(':id')
@@ -119,8 +181,11 @@ export class TicketsController {
     return { message: 'Tiket berhasil ditandai selesai', data: await this.ticketsService.markDone(id, dto, user) };
   }
 
+  // F2-18 (tenant-pengawas): STAFF boleh menutup tiket (termasuk CHECKOUT_INSPECTION →
+  // tandai kamar siap). Guard keselamatan tetap di service close(): kamar HANYA jadi
+  // AVAILABLE bila status akhir barang GOOD & tak ada stay aktif (else room-ready diblokir).
   @Post(':id/close')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async close(@Param('id', ParseIntPipe) id: number, @Body() dto: CloseTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Status tiket berhasil diperbarui', data: await this.ticketsService.close(id, dto, user) };
   }
