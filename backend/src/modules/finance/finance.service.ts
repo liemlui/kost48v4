@@ -63,7 +63,7 @@ export class FinanceService {
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         _count: { id: true },
-        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: start, lt: end } },
+        where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: start, lt: end } },
       }),
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
@@ -184,7 +184,7 @@ export class FinanceService {
       this.prisma.stay.count({ where: { status: StayStatus.ACTIVE as any, initialMetersPromotedAt: { not: null } } }),
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
-        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: start, lt: end } },
+        where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: start, lt: end } },
       }),
       this.prisma.ticket.count({ where: { status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] as any } } }),
     ]);
@@ -308,12 +308,12 @@ export class FinanceService {
       // Current month invoice
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
-        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: start, lt: end } },
+        where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: start, lt: end } },
       }),
       // Prev month invoice
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
-        where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: prevStart, lt: prevEnd } },
+        where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: prevStart, lt: prevEnd } },
       }),
       // Current month payment
       this.prisma.invoicePayment.aggregate({
@@ -433,7 +433,7 @@ export class FinanceService {
       const [trendInvoice, trendExpense, trendWifi] = await Promise.all([
         this.prisma.invoice.aggregate({
           _sum: { totalAmountRupiah: true },
-          where: { status: { not: InvoiceStatus.CANCELLED as any }, periodStart: { gte: trendStart, lt: trendEnd } },
+          where: { status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any }, periodStart: { gte: trendStart, lt: trendEnd } },
         }),
         this.prisma.expense.aggregate({
           _sum: { amountRupiah: true },

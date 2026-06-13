@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-7: Invoice DRAFT Bukan Revenue (F-09)
+
+- **`reports.service.ts` (4 agregat revenue/billed)** + **`finance.service.ts` (5 agregat revenue ber-periodStart)**: filter `status: { not: CANCELLED }` → `status: { notIn: [DRAFT, CANCELLED] }` → DRAFT (belum diterbitkan) tidak lagi dihitung sebagai pendapatan/tagihan.
+- **Sengaja TIDAK diubah** (LARANGAN): groupBy `countByStatus` di reports (masih perlu DRAFT untuk `unpaidCount`), dan openInvoice/AR (`notIn [PAID, CANCELLED]` — termasuk DRAFT sesuai guard checkout).
+- Verifikasi: grep memastikan 4+5 spot benar berubah, groupBy & openInvoice tetap. `tsc --noEmit` 0, `npm run test:unit` 13/13 hijau. ⏳ runtime (P&L revenue tanpa DRAFT) = gate pra-deploy F1-12.
+
+Status: perubahan filter query laporan; tanpa schema/DB.
+
 ## 2026-06-13 — F1-6: Occupancy Rasio (F-04) dihitung inline
 
 - **`financialRatios()`**: `occupancyRate` tak lagi membaca `bs.statement?.occupancyRate` (yang tidak ada → selalu 0). Dihitung INLINE: `operableRooms = kamar isActive − (MAINTENANCE+INACTIVE)`, `occupiedPromoted = stay ACTIVE & initialMetersPromotedAt != null`, lalu `occupancyRatePercent(occupied, operable)`. Konsisten dengan `finance.service` occupancySummary.

@@ -28,7 +28,8 @@ export class ReportsService {
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         where: {
-          status: { not: InvoiceStatus.CANCELLED as any },
+          // F1-7 (F-09): DRAFT belum diterbitkan → bukan pendapatan/tagihan.
+          status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any },
           periodStart: { gte: start, lt: end },
         },
       }),
@@ -306,7 +307,8 @@ export class ReportsService {
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         where: {
-          status: { not: InvoiceStatus.CANCELLED as any },
+          // F1-7 (F-09): DRAFT belum diterbitkan → bukan pendapatan/tagihan.
+          status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any },
           periodStart: { gte: start, lt: end },
         },
       }),
@@ -374,7 +376,8 @@ export class ReportsService {
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         where: {
-          status: { not: InvoiceStatus.CANCELLED as any },
+          // F1-7 (F-09): DRAFT belum diterbitkan → bukan pendapatan/tagihan.
+          status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any },
           periodStart: { gte: start, lt: end },
         },
       }),
@@ -482,7 +485,8 @@ export class ReportsService {
       this.prisma.invoice.aggregate({
         _sum: { totalAmountRupiah: true },
         where: {
-          status: { not: InvoiceStatus.CANCELLED as any },
+          // F1-7 (F-09): DRAFT belum diterbitkan → bukan pendapatan/tagihan.
+          status: { notIn: [InvoiceStatus.DRAFT, InvoiceStatus.CANCELLED] as any },
           periodStart: { gte: start, lt: end },
         },
       }),
