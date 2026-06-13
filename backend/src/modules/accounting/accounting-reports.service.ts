@@ -14,6 +14,7 @@ import { classifyCashflow, type CashflowLineInput } from './cashflow-classifier'
 import {
   sumLinesByPrefix,
   expenseRatioPercent,
+  occupancyRatePercent,
   CASH_PREFIXES,
   INVENTORY_PREFIXES,
   CURRENT_LIABILITY_PREFIXES,
@@ -953,7 +954,18 @@ export class AccountingReportsService {
       : 0;
     // F1-4 (F-02): perbaiki presedensi — (expense / revenue) × 100, bukan expense × 100.
     const expenseRatio = expenseRatioPercent(pnl.totals?.expenseRupiah ?? 0, totalRevenue);
-    const occupancyRate = bs.statement?.occupancyRate ?? 0;
+    // F1-6 (F-04): hitung occupancy INLINE (bs.statement tak punya occupancyRate → dulu selalu 0).
+    // operable = kamar isActive − (MAINTENANCE+INACTIVE); huni = stay ACTIVE & promoted. Konsisten finance.service.
+    const [roomsByStatus, occupiedPromoted] = await Promise.all([
+      (this.prisma as any).room.groupBy({ by: ['status'], _count: { id: true }, where: { isActive: true } }),
+      (this.prisma as any).stay.count({ where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null } } }),
+    ]);
+    const roomCountByStatus: Record<string, number> = {};
+    for (const r of roomsByStatus) roomCountByStatus[String(r.status)] = Number(r._count?.id ?? 0);
+    const totalOperableBase = Object.values(roomCountByStatus).reduce((s, n) => s + n, 0);
+    const downRooms = (roomCountByStatus['MAINTENANCE'] ?? 0) + (roomCountByStatus['INACTIVE'] ?? 0);
+    const operableRooms = Math.max(0, totalOperableBase - downRooms);
+    const occupancyRate = occupancyRatePercent(occupiedPromoted, operableRooms);
 
     return {
       asOf: trial.asOf,

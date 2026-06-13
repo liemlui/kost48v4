@@ -23,3 +23,10 @@ test('sumLinesByPrefix — kas 10 (bukan AR 11), inventory 12, currentLiab 20-23
   assert.strictEqual(R.sumLinesByPrefix(lines, 'ASSET', R.INVENTORY_PREFIXES), 300000);        // 1200
   assert.strictEqual(R.sumLinesByPrefix(lines, 'LIABILITY', R.CURRENT_LIABILITY_PREFIXES), 700000); // 2000+2100 (deposit termasuk)
 });
+
+test('occupancyRatePercent — F-04: promoted/operable, operable 0 -> 0', () => {
+  assert.strictEqual(R.occupancyRatePercent(5, 10), 50);
+  assert.strictEqual(R.occupancyRatePercent(0, 10), 0);
+  assert.strictEqual(R.occupancyRatePercent(48, 48), 100);
+  assert.strictEqual(R.occupancyRatePercent(3, 0), 0);   // tak ada kamar operable -> 0, bukan Infinity
+});

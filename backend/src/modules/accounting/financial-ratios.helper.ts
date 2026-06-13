@@ -35,3 +35,13 @@ export function expenseRatioPercent(expenseRupiah: number, totalRevenue: number)
   if (!(totalRevenue > 0)) return 0;
   return Math.round(((expenseRupiah ?? 0) / totalRevenue) * 10000) / 100;
 }
+
+/**
+ * F1-4/F1-6 (F-04): occupancy % = stay promoted (huni) / kamar operable, 2 desimal.
+ * operable = total kamar isActive − (MAINTENANCE + INACTIVE). operable 0 → 0 (bukan Infinity).
+ * Konsisten dengan finance.service occupancySummary.
+ */
+export function occupancyRatePercent(occupiedPromoted: number, operableRooms: number): number {
+  if (!(operableRooms > 0)) return 0;
+  return Math.round((occupiedPromoted / operableRooms) * 10000) / 100;
+}

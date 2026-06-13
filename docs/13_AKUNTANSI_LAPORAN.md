@@ -79,5 +79,6 @@ Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financi
 - **Current liabilities:** *before* `startsWith('21')` (lewatkan deposit 2000) → *after* `CURRENT_LIABILITY_PREFIXES=['20','21','22','23']` → semua liquidity ratio (current/quick/cash) benar.
 - **Verifikasi:** `financial-ratios.helper.test.js` (expenseRatio→25; kas 10≠AR 11; inventory 12; currentLiab termasuk deposit 2000). 12/12 hijau total. ⏳ runtime → gate pra-deploy F1-12.
 - COA acuan (`constants/default-coa.ts`): kas 1000/1010/1020 · AR 1100 · inventory 1200 · fixed 1500/1590 · liab 2000/2100/2200/2300.
+- **F1-6 occupancy (F-04):** *before* `occupancyRate = bs.statement?.occupancyRate ?? 0` (balanceSheet tak punya field itu → selalu 0). *after* hitung INLINE: `operable = kamar isActive − (MAINTENANCE+INACTIVE)`, huni = `stay ACTIVE & initialMetersPromotedAt!=null` → `occupancyRatePercent(huni, operable)`. Konsisten `finance.service` occupancySummary. Test: 5/10→50, operable 0→0.
 
 **Lintas-dossier:** jurnal booking/payment → dossier 10; jurnal deposit → dossier 12; keputusan owner → `03_KEPUTUSAN_OWNER.md`.

@@ -2,6 +2,22 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-13 — F1-6: Occupancy Rasio (F-04) dihitung inline
+
+- **`financialRatios()`**: `occupancyRate` tak lagi membaca `bs.statement?.occupancyRate` (yang tidak ada → selalu 0). Dihitung INLINE: `operableRooms = kamar isActive − (MAINTENANCE+INACTIVE)`, `occupiedPromoted = stay ACTIVE & initialMetersPromotedAt != null`, lalu `occupancyRatePercent(occupied, operable)`. Konsisten dengan `finance.service` occupancySummary.
+- Helper `occupancyRatePercent` (di `financial-ratios.helper.ts`) + test (5/10→50; operable 0→0; 48/48→100). Total `test:unit` **13/13 hijau**.
+- Gate: `tsc --noEmit` 0. ⏳ runtime (occupancy>0 saat ada penghuni) = gate pra-deploy F1-12.
+
+Status: perubahan kode finance (rasio occupancy) + helper + test; tanpa schema/DB.
+
+## 2026-06-13 — F1-5: Deposit sebagai Kewajiban Lancar (F-03) — verifikasi & tutup (docs-only)
+
+- Inti F1-5 (deposit masuk kewajiban lancar → currentRatio turun wajar saat deposit HELD) sudah terpenuhi di **F1-4**: `currentLiabilities` memakai `CURRENT_LIABILITY_PREFIXES ['20','21','22','23']`, mencakup `Tenant Deposit Liability` (2000).
+- `balanceSheet()` ditelaah baris-demi-baris: identitas **A = L + E** benar — keenam tipe akun (ASSET/LIABILITY/EQUITY/REVENUE/COGS/EXPENSE) ter-map, contra-asset (1590) ter-net via `netFixedAssets`, `currentProfit = revenue − cogs − expenses`. F-17 (imbalance karena mapping tak lengkap) **tidak bermanifestasi** di kode saat ini; konsisten dengan UAT GROUND_STATE "balance sheet A=L+E".
+- Tidak ada perubahan kode (tercakup commit F1-4); hanya penutupan checklist + catatan.
+
+Status: docs-only.
+
 ## 2026-06-13 — F1-4: Rasio Keuangan Benar (F-02 presedensi + F-18 kas/AR)
 
 - **`financial-ratios.helper.ts` (baru, pure)** + `backend/test/unit/financial-ratios.helper.test.js` (12/12 hijau total).
