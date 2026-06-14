@@ -142,6 +142,77 @@ export class TenantsService {
     );
   }
 
+  // ── F3-17: KTP (foto identitas terproteksi + verifikasi + hapus PDP) ─────────
+
+  /** Simpan metadata foto KTP yang sudah diunggah; upload baru me-reset verifikasi. */
+  async setKtpImage(
+    id: number,
+    file: { fileKey: string; fileUrl: string; originalFilename?: string; mimeType: string; fileSizeBytes?: number },
+    actor: CurrentUserPayload,
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true } });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: {
+        ktpImageUrl: file.fileUrl,
+        ktpImageFileKey: file.fileKey,
+        ktpImageOriginalFilename: file.originalFilename ?? null,
+        ktpImageMimeType: file.mimeType,
+        ktpImageFileSizeBytes: file.fileSizeBytes ?? null,
+        ktpVerifiedAt: null,
+        ktpVerifiedById: null,
+        ktpDeletedAt: null,
+      },
+    });
+    await this.audit.log({ actorUserId: actor.id, action: 'KTP_UPLOAD', entityType: 'Tenant', entityId: String(id) });
+    // fileKey lama (jika ada) dikembalikan agar controller bisa hapus file fisiknya.
+    return { tenant: updated, previousFileKey: tenant.ktpImageFileKey };
+  }
+
+  /** OWNER memverifikasi KTP (gate aktivasi kamar bila diaktifkan). */
+  async verifyKtp(id: number, actor: CurrentUserPayload) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true, ktpVerifiedAt: true } });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    if (!tenant.ktpImageFileKey) throw new ConflictException('Tenant belum mengunggah foto KTP.');
+    if (tenant.ktpVerifiedAt) throw new ConflictException('KTP sudah terverifikasi.');
+    const updated = await this.prisma.tenant.update({
+      where: { id },
+      data: { ktpVerifiedAt: new Date(), ktpVerifiedById: actor.id },
+    });
+    await this.audit.log({ actorUserId: actor.id, action: 'KTP_VERIFY', entityType: 'Tenant', entityId: String(id) });
+    return updated;
+  }
+
+  /** fileKey untuk penyajian terproteksi (controller batasi role OWNER/ADMIN). */
+  async getKtpImageKey(id: number): Promise<string> {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { ktpImageFileKey: true } });
+    if (!tenant?.ktpImageFileKey) throw new NotFoundException('Foto KTP tidak ditemukan');
+    return tenant.ktpImageFileKey;
+  }
+
+  /** Hapus data KTP (UU PDP) — kembalikan fileKey agar controller hapus file fisik. */
+  async clearKtp(id: number, actor: CurrentUserPayload, reason: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id }, select: { id: true, ktpImageFileKey: true } });
+    if (!tenant) throw new NotFoundException('Tenant tidak ditemukan');
+    const previousFileKey = tenant.ktpImageFileKey;
+    await this.prisma.tenant.update({
+      where: { id },
+      data: {
+        ktpImageUrl: null,
+        ktpImageFileKey: null,
+        ktpImageOriginalFilename: null,
+        ktpImageMimeType: null,
+        ktpImageFileSizeBytes: null,
+        ktpVerifiedAt: null,
+        ktpVerifiedById: null,
+        ktpDeletedAt: new Date(),
+      },
+    });
+    await this.audit.log({ actorUserId: actor.id, action: 'KTP_DELETE', entityType: 'Tenant', entityId: String(id), meta: { reason } });
+    return { previousFileKey };
+  }
+
   async create(dto: CreateTenantDto, actor: CurrentUserPayload) {
     const data = this.normalizeTenantData(dto);
     await this.validateTenantUniqueness(data);

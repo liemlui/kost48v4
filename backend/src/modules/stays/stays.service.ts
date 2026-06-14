@@ -23,6 +23,8 @@ import {
   UserRole,
 } from "../../common/enums/app.enums";
 import { serializePrismaResult } from "../../common/utils/serialization";
+import { deleteFileSafe } from "../../common/utils/file-signature.util";
+import { join } from "path";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
   CancelStayDto,
@@ -131,6 +133,18 @@ export class StaysService {
       where: { id: dto.tenantId },
     });
     if (!tenant) throw new NotFoundException("Tenant tidak ditemukan");
+
+    // F3-17: gate aktivasi kamar — bila KTP_ACTIVATION_GATE_ENABLED=true, tenant
+    // wajib KTP terverifikasi sebelum check-in. Default OFF agar tak mengganggu
+    // alur sampai onboarding KTP terpasang penuh; owner aktifkan saat siap.
+    if (
+      String(process.env.KTP_ACTIVATION_GATE_ENABLED ?? "false").toLowerCase() === "true" &&
+      (tenant as { ktpVerifiedAt: Date | null }).ktpVerifiedAt == null
+    ) {
+      throw new ConflictException(
+        "KTP tenant belum diverifikasi. Unggah & verifikasi KTP sebelum aktivasi kamar (gate UU PDP/onboarding).",
+      );
+    }
 
     const room = await this.prisma.room.findUnique({
       where: { id: dto.roomId },
@@ -686,11 +700,50 @@ export class StaysService {
       oldData: existing,
       newData: updated,
     });
+
+    // F3-17 (UU PDP): hapus foto KTP saat tenant keluar bila tak punya stay aktif
+    // lain. Best-effort di luar tx (file IO) — kegagalan tak menggagalkan checkout.
+    await this.cleanupTenantKtpOnCheckout(existing.tenantId, id).catch((err) =>
+      this.logger.warn(
+        `PDP cleanup KTP tenant #${existing.tenantId} gagal: ${err instanceof Error ? err.message : String(err)}`,
+      ),
+    );
+
     return normalizeStayForResponse({
       ...updated,
       roomStatusAfterSync: "MAINTENANCE",
       roomReadinessAfterCheckout: "NEEDS_INSPECTION",
     });
+  }
+
+  // F3-17 (UU PDP): hapus foto KTP saat tenant checkout & tak punya stay aktif lain.
+  private async cleanupTenantKtpOnCheckout(tenantId: number, completedStayId: number) {
+    const otherActive = await this.prisma.stay.count({
+      where: { tenantId, status: StayStatus.ACTIVE, id: { not: completedStayId } },
+    });
+    if (otherActive > 0) return; // tenant masih huni kamar lain → simpan KTP
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { ktpImageFileKey: true },
+    });
+    if (!tenant?.ktpImageFileKey) return;
+
+    deleteFileSafe(join(process.cwd(), "uploads", "ktp-images", tenant.ktpImageFileKey));
+    await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        ktpImageUrl: null,
+        ktpImageFileKey: null,
+        ktpImageOriginalFilename: null,
+        ktpImageMimeType: null,
+        ktpImageFileSizeBytes: null,
+        ktpVerifiedAt: null,
+        ktpVerifiedById: null,
+        ktpDeletedAt: new Date(),
+      },
+    });
+    this.logger.log(`PDP: foto KTP tenant #${tenantId} dihapus otomatis pasca-checkout.`);
   }
 
   // F3-15: admin menandai barang tenant pasca-checkout (diambil=CLAIMED atau

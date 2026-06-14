@@ -2,6 +2,16 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — feat(F3-17): upload + verifikasi KTP (terproteksi, gate aktivasi, hapus PDP)
+
+- **Schema (approved):** `Tenant.ktpImage*` (url/fileKey/originalFilename/mimeType/fileSizeBytes) + `ktpVerifiedAt/ktpVerifiedById` + `ktpDeletedAt`.
+- **Upload:** `POST /tenants/:id/ktp/upload` (OWNER/ADMIN, multer + validasi MIME signature, simpan di `uploads/ktp-images` terpisah dari foto kamar/tiket). Upload baru me-reset verifikasi & hapus berkas lama.
+- **Verifikasi:** `POST /tenants/:id/ktp/verify` (OWNER) → set `ktpVerifiedAt/ById`.
+- **Penyajian terproteksi:** `GET /tenants/:id/ktp/image` **OWNER/ADMIN saja** (no-store, nosniff, Vary Authorization) — STAFF/TENANT tak bisa akses data PDP.
+- **Gate aktivasi (opsional):** `stays.create` menolak check-in bila `KTP_ACTIVATION_GATE_ENABLED=true` dan KTP tenant belum terverifikasi. **Default OFF** agar alur tak terganggu sampai onboarding KTP siap; owner aktifkan saat siap.
+- **Hapus PDP:** otomatis saat checkout final (`stays.complete`) bila tenant tak punya stay aktif lain (hapus file + kosongkan field + set `ktpDeletedAt`, best-effort di luar tx); plus manual `DELETE /tenants/:id/ktp` (OWNER).
+- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau.
+
 ## 2026-06-14 — feat(F3-15): lacak barang ditinggal 30 hari → ABANDONED
 
 - **Schema (approved):** `Stay.belongingsStatus` (enum `BelongingsStatus PENDING/CLAIMED/ABANDONED`, default PENDING), `belongingsDeadline`, `belongingsResolvedAt` + index.
