@@ -456,6 +456,14 @@ BEGIN
     RAISE EXCEPTION 'Deposit hanya dapat diproses setelah stay selesai atau dibatalkan';
   END IF;
 
+  -- F3-16 carve-out: forced-checkout admin SENGAJA menyetel deposit untuk menutup
+  -- tagihan terbuka (deposit -> AR), sisa TETAP jadi piutang. Diaktifkan hanya via
+  -- GUC sesi-transaksi yang di-set oleh service forced-checkout; flow normal
+  -- (processDeposit) tidak men-set GUC ini sehingga tetap terlindungi penuh.
+  IF coalesce(current_setting('app.allow_deposit_with_open_invoices', true), '') = 'on' THEN
+    RETURN NEW;
+  END IF;
+
   SELECT COUNT(*) INTO v_open_invoices
   FROM "Invoice"
   WHERE "stayId" = NEW.id

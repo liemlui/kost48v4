@@ -706,6 +706,89 @@ export class AccountingPostingService {
     });
   }
 
+  // F3-16: settlement deposit saat FORCED-CHECKOUT — deposit menutup piutang (AR)
+  // tenant, kelebihan di-refund kas. BERBEDA dari postDepositSettlementTx yang
+  // mengkredit 4400 (potongan/forfeit damages); di sini "deduction" = pembayaran
+  // tunggakan tenant, jadi mengkredit AR 1100, bukan pendapatan.
+  async postForcedCheckoutDepositSettlementTx(
+    tx: any,
+    stayId: number,
+    appliedToArRupiah: number,
+    refundedCashRupiah: number,
+    createdById?: number | null,
+  ) {
+    const applied = rupiah(appliedToArRupiah);
+    const refunded = rupiah(refundedCashRupiah);
+    const total = applied + refunded;
+    const sourceId = `FORCED_CHECKOUT_DEPOSIT:${stayId}`;
+    if (total <= 0)
+      return { ...this.skip("ADJUSTMENT", sourceId, "Tidak ada deposit untuk disetel."), benign: true };
+
+    // F-24: hanya debit liability 2000 bila ada jurnal PENERIMAAN deposit (credit 2000).
+    const receipt = await tx.journalEntry.findFirst({
+      where: { sourceType: "DEPOSIT" as any, sourceId: String(stayId), status: "POSTED" as any },
+      select: { id: true },
+    });
+    if (!receipt)
+      return {
+        ...this.skip(
+          "ADJUSTMENT",
+          sourceId,
+          "Belum ada jurnal penerimaan deposit (2000 tak pernah dikredit); settlement deposit forced-checkout dilewati (F-24).",
+        ),
+        benign: true,
+      };
+
+    const depositLiability = await findAccountByCodeTx(tx, "2000");
+    if (!depositLiability)
+      return this.skip("ADJUSTMENT", sourceId, "COA 2000 Tenant Deposit Liability belum tersedia.");
+
+    const lines: JournalLineInput[] = [
+      {
+        chartOfAccountId: depositLiability.id,
+        description: `Pelepasan deposit (forced-checkout) stay #${stayId}`,
+        debitRupiah: total,
+        creditRupiah: 0,
+        sortOrder: 0,
+      },
+    ];
+    let sortOrder = 1;
+    if (applied > 0) {
+      const ar = await findAccountByCodeTx(tx, "1100");
+      if (!ar)
+        return this.skip("ADJUSTMENT", sourceId, "COA 1100 Accounts Receivable belum tersedia.");
+      lines.push({
+        chartOfAccountId: ar.id,
+        description: `Deposit menutup tunggakan (AR) stay #${stayId}`,
+        debitRupiah: 0,
+        creditRupiah: applied,
+        sortOrder: sortOrder++,
+      });
+    }
+    if (refunded > 0) {
+      const cash = await findDefaultCashAccountTx(tx);
+      if (!cash)
+        return this.skip("ADJUSTMENT", sourceId, "Cash/bank account aktif belum tersedia untuk refund deposit.");
+      lines.push({
+        chartOfAccountId: cash.chartOfAccountId,
+        cashAccountId: cash.id,
+        description: `Refund kelebihan deposit stay #${stayId}`,
+        debitRupiah: 0,
+        creditRupiah: refunded,
+        sortOrder: sortOrder++,
+      });
+    }
+
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(new Date()),
+      memo: `Settlement deposit forced-checkout stay #${stayId} (AR ${applied}, refund ${refunded})`,
+      createdById: createdById ?? null,
+      lines,
+    });
+  }
+
   async postInvoiceCancellationReversalTx(
     tx: any,
     invoiceId: number,

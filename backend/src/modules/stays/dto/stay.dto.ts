@@ -1,6 +1,21 @@
 import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
 import { LeadSource, PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
 
+// F3-14/F3-16: admin paksa-checkout tenant (overstay nunggak / kabur). Deposit
+// menutup tunggakan, sisa jadi piutang (AR). Kelebihan deposit di-refund.
+export class ForcedCheckoutDto {
+  @IsIn(['OVERSTAY_NUNGGAK', 'TENANT_KABUR'])
+  reason!: 'OVERSTAY_NUNGGAK' | 'TENANT_KABUR';
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @IsOptional()
+  @IsDateString()
+  actualCheckOutDate?: string;
+}
+
 // F3-15: admin menandai barang tenant pasca-checkout (diambil / dinyatakan ditinggal).
 export class MarkBelongingsDto {
   @IsIn(['CLAIMED', 'ABANDONED'])

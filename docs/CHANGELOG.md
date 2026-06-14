@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — feat(F3-14/F3-16): forced-checkout admin (kabur/overstay) + deposit→AR [UAT runtime pending]
+
+- **Gabung F3-14+F3-16 (keputusan owner):** satu endpoint `POST /stays/:id/forced-checkout` (OWNER) beralasan `OVERSTAY_NUNGGAK`/`TENANT_KABUR`.
+- **Akuntansi (disetujui owner):** deposit menutup tunggakan → jurnal **DR 2000 / CR 1100** (`postForcedCheckoutDepositSettlementTx`, BEDA dari settlement damages yg kredit 4400); sisa tunggakan **TETAP jadi piutang AR 1100** (bukan write-off); kelebihan deposit di-refund kas. Invoice tertutup ditandai PAID/PARTIAL via pembayaran NON-KAS (method OTHER) agar aging konsisten.
+- **Guard carve-out (disetujui owner):** trigger `guard_stay_deposit_processing` (sql/bootstrap.sql) menambah carve-out via GUC sesi-transaksi `app.allow_deposit_with_open_invoices` — settlement deposit boleh jalan saat ada invoice terbuka HANYA dalam forced-checkout; flow normal `processDeposit` tetap terproteksi penuh.
+- **Lifecycle:** stay COMPLETED + `fled*` (jika kabur) + `belongingsDeadline` (F3-15) + kamar MAINTENANCE + tiket inspeksi; status deposit patuh `stay_deposit_status_consistency_chk`; ledger via `recordDepositSettlementTx`; KTP PDP cleanup; audit `FORCED_CHECKOUT`.
+- **Verifikasi:** backend `tsc` 0; unit 26/26. **⏳ UAT runtime (trial balance seimbang + AR sisa + deposit reconciliation) sedang dijalankan** — belum dicentang SELESAI sampai UAT lulus.
+
 ## 2026-06-14 — ui(F3-9): hierarki laporan — badge Formal/Estimasi
 
 - **Badge tier (F-11):** `ReportSection` kini menandai setiap kartu laporan operasional dengan badge **≈ Estimasi** (default) — angka dihitung mentah dari data transaksi (invoice/pembayaran/stay/beban), bisa beda tipis dari buku besar. Badge **✓ Formal** disediakan untuk angka berbasis jurnal.

@@ -19,6 +19,7 @@ import {
   InvoiceStatus,
   InvoiceLineType,
   DepositStatus,
+  PaymentMethod,
   UtilityType,
   UserRole,
 } from "../../common/enums/app.enums";
@@ -30,6 +31,7 @@ import {
   CancelStayDto,
   CompleteStayDto,
   CreateStayDto,
+  ForcedCheckoutDto,
   MarkBelongingsDto,
   ProcessDepositDto,
   ProcessLossRefundDto,
@@ -714,6 +716,245 @@ export class StaysService {
       roomStatusAfterSync: "MAINTENANCE",
       roomReadinessAfterCheckout: "NEEDS_INSPECTION",
     });
+  }
+
+  // F3-14/F3-16: paksa-checkout admin (overstay nunggak / tenant kabur). Deposit
+  // menutup tunggakan (AR), sisa TETAP jadi piutang AR; kelebihan deposit di-refund.
+  // OWNER-only. Guard deposit di-bypass khusus tx ini via GUC sesi-transaksi.
+  async forcedCheckout(id: number, dto: ForcedCheckoutDto, actor: CurrentUserPayload) {
+    assertCoreLifecycleActor(actor, "Forced checkout");
+    const actualCheckOutDate = dto.actualCheckOutDate
+      ? parseJakartaDateOnly(dto.actualCheckOutDate, "Tanggal checkout final tidak valid")
+      : startOfJakartaBusinessDay(new Date());
+    const note = dto.note?.trim() || `Forced checkout admin (${dto.reason})`;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Carve-out guard deposit HANYA untuk transaksi ini (auto-reset saat commit).
+      await tx.$executeRawUnsafe(`SET LOCAL "app.allow_deposit_with_open_invoices" = 'on'`);
+
+      const stay = await tx.stay.findUnique({ where: { id } });
+      if (!stay) throw new NotFoundException("Stay tidak ditemukan");
+      if (stay.status !== StayStatus.ACTIVE)
+        throw new ConflictException("Hanya stay ACTIVE yang bisa di-forced-checkout");
+      if (!stay.initialMetersPromotedAt)
+        throw new ConflictException(
+          "Forced checkout hanya untuk penghuni aktif (sudah promoted). Booking belum huni: gunakan pembatalan.",
+        );
+      if (stay.depositStatus !== DepositStatus.HELD)
+        throw new ConflictException("Deposit sudah diproses sebelumnya.");
+
+      const depositAmount = Number(stay.depositAmountRupiah ?? 0);
+      const depositHeld = Number(stay.depositPaidAmountRupiah ?? 0);
+      // Constraint deposit memakai depositAmountRupiah; settlement bersih hanya saat
+      // deposit dibayar penuh. Deposit parsial → proses manual (hindari langgar CHECK).
+      if (depositHeld > 0 && depositHeld !== depositAmount) {
+        throw new ConflictException(
+          "Deposit dibayar parsial — selesaikan lewat Proses Deposit manual, bukan forced checkout.",
+        );
+      }
+
+      // 1. Batalkan invoice DRAFT (tanpa jurnal).
+      await tx.invoice.updateMany({
+        where: { stayId: id, status: InvoiceStatus.DRAFT },
+        data: { status: InvoiceStatus.CANCELLED, cancelReason: note },
+      });
+
+      // 2. Outstanding = Σ sisa (total − Σ pembayaran) invoice ISSUED/PARTIAL.
+      const openInvoices = await tx.invoice.findMany({
+        where: { stayId: id, status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] } },
+        select: { id: true, totalAmountRupiah: true, payments: { select: { amountRupiah: true } } },
+        orderBy: { id: "asc" },
+      });
+      const withRemaining = openInvoices
+        .map((inv) => {
+          const paid = inv.payments.reduce((s, p) => s + Number(p.amountRupiah), 0);
+          return { id: inv.id, remaining: Math.max(0, Number(inv.totalAmountRupiah) - paid) };
+        })
+        .filter((x) => x.remaining > 0);
+      const outstanding = withRemaining.reduce((s, x) => s + x.remaining, 0);
+
+      const applied = Math.min(outstanding, depositHeld);
+      const excess = depositHeld - applied;
+      const shortfall = outstanding - applied;
+
+      // 3. Terapkan deposit ke invoice (oldest first) — pembayaran NON-KAS (method
+      //    OTHER + catatan); AR di-clear lewat jurnal offset, bukan jurnal kas.
+      let left = applied;
+      for (const inv of withRemaining) {
+        if (left <= 0) break;
+        const cover = Math.min(inv.remaining, left);
+        await tx.invoicePayment.create({
+          data: {
+            invoiceId: inv.id,
+            paymentDate: actualCheckOutDate,
+            amountRupiah: cover,
+            method: PaymentMethod.OTHER,
+            note: `Potongan deposit (forced checkout ${dto.reason})`,
+            capturedById: actor.id,
+          },
+        });
+        await tx.invoice.update({
+          where: { id: inv.id },
+          data:
+            cover >= inv.remaining
+              ? { status: InvoiceStatus.PAID, paidAt: new Date() }
+              : { status: InvoiceStatus.PARTIAL },
+        });
+        left -= cover;
+      }
+
+      // 4. Jurnal settlement deposit forced-checkout (DR 2000 / CR 1100 applied / CR kas excess).
+      let depositSettlement: any = null;
+      if (depositHeld > 0) {
+        depositSettlement = await this.accountingPosting.postForcedCheckoutDepositSettlementTx(
+          tx,
+          id,
+          applied,
+          excess,
+          actor.id,
+        );
+      }
+
+      // 5. Tentukan status deposit (patuh stay_deposit_status_consistency_chk).
+      let depositPatch: any = {};
+      if (depositHeld > 0) {
+        if (applied === 0) {
+          depositPatch = {
+            depositStatus: DepositStatus.REFUNDED,
+            depositDeductionRupiah: 0,
+            depositRefundedRupiah: excess,
+            depositRefundedAt: new Date(),
+          };
+        } else if (excess === 0) {
+          depositPatch = {
+            depositStatus: DepositStatus.FORFEITED,
+            depositDeductionRupiah: applied, // == depositAmount (dijaga di atas)
+            depositRefundedRupiah: 0,
+            depositRefundedAt: null,
+          };
+        } else {
+          depositPatch = {
+            depositStatus: DepositStatus.PARTIALLY_REFUNDED,
+            depositDeductionRupiah: applied,
+            depositRefundedRupiah: excess,
+            depositRefundedAt: new Date(),
+          };
+        }
+      }
+
+      // 6. Update stay: COMPLETED + fled (jika kabur) + belongings + deposit + alasan.
+      const updateRes = await tx.stay.updateMany({
+        where: { id, status: StayStatus.ACTIVE },
+        data: {
+          status: StayStatus.COMPLETED,
+          actualCheckOutDate,
+          checkoutReason: note,
+          depositNote: note,
+          belongingsDeadline: new Date(actualCheckOutDate.getTime() + 30 * 24 * 60 * 60 * 1000),
+          ...(dto.reason === "TENANT_KABUR"
+            ? { fledMarkedAt: new Date(), fledMarkedById: actor.id, fledReason: note }
+            : {}),
+          ...depositPatch,
+        },
+      });
+      if (updateRes.count !== 1)
+        throw new ConflictException("Status stay berubah saat diproses. Muat ulang.");
+
+      // 7. Kamar → MAINTENANCE + tiket inspeksi (dedupe).
+      const otherActive = await tx.stay.count({
+        where: { roomId: stay.roomId, status: StayStatus.ACTIVE, id: { not: id } },
+      });
+      if (otherActive === 0) {
+        await tx.room.update({
+          where: { id: stay.roomId },
+          data: { status: RoomStatus.MAINTENANCE, allowBookingWhileCleaning: true },
+        });
+        const existingInspection = await tx.ticket.findFirst({
+          where: { stayId: id, roomId: stay.roomId, category: "CHECKOUT_INSPECTION" },
+          select: { id: true },
+        });
+        if (!existingInspection) {
+          const staffAssignee = await tx.user.findFirst({
+            where: { role: UserRole.STAFF, isActive: true },
+            orderBy: { id: "asc" },
+            select: { id: true },
+          });
+          const roomInfo = await tx.room.findUnique({
+            where: { id: stay.roomId },
+            select: { code: true, name: true },
+          });
+          const roomLabel = roomInfo?.code || roomInfo?.name || `Kamar #${stay.roomId}`;
+          const baseTicketNumber = `TIC-${new Date().getFullYear()}-CHK-${id}`;
+          let ticketNumber = baseTicketNumber;
+          let suffix = 1;
+          while (await tx.ticket.findUnique({ where: { ticketNumber }, select: { id: true } })) {
+            suffix += 1;
+            ticketNumber = `${baseTicketNumber}-${suffix}`;
+          }
+          await tx.ticket.create({
+            data: {
+              ticketNumber,
+              tenantId: stay.tenantId,
+              roomId: stay.roomId,
+              stayId: id,
+              title: `Cek kamar pasca forced-checkout - ${roomLabel}`,
+              description: [
+                `Kamar ${roomLabel} di-forced-checkout admin (alasan: ${dto.reason}).`,
+                "Keluarkan & amankan barang tenant, bersihkan, cek inventaris & kerusakan, foto kondisi akhir.",
+                "Barang tenant dilacak 30 hari (ABANDONED otomatis bila tak diambil).",
+              ].join("\n"),
+              category: "CHECKOUT_INSPECTION",
+              assignedToId: staffAssignee?.id ?? null,
+            },
+          });
+        }
+      }
+
+      // 8. Ledger deposit (reconciliation) — baca field deduction/refund yang baru diset.
+      let depositLedgerResult: any = null;
+      if (depositHeld > 0) {
+        depositLedgerResult = await this.depositLedger.recordDepositSettlementTx(tx, {
+          stayId: id,
+          actorUserId: actor.id,
+          note,
+          metadata: { action: "FORCED_CHECKOUT", reason: dto.reason, appliedToArRupiah: applied },
+        });
+      }
+
+      const finalStay = await tx.stay.findUnique({ where: { id } });
+      return {
+        stay: finalStay,
+        outstanding,
+        depositHeld,
+        appliedToArRupiah: applied,
+        refundedRupiah: excess,
+        shortfallRemainingArRupiah: shortfall,
+        depositSettlement,
+        depositLedger: depositLedgerResult,
+      };
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: "FORCED_CHECKOUT",
+      entityType: "Stay",
+      entityId: String(id),
+      newData: {
+        reason: dto.reason,
+        appliedToArRupiah: result.appliedToArRupiah,
+        refundedRupiah: result.refundedRupiah,
+        shortfallRemainingArRupiah: result.shortfallRemainingArRupiah,
+      },
+    });
+
+    // PDP: hapus KTP pasca-checkout bila tak ada stay aktif lain (best-effort).
+    await this.cleanupTenantKtpOnCheckout(result.stay!.tenantId, id).catch((err) =>
+      this.logger.warn(
+        `PDP cleanup KTP (forced-checkout) tenant #${result.stay!.tenantId} gagal: ${err instanceof Error ? err.message : String(err)}`,
+      ),
+    );
+
+    return normalizeStayForResponse({ ...result.stay, forcedCheckout: { ...result, stay: undefined } });
   }
 
   // F3-17 (UU PDP): hapus foto KTP saat tenant checkout & tak punya stay aktif lain.
