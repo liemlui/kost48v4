@@ -7,9 +7,11 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ForcedCheckoutDto, MarkBelongingsDto, ProcessDepositDto, ProcessLossRefundDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
+import { TransferRoomDto } from './dto/room-transfer.dto';
 import { StaysQueryDto } from './dto/stays-query.dto';
 import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
+import { RoomTransferService } from './room-transfer.service';
 
 @ApiTags('stays')
 @ApiBearerAuth()
@@ -19,7 +21,19 @@ export class StaysController {
   constructor(
     private readonly staysService: StaysService,
     private readonly staysQueryService: StaysQueryService,
+    private readonly roomTransferService: RoomTransferService,
   ) {}
+
+  // F4-8: pindah kamar resmi (OWNER/ADMIN; override harga OWNER-only di service).
+  @Post(':id/transfer-room')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async transferRoom(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: TransferRoomDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return { message: 'Pindah kamar berhasil', data: await this.roomTransferService.transferRoom(id, dto, user) };
+  }
 
   @Get()
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)

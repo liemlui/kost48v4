@@ -12,7 +12,7 @@
 
 ---
 
-## D — KEPUTUSAN UTAMA (D-01 s/d D-19)
+## D — KEPUTUSAN UTAMA (D-01 s/d D-20)
 
 | ID | Keputusan | Dampak |
 |----|-----------|--------|
@@ -35,6 +35,7 @@
 | D-17 | **Empat area OWNER-only:** tutup/buka periode akuntansi; hapus/nonaktif user atau staf; setelan kamar dan harga; proses deposit/refund settlement. ADMIN hanya boleh membaca atau menjalankan operasi lain yang secara eksplisit diizinkan. | Task F2-16. |
 | D-18 | **RENEWAL/PRABAYAR FLEKSIBEL KAPAN SAJA** (2026-06-14). Tenant boleh perpanjang / **bayar di muka 2-4 bulan ke depan dengan harga BULANAN**, KAPAN SAJA — **tak harus menunggu kontrak lama habis**. Ini menambah jalur "prabayar/perpanjang lebih awal" di samping renewal akhir-kontrak (R1-R5, prompt H-10). Prabayar >1 bulan = **pendapatan diterima di muka** (akui bertahap → F4-1 unearned revenue). Rent-lock D-16 tetap berlaku (harga tak naik selama renew berlanjut). | Backlog **F4-11**; terkait F4-1. |
 | D-19 | **FAQ DETAIL + "MANUAL BOOK" DI TENANT APP** (2026-06-14). Semua aturan/flow kos di-generate jadi **FAQ sangat detail** lalu disajikan sebagai **menu "Panduan/Aturan" di tenant app** — tenant bisa baca manual aturan kos secara mandiri. **Openness, TAPI jangan bikin tenant pusing** (ringkas, terstruktur, berkategori). Sumber konten: `03_KEPUTUSAN_OWNER` + dossier flow; input tambahan via **interview owner** atau **analisa percakapan WhatsApp** (pertanyaan & keluhan tenant yang sering). Fondasi `FaqsModule` sudah ada. | Backlog **F4-12**; dossier 17/16. |
+| D-20 | **PINDAH KAMAR RESMI** (2026-06-15). Stay SAMA (roomId diperbarui); deposit ikut apa adanya; harga dikunci (D-16) kecuali **override OWNER-only** (D-17); meter kamar baru di-snapshot; kamar lama→inspeksi, kamar baru→OCCUPIED. Detail di §D-20. | **F4-8 SELESAI**. |
 
 ---
 
@@ -105,6 +106,13 @@
 - **Akuntansi:** prabayar lebih dari 1 bulan = **pendapatan diterima di muka (unearned revenue, COA 2200)** → diakui bertahap per bulan. **Terikat ke F4-1** (RentRecognitionSchedule). Jangan akui seluruh prabayar sebagai pendapatan bulan berjalan.
 - **Harga:** mengikuti **rent-lock D-16** — selama tenant terus renew tanpa putus kontrak, harga tidak naik.
 - **Desain yang perlu (saat F4-11 dimulai):** titik masuk UI kapan saja (tenant app), pilih jumlah bulan, hitung total = bulan × tarif bulanan, alur pembayaran (no-partial D-02), perpanjangan `plannedCheckOutDate` stay, dan penjadwalan pengakuan pendapatan.
+
+### D-20 — Pindah kamar resmi (F4-8, keputusan desain 2026-06-15)
+- **Stay yang SAMA** dipertahankan (hanya `roomId` diperbarui + dicatat `RoomTransfer`) → histori/loyalitas/masa sewa utuh, tak putus kontrak.
+- **Deposit jaminan ikut pindah apa adanya** (tak dihitung ulang; tak ada transaksi uang deposit saat pindah).
+- **Harga sewa dikunci** (rent-loyalty D-16) **kecuali override manual oleh OWNER** (mis. upgrade VIP yang tenant setujui; ADMIN tak boleh ubah harga — D-17).
+- **Meter kamar baru di-snapshot baseline** saat pindah (seperti check-in).
+- **Kamar lama → MAINTENANCE + tiket CHECKOUT_INSPECTION** (lalu AVAILABLE saat inspeksi ditutup); **kamar baru → OCCUPIED**.
 
 ### D-19 — FAQ detail + "manual book" tenant app (backlog F4-12)
 - **Tujuan:** tenant dapat membaca **manual/aturan kos** secara mandiri di tenant app → transparansi (openness) + mengurangi pertanyaan berulang ke admin/staf (selaras filosofi tenant-pengawas).

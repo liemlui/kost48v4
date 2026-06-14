@@ -868,6 +868,20 @@ exports.Prisma.RentRecognitionScheduleScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RoomTransferScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  fromRoomId: 'fromRoomId',
+  toRoomId: 'toRoomId',
+  transferDate: 'transferDate',
+  reason: 'reason',
+  rentBeforeRupiah: 'rentBeforeRupiah',
+  rentAfterRupiah: 'rentAfterRupiah',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.LoyaltyPointScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -1449,6 +1463,7 @@ exports.Prisma.ModelName = {
   JournalEntry: 'JournalEntry',
   JournalLine: 'JournalLine',
   RentRecognitionSchedule: 'RentRecognitionSchedule',
+  RoomTransfer: 'RoomTransfer',
   LoyaltyPoint: 'LoyaltyPoint',
   LoyaltyReward: 'LoyaltyReward',
   Redemption: 'Redemption',

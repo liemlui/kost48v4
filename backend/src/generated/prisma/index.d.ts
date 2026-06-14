@@ -224,6 +224,11 @@ export type JournalLine = $Result.DefaultSelection<Prisma.$JournalLinePayload>
  */
 export type RentRecognitionSchedule = $Result.DefaultSelection<Prisma.$RentRecognitionSchedulePayload>
 /**
+ * Model RoomTransfer
+ * 
+ */
+export type RoomTransfer = $Result.DefaultSelection<Prisma.$RoomTransferPayload>
+/**
  * Model LoyaltyPoint
  * 
  */
@@ -1661,6 +1666,16 @@ export class PrismaClient<
   get rentRecognitionSchedule(): Prisma.RentRecognitionScheduleDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.roomTransfer`: Exposes CRUD operations for the **RoomTransfer** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RoomTransfers
+    * const roomTransfers = await prisma.roomTransfer.findMany()
+    * ```
+    */
+  get roomTransfer(): Prisma.RoomTransferDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.loyaltyPoint`: Exposes CRUD operations for the **LoyaltyPoint** model.
     * Example usage:
     * ```ts
@@ -2175,6 +2190,7 @@ export namespace Prisma {
     JournalEntry: 'JournalEntry',
     JournalLine: 'JournalLine',
     RentRecognitionSchedule: 'RentRecognitionSchedule',
+    RoomTransfer: 'RoomTransfer',
     LoyaltyPoint: 'LoyaltyPoint',
     LoyaltyReward: 'LoyaltyReward',
     Redemption: 'Redemption',
@@ -2194,7 +2210,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "faq"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "roomTransfer" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "faq"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5306,6 +5322,80 @@ export namespace Prisma {
           }
         }
       }
+      RoomTransfer: {
+        payload: Prisma.$RoomTransferPayload<ExtArgs>
+        fields: Prisma.RoomTransferFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RoomTransferFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RoomTransferFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          findFirst: {
+            args: Prisma.RoomTransferFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RoomTransferFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          findMany: {
+            args: Prisma.RoomTransferFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>[]
+          }
+          create: {
+            args: Prisma.RoomTransferCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          createMany: {
+            args: Prisma.RoomTransferCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RoomTransferCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>[]
+          }
+          delete: {
+            args: Prisma.RoomTransferDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          update: {
+            args: Prisma.RoomTransferUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          deleteMany: {
+            args: Prisma.RoomTransferDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RoomTransferUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RoomTransferUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>[]
+          }
+          upsert: {
+            args: Prisma.RoomTransferUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoomTransferPayload>
+          }
+          aggregate: {
+            args: Prisma.RoomTransferAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRoomTransfer>
+          }
+          groupBy: {
+            args: Prisma.RoomTransferGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RoomTransferGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RoomTransferCountArgs<ExtArgs>
+            result: $Utils.Optional<RoomTransferCountAggregateOutputType> | number
+          }
+        }
+      }
       LoyaltyPoint: {
         payload: Prisma.$LoyaltyPointPayload<ExtArgs>
         fields: Prisma.LoyaltyPointFieldRefs
@@ -5752,6 +5842,7 @@ export namespace Prisma {
     journalEntry?: JournalEntryOmit
     journalLine?: JournalLineOmit
     rentRecognitionSchedule?: RentRecognitionScheduleOmit
+    roomTransfer?: RoomTransferOmit
     loyaltyPoint?: LoyaltyPointOmit
     loyaltyReward?: LoyaltyRewardOmit
     redemption?: RedemptionOmit
@@ -5869,6 +5960,7 @@ export namespace Prisma {
     depositLedgerEntriesActed: number
     staysFledMarked: number
     tenantsKtpVerified: number
+    roomTransfersCreated: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5905,6 +5997,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: boolean | UserCountOutputTypeCountDepositLedgerEntriesActedArgs
     staysFledMarked?: boolean | UserCountOutputTypeCountStaysFledMarkedArgs
     tenantsKtpVerified?: boolean | UserCountOutputTypeCountTenantsKtpVerifiedArgs
+    roomTransfersCreated?: boolean | UserCountOutputTypeCountRoomTransfersCreatedArgs
   }
 
   // Custom InputTypes
@@ -6149,6 +6242,13 @@ export namespace Prisma {
     where?: TenantWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountRoomTransfersCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomTransferWhereInput
+  }
+
 
   /**
    * Count Type TenantCountOutputType
@@ -6253,6 +6353,8 @@ export namespace Prisma {
     meterReadings: number
     tickets: number
     roomItems: number
+    transfersFrom: number
+    transfersTo: number
     staffRoutineAssignments: number
     staffRoutineCompletions: number
     expenses: number
@@ -6268,6 +6370,8 @@ export namespace Prisma {
     meterReadings?: boolean | RoomCountOutputTypeCountMeterReadingsArgs
     tickets?: boolean | RoomCountOutputTypeCountTicketsArgs
     roomItems?: boolean | RoomCountOutputTypeCountRoomItemsArgs
+    transfersFrom?: boolean | RoomCountOutputTypeCountTransfersFromArgs
+    transfersTo?: boolean | RoomCountOutputTypeCountTransfersToArgs
     staffRoutineAssignments?: boolean | RoomCountOutputTypeCountStaffRoutineAssignmentsArgs
     staffRoutineCompletions?: boolean | RoomCountOutputTypeCountStaffRoutineCompletionsArgs
     expenses?: boolean | RoomCountOutputTypeCountExpensesArgs
@@ -6315,6 +6419,20 @@ export namespace Prisma {
    */
   export type RoomCountOutputTypeCountRoomItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RoomItemWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountTransfersFromArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomTransferWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountTransfersToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomTransferWhereInput
   }
 
   /**
@@ -6387,6 +6505,7 @@ export namespace Prisma {
     checkoutRequests: number
     depositLedgerEntries: number
     rentRecognitionSchedules: number
+    roomTransfers: number
   }
 
   export type StayCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6398,6 +6517,7 @@ export namespace Prisma {
     checkoutRequests?: boolean | StayCountOutputTypeCountCheckoutRequestsArgs
     depositLedgerEntries?: boolean | StayCountOutputTypeCountDepositLedgerEntriesArgs
     rentRecognitionSchedules?: boolean | StayCountOutputTypeCountRentRecognitionSchedulesArgs
+    roomTransfers?: boolean | StayCountOutputTypeCountRoomTransfersArgs
   }
 
   // Custom InputTypes
@@ -6465,6 +6585,13 @@ export namespace Prisma {
    */
   export type StayCountOutputTypeCountRentRecognitionSchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RentRecognitionScheduleWhereInput
+  }
+
+  /**
+   * StayCountOutputType without action
+   */
+  export type StayCountOutputTypeCountRoomTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomTransferWhereInput
   }
 
 
@@ -7423,6 +7550,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: boolean | User$depositLedgerEntriesActedArgs<ExtArgs>
     staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
+    roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -7506,6 +7634,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: boolean | User$depositLedgerEntriesActedArgs<ExtArgs>
     staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
+    roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7552,6 +7681,7 @@ export namespace Prisma {
       depositLedgerEntriesActed: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
       staysFledMarked: Prisma.$StayPayload<ExtArgs>[]
       tenantsKtpVerified: Prisma.$TenantPayload<ExtArgs>[]
+      roomTransfersCreated: Prisma.$RoomTransferPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7993,6 +8123,7 @@ export namespace Prisma {
     depositLedgerEntriesActed<T extends User$depositLedgerEntriesActedArgs<ExtArgs> = {}>(args?: Subset<T, User$depositLedgerEntriesActedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staysFledMarked<T extends User$staysFledMarkedArgs<ExtArgs> = {}>(args?: Subset<T, User$staysFledMarkedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tenantsKtpVerified<T extends User$tenantsKtpVerifiedArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsKtpVerifiedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    roomTransfersCreated<T extends User$roomTransfersCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$roomTransfersCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9242,6 +9373,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TenantScalarFieldEnum | TenantScalarFieldEnum[]
+  }
+
+  /**
+   * User.roomTransfersCreated
+   */
+  export type User$roomTransfersCreatedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    where?: RoomTransferWhereInput
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    cursor?: RoomTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
   }
 
   /**
@@ -11213,6 +11368,8 @@ export namespace Prisma {
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
     tickets?: boolean | Room$ticketsArgs<ExtArgs>
     roomItems?: boolean | Room$roomItemsArgs<ExtArgs>
+    transfersFrom?: boolean | Room$transfersFromArgs<ExtArgs>
+    transfersTo?: boolean | Room$transfersToArgs<ExtArgs>
     staffRoutineAssignments?: boolean | Room$staffRoutineAssignmentsArgs<ExtArgs>
     staffRoutineCompletions?: boolean | Room$staffRoutineCompletionsArgs<ExtArgs>
     expenses?: boolean | Room$expensesArgs<ExtArgs>
@@ -11293,6 +11450,8 @@ export namespace Prisma {
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
     tickets?: boolean | Room$ticketsArgs<ExtArgs>
     roomItems?: boolean | Room$roomItemsArgs<ExtArgs>
+    transfersFrom?: boolean | Room$transfersFromArgs<ExtArgs>
+    transfersTo?: boolean | Room$transfersToArgs<ExtArgs>
     staffRoutineAssignments?: boolean | Room$staffRoutineAssignmentsArgs<ExtArgs>
     staffRoutineCompletions?: boolean | Room$staffRoutineCompletionsArgs<ExtArgs>
     expenses?: boolean | Room$expensesArgs<ExtArgs>
@@ -11313,6 +11472,8 @@ export namespace Prisma {
       meterReadings: Prisma.$MeterReadingPayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       roomItems: Prisma.$RoomItemPayload<ExtArgs>[]
+      transfersFrom: Prisma.$RoomTransferPayload<ExtArgs>[]
+      transfersTo: Prisma.$RoomTransferPayload<ExtArgs>[]
       staffRoutineAssignments: Prisma.$StaffRoutineAssignmentPayload<ExtArgs>[]
       staffRoutineCompletions: Prisma.$StaffRoutineCompletionPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
@@ -11739,6 +11900,8 @@ export namespace Prisma {
     meterReadings<T extends Room$meterReadingsArgs<ExtArgs> = {}>(args?: Subset<T, Room$meterReadingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MeterReadingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Room$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Room$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     roomItems<T extends Room$roomItemsArgs<ExtArgs> = {}>(args?: Subset<T, Room$roomItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    transfersFrom<T extends Room$transfersFromArgs<ExtArgs> = {}>(args?: Subset<T, Room$transfersFromArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    transfersTo<T extends Room$transfersToArgs<ExtArgs> = {}>(args?: Subset<T, Room$transfersToArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staffRoutineAssignments<T extends Room$staffRoutineAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, Room$staffRoutineAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staffRoutineCompletions<T extends Room$staffRoutineCompletionsArgs<ExtArgs> = {}>(args?: Subset<T, Room$staffRoutineCompletionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffRoutineCompletionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Room$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Room$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12280,6 +12443,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RoomItemScalarFieldEnum | RoomItemScalarFieldEnum[]
+  }
+
+  /**
+   * Room.transfersFrom
+   */
+  export type Room$transfersFromArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    where?: RoomTransferWhereInput
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    cursor?: RoomTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
+  }
+
+  /**
+   * Room.transfersTo
+   */
+  export type Room$transfersToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    where?: RoomTransferWhereInput
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    cursor?: RoomTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
   }
 
   /**
@@ -14314,6 +14525,7 @@ export namespace Prisma {
     checkoutRequests?: boolean | Stay$checkoutRequestsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Stay$depositLedgerEntriesArgs<ExtArgs>
     rentRecognitionSchedules?: boolean | Stay$rentRecognitionSchedulesArgs<ExtArgs>
+    roomTransfers?: boolean | Stay$roomTransfersArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
@@ -14504,6 +14716,7 @@ export namespace Prisma {
     checkoutRequests?: boolean | Stay$checkoutRequestsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Stay$depositLedgerEntriesArgs<ExtArgs>
     rentRecognitionSchedules?: boolean | Stay$rentRecognitionSchedulesArgs<ExtArgs>
+    roomTransfers?: boolean | Stay$roomTransfersArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type StayIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14537,6 +14750,7 @@ export namespace Prisma {
       checkoutRequests: Prisma.$CheckoutRequestPayload<ExtArgs>[]
       depositLedgerEntries: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
       rentRecognitionSchedules: Prisma.$RentRecognitionSchedulePayload<ExtArgs>[]
+      roomTransfers: Prisma.$RoomTransferPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -14997,6 +15211,7 @@ export namespace Prisma {
     checkoutRequests<T extends Stay$checkoutRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$checkoutRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CheckoutRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     depositLedgerEntries<T extends Stay$depositLedgerEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$depositLedgerEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     rentRecognitionSchedules<T extends Stay$rentRecognitionSchedulesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$rentRecognitionSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    roomTransfers<T extends Stay$roomTransfersArgs<ExtArgs> = {}>(args?: Subset<T, Stay$roomTransfersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15724,6 +15939,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * Stay.roomTransfers
+   */
+  export type Stay$roomTransfersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    where?: RoomTransferWhereInput
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    cursor?: RoomTransferWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
   }
 
   /**
@@ -63455,6 +63694,1248 @@ export namespace Prisma {
 
 
   /**
+   * Model RoomTransfer
+   */
+
+  export type AggregateRoomTransfer = {
+    _count: RoomTransferCountAggregateOutputType | null
+    _avg: RoomTransferAvgAggregateOutputType | null
+    _sum: RoomTransferSumAggregateOutputType | null
+    _min: RoomTransferMinAggregateOutputType | null
+    _max: RoomTransferMaxAggregateOutputType | null
+  }
+
+  export type RoomTransferAvgAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    fromRoomId: number | null
+    toRoomId: number | null
+    rentBeforeRupiah: number | null
+    rentAfterRupiah: number | null
+    createdById: number | null
+  }
+
+  export type RoomTransferSumAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    fromRoomId: number | null
+    toRoomId: number | null
+    rentBeforeRupiah: number | null
+    rentAfterRupiah: number | null
+    createdById: number | null
+  }
+
+  export type RoomTransferMinAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    fromRoomId: number | null
+    toRoomId: number | null
+    transferDate: Date | null
+    reason: string | null
+    rentBeforeRupiah: number | null
+    rentAfterRupiah: number | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type RoomTransferMaxAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    fromRoomId: number | null
+    toRoomId: number | null
+    transferDate: Date | null
+    reason: string | null
+    rentBeforeRupiah: number | null
+    rentAfterRupiah: number | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type RoomTransferCountAggregateOutputType = {
+    id: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: number
+    reason: number
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type RoomTransferAvgAggregateInputType = {
+    id?: true
+    stayId?: true
+    fromRoomId?: true
+    toRoomId?: true
+    rentBeforeRupiah?: true
+    rentAfterRupiah?: true
+    createdById?: true
+  }
+
+  export type RoomTransferSumAggregateInputType = {
+    id?: true
+    stayId?: true
+    fromRoomId?: true
+    toRoomId?: true
+    rentBeforeRupiah?: true
+    rentAfterRupiah?: true
+    createdById?: true
+  }
+
+  export type RoomTransferMinAggregateInputType = {
+    id?: true
+    stayId?: true
+    fromRoomId?: true
+    toRoomId?: true
+    transferDate?: true
+    reason?: true
+    rentBeforeRupiah?: true
+    rentAfterRupiah?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type RoomTransferMaxAggregateInputType = {
+    id?: true
+    stayId?: true
+    fromRoomId?: true
+    toRoomId?: true
+    transferDate?: true
+    reason?: true
+    rentBeforeRupiah?: true
+    rentAfterRupiah?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type RoomTransferCountAggregateInputType = {
+    id?: true
+    stayId?: true
+    fromRoomId?: true
+    toRoomId?: true
+    transferDate?: true
+    reason?: true
+    rentBeforeRupiah?: true
+    rentAfterRupiah?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type RoomTransferAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoomTransfer to aggregate.
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomTransfers to fetch.
+     */
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RoomTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RoomTransfers
+    **/
+    _count?: true | RoomTransferCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RoomTransferAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RoomTransferSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RoomTransferMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RoomTransferMaxAggregateInputType
+  }
+
+  export type GetRoomTransferAggregateType<T extends RoomTransferAggregateArgs> = {
+        [P in keyof T & keyof AggregateRoomTransfer]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRoomTransfer[P]>
+      : GetScalarType<T[P], AggregateRoomTransfer[P]>
+  }
+
+
+
+
+  export type RoomTransferGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomTransferWhereInput
+    orderBy?: RoomTransferOrderByWithAggregationInput | RoomTransferOrderByWithAggregationInput[]
+    by: RoomTransferScalarFieldEnum[] | RoomTransferScalarFieldEnum
+    having?: RoomTransferScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RoomTransferCountAggregateInputType | true
+    _avg?: RoomTransferAvgAggregateInputType
+    _sum?: RoomTransferSumAggregateInputType
+    _min?: RoomTransferMinAggregateInputType
+    _max?: RoomTransferMaxAggregateInputType
+  }
+
+  export type RoomTransferGroupByOutputType = {
+    id: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date
+    reason: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note: string | null
+    createdById: number | null
+    createdAt: Date
+    _count: RoomTransferCountAggregateOutputType | null
+    _avg: RoomTransferAvgAggregateOutputType | null
+    _sum: RoomTransferSumAggregateOutputType | null
+    _min: RoomTransferMinAggregateOutputType | null
+    _max: RoomTransferMaxAggregateOutputType | null
+  }
+
+  type GetRoomTransferGroupByPayload<T extends RoomTransferGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RoomTransferGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RoomTransferGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RoomTransferGroupByOutputType[P]>
+            : GetScalarType<T[P], RoomTransferGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RoomTransferSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    fromRoomId?: boolean
+    toRoomId?: boolean
+    transferDate?: boolean
+    reason?: boolean
+    rentBeforeRupiah?: boolean
+    rentAfterRupiah?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["roomTransfer"]>
+
+  export type RoomTransferSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    fromRoomId?: boolean
+    toRoomId?: boolean
+    transferDate?: boolean
+    reason?: boolean
+    rentBeforeRupiah?: boolean
+    rentAfterRupiah?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["roomTransfer"]>
+
+  export type RoomTransferSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    fromRoomId?: boolean
+    toRoomId?: boolean
+    transferDate?: boolean
+    reason?: boolean
+    rentBeforeRupiah?: boolean
+    rentAfterRupiah?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["roomTransfer"]>
+
+  export type RoomTransferSelectScalar = {
+    id?: boolean
+    stayId?: boolean
+    fromRoomId?: boolean
+    toRoomId?: boolean
+    transferDate?: boolean
+    reason?: boolean
+    rentBeforeRupiah?: boolean
+    rentAfterRupiah?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type RoomTransferOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "fromRoomId" | "toRoomId" | "transferDate" | "reason" | "rentBeforeRupiah" | "rentAfterRupiah" | "note" | "createdById" | "createdAt", ExtArgs["result"]["roomTransfer"]>
+  export type RoomTransferInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }
+  export type RoomTransferIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }
+  export type RoomTransferIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    fromRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    toRoom?: boolean | RoomDefaultArgs<ExtArgs>
+    createdBy?: boolean | RoomTransfer$createdByArgs<ExtArgs>
+  }
+
+  export type $RoomTransferPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RoomTransfer"
+    objects: {
+      stay: Prisma.$StayPayload<ExtArgs>
+      fromRoom: Prisma.$RoomPayload<ExtArgs>
+      toRoom: Prisma.$RoomPayload<ExtArgs>
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      stayId: number
+      fromRoomId: number
+      toRoomId: number
+      transferDate: Date
+      reason: string | null
+      rentBeforeRupiah: number
+      rentAfterRupiah: number
+      note: string | null
+      createdById: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["roomTransfer"]>
+    composites: {}
+  }
+
+  type RoomTransferGetPayload<S extends boolean | null | undefined | RoomTransferDefaultArgs> = $Result.GetResult<Prisma.$RoomTransferPayload, S>
+
+  type RoomTransferCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RoomTransferFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RoomTransferCountAggregateInputType | true
+    }
+
+  export interface RoomTransferDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RoomTransfer'], meta: { name: 'RoomTransfer' } }
+    /**
+     * Find zero or one RoomTransfer that matches the filter.
+     * @param {RoomTransferFindUniqueArgs} args - Arguments to find a RoomTransfer
+     * @example
+     * // Get one RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RoomTransferFindUniqueArgs>(args: SelectSubset<T, RoomTransferFindUniqueArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RoomTransfer that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RoomTransferFindUniqueOrThrowArgs} args - Arguments to find a RoomTransfer
+     * @example
+     * // Get one RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RoomTransferFindUniqueOrThrowArgs>(args: SelectSubset<T, RoomTransferFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoomTransfer that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferFindFirstArgs} args - Arguments to find a RoomTransfer
+     * @example
+     * // Get one RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RoomTransferFindFirstArgs>(args?: SelectSubset<T, RoomTransferFindFirstArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoomTransfer that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferFindFirstOrThrowArgs} args - Arguments to find a RoomTransfer
+     * @example
+     * // Get one RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RoomTransferFindFirstOrThrowArgs>(args?: SelectSubset<T, RoomTransferFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RoomTransfers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RoomTransfers
+     * const roomTransfers = await prisma.roomTransfer.findMany()
+     * 
+     * // Get first 10 RoomTransfers
+     * const roomTransfers = await prisma.roomTransfer.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const roomTransferWithIdOnly = await prisma.roomTransfer.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RoomTransferFindManyArgs>(args?: SelectSubset<T, RoomTransferFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RoomTransfer.
+     * @param {RoomTransferCreateArgs} args - Arguments to create a RoomTransfer.
+     * @example
+     * // Create one RoomTransfer
+     * const RoomTransfer = await prisma.roomTransfer.create({
+     *   data: {
+     *     // ... data to create a RoomTransfer
+     *   }
+     * })
+     * 
+     */
+    create<T extends RoomTransferCreateArgs>(args: SelectSubset<T, RoomTransferCreateArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RoomTransfers.
+     * @param {RoomTransferCreateManyArgs} args - Arguments to create many RoomTransfers.
+     * @example
+     * // Create many RoomTransfers
+     * const roomTransfer = await prisma.roomTransfer.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RoomTransferCreateManyArgs>(args?: SelectSubset<T, RoomTransferCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RoomTransfers and returns the data saved in the database.
+     * @param {RoomTransferCreateManyAndReturnArgs} args - Arguments to create many RoomTransfers.
+     * @example
+     * // Create many RoomTransfers
+     * const roomTransfer = await prisma.roomTransfer.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RoomTransfers and only return the `id`
+     * const roomTransferWithIdOnly = await prisma.roomTransfer.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RoomTransferCreateManyAndReturnArgs>(args?: SelectSubset<T, RoomTransferCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RoomTransfer.
+     * @param {RoomTransferDeleteArgs} args - Arguments to delete one RoomTransfer.
+     * @example
+     * // Delete one RoomTransfer
+     * const RoomTransfer = await prisma.roomTransfer.delete({
+     *   where: {
+     *     // ... filter to delete one RoomTransfer
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RoomTransferDeleteArgs>(args: SelectSubset<T, RoomTransferDeleteArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RoomTransfer.
+     * @param {RoomTransferUpdateArgs} args - Arguments to update one RoomTransfer.
+     * @example
+     * // Update one RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RoomTransferUpdateArgs>(args: SelectSubset<T, RoomTransferUpdateArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RoomTransfers.
+     * @param {RoomTransferDeleteManyArgs} args - Arguments to filter RoomTransfers to delete.
+     * @example
+     * // Delete a few RoomTransfers
+     * const { count } = await prisma.roomTransfer.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RoomTransferDeleteManyArgs>(args?: SelectSubset<T, RoomTransferDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoomTransfers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RoomTransfers
+     * const roomTransfer = await prisma.roomTransfer.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RoomTransferUpdateManyArgs>(args: SelectSubset<T, RoomTransferUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoomTransfers and returns the data updated in the database.
+     * @param {RoomTransferUpdateManyAndReturnArgs} args - Arguments to update many RoomTransfers.
+     * @example
+     * // Update many RoomTransfers
+     * const roomTransfer = await prisma.roomTransfer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RoomTransfers and only return the `id`
+     * const roomTransferWithIdOnly = await prisma.roomTransfer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RoomTransferUpdateManyAndReturnArgs>(args: SelectSubset<T, RoomTransferUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RoomTransfer.
+     * @param {RoomTransferUpsertArgs} args - Arguments to update or create a RoomTransfer.
+     * @example
+     * // Update or create a RoomTransfer
+     * const roomTransfer = await prisma.roomTransfer.upsert({
+     *   create: {
+     *     // ... data to create a RoomTransfer
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RoomTransfer we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RoomTransferUpsertArgs>(args: SelectSubset<T, RoomTransferUpsertArgs<ExtArgs>>): Prisma__RoomTransferClient<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RoomTransfers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferCountArgs} args - Arguments to filter RoomTransfers to count.
+     * @example
+     * // Count the number of RoomTransfers
+     * const count = await prisma.roomTransfer.count({
+     *   where: {
+     *     // ... the filter for the RoomTransfers we want to count
+     *   }
+     * })
+    **/
+    count<T extends RoomTransferCountArgs>(
+      args?: Subset<T, RoomTransferCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RoomTransferCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RoomTransfer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RoomTransferAggregateArgs>(args: Subset<T, RoomTransferAggregateArgs>): Prisma.PrismaPromise<GetRoomTransferAggregateType<T>>
+
+    /**
+     * Group by RoomTransfer.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoomTransferGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RoomTransferGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RoomTransferGroupByArgs['orderBy'] }
+        : { orderBy?: RoomTransferGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RoomTransferGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRoomTransferGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RoomTransfer model
+   */
+  readonly fields: RoomTransferFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RoomTransfer.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RoomTransferClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    stay<T extends StayDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StayDefaultArgs<ExtArgs>>): Prisma__StayClient<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    fromRoom<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    toRoom<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    createdBy<T extends RoomTransfer$createdByArgs<ExtArgs> = {}>(args?: Subset<T, RoomTransfer$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RoomTransfer model
+   */
+  interface RoomTransferFieldRefs {
+    readonly id: FieldRef<"RoomTransfer", 'Int'>
+    readonly stayId: FieldRef<"RoomTransfer", 'Int'>
+    readonly fromRoomId: FieldRef<"RoomTransfer", 'Int'>
+    readonly toRoomId: FieldRef<"RoomTransfer", 'Int'>
+    readonly transferDate: FieldRef<"RoomTransfer", 'DateTime'>
+    readonly reason: FieldRef<"RoomTransfer", 'String'>
+    readonly rentBeforeRupiah: FieldRef<"RoomTransfer", 'Int'>
+    readonly rentAfterRupiah: FieldRef<"RoomTransfer", 'Int'>
+    readonly note: FieldRef<"RoomTransfer", 'String'>
+    readonly createdById: FieldRef<"RoomTransfer", 'Int'>
+    readonly createdAt: FieldRef<"RoomTransfer", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RoomTransfer findUnique
+   */
+  export type RoomTransferFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomTransfer to fetch.
+     */
+    where: RoomTransferWhereUniqueInput
+  }
+
+  /**
+   * RoomTransfer findUniqueOrThrow
+   */
+  export type RoomTransferFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomTransfer to fetch.
+     */
+    where: RoomTransferWhereUniqueInput
+  }
+
+  /**
+   * RoomTransfer findFirst
+   */
+  export type RoomTransferFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomTransfer to fetch.
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomTransfers to fetch.
+     */
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoomTransfers.
+     */
+    cursor?: RoomTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoomTransfers.
+     */
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
+  }
+
+  /**
+   * RoomTransfer findFirstOrThrow
+   */
+  export type RoomTransferFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomTransfer to fetch.
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomTransfers to fetch.
+     */
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RoomTransfers.
+     */
+    cursor?: RoomTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoomTransfers.
+     */
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
+  }
+
+  /**
+   * RoomTransfer findMany
+   */
+  export type RoomTransferFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter, which RoomTransfers to fetch.
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RoomTransfers to fetch.
+     */
+    orderBy?: RoomTransferOrderByWithRelationInput | RoomTransferOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RoomTransfers.
+     */
+    cursor?: RoomTransferWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RoomTransfers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RoomTransfers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RoomTransfers.
+     */
+    distinct?: RoomTransferScalarFieldEnum | RoomTransferScalarFieldEnum[]
+  }
+
+  /**
+   * RoomTransfer create
+   */
+  export type RoomTransferCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RoomTransfer.
+     */
+    data: XOR<RoomTransferCreateInput, RoomTransferUncheckedCreateInput>
+  }
+
+  /**
+   * RoomTransfer createMany
+   */
+  export type RoomTransferCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RoomTransfers.
+     */
+    data: RoomTransferCreateManyInput | RoomTransferCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RoomTransfer createManyAndReturn
+   */
+  export type RoomTransferCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * The data used to create many RoomTransfers.
+     */
+    data: RoomTransferCreateManyInput | RoomTransferCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoomTransfer update
+   */
+  export type RoomTransferUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RoomTransfer.
+     */
+    data: XOR<RoomTransferUpdateInput, RoomTransferUncheckedUpdateInput>
+    /**
+     * Choose, which RoomTransfer to update.
+     */
+    where: RoomTransferWhereUniqueInput
+  }
+
+  /**
+   * RoomTransfer updateMany
+   */
+  export type RoomTransferUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RoomTransfers.
+     */
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyInput>
+    /**
+     * Filter which RoomTransfers to update
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * Limit how many RoomTransfers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoomTransfer updateManyAndReturn
+   */
+  export type RoomTransferUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * The data used to update RoomTransfers.
+     */
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyInput>
+    /**
+     * Filter which RoomTransfers to update
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * Limit how many RoomTransfers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoomTransfer upsert
+   */
+  export type RoomTransferUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RoomTransfer to update in case it exists.
+     */
+    where: RoomTransferWhereUniqueInput
+    /**
+     * In case the RoomTransfer found by the `where` argument doesn't exist, create a new RoomTransfer with this data.
+     */
+    create: XOR<RoomTransferCreateInput, RoomTransferUncheckedCreateInput>
+    /**
+     * In case the RoomTransfer was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RoomTransferUpdateInput, RoomTransferUncheckedUpdateInput>
+  }
+
+  /**
+   * RoomTransfer delete
+   */
+  export type RoomTransferDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+    /**
+     * Filter which RoomTransfer to delete.
+     */
+    where: RoomTransferWhereUniqueInput
+  }
+
+  /**
+   * RoomTransfer deleteMany
+   */
+  export type RoomTransferDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoomTransfers to delete
+     */
+    where?: RoomTransferWhereInput
+    /**
+     * Limit how many RoomTransfers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoomTransfer.createdBy
+   */
+  export type RoomTransfer$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * RoomTransfer without action
+   */
+  export type RoomTransferDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomTransfer
+     */
+    select?: RoomTransferSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomTransfer
+     */
+    omit?: RoomTransferOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomTransferInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model LoyaltyPoint
    */
 
@@ -68983,6 +70464,23 @@ export namespace Prisma {
   export type RentRecognitionScheduleScalarFieldEnum = (typeof RentRecognitionScheduleScalarFieldEnum)[keyof typeof RentRecognitionScheduleScalarFieldEnum]
 
 
+  export const RoomTransferScalarFieldEnum: {
+    id: 'id',
+    stayId: 'stayId',
+    fromRoomId: 'fromRoomId',
+    toRoomId: 'toRoomId',
+    transferDate: 'transferDate',
+    reason: 'reason',
+    rentBeforeRupiah: 'rentBeforeRupiah',
+    rentAfterRupiah: 'rentAfterRupiah',
+    note: 'note',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type RoomTransferScalarFieldEnum = (typeof RoomTransferScalarFieldEnum)[keyof typeof RoomTransferScalarFieldEnum]
+
+
   export const LoyaltyPointScalarFieldEnum: {
     id: 'id',
     tenantId: 'tenantId',
@@ -70045,6 +71543,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryListRelationFilter
     staysFledMarked?: StayListRelationFilter
     tenantsKtpVerified?: TenantListRelationFilter
+    roomTransfersCreated?: RoomTransferListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -70093,6 +71592,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryOrderByRelationAggregateInput
     staysFledMarked?: StayOrderByRelationAggregateInput
     tenantsKtpVerified?: TenantOrderByRelationAggregateInput
+    roomTransfersCreated?: RoomTransferOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -70144,6 +71644,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryListRelationFilter
     staysFledMarked?: StayListRelationFilter
     tenantsKtpVerified?: TenantListRelationFilter
+    roomTransfersCreated?: RoomTransferListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -70387,6 +71888,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingListRelationFilter
     tickets?: TicketListRelationFilter
     roomItems?: RoomItemListRelationFilter
+    transfersFrom?: RoomTransferListRelationFilter
+    transfersTo?: RoomTransferListRelationFilter
     staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
     staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -70420,6 +71923,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     roomItems?: RoomItemOrderByRelationAggregateInput
+    transfersFrom?: RoomTransferOrderByRelationAggregateInput
+    transfersTo?: RoomTransferOrderByRelationAggregateInput
     staffRoutineAssignments?: StaffRoutineAssignmentOrderByRelationAggregateInput
     staffRoutineCompletions?: StaffRoutineCompletionOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
@@ -70456,6 +71961,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingListRelationFilter
     tickets?: TicketListRelationFilter
     roomItems?: RoomItemListRelationFilter
+    transfersFrom?: RoomTransferListRelationFilter
+    transfersTo?: RoomTransferListRelationFilter
     staffRoutineAssignments?: StaffRoutineAssignmentListRelationFilter
     staffRoutineCompletions?: StaffRoutineCompletionListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -70666,6 +72173,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     rentRecognitionSchedules?: RentRecognitionScheduleListRelationFilter
+    roomTransfers?: RoomTransferListRelationFilter
   }
 
   export type StayOrderByWithRelationInput = {
@@ -70733,6 +72241,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestOrderByRelationAggregateInput
     depositLedgerEntries?: TenantDepositLedgerEntryOrderByRelationAggregateInput
     rentRecognitionSchedules?: RentRecognitionScheduleOrderByRelationAggregateInput
+    roomTransfers?: RoomTransferOrderByRelationAggregateInput
   }
 
   export type StayWhereUniqueInput = Prisma.AtLeast<{
@@ -70803,6 +72312,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     rentRecognitionSchedules?: RentRecognitionScheduleListRelationFilter
+    roomTransfers?: RoomTransferListRelationFilter
   }, "id">
 
   export type StayOrderByWithAggregationInput = {
@@ -74899,6 +76409,102 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string
   }
 
+  export type RoomTransferWhereInput = {
+    AND?: RoomTransferWhereInput | RoomTransferWhereInput[]
+    OR?: RoomTransferWhereInput[]
+    NOT?: RoomTransferWhereInput | RoomTransferWhereInput[]
+    id?: IntFilter<"RoomTransfer"> | number
+    stayId?: IntFilter<"RoomTransfer"> | number
+    fromRoomId?: IntFilter<"RoomTransfer"> | number
+    toRoomId?: IntFilter<"RoomTransfer"> | number
+    transferDate?: DateTimeFilter<"RoomTransfer"> | Date | string
+    reason?: StringNullableFilter<"RoomTransfer"> | string | null
+    rentBeforeRupiah?: IntFilter<"RoomTransfer"> | number
+    rentAfterRupiah?: IntFilter<"RoomTransfer"> | number
+    note?: StringNullableFilter<"RoomTransfer"> | string | null
+    createdById?: IntNullableFilter<"RoomTransfer"> | number | null
+    createdAt?: DateTimeFilter<"RoomTransfer"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    fromRoom?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    toRoom?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type RoomTransferOrderByWithRelationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    transferDate?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    stay?: StayOrderByWithRelationInput
+    fromRoom?: RoomOrderByWithRelationInput
+    toRoom?: RoomOrderByWithRelationInput
+    createdBy?: UserOrderByWithRelationInput
+  }
+
+  export type RoomTransferWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: RoomTransferWhereInput | RoomTransferWhereInput[]
+    OR?: RoomTransferWhereInput[]
+    NOT?: RoomTransferWhereInput | RoomTransferWhereInput[]
+    stayId?: IntFilter<"RoomTransfer"> | number
+    fromRoomId?: IntFilter<"RoomTransfer"> | number
+    toRoomId?: IntFilter<"RoomTransfer"> | number
+    transferDate?: DateTimeFilter<"RoomTransfer"> | Date | string
+    reason?: StringNullableFilter<"RoomTransfer"> | string | null
+    rentBeforeRupiah?: IntFilter<"RoomTransfer"> | number
+    rentAfterRupiah?: IntFilter<"RoomTransfer"> | number
+    note?: StringNullableFilter<"RoomTransfer"> | string | null
+    createdById?: IntNullableFilter<"RoomTransfer"> | number | null
+    createdAt?: DateTimeFilter<"RoomTransfer"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    fromRoom?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    toRoom?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type RoomTransferOrderByWithAggregationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    transferDate?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: RoomTransferCountOrderByAggregateInput
+    _avg?: RoomTransferAvgOrderByAggregateInput
+    _max?: RoomTransferMaxOrderByAggregateInput
+    _min?: RoomTransferMinOrderByAggregateInput
+    _sum?: RoomTransferSumOrderByAggregateInput
+  }
+
+  export type RoomTransferScalarWhereWithAggregatesInput = {
+    AND?: RoomTransferScalarWhereWithAggregatesInput | RoomTransferScalarWhereWithAggregatesInput[]
+    OR?: RoomTransferScalarWhereWithAggregatesInput[]
+    NOT?: RoomTransferScalarWhereWithAggregatesInput | RoomTransferScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    stayId?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    fromRoomId?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    toRoomId?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    transferDate?: DateTimeWithAggregatesFilter<"RoomTransfer"> | Date | string
+    reason?: StringNullableWithAggregatesFilter<"RoomTransfer"> | string | null
+    rentBeforeRupiah?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    rentAfterRupiah?: IntWithAggregatesFilter<"RoomTransfer"> | number
+    note?: StringNullableWithAggregatesFilter<"RoomTransfer"> | string | null
+    createdById?: IntNullableWithAggregatesFilter<"RoomTransfer"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"RoomTransfer"> | Date | string
+  }
+
   export type LoyaltyPointWhereInput = {
     AND?: LoyaltyPointWhereInput | LoyaltyPointWhereInput[]
     OR?: LoyaltyPointWhereInput[]
@@ -75260,6 +76866,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -75307,6 +76914,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -75353,6 +76961,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -75400,6 +77009,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -75685,6 +77295,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -75718,6 +77330,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -75750,6 +77364,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -75783,6 +77399,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -76001,6 +77619,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateInput = {
@@ -76063,6 +77682,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayUpdateInput = {
@@ -76124,6 +77744,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateInput = {
@@ -76186,6 +77807,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayCreateManyInput = {
@@ -80620,6 +82242,97 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RoomTransferCreateInput = {
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRoomTransfersInput
+    fromRoom: RoomCreateNestedOneWithoutTransfersFromInput
+    toRoom: RoomCreateNestedOneWithoutTransfersToInput
+    createdBy?: UserCreateNestedOneWithoutRoomTransfersCreatedInput
+  }
+
+  export type RoomTransferUncheckedCreateInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferUpdateInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRoomTransfersNestedInput
+    fromRoom?: RoomUpdateOneRequiredWithoutTransfersFromNestedInput
+    toRoom?: RoomUpdateOneRequiredWithoutTransfersToNestedInput
+    createdBy?: UserUpdateOneWithoutRoomTransfersCreatedNestedInput
+  }
+
+  export type RoomTransferUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferCreateManyInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferUpdateManyMutationInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type LoyaltyPointCreateInput = {
     delta: number
     reason: $Enums.LoyaltyPointReason
@@ -81189,6 +82902,12 @@ export namespace Prisma {
     none?: TenantWhereInput
   }
 
+  export type RoomTransferListRelationFilter = {
+    every?: RoomTransferWhereInput
+    some?: RoomTransferWhereInput
+    none?: RoomTransferWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -81299,6 +83018,10 @@ export namespace Prisma {
   }
 
   export type TenantOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RoomTransferOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -85809,6 +87532,68 @@ export namespace Prisma {
     journalEntryId?: SortOrder
   }
 
+  export type RoomTransferCountOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    transferDate?: SortOrder
+    reason?: SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RoomTransferAvgOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type RoomTransferMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    transferDate?: SortOrder
+    reason?: SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RoomTransferMinOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    transferDate?: SortOrder
+    reason?: SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RoomTransferSumOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    fromRoomId?: SortOrder
+    toRoomId?: SortOrder
+    rentBeforeRupiah?: SortOrder
+    rentAfterRupiah?: SortOrder
+    createdById?: SortOrder
+  }
+
   export type EnumLoyaltyPointReasonFilter<$PrismaModel = never> = {
     equals?: $Enums.LoyaltyPointReason | EnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
     in?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
@@ -86310,6 +88095,13 @@ export namespace Prisma {
     connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
   }
 
+  export type RoomTransferCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput> | RoomTransferCreateWithoutCreatedByInput[] | RoomTransferUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutCreatedByInput | RoomTransferCreateOrConnectWithoutCreatedByInput[]
+    createMany?: RoomTransferCreateManyCreatedByInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -86539,6 +88331,13 @@ export namespace Prisma {
     connectOrCreate?: TenantCreateOrConnectWithoutKtpVerifiedByInput | TenantCreateOrConnectWithoutKtpVerifiedByInput[]
     createMany?: TenantCreateManyKtpVerifiedByInputEnvelope
     connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+  }
+
+  export type RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput> | RoomTransferCreateWithoutCreatedByInput[] | RoomTransferUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutCreatedByInput | RoomTransferCreateOrConnectWithoutCreatedByInput[]
+    createMany?: RoomTransferCreateManyCreatedByInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -87033,6 +88832,20 @@ export namespace Prisma {
     deleteMany?: TenantScalarWhereInput | TenantScalarWhereInput[]
   }
 
+  export type RoomTransferUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput> | RoomTransferCreateWithoutCreatedByInput[] | RoomTransferUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutCreatedByInput | RoomTransferCreateOrConnectWithoutCreatedByInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput | RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: RoomTransferCreateManyCreatedByInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutCreatedByInput | RoomTransferUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutCreatedByInput | RoomTransferUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -87511,6 +89324,20 @@ export namespace Prisma {
     deleteMany?: TenantScalarWhereInput | TenantScalarWhereInput[]
   }
 
+  export type RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput> | RoomTransferCreateWithoutCreatedByInput[] | RoomTransferUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutCreatedByInput | RoomTransferCreateOrConnectWithoutCreatedByInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput | RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: RoomTransferCreateManyCreatedByInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutCreatedByInput | RoomTransferUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutCreatedByInput | RoomTransferUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -87935,6 +89762,20 @@ export namespace Prisma {
     connect?: RoomItemWhereUniqueInput | RoomItemWhereUniqueInput[]
   }
 
+  export type RoomTransferCreateNestedManyWithoutFromRoomInput = {
+    create?: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput> | RoomTransferCreateWithoutFromRoomInput[] | RoomTransferUncheckedCreateWithoutFromRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutFromRoomInput | RoomTransferCreateOrConnectWithoutFromRoomInput[]
+    createMany?: RoomTransferCreateManyFromRoomInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
+  export type RoomTransferCreateNestedManyWithoutToRoomInput = {
+    create?: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput> | RoomTransferCreateWithoutToRoomInput[] | RoomTransferUncheckedCreateWithoutToRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutToRoomInput | RoomTransferCreateOrConnectWithoutToRoomInput[]
+    createMany?: RoomTransferCreateManyToRoomInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
   export type StaffRoutineAssignmentCreateNestedManyWithoutRoomInput = {
     create?: XOR<StaffRoutineAssignmentCreateWithoutRoomInput, StaffRoutineAssignmentUncheckedCreateWithoutRoomInput> | StaffRoutineAssignmentCreateWithoutRoomInput[] | StaffRoutineAssignmentUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: StaffRoutineAssignmentCreateOrConnectWithoutRoomInput | StaffRoutineAssignmentCreateOrConnectWithoutRoomInput[]
@@ -88017,6 +89858,20 @@ export namespace Prisma {
     connectOrCreate?: RoomItemCreateOrConnectWithoutRoomInput | RoomItemCreateOrConnectWithoutRoomInput[]
     createMany?: RoomItemCreateManyRoomInputEnvelope
     connect?: RoomItemWhereUniqueInput | RoomItemWhereUniqueInput[]
+  }
+
+  export type RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput = {
+    create?: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput> | RoomTransferCreateWithoutFromRoomInput[] | RoomTransferUncheckedCreateWithoutFromRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutFromRoomInput | RoomTransferCreateOrConnectWithoutFromRoomInput[]
+    createMany?: RoomTransferCreateManyFromRoomInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
+  export type RoomTransferUncheckedCreateNestedManyWithoutToRoomInput = {
+    create?: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput> | RoomTransferCreateWithoutToRoomInput[] | RoomTransferUncheckedCreateWithoutToRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutToRoomInput | RoomTransferCreateOrConnectWithoutToRoomInput[]
+    createMany?: RoomTransferCreateManyToRoomInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
   }
 
   export type StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput = {
@@ -88138,6 +89993,34 @@ export namespace Prisma {
     update?: RoomItemUpdateWithWhereUniqueWithoutRoomInput | RoomItemUpdateWithWhereUniqueWithoutRoomInput[]
     updateMany?: RoomItemUpdateManyWithWhereWithoutRoomInput | RoomItemUpdateManyWithWhereWithoutRoomInput[]
     deleteMany?: RoomItemScalarWhereInput | RoomItemScalarWhereInput[]
+  }
+
+  export type RoomTransferUpdateManyWithoutFromRoomNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput> | RoomTransferCreateWithoutFromRoomInput[] | RoomTransferUncheckedCreateWithoutFromRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutFromRoomInput | RoomTransferCreateOrConnectWithoutFromRoomInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutFromRoomInput | RoomTransferUpsertWithWhereUniqueWithoutFromRoomInput[]
+    createMany?: RoomTransferCreateManyFromRoomInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutFromRoomInput | RoomTransferUpdateWithWhereUniqueWithoutFromRoomInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutFromRoomInput | RoomTransferUpdateManyWithWhereWithoutFromRoomInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+  }
+
+  export type RoomTransferUpdateManyWithoutToRoomNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput> | RoomTransferCreateWithoutToRoomInput[] | RoomTransferUncheckedCreateWithoutToRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutToRoomInput | RoomTransferCreateOrConnectWithoutToRoomInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutToRoomInput | RoomTransferUpsertWithWhereUniqueWithoutToRoomInput[]
+    createMany?: RoomTransferCreateManyToRoomInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutToRoomInput | RoomTransferUpdateWithWhereUniqueWithoutToRoomInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutToRoomInput | RoomTransferUpdateManyWithWhereWithoutToRoomInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
   }
 
   export type StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput = {
@@ -88306,6 +90189,34 @@ export namespace Prisma {
     update?: RoomItemUpdateWithWhereUniqueWithoutRoomInput | RoomItemUpdateWithWhereUniqueWithoutRoomInput[]
     updateMany?: RoomItemUpdateManyWithWhereWithoutRoomInput | RoomItemUpdateManyWithWhereWithoutRoomInput[]
     deleteMany?: RoomItemScalarWhereInput | RoomItemScalarWhereInput[]
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput> | RoomTransferCreateWithoutFromRoomInput[] | RoomTransferUncheckedCreateWithoutFromRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutFromRoomInput | RoomTransferCreateOrConnectWithoutFromRoomInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutFromRoomInput | RoomTransferUpsertWithWhereUniqueWithoutFromRoomInput[]
+    createMany?: RoomTransferCreateManyFromRoomInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutFromRoomInput | RoomTransferUpdateWithWhereUniqueWithoutFromRoomInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutFromRoomInput | RoomTransferUpdateManyWithWhereWithoutFromRoomInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput> | RoomTransferCreateWithoutToRoomInput[] | RoomTransferUncheckedCreateWithoutToRoomInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutToRoomInput | RoomTransferCreateOrConnectWithoutToRoomInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutToRoomInput | RoomTransferUpsertWithWhereUniqueWithoutToRoomInput[]
+    createMany?: RoomTransferCreateManyToRoomInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutToRoomInput | RoomTransferUpdateWithWhereUniqueWithoutToRoomInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutToRoomInput | RoomTransferUpdateManyWithWhereWithoutToRoomInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
   }
 
   export type StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput = {
@@ -88520,6 +90431,13 @@ export namespace Prisma {
     connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
   }
 
+  export type RoomTransferCreateNestedManyWithoutStayInput = {
+    create?: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput> | RoomTransferCreateWithoutStayInput[] | RoomTransferUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutStayInput | RoomTransferCreateOrConnectWithoutStayInput[]
+    createMany?: RoomTransferCreateManyStayInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
   export type InvoiceUncheckedCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -88574,6 +90492,13 @@ export namespace Prisma {
     connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutStayInput | RentRecognitionScheduleCreateOrConnectWithoutStayInput[]
     createMany?: RentRecognitionScheduleCreateManyStayInputEnvelope
     connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+  }
+
+  export type RoomTransferUncheckedCreateNestedManyWithoutStayInput = {
+    create?: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput> | RoomTransferCreateWithoutStayInput[] | RoomTransferUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutStayInput | RoomTransferCreateOrConnectWithoutStayInput[]
+    createMany?: RoomTransferCreateManyStayInputEnvelope
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
   }
 
   export type EnumStayStatusFieldUpdateOperationsInput = {
@@ -88774,6 +90699,20 @@ export namespace Prisma {
     deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
   }
 
+  export type RoomTransferUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput> | RoomTransferCreateWithoutStayInput[] | RoomTransferUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutStayInput | RoomTransferCreateOrConnectWithoutStayInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutStayInput | RoomTransferUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RoomTransferCreateManyStayInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutStayInput | RoomTransferUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutStayInput | RoomTransferUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+  }
+
   export type InvoiceUncheckedUpdateManyWithoutStayNestedInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -88884,6 +90823,20 @@ export namespace Prisma {
     update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput[]
     updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput | RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput[]
     deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput> | RoomTransferCreateWithoutStayInput[] | RoomTransferUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RoomTransferCreateOrConnectWithoutStayInput | RoomTransferCreateOrConnectWithoutStayInput[]
+    upsert?: RoomTransferUpsertWithWhereUniqueWithoutStayInput | RoomTransferUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RoomTransferCreateManyStayInputEnvelope
+    set?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    disconnect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    delete?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+    update?: RoomTransferUpdateWithWhereUniqueWithoutStayInput | RoomTransferUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RoomTransferUpdateManyWithWhereWithoutStayInput | RoomTransferUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
   }
 
   export type StayCreateNestedOneWithoutDepositLedgerEntriesInput = {
@@ -91815,6 +93768,64 @@ export namespace Prisma {
     update?: XOR<XOR<JournalEntryUpdateToOneWithWhereWithoutRentRecognitionsInput, JournalEntryUpdateWithoutRentRecognitionsInput>, JournalEntryUncheckedUpdateWithoutRentRecognitionsInput>
   }
 
+  export type StayCreateNestedOneWithoutRoomTransfersInput = {
+    create?: XOR<StayCreateWithoutRoomTransfersInput, StayUncheckedCreateWithoutRoomTransfersInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRoomTransfersInput
+    connect?: StayWhereUniqueInput
+  }
+
+  export type RoomCreateNestedOneWithoutTransfersFromInput = {
+    create?: XOR<RoomCreateWithoutTransfersFromInput, RoomUncheckedCreateWithoutTransfersFromInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutTransfersFromInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type RoomCreateNestedOneWithoutTransfersToInput = {
+    create?: XOR<RoomCreateWithoutTransfersToInput, RoomUncheckedCreateWithoutTransfersToInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutTransfersToInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutRoomTransfersCreatedInput = {
+    create?: XOR<UserCreateWithoutRoomTransfersCreatedInput, UserUncheckedCreateWithoutRoomTransfersCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRoomTransfersCreatedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type StayUpdateOneRequiredWithoutRoomTransfersNestedInput = {
+    create?: XOR<StayCreateWithoutRoomTransfersInput, StayUncheckedCreateWithoutRoomTransfersInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRoomTransfersInput
+    upsert?: StayUpsertWithoutRoomTransfersInput
+    connect?: StayWhereUniqueInput
+    update?: XOR<XOR<StayUpdateToOneWithWhereWithoutRoomTransfersInput, StayUpdateWithoutRoomTransfersInput>, StayUncheckedUpdateWithoutRoomTransfersInput>
+  }
+
+  export type RoomUpdateOneRequiredWithoutTransfersFromNestedInput = {
+    create?: XOR<RoomCreateWithoutTransfersFromInput, RoomUncheckedCreateWithoutTransfersFromInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutTransfersFromInput
+    upsert?: RoomUpsertWithoutTransfersFromInput
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutTransfersFromInput, RoomUpdateWithoutTransfersFromInput>, RoomUncheckedUpdateWithoutTransfersFromInput>
+  }
+
+  export type RoomUpdateOneRequiredWithoutTransfersToNestedInput = {
+    create?: XOR<RoomCreateWithoutTransfersToInput, RoomUncheckedCreateWithoutTransfersToInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutTransfersToInput
+    upsert?: RoomUpsertWithoutTransfersToInput
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutTransfersToInput, RoomUpdateWithoutTransfersToInput>, RoomUncheckedUpdateWithoutTransfersToInput>
+  }
+
+  export type UserUpdateOneWithoutRoomTransfersCreatedNestedInput = {
+    create?: XOR<UserCreateWithoutRoomTransfersCreatedInput, UserUncheckedCreateWithoutRoomTransfersCreatedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRoomTransfersCreatedInput
+    upsert?: UserUpsertWithoutRoomTransfersCreatedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRoomTransfersCreatedInput, UserUpdateWithoutRoomTransfersCreatedInput>, UserUncheckedUpdateWithoutRoomTransfersCreatedInput>
+  }
+
   export type TenantCreateNestedOneWithoutLoyaltyPointsInput = {
     create?: XOR<TenantCreateWithoutLoyaltyPointsInput, TenantUncheckedCreateWithoutLoyaltyPointsInput>
     connectOrCreate?: TenantCreateOrConnectWithoutLoyaltyPointsInput
@@ -93455,6 +95466,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCreatedByInput = {
@@ -93516,6 +95528,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCreatedByInput = {
@@ -93586,6 +95599,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInitialMetersRecordedByInput = {
@@ -93647,6 +95661,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInitialMetersRecordedByInput = {
@@ -94942,6 +96957,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutFledMarkedByInput = {
@@ -95003,6 +97019,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutFledMarkedByInput = {
@@ -95091,6 +97108,41 @@ export namespace Prisma {
 
   export type TenantCreateManyKtpVerifiedByInputEnvelope = {
     data: TenantCreateManyKtpVerifiedByInput | TenantCreateManyKtpVerifiedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RoomTransferCreateWithoutCreatedByInput = {
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRoomTransfersInput
+    fromRoom: RoomCreateNestedOneWithoutTransfersFromInput
+    toRoom: RoomCreateNestedOneWithoutTransfersToInput
+  }
+
+  export type RoomTransferUncheckedCreateWithoutCreatedByInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferCreateOrConnectWithoutCreatedByInput = {
+    where: RoomTransferWhereUniqueInput
+    create: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type RoomTransferCreateManyCreatedByInputEnvelope = {
+    data: RoomTransferCreateManyCreatedByInput | RoomTransferCreateManyCreatedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -96304,6 +98356,39 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
   }
 
+  export type RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: RoomTransferWhereUniqueInput
+    update: XOR<RoomTransferUpdateWithoutCreatedByInput, RoomTransferUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<RoomTransferCreateWithoutCreatedByInput, RoomTransferUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type RoomTransferUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: RoomTransferWhereUniqueInput
+    data: XOR<RoomTransferUpdateWithoutCreatedByInput, RoomTransferUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type RoomTransferUpdateManyWithWhereWithoutCreatedByInput = {
+    where: RoomTransferScalarWhereInput
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type RoomTransferScalarWhereInput = {
+    AND?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+    OR?: RoomTransferScalarWhereInput[]
+    NOT?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
+    id?: IntFilter<"RoomTransfer"> | number
+    stayId?: IntFilter<"RoomTransfer"> | number
+    fromRoomId?: IntFilter<"RoomTransfer"> | number
+    toRoomId?: IntFilter<"RoomTransfer"> | number
+    transferDate?: DateTimeFilter<"RoomTransfer"> | Date | string
+    reason?: StringNullableFilter<"RoomTransfer"> | string | null
+    rentBeforeRupiah?: IntFilter<"RoomTransfer"> | number
+    rentAfterRupiah?: IntFilter<"RoomTransfer"> | number
+    note?: StringNullableFilter<"RoomTransfer"> | string | null
+    createdById?: IntNullableFilter<"RoomTransfer"> | number | null
+    createdAt?: DateTimeFilter<"RoomTransfer"> | Date | string
+  }
+
   export type UserCreateWithoutTenantInput = {
     fullName: string
     email: string
@@ -96347,6 +98432,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -96393,6 +98479,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
@@ -96443,6 +98530,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantsKtpVerifiedInput = {
@@ -96489,6 +98577,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantsKtpVerifiedInput = {
@@ -96554,6 +98643,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTenantInput = {
@@ -96615,6 +98705,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTenantInput = {
@@ -97030,6 +99121,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -97076,6 +99168,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutTenantsKtpVerifiedInput = {
@@ -97132,6 +99225,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantsKtpVerifiedInput = {
@@ -97178,6 +99272,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -97397,6 +99492,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRoomInput = {
@@ -97458,6 +99554,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRoomInput = {
@@ -97614,6 +99711,76 @@ export namespace Prisma {
 
   export type RoomItemCreateManyRoomInputEnvelope = {
     data: RoomItemCreateManyRoomInput | RoomItemCreateManyRoomInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RoomTransferCreateWithoutFromRoomInput = {
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRoomTransfersInput
+    toRoom: RoomCreateNestedOneWithoutTransfersToInput
+    createdBy?: UserCreateNestedOneWithoutRoomTransfersCreatedInput
+  }
+
+  export type RoomTransferUncheckedCreateWithoutFromRoomInput = {
+    id?: number
+    stayId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferCreateOrConnectWithoutFromRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    create: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput>
+  }
+
+  export type RoomTransferCreateManyFromRoomInputEnvelope = {
+    data: RoomTransferCreateManyFromRoomInput | RoomTransferCreateManyFromRoomInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RoomTransferCreateWithoutToRoomInput = {
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRoomTransfersInput
+    fromRoom: RoomCreateNestedOneWithoutTransfersFromInput
+    createdBy?: UserCreateNestedOneWithoutRoomTransfersCreatedInput
+  }
+
+  export type RoomTransferUncheckedCreateWithoutToRoomInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferCreateOrConnectWithoutToRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    create: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput>
+  }
+
+  export type RoomTransferCreateManyToRoomInputEnvelope = {
+    data: RoomTransferCreateManyToRoomInput | RoomTransferCreateManyToRoomInput[]
     skipDuplicates?: boolean
   }
 
@@ -98069,6 +100236,38 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"RoomItem"> | Date | string
   }
 
+  export type RoomTransferUpsertWithWhereUniqueWithoutFromRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    update: XOR<RoomTransferUpdateWithoutFromRoomInput, RoomTransferUncheckedUpdateWithoutFromRoomInput>
+    create: XOR<RoomTransferCreateWithoutFromRoomInput, RoomTransferUncheckedCreateWithoutFromRoomInput>
+  }
+
+  export type RoomTransferUpdateWithWhereUniqueWithoutFromRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    data: XOR<RoomTransferUpdateWithoutFromRoomInput, RoomTransferUncheckedUpdateWithoutFromRoomInput>
+  }
+
+  export type RoomTransferUpdateManyWithWhereWithoutFromRoomInput = {
+    where: RoomTransferScalarWhereInput
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyWithoutFromRoomInput>
+  }
+
+  export type RoomTransferUpsertWithWhereUniqueWithoutToRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    update: XOR<RoomTransferUpdateWithoutToRoomInput, RoomTransferUncheckedUpdateWithoutToRoomInput>
+    create: XOR<RoomTransferCreateWithoutToRoomInput, RoomTransferUncheckedCreateWithoutToRoomInput>
+  }
+
+  export type RoomTransferUpdateWithWhereUniqueWithoutToRoomInput = {
+    where: RoomTransferWhereUniqueInput
+    data: XOR<RoomTransferUpdateWithoutToRoomInput, RoomTransferUncheckedUpdateWithoutToRoomInput>
+  }
+
+  export type RoomTransferUpdateManyWithWhereWithoutToRoomInput = {
+    where: RoomTransferScalarWhereInput
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyWithoutToRoomInput>
+  }
+
   export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutRoomInput = {
     where: StaffRoutineAssignmentWhereUniqueInput
     update: XOR<StaffRoutineAssignmentUpdateWithoutRoomInput, StaffRoutineAssignmentUncheckedUpdateWithoutRoomInput>
@@ -98235,6 +100434,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -98267,6 +100468,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -98314,6 +100517,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -98346,6 +100551,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -98450,6 +100657,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -98482,6 +100691,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -98540,6 +100751,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -98586,6 +100798,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -98636,6 +100849,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysInitialMetersRecordedInput = {
@@ -98682,6 +100896,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysInitialMetersRecordedInput = {
@@ -98732,6 +100947,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysFledMarkedInput = {
@@ -98778,6 +100994,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysFledMarkedInput = {
@@ -99193,6 +101410,41 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RoomTransferCreateWithoutStayInput = {
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+    fromRoom: RoomCreateNestedOneWithoutTransfersFromInput
+    toRoom: RoomCreateNestedOneWithoutTransfersToInput
+    createdBy?: UserCreateNestedOneWithoutRoomTransfersCreatedInput
+  }
+
+  export type RoomTransferUncheckedCreateWithoutStayInput = {
+    id?: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferCreateOrConnectWithoutStayInput = {
+    where: RoomTransferWhereUniqueInput
+    create: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput>
+  }
+
+  export type RoomTransferCreateManyStayInputEnvelope = {
+    data: RoomTransferCreateManyStayInput | RoomTransferCreateManyStayInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutStaysInput = {
     update: XOR<TenantUpdateWithoutStaysInput, TenantUncheckedUpdateWithoutStaysInput>
     create: XOR<TenantCreateWithoutStaysInput, TenantUncheckedCreateWithoutStaysInput>
@@ -99305,6 +101557,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -99337,6 +101591,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -99401,6 +101657,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -99447,6 +101704,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaysInitialMetersRecordedInput = {
@@ -99503,6 +101761,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput = {
@@ -99549,6 +101808,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaysFledMarkedInput = {
@@ -99605,6 +101865,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysFledMarkedInput = {
@@ -99651,6 +101912,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -99796,6 +102058,22 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
   }
 
+  export type RoomTransferUpsertWithWhereUniqueWithoutStayInput = {
+    where: RoomTransferWhereUniqueInput
+    update: XOR<RoomTransferUpdateWithoutStayInput, RoomTransferUncheckedUpdateWithoutStayInput>
+    create: XOR<RoomTransferCreateWithoutStayInput, RoomTransferUncheckedCreateWithoutStayInput>
+  }
+
+  export type RoomTransferUpdateWithWhereUniqueWithoutStayInput = {
+    where: RoomTransferWhereUniqueInput
+    data: XOR<RoomTransferUpdateWithoutStayInput, RoomTransferUncheckedUpdateWithoutStayInput>
+  }
+
+  export type RoomTransferUpdateManyWithWhereWithoutStayInput = {
+    where: RoomTransferScalarWhereInput
+    data: XOR<RoomTransferUpdateManyMutationInput, RoomTransferUncheckedUpdateManyWithoutStayInput>
+  }
+
   export type StayCreateWithoutDepositLedgerEntriesInput = {
     status?: $Enums.StayStatus
     pricingTerm: $Enums.PricingTerm
@@ -99854,6 +102132,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutDepositLedgerEntriesInput = {
@@ -99915,6 +102194,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutDepositLedgerEntriesInput = {
@@ -100018,6 +102298,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -100050,6 +102332,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -100107,6 +102391,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutDepositLedgerEntriesActedInput = {
@@ -100153,6 +102438,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutDepositLedgerEntriesActedInput = {
@@ -100229,6 +102515,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutDepositLedgerEntriesInput = {
@@ -100290,6 +102577,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type TenantUpsertWithoutDepositLedgerEntriesInput = {
@@ -100405,6 +102693,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -100437,6 +102727,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -100500,6 +102792,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDepositLedgerEntriesActedInput = {
@@ -100546,6 +102839,7 @@ export namespace Prisma {
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -100569,6 +102863,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -100601,6 +102897,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -100659,6 +102957,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -100705,6 +103004,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -100744,6 +103044,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -100776,6 +103078,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -100840,6 +103144,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -100886,6 +103191,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -100946,6 +103252,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInvoicesInput = {
@@ -101007,6 +103314,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInvoicesInput = {
@@ -101057,6 +103365,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -101103,6 +103412,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -101312,6 +103622,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInvoicesInput = {
@@ -101373,6 +103684,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutInvoicesCreatedInput = {
@@ -101429,6 +103741,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -101475,6 +103788,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -101724,6 +104038,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -101770,6 +104085,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -101881,6 +104197,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -101927,6 +104244,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -101972,6 +104290,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -102018,6 +104337,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -102079,6 +104399,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -102125,6 +104446,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutPaymentSubmissionsInput = {
@@ -102185,6 +104507,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -102246,6 +104569,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -102414,6 +104738,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
@@ -102460,6 +104785,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
@@ -102510,6 +104836,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
@@ -102556,6 +104883,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
@@ -102632,6 +104960,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -102693,6 +105022,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type InvoiceUpsertWithoutPaymentSubmissionsInput = {
@@ -102879,6 +105209,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
@@ -102925,6 +105256,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
@@ -102981,6 +105313,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
@@ -103027,6 +105360,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -103124,6 +105458,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -103156,6 +105492,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -103229,6 +105567,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTicketsInput = {
@@ -103290,6 +105629,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTicketsInput = {
@@ -103340,6 +105680,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -103386,6 +105727,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -103640,6 +105982,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -103672,6 +106016,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -103751,6 +106097,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTicketsInput = {
@@ -103812,6 +106159,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutTicketsAssignedInput = {
@@ -103868,6 +106216,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -103914,6 +106263,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomItemUpsertWithoutLinkedTicketsInput = {
@@ -104063,6 +106413,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -104109,6 +106460,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput = {
@@ -104236,6 +106588,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -104282,6 +106635,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -104399,6 +106753,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
@@ -104445,6 +106800,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
@@ -104474,6 +106830,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
@@ -104506,6 +106864,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
@@ -104657,6 +107017,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
@@ -104703,6 +107064,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineAssignmentsInput = {
@@ -104738,6 +107100,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
@@ -104770,6 +107134,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
@@ -104902,6 +107268,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineCompletionsInput = {
@@ -104948,6 +107315,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineCompletionsInput = {
@@ -104977,6 +107345,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
@@ -105009,6 +107379,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
@@ -105153,6 +107525,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
@@ -105199,6 +107572,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineCompletionsInput = {
@@ -105234,6 +107608,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
@@ -105266,6 +107642,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
@@ -105318,6 +107696,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsInput = {
@@ -105364,6 +107743,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsInput = {
@@ -105414,6 +107794,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsMadeInput = {
@@ -105460,6 +107841,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsMadeInput = {
@@ -105521,6 +107903,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsInput = {
@@ -105567,6 +107950,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaffPerformanceAuditsMadeInput = {
@@ -105623,6 +108007,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsMadeInput = {
@@ -105669,6 +108054,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutStaffPerformanceEventsInput = {
@@ -105714,6 +108100,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceEventsInput = {
@@ -105760,6 +108147,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceEventsInput = {
@@ -105821,6 +108209,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceEventsInput = {
@@ -105867,6 +108256,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutStaffReviewsReceivedInput = {
@@ -105912,6 +108302,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsReceivedInput = {
@@ -105958,6 +108349,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsReceivedInput = {
@@ -106082,6 +108474,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsModeratedInput = {
@@ -106128,6 +108521,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsModeratedInput = {
@@ -106189,6 +108583,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsReceivedInput = {
@@ -106235,6 +108630,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type TenantUpsertWithoutStaffReviewsInput = {
@@ -106371,6 +108767,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsModeratedInput = {
@@ -106417,6 +108814,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -106462,6 +108860,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -106508,6 +108907,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -106569,6 +108969,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -106615,6 +109016,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -107088,6 +109490,8 @@ export namespace Prisma {
     stays?: StayCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -107120,6 +109524,8 @@ export namespace Prisma {
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -107440,6 +109846,8 @@ export namespace Prisma {
     stays?: StayUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -107472,6 +109880,8 @@ export namespace Prisma {
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -107650,6 +110060,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -107682,6 +110094,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -107739,6 +110153,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -107785,6 +110200,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -107936,6 +110352,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -107968,6 +110386,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -108031,6 +110451,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -108077,6 +110498,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutRelatedMovementInput = {
@@ -108195,6 +110617,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -108227,6 +110651,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -108406,6 +110832,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsCreatedInput = {
@@ -108452,6 +110879,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsCreatedInput = {
@@ -108502,6 +110930,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsReviewedInput = {
@@ -108548,6 +110977,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsReviewedInput = {
@@ -108700,6 +111130,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -108732,6 +111164,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -108935,6 +111369,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsCreatedInput = {
@@ -108981,6 +111416,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUpsertWithoutStaffFieldReportsReviewedInput = {
@@ -109037,6 +111473,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsReviewedInput = {
@@ -109083,6 +111520,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type InventoryMovementUpsertWithoutFieldReportsInput = {
@@ -109177,6 +111615,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRenewRequestsInput = {
@@ -109238,6 +111677,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRenewRequestsInput = {
@@ -109362,6 +111802,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutRenewRequestsReviewedInput = {
@@ -109408,6 +111849,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutRenewRequestsReviewedInput = {
@@ -109484,6 +111926,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRenewRequestsInput = {
@@ -109545,6 +111988,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type TenantUpsertWithoutRenewRequestsInput = {
@@ -109681,6 +112125,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRenewRequestsReviewedInput = {
@@ -109727,6 +112172,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type StayCreateWithoutCheckoutRequestsInput = {
@@ -109787,6 +112233,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCheckoutRequestsInput = {
@@ -109848,6 +112295,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCheckoutRequestsInput = {
@@ -109898,6 +112346,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCheckoutRequestsReviewedInput = {
@@ -109944,6 +112393,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCheckoutRequestsReviewedInput = {
@@ -110020,6 +112470,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCheckoutRequestsInput = {
@@ -110081,6 +112532,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutCheckoutRequestsReviewedInput = {
@@ -110137,6 +112589,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCheckoutRequestsReviewedInput = {
@@ -110183,6 +112636,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -110228,6 +112682,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -110274,6 +112729,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -110335,6 +112791,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -110381,6 +112838,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -110405,6 +112863,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
@@ -110437,6 +112897,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
@@ -110509,6 +112971,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutExpensesInput = {
@@ -110570,6 +113033,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutExpensesInput = {
@@ -110620,6 +113084,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -110666,6 +113131,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -110791,6 +113257,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
@@ -110823,6 +113291,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
@@ -110901,6 +113371,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutExpensesInput = {
@@ -110962,6 +113433,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutExpensesCreatedInput = {
@@ -111018,6 +113490,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -111064,6 +113537,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type FixedAssetUpsertWithWhereUniqueWithoutExpenseInput = {
@@ -111104,6 +113578,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
     tickets?: TicketCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
     expenses?: ExpenseCreateNestedManyWithoutRoomInput
@@ -111136,6 +113612,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
     tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
     roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
     expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
@@ -111309,6 +113787,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutFixedAssetsCreatedInput = {
@@ -111355,6 +113834,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutFixedAssetsCreatedInput = {
@@ -111518,6 +113998,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
     tickets?: TicketUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUpdateManyWithoutRoomNestedInput
@@ -111550,6 +114032,8 @@ export namespace Prisma {
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
     roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
     staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
     staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
     expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
@@ -111747,6 +114231,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFixedAssetsCreatedInput = {
@@ -111793,6 +114278,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutFixedAssetAlignmentCreditsInput = {
@@ -112025,6 +114511,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAssetDepreciationRunsCreatedInput = {
@@ -112071,6 +114558,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAssetDepreciationRunsCreatedInput = {
@@ -112221,6 +114709,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssetDepreciationRunsCreatedInput = {
@@ -112267,6 +114756,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutRunInput = {
@@ -112576,6 +115066,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -112622,6 +115113,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -112683,6 +115175,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -112729,6 +115222,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutPushSubscriptionsInput = {
@@ -112774,6 +115268,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -112820,6 +115315,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -112881,6 +115377,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -112927,6 +115424,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -112972,6 +115470,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -113018,6 +115517,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -113079,6 +115579,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -113125,6 +115626,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ChartOfAccountCreateWithoutChildrenInput = {
@@ -114965,6 +117467,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRentRecognitionSchedulesInput = {
@@ -115026,6 +117529,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    roomTransfers?: RoomTransferUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRentRecognitionSchedulesInput = {
@@ -115154,6 +117658,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRentRecognitionSchedulesInput = {
@@ -115215,6 +117720,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type JournalEntryUpsertWithoutRentRecognitionsInput = {
@@ -115273,6 +117779,770 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
+  }
+
+  export type StayCreateWithoutRoomTransfersInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutRoomTransfersInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutRoomTransfersInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutRoomTransfersInput, StayUncheckedCreateWithoutRoomTransfersInput>
+  }
+
+  export type RoomCreateWithoutTransfersFromInput = {
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    allowBookingWhileCleaning?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
+    tickets?: TicketCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersTo?: RoomTransferCreateNestedManyWithoutToRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
+    staffFieldReports?: StaffFieldReportCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
+    fixedAssets?: FixedAssetCreateNestedManyWithoutRoomInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutTransfersFromInput = {
+    id?: number
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    allowBookingWhileCleaning?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayUncheckedCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersTo?: RoomTransferUncheckedCreateNestedManyWithoutToRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
+    staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
+    fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutRoomInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutTransfersFromInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutTransfersFromInput, RoomUncheckedCreateWithoutTransfersFromInput>
+  }
+
+  export type RoomCreateWithoutTransfersToInput = {
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    allowBookingWhileCleaning?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
+    tickets?: TicketCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferCreateNestedManyWithoutFromRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementCreateNestedManyWithoutRoomInput
+    staffFieldReports?: StaffFieldReportCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityCreateNestedManyWithoutRoomInput
+    fixedAssets?: FixedAssetCreateNestedManyWithoutRoomInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutTransfersToInput = {
+    id?: number
+    code: string
+    name?: string | null
+    floor?: string | null
+    status?: $Enums.RoomStatus
+    dailyRateRupiah?: number | null
+    weeklyRateRupiah?: number | null
+    biWeeklyRateRupiah?: number | null
+    monthlyRateRupiah: number
+    defaultDepositRupiah?: number
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    images?: RoomCreateimagesInput | string[]
+    notes?: string | null
+    isActive?: boolean
+    allowBookingWhileCleaning?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stays?: StayUncheckedCreateNestedManyWithoutRoomInput
+    meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutRoomInput
+    roomItems?: RoomItemUncheckedCreateNestedManyWithoutRoomInput
+    transfersFrom?: RoomTransferUncheckedCreateNestedManyWithoutFromRoomInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutRoomInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutRoomInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutRoomInput
+    inventoryMovements?: InventoryMovementUncheckedCreateNestedManyWithoutRoomInput
+    staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutRoomInput
+    facilities?: RoomFacilityUncheckedCreateNestedManyWithoutRoomInput
+    fixedAssets?: FixedAssetUncheckedCreateNestedManyWithoutRoomInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutTransfersToInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutTransfersToInput, RoomUncheckedCreateWithoutTransfersToInput>
+  }
+
+  export type UserCreateWithoutRoomTransfersCreatedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserUncheckedCreateWithoutRoomTransfersCreatedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserCreateOrConnectWithoutRoomTransfersCreatedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRoomTransfersCreatedInput, UserUncheckedCreateWithoutRoomTransfersCreatedInput>
+  }
+
+  export type StayUpsertWithoutRoomTransfersInput = {
+    update: XOR<StayUpdateWithoutRoomTransfersInput, StayUncheckedUpdateWithoutRoomTransfersInput>
+    create: XOR<StayCreateWithoutRoomTransfersInput, StayUncheckedCreateWithoutRoomTransfersInput>
+    where?: StayWhereInput
+  }
+
+  export type StayUpdateToOneWithWhereWithoutRoomTransfersInput = {
+    where?: StayWhereInput
+    data: XOR<StayUpdateWithoutRoomTransfersInput, StayUncheckedUpdateWithoutRoomTransfersInput>
+  }
+
+  export type StayUpdateWithoutRoomTransfersInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutRoomTransfersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type RoomUpsertWithoutTransfersFromInput = {
+    update: XOR<RoomUpdateWithoutTransfersFromInput, RoomUncheckedUpdateWithoutTransfersFromInput>
+    create: XOR<RoomCreateWithoutTransfersFromInput, RoomUncheckedCreateWithoutTransfersFromInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutTransfersFromInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutTransfersFromInput, RoomUncheckedUpdateWithoutTransfersFromInput>
+  }
+
+  export type RoomUpdateWithoutTransfersFromInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersTo?: RoomTransferUpdateManyWithoutToRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
+    staffFieldReports?: StaffFieldReportUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
+    fixedAssets?: FixedAssetUpdateManyWithoutRoomNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutTransfersFromInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersTo?: RoomTransferUncheckedUpdateManyWithoutToRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
+    staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
+    fixedAssets?: FixedAssetUncheckedUpdateManyWithoutRoomNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUpsertWithoutTransfersToInput = {
+    update: XOR<RoomUpdateWithoutTransfersToInput, RoomUncheckedUpdateWithoutTransfersToInput>
+    create: XOR<RoomCreateWithoutTransfersToInput, RoomUncheckedCreateWithoutTransfersToInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutTransfersToInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutTransfersToInput, RoomUncheckedUpdateWithoutTransfersToInput>
+  }
+
+  export type RoomUpdateWithoutTransfersToInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUpdateManyWithoutFromRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUpdateManyWithoutRoomNestedInput
+    staffFieldReports?: StaffFieldReportUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUpdateManyWithoutRoomNestedInput
+    fixedAssets?: FixedAssetUpdateManyWithoutRoomNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutTransfersToInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    floor?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    dailyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    weeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    biWeeklyRateRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    monthlyRateRupiah?: IntFieldUpdateOperationsInput | number
+    defaultDepositRupiah?: IntFieldUpdateOperationsInput | number
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    images?: RoomUpdateimagesInput | string[]
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
+    meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutRoomNestedInput
+    roomItems?: RoomItemUncheckedUpdateManyWithoutRoomNestedInput
+    transfersFrom?: RoomTransferUncheckedUpdateManyWithoutFromRoomNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutRoomNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutRoomNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutRoomNestedInput
+    inventoryMovements?: InventoryMovementUncheckedUpdateManyWithoutRoomNestedInput
+    staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutRoomNestedInput
+    facilities?: RoomFacilityUncheckedUpdateManyWithoutRoomNestedInput
+    fixedAssets?: FixedAssetUncheckedUpdateManyWithoutRoomNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type UserUpsertWithoutRoomTransfersCreatedInput = {
+    update: XOR<UserUpdateWithoutRoomTransfersCreatedInput, UserUncheckedUpdateWithoutRoomTransfersCreatedInput>
+    create: XOR<UserCreateWithoutRoomTransfersCreatedInput, UserUncheckedCreateWithoutRoomTransfersCreatedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRoomTransfersCreatedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRoomTransfersCreatedInput, UserUncheckedUpdateWithoutRoomTransfersCreatedInput>
+  }
+
+  export type UserUpdateWithoutRoomTransfersCreatedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRoomTransfersCreatedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type TenantCreateWithoutLoyaltyPointsInput = {
@@ -116487,6 +119757,19 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RoomTransferCreateManyCreatedByInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdAt?: Date | string
+  }
+
   export type AnnouncementUpdateWithoutCreatedByInput = {
     title?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
@@ -116601,6 +119884,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCreatedByInput = {
@@ -116662,6 +119946,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutCreatedByInput = {
@@ -116775,6 +120060,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInitialMetersRecordedByInput = {
@@ -116836,6 +120122,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutInitialMetersRecordedByInput = {
@@ -118369,6 +121656,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutFledMarkedByInput = {
@@ -118430,6 +121718,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutFledMarkedByInput = {
@@ -118578,6 +121867,44 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUpdateWithoutCreatedByInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRoomTransfersNestedInput
+    fromRoom?: RoomUpdateOneRequiredWithoutTransfersFromNestedInput
+    toRoom?: RoomUpdateOneRequiredWithoutTransfersToNestedInput
+  }
+
+  export type RoomTransferUncheckedUpdateWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StayCreateManyTenantInput = {
@@ -118833,6 +122160,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTenantInput = {
@@ -118894,6 +122222,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutTenantInput = {
@@ -119479,6 +122808,32 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RoomTransferCreateManyFromRoomInput = {
+    id?: number
+    stayId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RoomTransferCreateManyToRoomInput = {
+    id?: number
+    stayId: number
+    fromRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
   export type StaffRoutineAssignmentCreateManyRoomInput = {
     id?: number
     templateId: number
@@ -119684,6 +123039,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRoomInput = {
@@ -119745,6 +123101,7 @@ export namespace Prisma {
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
     rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
+    roomTransfers?: RoomTransferUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutRoomInput = {
@@ -119971,6 +123328,82 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUpdateWithoutFromRoomInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRoomTransfersNestedInput
+    toRoom?: RoomUpdateOneRequiredWithoutTransfersToNestedInput
+    createdBy?: UserUpdateOneWithoutRoomTransfersCreatedNestedInput
+  }
+
+  export type RoomTransferUncheckedUpdateWithoutFromRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutFromRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUpdateWithoutToRoomInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRoomTransfersNestedInput
+    fromRoom?: RoomUpdateOneRequiredWithoutTransfersFromNestedInput
+    createdBy?: UserUpdateOneWithoutRoomTransfersCreatedNestedInput
+  }
+
+  export type RoomTransferUncheckedUpdateWithoutToRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutToRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StaffRoutineAssignmentUpdateWithoutRoomInput = {
@@ -120577,6 +124010,19 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type RoomTransferCreateManyStayInput = {
+    id?: number
+    fromRoomId: number
+    toRoomId: number
+    transferDate: Date | string
+    reason?: string | null
+    rentBeforeRupiah: number
+    rentAfterRupiah: number
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
   export type InvoiceUpdateWithoutStayInput = {
     invoiceNumber?: StringFieldUpdateOperationsInput | string
     status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -121065,6 +124511,44 @@ export namespace Prisma {
     scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
     recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUpdateWithoutStayInput = {
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    fromRoom?: RoomUpdateOneRequiredWithoutTransfersFromNestedInput
+    toRoom?: RoomUpdateOneRequiredWithoutTransfersToNestedInput
+    createdBy?: UserUpdateOneWithoutRoomTransfersCreatedNestedInput
+  }
+
+  export type RoomTransferUncheckedUpdateWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoomTransferUncheckedUpdateManyWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fromRoomId?: IntFieldUpdateOperationsInput | number
+    toRoomId?: IntFieldUpdateOperationsInput | number
+    transferDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    rentBeforeRupiah?: IntFieldUpdateOperationsInput | number
+    rentAfterRupiah?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

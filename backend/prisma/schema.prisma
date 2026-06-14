@@ -492,6 +492,7 @@ model User {
   depositLedgerEntriesActed TenantDepositLedgerEntry[] @relation("DepositLedgerActor")
   staysFledMarked           Stay[]                     @relation("StayFledMarkedBy")
   tenantsKtpVerified        Tenant[]                   @relation("TenantKtpVerifiedBy")
+  roomTransfersCreated      RoomTransfer[]             @relation("RoomTransferCreatedBy")
 
   @@index([role])
   @@index([isActive])
@@ -580,6 +581,8 @@ model Room {
   meterReadings      MeterReading[]
   tickets            Ticket[]
   roomItems          RoomItem[]
+  transfersFrom      RoomTransfer[] @relation("RoomTransferFrom")
+  transfersTo        RoomTransfer[] @relation("RoomTransferTo")
   staffRoutineAssignments StaffRoutineAssignment[] @relation("StaffRoutineAssignmentRoom")
   staffRoutineCompletions StaffRoutineCompletion[] @relation("StaffRoutineCompletionRoom")
   expenses           Expense[]
@@ -697,6 +700,7 @@ model Stay {
   checkoutRequests   CheckoutRequest[]
   depositLedgerEntries TenantDepositLedgerEntry[]
   rentRecognitionSchedules RentRecognitionSchedule[]
+  roomTransfers      RoomTransfer[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -1699,6 +1703,32 @@ model RentRecognitionSchedule {
   @@unique([stayId, periodIndex])
   @@index([stayId])
   @@index([recognizedAt])
+}
+
+// F4-8 Pindah kamar resmi (E4). Stay SAMA dipertahankan (roomId diperbarui); deposit ikut
+// apa adanya; harga dikunci kecuali override OWNER; meter kamar baru di-snapshot; kamar lama
+// -> inspeksi. RoomTransfer = jejak audit perpindahan.
+model RoomTransfer {
+  id               Int      @id @default(autoincrement())
+  stayId           Int
+  fromRoomId       Int
+  toRoomId         Int
+  transferDate     DateTime @db.Date
+  reason           String?
+  rentBeforeRupiah Int
+  rentAfterRupiah  Int
+  note             String?
+  createdById      Int?
+  createdAt        DateTime @default(now())
+
+  stay      Stay  @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  fromRoom  Room  @relation("RoomTransferFrom", fields: [fromRoomId], references: [id], onDelete: Restrict)
+  toRoom    Room  @relation("RoomTransferTo", fields: [toRoomId], references: [id], onDelete: Restrict)
+  createdBy User? @relation("RoomTransferCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([stayId])
+  @@index([fromRoomId])
+  @@index([toRoomId])
 }
 
 // F4-9 Gamifikasi & Loyalitas tenant (dossier 19). Poin tak dapat dipindahtangankan;

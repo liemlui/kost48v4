@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-8): Pindah kamar resmi (E4) — SELESAI, schema S-2 + 5 keputusan desain owner
+
+- **Keputusan desain owner (D-20, 2026-06-15):** Stay **SAMA** (roomId diperbarui, tak putus kontrak); **deposit ikut apa adanya**; **harga dikunci** (rent-loyalty D-16) **kecuali override OWNER** (D-17, ADMIN dilarang ubah harga); **meter kamar baru di-snapshot**; kamar lama→MAINTENANCE+inspeksi, kamar baru→OCCUPIED.
+- **Schema additive (S-2):** `RoomTransfer` (stayId, fromRoomId, toRoomId, transferDate, reason, rentBefore/AfterRupiah, note, createdById) + back-rel Stay/Room(from/to)/User. Migration `20260615110000_f4_8_room_transfer` (zero-risk).
+- **`RoomTransferService.transferRoom`** (tx, FOR UPDATE): validasi stay ACTIVE+promoted & kamar tujuan AVAILABLE tanpa penghuni aktif; update stay (roomId + tarif kamar baru + harga override OWNER-only); snapshot meter awal kamar baru (opsional); kamar baru→OCCUPIED; kamar lama→MAINTENANCE + tiket `CHECKOUT_INSPECTION` (dedupe); catat `RoomTransfer`; audit `ROOM_TRANSFER`; notif tenant best-effort di luar tx. Endpoint `POST /stays/:id/transfer-room` (OWNER/ADMIN).
+- **UAT runtime LULUS (DB 5433):** transfer tanpa override → stay pindah, harga tetap, tarif kamar baru, kamar lama MAINTENANCE+tiket inspeksi, 2 baris meter baseline, RoomTransfer audit benar; OWNER override harga → rent diperbarui + kamar baru OCCUPIED; **ADMIN override harga → 403** (D-17). tsc 0; node --test 39/39. State UAT direstore penuh.
+
 ## 2026-06-15 — feat(F4-1): Unearned Revenue PSAK 72 (F-15) — SELESAI, schema S-2 approved
 
 - **Kebijakan (keputusan owner):** sewa yang mencakup **>1 bulan** diakui pendapatan **bertahap** (straight-line per bulan), bukan sekaligus saat check-in. **Invoice & uang tetap 1 penuh di muka** (1 invoice di bulan awal); yang dibagi hanya pengakuan pendapatan via akun **2200 Unearned Revenue** (sudah ada). Sekarang berlaku untuk **SMESTERLY (6) & YEARLY (12)**; mekanisme berbasis "jumlah bulan N" sehingga reusable oleh prabayar fleksibel (D-18/F4-11).

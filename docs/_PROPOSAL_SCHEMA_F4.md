@@ -170,12 +170,12 @@ model RoomTransfer {
 ```
 `model Stay`: `roomTransfers RoomTransfer[]` · `model Room`: `transfersFrom/transfersTo RoomTransfer[]` · `model User`: `roomTransfersCreated RoomTransfer[]`
 
-### ❓ Pertanyaan desain (perlu jawaban Anda sebelum implementasi)
-1. **Identitas stay:** pindah = **Stay yang sama** (update `roomId`) + catat transfer (rekomendasi saya) — atau Stay baru? *(rekomendasi: stay sama, agar histori/loyalitas utuh)*
-2. **Deposit jaminan:** ikut pindah apa adanya (rekomendasi) atau disesuaikan ke `defaultDepositRupiah` kamar baru?
-3. **Sewa:** bila kamar baru beda harga — naik/turun mengikuti kamar baru, atau **kunci harga lama** (sesuai rent-loyalty D-16)? *(rekomendasi: kunci harga lama; selisih = keputusan kasus-per-kasus)*
-4. **Meter:** kamar baru di-snapshot baseline saat transfer (seperti promote check-in) — setuju?
-5. **Kamar lama:** otomatis → tiket `CHECKOUT_INSPECTION` + `MAINTENANCE`→`AVAILABLE` (pola checkout), kamar baru → `OCCUPIED`. Setuju?
+### ✅ KEPUTUSAN DESAIN OWNER (2026-06-15)
+1. **Identitas stay:** **Stay yang SAMA**, hanya `roomId` diperbarui + dicatat di `RoomTransfer`. Histori/loyalitas/masa sewa utuh (tak putus kontrak).
+2. **Deposit jaminan:** **ikut pindah apa adanya** (tak dihitung ulang; tak ada transaksi uang deposit saat pindah).
+3. **Sewa:** **kunci harga lama by default** (rent-loyalty D-16), **TAPI admin/owner boleh override manual** saat memproses pindah (mis. upgrade VIP yang tenant setujui). Override opsional → simpan `rentAfterRupiah`.
+4. **Meter:** kamar baru **di-snapshot baseline** saat transfer (seperti promote check-in).
+5. **Kamar lama:** otomatis → tiket `CHECKOUT_INSPECTION` + `MAINTENANCE` (lalu `AVAILABLE` saat inspeksi ditutup via flow room-ready); kamar baru → `OCCUPIED`.
 
 ---
 
