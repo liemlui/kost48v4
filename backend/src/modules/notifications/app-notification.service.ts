@@ -121,4 +121,31 @@ export class AppNotificationService {
 
     return { affected: result.count };
   }
+
+  /**
+   * F4-7 (N-04): pruning notifikasi lebih tua dari retensi (default 90 hari) agar
+   * tabel AppNotification tak tumbuh tanpa batas (broadcast ALL ke banyak penerima).
+   * Dibatasi per-batch (`batchLimit`) supaya satu eksekusi sweeper tidak menghapus
+   * terlalu banyak sekaligus; sisa dibersihkan pada eksekusi berikutnya.
+   */
+  async pruneOlderThan(retentionDays = 90, batchLimit = 5000) {
+    const days = Number.isFinite(retentionDays) && retentionDays > 0 ? Math.floor(retentionDays) : 90;
+    const limit = Number.isFinite(batchLimit) && batchLimit > 0 ? Math.floor(batchLimit) : 5000;
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+    const stale = await this.prisma.appNotification.findMany({
+      where: { createdAt: { lt: cutoff } },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+      take: limit,
+    });
+    if (stale.length === 0) {
+      return { deleted: 0, retentionDays: days, cutoff: cutoff.toISOString() };
+    }
+
+    const result = await this.prisma.appNotification.deleteMany({
+      where: { id: { in: stale.map((n) => n.id) } },
+    });
+    return { deleted: result.count, retentionDays: days, cutoff: cutoff.toISOString() };
+  }
 }

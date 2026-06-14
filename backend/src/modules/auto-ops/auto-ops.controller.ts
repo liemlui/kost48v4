@@ -115,4 +115,11 @@ export class AutoOpsController {
   async runBelongingsAbandonment(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps penandaan barang abandoned berhasil dijalankan', data: await this.autoOpsService.runBelongingsAbandonment({ actorUserId: user.id, source: 'MANUAL_BELONGINGS_ABANDONMENT_RUN' }) };
   }
+
+  // F4-7: trigger manual pruning notifikasi >90 hari (UAT/ops).
+  @Post('run/notification-pruning')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runNotificationPruning(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps pruning notifikasi berhasil dijalankan', data: await this.autoOpsService.runNotificationPruning({ actorUserId: user.id, source: 'MANUAL_NOTIFICATION_PRUNING_RUN' }) };
+  }
 }

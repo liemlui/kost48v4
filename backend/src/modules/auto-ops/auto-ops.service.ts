@@ -20,6 +20,7 @@ type AutoOpsRunResult = {
   accountingAutoClose?: unknown;
   recurringExpenseDrafts?: unknown;
   automaticDepreciation?: unknown;
+  notificationPruning?: unknown;
 };
 
 @Injectable()
@@ -116,6 +117,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const recurringExpenseDrafts = await this.runRecurringExpenseDrafts(options);
       const automaticDepreciation = await this.runAutomaticDepreciation(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
+      const notificationPruning = await this.runNotificationPruning(options);
       return {
         expiredBookings: bookingResult.expiredStayIds.length,
         heldForPaymentReview: bookingResult.heldForPaymentReview,
@@ -125,6 +127,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         recurringExpenseDrafts,
         automaticDepreciation,
         accountingAutoClose,
+        notificationPruning,
       };
     } finally {
       this.running = false;
@@ -651,6 +654,27 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { abandoned };
+  }
+
+  /**
+   * F4-7 (N-04): pruning notifikasi lebih tua dari retensi agar AppNotification tak
+   * tumbuh tanpa batas (broadcast ALL ke banyak penerima). Retensi via env
+   * NOTIFICATION_RETENTION_DAYS (default 90 hari); bisa dimatikan via
+   * NOTIFICATION_PRUNING_ENABLED=false. Best-effort, tak pernah menggagalkan runAll.
+   */
+  async runNotificationPruning(options: { actorUserId?: number | null; source?: string } = {}) {
+    const source = options.source ?? 'AUTO_OPS_NOTIFICATION_PRUNING';
+    const enabled = String(process.env.NOTIFICATION_PRUNING_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { deleted: 0, skipped: true, skippedReason: 'NOTIFICATION_PRUNING_DISABLED', source };
+
+    const retentionDays = Number(process.env.NOTIFICATION_RETENTION_DAYS ?? 90);
+    try {
+      const result = await this.appNotification.pruneOlderThan(retentionDays);
+      return { ...result, skipped: false, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps notification pruning gagal: ${error?.message ?? error}`);
+      return { deleted: 0, skipped: true, skippedReason: error?.message ?? 'Notification pruning skipped', source };
+    }
   }
 
   /**

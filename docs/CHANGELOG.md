@@ -2,7 +2,12 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
-## 2026-06-14 — chore(migration): squash baseline → `migrate deploy` end-to-end berfungsi
+## 2026-06-14 — ops(F4-7): pruning notifikasi >90 hari (N-04) — retensi AppNotification
+
+- **Masalah (N-04):** `AppNotification` tak punya retensi → tumbuh tanpa batas, terutama untuk broadcast ALL ke banyak penerima.
+- **Solusi:** `AppNotificationService.pruneOlderThan(retentionDays=90, batchLimit=5000)` menghapus notifikasi `createdAt < now − retensi`, dibatasi per-batch (pilih id via index `createdAt` lalu `deleteMany`) agar satu eksekusi sweeper tidak menghapus terlalu banyak sekaligus.
+- **Sweeper:** `AutoOps.runNotificationPruning` dipanggil di akhir `runAll` (independen dari Stay/Room, best-effort never-throw). Retensi via env `NOTIFICATION_RETENTION_DAYS` (default 90); dapat dimatikan via `NOTIFICATION_PRUNING_ENABLED=false`. Endpoint manual `POST /auto-ops/run/notification-pruning` (OWNER/ADMIN).
+- **Verifikasi — UAT runtime LULUS (DB UAT 5433, transaksi ROLLBACK tanpa residu):** sisip 2 notif (umur 100 hari & 10 hari) → prune menghapus **tepat 1** (yang 100 hari), notif 10 hari TETAP. backend `tsc` 0.
 
 - **Masalah:** rantai migration lama tak lengkap (tabel `RenewRequest` dll. ditambah lewat `db push` tanpa create-migration) → `migrate deploy`/`migrate diff --from-migrations` GAGAL replay dari kosong.
 - **Squash baseline:** 13 migration lama dipindah ke `prisma/_archive_migrations_pre_baseline/`; dibuat satu **`prisma/migrations/00000000000000_baseline/migration.sql`** = SELURUH schema saat ini (41 tabel, 54 enum, 192 index, 90 FK) via `migrate diff --from-empty --to-schema`. Migration F3 additive ikut terserap ke baseline.

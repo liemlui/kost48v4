@@ -85,7 +85,7 @@
 ## FASE 4 — FUTURE
 - [ ] **F4-1** 🧬 Unearned revenue PSAK 72 (F-15, sewa panjang) — dossier **13** · desain dulu.
 - [ ] **F4-2** PWA Web Push (4 kelompok event J-d) — dossier **16** · outbox+VAPID.
-- [ ] **F4-7** Pruning notifikasi >90 hari (N-04) — dossier **16**.
+- [x] **F4-7** Pruning notifikasi >90 hari (N-04) — dossier **16** (SELESAI 2026-06-14). `AppNotificationService.pruneOlderThan(90, batch 5000)` + sweeper `runNotificationPruning` di akhir `runAll` (env `NOTIFICATION_RETENTION_DAYS`/`NOTIFICATION_PRUNING_ENABLED`) + endpoint `POST /auto-ops/run/notification-pruning`. **UAT (ROLLBACK):** umur 100hr terhapus, 10hr tetap. tsc 0.
 - [ ] **F4-8** 🧬 Flow pindah kamar resmi (E4) — desain dulu.
 - [ ] **F4-9** 🧬 Gamifikasi/loyalitas tenant — dossier **19** (desain lengkap) · schema TenantPoint/RewardCatalog/Redemption · bangun setelah inti sehat.
 
