@@ -125,4 +125,18 @@
 
 ---
 
+## D-21 — Keputusan tindak-lanjut AUDIT (2026-06-15, jawaban owner atas temuan `docs/AUDIT_FASE4_FINAL.md`)
+- **D-21.1 (AUD-1, pindah kamar):** saat pindah kamar, **utilitas kamar LAMA periode berjalan WAJIB ditagih lebih dulu** — snapshot meter akhir kamar lama → buat tagihan utilitas berjalan SEBELUM `roomId` dipindah. Tidak boleh ada pemakaian tak tertagih. (mengikat ke F4-8 / D-20)
+- **D-21.2 (AUD-2 + D-6, tip staf):** info e-wallet staf (GoPay/OVO/Bank/DANA) **diisi sendiri oleh staf** lewat halaman profil self-service. Owner hanya menyediakan fitur; aliran uang tetap P2P, **tidak dijurnal** (F4-14). Perlu UI profil staf + field e-wallet.
+- **D-21.3 (AUD-3, cuci AC):** jadwal cuci AC pakai pendekatan **HIBRID** — interval hari sebagai dasar **+ alert dini bila estimasi kWh tinggi** (kWh = watt × jam-pakai/hari). `acWattage` mulai dipakai; perlu data **jam-pakai per kamar** (default wajar bila kosong).
+- **D-21.4 (prabayar & poin, A-5/A-6/A-7/B-4) — KEEMPAT diaktifkan:**
+  - **A-6:** blokir permintaan prabayar bila tenant masih punya **tagihan menunggak**.
+  - **A-7:** beri **poin loyalitas saat prabayar** multi-bulan.
+  - **B-4:** poin ON_TIME diberikan untuk **SETIAP invoice** yang dibayar tepat waktu (bukan hanya invoice sewa).
+  - **A-5:** izinkan **tarif diskon SMESTERLY/YEARLY** untuk prabayar (bukan hanya tarif bulanan penuh) — owner yang menetapkan tarif diskonnya.
+
+> Catatan eksekusi: D-21 menghasilkan task tindak-lanjut AUD-1..AUD-4 di `08_CHECKLIST.md`. AUD-4 (FAQ auto-generate) & AUD-5 (round-robin tiket sistem) & B-9 (referral via admin) masih perlu keputusan lanjutan.
+
+---
+
 **Akhir dokumen.** Semua keputusan di atas mengikat. Detail implementasi & kode spesifik → dossier domain `10`-`19`. Peta fase → `00_BLUEPRINT.md §4`.
