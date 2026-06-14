@@ -8,6 +8,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RedemptionService } from './redemption.service';
 import { CreateRewardDto, DecideRedemptionDto, UpdateRewardDto } from './dto/loyalty.dto';
+import { LOYALTY_POINTS, LOYALTY_POINT_RUPIAH_VALUE } from './loyalty.constants';
 
 @ApiTags('Loyalty')
 @ApiBearerAuth()
@@ -15,6 +16,12 @@ import { CreateRewardDto, DecideRedemptionDto, UpdateRewardDto } from './dto/loy
 @Controller('loyalty')
 export class LoyaltyAdminController {
   constructor(private readonly redemption: RedemptionService) {}
+
+  // Setelan loyalitas (estimasi nilai poin + nilai poin per aktivitas) — semua user auth.
+  @Get('config')
+  config() {
+    return { message: 'Setelan loyalitas', data: { pointRupiahValue: LOYALTY_POINT_RUPIAH_VALUE, pointValues: LOYALTY_POINTS } };
+  }
 
   // Katalog reward dapat dibaca semua user terautentikasi (tenant lihat yang aktif).
   @Get('rewards')

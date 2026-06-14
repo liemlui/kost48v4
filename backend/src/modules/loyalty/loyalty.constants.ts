@@ -9,6 +9,25 @@ export const LOYALTY_POINTS = {
 
 export type EarnReason = keyof typeof LOYALTY_POINTS;
 
+// F4-9: estimasi nilai 1 poin dalam Rupiah (setelan owner, env-override). Dipakai untuk
+// menyarankan biaya poin sebuah reward dari nilai rupiahnya → owner fleksibel mengatur
+// reward (mis. layanan in-house: pembersihan/cat ulang kamar, voucher WiFi).
+export const LOYALTY_POINT_RUPIAH_VALUE = Number(process.env.LOYALTY_POINT_RUPIAH_VALUE ?? 100);
+
+/** Saran biaya poin dari nilai rupiah reward = nilai / (rupiah per poin), minimal 1. */
+export function suggestedPointCost(valueRupiah: number): number {
+  const perPoint = LOYALTY_POINT_RUPIAH_VALUE > 0 ? LOYALTY_POINT_RUPIAH_VALUE : 100;
+  const value = Number(valueRupiah);
+  if (!Number.isFinite(value) || value <= 0) return 1;
+  return Math.max(1, Math.round(value / perPoint));
+}
+
+/** Estimasi nilai rupiah dari sejumlah poin. */
+export function pointsToRupiah(points: number): number {
+  const perPoint = LOYALTY_POINT_RUPIAH_VALUE > 0 ? LOYALTY_POINT_RUPIAH_VALUE : 100;
+  return Math.max(0, Math.round((Number(points) || 0) * perPoint));
+}
+
 /** Poin (selalu >= 0) untuk sebuah aktivitas perolehan. */
 export function pointsForReason(reason: EarnReason): number {
   const value = LOYALTY_POINTS[reason];

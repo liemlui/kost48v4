@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createReward,
   decideRedemption,
+  getLoyaltyConfig,
   getRedemptions,
   getRewards,
   updateReward,
@@ -28,6 +29,10 @@ export default function LoyaltyAdminPage() {
 
   const rewardsQuery = useQuery({ queryKey: ['admin-rewards'], queryFn: () => getRewards(true) });
   const redemptionsQuery = useQuery({ queryKey: ['admin-redemptions'], queryFn: () => getRedemptions() });
+  const configQuery = useQuery({ queryKey: ['loyalty-config'], queryFn: getLoyaltyConfig });
+
+  const perPoint = configQuery.data?.pointRupiahValue ?? 100;
+  const suggestedCost = form.valueRupiah && perPoint > 0 ? Math.max(1, Math.round(form.valueRupiah / perPoint)) : null;
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-rewards'] });
@@ -59,7 +64,11 @@ export default function LoyaltyAdminPage() {
 
   return (
     <div className="container py-4">
-      <h3 className="mb-4">Loyalitas & Reward</h3>
+      <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <h3 className="mb-0">Loyalitas & Reward</h3>
+        <Badge bg="light" text="dark" className="border">1 poin ≈ Rp{perPoint.toLocaleString('id-ID')}</Badge>
+      </div>
+      <p className="text-muted small">Estimasi nilai poin diatur lewat env <code>LOYALTY_POINT_RUPIAH_VALUE</code>. Saran: gunakan reward layanan in-house (pembersihan/cat ulang kamar, voucher WiFi) — lebih hemat daripada diskon sewa.</p>
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
 
       <Card className="mb-4">
@@ -126,7 +135,16 @@ export default function LoyaltyAdminPage() {
           <Form.Group className="mb-3"><Form.Label>Deskripsi</Form.Label><Form.Control as="textarea" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Tipe</Form.Label><Form.Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{REWARD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</Form.Select></Form.Group>
           <Form.Group className="mb-3"><Form.Label>Biaya Poin</Form.Label><Form.Control type="number" min={1} value={form.pointCost} onChange={(e) => setForm({ ...form, pointCost: Number(e.target.value) })} /></Form.Group>
-          <Form.Group className="mb-3"><Form.Label>Nilai (Rp, untuk jurnal reward)</Form.Label><Form.Control type="number" min={0} value={form.valueRupiah ?? 0} onChange={(e) => setForm({ ...form, valueRupiah: Number(e.target.value) })} /></Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Nilai (Rp, untuk jurnal reward)</Form.Label>
+            <Form.Control type="number" min={0} value={form.valueRupiah ?? 0} onChange={(e) => setForm({ ...form, valueRupiah: Number(e.target.value) })} />
+            {suggestedCost != null && suggestedCost !== form.pointCost && (
+              <Form.Text>
+                Saran biaya poin: <strong>{suggestedCost}</strong> (≈ Rp{perPoint.toLocaleString('id-ID')}/poin).{' '}
+                <Button variant="link" size="sm" className="p-0 align-baseline" onClick={() => setForm({ ...form, pointCost: suggestedCost })}>Pakai saran</Button>
+              </Form.Text>
+            )}
+          </Form.Group>
           <Form.Group className="mb-3"><Form.Label>Stok (kosongkan = tak terbatas)</Form.Label><Form.Control type="number" min={0} value={form.stockQty ?? ''} onChange={(e) => setForm({ ...form, stockQty: e.target.value === '' ? undefined : Number(e.target.value) })} /></Form.Group>
           <Form.Check type="switch" label="Aktif" checked={form.isActive ?? true} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
         </Modal.Body>

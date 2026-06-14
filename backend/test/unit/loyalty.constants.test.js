@@ -9,6 +9,15 @@ test('pointsForReason — default dossier 19', () => {
   assert.strictEqual(L.pointsForReason('ONBOARDING_QUEST'), 200);
 });
 
+test('suggestedPointCost / pointsToRupiah — estimasi nilai poin (default Rp100/poin)', () => {
+  // default LOYALTY_POINT_RUPIAH_VALUE = 100
+  assert.strictEqual(L.suggestedPointCost(50000), 500);
+  assert.strictEqual(L.suggestedPointCost(0), 1);      // minimal 1
+  assert.strictEqual(L.suggestedPointCost(-5), 1);
+  assert.strictEqual(L.pointsToRupiah(500), 50000);
+  assert.strictEqual(L.pointsToRupiah(0), 0);
+});
+
 test('computeLoyaltyBalance — Σ delta (earn - redeem)', () => {
   assert.strictEqual(L.computeLoyaltyBalance([]), 0);
   assert.strictEqual(

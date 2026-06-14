@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getMyLoyalty, getMyRedemptions, getRewards, requestRedemption } from '../../api/loyalty';
+import { getLoyaltyConfig, getMyLoyalty, getMyRedemptions, getRewards, requestRedemption } from '../../api/loyalty';
 
 function rupiah(n: number | null | undefined): string {
   return typeof n === 'number' ? `Rp${n.toLocaleString('id-ID')}` : '-';
@@ -22,8 +22,10 @@ export default function MyLoyaltyPage() {
   const loyaltyQuery = useQuery({ queryKey: ['me-loyalty'], queryFn: getMyLoyalty });
   const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false) });
   const redemptionsQuery = useQuery({ queryKey: ['me-redemptions'], queryFn: getMyRedemptions });
+  const configQuery = useQuery({ queryKey: ['loyalty-config'], queryFn: getLoyaltyConfig });
 
   const balance = loyaltyQuery.data?.balance ?? 0;
+  const perPoint = configQuery.data?.pointRupiahValue ?? 100;
 
   const redeemMutation = useMutation({
     mutationFn: (rewardId: number) => requestRedemption(rewardId),
@@ -43,6 +45,7 @@ export default function MyLoyaltyPage() {
       <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
         <h3 className="mb-0">Poin & Reward</h3>
         <Badge bg="primary" pill className="fs-6">{balance.toLocaleString('id-ID')} poin</Badge>
+        <span className="text-muted small">≈ Rp{(balance * perPoint).toLocaleString('id-ID')} (1 poin ≈ Rp{perPoint.toLocaleString('id-ID')})</span>
       </div>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}

@@ -41,6 +41,16 @@ export interface Redemption {
   tenant?: { fullName: string };
 }
 
+export interface LoyaltyConfig {
+  pointRupiahValue: number;
+  pointValues: Record<string, number>;
+}
+
+export async function getLoyaltyConfig(): Promise<LoyaltyConfig> {
+  const res = await client.get<ApiEnvelope<LoyaltyConfig>>('/loyalty/config');
+  return res.data.data;
+}
+
 // ── Tenant ──────────────────────────────────────────
 export async function getMyLoyalty(): Promise<LoyaltyMine> {
   const res = await client.get<ApiEnvelope<LoyaltyMine>>('/me/loyalty');
