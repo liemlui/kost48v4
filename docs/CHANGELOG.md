@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — ops(F3-13 sebagian): hardening B-12, N-02, B-07
+
+- **B-07 (D-03):** forced-checkout overstay tak lagi diblokir tagihan **DRAFT** (belum terbit, tanpa jurnal). `forceCheckoutOverstay` mengecualikan DRAFT dari blocker pra-tx & re-cek in-tx, lalu membatalkan DRAFT yang tersisa di dalam tx (aman, tanpa reversal). Sebelumnya 1 DRAFT terlupakan = overstay tak pernah auto-checkout + alert merah harian.
+- **B-12:** `stays.update` menolak `plannedCheckOutDate` di masa lalu (WIB) — mencegah admin tak sengaja menjadikan stay target overstay/forced-checkout instan; keluar lebih awal harus lewat flow checkout.
+- **N-02:** notifikasi pengumuman ditahan bila `startsAt` masih di masa depan (konten belum tayang) — hilangkan notif instan yang menunjuk pengumuman yang belum bisa dibuka. (Pengiriman tepat di `startsAt` butuh sweeper terjadwal = peningkatan lanjutan.)
+- **Tertunda di F3-13:** B-06 (copy/meta "DP hangus" mode non-forfeit — anchor bergeser pasca-rewrite, perlu di-grounding ulang), B-14 (reminder window `<=` + dedupe), B-11 (spek tak ada di dossier).
+- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau (B-07 hanya menyentuh DRAFT = tanpa dampak jurnal).
+
 ## 2026-06-14 — refactor(F3-11): lead source + katalog foto marketing ke config
 
 - **M-08 lead source:** sudah lengkap di kode — check-in wizard admin punya dropdown `bookingSource` 10 kanal (Google Maps/Walk-in/Referral/Instagram/TikTok/WhatsApp/Facebook/Website/OTA/Lainnya), backend `stays` menyimpan `bookingSource`+`bookingSourceDetail`, query stay bisa filter per kanal → CAC terukur. Booking publik tetap `WEBSITE` (benar — memang dari website).

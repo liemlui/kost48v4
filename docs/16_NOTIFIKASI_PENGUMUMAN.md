@@ -24,7 +24,7 @@
 | N-01 | ✅ RESOLVED | Copy A17 sudah dua varian berdasarkan keberadaan submission/DP; pencatatan refund lossRefund* sudah task F2-3b SELESAI. | `payment-submissions.notifyLosingTenants` | **F2-3 selesai; F2-3b selesai** |
 | Renew notif | ✅ RESOLVED | Notif siklus renewal + prompt H-10 + fallback admin tenant tanpa portal sudah selesai 2026-06-14. | `renew-requests.service.ts`, `auto-ops.service.ts` | **F2-2 selesai** |
 | Sweeper-cancel | ✅ RESOLVED | Booking yang dibatalkan expiry/H+1/DP-forfeit mengirim notif tenant di luar transaksi; UAT tercatat lulus. | `cancelEndedUnpaidStay`/`expireBookingTx` | **F2-17 selesai** |
-| N-02 | 🟡 P3 | Publish announcement ber-startsAt masa depan → notif instan, konten belum tayang. | `announcements.service.ts:116` | **F3-13** tunda notif sampai startsAt |
+| N-02 | ✅ RESOLVED (F3-13, 2026-06-14) | `notifyPublished` menahan notif bila `startsAt` masih di masa depan → tak ada lagi notif instan ke konten yang belum tayang. (Pengiriman tepat di `startsAt` butuh sweeper terjadwal = lanjutan.) | `announcements.service.ts` `notifyPublished` | **F3-13 (N-02 selesai)** |
 | Coverage 5 | 🟡 PARSIAL | payment-submitted→OWNER/ADMIN dan prompt-review tenant sudah selesai; tersisa ticket-assigned→staf, wifi-order, room-ready, dan K-8 penerima. | berbagai | **F3-2 selesai**; lanjut **F3-1** |
 | N-04 | INFO | AppNotification tanpa retensi → tumbuh tanpa batas (broadcast ALL). | `app-notification.service.ts` | **F4-7** pruning >90 hari |
 | B-14 | 🟡 P3 | Reminder exact-match daysLeft → downtime di hari gelombang = gelombang hilang. | `auto-ops.service.ts:451-457` | **F3-13** window `<=` + dedupe gelombang |

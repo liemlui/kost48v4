@@ -29,11 +29,11 @@
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | B-08 | 🟡 KODE FIXED/UAT PENDING | `stays.cancel` sudah membuat tiket CHECKOUT_INSPECTION untuk stay promoted dan dedupe tiket terbuka. UAT runtime cancel→MAINTENANCE+tiket belum tercatat. | `stays.service.ts` `cancel()` | **F2-6 belum boleh dicentang sebelum UAT** |
-| B-07 | 🟡 P3 | Forced checkout diblokir oleh SEMUA invoice non-PAID termasuk DRAFT → 1 draft terlupakan = overstay tak pernah auto-checkout + alert merah tiap hari. Owner: checkout jalan + cancel DRAFT (D-03). | `auto-ops.service.ts:548-554` | **F3-13** exclude+auto-cancel DRAFT |
+| B-07 | ✅ RESOLVED (F3-13, 2026-06-14) | `forceCheckoutOverstay` mengecualikan DRAFT dari blocker (pra-tx & re-cek in-tx) lalu membatalkan DRAFT tersisa di dalam tx (tanpa jurnal → aman). Overstay tak lagi tersandera DRAFT terlupakan. | `auto-ops.service.ts` `forceCheckoutOverstay` | **F3-13 selesai** |
 | B-06 | 🟡 P3 | Job H+1 cancel & meta menulis "DP hangus" padahal mode non-forfeit tak menghanguskan apa pun → copy/audit menyesatkan. | `auto-ops.service.ts:857,:361` | **F3-13** perbaiki copy+meta |
 | F-24 | 🔴 P1(akuntansi) | Settlement deposit tanpa cek receipt journal → akun 2000 bisa debit permanen. (Detail di dossier 13.) | `accounting-posting.service.ts:602` | **F1-8** (dossier 13) |
 | F-30 | 🟡 P3 | Ledger deposit sourceId fallback stayId → setoran jaminan manual ke-2 kena dedupe → kurang catat. | `deposit-ledger.service.ts:184` | sertakan invoicePaymentId di sourceId |
-| B-12 | 🟡 P3 | `stays.update` menerima `plannedCheckOutDate` apa pun > checkInDate — admin bisa set tanggal KEMARIN → stay langsung jadi target overstay/forced-checkout pada sweep berikutnya tanpa konfirmasi. | `stays.service.ts:78-99` | **F3-13** tambah guard `plannedCheckOutDate ≥ hari ini` atau konfirmasi eksplisit |
+| B-12 | ✅ RESOLVED (F3-13, 2026-06-14) | `stays.update` menolak `plannedCheckOutDate` < hari ini (WIB) saat tanggal diubah → tak bisa lagi tak sengaja menjadikan stay target overstay/forced-checkout instan. Keluar lebih awal lewat flow checkout. | `stays.service.ts` `update()` | **F3-13 selesai** |
 | B-05 | ✅ verified | (Anti-drift) noon-release SUDAH cek `paymentSubmissions none PENDING/APPROVED` + satu pintu `cancelEndedUnpaidStay` skip invoice PAID/PARTIAL → risiko "tenant-approved-belum-promoted di-cancel" TERTUTUP. Klaim FLOW_MAP lama (job #3 tak cek submissions) BASI. | `auto-ops.service.ts:179-181, :255-262` | tidak ada aksi; jaga saat refactor auto-ops |
 | (sehat) | ✅ | reconciliationLite + settlement blocking + gate inspeksi = kontrol checkout terbaik. UAT overstay PASS penuh. | — | pertahankan |
 

@@ -88,6 +88,20 @@ export class StaysService {
       );
     }
 
+    // B-12: cegah set plannedCheckOutDate ke masa lalu (langsung jadi target
+    // overstay/forced-checkout di sweep berikutnya). Hanya saat tanggal diubah.
+    if (dto.plannedCheckOutDate && nextPlannedCheckOutDate) {
+      const wibNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
+      const wibToday = new Date(
+        Date.UTC(wibNow.getUTCFullYear(), wibNow.getUTCMonth(), wibNow.getUTCDate()),
+      );
+      if (nextPlannedCheckOutDate < wibToday) {
+        throw new ConflictException(
+          "Tanggal keluar tidak boleh di masa lalu. Untuk mengeluarkan tenant lebih awal, pakai flow checkout/forced-checkout, bukan ubah tanggal.",
+        );
+      }
+    }
+
     const updated = await this.prisma.stay.update({
       where: { id },
       data: {

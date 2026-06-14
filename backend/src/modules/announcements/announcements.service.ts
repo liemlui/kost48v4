@@ -179,6 +179,16 @@ export class AnnouncementsService {
   }
 
   private async notifyPublished(announcement: Announcement) {
+    // N-02: jangan kirim notifikasi bila konten belum tayang (startsAt di masa
+    // depan). Sebelumnya notif instan menunjuk pengumuman yang belum bisa dibuka.
+    // (Pengiriman tepat di startsAt butuh sweeper terjadwal — peningkatan lanjutan.)
+    if (announcement.startsAt && announcement.startsAt.getTime() > Date.now()) {
+      this.logger.log(
+        `Notif pengumuman #${announcement.id} ditahan: startsAt ${announcement.startsAt.toISOString()} masih di masa depan.`,
+      );
+      return;
+    }
+
     const isTenantAudience = announcement.audience === AnnouncementAudience.TENANT;
 
     let recipients: { id: number; role: string }[];

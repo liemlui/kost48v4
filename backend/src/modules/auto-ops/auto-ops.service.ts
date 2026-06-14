@@ -984,9 +984,11 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     options: { actorUserId?: number | null; source?: string },
     cutoffDate: Date,
   ): Promise<boolean> {
-    // Tagihan terbuka = blokir auto-checkout, eskalasi ke admin/owner (di luar tx; tidak ada mutasi).
+    // B-07 (D-03): tagihan DRAFT (belum diterbitkan, tanpa jurnal) TIDAK boleh
+    // memblokir forced checkout — DRAFT yang terlupakan dulu bikin overstay tak
+    // pernah auto-checkout + alert merah tiap hari. Hanya ISSUED/PARTIAL yang blokir.
     const openInvoices = await this.prisma.invoice.findMany({
-      where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
+      where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED, InvoiceStatus.DRAFT] as any } },
       select: { id: true, invoiceNumber: true, status: true },
     });
     if (openInvoices.length > 0) {
@@ -1016,11 +1018,22 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
 
       // Re-cek tagihan dalam tx (race: pembayaran/invoice baru sesaat sebelum lock).
+      // DRAFT dikecualikan (sama dgn blocker pra-tx B-07).
       const freshOpenInvoice = await tx.invoice.findFirst({
-        where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] as any } },
+        where: { stayId, status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED, InvoiceStatus.DRAFT] as any } },
         select: { id: true },
       });
       if (freshOpenInvoice) return null;
+
+      // B-07 (D-03): batalkan tagihan DRAFT yang tersisa (tanpa jurnal → aman, tak
+      // perlu reversal) agar tidak menggantung sebagai "hantu" setelah checkout.
+      await tx.invoice.updateMany({
+        where: { stayId, status: InvoiceStatus.DRAFT as any },
+        data: {
+          status: InvoiceStatus.CANCELLED as any,
+          cancelReason: 'Auto-cancel DRAFT saat forced checkout overstay (D-03).',
+        },
+      });
 
       await tx.stay.update({
         where: { id: stayId },
