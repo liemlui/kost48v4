@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — F3-2/F3-20: inbox pembayaran dan prompt review
+
+- Payment submission yang berhasil commit kini mengirim inbox dedupe ke seluruh OWNER/ADMIN aktif, lengkap dengan tenant, nominal, invoice, kamar, dan deep-link antrean review.
+- Tiket tenant ber-assignee STAFF kini mengirim ajakan review saat masuk DONE/CLOSED; pemanggilan ulang pada close aman karena dedupe.
+- Menambahkan `AppNotificationService.createOnce()` sebagai primitive dedupe bersama. Notifikasi tetap best-effort dan berjalan setelah transaksi bisnis utama.
+- **Verifikasi:** backend build lulus; unit test 20/20; UAT rollback real DB membuktikan 3/3 penerima payment dan 1/1 prompt ticket tanpa notifikasi ganda maupun residu data.
+
 ## 2026-06-14 — Fase 3 independen: visibilitas dan otomasi operasional
 
 - Menambahkan SEO dasar guest page: metadata, OpenGraph/Twitter Card, canonical, JSON-LD, `robots.txt`, dan `sitemap.xml`. Implementasi lulus build; skor Lighthouse belum diukur karena konektor browser lokal gagal dijalankan.
@@ -10,6 +17,10 @@
 - Menambahkan draft biaya rutin bulanan yang idempotent, tidak masuk laporan/jurnal sebelum dikonfirmasi, serta konfirmasi-posting atomik.
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
+
+## 2026-06-14 — ui(F2-11): paginasi 12 + skeleton katalog publik → F2-11 SELESAI
+
+`PublicRoomsPage`: **W-03** paginasi **12 kamar/halaman** (kontrol ‹ Sebelumnya / nomor / Berikutnya ›; reset ke hal.1 saat filter/sort berubah) — sebelumnya seluruh hasil dirender sekaligus. **W-02** skeleton grid (`SkeletonBlock`) saat memuat (ganti grid kosong+spinner). Melengkapi V-1 (code-split, sebelumnya) + UD-05 sticky CTA detail (`room-detail-mobile-sticky`). `npm run build` LULUS (94 chunk, PWA verify ok). → **F2-11 SELESAI.**
 
 ## 2026-06-14 — refactor(F2-5): satukan generateTicketNumber (4 salinan → 1 util) → F2-5 SELESAI
 

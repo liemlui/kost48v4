@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { listPublicRooms } from "../../api/bookings";
 import CurrencyDisplay from "../../components/common/CurrencyDisplay";
 import EmptyState from "../../components/common/EmptyState";
+import { SkeletonBlock } from "../../components/common/SkeletonLoader";
 import TenantBookingGate from "../../components/tenant/TenantBookingGate";
 import RoomComparePanel from "../../components/rooms/RoomComparePanel";
 import Kost48LogoMark from "../../components/common/Kost48LogoMark";
@@ -31,6 +32,7 @@ type AvailFilter = "" | "bookable" | "occupied" | "checking";
 type SortFilter = "price-asc" | "price-desc";
 
 const pricingTerm: PricingTerm = "MONTHLY";
+const ROOMS_PER_PAGE = 12; // F2-11 (W-03): paginasi katalog publik
 
 function buildWhatsAppUrl(room: PublicRoom) {
   const number = String(import.meta.env.VITE_PUBLIC_ADMIN_WHATSAPP ?? "").replace(/\D/g, "");
@@ -345,6 +347,16 @@ export default function PublicRoomsPage() {
   const bookableCount = rooms.filter((r) => isPublicRoomBookable(r)).length;
   const lockedForTenant = isTenant && !isTenantStageLoading && stage !== "browsing";
 
+  // F2-11 (W-03): paginasi 12 per halaman; reset ke hal.1 saat filter/sort berubah.
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [bathroom, cooling, avail, sort]);
+  const totalPages = Math.max(1, Math.ceil(rooms.length / ROOMS_PER_PAGE));
+  const safePage = Math.min(page, totalPages);
+  const pageRooms = useMemo(
+    () => rooms.slice((safePage - 1) * ROOMS_PER_PAGE, safePage * ROOMS_PER_PAGE),
+    [rooms, safePage],
+  );
+
   const comparedRooms = useMemo(
     () => comparedRoomIds.map((id) => roomsFromApi.find((r) => r.id === id)).filter((r): r is PublicRoom => Boolean(r)),
     [comparedRoomIds, roomsFromApi],
@@ -449,6 +461,24 @@ export default function PublicRoomsPage() {
               )}
             </div>
 
+            {/* ── Skeleton saat memuat (F2-11 W-02) ── */}
+            {query.isLoading && (
+              <Row className="g-3 rm-grid" aria-hidden="true">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Col xl={4} md={6} key={i}>
+                    <div className="rm-card">
+                      <SkeletonBlock height={180} />
+                      <div className="rm-card-body">
+                        <SkeletonBlock width="55%" height={18} className="mb-2" />
+                        <SkeletonBlock width="40%" height={12} className="mb-3" />
+                        <SkeletonBlock width="70%" height={28} />
+                      </div>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            )}
+
             {/* ── States ── */}
             {query.isError && (
               <Alert variant="danger" className="rm-alert">
@@ -472,7 +502,7 @@ export default function PublicRoomsPage() {
             )}
 
             <Row className="g-3 rm-grid">
-              {rooms.map((room) => {
+              {pageRooms.map((room) => {
                 const isCompared = comparedRoomIds.includes(room.id);
                 return (
                   <Col xl={4} md={6} key={room.id}>
@@ -487,6 +517,29 @@ export default function PublicRoomsPage() {
                 );
               })}
             </Row>
+
+            {/* ── Paginasi (F2-11 W-03) ── */}
+            {totalPages > 1 && (
+              <nav className="rm-pagination d-flex justify-content-center align-items-center gap-2 mt-4" aria-label="Navigasi halaman katalog">
+                <Button size="sm" variant="outline-secondary" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+                  ‹ Sebelumnya
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Button
+                    key={p}
+                    size="sm"
+                    variant={p === safePage ? "primary" : "outline-secondary"}
+                    aria-current={p === safePage ? "page" : undefined}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </Button>
+                ))}
+                <Button size="sm" variant="outline-secondary" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
+                  Berikutnya ›
+                </Button>
+              </nav>
+            )}
 
             {/* ── Compare ── */}
             {comparedRooms.length > 0 && (
