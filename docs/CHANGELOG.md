@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — chore(migration): migration resmi F3 additive + dukungan shadow DB
+
+- **Migration baru** `prisma/migrations/20260614210000_f3_admin_safety/migration.sql` — additive untuk F3-14/15/17/19: enum `BelongingsStatus`; `Tenant.ktp*` (8 kolom) + FK `Tenant_ktpVerifiedById_fkey`; `Stay.fled*`+`belongings*` (6 kolom) + FK `Stay_fledMarkedById_fkey`; `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt`; 3 index. Semua nullable/ber-default → zero-risk.
+- **Divalidasi vs DB UAT live:** seluruh 18 kolom + enum + 3 index + 2 FK ADA dengan nama/tipe/default PERSIS sesuai migration → file akurat & lengkap.
+- **`prisma.config.ts`:** tambah dukungan `shadowDatabaseUrl` (opsional via env `SHADOW_DATABASE_URL`) untuk operasi `migrate diff`/`migrate dev`.
+- **⚠️ Temuan deploy:** rantai migration TIDAK lengkap (mis. tabel `RenewRequest` tak punya create-migration) karena proyek selama ini deploy via **`db push` + `sql/bootstrap.sql`**, bukan `migrate deploy`. Jadi `migrate deploy` dari kosong TIDAK bisa replay bersih. Migration F3 ini akurat sebagai dokumentasi + bisa diterapkan manual pada DB hasil `db push`. **Path deploy prod tetap:** `prisma db push` (schema = sumber kebenaran) + `bootstrap.sql` (termasuk trigger carve-out F3-16). Squash baseline penuh = keputusan terpisah bila ingin `migrate deploy` end-to-end.
+
 ## 2026-06-14 — feat(F3-14/F3-16): forced-checkout admin (kabur/overstay) + deposit→AR (SELESAI, UAT LULUS)
 
 - **Gabung F3-14+F3-16 (keputusan owner):** satu endpoint `POST /stays/:id/forced-checkout` (OWNER) beralasan `OVERSTAY_NUNGGAK`/`TENANT_KABUR`.

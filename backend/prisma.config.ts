@@ -16,5 +16,8 @@ export default defineConfig({
   },
   datasource: {
     url: databaseUrl,
+    // Opsional: dipakai oleh `prisma migrate diff --from-migrations` / `migrate dev`
+    // untuk shadow DB. Aman bila kosong (hanya perlu saat operasi migrasi lokal).
+    shadowDatabaseUrl: process.env['SHADOW_DATABASE_URL'],
   },
 });
