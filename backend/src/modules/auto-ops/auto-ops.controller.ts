@@ -94,4 +94,11 @@ export class AutoOpsController {
   async runRenewalForfeit(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps renewal forfeit berhasil dijalankan', data: await this.autoOpsService.runRenewalSettlementForfeit({ actorUserId: user.id, source: 'MANUAL_RENEWAL_FORFEIT_RUN' }) };
   }
+
+  // F2-1 #3: trigger manual pengingat akhir kontrak / prompt renewal H-10..H-day (UAT/ops).
+  @Post('run/contract-reminders')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runContractReminders(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps contract-end reminders berhasil dijalankan', data: await this.autoOpsService.runContractEndReminders({ actorUserId: user.id, source: 'MANUAL_CONTRACT_REMINDERS_RUN' }) };
+  }
 }

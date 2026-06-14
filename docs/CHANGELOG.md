@@ -11,6 +11,11 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — feat(F2-2/#3): prompt renewal H-10 + fallback admin tenant tanpa portal
+
+`auto-ops.runContractEndReminders`: REMINDER_DAYS `[7,3,1,0]` → **`[10,7,3,1,0]`** (horizon +10) sehingga tenant promoted dapat **prompt keputusan perpanjangan mulai H-10**. **Fallback portal-less:** bila tenant tak punya akun portal aktif, kini tak di-skip diam-diam — `notifyAdminsTenantNoPortalContract` memberi tahu OWNER/ADMIN (dedupe harian) agar tenant dihubungi manual. Endpoint manual baru `POST /auto-ops/run/contract-reminders` (UAT/ops).
+- **UAT runtime:** stay di H-10 → notif tenant "berakhir 10 hari lagi"; tenant non-portal → notif 3 admin "Tenant tanpa portal"; data uji dipulihkan. `tsc` 0. → **F2-2 SELESAI.**
+
 ## 2026-06-14 — feat(F2-1 R3): gate deadline renewal di command service
 
 Tindak lanjut audit (deadline hanya digate sweeper): `renew-requests.service` kini menegakkan deadline di tingkat command (deterministik):

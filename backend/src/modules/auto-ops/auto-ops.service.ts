@@ -599,7 +599,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const jakartaNow = new Date(now.getTime() + 7 * 3600 * 1000);
     const todayWib = new Date(Date.UTC(jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()));
     const horizon = new Date(todayWib);
-    horizon.setUTCDate(horizon.getUTCDate() + 7);
+    horizon.setUTCDate(horizon.getUTCDate() + 10); // F2-1 #3: prompt renewal mulai H-10
 
     const stays = await this.prisma.stay.findMany({
       where: {
@@ -616,7 +616,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       take: 200,
     });
 
-    const REMINDER_DAYS = [7, 3, 1, 0];
+    const REMINDER_DAYS = [10, 7, 3, 1, 0]; // F2-1 #3: tambah prompt H-10 keputusan perpanjangan
     let sent = 0;
     for (const stay of stays) {
       const planned = new Date(stay.plannedCheckOutDate as Date);
@@ -624,13 +624,19 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const daysLeft = Math.round((planned.getTime() - todayWib.getTime()) / 86_400_000);
       if (!REMINDER_DAYS.includes(daysLeft)) continue;
 
+      const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.id}`;
       const tenantUser = await this.prisma.user.findFirst({
         where: { tenantId: stay.tenantId, role: 'TENANT' as any, isActive: true },
         select: { id: true },
       });
-      if (!tenantUser) continue;
-
-      const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.id}`;
+      // F2-1 #3 fallback: tenant tanpa akun portal tak bisa diberi notif → beri tahu ADMIN
+      // agar dihubungi manual soal perpanjangan/checkout (dedupe per stay per gelombang).
+      if (!tenantUser) {
+        await this.notifyAdminsTenantNoPortalContract(stay.id, roomLabel, daysLeft, planned).catch((err) =>
+          this.logger.warn(`Notif admin fallback (stay #${stay.id}) gagal: ${err instanceof Error ? err.message : String(err)}`),
+        );
+        continue;
+      }
       const title =
         daysLeft === 0
           ? `⏰ Kontrak ${roomLabel} berakhir HARI INI`
@@ -662,6 +668,35 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     }
 
     return { remindersSent: sent };
+  }
+
+  /** F2-1 #3: fallback — tenant tanpa akun portal → beri tahu ADMIN/OWNER agar dihubungi manual. */
+  private async notifyAdminsTenantNoPortalContract(stayId: number, roomLabel: string, daysLeft: number, planned: Date) {
+    const title = `📭 Tenant tanpa portal — kontrak ${roomLabel} ${daysLeft === 0 ? 'berakhir HARI INI' : `H-${daysLeft}`}`;
+    const todayWib = this.wibToday();
+    const admins = await this.prisma.user.findMany({
+      where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true },
+      select: { id: true },
+    });
+    for (const admin of admins) {
+      const existing = await (this.prisma as any).appNotification.findFirst({
+        where: { recipientUserId: admin.id, entityType: 'Stay', entityId: String(stayId), title, createdAt: { gte: todayWib } },
+        select: { id: true },
+      });
+      if (existing) continue;
+      try {
+        await this.appNotification.create({
+          recipientUserId: admin.id,
+          title,
+          body: `Tenant kamar ${roomLabel} TIDAK punya akun portal → tak bisa diberi notifikasi perpanjangan otomatis. Kontrak berakhir ${planned.toISOString().slice(0, 10)} (H-${daysLeft}). Hubungi tenant secara manual untuk konfirmasi perpanjang atau checkout.`,
+          linkTo: '/stays',
+          entityType: 'Stay',
+          entityId: String(stayId),
+        });
+      } catch (err) {
+        this.logger.warn(`Notif admin fallback create gagal (stay #${stayId}): ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
   private wibToday(): Date {
