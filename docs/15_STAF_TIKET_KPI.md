@@ -2,6 +2,7 @@
 **Domain:** manajemen tiket operasional, work queue staf, staff performance KPI, round-robin assignment. **Flow 11.**
 **Status:** 🟡 Tiket/KPI parsial — STAFF close dibatasi ke CHECKOUT_INSPECTION, prompt review tenant aktif, dan **workflow verifikasi review (≤2 → PENDING_VERIFICATION → owner verify, KPI hanya hitung VISIBLE) SUDAH** (F2-18, 2026-06-14). Sisa utama: SLA/KPI per kategori (F3-19).
 **File inti:** `tickets.service.ts` (assign/close/auto-create), `tickets.controller.ts`, KPI data dari `reviews` + `tickets`.
+**🆕 Backlog (F4-14, ide owner 2026-06-15):** **tip ke staf** setelah keluhan tenant selesai — tenant beri tip langsung via link **GoPay/OVO/Bank/DANA milik staf**. **Owner HANYA sediakan fitur/link; aliran uang TIDAK direkap/dijurnal** (P2P tenant→staf, di luar buku kos — JANGAN buat jurnal). Perlu field rekening/e-wallet di profil staf + UI link di tiket selesai.
 
 ---
 ## 1. Aturan bisnis

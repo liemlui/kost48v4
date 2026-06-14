@@ -93,6 +93,8 @@
 ## 🆕 BACKLOG IDE OWNER (2026-06-14 — belum dijadwalkan, perlu desain)
 - [ ] **F4-11** Renewal/prabayar fleksibel kapan saja — tenant boleh perpanjang/bayar **2-4 bulan ke depan harga bulanan** TANPA menunggu kontrak habis (bukan hanya prompt H-10). Dossier **11**. **Terkait F4-1 unearned revenue** (prabayar >1 bln = pendapatan diterima di muka). Selaras rent-loyalty D-16.
 - [ ] **F4-12** FAQ detail + "manual book" tenant app — generate FAQ dari semua aturan/flow (`03_KEPUTUSAN_OWNER` + dossier) → menu **Panduan/Aturan** di tenant app (openness, ringkas, jangan bikin pusing). Input tambahan: interview owner / analisa percakapan WhatsApp. Fondasi `FaqsModule` sudah ada. Dossier **17** (+16).
+- [ ] **F4-13** Sumber poin gamifikasi TAMBAHAN (ide owner 2026-06-15) — dossier **19 §2b**: (a) **review saat renewal** (tenant beri masukan+keluhan tiap perpanjang → poin); (b) **referral teman** (ajak teman jadi tenant → poin); (c) **quest perbaikan sikap** (tenant A lapor anonim keburukan B → B berubah → A konfirmasi → B dapat poin; B tak tahu pelapor — KOMPLEKS). Perlu mekanisme/desain baru per ide.
+- [ ] **F4-14** Tip ke staf (ide owner 2026-06-15) — dossier **15**: setelah staf menyelesaikan keluhan tenant A, tenant boleh **memberi tip langsung** via link **GoPay/OVO/Bank/DANA milik staf**. **Owner HANYA menyediakan fitur/link; aliran uang TIDAK direkap/dijurnal** (P2P tenant→staf, di luar buku kos). Perlu field rekening/e-wallet staf + UI link di tiket selesai.
 
 ## ⏸️ DITUNDA (1 staf — aktifkan saat staf ≥ 2)
 - [ ] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15**.

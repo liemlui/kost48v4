@@ -10,13 +10,20 @@
 - **Penukaran WAJIB konfirmasi admin/owner** (M3), terutama diskon sewa (dampak pendapatan).
 - **Rent-loyalty (D-16): tenant yang perpanjang (renew) tanpa putus kontrak TIDAK mengalami kenaikan harga sewa. Harga hanya bisa naik setelah gagal-bayar atau re-kontrak baru (tenant keluar lalu booking baru).** Ini memperkuat retensi & gamifikasi — tenant loyal dilindungi dari inflasi sewa.
 
-## 2. Sumber poin (M1 — keempat dipakai)
-| Aktivitas | Pemicu | Poin (owner-set) |
+## 2. Sumber poin (M1 — keempat ✅ IMPLEMENTASI SELESAI F4-9 inc.2/inc.4, 2026-06-15)
+| Aktivitas | Pemicu | Poin (default, env-override) | Status |
+|---|---|---|---|
+| Perpanjang kontrak | renewal COMPLETED | +100 | ✅ |
+| Bayar tepat waktu | invoice PAID & paidAt ≤ dueDate | +50 | ✅ |
+| Lapor masalah & tervalidasi | tiket PORTAL tenant → CLOSED (divalidasi admin) | +30 | ✅ |
+| Selesai quest onboarding | semua field profil terisi (kecuali KTP) | +200 sekali | ✅ |
+
+### 2b. Sumber poin TAMBAHAN (ide owner 2026-06-15 — backlog F4-9+, perlu mekanisme baru)
+| Ide | Konsep | Catatan kompleksitas |
 |---|---|---|
-| Perpanjang kontrak | renewal COMPLETED | mis. +100 |
-| Bayar tepat waktu | invoice PAID sebelum jatuh tempo | mis. +50 |
-| Lapor masalah & tervalidasi | staff/admin verifikasi laporan | mis. +30 |
-| Selesai quest onboarding | semua field profil terisi (kecuali KTP) | mis. +200 sekali |
+| **Review saat renewal** | Tiap perpanjangan, tenant beri **review/masukan membangun + cerita keluhan** → dapat poin. | Perlu form review terhubung ke event renewal + 1 poin per renewal (idempotent per renewRequestId). Relatif mudah. |
+| **Referral teman** | Tenant **mengajak teman** yang akhirnya jadi tenant → dapat poin. | Perlu pelacakan referral (kode/relasi tenant→tenant) + pemicu saat tenant baru aktif. Sedang. |
+| **Quest perbaikan sikap** | Tenant A menegur (lapor) keburukan tenant B (**anonim** — B tak tahu siapa pelapor); B mengubah kebiasaan; A **konfirmasi ulang** B sudah membaik → B dapat poin (seperti quest). | KOMPLEKS: butuh alur laporan-antar-tenant anonim + status "perbaikan" + konfirmasi pelapor + privasi (B tak tahu pelapor). Desain hati-hati. |
 
 ## 3. Katalog reward (M2 — contoh, owner finalkan)
 | Reward | Poin | Tipe | Catatan |
