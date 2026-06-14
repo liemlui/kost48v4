@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — ui(F3-9): hierarki laporan — badge Formal/Estimasi
+
+- **Badge tier (F-11):** `ReportSection` kini menandai setiap kartu laporan operasional dengan badge **≈ Estimasi** (default) — angka dihitung mentah dari data transaksi (invoice/pembayaran/stay/beban), bisa beda tipis dari buku besar. Badge **✓ Formal** disediakan untuk angka berbasis jurnal.
+- **Banner hierarki:** ReportsPage menambah catatan tetap yang menjelaskan tab operasional = Estimasi, dan mengarahkan ke tab **"Laporan Formal"** (sudah ada: `UnlockedFormalReports` + readiness) untuk angka audit-grade berbasis jurnal/neraca saldo.
+- **Filter unmapped (F-12):** kesiapan formal & hitung unmapped tetap dikelola gate `fetchFormalRatiosReadiness`/`LockedFormalRatios` yang sudah ada (laporan formal hanya terbuka saat data ter-map) — konsisten dengan readiness auto-close.
+- **Verifikasi:** `frontend npm run build` LULUS (95 chunk, PWA ok); tsc 0. Murni presentasi, tanpa ubah angka.
+
 ## 2026-06-14 — feat(F3-17): upload + verifikasi KTP (terproteksi, gate aktivasi, hapus PDP)
 
 - **Schema (approved):** `Tenant.ktpImage*` (url/fileKey/originalFilename/mimeType/fileSizeBytes) + `ktpVerifiedAt/ktpVerifiedById` + `ktpDeletedAt`.

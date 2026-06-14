@@ -219,6 +219,16 @@ export default function ReportsPage() {
         </div>
       </section>
 
+      {/* F3-9: hierarki laporan — perjelas tier angka agar Estimasi tak disalahartikan sbg audit-grade. */}
+      <Alert variant="warning" className="report-formality-note d-flex align-items-start gap-2 mb-3 py-2 small">
+        <span aria-hidden="true">≈</span>
+        <div>
+          <strong>Tab operasional = Estimasi.</strong> Angka di tab ini dihitung langsung dari data transaksi
+          (invoice, pembayaran, stay, beban) untuk pemantauan cepat dan bisa sedikit berbeda dari buku besar.
+          Untuk angka <strong>Formal</strong> (berbasis jurnal/neraca saldo, audit-grade), buka tab <strong>“Laporan Formal”</strong>.
+        </div>
+      </Alert>
+
       {isLoading && (
         <Card className="report-glass-card mb-3">
           <Card.Body className="text-center py-4"><Spinner animation="border" size="sm" /> <span className="ms-2">Memuat data analytics...</span></Card.Body>
@@ -389,12 +399,25 @@ function ReportTabs({ activeTab, onChange, counts }: { activeTab: ReportTab; onC
   );
 }
 
-function ReportSection({ title, badge, children }: { title: string; badge?: string; children: React.ReactNode }) {
+function ReportSection({ title, badge, tier = 'Estimasi', children }: { title: string; badge?: string; tier?: 'Formal' | 'Estimasi'; children: React.ReactNode }) {
+  // F3-9: tier menandai sumber angka — Formal (jurnal/audit-grade) vs Estimasi
+  // (hitung mentah dari data transaksi). Seluruh laporan /reports = operasional/Estimasi.
   return (
     <Card className="report-panel h-100">
       <Card.Header>
         <span>{title}</span>
-        {badge && <Badge bg="primary">{badge}</Badge>}
+        <span className="d-inline-flex gap-1 align-items-center">
+          <Badge
+            bg={tier === 'Formal' ? 'success' : 'warning'}
+            text={tier === 'Formal' ? undefined : 'dark'}
+            title={tier === 'Formal'
+              ? 'Angka berbasis jurnal akuntansi (audit-grade).'
+              : 'Estimasi operasional dari data transaksi; angka formal ada di modul Akuntansi.'}
+          >
+            {tier === 'Formal' ? '✓ Formal' : '≈ Estimasi'}
+          </Badge>
+          {badge && <Badge bg="primary">{badge}</Badge>}
+        </span>
       </Card.Header>
       <Card.Body>{children}</Card.Body>
     </Card>
