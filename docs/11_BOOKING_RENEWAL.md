@@ -28,18 +28,18 @@
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
-| GAP #2 / B-03 | 🔴 P1 | Renewal approve LANGSUNG perpanjang tanpa fase DP/prioritas/grace → kamar bisa "terjual dua kali", vacancy tak termonetisasi, churn risk. | `renew-requests.service.ts:77` | **F2-1** (desain §5 SIAP) |
-| Renew notif / B-03 | 🔴 P1 | NOL notifikasi di seluruh renew (request/approve/reject) — tenant tak tahu nasib perpanjangan = vacancy risk. | `renew-requests.service.ts` (tak ada import AppNotification) | **F2-2** salin pola checkout-requests |
+| GAP #2 / B-03 | ✅ RESOLVED | Renewal DP penuh + state machine + invoice DP terpisah + rent-loyalty + sweeper hibrida + deadline-gate command (R3) selesai 2026-06-14. | `renew-requests.service.ts` | **F2-1 selesai** |
+| Renew notif / B-03 | ✅ RESOLVED | Notif siklus renewal + prompt H-10 + fallback admin tenant tanpa portal selesai 2026-06-14. | `renew-requests.service.ts` | **F2-2 selesai** |
 | C3 | 🟠 P2 | Admin bisa override nominal deposit saat approve booking/check-in — owner: deposit SELALU tetap. | `tenant-bookings.service.ts:341` + `stays.create:159` | **F1-10** kunci ke `Room.defaultDepositRupiah` |
 | B-10 | ✅ SELESAI | Expiry publik dan portal sama-sama memakai helper 3 jam flat. | dua helper `calculateBookingExpiry` | **F1-11 selesai** |
 | M-08 | 🟡 P3 | Booking publik hardcode bookingSource=WEBSITE → kanal akuisisi tak terukur (CAC). | `public-bookings.service.ts:187` | **F3-11** dropdown lead source (detail dossier 17) |
-| B-15 | 🟡 P3 | Kode saat ini baru mengirim H-7/H-3/H-1/H-day dan hanya ke tenant dengan akun portal aktif. | `auto-ops.service.ts:451-463` | **F2-2** tambah H-10 dan fallback antrean admin |
+| B-15 | ✅ RESOLVED | Prompt H-10 + fallback admin tenant tanpa portal selesai 2026-06-14. REMINDER_DAYS kini `[10,7,3,1,0]`. | `auto-ops.service.ts` | **F2-2 selesai** |
 
 ## 4. Task
 - **F1-10 · FASE 1:** kunci deposit = `Room.defaultDepositRupiah`; abaikan `dto.depositAmountRupiah` di approveBooking + stays.create. (C3)
 - **F1-11 · SELESAI:** expiry 3 jam flat sudah dipakai portal dan publik.
-- **F2-1 · FASE 2 (PRIORITAS retensi):** implementasi renewal DP penuh per desain §5. Prasyarat: Fase 1 + F1-1R selesai. Schema additive owner-approve. **Termasuk rent-loyalty D-16: harga tidak naik saat renew tanpa putus kontrak.**
-- **F2-2 · FASE 2:** notif renew (request→admin, approve/reject→tenant + prompt H-10 "perpanjang?") — salin `checkout-requests.service.ts:294-422`.
+- **F2-1 · FASE 2 (SELESAI 2026-06-14):** implementasi renewal DP penuh per desain §5 — state machine, invoice DP terpisah, rent-loyalty D-16, sweeper hibrida (EXPIRED_PRIORITY/FORFEITED), deadline-gate command service (R3). **FORFEITED = flag+notif admin; forced checkout & potong deposit MANUAL admin (keputusan owner hibrida, override R5 auto).**
+- **F2-2 · FASE 2 (SELESAI 2026-06-14):** notif siklus renewal (request→admin, decide YA→tenant, decide TIDAK→admin, confirm-dp→tenant, approve→tenant, reject→tenant, sweeper EXPIRED/FORFEITED) + prompt H-10 + fallback admin tenant tanpa portal.
 
 ## 5. DESAIN RENEWAL (deliverable F2-1 — state machine penuh)
 **State RenewRequest:** `PENDING_DECISION → (YA) AWAITING_DP → (DP≤hari-H) DP_SECURED → (lunas≤H+7) COMPLETED`; cabang: `(TIDAK) REJECTED_BY_TENANT → kamar dibuka`; `(hari-H tanpa DP) EXPIRED_PRIORITY → kamar dibuka first-paid`; `(gagal lunas H+7) FORFEITED → ditandai + notif admin; forced checkout + DP hangus + potong deposit = MANUAL admin (owner hibrida 2026-06-14, override R5 auto)`.

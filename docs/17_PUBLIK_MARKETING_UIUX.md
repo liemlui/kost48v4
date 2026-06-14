@@ -33,7 +33,7 @@
 - **F3-3 · FASE 3 (IMPLEMENTASI SELESAI 2026-06-14):** `index.html` memuat OG/description/Twitter Card/canonical dan JSON-LD `LodgingBusiness`; `robots.txt` serta `sitemap.xml` tersedia. Build dan verifikasi statis lulus. Target Lighthouse SEO ≥90 belum diukur karena konektor browser lokal gagal berjalan.
 - **F3-4 · FASE 3 (SELESAI 2026-06-14):** endpoint publik read-only hanya mengekspos StaffReview VISIBLE rating≥4 dengan inisial tenant, agregat rating, ulasan terbaru, dan count penghuni aktif terpromosi. UAT real DB: 11 penghuni, 0 ulasan visible.
 - **F3-7 · FASE 3 (SELESAI 2026-06-14):** endpoint owner `/api/reports/occupancy-daily?from&to` dan heatmap CSS-grid 12 bulan historis + 3 bulan proyeksi. Rentang maksimal 550 hari; checkout aktual eksklusif dan planned checkout dipakai untuk proyeksi.
-- **F2-11 · FASE 2:** V-1 (lazy/CSS ring) + W-02 skeleton + W-03 pagination 12 + UD-05 sticky CTA + UD-06 fix tablet grid.
+- **F2-11 · FASE 2 (SELESAI 2026-06-14):** V-1 (lazy/code-split) + W-02 skeleton + W-03 pagination 12 + UD-05 sticky CTA + UD-06 fix tablet grid. Build LULUS (94 chunk, PWA verify ok).
 - **F3-11 · FASE 3:** lead source dropdown (kanal akuisisi, enum ada) + pindah 76 foto hardcode ke `Room.images`/config.
 - **F3-12 · FASE 3:** paket chart — UD-04 empty-state all-zero, V-2 count n<5, V-3 empty-state, V-5 palet Okabe-Ito, V-6 dark mode contrast, V-7 kurangi seri, UD-07 rename filter, + 7 rekomendasi visual baru (heatmap okupansi #1 = paling bernilai, lihat di bawah).
 - **Audit WCAG 1 sesi:** axe-core 5 halaman (login, katalog, detail, submit payment, review payment).
