@@ -7298,6 +7298,10 @@ export namespace Prisma {
     isActive: boolean | null
     lastLoginAt: Date | null
     passwordChangedAt: Date | null
+    tipGopay: string | null
+    tipOvo: string | null
+    tipDana: string | null
+    tipBank: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7312,6 +7316,10 @@ export namespace Prisma {
     isActive: boolean | null
     lastLoginAt: Date | null
     passwordChangedAt: Date | null
+    tipGopay: string | null
+    tipOvo: string | null
+    tipDana: string | null
+    tipBank: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7326,6 +7334,10 @@ export namespace Prisma {
     isActive: number
     lastLoginAt: number
     passwordChangedAt: number
+    tipGopay: number
+    tipOvo: number
+    tipDana: number
+    tipBank: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -7352,6 +7364,10 @@ export namespace Prisma {
     isActive?: true
     lastLoginAt?: true
     passwordChangedAt?: true
+    tipGopay?: true
+    tipOvo?: true
+    tipDana?: true
+    tipBank?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7366,6 +7382,10 @@ export namespace Prisma {
     isActive?: true
     lastLoginAt?: true
     passwordChangedAt?: true
+    tipGopay?: true
+    tipOvo?: true
+    tipDana?: true
+    tipBank?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7380,6 +7400,10 @@ export namespace Prisma {
     isActive?: true
     lastLoginAt?: true
     passwordChangedAt?: true
+    tipGopay?: true
+    tipOvo?: true
+    tipDana?: true
+    tipBank?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -7481,6 +7505,10 @@ export namespace Prisma {
     isActive: boolean
     lastLoginAt: Date | null
     passwordChangedAt: Date | null
+    tipGopay: string | null
+    tipOvo: string | null
+    tipDana: string | null
+    tipBank: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -7514,6 +7542,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: boolean
     passwordChangedAt?: boolean
+    tipGopay?: boolean
+    tipOvo?: boolean
+    tipDana?: boolean
+    tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -7564,6 +7596,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: boolean
     passwordChangedAt?: boolean
+    tipGopay?: boolean
+    tipOvo?: boolean
+    tipDana?: boolean
+    tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -7579,6 +7615,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: boolean
     passwordChangedAt?: boolean
+    tipGopay?: boolean
+    tipOvo?: boolean
+    tipDana?: boolean
+    tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | User$tenantArgs<ExtArgs>
@@ -7594,11 +7634,15 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: boolean
     passwordChangedAt?: boolean
+    tipGopay?: boolean
+    tipOvo?: boolean
+    tipDana?: boolean
+    tipBank?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "passwordChangedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "email" | "passwordHash" | "role" | "tenantId" | "isActive" | "lastLoginAt" | "passwordChangedAt" | "tipGopay" | "tipOvo" | "tipDana" | "tipBank" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | User$tenantArgs<ExtArgs>
     announcementsCreated?: boolean | User$announcementsCreatedArgs<ExtArgs>
@@ -7693,6 +7737,10 @@ export namespace Prisma {
       isActive: boolean
       lastLoginAt: Date | null
       passwordChangedAt: Date | null
+      tipGopay: string | null
+      tipOvo: string | null
+      tipDana: string | null
+      tipBank: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -8162,6 +8210,10 @@ export namespace Prisma {
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly lastLoginAt: FieldRef<"User", 'DateTime'>
     readonly passwordChangedAt: FieldRef<"User", 'DateTime'>
+    readonly tipGopay: FieldRef<"User", 'String'>
+    readonly tipOvo: FieldRef<"User", 'String'>
+    readonly tipDana: FieldRef<"User", 'String'>
+    readonly tipBank: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -11059,6 +11111,8 @@ export namespace Prisma {
     defaultDepositRupiah: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
+    acWattage: number | null
+    acCleanIntervalDays: number | null
   }
 
   export type RoomSumAggregateOutputType = {
@@ -11070,6 +11124,8 @@ export namespace Prisma {
     defaultDepositRupiah: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
+    acWattage: number | null
+    acCleanIntervalDays: number | null
   }
 
   export type RoomMinAggregateOutputType = {
@@ -11088,6 +11144,10 @@ export namespace Prisma {
     notes: string | null
     isActive: boolean | null
     allowBookingWhileCleaning: boolean | null
+    hasAc: boolean | null
+    acWattage: number | null
+    acLastCleanedAt: Date | null
+    acCleanIntervalDays: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11108,6 +11168,10 @@ export namespace Prisma {
     notes: string | null
     isActive: boolean | null
     allowBookingWhileCleaning: boolean | null
+    hasAc: boolean | null
+    acWattage: number | null
+    acLastCleanedAt: Date | null
+    acCleanIntervalDays: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11129,6 +11193,10 @@ export namespace Prisma {
     notes: number
     isActive: number
     allowBookingWhileCleaning: number
+    hasAc: number
+    acWattage: number
+    acLastCleanedAt: number
+    acCleanIntervalDays: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11144,6 +11212,8 @@ export namespace Prisma {
     defaultDepositRupiah?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
+    acWattage?: true
+    acCleanIntervalDays?: true
   }
 
   export type RoomSumAggregateInputType = {
@@ -11155,6 +11225,8 @@ export namespace Prisma {
     defaultDepositRupiah?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
+    acWattage?: true
+    acCleanIntervalDays?: true
   }
 
   export type RoomMinAggregateInputType = {
@@ -11173,6 +11245,10 @@ export namespace Prisma {
     notes?: true
     isActive?: true
     allowBookingWhileCleaning?: true
+    hasAc?: true
+    acWattage?: true
+    acLastCleanedAt?: true
+    acCleanIntervalDays?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11193,6 +11269,10 @@ export namespace Prisma {
     notes?: true
     isActive?: true
     allowBookingWhileCleaning?: true
+    hasAc?: true
+    acWattage?: true
+    acLastCleanedAt?: true
+    acCleanIntervalDays?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11214,6 +11294,10 @@ export namespace Prisma {
     notes?: true
     isActive?: true
     allowBookingWhileCleaning?: true
+    hasAc?: true
+    acWattage?: true
+    acLastCleanedAt?: true
+    acCleanIntervalDays?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11322,6 +11406,10 @@ export namespace Prisma {
     notes: string | null
     isActive: boolean
     allowBookingWhileCleaning: boolean
+    hasAc: boolean
+    acWattage: number | null
+    acLastCleanedAt: Date | null
+    acCleanIntervalDays: number
     createdAt: Date
     updatedAt: Date
     _count: RoomCountAggregateOutputType | null
@@ -11362,6 +11450,10 @@ export namespace Prisma {
     notes?: boolean
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: boolean
+    acLastCleanedAt?: boolean
+    acCleanIntervalDays?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stays?: boolean | Room$staysArgs<ExtArgs>
@@ -11398,6 +11490,10 @@ export namespace Prisma {
     notes?: boolean
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: boolean
+    acLastCleanedAt?: boolean
+    acCleanIntervalDays?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -11419,6 +11515,10 @@ export namespace Prisma {
     notes?: boolean
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: boolean
+    acLastCleanedAt?: boolean
+    acCleanIntervalDays?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -11440,11 +11540,15 @@ export namespace Prisma {
     notes?: boolean
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: boolean
+    acLastCleanedAt?: boolean
+    acCleanIntervalDays?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "hasAc" | "acWattage" | "acLastCleanedAt" | "acCleanIntervalDays" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | Room$staysArgs<ExtArgs>
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
@@ -11500,6 +11604,10 @@ export namespace Prisma {
       notes: string | null
       isActive: boolean
       allowBookingWhileCleaning: boolean
+      hasAc: boolean
+      acWattage: number | null
+      acLastCleanedAt: Date | null
+      acCleanIntervalDays: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["room"]>
@@ -11955,6 +12063,10 @@ export namespace Prisma {
     readonly notes: FieldRef<"Room", 'String'>
     readonly isActive: FieldRef<"Room", 'Boolean'>
     readonly allowBookingWhileCleaning: FieldRef<"Room", 'Boolean'>
+    readonly hasAc: FieldRef<"Room", 'Boolean'>
+    readonly acWattage: FieldRef<"Room", 'Int'>
+    readonly acLastCleanedAt: FieldRef<"Room", 'DateTime'>
+    readonly acCleanIntervalDays: FieldRef<"Room", 'Int'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly updatedAt: FieldRef<"Room", 'DateTime'>
   }
@@ -40644,6 +40756,7 @@ export namespace Prisma {
     downPaymentAmountRupiah: number | null
     downPaymentInvoiceId: number | null
     settlementInvoiceId: number | null
+    prepaidMonths: number | null
   }
 
   export type RenewRequestSumAggregateOutputType = {
@@ -40654,6 +40767,7 @@ export namespace Prisma {
     downPaymentAmountRupiah: number | null
     downPaymentInvoiceId: number | null
     settlementInvoiceId: number | null
+    prepaidMonths: number | null
   }
 
   export type RenewRequestMinAggregateOutputType = {
@@ -40673,6 +40787,10 @@ export namespace Prisma {
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
     settlementInvoiceId: number | null
+    prepaidMonths: number | null
+    isEarly: boolean | null
+    tenantReview: string | null
+    tenantReviewAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -40694,6 +40812,10 @@ export namespace Prisma {
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
     settlementInvoiceId: number | null
+    prepaidMonths: number | null
+    isEarly: boolean | null
+    tenantReview: string | null
+    tenantReviewAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -40715,6 +40837,10 @@ export namespace Prisma {
     settlementDueDate: number
     downPaymentInvoiceId: number
     settlementInvoiceId: number
+    prepaidMonths: number
+    isEarly: number
+    tenantReview: number
+    tenantReviewAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -40729,6 +40855,7 @@ export namespace Prisma {
     downPaymentAmountRupiah?: true
     downPaymentInvoiceId?: true
     settlementInvoiceId?: true
+    prepaidMonths?: true
   }
 
   export type RenewRequestSumAggregateInputType = {
@@ -40739,6 +40866,7 @@ export namespace Prisma {
     downPaymentAmountRupiah?: true
     downPaymentInvoiceId?: true
     settlementInvoiceId?: true
+    prepaidMonths?: true
   }
 
   export type RenewRequestMinAggregateInputType = {
@@ -40758,6 +40886,10 @@ export namespace Prisma {
     settlementDueDate?: true
     downPaymentInvoiceId?: true
     settlementInvoiceId?: true
+    prepaidMonths?: true
+    isEarly?: true
+    tenantReview?: true
+    tenantReviewAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -40779,6 +40911,10 @@ export namespace Prisma {
     settlementDueDate?: true
     downPaymentInvoiceId?: true
     settlementInvoiceId?: true
+    prepaidMonths?: true
+    isEarly?: true
+    tenantReview?: true
+    tenantReviewAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -40800,6 +40936,10 @@ export namespace Prisma {
     settlementDueDate?: true
     downPaymentInvoiceId?: true
     settlementInvoiceId?: true
+    prepaidMonths?: true
+    isEarly?: true
+    tenantReview?: true
+    tenantReviewAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -40908,6 +41048,10 @@ export namespace Prisma {
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
     settlementInvoiceId: number | null
+    prepaidMonths: number | null
+    isEarly: boolean
+    tenantReview: string | null
+    tenantReviewAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: RenewRequestCountAggregateOutputType | null
@@ -40948,6 +41092,10 @@ export namespace Prisma {
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
     settlementInvoiceId?: boolean
+    prepaidMonths?: boolean
+    isEarly?: boolean
+    tenantReview?: boolean
+    tenantReviewAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -40972,6 +41120,10 @@ export namespace Prisma {
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
     settlementInvoiceId?: boolean
+    prepaidMonths?: boolean
+    isEarly?: boolean
+    tenantReview?: boolean
+    tenantReviewAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -40996,6 +41148,10 @@ export namespace Prisma {
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
     settlementInvoiceId?: boolean
+    prepaidMonths?: boolean
+    isEarly?: boolean
+    tenantReview?: boolean
+    tenantReviewAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -41020,11 +41176,15 @@ export namespace Prisma {
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
     settlementInvoiceId?: boolean
+    prepaidMonths?: boolean
+    isEarly?: boolean
+    tenantReview?: boolean
+    tenantReviewAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "downPaymentAmountRupiah" | "downPaymentPaidAt" | "downPaymentDueDate" | "settlementDueDate" | "downPaymentInvoiceId" | "settlementInvoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
+  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "downPaymentAmountRupiah" | "downPaymentPaidAt" | "downPaymentDueDate" | "settlementDueDate" | "downPaymentInvoiceId" | "settlementInvoiceId" | "prepaidMonths" | "isEarly" | "tenantReview" | "tenantReviewAt" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
   export type RenewRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
@@ -41065,6 +41225,10 @@ export namespace Prisma {
       settlementDueDate: Date | null
       downPaymentInvoiceId: number | null
       settlementInvoiceId: number | null
+      prepaidMonths: number | null
+      isEarly: boolean
+      tenantReview: string | null
+      tenantReviewAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["renewRequest"]>
@@ -41509,6 +41673,10 @@ export namespace Prisma {
     readonly settlementDueDate: FieldRef<"RenewRequest", 'DateTime'>
     readonly downPaymentInvoiceId: FieldRef<"RenewRequest", 'Int'>
     readonly settlementInvoiceId: FieldRef<"RenewRequest", 'Int'>
+    readonly prepaidMonths: FieldRef<"RenewRequest", 'Int'>
+    readonly isEarly: FieldRef<"RenewRequest", 'Boolean'>
+    readonly tenantReview: FieldRef<"RenewRequest", 'String'>
+    readonly tenantReviewAt: FieldRef<"RenewRequest", 'DateTime'>
     readonly createdAt: FieldRef<"RenewRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"RenewRequest", 'DateTime'>
   }
@@ -66131,6 +66299,8 @@ export namespace Prisma {
     valueRupiah: number | null
     isActive: boolean | null
     stockQty: number | null
+    fulfillmentTaskCategory: string | null
+    fulfillmentTaskTitle: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -66144,6 +66314,8 @@ export namespace Prisma {
     valueRupiah: number | null
     isActive: boolean | null
     stockQty: number | null
+    fulfillmentTaskCategory: string | null
+    fulfillmentTaskTitle: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -66157,6 +66329,8 @@ export namespace Prisma {
     valueRupiah: number
     isActive: number
     stockQty: number
+    fulfillmentTaskCategory: number
+    fulfillmentTaskTitle: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -66186,6 +66360,8 @@ export namespace Prisma {
     valueRupiah?: true
     isActive?: true
     stockQty?: true
+    fulfillmentTaskCategory?: true
+    fulfillmentTaskTitle?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -66199,6 +66375,8 @@ export namespace Prisma {
     valueRupiah?: true
     isActive?: true
     stockQty?: true
+    fulfillmentTaskCategory?: true
+    fulfillmentTaskTitle?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -66212,6 +66390,8 @@ export namespace Prisma {
     valueRupiah?: true
     isActive?: true
     stockQty?: true
+    fulfillmentTaskCategory?: true
+    fulfillmentTaskTitle?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -66312,6 +66492,8 @@ export namespace Prisma {
     valueRupiah: number | null
     isActive: boolean
     stockQty: number | null
+    fulfillmentTaskCategory: string | null
+    fulfillmentTaskTitle: string | null
     createdAt: Date
     updatedAt: Date
     _count: LoyaltyRewardCountAggregateOutputType | null
@@ -66344,6 +66526,8 @@ export namespace Prisma {
     valueRupiah?: boolean
     isActive?: boolean
     stockQty?: boolean
+    fulfillmentTaskCategory?: boolean
+    fulfillmentTaskTitle?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     redemptions?: boolean | LoyaltyReward$redemptionsArgs<ExtArgs>
@@ -66359,6 +66543,8 @@ export namespace Prisma {
     valueRupiah?: boolean
     isActive?: boolean
     stockQty?: boolean
+    fulfillmentTaskCategory?: boolean
+    fulfillmentTaskTitle?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["loyaltyReward"]>
@@ -66372,6 +66558,8 @@ export namespace Prisma {
     valueRupiah?: boolean
     isActive?: boolean
     stockQty?: boolean
+    fulfillmentTaskCategory?: boolean
+    fulfillmentTaskTitle?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["loyaltyReward"]>
@@ -66385,11 +66573,13 @@ export namespace Prisma {
     valueRupiah?: boolean
     isActive?: boolean
     stockQty?: boolean
+    fulfillmentTaskCategory?: boolean
+    fulfillmentTaskTitle?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type LoyaltyRewardOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "pointCost" | "type" | "valueRupiah" | "isActive" | "stockQty" | "createdAt" | "updatedAt", ExtArgs["result"]["loyaltyReward"]>
+  export type LoyaltyRewardOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "pointCost" | "type" | "valueRupiah" | "isActive" | "stockQty" | "fulfillmentTaskCategory" | "fulfillmentTaskTitle" | "createdAt" | "updatedAt", ExtArgs["result"]["loyaltyReward"]>
   export type LoyaltyRewardInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     redemptions?: boolean | LoyaltyReward$redemptionsArgs<ExtArgs>
     _count?: boolean | LoyaltyRewardCountOutputTypeDefaultArgs<ExtArgs>
@@ -66411,6 +66601,8 @@ export namespace Prisma {
       valueRupiah: number | null
       isActive: boolean
       stockQty: number | null
+      fulfillmentTaskCategory: string | null
+      fulfillmentTaskTitle: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["loyaltyReward"]>
@@ -66845,6 +67037,8 @@ export namespace Prisma {
     readonly valueRupiah: FieldRef<"LoyaltyReward", 'Int'>
     readonly isActive: FieldRef<"LoyaltyReward", 'Boolean'>
     readonly stockQty: FieldRef<"LoyaltyReward", 'Int'>
+    readonly fulfillmentTaskCategory: FieldRef<"LoyaltyReward", 'String'>
+    readonly fulfillmentTaskTitle: FieldRef<"LoyaltyReward", 'String'>
     readonly createdAt: FieldRef<"LoyaltyReward", 'DateTime'>
     readonly updatedAt: FieldRef<"LoyaltyReward", 'DateTime'>
   }
@@ -69600,6 +69794,10 @@ export namespace Prisma {
     isActive: 'isActive',
     lastLoginAt: 'lastLoginAt',
     passwordChangedAt: 'passwordChangedAt',
+    tipGopay: 'tipGopay',
+    tipOvo: 'tipOvo',
+    tipDana: 'tipDana',
+    tipBank: 'tipBank',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -69654,6 +69852,10 @@ export namespace Prisma {
     notes: 'notes',
     isActive: 'isActive',
     allowBookingWhileCleaning: 'allowBookingWhileCleaning',
+    hasAc: 'hasAc',
+    acWattage: 'acWattage',
+    acLastCleanedAt: 'acLastCleanedAt',
+    acCleanIntervalDays: 'acCleanIntervalDays',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -70129,6 +70331,10 @@ export namespace Prisma {
     settlementDueDate: 'settlementDueDate',
     downPaymentInvoiceId: 'downPaymentInvoiceId',
     settlementInvoiceId: 'settlementInvoiceId',
+    prepaidMonths: 'prepaidMonths',
+    isEarly: 'isEarly',
+    tenantReview: 'tenantReview',
+    tenantReviewAt: 'tenantReviewAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -70505,6 +70711,8 @@ export namespace Prisma {
     valueRupiah: 'valueRupiah',
     isActive: 'isActive',
     stockQty: 'stockQty',
+    fulfillmentTaskCategory: 'fulfillmentTaskCategory',
+    fulfillmentTaskTitle: 'fulfillmentTaskTitle',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -71507,6 +71715,10 @@ export namespace Prisma {
     isActive?: BoolFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    tipGopay?: StringNullableFilter<"User"> | string | null
+    tipOvo?: StringNullableFilter<"User"> | string | null
+    tipDana?: StringNullableFilter<"User"> | string | null
+    tipBank?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -71556,6 +71768,10 @@ export namespace Prisma {
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     passwordChangedAt?: SortOrderInput | SortOrder
+    tipGopay?: SortOrderInput | SortOrder
+    tipOvo?: SortOrderInput | SortOrder
+    tipDana?: SortOrderInput | SortOrder
+    tipBank?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tenant?: TenantOrderByWithRelationInput
@@ -71608,6 +71824,10 @@ export namespace Prisma {
     isActive?: BoolFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    tipGopay?: StringNullableFilter<"User"> | string | null
+    tipOvo?: StringNullableFilter<"User"> | string | null
+    tipDana?: StringNullableFilter<"User"> | string | null
+    tipBank?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -71657,6 +71877,10 @@ export namespace Prisma {
     isActive?: SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     passwordChangedAt?: SortOrderInput | SortOrder
+    tipGopay?: SortOrderInput | SortOrder
+    tipOvo?: SortOrderInput | SortOrder
+    tipDana?: SortOrderInput | SortOrder
+    tipBank?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -71679,6 +71903,10 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     passwordChangedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    tipGopay?: StringNullableWithAggregatesFilter<"User"> | string | null
+    tipOvo?: StringNullableWithAggregatesFilter<"User"> | string | null
+    tipDana?: StringNullableWithAggregatesFilter<"User"> | string | null
+    tipBank?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -71882,6 +72110,10 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
     allowBookingWhileCleaning?: BoolFilter<"Room"> | boolean
+    hasAc?: BoolFilter<"Room"> | boolean
+    acWattage?: IntNullableFilter<"Room"> | number | null
+    acLastCleanedAt?: DateTimeNullableFilter<"Room"> | Date | string | null
+    acCleanIntervalDays?: IntFilter<"Room"> | number
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -71917,6 +72149,10 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     allowBookingWhileCleaning?: SortOrder
+    hasAc?: SortOrder
+    acWattage?: SortOrderInput | SortOrder
+    acLastCleanedAt?: SortOrderInput | SortOrder
+    acCleanIntervalDays?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stays?: StayOrderByRelationAggregateInput
@@ -71955,6 +72191,10 @@ export namespace Prisma {
     notes?: StringNullableFilter<"Room"> | string | null
     isActive?: BoolFilter<"Room"> | boolean
     allowBookingWhileCleaning?: BoolFilter<"Room"> | boolean
+    hasAc?: BoolFilter<"Room"> | boolean
+    acWattage?: IntNullableFilter<"Room"> | number | null
+    acLastCleanedAt?: DateTimeNullableFilter<"Room"> | Date | string | null
+    acCleanIntervalDays?: IntFilter<"Room"> | number
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -71990,6 +72230,10 @@ export namespace Prisma {
     notes?: SortOrderInput | SortOrder
     isActive?: SortOrder
     allowBookingWhileCleaning?: SortOrder
+    hasAc?: SortOrder
+    acWattage?: SortOrderInput | SortOrder
+    acLastCleanedAt?: SortOrderInput | SortOrder
+    acCleanIntervalDays?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoomCountOrderByAggregateInput
@@ -72019,6 +72263,10 @@ export namespace Prisma {
     notes?: StringNullableWithAggregatesFilter<"Room"> | string | null
     isActive?: BoolWithAggregatesFilter<"Room"> | boolean
     allowBookingWhileCleaning?: BoolWithAggregatesFilter<"Room"> | boolean
+    hasAc?: BoolWithAggregatesFilter<"Room"> | boolean
+    acWattage?: IntNullableWithAggregatesFilter<"Room"> | number | null
+    acLastCleanedAt?: DateTimeNullableWithAggregatesFilter<"Room"> | Date | string | null
+    acCleanIntervalDays?: IntWithAggregatesFilter<"Room"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
   }
@@ -74530,6 +74778,10 @@ export namespace Prisma {
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    prepaidMonths?: IntNullableFilter<"RenewRequest"> | number | null
+    isEarly?: BoolFilter<"RenewRequest"> | boolean
+    tenantReview?: StringNullableFilter<"RenewRequest"> | string | null
+    tenantReviewAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -74554,6 +74806,10 @@ export namespace Prisma {
     settlementDueDate?: SortOrderInput | SortOrder
     downPaymentInvoiceId?: SortOrderInput | SortOrder
     settlementInvoiceId?: SortOrderInput | SortOrder
+    prepaidMonths?: SortOrderInput | SortOrder
+    isEarly?: SortOrder
+    tenantReview?: SortOrderInput | SortOrder
+    tenantReviewAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stay?: StayOrderByWithRelationInput
@@ -74581,6 +74837,10 @@ export namespace Prisma {
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    prepaidMonths?: IntNullableFilter<"RenewRequest"> | number | null
+    isEarly?: BoolFilter<"RenewRequest"> | boolean
+    tenantReview?: StringNullableFilter<"RenewRequest"> | string | null
+    tenantReviewAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -74605,6 +74865,10 @@ export namespace Prisma {
     settlementDueDate?: SortOrderInput | SortOrder
     downPaymentInvoiceId?: SortOrderInput | SortOrder
     settlementInvoiceId?: SortOrderInput | SortOrder
+    prepaidMonths?: SortOrderInput | SortOrder
+    isEarly?: SortOrder
+    tenantReview?: SortOrderInput | SortOrder
+    tenantReviewAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RenewRequestCountOrderByAggregateInput
@@ -74634,6 +74898,10 @@ export namespace Prisma {
     settlementDueDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
     settlementInvoiceId?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
+    prepaidMonths?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
+    isEarly?: BoolWithAggregatesFilter<"RenewRequest"> | boolean
+    tenantReview?: StringNullableWithAggregatesFilter<"RenewRequest"> | string | null
+    tenantReviewAt?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
   }
@@ -76595,6 +76863,8 @@ export namespace Prisma {
     valueRupiah?: IntNullableFilter<"LoyaltyReward"> | number | null
     isActive?: BoolFilter<"LoyaltyReward"> | boolean
     stockQty?: IntNullableFilter<"LoyaltyReward"> | number | null
+    fulfillmentTaskCategory?: StringNullableFilter<"LoyaltyReward"> | string | null
+    fulfillmentTaskTitle?: StringNullableFilter<"LoyaltyReward"> | string | null
     createdAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
     updatedAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
     redemptions?: RedemptionListRelationFilter
@@ -76609,6 +76879,8 @@ export namespace Prisma {
     valueRupiah?: SortOrderInput | SortOrder
     isActive?: SortOrder
     stockQty?: SortOrderInput | SortOrder
+    fulfillmentTaskCategory?: SortOrderInput | SortOrder
+    fulfillmentTaskTitle?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     redemptions?: RedemptionOrderByRelationAggregateInput
@@ -76626,6 +76898,8 @@ export namespace Prisma {
     valueRupiah?: IntNullableFilter<"LoyaltyReward"> | number | null
     isActive?: BoolFilter<"LoyaltyReward"> | boolean
     stockQty?: IntNullableFilter<"LoyaltyReward"> | number | null
+    fulfillmentTaskCategory?: StringNullableFilter<"LoyaltyReward"> | string | null
+    fulfillmentTaskTitle?: StringNullableFilter<"LoyaltyReward"> | string | null
     createdAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
     updatedAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
     redemptions?: RedemptionListRelationFilter
@@ -76640,6 +76914,8 @@ export namespace Prisma {
     valueRupiah?: SortOrderInput | SortOrder
     isActive?: SortOrder
     stockQty?: SortOrderInput | SortOrder
+    fulfillmentTaskCategory?: SortOrderInput | SortOrder
+    fulfillmentTaskTitle?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: LoyaltyRewardCountOrderByAggregateInput
@@ -76661,6 +76937,8 @@ export namespace Prisma {
     valueRupiah?: IntNullableWithAggregatesFilter<"LoyaltyReward"> | number | null
     isActive?: BoolWithAggregatesFilter<"LoyaltyReward"> | boolean
     stockQty?: IntNullableWithAggregatesFilter<"LoyaltyReward"> | number | null
+    fulfillmentTaskCategory?: StringNullableWithAggregatesFilter<"LoyaltyReward"> | string | null
+    fulfillmentTaskTitle?: StringNullableWithAggregatesFilter<"LoyaltyReward"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LoyaltyReward"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"LoyaltyReward"> | Date | string
   }
@@ -76830,6 +77108,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -76879,6 +77161,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -76925,6 +77211,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -76974,6 +77264,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -77022,6 +77316,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -77034,6 +77332,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -77048,6 +77350,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -77289,6 +77595,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -77324,6 +77634,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -77358,6 +77672,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -77393,6 +77711,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -77428,6 +77750,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -77448,6 +77774,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -77469,6 +77799,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -80189,6 +80523,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -80213,6 +80551,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -80230,6 +80572,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -80254,6 +80600,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -80275,6 +80625,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -80292,6 +80646,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -80313,6 +80671,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82421,6 +82783,8 @@ export namespace Prisma {
     valueRupiah?: number | null
     isActive?: boolean
     stockQty?: number | null
+    fulfillmentTaskCategory?: string | null
+    fulfillmentTaskTitle?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     redemptions?: RedemptionCreateNestedManyWithoutRewardInput
@@ -82435,6 +82799,8 @@ export namespace Prisma {
     valueRupiah?: number | null
     isActive?: boolean
     stockQty?: number | null
+    fulfillmentTaskCategory?: string | null
+    fulfillmentTaskTitle?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutRewardInput
@@ -82448,6 +82814,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     redemptions?: RedemptionUpdateManyWithoutRewardNestedInput
@@ -82462,6 +82830,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     redemptions?: RedemptionUncheckedUpdateManyWithoutRewardNestedInput
@@ -82476,6 +82846,8 @@ export namespace Prisma {
     valueRupiah?: number | null
     isActive?: boolean
     stockQty?: number | null
+    fulfillmentTaskCategory?: string | null
+    fulfillmentTaskTitle?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -82488,6 +82860,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82501,6 +82875,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82722,6 +83098,21 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -83035,6 +83426,10 @@ export namespace Prisma {
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     passwordChangedAt?: SortOrder
+    tipGopay?: SortOrder
+    tipOvo?: SortOrder
+    tipDana?: SortOrder
+    tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83054,6 +83449,10 @@ export namespace Prisma {
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     passwordChangedAt?: SortOrder
+    tipGopay?: SortOrder
+    tipOvo?: SortOrder
+    tipDana?: SortOrder
+    tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83068,6 +83467,10 @@ export namespace Prisma {
     isActive?: SortOrder
     lastLoginAt?: SortOrder
     passwordChangedAt?: SortOrder
+    tipGopay?: SortOrder
+    tipOvo?: SortOrder
+    tipDana?: SortOrder
+    tipBank?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83159,6 +83562,24 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -83171,21 +83592,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type EnumGenderNullableFilter<$PrismaModel = never> = {
@@ -83313,24 +83719,6 @@ export namespace Prisma {
     ktpVerifiedById?: SortOrder
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type EnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
@@ -83393,6 +83781,10 @@ export namespace Prisma {
     notes?: SortOrder
     isActive?: SortOrder
     allowBookingWhileCleaning?: SortOrder
+    hasAc?: SortOrder
+    acWattage?: SortOrder
+    acLastCleanedAt?: SortOrder
+    acCleanIntervalDays?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83406,6 +83798,8 @@ export namespace Prisma {
     defaultDepositRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    acWattage?: SortOrder
+    acCleanIntervalDays?: SortOrder
   }
 
   export type RoomMaxOrderByAggregateInput = {
@@ -83424,6 +83818,10 @@ export namespace Prisma {
     notes?: SortOrder
     isActive?: SortOrder
     allowBookingWhileCleaning?: SortOrder
+    hasAc?: SortOrder
+    acWattage?: SortOrder
+    acLastCleanedAt?: SortOrder
+    acCleanIntervalDays?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83444,6 +83842,10 @@ export namespace Prisma {
     notes?: SortOrder
     isActive?: SortOrder
     allowBookingWhileCleaning?: SortOrder
+    hasAc?: SortOrder
+    acWattage?: SortOrder
+    acLastCleanedAt?: SortOrder
+    acCleanIntervalDays?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -83457,6 +83859,8 @@ export namespace Prisma {
     defaultDepositRupiah?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    acWattage?: SortOrder
+    acCleanIntervalDays?: SortOrder
   }
 
   export type EnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -85865,6 +86269,10 @@ export namespace Prisma {
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
     settlementInvoiceId?: SortOrder
+    prepaidMonths?: SortOrder
+    isEarly?: SortOrder
+    tenantReview?: SortOrder
+    tenantReviewAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -85877,6 +86285,7 @@ export namespace Prisma {
     downPaymentAmountRupiah?: SortOrder
     downPaymentInvoiceId?: SortOrder
     settlementInvoiceId?: SortOrder
+    prepaidMonths?: SortOrder
   }
 
   export type RenewRequestMaxOrderByAggregateInput = {
@@ -85896,6 +86305,10 @@ export namespace Prisma {
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
     settlementInvoiceId?: SortOrder
+    prepaidMonths?: SortOrder
+    isEarly?: SortOrder
+    tenantReview?: SortOrder
+    tenantReviewAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -85917,6 +86330,10 @@ export namespace Prisma {
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
     settlementInvoiceId?: SortOrder
+    prepaidMonths?: SortOrder
+    isEarly?: SortOrder
+    tenantReview?: SortOrder
+    tenantReviewAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -85929,6 +86346,7 @@ export namespace Prisma {
     downPaymentAmountRupiah?: SortOrder
     downPaymentInvoiceId?: SortOrder
     settlementInvoiceId?: SortOrder
+    prepaidMonths?: SortOrder
   }
 
   export type EnumRenewRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -87682,6 +88100,8 @@ export namespace Prisma {
     valueRupiah?: SortOrder
     isActive?: SortOrder
     stockQty?: SortOrder
+    fulfillmentTaskCategory?: SortOrder
+    fulfillmentTaskTitle?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87702,6 +88122,8 @@ export namespace Prisma {
     valueRupiah?: SortOrder
     isActive?: SortOrder
     stockQty?: SortOrder
+    fulfillmentTaskCategory?: SortOrder
+    fulfillmentTaskTitle?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87715,6 +88137,8 @@ export namespace Prisma {
     valueRupiah?: SortOrder
     isActive?: SortOrder
     stockQty?: SortOrder
+    fulfillmentTaskCategory?: SortOrder
+    fulfillmentTaskTitle?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -88354,6 +88778,10 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -89466,10 +89894,6 @@ export namespace Prisma {
     connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
     createMany?: RedemptionCreateManyTenantInputEnvelope
     connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type NullableEnumGenderFieldUpdateOperationsInput = {
@@ -93997,6 +94421,20 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -94111,41 +94549,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
-    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
-  }
-
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -94161,6 +94564,27 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
   }
 
   export type NestedEnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -96274,6 +96698,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -96296,6 +96724,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -97872,6 +98304,10 @@ export namespace Prisma {
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    prepaidMonths?: IntNullableFilter<"RenewRequest"> | number | null
+    isEarly?: BoolFilter<"RenewRequest"> | boolean
+    tenantReview?: StringNullableFilter<"RenewRequest"> | string | null
+    tenantReviewAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
   }
@@ -98397,6 +98833,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
@@ -98444,6 +98884,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -98495,6 +98939,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -98543,6 +98991,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -98877,6 +99329,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -98899,6 +99355,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -99086,6 +99546,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
@@ -99133,6 +99597,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -99190,6 +99658,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -99238,6 +99710,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -100428,6 +100904,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -100462,6 +100942,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -100511,6 +100995,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -100545,6 +101033,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -100652,6 +101144,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
@@ -100686,6 +101182,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
@@ -100716,6 +101216,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -100764,6 +101268,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -100814,6 +101322,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -100862,6 +101374,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -100912,6 +101428,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -100960,6 +101480,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -101255,6 +101779,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant: TenantCreateNestedOneWithoutRenewRequestsInput
@@ -101277,6 +101805,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -101552,6 +102084,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
@@ -101586,6 +102122,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
@@ -101622,6 +102162,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -101670,6 +102214,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -101726,6 +102274,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -101774,6 +102326,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -101830,6 +102386,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -101878,6 +102438,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -102292,6 +102856,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -102326,6 +102894,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -102356,6 +102928,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -102404,6 +102980,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -102687,6 +103267,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -102721,6 +103305,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -102757,6 +103345,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -102805,6 +103397,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -102858,6 +103454,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -102892,6 +103492,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -102922,6 +103526,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -102970,6 +103578,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -103039,6 +103651,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -103073,6 +103689,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -103109,6 +103729,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -103157,6 +103781,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -103330,6 +103958,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -103378,6 +104010,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -103706,6 +104342,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -103754,6 +104394,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -104003,6 +104647,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -104051,6 +104699,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -104162,6 +104814,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -104210,6 +104866,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -104255,6 +104915,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -104303,6 +104967,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -104364,6 +105032,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -104412,6 +105084,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -104703,6 +105379,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -104751,6 +105431,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -104801,6 +105485,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -104849,6 +105537,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -105174,6 +105866,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -105222,6 +105918,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -105278,6 +105978,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -105326,6 +106030,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -105453,6 +106161,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -105487,6 +106199,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -105645,6 +106361,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -105693,6 +106413,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -105977,6 +106701,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -106011,6 +106739,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -106181,6 +106913,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -106229,6 +106965,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -106378,6 +107118,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -106426,6 +107170,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -106553,6 +107301,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -106601,6 +107353,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -106718,6 +107474,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -106766,6 +107526,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -106824,6 +107588,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -106858,6 +107626,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -106982,6 +107754,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -107030,6 +107806,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -107094,6 +107874,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -107128,6 +107912,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -107233,6 +108021,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -107281,6 +108073,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -107339,6 +108135,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -107373,6 +108173,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -107490,6 +108294,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -107538,6 +108346,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -107602,6 +108414,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -107636,6 +108452,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -107661,6 +108481,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -107709,6 +108533,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -107759,6 +108587,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -107807,6 +108639,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -107868,6 +108704,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -107916,6 +108756,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -107972,6 +108816,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -108020,6 +108868,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -108065,6 +108917,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -108113,6 +108969,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -108174,6 +109034,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -108222,6 +109086,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -108267,6 +109135,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -108315,6 +109187,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -108439,6 +109315,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -108487,6 +109367,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -108548,6 +109432,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -108596,6 +109484,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -108732,6 +109624,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -108780,6 +109676,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -108825,6 +109725,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -108873,6 +109777,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
@@ -108934,6 +109842,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -108982,6 +109894,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -109485,6 +110401,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -109519,6 +110439,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -109841,6 +110765,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -109875,6 +110803,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -110054,6 +110986,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -110088,6 +111024,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -110118,6 +111058,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -110166,6 +111110,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -110346,6 +111294,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -110380,6 +111332,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -110416,6 +111372,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -110464,6 +111424,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -110611,6 +111575,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -110645,6 +111613,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -110797,6 +111769,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -110845,6 +111821,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -110895,6 +111875,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -110943,6 +111927,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -111124,6 +112112,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -111158,6 +112150,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -111334,6 +112330,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -111382,6 +112382,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -111438,6 +112442,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -111486,6 +112494,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -111767,6 +112779,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -111815,6 +112831,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -112090,6 +113110,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -112138,6 +113162,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -112311,6 +113339,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -112359,6 +113391,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -112554,6 +113590,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -112602,6 +113642,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -112647,6 +113691,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -112695,6 +113743,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -112756,6 +113808,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -112804,6 +113860,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -112857,6 +113917,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -112891,6 +113955,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -113049,6 +114117,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -113097,6 +114169,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -113251,6 +114327,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -113285,6 +114365,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -113455,6 +114539,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -113503,6 +114591,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -113572,6 +114664,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -113606,6 +114702,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -113752,6 +114852,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -113800,6 +114904,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -113992,6 +115100,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -114026,6 +115138,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -114196,6 +115312,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -114244,6 +115364,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -114476,6 +115600,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -114524,6 +115652,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -114674,6 +115806,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -114722,6 +115858,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -115031,6 +116171,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -115079,6 +116223,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -115140,6 +116288,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -115188,6 +116340,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -115233,6 +116389,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -115281,6 +116441,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -115342,6 +116506,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -115390,6 +116558,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -115435,6 +116607,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -115483,6 +116659,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -115544,6 +116724,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -115592,6 +116776,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -117925,6 +119113,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -117959,6 +119151,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -117997,6 +119193,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -118031,6 +119231,10 @@ export namespace Prisma {
     notes?: string | null
     isActive?: boolean
     allowBookingWhileCleaning?: boolean
+    hasAc?: boolean
+    acWattage?: number | null
+    acLastCleanedAt?: Date | string | null
+    acCleanIntervalDays?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -118061,6 +119265,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutUserInput
@@ -118109,6 +119317,10 @@ export namespace Prisma {
     isActive?: boolean
     lastLoginAt?: Date | string | null
     passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
@@ -118312,6 +119524,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -118346,6 +119562,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -118390,6 +119610,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -118424,6 +119648,10 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     allowBookingWhileCleaning?: BoolFieldUpdateOperationsInput | boolean
+    hasAc?: BoolFieldUpdateOperationsInput | boolean
+    acWattage?: NullableIntFieldUpdateOperationsInput | number | null
+    acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -118460,6 +119688,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutUserNestedInput
@@ -118508,6 +119740,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -118830,6 +120066,8 @@ export namespace Prisma {
     valueRupiah?: number | null
     isActive?: boolean
     stockQty?: number | null
+    fulfillmentTaskCategory?: string | null
+    fulfillmentTaskTitle?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -118843,6 +120081,8 @@ export namespace Prisma {
     valueRupiah?: number | null
     isActive?: boolean
     stockQty?: number | null
+    fulfillmentTaskCategory?: string | null
+    fulfillmentTaskTitle?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -119003,6 +120243,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -119016,6 +120258,8 @@ export namespace Prisma {
     valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    fulfillmentTaskCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentTaskTitle?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -119436,6 +120680,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -120845,6 +122093,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -120867,6 +122119,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -120887,6 +122143,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -122039,6 +123299,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -122480,6 +123744,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -122502,6 +123770,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -122522,6 +123794,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -123960,6 +125236,10 @@ export namespace Prisma {
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
     settlementInvoiceId?: number | null
+    prepaidMonths?: number | null
+    isEarly?: boolean
+    tenantReview?: string | null
+    tenantReviewAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -124333,6 +125613,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -124355,6 +125639,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -124375,6 +125663,10 @@ export namespace Prisma {
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    prepaidMonths?: NullableIntFieldUpdateOperationsInput | number | null
+    isEarly?: BoolFieldUpdateOperationsInput | boolean
+    tenantReview?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantReviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

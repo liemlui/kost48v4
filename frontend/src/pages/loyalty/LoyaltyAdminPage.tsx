@@ -56,7 +56,7 @@ export default function LoyaltyAdminPage() {
   const openCreate = () => { setEditId(null); setForm(emptyForm); setShowForm(true); };
   const openEdit = (r: LoyaltyReward) => {
     setEditId(r.id);
-    setForm({ name: r.name, description: r.description ?? '', pointCost: r.pointCost, type: r.type, valueRupiah: r.valueRupiah ?? 0, stockQty: r.stockQty ?? undefined, isActive: r.isActive });
+    setForm({ name: r.name, description: r.description ?? '', pointCost: r.pointCost, type: r.type, valueRupiah: r.valueRupiah ?? 0, stockQty: r.stockQty ?? undefined, isActive: r.isActive, fulfillmentTaskCategory: r.fulfillmentTaskCategory ?? undefined, fulfillmentTaskTitle: r.fulfillmentTaskTitle ?? undefined });
     setShowForm(true);
   };
 
@@ -146,6 +146,10 @@ export default function LoyaltyAdminPage() {
             )}
           </Form.Group>
           <Form.Group className="mb-3"><Form.Label>Stok (kosongkan = tak terbatas)</Form.Label><Form.Control type="number" min={0} value={form.stockQty ?? ''} onChange={(e) => setForm({ ...form, stockQty: e.target.value === '' ? undefined : Number(e.target.value) })} /></Form.Group>
+          <hr />
+          <p className="text-muted small mb-2">Opsional — jika reward ini berupa <strong>tugas staf</strong> (mis. bersihkan area umum), isi kategori tiket. Saat disetujui, tiket staf dibuat otomatis.</p>
+          <Form.Group className="mb-3"><Form.Label>Kategori tugas staf</Form.Label><Form.Control placeholder="mis. CLEANING_COMMON" value={form.fulfillmentTaskCategory ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskCategory: e.target.value || undefined })} /></Form.Group>
+          <Form.Group className="mb-3"><Form.Label>Judul tugas staf</Form.Label><Form.Control placeholder="mis. Bersihkan dapur umum" value={form.fulfillmentTaskTitle ?? ''} onChange={(e) => setForm({ ...form, fulfillmentTaskTitle: e.target.value || undefined })} /></Form.Group>
           <Form.Check type="switch" label="Aktif" checked={form.isActive ?? true} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
         </Modal.Body>
         <Modal.Footer>

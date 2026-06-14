@@ -622,6 +622,11 @@ export class TicketsService {
           },
         });
 
+        // F4-15: tiket cuci AC selesai → reset jadwal AC kamar (acLastCleanedAt = sekarang).
+        if (ticket.category === 'AC_CLEANING' && ticket.roomId) {
+          await tx.room.update({ where: { id: ticket.roomId }, data: { acLastCleanedAt: new Date() } });
+        }
+
         if (roomItemId && dto.finalRoomItemStatus) {
           const roomItem = await tx.roomItem.findUnique({
             where: { id: roomItemId },

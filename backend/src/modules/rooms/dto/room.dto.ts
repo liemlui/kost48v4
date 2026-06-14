@@ -15,5 +15,9 @@ export class CreateRoomDto {
   @IsOptional() @IsArray() @IsString({ each: true }) images?: string[];
   @IsOptional() @IsString() notes?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
+  // F4-15: konfigurasi AC untuk penjadwalan cuci AC.
+  @IsOptional() @IsBoolean() hasAc?: boolean;
+  @IsOptional() @IsInt() @Min(0) acWattage?: number;
+  @IsOptional() @IsInt() @Min(1) acCleanIntervalDays?: number;
 }
 export class UpdateRoomDto extends CreateRoomDto {}

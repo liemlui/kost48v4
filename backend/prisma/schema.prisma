@@ -455,6 +455,11 @@ model User {
   isActive          Boolean   @default(true)
   lastLoginAt       DateTime?
   passwordChangedAt DateTime?
+  // F4-14: info tip P2P staf (tenant tip langsung; TIDAK dijurnal/direkap di buku kos).
+  tipGopay          String?
+  tipOvo            String?
+  tipDana           String?
+  tipBank           String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -573,6 +578,12 @@ model Room {
   // staf) tetapi sudah boleh DIPESAN (booking + DP); aktivasi/huni menunggu
   // tiket pembersihan ditutup. Keputusan owner 2026-06-11.
   allowBookingWhileCleaning Boolean @default(false)
+
+  // F4-15: penjadwalan cuci AC berbasis pemakaian listrik (additive S-3).
+  hasAc               Boolean   @default(false)
+  acWattage           Int?      // watt AC (1/2 PK ~ 380-450)
+  acLastCleanedAt     DateTime?
+  acCleanIntervalDays Int       @default(90)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1249,6 +1260,12 @@ model RenewRequest {
   settlementDueDate       DateTime?         @db.Date // = downPaymentPaidAt + 7 hari
   downPaymentInvoiceId    Int?                       // F2-1 inc.2b: invoice DP 30% terpisah (dibayar penuh sblm DP_SECURED)
   settlementInvoiceId     Int?                       // Invoice sisa sewa + utilitas; wajib PAID sebelum COMPLETED
+  // F4-11: renewal/prabayar fleksibel kapan saja (additive S-3).
+  prepaidMonths           Int?                       // jumlah bulan prabayar (>1 → unearned via F4-1)
+  isEarly                 Boolean            @default(false) // diajukan lebih awal (bukan dekat akhir kontrak)
+  // F4-13a: review/masukan tenant saat renewal → poin RENEWAL_REVIEW.
+  tenantReview            String?
+  tenantReviewAt          DateTime?
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
@@ -1786,6 +1803,9 @@ model LoyaltyReward {
   valueRupiah Int?
   isActive    Boolean           @default(true)
   stockQty    Int?
+  // F4-13b: reward yang menukar poin jadi tugas staf (auto-create tiket saat FULFILLED).
+  fulfillmentTaskCategory String?
+  fulfillmentTaskTitle    String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 

@@ -136,4 +136,11 @@ export class AutoOpsController {
   async runRentRecognition(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps pengakuan pendapatan sewa berhasil dijalankan', data: await this.autoOpsService.runRentRecognition({ actorUserId: user.id, source: 'MANUAL_RENT_RECOGNITION_RUN' }) };
   }
+
+  // F4-15: trigger manual jadwal cuci AC (UAT/ops).
+  @Post('run/ac-cleaning')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runAcCleaning(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps jadwal cuci AC berhasil dijalankan', data: await this.autoOpsService.runAcCleaningSchedule({ actorUserId: user.id, source: 'MANUAL_AC_CLEANING_RUN' }) };
+  }
 }

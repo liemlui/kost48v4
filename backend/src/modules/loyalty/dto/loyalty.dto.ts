@@ -23,6 +23,13 @@ export class CreateRewardDto {
 
   @IsOptional() @IsBoolean()
   isActive?: boolean;
+
+  // F4-13b: reward yang jadi tugas staf saat FULFILLED.
+  @IsOptional() @IsString() @MaxLength(60)
+  fulfillmentTaskCategory?: string;
+
+  @IsOptional() @IsString() @MaxLength(160)
+  fulfillmentTaskTitle?: string;
 }
 
 export class UpdateRewardDto {
@@ -46,6 +53,12 @@ export class UpdateRewardDto {
 
   @IsOptional() @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional() @IsString() @MaxLength(60)
+  fulfillmentTaskCategory?: string;
+
+  @IsOptional() @IsString() @MaxLength(160)
+  fulfillmentTaskTitle?: string;
 }
 
 export class RequestRedemptionDto {

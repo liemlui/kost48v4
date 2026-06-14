@@ -130,6 +130,10 @@ exports.Prisma.UserScalarFieldEnum = {
   isActive: 'isActive',
   lastLoginAt: 'lastLoginAt',
   passwordChangedAt: 'passwordChangedAt',
+  tipGopay: 'tipGopay',
+  tipOvo: 'tipOvo',
+  tipDana: 'tipDana',
+  tipBank: 'tipBank',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -178,6 +182,10 @@ exports.Prisma.RoomScalarFieldEnum = {
   notes: 'notes',
   isActive: 'isActive',
   allowBookingWhileCleaning: 'allowBookingWhileCleaning',
+  hasAc: 'hasAc',
+  acWattage: 'acWattage',
+  acLastCleanedAt: 'acLastCleanedAt',
+  acCleanIntervalDays: 'acCleanIntervalDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -587,6 +595,10 @@ exports.Prisma.RenewRequestScalarFieldEnum = {
   settlementDueDate: 'settlementDueDate',
   downPaymentInvoiceId: 'downPaymentInvoiceId',
   settlementInvoiceId: 'settlementInvoiceId',
+  prepaidMonths: 'prepaidMonths',
+  isEarly: 'isEarly',
+  tenantReview: 'tenantReview',
+  tenantReviewAt: 'tenantReviewAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -903,6 +915,8 @@ exports.Prisma.LoyaltyRewardScalarFieldEnum = {
   valueRupiah: 'valueRupiah',
   isActive: 'isActive',
   stockQty: 'stockQty',
+  fulfillmentTaskCategory: 'fulfillmentTaskCategory',
+  fulfillmentTaskTitle: 'fulfillmentTaskTitle',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

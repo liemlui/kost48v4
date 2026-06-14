@@ -28,6 +28,8 @@ export class RedemptionService {
         valueRupiah: dto.valueRupiah ?? null,
         stockQty: dto.stockQty ?? null,
         isActive: dto.isActive ?? true,
+        fulfillmentTaskCategory: dto.fulfillmentTaskCategory ?? null,
+        fulfillmentTaskTitle: dto.fulfillmentTaskTitle ?? null,
       },
     });
   }
@@ -45,6 +47,8 @@ export class RedemptionService {
         valueRupiah: dto.valueRupiah ?? undefined,
         stockQty: dto.stockQty ?? undefined,
         isActive: dto.isActive ?? undefined,
+        fulfillmentTaskCategory: dto.fulfillmentTaskCategory ?? undefined,
+        fulfillmentTaskTitle: dto.fulfillmentTaskTitle ?? undefined,
       },
     });
   }
@@ -130,6 +134,37 @@ export class RedemptionService {
         });
         journalEntryId = (res as any)?.journalEntry?.id ?? null;
       }
+
+      // F4-13b: reward "special request" → auto-create tiket tugas staf.
+      if (redemption.reward.fulfillmentTaskCategory) {
+        const tenantStay = await tx.stay.findFirst({
+          where: { tenantId: redemption.tenantId, status: 'ACTIVE' as any },
+          orderBy: { id: 'desc' },
+          select: { id: true, roomId: true },
+        });
+        const staff = await tx.user.findFirst({ where: { role: 'STAFF' as any, isActive: true }, orderBy: { id: 'asc' }, select: { id: true } });
+        const base = `TIC-${new Date().getFullYear()}-RWD-${redemption.id}`;
+        let ticketNumber = base;
+        let suffix = 1;
+        // eslint-disable-next-line no-await-in-loop
+        while (await tx.ticket.findUnique({ where: { ticketNumber }, select: { id: true } })) {
+          suffix += 1;
+          ticketNumber = `${base}-${suffix}`;
+        }
+        await tx.ticket.create({
+          data: {
+            ticketNumber,
+            tenantId: redemption.tenantId,
+            roomId: tenantStay?.roomId ?? null,
+            stayId: tenantStay?.id ?? null,
+            title: redemption.reward.fulfillmentTaskTitle || `Reward: ${redemption.reward.name}`,
+            description: `Tugas dari penukaran poin tenant (reward "${redemption.reward.name}"). ${redemption.reward.description ?? ''}`.trim(),
+            category: redemption.reward.fulfillmentTaskCategory as any,
+            assignedToId: staff?.id,
+          },
+        });
+      }
+
       return tx.redemption.update({
         where: { id },
         data: { status: 'FULFILLED' as any, decidedAt: new Date(), decidedById: actorId, journalEntryId, note: note ?? null },

@@ -25,6 +25,8 @@ export interface LoyaltyReward {
   valueRupiah: number | null;
   isActive: boolean;
   stockQty: number | null;
+  fulfillmentTaskCategory?: string | null;
+  fulfillmentTaskTitle?: string | null;
   createdAt: string;
 }
 
@@ -84,6 +86,8 @@ export interface RewardInput {
   valueRupiah?: number;
   stockQty?: number;
   isActive?: boolean;
+  fulfillmentTaskCategory?: string;
+  fulfillmentTaskTitle?: string;
 }
 
 export async function createReward(input: RewardInput): Promise<LoyaltyReward> {

@@ -25,6 +25,7 @@ type AutoOpsRunResult = {
   notificationPruning?: unknown;
   pushDispatch?: unknown;
   rentRecognition?: unknown;
+  acCleaning?: unknown;
 };
 
 @Injectable()
@@ -123,6 +124,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const recurringExpenseDrafts = await this.runRecurringExpenseDrafts(options);
       const automaticDepreciation = await this.runAutomaticDepreciation(options);
       const rentRecognition = await this.runRentRecognition(options);
+      const acCleaning = await this.runAcCleaningSchedule(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       const notificationPruning = await this.runNotificationPruning(options);
       const pushDispatch = await this.runPushDispatch(options);
@@ -138,6 +140,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         accountingAutoClose,
         notificationPruning,
         pushDispatch,
+        acCleaning,
       };
     } finally {
       this.running = false;
@@ -664,6 +667,62 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { abandoned };
+  }
+
+  /**
+   * F4-15: jadwal cuci AC. Kamar ber-AC yang belum pernah / sudah lewat interval sejak
+   * dicuci → buat tiket `AC_CLEANING` (dedupe: tak ada tiket AC terbuka). Biaya cuci
+   * dicatat owner sebagai Expense saat bayar tukang (flow normal). Reset jadwal saat
+   * tiket AC ditutup (lihat tickets.service). Best-effort.
+   */
+  async runAcCleaningSchedule(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
+    const source = options.source ?? 'AUTO_OPS_AC_CLEANING';
+    const enabled = String(process.env.AC_CLEANING_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { skipped: true, skippedReason: 'AC_CLEANING_DISABLED', source };
+    const now = options.now ?? new Date();
+    try {
+      const rooms = await this.prisma.room.findMany({
+        where: { hasAc: true, isActive: true },
+        select: { id: true, code: true, name: true, acLastCleanedAt: true, acCleanIntervalDays: true },
+        take: 100,
+      });
+      let created = 0;
+      for (const room of rooms) {
+        const intervalMs = Math.max(1, room.acCleanIntervalDays) * 24 * 60 * 60 * 1000;
+        const due = !room.acLastCleanedAt || now.getTime() - new Date(room.acLastCleanedAt).getTime() >= intervalMs;
+        if (!due) continue;
+        const open = await this.prisma.ticket.findFirst({
+          where: { roomId: room.id, category: 'AC_CLEANING' as any, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
+          select: { id: true },
+        });
+        if (open) continue;
+        const staff = await this.prisma.user.findFirst({ where: { role: 'STAFF' as any, isActive: true }, orderBy: { id: 'asc' }, select: { id: true } });
+        const roomLabel = room.code || room.name || `Kamar #${room.id}`;
+        const base = `TIC-${now.getFullYear()}-AC-${room.id}`;
+        let ticketNumber = base;
+        let suffix = 1;
+        // eslint-disable-next-line no-await-in-loop
+        while (await this.prisma.ticket.findUnique({ where: { ticketNumber }, select: { id: true } })) {
+          suffix += 1;
+          ticketNumber = `${base}-${suffix}`;
+        }
+        await this.prisma.ticket.create({
+          data: {
+            ticketNumber,
+            roomId: room.id,
+            title: `Cuci AC — ${roomLabel}`,
+            description: `AC kamar ${roomLabel} sudah waktunya dicuci (rutin tiap ${room.acCleanIntervalDays} hari). Jadwalkan tukang cuci AC; biaya ditanggung kos (catat sebagai Expense). Tandai tiket selesai setelah AC bersih.`,
+            category: 'AC_CLEANING' as any,
+            assignedToId: staff?.id,
+          },
+        });
+        created += 1;
+      }
+      return { created, skipped: false, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps AC cleaning gagal: ${error?.message ?? error}`);
+      return { skipped: true, skippedReason: error?.message ?? 'AC cleaning skipped', source };
+    }
   }
 
   /**
