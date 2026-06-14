@@ -23,6 +23,12 @@ export class RenewRequestsService {
     private readonly appNotification: AppNotificationService,
   ) {}
 
+  /** F2-1 R3: awal hari ini dalam WIB (UTC+7) sbg UTC-midnight, utk bandingkan @db.Date deadline. */
+  private static wibStartOfToday(): Date {
+    const wib = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    return new Date(Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth(), wib.getUTCDate()));
+  }
+
   /** Tenant creates a renew request for their active stay. */
   async createRequest(dto: CreateRenewRequestDto, actor: CurrentUserPayload) {
     if (actor.role !== UserRole.TENANT) {
@@ -172,6 +178,11 @@ export class RenewRequestsService {
     if (!dpInvoice || dpInvoice.status !== InvoiceStatus.PAID) {
       throw new ConflictException('DP belum lunas. Setujui dulu bukti pembayaran DP (invoice harus PAID) sebelum mengamankan kamar.');
     }
+    // F2-1 R3: gate deadline di command service (tak hanya andalkan sweeper). DP hanya boleh
+    // diamankan ≤ hari-H (downPaymentDueDate, WIB). Lewat hari-H → tolak (prioritas hangus).
+    if (request.downPaymentDueDate && RenewRequestsService.wibStartOfToday().getTime() > new Date(request.downPaymentDueDate).getTime()) {
+      throw new ConflictException('Hari-H (batas prioritas) sudah lewat; DP tak dapat diamankan lagi. Prioritas perpanjangan hangus — ajukan ulang bila kamar masih tersedia.');
+    }
     const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
     const settlementDueDate = new Date(paidAt);
     settlementDueDate.setUTCDate(settlementDueDate.getUTCDate() + 7); // pelunasan maks H+7 dari DP (R2)
@@ -218,6 +229,11 @@ export class RenewRequestsService {
       if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
       if (request.status !== RenewRequestStatus.DP_SECURED) {
         throw new ConflictException('Pelunasan perpanjangan hanya dapat diproses setelah DP diamankan (status DP_SECURED).');
+      }
+      // F2-1 R3: gate deadline di command service. Pelunasan/approve maks ≤ H+7 (settlementDueDate, WIB).
+      // Lewat H+7 → tolak (seharusnya FORFEITED via sweeper; admin proses forced checkout manual).
+      if (request.settlementDueDate && RenewRequestsService.wibStartOfToday().getTime() > new Date(request.settlementDueDate).getTime()) {
+        throw new ConflictException('Batas pelunasan (H+7) sudah lewat. Perpanjangan gagal — proses sebagai FORFEITED (forced checkout + settle deposit manual).');
       }
 
       // F2-1 rent-loyalty (D-16): harga sewa renewal = sewa SAAT INI (tak naik). Abaikan kenaikan via dto.

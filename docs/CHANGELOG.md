@@ -11,6 +11,14 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — feat(F2-1 R3): gate deadline renewal di command service
+
+Tindak lanjut audit (deadline hanya digate sweeper): `renew-requests.service` kini menegakkan deadline di tingkat command (deterministik):
+- **`confirmDownPayment`** → 409 bila WIB-today > `downPaymentDueDate` (hari-H lewat → prioritas hangus).
+- **`approveRequest`** → 409 bila WIB-today > `settlementDueDate` (H+7 lewat → harus FORFEITED, bukan di-approve).
+- Helper `wibStartOfToday()` (UTC-midnight tanggal WIB) utk banding `@db.Date`.
+- **UAT:** confirm past-hari-H→409; confirm dalam-deadline→200 (DP_SECURED); approve past-H+7→409; data uji dipulihkan. `tsc` 0.
+
 ## 2026-06-14 — fix(F2-5): tutup ghost-stock RETURN_FROM_ROOM (lock + 409 di dua jalur)
 
 Tindak lanjut temuan audit: `staff-field-reports.adminReview` membuat movement `RETURN_FROM_ROOM` tanpa validasi/lock qty kamar → bila RETURN > stok kamar, `syncRoomItemTx` menghapus RoomItem (qty≤0) sambil menambah stok gudang fiktif (ghost-stock).
