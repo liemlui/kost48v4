@@ -12,6 +12,7 @@ import { DecideRenewRequestDto } from './dto/decide-renew-request.dto';
 import { ConfirmDownPaymentDto } from './dto/confirm-down-payment.dto';
 import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus, PricingTerm } from '../../common/enums/app.enums';
 import { roundRupiah } from '../../common/business/money.helper';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 
 @Injectable()
 export class RenewRequestsService {
@@ -22,6 +23,7 @@ export class RenewRequestsService {
     private readonly staysService: StaysService,
     private readonly audit: AuditLogService,
     private readonly appNotification: AppNotificationService,
+    private readonly loyalty: LoyaltyService,
   ) {}
 
   /** F2-1 R3: awal hari ini dalam WIB (UTC+7) sbg UTC-midnight, utk bandingkan @db.Date deadline. */
@@ -368,6 +370,18 @@ export class RenewRequestsService {
       '🎉 Perpanjangan disetujui',
       `Pelunasan telah diverifikasi. Masa sewa Anda kini berlaku sampai ${outStr}.`,
     );
+
+    // F4-9: poin loyalitas perpanjangan (best-effort, idempotent per renewRequestId, di luar tx).
+    const stayForPoints = await this.prisma.stay.findUnique({
+      where: { id: result.request.stayId },
+      select: { tenantId: true },
+    });
+    if (stayForPoints) {
+      await this.loyalty.earnSafe(stayForPoints.tenantId, 'RENEWAL', String(result.request.id), {
+        note: `Perpanjangan kontrak #${result.request.id} selesai`,
+        createdById: actor.id,
+      });
+    }
 
     return { phase: result.phase, request: result.request, stay: result.stay, invoice: result.invoice };
   }
