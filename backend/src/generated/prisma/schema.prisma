@@ -533,6 +533,8 @@ model Tenant {
   renewRequests        RenewRequest[]
   staffReviews         StaffReview[]
   depositLedgerEntries TenantDepositLedgerEntry[]
+  loyaltyPoints        LoyaltyPoint[]
+  redemptions          Redemption[]
 
   @@index([fullName])
   @@index([phone])
@@ -1644,6 +1646,7 @@ model JournalEntry {
   depreciationRuns           AssetDepreciationRun[]
   fixedAssetLedgerAlignments FixedAsset[]              @relation("FixedAssetAlignmentJournalEntry")
   rentRecognitions           RentRecognitionSchedule[]
+  redemptions                Redemption[]
 
   @@index([entryDate])
   @@index([accountingPeriodId])
@@ -1691,6 +1694,88 @@ model RentRecognitionSchedule {
   @@unique([stayId, periodIndex])
   @@index([stayId])
   @@index([recognizedAt])
+}
+
+// F4-9 Gamifikasi & Loyalitas tenant (dossier 19). Poin tak dapat dipindahtangankan;
+// reward WAJIB terjurnal (M4); penukaran WAJIB approve admin/owner (M3).
+enum LoyaltyPointReason {
+  RENEWAL
+  ON_TIME_PAYMENT
+  VALIDATED_REPORT
+  ONBOARDING_QUEST
+  REDEMPTION
+  ADJUSTMENT
+}
+
+enum LoyaltyRewardType {
+  RENT_DISCOUNT
+  SERVICE_ADDON
+  METER_DISCOUNT
+  BADGE
+  PHYSICAL
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FULFILLED
+  CANCELLED
+}
+
+// Ledger poin append-only (saldo = Σ delta). Idempotent per (sourceType, sourceId).
+model LoyaltyPoint {
+  id          Int                @id @default(autoincrement())
+  tenantId    Int
+  delta       Int
+  reason      LoyaltyPointReason
+  sourceType  String
+  sourceId    String
+  note        String?
+  createdById Int?
+  createdAt   DateTime           @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceType, sourceId])
+  @@index([tenantId])
+}
+
+// Katalog reward (owner kelola).
+model LoyaltyReward {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  pointCost   Int
+  type        LoyaltyRewardType
+  valueRupiah Int?
+  isActive    Boolean           @default(true)
+  stockQty    Int?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  redemptions Redemption[]
+}
+
+// Penukaran reward (wajib approve; reward terjurnal saat FULFILLED).
+model Redemption {
+  id             Int              @id @default(autoincrement())
+  tenantId       Int
+  rewardId       Int
+  pointCost      Int
+  status         RedemptionStatus @default(PENDING)
+  requestedAt    DateTime         @default(now())
+  decidedAt      DateTime?
+  decidedById    Int?
+  journalEntryId Int?
+  note           String?
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reward       LoyaltyReward @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([status])
 }
 
 model Faq {

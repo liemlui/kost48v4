@@ -224,6 +224,21 @@ export type JournalLine = $Result.DefaultSelection<Prisma.$JournalLinePayload>
  */
 export type RentRecognitionSchedule = $Result.DefaultSelection<Prisma.$RentRecognitionSchedulePayload>
 /**
+ * Model LoyaltyPoint
+ * 
+ */
+export type LoyaltyPoint = $Result.DefaultSelection<Prisma.$LoyaltyPointPayload>
+/**
+ * Model LoyaltyReward
+ * 
+ */
+export type LoyaltyReward = $Result.DefaultSelection<Prisma.$LoyaltyRewardPayload>
+/**
+ * Model Redemption
+ * 
+ */
+export type Redemption = $Result.DefaultSelection<Prisma.$RedemptionPayload>
+/**
  * Model Faq
  * 
  */
@@ -836,6 +851,40 @@ export const PushDeliveryStatus: {
 
 export type PushDeliveryStatus = (typeof PushDeliveryStatus)[keyof typeof PushDeliveryStatus]
 
+
+export const LoyaltyPointReason: {
+  RENEWAL: 'RENEWAL',
+  ON_TIME_PAYMENT: 'ON_TIME_PAYMENT',
+  VALIDATED_REPORT: 'VALIDATED_REPORT',
+  ONBOARDING_QUEST: 'ONBOARDING_QUEST',
+  REDEMPTION: 'REDEMPTION',
+  ADJUSTMENT: 'ADJUSTMENT'
+};
+
+export type LoyaltyPointReason = (typeof LoyaltyPointReason)[keyof typeof LoyaltyPointReason]
+
+
+export const LoyaltyRewardType: {
+  RENT_DISCOUNT: 'RENT_DISCOUNT',
+  SERVICE_ADDON: 'SERVICE_ADDON',
+  METER_DISCOUNT: 'METER_DISCOUNT',
+  BADGE: 'BADGE',
+  PHYSICAL: 'PHYSICAL'
+};
+
+export type LoyaltyRewardType = (typeof LoyaltyRewardType)[keyof typeof LoyaltyRewardType]
+
+
+export const RedemptionStatus: {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  FULFILLED: 'FULFILLED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type RedemptionStatus = (typeof RedemptionStatus)[keyof typeof RedemptionStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -1057,6 +1106,18 @@ export const BelongingsStatus: typeof $Enums.BelongingsStatus
 export type PushDeliveryStatus = $Enums.PushDeliveryStatus
 
 export const PushDeliveryStatus: typeof $Enums.PushDeliveryStatus
+
+export type LoyaltyPointReason = $Enums.LoyaltyPointReason
+
+export const LoyaltyPointReason: typeof $Enums.LoyaltyPointReason
+
+export type LoyaltyRewardType = $Enums.LoyaltyRewardType
+
+export const LoyaltyRewardType: typeof $Enums.LoyaltyRewardType
+
+export type RedemptionStatus = $Enums.RedemptionStatus
+
+export const RedemptionStatus: typeof $Enums.RedemptionStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1600,6 +1661,36 @@ export class PrismaClient<
   get rentRecognitionSchedule(): Prisma.RentRecognitionScheduleDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.loyaltyPoint`: Exposes CRUD operations for the **LoyaltyPoint** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoyaltyPoints
+    * const loyaltyPoints = await prisma.loyaltyPoint.findMany()
+    * ```
+    */
+  get loyaltyPoint(): Prisma.LoyaltyPointDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.loyaltyReward`: Exposes CRUD operations for the **LoyaltyReward** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LoyaltyRewards
+    * const loyaltyRewards = await prisma.loyaltyReward.findMany()
+    * ```
+    */
+  get loyaltyReward(): Prisma.LoyaltyRewardDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.redemption`: Exposes CRUD operations for the **Redemption** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Redemptions
+    * const redemptions = await prisma.redemption.findMany()
+    * ```
+    */
+  get redemption(): Prisma.RedemptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.faq`: Exposes CRUD operations for the **Faq** model.
     * Example usage:
     * ```ts
@@ -2084,6 +2175,9 @@ export namespace Prisma {
     JournalEntry: 'JournalEntry',
     JournalLine: 'JournalLine',
     RentRecognitionSchedule: 'RentRecognitionSchedule',
+    LoyaltyPoint: 'LoyaltyPoint',
+    LoyaltyReward: 'LoyaltyReward',
+    Redemption: 'Redemption',
     Faq: 'Faq'
   };
 
@@ -2100,7 +2194,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "faq"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "faq"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5212,6 +5306,228 @@ export namespace Prisma {
           }
         }
       }
+      LoyaltyPoint: {
+        payload: Prisma.$LoyaltyPointPayload<ExtArgs>
+        fields: Prisma.LoyaltyPointFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoyaltyPointFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoyaltyPointFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          findFirst: {
+            args: Prisma.LoyaltyPointFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoyaltyPointFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          findMany: {
+            args: Prisma.LoyaltyPointFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>[]
+          }
+          create: {
+            args: Prisma.LoyaltyPointCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          createMany: {
+            args: Prisma.LoyaltyPointCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoyaltyPointCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>[]
+          }
+          delete: {
+            args: Prisma.LoyaltyPointDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          update: {
+            args: Prisma.LoyaltyPointUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoyaltyPointDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoyaltyPointUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoyaltyPointUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoyaltyPointUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyPointPayload>
+          }
+          aggregate: {
+            args: Prisma.LoyaltyPointAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoyaltyPoint>
+          }
+          groupBy: {
+            args: Prisma.LoyaltyPointGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyPointGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoyaltyPointCountArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyPointCountAggregateOutputType> | number
+          }
+        }
+      }
+      LoyaltyReward: {
+        payload: Prisma.$LoyaltyRewardPayload<ExtArgs>
+        fields: Prisma.LoyaltyRewardFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LoyaltyRewardFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LoyaltyRewardFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          findFirst: {
+            args: Prisma.LoyaltyRewardFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LoyaltyRewardFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          findMany: {
+            args: Prisma.LoyaltyRewardFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>[]
+          }
+          create: {
+            args: Prisma.LoyaltyRewardCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          createMany: {
+            args: Prisma.LoyaltyRewardCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LoyaltyRewardCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>[]
+          }
+          delete: {
+            args: Prisma.LoyaltyRewardDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          update: {
+            args: Prisma.LoyaltyRewardUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          deleteMany: {
+            args: Prisma.LoyaltyRewardDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LoyaltyRewardUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LoyaltyRewardUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>[]
+          }
+          upsert: {
+            args: Prisma.LoyaltyRewardUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LoyaltyRewardPayload>
+          }
+          aggregate: {
+            args: Prisma.LoyaltyRewardAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLoyaltyReward>
+          }
+          groupBy: {
+            args: Prisma.LoyaltyRewardGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyRewardGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LoyaltyRewardCountArgs<ExtArgs>
+            result: $Utils.Optional<LoyaltyRewardCountAggregateOutputType> | number
+          }
+        }
+      }
+      Redemption: {
+        payload: Prisma.$RedemptionPayload<ExtArgs>
+        fields: Prisma.RedemptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RedemptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RedemptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          findFirst: {
+            args: Prisma.RedemptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RedemptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          findMany: {
+            args: Prisma.RedemptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>[]
+          }
+          create: {
+            args: Prisma.RedemptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          createMany: {
+            args: Prisma.RedemptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RedemptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>[]
+          }
+          delete: {
+            args: Prisma.RedemptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          update: {
+            args: Prisma.RedemptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.RedemptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RedemptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RedemptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.RedemptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RedemptionPayload>
+          }
+          aggregate: {
+            args: Prisma.RedemptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRedemption>
+          }
+          groupBy: {
+            args: Prisma.RedemptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RedemptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RedemptionCountArgs<ExtArgs>
+            result: $Utils.Optional<RedemptionCountAggregateOutputType> | number
+          }
+        }
+      }
       Faq: {
         payload: Prisma.$FaqPayload<ExtArgs>
         fields: Prisma.FaqFieldRefs
@@ -5436,6 +5752,9 @@ export namespace Prisma {
     journalEntry?: JournalEntryOmit
     journalLine?: JournalLineOmit
     rentRecognitionSchedule?: RentRecognitionScheduleOmit
+    loyaltyPoint?: LoyaltyPointOmit
+    loyaltyReward?: LoyaltyRewardOmit
+    redemption?: RedemptionOmit
     faq?: FaqOmit
   }
 
@@ -5842,6 +6161,8 @@ export namespace Prisma {
     renewRequests: number
     staffReviews: number
     depositLedgerEntries: number
+    loyaltyPoints: number
+    redemptions: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5851,6 +6172,8 @@ export namespace Prisma {
     renewRequests?: boolean | TenantCountOutputTypeCountRenewRequestsArgs
     staffReviews?: boolean | TenantCountOutputTypeCountStaffReviewsArgs
     depositLedgerEntries?: boolean | TenantCountOutputTypeCountDepositLedgerEntriesArgs
+    loyaltyPoints?: boolean | TenantCountOutputTypeCountLoyaltyPointsArgs
+    redemptions?: boolean | TenantCountOutputTypeCountRedemptionsArgs
   }
 
   // Custom InputTypes
@@ -5904,6 +6227,20 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountDepositLedgerEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantDepositLedgerEntryWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountLoyaltyPointsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyPointWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RedemptionWhereInput
   }
 
 
@@ -6709,6 +7046,7 @@ export namespace Prisma {
     depreciationRuns: number
     fixedAssetLedgerAlignments: number
     rentRecognitions: number
+    redemptions: number
   }
 
   export type JournalEntryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6716,6 +7054,7 @@ export namespace Prisma {
     depreciationRuns?: boolean | JournalEntryCountOutputTypeCountDepreciationRunsArgs
     fixedAssetLedgerAlignments?: boolean | JournalEntryCountOutputTypeCountFixedAssetLedgerAlignmentsArgs
     rentRecognitions?: boolean | JournalEntryCountOutputTypeCountRentRecognitionsArgs
+    redemptions?: boolean | JournalEntryCountOutputTypeCountRedemptionsArgs
   }
 
   // Custom InputTypes
@@ -6755,6 +7094,44 @@ export namespace Prisma {
    */
   export type JournalEntryCountOutputTypeCountRentRecognitionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RentRecognitionScheduleWhereInput
+  }
+
+  /**
+   * JournalEntryCountOutputType without action
+   */
+  export type JournalEntryCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RedemptionWhereInput
+  }
+
+
+  /**
+   * Count Type LoyaltyRewardCountOutputType
+   */
+
+  export type LoyaltyRewardCountOutputType = {
+    redemptions: number
+  }
+
+  export type LoyaltyRewardCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    redemptions?: boolean | LoyaltyRewardCountOutputTypeCountRedemptionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * LoyaltyRewardCountOutputType without action
+   */
+  export type LoyaltyRewardCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyRewardCountOutputType
+     */
+    select?: LoyaltyRewardCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyRewardCountOutputType without action
+   */
+  export type LoyaltyRewardCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RedemptionWhereInput
   }
 
 
@@ -9252,6 +9629,8 @@ export namespace Prisma {
     renewRequests?: boolean | Tenant$renewRequestsArgs<ExtArgs>
     staffReviews?: boolean | Tenant$staffReviewsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
+    loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
+    redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -9348,6 +9727,8 @@ export namespace Prisma {
     renewRequests?: boolean | Tenant$renewRequestsArgs<ExtArgs>
     staffReviews?: boolean | Tenant$staffReviewsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
+    loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
+    redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9368,6 +9749,8 @@ export namespace Prisma {
       renewRequests: Prisma.$RenewRequestPayload<ExtArgs>[]
       staffReviews: Prisma.$StaffReviewPayload<ExtArgs>[]
       depositLedgerEntries: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
+      loyaltyPoints: Prisma.$LoyaltyPointPayload<ExtArgs>[]
+      redemptions: Prisma.$RedemptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -9796,6 +10179,8 @@ export namespace Prisma {
     renewRequests<T extends Tenant$renewRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$renewRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staffReviews<T extends Tenant$staffReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$staffReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     depositLedgerEntries<T extends Tenant$depositLedgerEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$depositLedgerEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loyaltyPoints<T extends Tenant$loyaltyPointsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$loyaltyPointsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    redemptions<T extends Tenant$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10429,6 +10814,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TenantDepositLedgerEntryScalarFieldEnum | TenantDepositLedgerEntryScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.loyaltyPoints
+   */
+  export type Tenant$loyaltyPointsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    where?: LoyaltyPointWhereInput
+    orderBy?: LoyaltyPointOrderByWithRelationInput | LoyaltyPointOrderByWithRelationInput[]
+    cursor?: LoyaltyPointWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LoyaltyPointScalarFieldEnum | LoyaltyPointScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.redemptions
+   */
+  export type Tenant$redemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    where?: RedemptionWhereInput
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    cursor?: RedemptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
   }
 
   /**
@@ -59506,6 +59939,7 @@ export namespace Prisma {
     depreciationRuns?: boolean | JournalEntry$depreciationRunsArgs<ExtArgs>
     fixedAssetLedgerAlignments?: boolean | JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>
     rentRecognitions?: boolean | JournalEntry$rentRecognitionsArgs<ExtArgs>
+    redemptions?: boolean | JournalEntry$redemptionsArgs<ExtArgs>
     _count?: boolean | JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["journalEntry"]>
 
@@ -59578,6 +60012,7 @@ export namespace Prisma {
     depreciationRuns?: boolean | JournalEntry$depreciationRunsArgs<ExtArgs>
     fixedAssetLedgerAlignments?: boolean | JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>
     rentRecognitions?: boolean | JournalEntry$rentRecognitionsArgs<ExtArgs>
+    redemptions?: boolean | JournalEntry$redemptionsArgs<ExtArgs>
     _count?: boolean | JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JournalEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -59595,6 +60030,7 @@ export namespace Prisma {
       depreciationRuns: Prisma.$AssetDepreciationRunPayload<ExtArgs>[]
       fixedAssetLedgerAlignments: Prisma.$FixedAssetPayload<ExtArgs>[]
       rentRecognitions: Prisma.$RentRecognitionSchedulePayload<ExtArgs>[]
+      redemptions: Prisma.$RedemptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -60013,6 +60449,7 @@ export namespace Prisma {
     depreciationRuns<T extends JournalEntry$depreciationRunsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$depreciationRunsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssetDepreciationRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fixedAssetLedgerAlignments<T extends JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FixedAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     rentRecognitions<T extends JournalEntry$rentRecognitionsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$rentRecognitionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    redemptions<T extends JournalEntry$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -60572,6 +61009,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * JournalEntry.redemptions
+   */
+  export type JournalEntry$redemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    where?: RedemptionWhereInput
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    cursor?: RedemptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
   }
 
   /**
@@ -62994,6 +63455,3570 @@ export namespace Prisma {
 
 
   /**
+   * Model LoyaltyPoint
+   */
+
+  export type AggregateLoyaltyPoint = {
+    _count: LoyaltyPointCountAggregateOutputType | null
+    _avg: LoyaltyPointAvgAggregateOutputType | null
+    _sum: LoyaltyPointSumAggregateOutputType | null
+    _min: LoyaltyPointMinAggregateOutputType | null
+    _max: LoyaltyPointMaxAggregateOutputType | null
+  }
+
+  export type LoyaltyPointAvgAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    delta: number | null
+    createdById: number | null
+  }
+
+  export type LoyaltyPointSumAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    delta: number | null
+    createdById: number | null
+  }
+
+  export type LoyaltyPointMinAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    delta: number | null
+    reason: $Enums.LoyaltyPointReason | null
+    sourceType: string | null
+    sourceId: string | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type LoyaltyPointMaxAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    delta: number | null
+    reason: $Enums.LoyaltyPointReason | null
+    sourceType: string | null
+    sourceId: string | null
+    note: string | null
+    createdById: number | null
+    createdAt: Date | null
+  }
+
+  export type LoyaltyPointCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    delta: number
+    reason: number
+    sourceType: number
+    sourceId: number
+    note: number
+    createdById: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type LoyaltyPointAvgAggregateInputType = {
+    id?: true
+    tenantId?: true
+    delta?: true
+    createdById?: true
+  }
+
+  export type LoyaltyPointSumAggregateInputType = {
+    id?: true
+    tenantId?: true
+    delta?: true
+    createdById?: true
+  }
+
+  export type LoyaltyPointMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    delta?: true
+    reason?: true
+    sourceType?: true
+    sourceId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type LoyaltyPointMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    delta?: true
+    reason?: true
+    sourceType?: true
+    sourceId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+  }
+
+  export type LoyaltyPointCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    delta?: true
+    reason?: true
+    sourceType?: true
+    sourceId?: true
+    note?: true
+    createdById?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type LoyaltyPointAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyPoint to aggregate.
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPoints to fetch.
+     */
+    orderBy?: LoyaltyPointOrderByWithRelationInput | LoyaltyPointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoyaltyPointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoyaltyPoints
+    **/
+    _count?: true | LoyaltyPointCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoyaltyPointAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoyaltyPointSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoyaltyPointMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoyaltyPointMaxAggregateInputType
+  }
+
+  export type GetLoyaltyPointAggregateType<T extends LoyaltyPointAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoyaltyPoint]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoyaltyPoint[P]>
+      : GetScalarType<T[P], AggregateLoyaltyPoint[P]>
+  }
+
+
+
+
+  export type LoyaltyPointGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyPointWhereInput
+    orderBy?: LoyaltyPointOrderByWithAggregationInput | LoyaltyPointOrderByWithAggregationInput[]
+    by: LoyaltyPointScalarFieldEnum[] | LoyaltyPointScalarFieldEnum
+    having?: LoyaltyPointScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoyaltyPointCountAggregateInputType | true
+    _avg?: LoyaltyPointAvgAggregateInputType
+    _sum?: LoyaltyPointSumAggregateInputType
+    _min?: LoyaltyPointMinAggregateInputType
+    _max?: LoyaltyPointMaxAggregateInputType
+  }
+
+  export type LoyaltyPointGroupByOutputType = {
+    id: number
+    tenantId: number
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note: string | null
+    createdById: number | null
+    createdAt: Date
+    _count: LoyaltyPointCountAggregateOutputType | null
+    _avg: LoyaltyPointAvgAggregateOutputType | null
+    _sum: LoyaltyPointSumAggregateOutputType | null
+    _min: LoyaltyPointMinAggregateOutputType | null
+    _max: LoyaltyPointMaxAggregateOutputType | null
+  }
+
+  type GetLoyaltyPointGroupByPayload<T extends LoyaltyPointGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoyaltyPointGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoyaltyPointGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoyaltyPointGroupByOutputType[P]>
+            : GetScalarType<T[P], LoyaltyPointGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoyaltyPointSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    delta?: boolean
+    reason?: boolean
+    sourceType?: boolean
+    sourceId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyPoint"]>
+
+  export type LoyaltyPointSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    delta?: boolean
+    reason?: boolean
+    sourceType?: boolean
+    sourceId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyPoint"]>
+
+  export type LoyaltyPointSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    delta?: boolean
+    reason?: boolean
+    sourceType?: boolean
+    sourceId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyPoint"]>
+
+  export type LoyaltyPointSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    delta?: boolean
+    reason?: boolean
+    sourceType?: boolean
+    sourceId?: boolean
+    note?: boolean
+    createdById?: boolean
+    createdAt?: boolean
+  }
+
+  export type LoyaltyPointOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "delta" | "reason" | "sourceType" | "sourceId" | "note" | "createdById" | "createdAt", ExtArgs["result"]["loyaltyPoint"]>
+  export type LoyaltyPointInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyPointIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyPointIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+  }
+
+  export type $LoyaltyPointPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoyaltyPoint"
+    objects: {
+      tenant: Prisma.$TenantPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      tenantId: number
+      delta: number
+      reason: $Enums.LoyaltyPointReason
+      sourceType: string
+      sourceId: string
+      note: string | null
+      createdById: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["loyaltyPoint"]>
+    composites: {}
+  }
+
+  type LoyaltyPointGetPayload<S extends boolean | null | undefined | LoyaltyPointDefaultArgs> = $Result.GetResult<Prisma.$LoyaltyPointPayload, S>
+
+  type LoyaltyPointCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoyaltyPointFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoyaltyPointCountAggregateInputType | true
+    }
+
+  export interface LoyaltyPointDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoyaltyPoint'], meta: { name: 'LoyaltyPoint' } }
+    /**
+     * Find zero or one LoyaltyPoint that matches the filter.
+     * @param {LoyaltyPointFindUniqueArgs} args - Arguments to find a LoyaltyPoint
+     * @example
+     * // Get one LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoyaltyPointFindUniqueArgs>(args: SelectSubset<T, LoyaltyPointFindUniqueArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoyaltyPoint that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoyaltyPointFindUniqueOrThrowArgs} args - Arguments to find a LoyaltyPoint
+     * @example
+     * // Get one LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoyaltyPointFindUniqueOrThrowArgs>(args: SelectSubset<T, LoyaltyPointFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyPoint that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointFindFirstArgs} args - Arguments to find a LoyaltyPoint
+     * @example
+     * // Get one LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoyaltyPointFindFirstArgs>(args?: SelectSubset<T, LoyaltyPointFindFirstArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyPoint that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointFindFirstOrThrowArgs} args - Arguments to find a LoyaltyPoint
+     * @example
+     * // Get one LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoyaltyPointFindFirstOrThrowArgs>(args?: SelectSubset<T, LoyaltyPointFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoyaltyPoints that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoyaltyPoints
+     * const loyaltyPoints = await prisma.loyaltyPoint.findMany()
+     * 
+     * // Get first 10 LoyaltyPoints
+     * const loyaltyPoints = await prisma.loyaltyPoint.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loyaltyPointWithIdOnly = await prisma.loyaltyPoint.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoyaltyPointFindManyArgs>(args?: SelectSubset<T, LoyaltyPointFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoyaltyPoint.
+     * @param {LoyaltyPointCreateArgs} args - Arguments to create a LoyaltyPoint.
+     * @example
+     * // Create one LoyaltyPoint
+     * const LoyaltyPoint = await prisma.loyaltyPoint.create({
+     *   data: {
+     *     // ... data to create a LoyaltyPoint
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoyaltyPointCreateArgs>(args: SelectSubset<T, LoyaltyPointCreateArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoyaltyPoints.
+     * @param {LoyaltyPointCreateManyArgs} args - Arguments to create many LoyaltyPoints.
+     * @example
+     * // Create many LoyaltyPoints
+     * const loyaltyPoint = await prisma.loyaltyPoint.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoyaltyPointCreateManyArgs>(args?: SelectSubset<T, LoyaltyPointCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoyaltyPoints and returns the data saved in the database.
+     * @param {LoyaltyPointCreateManyAndReturnArgs} args - Arguments to create many LoyaltyPoints.
+     * @example
+     * // Create many LoyaltyPoints
+     * const loyaltyPoint = await prisma.loyaltyPoint.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoyaltyPoints and only return the `id`
+     * const loyaltyPointWithIdOnly = await prisma.loyaltyPoint.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoyaltyPointCreateManyAndReturnArgs>(args?: SelectSubset<T, LoyaltyPointCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoyaltyPoint.
+     * @param {LoyaltyPointDeleteArgs} args - Arguments to delete one LoyaltyPoint.
+     * @example
+     * // Delete one LoyaltyPoint
+     * const LoyaltyPoint = await prisma.loyaltyPoint.delete({
+     *   where: {
+     *     // ... filter to delete one LoyaltyPoint
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoyaltyPointDeleteArgs>(args: SelectSubset<T, LoyaltyPointDeleteArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoyaltyPoint.
+     * @param {LoyaltyPointUpdateArgs} args - Arguments to update one LoyaltyPoint.
+     * @example
+     * // Update one LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoyaltyPointUpdateArgs>(args: SelectSubset<T, LoyaltyPointUpdateArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoyaltyPoints.
+     * @param {LoyaltyPointDeleteManyArgs} args - Arguments to filter LoyaltyPoints to delete.
+     * @example
+     * // Delete a few LoyaltyPoints
+     * const { count } = await prisma.loyaltyPoint.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoyaltyPointDeleteManyArgs>(args?: SelectSubset<T, LoyaltyPointDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyPoints.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoyaltyPoints
+     * const loyaltyPoint = await prisma.loyaltyPoint.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoyaltyPointUpdateManyArgs>(args: SelectSubset<T, LoyaltyPointUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyPoints and returns the data updated in the database.
+     * @param {LoyaltyPointUpdateManyAndReturnArgs} args - Arguments to update many LoyaltyPoints.
+     * @example
+     * // Update many LoyaltyPoints
+     * const loyaltyPoint = await prisma.loyaltyPoint.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoyaltyPoints and only return the `id`
+     * const loyaltyPointWithIdOnly = await prisma.loyaltyPoint.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoyaltyPointUpdateManyAndReturnArgs>(args: SelectSubset<T, LoyaltyPointUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoyaltyPoint.
+     * @param {LoyaltyPointUpsertArgs} args - Arguments to update or create a LoyaltyPoint.
+     * @example
+     * // Update or create a LoyaltyPoint
+     * const loyaltyPoint = await prisma.loyaltyPoint.upsert({
+     *   create: {
+     *     // ... data to create a LoyaltyPoint
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoyaltyPoint we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoyaltyPointUpsertArgs>(args: SelectSubset<T, LoyaltyPointUpsertArgs<ExtArgs>>): Prisma__LoyaltyPointClient<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoyaltyPoints.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointCountArgs} args - Arguments to filter LoyaltyPoints to count.
+     * @example
+     * // Count the number of LoyaltyPoints
+     * const count = await prisma.loyaltyPoint.count({
+     *   where: {
+     *     // ... the filter for the LoyaltyPoints we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoyaltyPointCountArgs>(
+      args?: Subset<T, LoyaltyPointCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoyaltyPointCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoyaltyPoint.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoyaltyPointAggregateArgs>(args: Subset<T, LoyaltyPointAggregateArgs>): Prisma.PrismaPromise<GetLoyaltyPointAggregateType<T>>
+
+    /**
+     * Group by LoyaltyPoint.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyPointGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoyaltyPointGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoyaltyPointGroupByArgs['orderBy'] }
+        : { orderBy?: LoyaltyPointGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoyaltyPointGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoyaltyPointGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoyaltyPoint model
+   */
+  readonly fields: LoyaltyPointFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoyaltyPoint.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoyaltyPointClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoyaltyPoint model
+   */
+  interface LoyaltyPointFieldRefs {
+    readonly id: FieldRef<"LoyaltyPoint", 'Int'>
+    readonly tenantId: FieldRef<"LoyaltyPoint", 'Int'>
+    readonly delta: FieldRef<"LoyaltyPoint", 'Int'>
+    readonly reason: FieldRef<"LoyaltyPoint", 'LoyaltyPointReason'>
+    readonly sourceType: FieldRef<"LoyaltyPoint", 'String'>
+    readonly sourceId: FieldRef<"LoyaltyPoint", 'String'>
+    readonly note: FieldRef<"LoyaltyPoint", 'String'>
+    readonly createdById: FieldRef<"LoyaltyPoint", 'Int'>
+    readonly createdAt: FieldRef<"LoyaltyPoint", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoyaltyPoint findUnique
+   */
+  export type LoyaltyPointFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPoint to fetch.
+     */
+    where: LoyaltyPointWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyPoint findUniqueOrThrow
+   */
+  export type LoyaltyPointFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPoint to fetch.
+     */
+    where: LoyaltyPointWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyPoint findFirst
+   */
+  export type LoyaltyPointFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPoint to fetch.
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPoints to fetch.
+     */
+    orderBy?: LoyaltyPointOrderByWithRelationInput | LoyaltyPointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyPoints.
+     */
+    cursor?: LoyaltyPointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyPoints.
+     */
+    distinct?: LoyaltyPointScalarFieldEnum | LoyaltyPointScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyPoint findFirstOrThrow
+   */
+  export type LoyaltyPointFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPoint to fetch.
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPoints to fetch.
+     */
+    orderBy?: LoyaltyPointOrderByWithRelationInput | LoyaltyPointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyPoints.
+     */
+    cursor?: LoyaltyPointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyPoints.
+     */
+    distinct?: LoyaltyPointScalarFieldEnum | LoyaltyPointScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyPoint findMany
+   */
+  export type LoyaltyPointFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyPoints to fetch.
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyPoints to fetch.
+     */
+    orderBy?: LoyaltyPointOrderByWithRelationInput | LoyaltyPointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoyaltyPoints.
+     */
+    cursor?: LoyaltyPointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyPoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyPoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyPoints.
+     */
+    distinct?: LoyaltyPointScalarFieldEnum | LoyaltyPointScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyPoint create
+   */
+  export type LoyaltyPointCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoyaltyPoint.
+     */
+    data: XOR<LoyaltyPointCreateInput, LoyaltyPointUncheckedCreateInput>
+  }
+
+  /**
+   * LoyaltyPoint createMany
+   */
+  export type LoyaltyPointCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoyaltyPoints.
+     */
+    data: LoyaltyPointCreateManyInput | LoyaltyPointCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyPoint createManyAndReturn
+   */
+  export type LoyaltyPointCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoyaltyPoints.
+     */
+    data: LoyaltyPointCreateManyInput | LoyaltyPointCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyPoint update
+   */
+  export type LoyaltyPointUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoyaltyPoint.
+     */
+    data: XOR<LoyaltyPointUpdateInput, LoyaltyPointUncheckedUpdateInput>
+    /**
+     * Choose, which LoyaltyPoint to update.
+     */
+    where: LoyaltyPointWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyPoint updateMany
+   */
+  export type LoyaltyPointUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoyaltyPoints.
+     */
+    data: XOR<LoyaltyPointUpdateManyMutationInput, LoyaltyPointUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyPoints to update
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * Limit how many LoyaltyPoints to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyPoint updateManyAndReturn
+   */
+  export type LoyaltyPointUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * The data used to update LoyaltyPoints.
+     */
+    data: XOR<LoyaltyPointUpdateManyMutationInput, LoyaltyPointUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyPoints to update
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * Limit how many LoyaltyPoints to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LoyaltyPoint upsert
+   */
+  export type LoyaltyPointUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoyaltyPoint to update in case it exists.
+     */
+    where: LoyaltyPointWhereUniqueInput
+    /**
+     * In case the LoyaltyPoint found by the `where` argument doesn't exist, create a new LoyaltyPoint with this data.
+     */
+    create: XOR<LoyaltyPointCreateInput, LoyaltyPointUncheckedCreateInput>
+    /**
+     * In case the LoyaltyPoint was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoyaltyPointUpdateInput, LoyaltyPointUncheckedUpdateInput>
+  }
+
+  /**
+   * LoyaltyPoint delete
+   */
+  export type LoyaltyPointDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+    /**
+     * Filter which LoyaltyPoint to delete.
+     */
+    where: LoyaltyPointWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyPoint deleteMany
+   */
+  export type LoyaltyPointDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyPoints to delete
+     */
+    where?: LoyaltyPointWhereInput
+    /**
+     * Limit how many LoyaltyPoints to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyPoint without action
+   */
+  export type LoyaltyPointDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyPoint
+     */
+    select?: LoyaltyPointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyPoint
+     */
+    omit?: LoyaltyPointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyPointInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LoyaltyReward
+   */
+
+  export type AggregateLoyaltyReward = {
+    _count: LoyaltyRewardCountAggregateOutputType | null
+    _avg: LoyaltyRewardAvgAggregateOutputType | null
+    _sum: LoyaltyRewardSumAggregateOutputType | null
+    _min: LoyaltyRewardMinAggregateOutputType | null
+    _max: LoyaltyRewardMaxAggregateOutputType | null
+  }
+
+  export type LoyaltyRewardAvgAggregateOutputType = {
+    id: number | null
+    pointCost: number | null
+    valueRupiah: number | null
+    stockQty: number | null
+  }
+
+  export type LoyaltyRewardSumAggregateOutputType = {
+    id: number | null
+    pointCost: number | null
+    valueRupiah: number | null
+    stockQty: number | null
+  }
+
+  export type LoyaltyRewardMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+    description: string | null
+    pointCost: number | null
+    type: $Enums.LoyaltyRewardType | null
+    valueRupiah: number | null
+    isActive: boolean | null
+    stockQty: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type LoyaltyRewardMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+    description: string | null
+    pointCost: number | null
+    type: $Enums.LoyaltyRewardType | null
+    valueRupiah: number | null
+    isActive: boolean | null
+    stockQty: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type LoyaltyRewardCountAggregateOutputType = {
+    id: number
+    name: number
+    description: number
+    pointCost: number
+    type: number
+    valueRupiah: number
+    isActive: number
+    stockQty: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type LoyaltyRewardAvgAggregateInputType = {
+    id?: true
+    pointCost?: true
+    valueRupiah?: true
+    stockQty?: true
+  }
+
+  export type LoyaltyRewardSumAggregateInputType = {
+    id?: true
+    pointCost?: true
+    valueRupiah?: true
+    stockQty?: true
+  }
+
+  export type LoyaltyRewardMinAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    pointCost?: true
+    type?: true
+    valueRupiah?: true
+    isActive?: true
+    stockQty?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type LoyaltyRewardMaxAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    pointCost?: true
+    type?: true
+    valueRupiah?: true
+    isActive?: true
+    stockQty?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type LoyaltyRewardCountAggregateInputType = {
+    id?: true
+    name?: true
+    description?: true
+    pointCost?: true
+    type?: true
+    valueRupiah?: true
+    isActive?: true
+    stockQty?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type LoyaltyRewardAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyReward to aggregate.
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewards to fetch.
+     */
+    orderBy?: LoyaltyRewardOrderByWithRelationInput | LoyaltyRewardOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LoyaltyRewardWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LoyaltyRewards
+    **/
+    _count?: true | LoyaltyRewardCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: LoyaltyRewardAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: LoyaltyRewardSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LoyaltyRewardMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LoyaltyRewardMaxAggregateInputType
+  }
+
+  export type GetLoyaltyRewardAggregateType<T extends LoyaltyRewardAggregateArgs> = {
+        [P in keyof T & keyof AggregateLoyaltyReward]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLoyaltyReward[P]>
+      : GetScalarType<T[P], AggregateLoyaltyReward[P]>
+  }
+
+
+
+
+  export type LoyaltyRewardGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LoyaltyRewardWhereInput
+    orderBy?: LoyaltyRewardOrderByWithAggregationInput | LoyaltyRewardOrderByWithAggregationInput[]
+    by: LoyaltyRewardScalarFieldEnum[] | LoyaltyRewardScalarFieldEnum
+    having?: LoyaltyRewardScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LoyaltyRewardCountAggregateInputType | true
+    _avg?: LoyaltyRewardAvgAggregateInputType
+    _sum?: LoyaltyRewardSumAggregateInputType
+    _min?: LoyaltyRewardMinAggregateInputType
+    _max?: LoyaltyRewardMaxAggregateInputType
+  }
+
+  export type LoyaltyRewardGroupByOutputType = {
+    id: number
+    name: string
+    description: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah: number | null
+    isActive: boolean
+    stockQty: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: LoyaltyRewardCountAggregateOutputType | null
+    _avg: LoyaltyRewardAvgAggregateOutputType | null
+    _sum: LoyaltyRewardSumAggregateOutputType | null
+    _min: LoyaltyRewardMinAggregateOutputType | null
+    _max: LoyaltyRewardMaxAggregateOutputType | null
+  }
+
+  type GetLoyaltyRewardGroupByPayload<T extends LoyaltyRewardGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LoyaltyRewardGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LoyaltyRewardGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LoyaltyRewardGroupByOutputType[P]>
+            : GetScalarType<T[P], LoyaltyRewardGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LoyaltyRewardSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    pointCost?: boolean
+    type?: boolean
+    valueRupiah?: boolean
+    isActive?: boolean
+    stockQty?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    redemptions?: boolean | LoyaltyReward$redemptionsArgs<ExtArgs>
+    _count?: boolean | LoyaltyRewardCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["loyaltyReward"]>
+
+  export type LoyaltyRewardSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    pointCost?: boolean
+    type?: boolean
+    valueRupiah?: boolean
+    isActive?: boolean
+    stockQty?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["loyaltyReward"]>
+
+  export type LoyaltyRewardSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    pointCost?: boolean
+    type?: boolean
+    valueRupiah?: boolean
+    isActive?: boolean
+    stockQty?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["loyaltyReward"]>
+
+  export type LoyaltyRewardSelectScalar = {
+    id?: boolean
+    name?: boolean
+    description?: boolean
+    pointCost?: boolean
+    type?: boolean
+    valueRupiah?: boolean
+    isActive?: boolean
+    stockQty?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type LoyaltyRewardOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "pointCost" | "type" | "valueRupiah" | "isActive" | "stockQty" | "createdAt" | "updatedAt", ExtArgs["result"]["loyaltyReward"]>
+  export type LoyaltyRewardInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    redemptions?: boolean | LoyaltyReward$redemptionsArgs<ExtArgs>
+    _count?: boolean | LoyaltyRewardCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type LoyaltyRewardIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type LoyaltyRewardIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $LoyaltyRewardPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LoyaltyReward"
+    objects: {
+      redemptions: Prisma.$RedemptionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+      description: string | null
+      pointCost: number
+      type: $Enums.LoyaltyRewardType
+      valueRupiah: number | null
+      isActive: boolean
+      stockQty: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["loyaltyReward"]>
+    composites: {}
+  }
+
+  type LoyaltyRewardGetPayload<S extends boolean | null | undefined | LoyaltyRewardDefaultArgs> = $Result.GetResult<Prisma.$LoyaltyRewardPayload, S>
+
+  type LoyaltyRewardCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LoyaltyRewardFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LoyaltyRewardCountAggregateInputType | true
+    }
+
+  export interface LoyaltyRewardDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LoyaltyReward'], meta: { name: 'LoyaltyReward' } }
+    /**
+     * Find zero or one LoyaltyReward that matches the filter.
+     * @param {LoyaltyRewardFindUniqueArgs} args - Arguments to find a LoyaltyReward
+     * @example
+     * // Get one LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LoyaltyRewardFindUniqueArgs>(args: SelectSubset<T, LoyaltyRewardFindUniqueArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LoyaltyReward that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LoyaltyRewardFindUniqueOrThrowArgs} args - Arguments to find a LoyaltyReward
+     * @example
+     * // Get one LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LoyaltyRewardFindUniqueOrThrowArgs>(args: SelectSubset<T, LoyaltyRewardFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyReward that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardFindFirstArgs} args - Arguments to find a LoyaltyReward
+     * @example
+     * // Get one LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LoyaltyRewardFindFirstArgs>(args?: SelectSubset<T, LoyaltyRewardFindFirstArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LoyaltyReward that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardFindFirstOrThrowArgs} args - Arguments to find a LoyaltyReward
+     * @example
+     * // Get one LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LoyaltyRewardFindFirstOrThrowArgs>(args?: SelectSubset<T, LoyaltyRewardFindFirstOrThrowArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LoyaltyRewards that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LoyaltyRewards
+     * const loyaltyRewards = await prisma.loyaltyReward.findMany()
+     * 
+     * // Get first 10 LoyaltyRewards
+     * const loyaltyRewards = await prisma.loyaltyReward.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const loyaltyRewardWithIdOnly = await prisma.loyaltyReward.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LoyaltyRewardFindManyArgs>(args?: SelectSubset<T, LoyaltyRewardFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LoyaltyReward.
+     * @param {LoyaltyRewardCreateArgs} args - Arguments to create a LoyaltyReward.
+     * @example
+     * // Create one LoyaltyReward
+     * const LoyaltyReward = await prisma.loyaltyReward.create({
+     *   data: {
+     *     // ... data to create a LoyaltyReward
+     *   }
+     * })
+     * 
+     */
+    create<T extends LoyaltyRewardCreateArgs>(args: SelectSubset<T, LoyaltyRewardCreateArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LoyaltyRewards.
+     * @param {LoyaltyRewardCreateManyArgs} args - Arguments to create many LoyaltyRewards.
+     * @example
+     * // Create many LoyaltyRewards
+     * const loyaltyReward = await prisma.loyaltyReward.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LoyaltyRewardCreateManyArgs>(args?: SelectSubset<T, LoyaltyRewardCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LoyaltyRewards and returns the data saved in the database.
+     * @param {LoyaltyRewardCreateManyAndReturnArgs} args - Arguments to create many LoyaltyRewards.
+     * @example
+     * // Create many LoyaltyRewards
+     * const loyaltyReward = await prisma.loyaltyReward.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LoyaltyRewards and only return the `id`
+     * const loyaltyRewardWithIdOnly = await prisma.loyaltyReward.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LoyaltyRewardCreateManyAndReturnArgs>(args?: SelectSubset<T, LoyaltyRewardCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LoyaltyReward.
+     * @param {LoyaltyRewardDeleteArgs} args - Arguments to delete one LoyaltyReward.
+     * @example
+     * // Delete one LoyaltyReward
+     * const LoyaltyReward = await prisma.loyaltyReward.delete({
+     *   where: {
+     *     // ... filter to delete one LoyaltyReward
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LoyaltyRewardDeleteArgs>(args: SelectSubset<T, LoyaltyRewardDeleteArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LoyaltyReward.
+     * @param {LoyaltyRewardUpdateArgs} args - Arguments to update one LoyaltyReward.
+     * @example
+     * // Update one LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LoyaltyRewardUpdateArgs>(args: SelectSubset<T, LoyaltyRewardUpdateArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LoyaltyRewards.
+     * @param {LoyaltyRewardDeleteManyArgs} args - Arguments to filter LoyaltyRewards to delete.
+     * @example
+     * // Delete a few LoyaltyRewards
+     * const { count } = await prisma.loyaltyReward.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LoyaltyRewardDeleteManyArgs>(args?: SelectSubset<T, LoyaltyRewardDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyRewards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LoyaltyRewards
+     * const loyaltyReward = await prisma.loyaltyReward.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LoyaltyRewardUpdateManyArgs>(args: SelectSubset<T, LoyaltyRewardUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LoyaltyRewards and returns the data updated in the database.
+     * @param {LoyaltyRewardUpdateManyAndReturnArgs} args - Arguments to update many LoyaltyRewards.
+     * @example
+     * // Update many LoyaltyRewards
+     * const loyaltyReward = await prisma.loyaltyReward.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LoyaltyRewards and only return the `id`
+     * const loyaltyRewardWithIdOnly = await prisma.loyaltyReward.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LoyaltyRewardUpdateManyAndReturnArgs>(args: SelectSubset<T, LoyaltyRewardUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LoyaltyReward.
+     * @param {LoyaltyRewardUpsertArgs} args - Arguments to update or create a LoyaltyReward.
+     * @example
+     * // Update or create a LoyaltyReward
+     * const loyaltyReward = await prisma.loyaltyReward.upsert({
+     *   create: {
+     *     // ... data to create a LoyaltyReward
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LoyaltyReward we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LoyaltyRewardUpsertArgs>(args: SelectSubset<T, LoyaltyRewardUpsertArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LoyaltyRewards.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardCountArgs} args - Arguments to filter LoyaltyRewards to count.
+     * @example
+     * // Count the number of LoyaltyRewards
+     * const count = await prisma.loyaltyReward.count({
+     *   where: {
+     *     // ... the filter for the LoyaltyRewards we want to count
+     *   }
+     * })
+    **/
+    count<T extends LoyaltyRewardCountArgs>(
+      args?: Subset<T, LoyaltyRewardCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LoyaltyRewardCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LoyaltyReward.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LoyaltyRewardAggregateArgs>(args: Subset<T, LoyaltyRewardAggregateArgs>): Prisma.PrismaPromise<GetLoyaltyRewardAggregateType<T>>
+
+    /**
+     * Group by LoyaltyReward.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LoyaltyRewardGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LoyaltyRewardGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LoyaltyRewardGroupByArgs['orderBy'] }
+        : { orderBy?: LoyaltyRewardGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LoyaltyRewardGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLoyaltyRewardGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LoyaltyReward model
+   */
+  readonly fields: LoyaltyRewardFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LoyaltyReward.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LoyaltyRewardClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    redemptions<T extends LoyaltyReward$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyReward$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LoyaltyReward model
+   */
+  interface LoyaltyRewardFieldRefs {
+    readonly id: FieldRef<"LoyaltyReward", 'Int'>
+    readonly name: FieldRef<"LoyaltyReward", 'String'>
+    readonly description: FieldRef<"LoyaltyReward", 'String'>
+    readonly pointCost: FieldRef<"LoyaltyReward", 'Int'>
+    readonly type: FieldRef<"LoyaltyReward", 'LoyaltyRewardType'>
+    readonly valueRupiah: FieldRef<"LoyaltyReward", 'Int'>
+    readonly isActive: FieldRef<"LoyaltyReward", 'Boolean'>
+    readonly stockQty: FieldRef<"LoyaltyReward", 'Int'>
+    readonly createdAt: FieldRef<"LoyaltyReward", 'DateTime'>
+    readonly updatedAt: FieldRef<"LoyaltyReward", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LoyaltyReward findUnique
+   */
+  export type LoyaltyRewardFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyReward to fetch.
+     */
+    where: LoyaltyRewardWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyReward findUniqueOrThrow
+   */
+  export type LoyaltyRewardFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyReward to fetch.
+     */
+    where: LoyaltyRewardWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyReward findFirst
+   */
+  export type LoyaltyRewardFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyReward to fetch.
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewards to fetch.
+     */
+    orderBy?: LoyaltyRewardOrderByWithRelationInput | LoyaltyRewardOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyRewards.
+     */
+    cursor?: LoyaltyRewardWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyRewards.
+     */
+    distinct?: LoyaltyRewardScalarFieldEnum | LoyaltyRewardScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyReward findFirstOrThrow
+   */
+  export type LoyaltyRewardFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyReward to fetch.
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewards to fetch.
+     */
+    orderBy?: LoyaltyRewardOrderByWithRelationInput | LoyaltyRewardOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LoyaltyRewards.
+     */
+    cursor?: LoyaltyRewardWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyRewards.
+     */
+    distinct?: LoyaltyRewardScalarFieldEnum | LoyaltyRewardScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyReward findMany
+   */
+  export type LoyaltyRewardFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter, which LoyaltyRewards to fetch.
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LoyaltyRewards to fetch.
+     */
+    orderBy?: LoyaltyRewardOrderByWithRelationInput | LoyaltyRewardOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LoyaltyRewards.
+     */
+    cursor?: LoyaltyRewardWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LoyaltyRewards from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LoyaltyRewards.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LoyaltyRewards.
+     */
+    distinct?: LoyaltyRewardScalarFieldEnum | LoyaltyRewardScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyReward create
+   */
+  export type LoyaltyRewardCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LoyaltyReward.
+     */
+    data: XOR<LoyaltyRewardCreateInput, LoyaltyRewardUncheckedCreateInput>
+  }
+
+  /**
+   * LoyaltyReward createMany
+   */
+  export type LoyaltyRewardCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LoyaltyRewards.
+     */
+    data: LoyaltyRewardCreateManyInput | LoyaltyRewardCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyReward createManyAndReturn
+   */
+  export type LoyaltyRewardCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * The data used to create many LoyaltyRewards.
+     */
+    data: LoyaltyRewardCreateManyInput | LoyaltyRewardCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LoyaltyReward update
+   */
+  export type LoyaltyRewardUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LoyaltyReward.
+     */
+    data: XOR<LoyaltyRewardUpdateInput, LoyaltyRewardUncheckedUpdateInput>
+    /**
+     * Choose, which LoyaltyReward to update.
+     */
+    where: LoyaltyRewardWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyReward updateMany
+   */
+  export type LoyaltyRewardUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LoyaltyRewards.
+     */
+    data: XOR<LoyaltyRewardUpdateManyMutationInput, LoyaltyRewardUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyRewards to update
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * Limit how many LoyaltyRewards to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyReward updateManyAndReturn
+   */
+  export type LoyaltyRewardUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * The data used to update LoyaltyRewards.
+     */
+    data: XOR<LoyaltyRewardUpdateManyMutationInput, LoyaltyRewardUncheckedUpdateManyInput>
+    /**
+     * Filter which LoyaltyRewards to update
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * Limit how many LoyaltyRewards to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyReward upsert
+   */
+  export type LoyaltyRewardUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LoyaltyReward to update in case it exists.
+     */
+    where: LoyaltyRewardWhereUniqueInput
+    /**
+     * In case the LoyaltyReward found by the `where` argument doesn't exist, create a new LoyaltyReward with this data.
+     */
+    create: XOR<LoyaltyRewardCreateInput, LoyaltyRewardUncheckedCreateInput>
+    /**
+     * In case the LoyaltyReward was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LoyaltyRewardUpdateInput, LoyaltyRewardUncheckedUpdateInput>
+  }
+
+  /**
+   * LoyaltyReward delete
+   */
+  export type LoyaltyRewardDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+    /**
+     * Filter which LoyaltyReward to delete.
+     */
+    where: LoyaltyRewardWhereUniqueInput
+  }
+
+  /**
+   * LoyaltyReward deleteMany
+   */
+  export type LoyaltyRewardDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LoyaltyRewards to delete
+     */
+    where?: LoyaltyRewardWhereInput
+    /**
+     * Limit how many LoyaltyRewards to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LoyaltyReward.redemptions
+   */
+  export type LoyaltyReward$redemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    where?: RedemptionWhereInput
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    cursor?: RedemptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
+  }
+
+  /**
+   * LoyaltyReward without action
+   */
+  export type LoyaltyRewardDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LoyaltyReward
+     */
+    select?: LoyaltyRewardSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LoyaltyReward
+     */
+    omit?: LoyaltyRewardOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LoyaltyRewardInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Redemption
+   */
+
+  export type AggregateRedemption = {
+    _count: RedemptionCountAggregateOutputType | null
+    _avg: RedemptionAvgAggregateOutputType | null
+    _sum: RedemptionSumAggregateOutputType | null
+    _min: RedemptionMinAggregateOutputType | null
+    _max: RedemptionMaxAggregateOutputType | null
+  }
+
+  export type RedemptionAvgAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    rewardId: number | null
+    pointCost: number | null
+    decidedById: number | null
+    journalEntryId: number | null
+  }
+
+  export type RedemptionSumAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    rewardId: number | null
+    pointCost: number | null
+    decidedById: number | null
+    journalEntryId: number | null
+  }
+
+  export type RedemptionMinAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    rewardId: number | null
+    pointCost: number | null
+    status: $Enums.RedemptionStatus | null
+    requestedAt: Date | null
+    decidedAt: Date | null
+    decidedById: number | null
+    journalEntryId: number | null
+    note: string | null
+  }
+
+  export type RedemptionMaxAggregateOutputType = {
+    id: number | null
+    tenantId: number | null
+    rewardId: number | null
+    pointCost: number | null
+    status: $Enums.RedemptionStatus | null
+    requestedAt: Date | null
+    decidedAt: Date | null
+    decidedById: number | null
+    journalEntryId: number | null
+    note: string | null
+  }
+
+  export type RedemptionCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status: number
+    requestedAt: number
+    decidedAt: number
+    decidedById: number
+    journalEntryId: number
+    note: number
+    _all: number
+  }
+
+
+  export type RedemptionAvgAggregateInputType = {
+    id?: true
+    tenantId?: true
+    rewardId?: true
+    pointCost?: true
+    decidedById?: true
+    journalEntryId?: true
+  }
+
+  export type RedemptionSumAggregateInputType = {
+    id?: true
+    tenantId?: true
+    rewardId?: true
+    pointCost?: true
+    decidedById?: true
+    journalEntryId?: true
+  }
+
+  export type RedemptionMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    rewardId?: true
+    pointCost?: true
+    status?: true
+    requestedAt?: true
+    decidedAt?: true
+    decidedById?: true
+    journalEntryId?: true
+    note?: true
+  }
+
+  export type RedemptionMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    rewardId?: true
+    pointCost?: true
+    status?: true
+    requestedAt?: true
+    decidedAt?: true
+    decidedById?: true
+    journalEntryId?: true
+    note?: true
+  }
+
+  export type RedemptionCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    rewardId?: true
+    pointCost?: true
+    status?: true
+    requestedAt?: true
+    decidedAt?: true
+    decidedById?: true
+    journalEntryId?: true
+    note?: true
+    _all?: true
+  }
+
+  export type RedemptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Redemption to aggregate.
+     */
+    where?: RedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Redemptions to fetch.
+     */
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Redemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Redemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Redemptions
+    **/
+    _count?: true | RedemptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RedemptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RedemptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RedemptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RedemptionMaxAggregateInputType
+  }
+
+  export type GetRedemptionAggregateType<T extends RedemptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateRedemption]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRedemption[P]>
+      : GetScalarType<T[P], AggregateRedemption[P]>
+  }
+
+
+
+
+  export type RedemptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RedemptionWhereInput
+    orderBy?: RedemptionOrderByWithAggregationInput | RedemptionOrderByWithAggregationInput[]
+    by: RedemptionScalarFieldEnum[] | RedemptionScalarFieldEnum
+    having?: RedemptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RedemptionCountAggregateInputType | true
+    _avg?: RedemptionAvgAggregateInputType
+    _sum?: RedemptionSumAggregateInputType
+    _min?: RedemptionMinAggregateInputType
+    _max?: RedemptionMaxAggregateInputType
+  }
+
+  export type RedemptionGroupByOutputType = {
+    id: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status: $Enums.RedemptionStatus
+    requestedAt: Date
+    decidedAt: Date | null
+    decidedById: number | null
+    journalEntryId: number | null
+    note: string | null
+    _count: RedemptionCountAggregateOutputType | null
+    _avg: RedemptionAvgAggregateOutputType | null
+    _sum: RedemptionSumAggregateOutputType | null
+    _min: RedemptionMinAggregateOutputType | null
+    _max: RedemptionMaxAggregateOutputType | null
+  }
+
+  type GetRedemptionGroupByPayload<T extends RedemptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RedemptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RedemptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RedemptionGroupByOutputType[P]>
+            : GetScalarType<T[P], RedemptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RedemptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    rewardId?: boolean
+    pointCost?: boolean
+    status?: boolean
+    requestedAt?: boolean
+    decidedAt?: boolean
+    decidedById?: boolean
+    journalEntryId?: boolean
+    note?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["redemption"]>
+
+  export type RedemptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    rewardId?: boolean
+    pointCost?: boolean
+    status?: boolean
+    requestedAt?: boolean
+    decidedAt?: boolean
+    decidedById?: boolean
+    journalEntryId?: boolean
+    note?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["redemption"]>
+
+  export type RedemptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    rewardId?: boolean
+    pointCost?: boolean
+    status?: boolean
+    requestedAt?: boolean
+    decidedAt?: boolean
+    decidedById?: boolean
+    journalEntryId?: boolean
+    note?: boolean
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["redemption"]>
+
+  export type RedemptionSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    rewardId?: boolean
+    pointCost?: boolean
+    status?: boolean
+    requestedAt?: boolean
+    decidedAt?: boolean
+    decidedById?: boolean
+    journalEntryId?: boolean
+    note?: boolean
+  }
+
+  export type RedemptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "rewardId" | "pointCost" | "status" | "requestedAt" | "decidedAt" | "decidedById" | "journalEntryId" | "note", ExtArgs["result"]["redemption"]>
+  export type RedemptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }
+  export type RedemptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }
+  export type RedemptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
+    reward?: boolean | LoyaltyRewardDefaultArgs<ExtArgs>
+    journalEntry?: boolean | Redemption$journalEntryArgs<ExtArgs>
+  }
+
+  export type $RedemptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Redemption"
+    objects: {
+      tenant: Prisma.$TenantPayload<ExtArgs>
+      reward: Prisma.$LoyaltyRewardPayload<ExtArgs>
+      journalEntry: Prisma.$JournalEntryPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      tenantId: number
+      rewardId: number
+      pointCost: number
+      status: $Enums.RedemptionStatus
+      requestedAt: Date
+      decidedAt: Date | null
+      decidedById: number | null
+      journalEntryId: number | null
+      note: string | null
+    }, ExtArgs["result"]["redemption"]>
+    composites: {}
+  }
+
+  type RedemptionGetPayload<S extends boolean | null | undefined | RedemptionDefaultArgs> = $Result.GetResult<Prisma.$RedemptionPayload, S>
+
+  type RedemptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RedemptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RedemptionCountAggregateInputType | true
+    }
+
+  export interface RedemptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Redemption'], meta: { name: 'Redemption' } }
+    /**
+     * Find zero or one Redemption that matches the filter.
+     * @param {RedemptionFindUniqueArgs} args - Arguments to find a Redemption
+     * @example
+     * // Get one Redemption
+     * const redemption = await prisma.redemption.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RedemptionFindUniqueArgs>(args: SelectSubset<T, RedemptionFindUniqueArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Redemption that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RedemptionFindUniqueOrThrowArgs} args - Arguments to find a Redemption
+     * @example
+     * // Get one Redemption
+     * const redemption = await prisma.redemption.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RedemptionFindUniqueOrThrowArgs>(args: SelectSubset<T, RedemptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Redemption that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionFindFirstArgs} args - Arguments to find a Redemption
+     * @example
+     * // Get one Redemption
+     * const redemption = await prisma.redemption.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RedemptionFindFirstArgs>(args?: SelectSubset<T, RedemptionFindFirstArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Redemption that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionFindFirstOrThrowArgs} args - Arguments to find a Redemption
+     * @example
+     * // Get one Redemption
+     * const redemption = await prisma.redemption.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RedemptionFindFirstOrThrowArgs>(args?: SelectSubset<T, RedemptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Redemptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Redemptions
+     * const redemptions = await prisma.redemption.findMany()
+     * 
+     * // Get first 10 Redemptions
+     * const redemptions = await prisma.redemption.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const redemptionWithIdOnly = await prisma.redemption.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RedemptionFindManyArgs>(args?: SelectSubset<T, RedemptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Redemption.
+     * @param {RedemptionCreateArgs} args - Arguments to create a Redemption.
+     * @example
+     * // Create one Redemption
+     * const Redemption = await prisma.redemption.create({
+     *   data: {
+     *     // ... data to create a Redemption
+     *   }
+     * })
+     * 
+     */
+    create<T extends RedemptionCreateArgs>(args: SelectSubset<T, RedemptionCreateArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Redemptions.
+     * @param {RedemptionCreateManyArgs} args - Arguments to create many Redemptions.
+     * @example
+     * // Create many Redemptions
+     * const redemption = await prisma.redemption.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RedemptionCreateManyArgs>(args?: SelectSubset<T, RedemptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Redemptions and returns the data saved in the database.
+     * @param {RedemptionCreateManyAndReturnArgs} args - Arguments to create many Redemptions.
+     * @example
+     * // Create many Redemptions
+     * const redemption = await prisma.redemption.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Redemptions and only return the `id`
+     * const redemptionWithIdOnly = await prisma.redemption.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RedemptionCreateManyAndReturnArgs>(args?: SelectSubset<T, RedemptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Redemption.
+     * @param {RedemptionDeleteArgs} args - Arguments to delete one Redemption.
+     * @example
+     * // Delete one Redemption
+     * const Redemption = await prisma.redemption.delete({
+     *   where: {
+     *     // ... filter to delete one Redemption
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RedemptionDeleteArgs>(args: SelectSubset<T, RedemptionDeleteArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Redemption.
+     * @param {RedemptionUpdateArgs} args - Arguments to update one Redemption.
+     * @example
+     * // Update one Redemption
+     * const redemption = await prisma.redemption.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RedemptionUpdateArgs>(args: SelectSubset<T, RedemptionUpdateArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Redemptions.
+     * @param {RedemptionDeleteManyArgs} args - Arguments to filter Redemptions to delete.
+     * @example
+     * // Delete a few Redemptions
+     * const { count } = await prisma.redemption.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RedemptionDeleteManyArgs>(args?: SelectSubset<T, RedemptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Redemptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Redemptions
+     * const redemption = await prisma.redemption.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RedemptionUpdateManyArgs>(args: SelectSubset<T, RedemptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Redemptions and returns the data updated in the database.
+     * @param {RedemptionUpdateManyAndReturnArgs} args - Arguments to update many Redemptions.
+     * @example
+     * // Update many Redemptions
+     * const redemption = await prisma.redemption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Redemptions and only return the `id`
+     * const redemptionWithIdOnly = await prisma.redemption.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RedemptionUpdateManyAndReturnArgs>(args: SelectSubset<T, RedemptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Redemption.
+     * @param {RedemptionUpsertArgs} args - Arguments to update or create a Redemption.
+     * @example
+     * // Update or create a Redemption
+     * const redemption = await prisma.redemption.upsert({
+     *   create: {
+     *     // ... data to create a Redemption
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Redemption we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RedemptionUpsertArgs>(args: SelectSubset<T, RedemptionUpsertArgs<ExtArgs>>): Prisma__RedemptionClient<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Redemptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionCountArgs} args - Arguments to filter Redemptions to count.
+     * @example
+     * // Count the number of Redemptions
+     * const count = await prisma.redemption.count({
+     *   where: {
+     *     // ... the filter for the Redemptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends RedemptionCountArgs>(
+      args?: Subset<T, RedemptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RedemptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Redemption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RedemptionAggregateArgs>(args: Subset<T, RedemptionAggregateArgs>): Prisma.PrismaPromise<GetRedemptionAggregateType<T>>
+
+    /**
+     * Group by Redemption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RedemptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RedemptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RedemptionGroupByArgs['orderBy'] }
+        : { orderBy?: RedemptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RedemptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRedemptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Redemption model
+   */
+  readonly fields: RedemptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Redemption.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RedemptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    reward<T extends LoyaltyRewardDefaultArgs<ExtArgs> = {}>(args?: Subset<T, LoyaltyRewardDefaultArgs<ExtArgs>>): Prisma__LoyaltyRewardClient<$Result.GetResult<Prisma.$LoyaltyRewardPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    journalEntry<T extends Redemption$journalEntryArgs<ExtArgs> = {}>(args?: Subset<T, Redemption$journalEntryArgs<ExtArgs>>): Prisma__JournalEntryClient<$Result.GetResult<Prisma.$JournalEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Redemption model
+   */
+  interface RedemptionFieldRefs {
+    readonly id: FieldRef<"Redemption", 'Int'>
+    readonly tenantId: FieldRef<"Redemption", 'Int'>
+    readonly rewardId: FieldRef<"Redemption", 'Int'>
+    readonly pointCost: FieldRef<"Redemption", 'Int'>
+    readonly status: FieldRef<"Redemption", 'RedemptionStatus'>
+    readonly requestedAt: FieldRef<"Redemption", 'DateTime'>
+    readonly decidedAt: FieldRef<"Redemption", 'DateTime'>
+    readonly decidedById: FieldRef<"Redemption", 'Int'>
+    readonly journalEntryId: FieldRef<"Redemption", 'Int'>
+    readonly note: FieldRef<"Redemption", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Redemption findUnique
+   */
+  export type RedemptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Redemption to fetch.
+     */
+    where: RedemptionWhereUniqueInput
+  }
+
+  /**
+   * Redemption findUniqueOrThrow
+   */
+  export type RedemptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Redemption to fetch.
+     */
+    where: RedemptionWhereUniqueInput
+  }
+
+  /**
+   * Redemption findFirst
+   */
+  export type RedemptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Redemption to fetch.
+     */
+    where?: RedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Redemptions to fetch.
+     */
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Redemptions.
+     */
+    cursor?: RedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Redemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Redemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Redemptions.
+     */
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
+  }
+
+  /**
+   * Redemption findFirstOrThrow
+   */
+  export type RedemptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Redemption to fetch.
+     */
+    where?: RedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Redemptions to fetch.
+     */
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Redemptions.
+     */
+    cursor?: RedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Redemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Redemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Redemptions.
+     */
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
+  }
+
+  /**
+   * Redemption findMany
+   */
+  export type RedemptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which Redemptions to fetch.
+     */
+    where?: RedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Redemptions to fetch.
+     */
+    orderBy?: RedemptionOrderByWithRelationInput | RedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Redemptions.
+     */
+    cursor?: RedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Redemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Redemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Redemptions.
+     */
+    distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
+  }
+
+  /**
+   * Redemption create
+   */
+  export type RedemptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Redemption.
+     */
+    data: XOR<RedemptionCreateInput, RedemptionUncheckedCreateInput>
+  }
+
+  /**
+   * Redemption createMany
+   */
+  export type RedemptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Redemptions.
+     */
+    data: RedemptionCreateManyInput | RedemptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Redemption createManyAndReturn
+   */
+  export type RedemptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many Redemptions.
+     */
+    data: RedemptionCreateManyInput | RedemptionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Redemption update
+   */
+  export type RedemptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Redemption.
+     */
+    data: XOR<RedemptionUpdateInput, RedemptionUncheckedUpdateInput>
+    /**
+     * Choose, which Redemption to update.
+     */
+    where: RedemptionWhereUniqueInput
+  }
+
+  /**
+   * Redemption updateMany
+   */
+  export type RedemptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Redemptions.
+     */
+    data: XOR<RedemptionUpdateManyMutationInput, RedemptionUncheckedUpdateManyInput>
+    /**
+     * Filter which Redemptions to update
+     */
+    where?: RedemptionWhereInput
+    /**
+     * Limit how many Redemptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Redemption updateManyAndReturn
+   */
+  export type RedemptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * The data used to update Redemptions.
+     */
+    data: XOR<RedemptionUpdateManyMutationInput, RedemptionUncheckedUpdateManyInput>
+    /**
+     * Filter which Redemptions to update
+     */
+    where?: RedemptionWhereInput
+    /**
+     * Limit how many Redemptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Redemption upsert
+   */
+  export type RedemptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Redemption to update in case it exists.
+     */
+    where: RedemptionWhereUniqueInput
+    /**
+     * In case the Redemption found by the `where` argument doesn't exist, create a new Redemption with this data.
+     */
+    create: XOR<RedemptionCreateInput, RedemptionUncheckedCreateInput>
+    /**
+     * In case the Redemption was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RedemptionUpdateInput, RedemptionUncheckedUpdateInput>
+  }
+
+  /**
+   * Redemption delete
+   */
+  export type RedemptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+    /**
+     * Filter which Redemption to delete.
+     */
+    where: RedemptionWhereUniqueInput
+  }
+
+  /**
+   * Redemption deleteMany
+   */
+  export type RedemptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Redemptions to delete
+     */
+    where?: RedemptionWhereInput
+    /**
+     * Limit how many Redemptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Redemption.journalEntry
+   */
+  export type Redemption$journalEntryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JournalEntry
+     */
+    select?: JournalEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JournalEntry
+     */
+    omit?: JournalEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JournalEntryInclude<ExtArgs> | null
+    where?: JournalEntryWhereInput
+  }
+
+  /**
+   * Redemption without action
+   */
+  export type RedemptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Redemption
+     */
+    select?: RedemptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Redemption
+     */
+    omit?: RedemptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RedemptionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Faq
    */
 
@@ -64958,6 +68983,53 @@ export namespace Prisma {
   export type RentRecognitionScheduleScalarFieldEnum = (typeof RentRecognitionScheduleScalarFieldEnum)[keyof typeof RentRecognitionScheduleScalarFieldEnum]
 
 
+  export const LoyaltyPointScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    delta: 'delta',
+    reason: 'reason',
+    sourceType: 'sourceType',
+    sourceId: 'sourceId',
+    note: 'note',
+    createdById: 'createdById',
+    createdAt: 'createdAt'
+  };
+
+  export type LoyaltyPointScalarFieldEnum = (typeof LoyaltyPointScalarFieldEnum)[keyof typeof LoyaltyPointScalarFieldEnum]
+
+
+  export const LoyaltyRewardScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    pointCost: 'pointCost',
+    type: 'type',
+    valueRupiah: 'valueRupiah',
+    isActive: 'isActive',
+    stockQty: 'stockQty',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type LoyaltyRewardScalarFieldEnum = (typeof LoyaltyRewardScalarFieldEnum)[keyof typeof LoyaltyRewardScalarFieldEnum]
+
+
+  export const RedemptionScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    rewardId: 'rewardId',
+    pointCost: 'pointCost',
+    status: 'status',
+    requestedAt: 'requestedAt',
+    decidedAt: 'decidedAt',
+    decidedById: 'decidedById',
+    journalEntryId: 'journalEntryId',
+    note: 'note'
+  };
+
+  export type RedemptionScalarFieldEnum = (typeof RedemptionScalarFieldEnum)[keyof typeof RedemptionScalarFieldEnum]
+
+
   export const FaqScalarFieldEnum: {
     id: 'id',
     question: 'question',
@@ -65866,6 +69938,48 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'LoyaltyPointReason'
+   */
+  export type EnumLoyaltyPointReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoyaltyPointReason'>
+    
+
+
+  /**
+   * Reference to a field of type 'LoyaltyPointReason[]'
+   */
+  export type ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoyaltyPointReason[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'LoyaltyRewardType'
+   */
+  export type EnumLoyaltyRewardTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoyaltyRewardType'>
+    
+
+
+  /**
+   * Reference to a field of type 'LoyaltyRewardType[]'
+   */
+  export type ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoyaltyRewardType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RedemptionStatus'
+   */
+  export type EnumRedemptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RedemptionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RedemptionStatus[]'
+   */
+  export type ListEnumRedemptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RedemptionStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -66104,6 +70218,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestListRelationFilter
     staffReviews?: StaffReviewListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
+    loyaltyPoints?: LoyaltyPointListRelationFilter
+    redemptions?: RedemptionListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -66139,6 +70255,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestOrderByRelationAggregateInput
     staffReviews?: StaffReviewOrderByRelationAggregateInput
     depositLedgerEntries?: TenantDepositLedgerEntryOrderByRelationAggregateInput
+    loyaltyPoints?: LoyaltyPointOrderByRelationAggregateInput
+    redemptions?: RedemptionOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -66177,6 +70295,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestListRelationFilter
     staffReviews?: StaffReviewListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
+    loyaltyPoints?: LoyaltyPointListRelationFilter
+    redemptions?: RedemptionListRelationFilter
   }, "id">
 
   export type TenantOrderByWithAggregationInput = {
@@ -70509,6 +74629,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunListRelationFilter
     fixedAssetLedgerAlignments?: FixedAssetListRelationFilter
     rentRecognitions?: RentRecognitionScheduleListRelationFilter
+    redemptions?: RedemptionListRelationFilter
   }
 
   export type JournalEntryOrderByWithRelationInput = {
@@ -70534,6 +74655,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunOrderByRelationAggregateInput
     fixedAssetLedgerAlignments?: FixedAssetOrderByRelationAggregateInput
     rentRecognitions?: RentRecognitionScheduleOrderByRelationAggregateInput
+    redemptions?: RedemptionOrderByRelationAggregateInput
   }
 
   export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -70562,6 +74684,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunListRelationFilter
     fixedAssetLedgerAlignments?: FixedAssetListRelationFilter
     rentRecognitions?: RentRecognitionScheduleListRelationFilter
+    redemptions?: RedemptionListRelationFilter
   }, "id" | "entryNumber">
 
   export type JournalEntryOrderByWithAggregationInput = {
@@ -70774,6 +74897,254 @@ export namespace Prisma {
     recognizedAt?: DateTimeNullableWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string | null
     journalEntryId?: IntNullableWithAggregatesFilter<"RentRecognitionSchedule"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string
+  }
+
+  export type LoyaltyPointWhereInput = {
+    AND?: LoyaltyPointWhereInput | LoyaltyPointWhereInput[]
+    OR?: LoyaltyPointWhereInput[]
+    NOT?: LoyaltyPointWhereInput | LoyaltyPointWhereInput[]
+    id?: IntFilter<"LoyaltyPoint"> | number
+    tenantId?: IntFilter<"LoyaltyPoint"> | number
+    delta?: IntFilter<"LoyaltyPoint"> | number
+    reason?: EnumLoyaltyPointReasonFilter<"LoyaltyPoint"> | $Enums.LoyaltyPointReason
+    sourceType?: StringFilter<"LoyaltyPoint"> | string
+    sourceId?: StringFilter<"LoyaltyPoint"> | string
+    note?: StringNullableFilter<"LoyaltyPoint"> | string | null
+    createdById?: IntNullableFilter<"LoyaltyPoint"> | number | null
+    createdAt?: DateTimeFilter<"LoyaltyPoint"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }
+
+  export type LoyaltyPointOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    reason?: SortOrder
+    sourceType?: SortOrder
+    sourceId?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    tenant?: TenantOrderByWithRelationInput
+  }
+
+  export type LoyaltyPointWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    sourceType_sourceId?: LoyaltyPointSourceTypeSourceIdCompoundUniqueInput
+    AND?: LoyaltyPointWhereInput | LoyaltyPointWhereInput[]
+    OR?: LoyaltyPointWhereInput[]
+    NOT?: LoyaltyPointWhereInput | LoyaltyPointWhereInput[]
+    tenantId?: IntFilter<"LoyaltyPoint"> | number
+    delta?: IntFilter<"LoyaltyPoint"> | number
+    reason?: EnumLoyaltyPointReasonFilter<"LoyaltyPoint"> | $Enums.LoyaltyPointReason
+    sourceType?: StringFilter<"LoyaltyPoint"> | string
+    sourceId?: StringFilter<"LoyaltyPoint"> | string
+    note?: StringNullableFilter<"LoyaltyPoint"> | string | null
+    createdById?: IntNullableFilter<"LoyaltyPoint"> | number | null
+    createdAt?: DateTimeFilter<"LoyaltyPoint"> | Date | string
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+  }, "id" | "sourceType_sourceId">
+
+  export type LoyaltyPointOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    reason?: SortOrder
+    sourceType?: SortOrder
+    sourceId?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: LoyaltyPointCountOrderByAggregateInput
+    _avg?: LoyaltyPointAvgOrderByAggregateInput
+    _max?: LoyaltyPointMaxOrderByAggregateInput
+    _min?: LoyaltyPointMinOrderByAggregateInput
+    _sum?: LoyaltyPointSumOrderByAggregateInput
+  }
+
+  export type LoyaltyPointScalarWhereWithAggregatesInput = {
+    AND?: LoyaltyPointScalarWhereWithAggregatesInput | LoyaltyPointScalarWhereWithAggregatesInput[]
+    OR?: LoyaltyPointScalarWhereWithAggregatesInput[]
+    NOT?: LoyaltyPointScalarWhereWithAggregatesInput | LoyaltyPointScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"LoyaltyPoint"> | number
+    tenantId?: IntWithAggregatesFilter<"LoyaltyPoint"> | number
+    delta?: IntWithAggregatesFilter<"LoyaltyPoint"> | number
+    reason?: EnumLoyaltyPointReasonWithAggregatesFilter<"LoyaltyPoint"> | $Enums.LoyaltyPointReason
+    sourceType?: StringWithAggregatesFilter<"LoyaltyPoint"> | string
+    sourceId?: StringWithAggregatesFilter<"LoyaltyPoint"> | string
+    note?: StringNullableWithAggregatesFilter<"LoyaltyPoint"> | string | null
+    createdById?: IntNullableWithAggregatesFilter<"LoyaltyPoint"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"LoyaltyPoint"> | Date | string
+  }
+
+  export type LoyaltyRewardWhereInput = {
+    AND?: LoyaltyRewardWhereInput | LoyaltyRewardWhereInput[]
+    OR?: LoyaltyRewardWhereInput[]
+    NOT?: LoyaltyRewardWhereInput | LoyaltyRewardWhereInput[]
+    id?: IntFilter<"LoyaltyReward"> | number
+    name?: StringFilter<"LoyaltyReward"> | string
+    description?: StringNullableFilter<"LoyaltyReward"> | string | null
+    pointCost?: IntFilter<"LoyaltyReward"> | number
+    type?: EnumLoyaltyRewardTypeFilter<"LoyaltyReward"> | $Enums.LoyaltyRewardType
+    valueRupiah?: IntNullableFilter<"LoyaltyReward"> | number | null
+    isActive?: BoolFilter<"LoyaltyReward"> | boolean
+    stockQty?: IntNullableFilter<"LoyaltyReward"> | number | null
+    createdAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
+    redemptions?: RedemptionListRelationFilter
+  }
+
+  export type LoyaltyRewardOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    pointCost?: SortOrder
+    type?: SortOrder
+    valueRupiah?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    stockQty?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    redemptions?: RedemptionOrderByRelationAggregateInput
+  }
+
+  export type LoyaltyRewardWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: LoyaltyRewardWhereInput | LoyaltyRewardWhereInput[]
+    OR?: LoyaltyRewardWhereInput[]
+    NOT?: LoyaltyRewardWhereInput | LoyaltyRewardWhereInput[]
+    name?: StringFilter<"LoyaltyReward"> | string
+    description?: StringNullableFilter<"LoyaltyReward"> | string | null
+    pointCost?: IntFilter<"LoyaltyReward"> | number
+    type?: EnumLoyaltyRewardTypeFilter<"LoyaltyReward"> | $Enums.LoyaltyRewardType
+    valueRupiah?: IntNullableFilter<"LoyaltyReward"> | number | null
+    isActive?: BoolFilter<"LoyaltyReward"> | boolean
+    stockQty?: IntNullableFilter<"LoyaltyReward"> | number | null
+    createdAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
+    updatedAt?: DateTimeFilter<"LoyaltyReward"> | Date | string
+    redemptions?: RedemptionListRelationFilter
+  }, "id">
+
+  export type LoyaltyRewardOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrderInput | SortOrder
+    pointCost?: SortOrder
+    type?: SortOrder
+    valueRupiah?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    stockQty?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: LoyaltyRewardCountOrderByAggregateInput
+    _avg?: LoyaltyRewardAvgOrderByAggregateInput
+    _max?: LoyaltyRewardMaxOrderByAggregateInput
+    _min?: LoyaltyRewardMinOrderByAggregateInput
+    _sum?: LoyaltyRewardSumOrderByAggregateInput
+  }
+
+  export type LoyaltyRewardScalarWhereWithAggregatesInput = {
+    AND?: LoyaltyRewardScalarWhereWithAggregatesInput | LoyaltyRewardScalarWhereWithAggregatesInput[]
+    OR?: LoyaltyRewardScalarWhereWithAggregatesInput[]
+    NOT?: LoyaltyRewardScalarWhereWithAggregatesInput | LoyaltyRewardScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"LoyaltyReward"> | number
+    name?: StringWithAggregatesFilter<"LoyaltyReward"> | string
+    description?: StringNullableWithAggregatesFilter<"LoyaltyReward"> | string | null
+    pointCost?: IntWithAggregatesFilter<"LoyaltyReward"> | number
+    type?: EnumLoyaltyRewardTypeWithAggregatesFilter<"LoyaltyReward"> | $Enums.LoyaltyRewardType
+    valueRupiah?: IntNullableWithAggregatesFilter<"LoyaltyReward"> | number | null
+    isActive?: BoolWithAggregatesFilter<"LoyaltyReward"> | boolean
+    stockQty?: IntNullableWithAggregatesFilter<"LoyaltyReward"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"LoyaltyReward"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"LoyaltyReward"> | Date | string
+  }
+
+  export type RedemptionWhereInput = {
+    AND?: RedemptionWhereInput | RedemptionWhereInput[]
+    OR?: RedemptionWhereInput[]
+    NOT?: RedemptionWhereInput | RedemptionWhereInput[]
+    id?: IntFilter<"Redemption"> | number
+    tenantId?: IntFilter<"Redemption"> | number
+    rewardId?: IntFilter<"Redemption"> | number
+    pointCost?: IntFilter<"Redemption"> | number
+    status?: EnumRedemptionStatusFilter<"Redemption"> | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFilter<"Redemption"> | Date | string
+    decidedAt?: DateTimeNullableFilter<"Redemption"> | Date | string | null
+    decidedById?: IntNullableFilter<"Redemption"> | number | null
+    journalEntryId?: IntNullableFilter<"Redemption"> | number | null
+    note?: StringNullableFilter<"Redemption"> | string | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reward?: XOR<LoyaltyRewardScalarRelationFilter, LoyaltyRewardWhereInput>
+    journalEntry?: XOR<JournalEntryNullableScalarRelationFilter, JournalEntryWhereInput> | null
+  }
+
+  export type RedemptionOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    status?: SortOrder
+    requestedAt?: SortOrder
+    decidedAt?: SortOrderInput | SortOrder
+    decidedById?: SortOrderInput | SortOrder
+    journalEntryId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    tenant?: TenantOrderByWithRelationInput
+    reward?: LoyaltyRewardOrderByWithRelationInput
+    journalEntry?: JournalEntryOrderByWithRelationInput
+  }
+
+  export type RedemptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: RedemptionWhereInput | RedemptionWhereInput[]
+    OR?: RedemptionWhereInput[]
+    NOT?: RedemptionWhereInput | RedemptionWhereInput[]
+    tenantId?: IntFilter<"Redemption"> | number
+    rewardId?: IntFilter<"Redemption"> | number
+    pointCost?: IntFilter<"Redemption"> | number
+    status?: EnumRedemptionStatusFilter<"Redemption"> | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFilter<"Redemption"> | Date | string
+    decidedAt?: DateTimeNullableFilter<"Redemption"> | Date | string | null
+    decidedById?: IntNullableFilter<"Redemption"> | number | null
+    journalEntryId?: IntNullableFilter<"Redemption"> | number | null
+    note?: StringNullableFilter<"Redemption"> | string | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reward?: XOR<LoyaltyRewardScalarRelationFilter, LoyaltyRewardWhereInput>
+    journalEntry?: XOR<JournalEntryNullableScalarRelationFilter, JournalEntryWhereInput> | null
+  }, "id">
+
+  export type RedemptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    status?: SortOrder
+    requestedAt?: SortOrder
+    decidedAt?: SortOrderInput | SortOrder
+    decidedById?: SortOrderInput | SortOrder
+    journalEntryId?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    _count?: RedemptionCountOrderByAggregateInput
+    _avg?: RedemptionAvgOrderByAggregateInput
+    _max?: RedemptionMaxOrderByAggregateInput
+    _min?: RedemptionMinOrderByAggregateInput
+    _sum?: RedemptionSumOrderByAggregateInput
+  }
+
+  export type RedemptionScalarWhereWithAggregatesInput = {
+    AND?: RedemptionScalarWhereWithAggregatesInput | RedemptionScalarWhereWithAggregatesInput[]
+    OR?: RedemptionScalarWhereWithAggregatesInput[]
+    NOT?: RedemptionScalarWhereWithAggregatesInput | RedemptionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Redemption"> | number
+    tenantId?: IntWithAggregatesFilter<"Redemption"> | number
+    rewardId?: IntWithAggregatesFilter<"Redemption"> | number
+    pointCost?: IntWithAggregatesFilter<"Redemption"> | number
+    status?: EnumRedemptionStatusWithAggregatesFilter<"Redemption"> | $Enums.RedemptionStatus
+    requestedAt?: DateTimeWithAggregatesFilter<"Redemption"> | Date | string
+    decidedAt?: DateTimeNullableWithAggregatesFilter<"Redemption"> | Date | string | null
+    decidedById?: IntNullableWithAggregatesFilter<"Redemption"> | number | null
+    journalEntryId?: IntNullableWithAggregatesFilter<"Redemption"> | number | null
+    note?: StringNullableWithAggregatesFilter<"Redemption"> | string | null
   }
 
   export type FaqWhereInput = {
@@ -71102,6 +75473,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -71136,6 +75509,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
@@ -71169,6 +75544,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -71203,6 +75580,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -75949,6 +80328,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateInput = {
@@ -75973,6 +80353,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUpdateInput = {
@@ -75996,6 +80377,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateInput = {
@@ -76020,6 +80402,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryCreateManyInput = {
@@ -76235,6 +80618,263 @@ export namespace Prisma {
     recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointCreateInput = {
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    tenant: TenantCreateNestedOneWithoutLoyaltyPointsInput
+  }
+
+  export type LoyaltyPointUncheckedCreateInput = {
+    id?: number
+    tenantId: number
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type LoyaltyPointUpdateInput = {
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneRequiredWithoutLoyaltyPointsNestedInput
+  }
+
+  export type LoyaltyPointUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointCreateManyInput = {
+    id?: number
+    tenantId: number
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type LoyaltyPointUpdateManyMutationInput = {
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyRewardCreateInput = {
+    name: string
+    description?: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah?: number | null
+    isActive?: boolean
+    stockQty?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: RedemptionCreateNestedManyWithoutRewardInput
+  }
+
+  export type LoyaltyRewardUncheckedCreateInput = {
+    id?: number
+    name: string
+    description?: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah?: number | null
+    isActive?: boolean
+    stockQty?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutRewardInput
+  }
+
+  export type LoyaltyRewardUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: RedemptionUpdateManyWithoutRewardNestedInput
+  }
+
+  export type LoyaltyRewardUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: RedemptionUncheckedUpdateManyWithoutRewardNestedInput
+  }
+
+  export type LoyaltyRewardCreateManyInput = {
+    id?: number
+    name: string
+    description?: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah?: number | null
+    isActive?: boolean
+    stockQty?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LoyaltyRewardUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyRewardUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RedemptionCreateInput = {
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
+    tenant: TenantCreateNestedOneWithoutRedemptionsInput
+    reward: LoyaltyRewardCreateNestedOneWithoutRedemptionsInput
+    journalEntry?: JournalEntryCreateNestedOneWithoutRedemptionsInput
+  }
+
+  export type RedemptionUncheckedCreateInput = {
+    id?: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionUpdateInput = {
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    tenant?: TenantUpdateOneRequiredWithoutRedemptionsNestedInput
+    reward?: LoyaltyRewardUpdateOneRequiredWithoutRedemptionsNestedInput
+    journalEntry?: JournalEntryUpdateOneWithoutRedemptionsNestedInput
+  }
+
+  export type RedemptionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionCreateManyInput = {
+    id?: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionUpdateManyMutationInput = {
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type FaqCreateInput = {
@@ -76835,6 +81475,26 @@ export namespace Prisma {
   export type UserNullableScalarRelationFilter = {
     is?: UserWhereInput | null
     isNot?: UserWhereInput | null
+  }
+
+  export type LoyaltyPointListRelationFilter = {
+    every?: LoyaltyPointWhereInput
+    some?: LoyaltyPointWhereInput
+    none?: LoyaltyPointWhereInput
+  }
+
+  export type RedemptionListRelationFilter = {
+    every?: RedemptionWhereInput
+    some?: RedemptionWhereInput
+    none?: RedemptionWhereInput
+  }
+
+  export type LoyaltyPointOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RedemptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type TenantCountOrderByAggregateInput = {
@@ -81149,6 +85809,227 @@ export namespace Prisma {
     journalEntryId?: SortOrder
   }
 
+  export type EnumLoyaltyPointReasonFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyPointReason | EnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel> | $Enums.LoyaltyPointReason
+  }
+
+  export type LoyaltyPointSourceTypeSourceIdCompoundUniqueInput = {
+    sourceType: string
+    sourceId: string
+  }
+
+  export type LoyaltyPointCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    reason?: SortOrder
+    sourceType?: SortOrder
+    sourceId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoyaltyPointAvgOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type LoyaltyPointMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    reason?: SortOrder
+    sourceType?: SortOrder
+    sourceId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoyaltyPointMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    reason?: SortOrder
+    sourceType?: SortOrder
+    sourceId?: SortOrder
+    note?: SortOrder
+    createdById?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LoyaltyPointSumOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    delta?: SortOrder
+    createdById?: SortOrder
+  }
+
+  export type EnumLoyaltyPointReasonWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyPointReason | EnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyPointReasonWithAggregatesFilter<$PrismaModel> | $Enums.LoyaltyPointReason
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel>
+    _max?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel>
+  }
+
+  export type EnumLoyaltyRewardTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyRewardType | EnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel> | $Enums.LoyaltyRewardType
+  }
+
+  export type LoyaltyRewardCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    pointCost?: SortOrder
+    type?: SortOrder
+    valueRupiah?: SortOrder
+    isActive?: SortOrder
+    stockQty?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type LoyaltyRewardAvgOrderByAggregateInput = {
+    id?: SortOrder
+    pointCost?: SortOrder
+    valueRupiah?: SortOrder
+    stockQty?: SortOrder
+  }
+
+  export type LoyaltyRewardMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    pointCost?: SortOrder
+    type?: SortOrder
+    valueRupiah?: SortOrder
+    isActive?: SortOrder
+    stockQty?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type LoyaltyRewardMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    pointCost?: SortOrder
+    type?: SortOrder
+    valueRupiah?: SortOrder
+    isActive?: SortOrder
+    stockQty?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type LoyaltyRewardSumOrderByAggregateInput = {
+    id?: SortOrder
+    pointCost?: SortOrder
+    valueRupiah?: SortOrder
+    stockQty?: SortOrder
+  }
+
+  export type EnumLoyaltyRewardTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyRewardType | EnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyRewardTypeWithAggregatesFilter<$PrismaModel> | $Enums.LoyaltyRewardType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel>
+    _max?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel>
+  }
+
+  export type EnumRedemptionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RedemptionStatus | EnumRedemptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRedemptionStatusFilter<$PrismaModel> | $Enums.RedemptionStatus
+  }
+
+  export type LoyaltyRewardScalarRelationFilter = {
+    is?: LoyaltyRewardWhereInput
+    isNot?: LoyaltyRewardWhereInput
+  }
+
+  export type RedemptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    status?: SortOrder
+    requestedAt?: SortOrder
+    decidedAt?: SortOrder
+    decidedById?: SortOrder
+    journalEntryId?: SortOrder
+    note?: SortOrder
+  }
+
+  export type RedemptionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    decidedById?: SortOrder
+    journalEntryId?: SortOrder
+  }
+
+  export type RedemptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    status?: SortOrder
+    requestedAt?: SortOrder
+    decidedAt?: SortOrder
+    decidedById?: SortOrder
+    journalEntryId?: SortOrder
+    note?: SortOrder
+  }
+
+  export type RedemptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    status?: SortOrder
+    requestedAt?: SortOrder
+    decidedAt?: SortOrder
+    decidedById?: SortOrder
+    journalEntryId?: SortOrder
+    note?: SortOrder
+  }
+
+  export type RedemptionSumOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    rewardId?: SortOrder
+    pointCost?: SortOrder
+    decidedById?: SortOrder
+    journalEntryId?: SortOrder
+  }
+
+  export type EnumRedemptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RedemptionStatus | EnumRedemptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRedemptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.RedemptionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRedemptionStatusFilter<$PrismaModel>
+    _max?: NestedEnumRedemptionStatusFilter<$PrismaModel>
+  }
+
   export type FaqCountOrderByAggregateInput = {
     id?: SortOrder
     question?: SortOrder
@@ -82684,6 +87565,20 @@ export namespace Prisma {
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
   }
 
+  export type LoyaltyPointCreateNestedManyWithoutTenantInput = {
+    create?: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput> | LoyaltyPointCreateWithoutTenantInput[] | LoyaltyPointUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LoyaltyPointCreateOrConnectWithoutTenantInput | LoyaltyPointCreateOrConnectWithoutTenantInput[]
+    createMany?: LoyaltyPointCreateManyTenantInputEnvelope
+    connect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+  }
+
+  export type RedemptionCreateNestedManyWithoutTenantInput = {
+    create?: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput> | RedemptionCreateWithoutTenantInput[] | RedemptionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
+    createMany?: RedemptionCreateManyTenantInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -82730,6 +87625,20 @@ export namespace Prisma {
     connectOrCreate?: TenantDepositLedgerEntryCreateOrConnectWithoutTenantInput | TenantDepositLedgerEntryCreateOrConnectWithoutTenantInput[]
     createMany?: TenantDepositLedgerEntryCreateManyTenantInputEnvelope
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
+  }
+
+  export type LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput> | LoyaltyPointCreateWithoutTenantInput[] | LoyaltyPointUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LoyaltyPointCreateOrConnectWithoutTenantInput | LoyaltyPointCreateOrConnectWithoutTenantInput[]
+    createMany?: LoyaltyPointCreateManyTenantInputEnvelope
+    connect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+  }
+
+  export type RedemptionUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput> | RedemptionCreateWithoutTenantInput[] | RedemptionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
+    createMany?: RedemptionCreateManyTenantInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -82844,6 +87753,34 @@ export namespace Prisma {
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
   }
 
+  export type LoyaltyPointUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput> | LoyaltyPointCreateWithoutTenantInput[] | LoyaltyPointUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LoyaltyPointCreateOrConnectWithoutTenantInput | LoyaltyPointCreateOrConnectWithoutTenantInput[]
+    upsert?: LoyaltyPointUpsertWithWhereUniqueWithoutTenantInput | LoyaltyPointUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: LoyaltyPointCreateManyTenantInputEnvelope
+    set?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    disconnect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    delete?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    connect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    update?: LoyaltyPointUpdateWithWhereUniqueWithoutTenantInput | LoyaltyPointUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: LoyaltyPointUpdateManyWithWhereWithoutTenantInput | LoyaltyPointUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: LoyaltyPointScalarWhereInput | LoyaltyPointScalarWhereInput[]
+  }
+
+  export type RedemptionUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput> | RedemptionCreateWithoutTenantInput[] | RedemptionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutTenantInput | RedemptionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: RedemptionCreateManyTenantInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutTenantInput | RedemptionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutTenantInput | RedemptionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateOneWithoutTenantNestedInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -82936,6 +87873,34 @@ export namespace Prisma {
     update?: TenantDepositLedgerEntryUpdateWithWhereUniqueWithoutTenantInput | TenantDepositLedgerEntryUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: TenantDepositLedgerEntryUpdateManyWithWhereWithoutTenantInput | TenantDepositLedgerEntryUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
+  }
+
+  export type LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput> | LoyaltyPointCreateWithoutTenantInput[] | LoyaltyPointUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LoyaltyPointCreateOrConnectWithoutTenantInput | LoyaltyPointCreateOrConnectWithoutTenantInput[]
+    upsert?: LoyaltyPointUpsertWithWhereUniqueWithoutTenantInput | LoyaltyPointUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: LoyaltyPointCreateManyTenantInputEnvelope
+    set?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    disconnect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    delete?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    connect?: LoyaltyPointWhereUniqueInput | LoyaltyPointWhereUniqueInput[]
+    update?: LoyaltyPointUpdateWithWhereUniqueWithoutTenantInput | LoyaltyPointUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: LoyaltyPointUpdateManyWithWhereWithoutTenantInput | LoyaltyPointUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: LoyaltyPointScalarWhereInput | LoyaltyPointScalarWhereInput[]
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput> | RedemptionCreateWithoutTenantInput[] | RedemptionUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutTenantInput | RedemptionUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: RedemptionCreateManyTenantInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutTenantInput | RedemptionUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutTenantInput | RedemptionUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
   }
 
   export type RoomCreateimagesInput = {
@@ -86576,6 +91541,13 @@ export namespace Prisma {
     connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
   }
 
+  export type RedemptionCreateNestedManyWithoutJournalEntryInput = {
+    create?: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput> | RedemptionCreateWithoutJournalEntryInput[] | RedemptionUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutJournalEntryInput | RedemptionCreateOrConnectWithoutJournalEntryInput[]
+    createMany?: RedemptionCreateManyJournalEntryInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
   export type JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput = {
     create?: XOR<JournalLineCreateWithoutJournalEntryInput, JournalLineUncheckedCreateWithoutJournalEntryInput> | JournalLineCreateWithoutJournalEntryInput[] | JournalLineUncheckedCreateWithoutJournalEntryInput[]
     connectOrCreate?: JournalLineCreateOrConnectWithoutJournalEntryInput | JournalLineCreateOrConnectWithoutJournalEntryInput[]
@@ -86602,6 +91574,13 @@ export namespace Prisma {
     connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput | RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput[]
     createMany?: RentRecognitionScheduleCreateManyJournalEntryInputEnvelope
     connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+  }
+
+  export type RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput = {
+    create?: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput> | RedemptionCreateWithoutJournalEntryInput[] | RedemptionUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutJournalEntryInput | RedemptionCreateOrConnectWithoutJournalEntryInput[]
+    createMany?: RedemptionCreateManyJournalEntryInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
   }
 
   export type EnumJournalEntryStatusFieldUpdateOperationsInput = {
@@ -86678,6 +91657,20 @@ export namespace Prisma {
     deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
   }
 
+  export type RedemptionUpdateManyWithoutJournalEntryNestedInput = {
+    create?: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput> | RedemptionCreateWithoutJournalEntryInput[] | RedemptionUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutJournalEntryInput | RedemptionCreateOrConnectWithoutJournalEntryInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutJournalEntryInput | RedemptionUpsertWithWhereUniqueWithoutJournalEntryInput[]
+    createMany?: RedemptionCreateManyJournalEntryInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutJournalEntryInput | RedemptionUpdateWithWhereUniqueWithoutJournalEntryInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutJournalEntryInput | RedemptionUpdateManyWithWhereWithoutJournalEntryInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
   export type JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput = {
     create?: XOR<JournalLineCreateWithoutJournalEntryInput, JournalLineUncheckedCreateWithoutJournalEntryInput> | JournalLineCreateWithoutJournalEntryInput[] | JournalLineUncheckedCreateWithoutJournalEntryInput[]
     connectOrCreate?: JournalLineCreateOrConnectWithoutJournalEntryInput | JournalLineCreateOrConnectWithoutJournalEntryInput[]
@@ -86732,6 +91725,20 @@ export namespace Prisma {
     update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput[]
     updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput | RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput[]
     deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput = {
+    create?: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput> | RedemptionCreateWithoutJournalEntryInput[] | RedemptionUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutJournalEntryInput | RedemptionCreateOrConnectWithoutJournalEntryInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutJournalEntryInput | RedemptionUpsertWithWhereUniqueWithoutJournalEntryInput[]
+    createMany?: RedemptionCreateManyJournalEntryInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutJournalEntryInput | RedemptionUpdateWithWhereUniqueWithoutJournalEntryInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutJournalEntryInput | RedemptionUpdateManyWithWhereWithoutJournalEntryInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
   }
 
   export type JournalEntryCreateNestedOneWithoutLinesInput = {
@@ -86806,6 +91813,118 @@ export namespace Prisma {
     delete?: JournalEntryWhereInput | boolean
     connect?: JournalEntryWhereUniqueInput
     update?: XOR<XOR<JournalEntryUpdateToOneWithWhereWithoutRentRecognitionsInput, JournalEntryUpdateWithoutRentRecognitionsInput>, JournalEntryUncheckedUpdateWithoutRentRecognitionsInput>
+  }
+
+  export type TenantCreateNestedOneWithoutLoyaltyPointsInput = {
+    create?: XOR<TenantCreateWithoutLoyaltyPointsInput, TenantUncheckedCreateWithoutLoyaltyPointsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutLoyaltyPointsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumLoyaltyPointReasonFieldUpdateOperationsInput = {
+    set?: $Enums.LoyaltyPointReason
+  }
+
+  export type TenantUpdateOneRequiredWithoutLoyaltyPointsNestedInput = {
+    create?: XOR<TenantCreateWithoutLoyaltyPointsInput, TenantUncheckedCreateWithoutLoyaltyPointsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutLoyaltyPointsInput
+    upsert?: TenantUpsertWithoutLoyaltyPointsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutLoyaltyPointsInput, TenantUpdateWithoutLoyaltyPointsInput>, TenantUncheckedUpdateWithoutLoyaltyPointsInput>
+  }
+
+  export type RedemptionCreateNestedManyWithoutRewardInput = {
+    create?: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput> | RedemptionCreateWithoutRewardInput[] | RedemptionUncheckedCreateWithoutRewardInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutRewardInput | RedemptionCreateOrConnectWithoutRewardInput[]
+    createMany?: RedemptionCreateManyRewardInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
+  export type RedemptionUncheckedCreateNestedManyWithoutRewardInput = {
+    create?: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput> | RedemptionCreateWithoutRewardInput[] | RedemptionUncheckedCreateWithoutRewardInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutRewardInput | RedemptionCreateOrConnectWithoutRewardInput[]
+    createMany?: RedemptionCreateManyRewardInputEnvelope
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
+  export type EnumLoyaltyRewardTypeFieldUpdateOperationsInput = {
+    set?: $Enums.LoyaltyRewardType
+  }
+
+  export type RedemptionUpdateManyWithoutRewardNestedInput = {
+    create?: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput> | RedemptionCreateWithoutRewardInput[] | RedemptionUncheckedCreateWithoutRewardInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutRewardInput | RedemptionCreateOrConnectWithoutRewardInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutRewardInput | RedemptionUpsertWithWhereUniqueWithoutRewardInput[]
+    createMany?: RedemptionCreateManyRewardInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutRewardInput | RedemptionUpdateWithWhereUniqueWithoutRewardInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutRewardInput | RedemptionUpdateManyWithWhereWithoutRewardInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutRewardNestedInput = {
+    create?: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput> | RedemptionCreateWithoutRewardInput[] | RedemptionUncheckedCreateWithoutRewardInput[]
+    connectOrCreate?: RedemptionCreateOrConnectWithoutRewardInput | RedemptionCreateOrConnectWithoutRewardInput[]
+    upsert?: RedemptionUpsertWithWhereUniqueWithoutRewardInput | RedemptionUpsertWithWhereUniqueWithoutRewardInput[]
+    createMany?: RedemptionCreateManyRewardInputEnvelope
+    set?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    disconnect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    delete?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+    update?: RedemptionUpdateWithWhereUniqueWithoutRewardInput | RedemptionUpdateWithWhereUniqueWithoutRewardInput[]
+    updateMany?: RedemptionUpdateManyWithWhereWithoutRewardInput | RedemptionUpdateManyWithWhereWithoutRewardInput[]
+    deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
+  export type TenantCreateNestedOneWithoutRedemptionsInput = {
+    create?: XOR<TenantCreateWithoutRedemptionsInput, TenantUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutRedemptionsInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type LoyaltyRewardCreateNestedOneWithoutRedemptionsInput = {
+    create?: XOR<LoyaltyRewardCreateWithoutRedemptionsInput, LoyaltyRewardUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: LoyaltyRewardCreateOrConnectWithoutRedemptionsInput
+    connect?: LoyaltyRewardWhereUniqueInput
+  }
+
+  export type JournalEntryCreateNestedOneWithoutRedemptionsInput = {
+    create?: XOR<JournalEntryCreateWithoutRedemptionsInput, JournalEntryUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: JournalEntryCreateOrConnectWithoutRedemptionsInput
+    connect?: JournalEntryWhereUniqueInput
+  }
+
+  export type EnumRedemptionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RedemptionStatus
+  }
+
+  export type TenantUpdateOneRequiredWithoutRedemptionsNestedInput = {
+    create?: XOR<TenantCreateWithoutRedemptionsInput, TenantUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutRedemptionsInput
+    upsert?: TenantUpsertWithoutRedemptionsInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutRedemptionsInput, TenantUpdateWithoutRedemptionsInput>, TenantUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type LoyaltyRewardUpdateOneRequiredWithoutRedemptionsNestedInput = {
+    create?: XOR<LoyaltyRewardCreateWithoutRedemptionsInput, LoyaltyRewardUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: LoyaltyRewardCreateOrConnectWithoutRedemptionsInput
+    upsert?: LoyaltyRewardUpsertWithoutRedemptionsInput
+    connect?: LoyaltyRewardWhereUniqueInput
+    update?: XOR<XOR<LoyaltyRewardUpdateToOneWithWhereWithoutRedemptionsInput, LoyaltyRewardUpdateWithoutRedemptionsInput>, LoyaltyRewardUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type JournalEntryUpdateOneWithoutRedemptionsNestedInput = {
+    create?: XOR<JournalEntryCreateWithoutRedemptionsInput, JournalEntryUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: JournalEntryCreateOrConnectWithoutRedemptionsInput
+    upsert?: JournalEntryUpsertWithoutRedemptionsInput
+    disconnect?: JournalEntryWhereInput | boolean
+    delete?: JournalEntryWhereInput | boolean
+    connect?: JournalEntryWhereUniqueInput
+    update?: XOR<XOR<JournalEntryUpdateToOneWithWhereWithoutRedemptionsInput, JournalEntryUpdateWithoutRedemptionsInput>, JournalEntryUncheckedUpdateWithoutRedemptionsInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -88106,6 +93225,57 @@ export namespace Prisma {
     _max?: NestedEnumJournalSourceTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumLoyaltyPointReasonFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyPointReason | EnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel> | $Enums.LoyaltyPointReason
+  }
+
+  export type NestedEnumLoyaltyPointReasonWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyPointReason | EnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyPointReason[] | ListEnumLoyaltyPointReasonFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyPointReasonWithAggregatesFilter<$PrismaModel> | $Enums.LoyaltyPointReason
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel>
+    _max?: NestedEnumLoyaltyPointReasonFilter<$PrismaModel>
+  }
+
+  export type NestedEnumLoyaltyRewardTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyRewardType | EnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel> | $Enums.LoyaltyRewardType
+  }
+
+  export type NestedEnumLoyaltyRewardTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LoyaltyRewardType | EnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LoyaltyRewardType[] | ListEnumLoyaltyRewardTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumLoyaltyRewardTypeWithAggregatesFilter<$PrismaModel> | $Enums.LoyaltyRewardType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel>
+    _max?: NestedEnumLoyaltyRewardTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRedemptionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RedemptionStatus | EnumRedemptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRedemptionStatusFilter<$PrismaModel> | $Enums.RedemptionStatus
+  }
+
+  export type NestedEnumRedemptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RedemptionStatus | EnumRedemptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RedemptionStatus[] | ListEnumRedemptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRedemptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.RedemptionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRedemptionStatusFilter<$PrismaModel>
+    _max?: NestedEnumRedemptionStatusFilter<$PrismaModel>
+  }
+
   export type TenantCreateWithoutUserInput = {
     fullName: string
     phone: string
@@ -88136,6 +93306,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutUserInput = {
@@ -88169,6 +93341,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutUserInput = {
@@ -89871,6 +95045,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutKtpVerifiedByInput = {
@@ -89904,6 +95080,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutKtpVerifiedByInput = {
@@ -89957,6 +95135,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUserInput = {
@@ -89990,6 +95170,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type AnnouncementUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -91730,6 +96912,70 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LoyaltyPointCreateWithoutTenantInput = {
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type LoyaltyPointUncheckedCreateWithoutTenantInput = {
+    id?: number
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type LoyaltyPointCreateOrConnectWithoutTenantInput = {
+    where: LoyaltyPointWhereUniqueInput
+    create: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput>
+  }
+
+  export type LoyaltyPointCreateManyTenantInputEnvelope = {
+    data: LoyaltyPointCreateManyTenantInput | LoyaltyPointCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RedemptionCreateWithoutTenantInput = {
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
+    reward: LoyaltyRewardCreateNestedOneWithoutRedemptionsInput
+    journalEntry?: JournalEntryCreateNestedOneWithoutRedemptionsInput
+  }
+
+  export type RedemptionUncheckedCreateWithoutTenantInput = {
+    id?: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionCreateOrConnectWithoutTenantInput = {
+    where: RedemptionWhereUniqueInput
+    create: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type RedemptionCreateManyTenantInputEnvelope = {
+    data: RedemptionCreateManyTenantInput | RedemptionCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutTenantInput = {
     update: XOR<UserUpdateWithoutTenantInput, UserUncheckedUpdateWithoutTenantInput>
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
@@ -92028,6 +97274,69 @@ export namespace Prisma {
   export type TenantDepositLedgerEntryUpdateManyWithWhereWithoutTenantInput = {
     where: TenantDepositLedgerEntryScalarWhereInput
     data: XOR<TenantDepositLedgerEntryUpdateManyMutationInput, TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type LoyaltyPointUpsertWithWhereUniqueWithoutTenantInput = {
+    where: LoyaltyPointWhereUniqueInput
+    update: XOR<LoyaltyPointUpdateWithoutTenantInput, LoyaltyPointUncheckedUpdateWithoutTenantInput>
+    create: XOR<LoyaltyPointCreateWithoutTenantInput, LoyaltyPointUncheckedCreateWithoutTenantInput>
+  }
+
+  export type LoyaltyPointUpdateWithWhereUniqueWithoutTenantInput = {
+    where: LoyaltyPointWhereUniqueInput
+    data: XOR<LoyaltyPointUpdateWithoutTenantInput, LoyaltyPointUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type LoyaltyPointUpdateManyWithWhereWithoutTenantInput = {
+    where: LoyaltyPointScalarWhereInput
+    data: XOR<LoyaltyPointUpdateManyMutationInput, LoyaltyPointUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type LoyaltyPointScalarWhereInput = {
+    AND?: LoyaltyPointScalarWhereInput | LoyaltyPointScalarWhereInput[]
+    OR?: LoyaltyPointScalarWhereInput[]
+    NOT?: LoyaltyPointScalarWhereInput | LoyaltyPointScalarWhereInput[]
+    id?: IntFilter<"LoyaltyPoint"> | number
+    tenantId?: IntFilter<"LoyaltyPoint"> | number
+    delta?: IntFilter<"LoyaltyPoint"> | number
+    reason?: EnumLoyaltyPointReasonFilter<"LoyaltyPoint"> | $Enums.LoyaltyPointReason
+    sourceType?: StringFilter<"LoyaltyPoint"> | string
+    sourceId?: StringFilter<"LoyaltyPoint"> | string
+    note?: StringNullableFilter<"LoyaltyPoint"> | string | null
+    createdById?: IntNullableFilter<"LoyaltyPoint"> | number | null
+    createdAt?: DateTimeFilter<"LoyaltyPoint"> | Date | string
+  }
+
+  export type RedemptionUpsertWithWhereUniqueWithoutTenantInput = {
+    where: RedemptionWhereUniqueInput
+    update: XOR<RedemptionUpdateWithoutTenantInput, RedemptionUncheckedUpdateWithoutTenantInput>
+    create: XOR<RedemptionCreateWithoutTenantInput, RedemptionUncheckedCreateWithoutTenantInput>
+  }
+
+  export type RedemptionUpdateWithWhereUniqueWithoutTenantInput = {
+    where: RedemptionWhereUniqueInput
+    data: XOR<RedemptionUpdateWithoutTenantInput, RedemptionUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type RedemptionUpdateManyWithWhereWithoutTenantInput = {
+    where: RedemptionScalarWhereInput
+    data: XOR<RedemptionUpdateManyMutationInput, RedemptionUncheckedUpdateManyWithoutTenantInput>
+  }
+
+  export type RedemptionScalarWhereInput = {
+    AND?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+    OR?: RedemptionScalarWhereInput[]
+    NOT?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+    id?: IntFilter<"Redemption"> | number
+    tenantId?: IntFilter<"Redemption"> | number
+    rewardId?: IntFilter<"Redemption"> | number
+    pointCost?: IntFilter<"Redemption"> | number
+    status?: EnumRedemptionStatusFilter<"Redemption"> | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFilter<"Redemption"> | Date | string
+    decidedAt?: DateTimeNullableFilter<"Redemption"> | Date | string | null
+    decidedById?: IntNullableFilter<"Redemption"> | number | null
+    journalEntryId?: IntNullableFilter<"Redemption"> | number | null
+    note?: StringNullableFilter<"Redemption"> | string | null
   }
 
   export type StayCreateWithoutRoomInput = {
@@ -93076,6 +98385,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutStaysInput = {
@@ -93109,6 +98420,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutStaysInput = {
@@ -93921,6 +99234,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaysInput = {
@@ -93954,6 +99269,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutStaysInput = {
@@ -94635,6 +99952,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutDepositLedgerEntriesInput = {
@@ -94668,6 +99987,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutDepositLedgerEntriesInput = {
@@ -95012,6 +100333,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutDepositLedgerEntriesInput = {
@@ -95045,6 +100368,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutDepositLedgerEntriesInput = {
@@ -97002,6 +102327,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -97035,6 +102362,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -97457,6 +102786,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -97490,6 +102821,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsSubmittedInput = {
@@ -97726,6 +103059,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutTicketsInput = {
@@ -97759,6 +103094,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutTicketsInput = {
@@ -98232,6 +103569,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutTicketsInput = {
@@ -98265,6 +103604,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type RoomUpsertWithoutTicketsInput = {
@@ -100654,6 +105995,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutStaffReviewsInput = {
@@ -100687,6 +106030,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutStaffReviewsInput = {
@@ -100933,6 +106278,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaffReviewsInput = {
@@ -100966,6 +106313,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutStaffReviewsModeratedInput = {
@@ -103926,6 +109275,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutRenewRequestsInput = {
@@ -103959,6 +109310,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutRenewRequestsInput = {
@@ -104235,6 +109588,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutRenewRequestsInput = {
@@ -104268,6 +109623,8 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutRenewRequestsReviewedInput = {
@@ -106065,6 +111422,7 @@ export namespace Prisma {
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutFixedAssetLedgerAlignmentsInput = {
@@ -106088,6 +111446,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutFixedAssetLedgerAlignmentsInput = {
@@ -106513,6 +111872,7 @@ export namespace Prisma {
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutFixedAssetLedgerAlignmentsInput = {
@@ -106536,6 +111896,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutFixedAssetInput = {
@@ -106589,6 +111950,7 @@ export namespace Prisma {
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutDepreciationRunsInput = {
@@ -106612,6 +111974,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutDepreciationRunsInput = {
@@ -106777,6 +112140,7 @@ export namespace Prisma {
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutDepreciationRunsInput = {
@@ -106800,6 +112164,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type UserUpsertWithoutAssetDepreciationRunsCreatedInput = {
@@ -108421,6 +113786,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutAccountingPeriodInput = {
@@ -108444,6 +113810,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutAccountingPeriodInput = {
@@ -109091,6 +114458,39 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RedemptionCreateWithoutJournalEntryInput = {
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
+    tenant: TenantCreateNestedOneWithoutRedemptionsInput
+    reward: LoyaltyRewardCreateNestedOneWithoutRedemptionsInput
+  }
+
+  export type RedemptionUncheckedCreateWithoutJournalEntryInput = {
+    id?: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionCreateOrConnectWithoutJournalEntryInput = {
+    where: RedemptionWhereUniqueInput
+    create: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput>
+  }
+
+  export type RedemptionCreateManyJournalEntryInputEnvelope = {
+    data: RedemptionCreateManyJournalEntryInput | RedemptionCreateManyJournalEntryInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AccountingPeriodUpsertWithoutJournalEntriesInput = {
     update: XOR<AccountingPeriodUpdateWithoutJournalEntriesInput, AccountingPeriodUncheckedUpdateWithoutJournalEntriesInput>
     create: XOR<AccountingPeriodCreateWithoutJournalEntriesInput, AccountingPeriodUncheckedCreateWithoutJournalEntriesInput>
@@ -109213,6 +114613,22 @@ export namespace Prisma {
     data: XOR<RentRecognitionScheduleUpdateManyMutationInput, RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryInput>
   }
 
+  export type RedemptionUpsertWithWhereUniqueWithoutJournalEntryInput = {
+    where: RedemptionWhereUniqueInput
+    update: XOR<RedemptionUpdateWithoutJournalEntryInput, RedemptionUncheckedUpdateWithoutJournalEntryInput>
+    create: XOR<RedemptionCreateWithoutJournalEntryInput, RedemptionUncheckedCreateWithoutJournalEntryInput>
+  }
+
+  export type RedemptionUpdateWithWhereUniqueWithoutJournalEntryInput = {
+    where: RedemptionWhereUniqueInput
+    data: XOR<RedemptionUpdateWithoutJournalEntryInput, RedemptionUncheckedUpdateWithoutJournalEntryInput>
+  }
+
+  export type RedemptionUpdateManyWithWhereWithoutJournalEntryInput = {
+    where: RedemptionScalarWhereInput
+    data: XOR<RedemptionUpdateManyMutationInput, RedemptionUncheckedUpdateManyWithoutJournalEntryInput>
+  }
+
   export type JournalEntryCreateWithoutLinesInput = {
     entryNumber: string
     entryDate: Date | string
@@ -109233,6 +114649,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutLinesInput = {
@@ -109256,6 +114673,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
     rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutLinesInput = {
@@ -109372,6 +114790,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutLinesInput = {
@@ -109395,6 +114814,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutJournalLinesInput = {
@@ -109633,6 +115053,7 @@ export namespace Prisma {
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    redemptions?: RedemptionCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutRentRecognitionsInput = {
@@ -109656,6 +115077,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutRentRecognitionsInput = {
@@ -109826,6 +115248,7 @@ export namespace Prisma {
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutRentRecognitionsInput = {
@@ -109849,6 +115272,540 @@ export namespace Prisma {
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
+  }
+
+  export type TenantCreateWithoutLoyaltyPointsInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutLoyaltyPointsInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutLoyaltyPointsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutLoyaltyPointsInput, TenantUncheckedCreateWithoutLoyaltyPointsInput>
+  }
+
+  export type TenantUpsertWithoutLoyaltyPointsInput = {
+    update: XOR<TenantUpdateWithoutLoyaltyPointsInput, TenantUncheckedUpdateWithoutLoyaltyPointsInput>
+    create: XOR<TenantCreateWithoutLoyaltyPointsInput, TenantUncheckedCreateWithoutLoyaltyPointsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutLoyaltyPointsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutLoyaltyPointsInput, TenantUncheckedUpdateWithoutLoyaltyPointsInput>
+  }
+
+  export type TenantUpdateWithoutLoyaltyPointsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutLoyaltyPointsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type RedemptionCreateWithoutRewardInput = {
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
+    tenant: TenantCreateNestedOneWithoutRedemptionsInput
+    journalEntry?: JournalEntryCreateNestedOneWithoutRedemptionsInput
+  }
+
+  export type RedemptionUncheckedCreateWithoutRewardInput = {
+    id?: number
+    tenantId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionCreateOrConnectWithoutRewardInput = {
+    where: RedemptionWhereUniqueInput
+    create: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput>
+  }
+
+  export type RedemptionCreateManyRewardInputEnvelope = {
+    data: RedemptionCreateManyRewardInput | RedemptionCreateManyRewardInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RedemptionUpsertWithWhereUniqueWithoutRewardInput = {
+    where: RedemptionWhereUniqueInput
+    update: XOR<RedemptionUpdateWithoutRewardInput, RedemptionUncheckedUpdateWithoutRewardInput>
+    create: XOR<RedemptionCreateWithoutRewardInput, RedemptionUncheckedCreateWithoutRewardInput>
+  }
+
+  export type RedemptionUpdateWithWhereUniqueWithoutRewardInput = {
+    where: RedemptionWhereUniqueInput
+    data: XOR<RedemptionUpdateWithoutRewardInput, RedemptionUncheckedUpdateWithoutRewardInput>
+  }
+
+  export type RedemptionUpdateManyWithWhereWithoutRewardInput = {
+    where: RedemptionScalarWhereInput
+    data: XOR<RedemptionUpdateManyMutationInput, RedemptionUncheckedUpdateManyWithoutRewardInput>
+  }
+
+  export type TenantCreateWithoutRedemptionsInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutRedemptionsInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutRedemptionsInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutRedemptionsInput, TenantUncheckedCreateWithoutRedemptionsInput>
+  }
+
+  export type LoyaltyRewardCreateWithoutRedemptionsInput = {
+    name: string
+    description?: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah?: number | null
+    isActive?: boolean
+    stockQty?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LoyaltyRewardUncheckedCreateWithoutRedemptionsInput = {
+    id?: number
+    name: string
+    description?: string | null
+    pointCost: number
+    type: $Enums.LoyaltyRewardType
+    valueRupiah?: number | null
+    isActive?: boolean
+    stockQty?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type LoyaltyRewardCreateOrConnectWithoutRedemptionsInput = {
+    where: LoyaltyRewardWhereUniqueInput
+    create: XOR<LoyaltyRewardCreateWithoutRedemptionsInput, LoyaltyRewardUncheckedCreateWithoutRedemptionsInput>
+  }
+
+  export type JournalEntryCreateWithoutRedemptionsInput = {
+    entryNumber: string
+    entryDate: Date | string
+    status?: $Enums.JournalEntryStatus
+    sourceType?: $Enums.JournalSourceType
+    sourceId?: string | null
+    memo?: string | null
+    totalDebitRupiah?: number
+    totalCreditRupiah?: number
+    isBalanced?: boolean
+    createdById?: number | null
+    postedById?: number | null
+    postedAt?: Date | string | null
+    voidedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accountingPeriod?: AccountingPeriodCreateNestedOneWithoutJournalEntriesInput
+    lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
+    depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
+    fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
+  }
+
+  export type JournalEntryUncheckedCreateWithoutRedemptionsInput = {
+    id?: number
+    entryNumber: string
+    entryDate: Date | string
+    accountingPeriodId?: number | null
+    status?: $Enums.JournalEntryStatus
+    sourceType?: $Enums.JournalSourceType
+    sourceId?: string | null
+    memo?: string | null
+    totalDebitRupiah?: number
+    totalCreditRupiah?: number
+    isBalanced?: boolean
+    createdById?: number | null
+    postedById?: number | null
+    postedAt?: Date | string | null
+    voidedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
+    depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
+    fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
+  }
+
+  export type JournalEntryCreateOrConnectWithoutRedemptionsInput = {
+    where: JournalEntryWhereUniqueInput
+    create: XOR<JournalEntryCreateWithoutRedemptionsInput, JournalEntryUncheckedCreateWithoutRedemptionsInput>
+  }
+
+  export type TenantUpsertWithoutRedemptionsInput = {
+    update: XOR<TenantUpdateWithoutRedemptionsInput, TenantUncheckedUpdateWithoutRedemptionsInput>
+    create: XOR<TenantCreateWithoutRedemptionsInput, TenantUncheckedCreateWithoutRedemptionsInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutRedemptionsInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutRedemptionsInput, TenantUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type TenantUpdateWithoutRedemptionsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutRedemptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type LoyaltyRewardUpsertWithoutRedemptionsInput = {
+    update: XOR<LoyaltyRewardUpdateWithoutRedemptionsInput, LoyaltyRewardUncheckedUpdateWithoutRedemptionsInput>
+    create: XOR<LoyaltyRewardCreateWithoutRedemptionsInput, LoyaltyRewardUncheckedCreateWithoutRedemptionsInput>
+    where?: LoyaltyRewardWhereInput
+  }
+
+  export type LoyaltyRewardUpdateToOneWithWhereWithoutRedemptionsInput = {
+    where?: LoyaltyRewardWhereInput
+    data: XOR<LoyaltyRewardUpdateWithoutRedemptionsInput, LoyaltyRewardUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type LoyaltyRewardUpdateWithoutRedemptionsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyRewardUncheckedUpdateWithoutRedemptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    pointCost?: IntFieldUpdateOperationsInput | number
+    type?: EnumLoyaltyRewardTypeFieldUpdateOperationsInput | $Enums.LoyaltyRewardType
+    valueRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    stockQty?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JournalEntryUpsertWithoutRedemptionsInput = {
+    update: XOR<JournalEntryUpdateWithoutRedemptionsInput, JournalEntryUncheckedUpdateWithoutRedemptionsInput>
+    create: XOR<JournalEntryCreateWithoutRedemptionsInput, JournalEntryUncheckedCreateWithoutRedemptionsInput>
+    where?: JournalEntryWhereInput
+  }
+
+  export type JournalEntryUpdateToOneWithWhereWithoutRedemptionsInput = {
+    where?: JournalEntryWhereInput
+    data: XOR<JournalEntryUpdateWithoutRedemptionsInput, JournalEntryUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type JournalEntryUpdateWithoutRedemptionsInput = {
+    entryNumber?: StringFieldUpdateOperationsInput | string
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumJournalEntryStatusFieldUpdateOperationsInput | $Enums.JournalEntryStatus
+    sourceType?: EnumJournalSourceTypeFieldUpdateOperationsInput | $Enums.JournalSourceType
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalDebitRupiah?: IntFieldUpdateOperationsInput | number
+    totalCreditRupiah?: IntFieldUpdateOperationsInput | number
+    isBalanced?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountingPeriod?: AccountingPeriodUpdateOneWithoutJournalEntriesNestedInput
+    lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
+    depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
+    fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+  }
+
+  export type JournalEntryUncheckedUpdateWithoutRedemptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNumber?: StringFieldUpdateOperationsInput | string
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountingPeriodId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumJournalEntryStatusFieldUpdateOperationsInput | $Enums.JournalEntryStatus
+    sourceType?: EnumJournalSourceTypeFieldUpdateOperationsInput | $Enums.JournalSourceType
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalDebitRupiah?: IntFieldUpdateOperationsInput | number
+    totalCreditRupiah?: IntFieldUpdateOperationsInput | number
+    isBalanced?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
+    depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
+    fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type AnnouncementCreateManyCreatedByInput = {
@@ -112558,6 +118515,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutKtpVerifiedByInput = {
@@ -112591,6 +118550,8 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateManyWithoutKtpVerifiedByInput = {
@@ -112789,6 +118750,29 @@ export namespace Prisma {
     note?: string | null
     metadataJson?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+  }
+
+  export type LoyaltyPointCreateManyTenantInput = {
+    id?: number
+    delta: number
+    reason: $Enums.LoyaltyPointReason
+    sourceType: string
+    sourceId: string
+    note?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RedemptionCreateManyTenantInput = {
+    id?: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
   }
 
   export type StayUpdateWithoutTenantInput = {
@@ -113317,6 +119301,73 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     metadataJson?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointUpdateWithoutTenantInput = {
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointUncheckedUpdateWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LoyaltyPointUncheckedUpdateManyWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    delta?: IntFieldUpdateOperationsInput | number
+    reason?: EnumLoyaltyPointReasonFieldUpdateOperationsInput | $Enums.LoyaltyPointReason
+    sourceType?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RedemptionUpdateWithoutTenantInput = {
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    reward?: LoyaltyRewardUpdateOneRequiredWithoutRedemptionsNestedInput
+    journalEntry?: JournalEntryUpdateOneWithoutRedemptionsNestedInput
+  }
+
+  export type RedemptionUncheckedUpdateWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutTenantInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type StayCreateManyRoomInput = {
@@ -117281,6 +123332,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutAccountingPeriodInput = {
@@ -117304,6 +123356,7 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateManyWithoutAccountingPeriodInput = {
@@ -117437,6 +123490,18 @@ export namespace Prisma {
     scheduledAmountRupiah: number
     recognizedAt?: Date | string | null
     createdAt?: Date | string
+  }
+
+  export type RedemptionCreateManyJournalEntryInput = {
+    id?: number
+    tenantId: number
+    rewardId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    note?: string | null
   }
 
   export type JournalLineUpdateWithoutJournalEntryInput = {
@@ -117662,6 +123727,88 @@ export namespace Prisma {
     scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
     recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RedemptionUpdateWithoutJournalEntryInput = {
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    tenant?: TenantUpdateOneRequiredWithoutRedemptionsNestedInput
+    reward?: LoyaltyRewardUpdateOneRequiredWithoutRedemptionsNestedInput
+  }
+
+  export type RedemptionUncheckedUpdateWithoutJournalEntryInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutJournalEntryInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    rewardId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionCreateManyRewardInput = {
+    id?: number
+    tenantId: number
+    pointCost: number
+    status?: $Enums.RedemptionStatus
+    requestedAt?: Date | string
+    decidedAt?: Date | string | null
+    decidedById?: number | null
+    journalEntryId?: number | null
+    note?: string | null
+  }
+
+  export type RedemptionUpdateWithoutRewardInput = {
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    tenant?: TenantUpdateOneRequiredWithoutRedemptionsNestedInput
+    journalEntry?: JournalEntryUpdateOneWithoutRedemptionsNestedInput
+  }
+
+  export type RedemptionUncheckedUpdateWithoutRewardInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RedemptionUncheckedUpdateManyWithoutRewardInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    pointCost?: IntFieldUpdateOperationsInput | number
+    status?: EnumRedemptionStatusFieldUpdateOperationsInput | $Enums.RedemptionStatus
+    requestedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    decidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    decidedById?: NullableIntFieldUpdateOperationsInput | number | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

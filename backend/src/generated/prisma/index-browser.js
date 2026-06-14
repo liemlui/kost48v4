@@ -868,6 +868,44 @@ exports.Prisma.RentRecognitionScheduleScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.LoyaltyPointScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  delta: 'delta',
+  reason: 'reason',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  note: 'note',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.LoyaltyRewardScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  pointCost: 'pointCost',
+  type: 'type',
+  valueRupiah: 'valueRupiah',
+  isActive: 'isActive',
+  stockQty: 'stockQty',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RedemptionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  rewardId: 'rewardId',
+  pointCost: 'pointCost',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById',
+  journalEntryId: 'journalEntryId',
+  note: 'note'
+};
+
 exports.Prisma.FaqScalarFieldEnum = {
   id: 'id',
   question: 'question',
@@ -1343,6 +1381,31 @@ exports.JournalSourceType = exports.$Enums.JournalSourceType = {
   CLOSING_REVERSAL: 'CLOSING_REVERSAL'
 };
 
+exports.LoyaltyPointReason = exports.$Enums.LoyaltyPointReason = {
+  RENEWAL: 'RENEWAL',
+  ON_TIME_PAYMENT: 'ON_TIME_PAYMENT',
+  VALIDATED_REPORT: 'VALIDATED_REPORT',
+  ONBOARDING_QUEST: 'ONBOARDING_QUEST',
+  REDEMPTION: 'REDEMPTION',
+  ADJUSTMENT: 'ADJUSTMENT'
+};
+
+exports.LoyaltyRewardType = exports.$Enums.LoyaltyRewardType = {
+  RENT_DISCOUNT: 'RENT_DISCOUNT',
+  SERVICE_ADDON: 'SERVICE_ADDON',
+  METER_DISCOUNT: 'METER_DISCOUNT',
+  BADGE: 'BADGE',
+  PHYSICAL: 'PHYSICAL'
+};
+
+exports.RedemptionStatus = exports.$Enums.RedemptionStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  FULFILLED: 'FULFILLED',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Tenant: 'Tenant',
@@ -1386,6 +1449,9 @@ exports.Prisma.ModelName = {
   JournalEntry: 'JournalEntry',
   JournalLine: 'JournalLine',
   RentRecognitionSchedule: 'RentRecognitionSchedule',
+  LoyaltyPoint: 'LoyaltyPoint',
+  LoyaltyReward: 'LoyaltyReward',
+  Redemption: 'Redemption',
   Faq: 'Faq'
 };
 
