@@ -676,7 +676,7 @@ export class PaymentSubmissionsService {
                     utilityType: UtilityType.ELECTRICITY,
                     readingAt,
                   },
-                  select: { id: true },
+                  select: { id: true, readingValue: true },
                 });
                 if (!existingElectricity) {
                   await tx.meterReading.create({
@@ -689,6 +689,13 @@ export class PaymentSubmissionsService {
                       note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
                     },
                   });
+                } else if (Number(existingElectricity.readingValue) !== Number(electricityValue)) {
+                  // B-11: reading LISTRIK sudah ada di tanggal yang sama (mis. rebooking
+                  // sehari) → snapshot baru dibuang. Jangan diam-diam: catat agar admin
+                  // sadar tagihan utilitas awal mungkin perlu koreksi manual.
+                  this.logger.warn(
+                    `B-11: snapshot meter LISTRIK stay #${submission.stayId} (kamar ${stay.roomId}) diabaikan — sudah ada reading ${existingElectricity.readingValue} di ${readingAt.toISOString().slice(0, 10)}, snapshot baru ${electricityValue} dibuang. Cek tagihan utilitas awal.`,
+                  );
                 }
               }
 
@@ -700,7 +707,7 @@ export class PaymentSubmissionsService {
                     utilityType: UtilityType.WATER,
                     readingAt,
                   },
-                  select: { id: true },
+                  select: { id: true, readingValue: true },
                 });
                 if (!existingWater) {
                   await tx.meterReading.create({
@@ -713,6 +720,12 @@ export class PaymentSubmissionsService {
                       note: 'Meter awal dipromote otomatis setelah pembayaran booking disetujui.',
                     },
                   });
+                } else if (Number(existingWater.readingValue) !== Number(waterValue)) {
+                  // B-11: reading AIR sudah ada di tanggal yang sama → snapshot baru
+                  // dibuang. Catat agar tidak hilang diam-diam (cek tagihan awal).
+                  this.logger.warn(
+                    `B-11: snapshot meter AIR stay #${submission.stayId} (kamar ${stay.roomId}) diabaikan — sudah ada reading ${existingWater.readingValue} di ${readingAt.toISOString().slice(0, 10)}, snapshot baru ${waterValue} dibuang. Cek tagihan utilitas awal.`,
+                  );
                 }
               }
 

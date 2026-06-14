@@ -2,14 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
-## 2026-06-14 — ops(F3-13 sebagian): hardening B-07, B-12, B-14, N-02
+## 2026-06-14 — ops(F3-13): hardening checkout/notif (B-06/B-07/B-11/B-12/B-14/N-02) SELESAI
 
 - **B-07 (D-03):** forced-checkout overstay tak lagi diblokir tagihan **DRAFT** (belum terbit, tanpa jurnal). `forceCheckoutOverstay` mengecualikan DRAFT dari blocker pra-tx & re-cek in-tx, lalu membatalkan DRAFT yang tersisa di dalam tx (aman, tanpa reversal). Sebelumnya 1 DRAFT terlupakan = overstay tak pernah auto-checkout + alert merah harian.
 - **B-12:** `stays.update` menolak `plannedCheckOutDate` di masa lalu (WIB) — mencegah admin tak sengaja menjadikan stay target overstay/forced-checkout instan; keluar lebih awal harus lewat flow checkout.
 - **B-14:** reminder kontrak (`runContractEndReminders`) pakai **window** (`daysLeft <= threshold`) bukan exact-match → bila sweeper mati di hari-H gelombang, reminder tak hilang; gelombang yang terlewati tetap terkirim sekali. Dedupe per (stay, gelombang) via judul stabil `H-{wave}`; fallback admin tenant-tanpa-portal ikut dedupe per gelombang (bukan harian).
 - **N-02:** notifikasi pengumuman ditahan bila `startsAt` masih di masa depan (konten belum tayang) — hilangkan notif instan yang menunjuk pengumuman yang belum bisa dibuka. (Pengiriman tepat di `startsAt` butuh sweeper terjadwal = peningkatan lanjutan.)
-- **Tertunda di F3-13:** B-06 (copy/meta "DP hangus" mode non-forfeit — anchor bergeser pasca-rewrite, perlu di-grounding ulang), B-11 (spek tak ada di dossier).
-- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau (B-07 hanya menyentuh DRAFT = tanpa dampak jurnal; B-14/N-02 notif-only).
+- **B-11:** promosi snapshot meter (listrik/air) yang DIBUANG karena sudah ada reading di tanggal sama (mis. rebooking sehari) kini **mencatat warning** bila nilainya berbeda — tak lagi hilang diam-diam; admin diingatkan cek tagihan utilitas awal. (Tanpa ubah perilaku dedupe & tanpa ubah bentuk response.)
+- **B-06:** diverifikasi **sudah teratasi** oleh pemisahan mode `forfeitDownPayment` (A18/G2=A): caller non-forfeit (noon-release) tak lagi menulis "DP hangus", caller forfeit (H+1) menulis dengan benar. Tanpa kode baru.
+- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau (B-07 hanya menyentuh DRAFT = tanpa dampak jurnal; B-11/B-14/N-02 notif/log-only).
 
 ## 2026-06-14 — refactor(F3-11): lead source + katalog foto marketing ke config
 
