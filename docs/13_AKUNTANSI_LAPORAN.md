@@ -58,6 +58,7 @@
 - **F2-8 · FASE 1:** nonaktifkan endpoint/UI pembuatan jurnal draft manual; draft opening balance tetap terpisah dan terkontrol.
 - **F3-18 · FASE 3 (SELESAI 2026-06-14):** buat draft biaya rutin bulanan idempotent untuk gaji/listrik/air/internet/sewa/pajak; draft dikecualikan dari laporan dan jurnal hingga dikonfirmasi.
 - **F3-21 · FASE 3 (SELESAI 2026-06-14):** jalankan depresiasi bulan WIB sebelumnya sebelum accounting auto-close, memakai service dan idempotency yang sama dengan proses manual.
+- **F3-10 · FASE 3 (SELESAI 2026-06-14):** higiene jurnal. **race P2002** — 7 entrypoint posting ber-transaksi-sendiri dibungkus `runIdempotentPosting`: duplikat akibat dua proses paralel (entryNumber `@unique`) diperlakukan sebagai sudah-terposting di LUAR tx (catch P2002 di dalam tx mustahil karena Postgres meng-abort tx). **entryNumber suffix VOID = N/A** (tak ada jalur `journalEntry`→`VOID`). **forfeit entryDate** sudah = tanggal kejadian (post oleh sweeper).
 - **F4-10 · FASE 4:** standarisasi pembulatan.
 
 ## 5. Invarian & UAT

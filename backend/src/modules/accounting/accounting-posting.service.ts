@@ -1,4 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { Prisma } from "../../generated/prisma";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
   type AutoSourceType,
@@ -67,7 +68,7 @@ export class AccountingPostingService {
   }
 
   async postInvoiceIssued(invoiceId: number, createdById?: number | null) {
-    return (this.prisma as any).$transaction((tx: any) =>
+    return this.runIdempotentPosting(`INVOICE:${invoiceId}`, (tx: any) =>
       this.postInvoiceIssuedTx(tx, invoiceId, createdById),
     );
   }
@@ -76,19 +77,20 @@ export class AccountingPostingService {
     invoicePaymentId: number,
     createdById?: number | null,
   ) {
-    return (this.prisma as any).$transaction((tx: any) =>
-      this.postInvoicePaymentTx(tx, invoicePaymentId, createdById),
+    return this.runIdempotentPosting(
+      `INVOICE_PAYMENT:${invoicePaymentId}`,
+      (tx: any) => this.postInvoicePaymentTx(tx, invoicePaymentId, createdById),
     );
   }
 
   async postExpense(expenseId: number, createdById?: number | null) {
-    return (this.prisma as any).$transaction((tx: any) =>
+    return this.runIdempotentPosting(`EXPENSE:${expenseId}`, (tx: any) =>
       this.postExpenseTx(tx, expenseId, createdById),
     );
   }
 
   async postWifiSale(wifiSaleId: number, createdById?: number | null) {
-    return (this.prisma as any).$transaction((tx: any) =>
+    return this.runIdempotentPosting(`WIFI_SALE:${wifiSaleId}`, (tx: any) =>
       this.postWifiSaleTx(tx, wifiSaleId, createdById),
     );
   }
@@ -99,7 +101,7 @@ export class AccountingPostingService {
     paymentMethod?: string | null,
     entryDate?: Date | string | null,
   ) {
-    return (this.prisma as any).$transaction((tx: any) =>
+    return this.runIdempotentPosting(`DEPOSIT:${stayId}`, (tx: any) =>
       this.postDepositReceivedForStayTx(
         tx,
         stayId,
@@ -111,7 +113,7 @@ export class AccountingPostingService {
   }
 
   async postDepositSettlement(stayId: number, createdById?: number | null) {
-    return (this.prisma as any).$transaction((tx: any) =>
+    return this.runIdempotentPosting(`DEPOSIT_SETTLEMENT:${stayId}`, (tx: any) =>
       this.postDepositSettlementTx(tx, stayId, createdById),
     );
   }
@@ -120,8 +122,10 @@ export class AccountingPostingService {
     invoiceId: number,
     createdById?: number | null,
   ) {
-    return (this.prisma as any).$transaction((tx: any) =>
-      this.postInvoiceCancellationReversalTx(tx, invoiceId, createdById),
+    return this.runIdempotentPosting(
+      `INVOICE_CANCEL_REVERSAL:${invoiceId}`,
+      (tx: any) =>
+        this.postInvoiceCancellationReversalTx(tx, invoiceId, createdById),
     );
   }
 
@@ -1240,5 +1244,30 @@ export class AccountingPostingService {
       sourceId: String(sourceId),
       reason,
     };
+  }
+
+  // F3-10: jalankan posting jurnal idempoten yang punya transaksinya sendiri.
+  // Bila dua proses paralel memposting source yang sama, `entryNumber` @unique
+  // memicu P2002 pada create kedua. Karena error meng-abort transaksi Postgres
+  // (tak bisa di-catch lalu re-query di dalam tx yang sama), penanganan harus di
+  // LUAR transaksi: perlakukan duplikat sebagai sudah-terposting, bukan error.
+  private async runIdempotentPosting(
+    sourceLabel: string,
+    fn: (tx: any) => Promise<any>,
+  ) {
+    try {
+      return await (this.prisma as any).$transaction(fn);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        this.logger.warn(
+          `Auto journal duplikat (race P2002) untuk ${sourceLabel} diperlakukan sebagai sudah-terposting.`,
+        );
+        return this.skip(sourceLabel, sourceLabel, "Journal sudah ada (race duplicate, P2002).");
+      }
+      throw error;
+    }
   }
 }

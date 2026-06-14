@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — ops(F3-10): higiene jurnal — idempoten anti-race P2002 di posting
+
+- **Race P2002 (utama):** `accounting-posting.service` membungkus 7 entrypoint posting ber-transaksi-sendiri (invoice issued/payment, expense, wifi-sale, deposit received/settlement, invoice-cancel-reversal) dengan `runIdempotentPosting`. Bila dua proses paralel memposting source yang sama, `JournalEntry.entryNumber` `@unique` memicu P2002 pada create kedua; karena error Postgres meng-abort transaksi (tak bisa di-catch lalu re-query di dalam tx yang sama), penanganan diletakkan di LUAR transaksi → duplikat diperlakukan sebagai **sudah-terposting** (skip benign), bukan error yang menggagalkan operasi bisnis.
+- **entryNumber suffix VOID:** _tidak berlaku pada kode saat ini_ — tidak ada jalur `journalEntry` → status `VOID` (reversal selalu membuat entry `ADJUSTMENT` baru, `entryNumber` kanonik tak pernah dibebaskan). Akan relevan bila kelak ada flow void/reopen entry.
+- **forfeit entryDate:** `postDownPaymentForfeitTx` diposting oleh sweeper PADA saat kejadian (gagal pelunasan H+1), jadi `entryDate = new Date()` sudah = tanggal kejadian; dibiarkan.
+- **Verifikasi:** backend build + `tsc` 0; unit test 26/26 hijau (fungsi murni finance tanpa regresi).
+
 ## 2026-06-14 — audit-fix(Fase 1/2): checklist dibuktikan ulang terhadap kode
 
 - **Renewal:** menutup celah kritis approval sebelum lunas. DP PAID kini hanya mengamankan prioritas; admin menerbitkan invoice pelunasan setelah catat meter; stay baru diperpanjang setelah invoice pelunasan PAID tepat waktu. Ditambah `RenewRequest.settlementInvoiceId`, gate payment deadline, pembatalan+reversal invoice saat reject sebelum DP, UI tenant/admin lengkap, dan direct-renew bypass dimatikan.
