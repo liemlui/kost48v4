@@ -1,6 +1,6 @@
 # DOSSIER 15 — STAF, TIKET & KPI
 **Domain:** manajemen tiket operasional, work queue staf, staff performance KPI, round-robin assignment. **Flow 11.**
-**Status:** 🟡 Tiket/KPI parsial — monthRange KPI sudah WIB, tetapi rutinitas masih timezone-server. STAFF close kini **sudah dibatasi ke CHECKOUT_INSPECTION** (guard kategori di `close()`, 2026-06-14, UAT lulus). Sisa: workflow verifikasi `StaffReview` PENDING_VERIFICATION + cakupan review.
+**Status:** 🟡 Tiket/KPI parsial — STAFF close dibatasi ke CHECKOUT_INSPECTION, prompt review tenant aktif, dan **workflow verifikasi review (≤2 → PENDING_VERIFICATION → owner verify, KPI hanya hitung VISIBLE) SUDAH** (F2-18, 2026-06-14). Sisa utama: SLA/KPI per kategori (F3-19).
 **File inti:** `tickets.service.ts` (assign/close/auto-create), `tickets.controller.ts`, KPI data dari `reviews` + `tickets`.
 
 ---
@@ -39,7 +39,7 @@
 - **F2-18 · FASE 2:** model tenant-pengawas dan staff boleh close inspeksi dengan guard keselamatan.
 - **F3-1 · FASE 3:** fix notification recipient untuk ticket BARANG_PINDAH. (K-6/K-8)
 - **F3-19 · FASE 3:** resolved time dari `assignedAt`, breakdown kategori, SLA, dan escalation.
-- **F3-20 · FASE 3:** prompt review tenant setelah tiket tenant ditutup.
+- **F3-20 · FASE 3 (SELESAI 2026-06-14):** tiket tenant ber-assignee STAFF memicu notifikasi ajakan review pada DONE dan CLOSED. Dedupe memakai recipient+title+entity; deep-link membuka `/portal/tickets`, tempat `TenantStaffReviewPrompt` mengambil tiket eligible.
 - **F2-10/F3-5 · DITUNDA:** round-robin dan leaderboard antar-staf selama staf hanya satu.
 
 ## 5. Invarian & UAT

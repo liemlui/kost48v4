@@ -18,6 +18,12 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — feat(F2-18): gate verifikasi owner utk review tenant ≤2 (F2-18 SELESAI)
+
+Model tenant-pengawas: review tenant rating **≤2 → `PENDING_VERIFICATION`** (tidak tampil & TIDAK dihitung KPI sampai owner verifikasi — `buildSummaryForStaff` hanya hitung `VISIBLE`), melindungi staf dari review buruk yang belum dicek. Rating >2 langsung `VISIBLE`.
+- Owner: `GET /tenant/staff-reviews/pending-verification` + `POST /:id/verify {decision: APPROVE→VISIBLE | DISMISS→HIDDEN}` (OWNER-only, set `moderatedById`). Notif staf saat review jadi VISIBLE. Notif komplain admin diperbarui ("menunggu verifikasi").
+- **UAT runtime:** rating-2 → PENDING_VERIFICATION; owner list memuatnya; ADMIN verify → 403; owner APPROVE → VISIBLE; re-verify → 409. `tsc` 0. → **F2-18 SELESAI** (close-guard kategori + workflow verifikasi; perluasan cakupan review fasilitas/admin = F3+).
+
 ## 2026-06-14 — test(F2-6): UAT cancel stay promoted → MAINTENANCE + tiket inspeksi (F2-6 SELESAI)
 
 Verifikasi runtime F2-6 (kode sudah ada): cancel stay promoted (stay 1, room OCCUPIED) → stay `CANCELLED` + room `MAINTENANCE` + tiket `TIC-2026-CHK-1` (`CHECKOUT_INSPECTION`, OPEN) terbentuk + invoice ter-reversal → **trial-balance balanced**. Kamar bekas huni tak lagi nyangkut MAINTENANCE (gate room-ready terbuka lewat tutup tiket inspeksi). → **F2-6 SELESAI.**

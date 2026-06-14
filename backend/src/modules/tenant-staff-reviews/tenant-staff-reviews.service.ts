@@ -61,6 +61,10 @@ export class TenantStaffReviewsService {
     if (!['DONE', 'CLOSED'].includes(ticket.status)) throw new ConflictException('Review hanya bisa diberikan setelah pekerjaan selesai');
     if (!ticket.assignedToId || ticket.assignedTo?.role !== 'STAFF') throw new ConflictException('Tiket belum memiliki staff yang bisa direview');
 
+    // F2-18 (gate ≤2): review rating rendah (≤2) MENUNGGU verifikasi owner sebelum tampil
+    // & sebelum dihitung KPI (buildSummaryForStaff hanya hitung status VISIBLE). Melindungi
+    // staf dari review buruk yang belum diverifikasi. Rating >2 langsung VISIBLE.
+    const needsVerification = dto.rating <= 2;
     let review: any;
     try {
       review = await this.prisma.staffReview.create({
@@ -70,7 +74,7 @@ export class TenantStaffReviewsService {
           ticketId: ticket.id,
           rating: dto.rating,
           comment: dto.comment?.trim() || null,
-          status: StaffReviewStatus.VISIBLE as any,
+          status: (needsVerification ? StaffReviewStatus.PENDING_VERIFICATION : StaffReviewStatus.VISIBLE) as any,
         },
         include: { staff: { select: { id: true, fullName: true, role: true } } },
       });
@@ -93,8 +97,8 @@ export class TenantStaffReviewsService {
       for (const admin of admins) {
         await this.notification.create({
           recipientUserId: admin.id,
-          title: `⚠️ Komplain dari ${tenantName}`,
-          body: `Rating ${dto.rating}/5 untuk staff ${staffName} — ${complaintLabel}. ${dto.comment ? dto.comment : ''}`,
+          title: `⚠️ Komplain ${tenantName} — perlu verifikasi`,
+          body: `Rating ${dto.rating}/5 untuk staff ${staffName} — ${complaintLabel}. ${dto.comment ? dto.comment : ''} Review MENUNGGU verifikasi Anda; belum tampil & belum dihitung KPI sampai diverifikasi.`,
           linkTo: `/staff-performance`,
           entityType: 'StaffReview',
           entityId: String(review.id),
@@ -115,5 +119,51 @@ export class TenantStaffReviewsService {
     }
 
     return review;
+  }
+
+  /** F2-18: daftar review tenant yang menunggu verifikasi owner (rating ≤2). */
+  async listPendingVerification() {
+    return this.prisma.staffReview.findMany({
+      where: { status: StaffReviewStatus.PENDING_VERIFICATION as any },
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        ticketId: true,
+        createdAt: true,
+        staff: { select: { id: true, fullName: true } },
+        tenant: { select: { id: true, fullName: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * F2-18: owner verifikasi review ≤2 — APPROVE → VISIBLE (mulai dihitung KPI),
+   * DISMISS → HIDDEN (tidak adil/abuse → tak dihitung). Hanya dari PENDING_VERIFICATION.
+   */
+  async verify(id: number, decision: 'APPROVE' | 'DISMISS', actor: CurrentUserPayload) {
+    const review = await this.prisma.staffReview.findUnique({ where: { id } });
+    if (!review) throw new NotFoundException('Review tidak ditemukan');
+    if (review.status !== StaffReviewStatus.PENDING_VERIFICATION) {
+      throw new ConflictException('Hanya review berstatus menunggu verifikasi yang dapat diverifikasi.');
+    }
+    const next = decision === 'APPROVE' ? StaffReviewStatus.VISIBLE : StaffReviewStatus.HIDDEN;
+    const updated = await this.prisma.staffReview.update({
+      where: { id },
+      data: { status: next as any, moderatedById: actor.id },
+    });
+    // Beri tahu staf hanya bila review jadi VISIBLE (mempengaruhi KPI).
+    if (next === StaffReviewStatus.VISIBLE) {
+      await this.notification.create({
+        recipientUserId: review.staffId,
+        title: 'ℹ️ Review tenant diverifikasi',
+        body: `Sebuah review (rating ${review.rating}/5) telah diverifikasi owner dan kini tercatat pada kinerja Anda.`,
+        linkTo: '/staff/monthly-report',
+        entityType: 'StaffReview',
+        entityId: String(review.id),
+      }).catch(() => undefined);
+    }
+    return updated;
   }
 }

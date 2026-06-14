@@ -1,4 +1,10 @@
-import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+
+// F2-18: keputusan owner atas review ≤2 yang menunggu verifikasi.
+export class VerifyStaffReviewDto {
+  @IsIn(['APPROVE', 'DISMISS'])
+  decision!: 'APPROVE' | 'DISMISS';
+}
 
 export class CreateTenantStaffReviewDto {
   @IsInt()
