@@ -856,6 +856,18 @@ exports.Prisma.JournalLineScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RentRecognitionScheduleScalarFieldEnum = {
+  id: 'id',
+  stayId: 'stayId',
+  periodIndex: 'periodIndex',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  scheduledAmountRupiah: 'scheduledAmountRupiah',
+  recognizedAt: 'recognizedAt',
+  journalEntryId: 'journalEntryId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.FaqScalarFieldEnum = {
   id: 'id',
   question: 'question',
@@ -1373,6 +1385,7 @@ exports.Prisma.ModelName = {
   OpeningBalanceLine: 'OpeningBalanceLine',
   JournalEntry: 'JournalEntry',
   JournalLine: 'JournalLine',
+  RentRecognitionSchedule: 'RentRecognitionSchedule',
   Faq: 'Faq'
 };
 

@@ -694,6 +694,7 @@ model Stay {
   renewRequests      RenewRequest[]
   checkoutRequests   CheckoutRequest[]
   depositLedgerEntries TenantDepositLedgerEntry[]
+  rentRecognitionSchedules RentRecognitionSchedule[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -1647,6 +1648,7 @@ model JournalEntry {
   lines            JournalLine[]
   depreciationRuns AssetDepreciationRun[]
   fixedAssetLedgerAlignments FixedAsset[] @relation("FixedAssetAlignmentJournalEntry")
+  rentRecognitions RentRecognitionSchedule[]
 
   @@index([entryDate])
   @@index([accountingPeriodId])
@@ -1672,6 +1674,28 @@ model JournalLine {
   @@index([journalEntryId])
   @@index([chartOfAccountId])
   @@index([cashAccountId])
+}
+
+// F4-1 (PSAK 72): jadwal pengakuan pendapatan sewa panjang (>1 bulan). Sewa ditangguhkan
+// ke akun 2200 (Unearned Revenue) saat invoice diterbitkan, lalu diakui bertahap per
+// bulan (DR 2200 / CR 4000). Satu baris = satu bulan; idempotent per (stayId, periodIndex).
+model RentRecognitionSchedule {
+  id                    Int       @id @default(autoincrement())
+  stayId                Int
+  periodIndex           Int
+  periodStart           DateTime  @db.Date
+  periodEnd             DateTime  @db.Date
+  scheduledAmountRupiah Int
+  recognizedAt          DateTime?
+  journalEntryId        Int?
+  createdAt             DateTime  @default(now())
+
+  stay         Stay          @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+
+  @@unique([stayId, periodIndex])
+  @@index([stayId])
+  @@index([recognizedAt])
 }
 
 

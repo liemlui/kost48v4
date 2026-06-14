@@ -219,6 +219,11 @@ export type JournalEntry = $Result.DefaultSelection<Prisma.$JournalEntryPayload>
  */
 export type JournalLine = $Result.DefaultSelection<Prisma.$JournalLinePayload>
 /**
+ * Model RentRecognitionSchedule
+ * 
+ */
+export type RentRecognitionSchedule = $Result.DefaultSelection<Prisma.$RentRecognitionSchedulePayload>
+/**
  * Model Faq
  * 
  */
@@ -1585,6 +1590,16 @@ export class PrismaClient<
   get journalLine(): Prisma.JournalLineDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.rentRecognitionSchedule`: Exposes CRUD operations for the **RentRecognitionSchedule** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RentRecognitionSchedules
+    * const rentRecognitionSchedules = await prisma.rentRecognitionSchedule.findMany()
+    * ```
+    */
+  get rentRecognitionSchedule(): Prisma.RentRecognitionScheduleDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.faq`: Exposes CRUD operations for the **Faq** model.
     * Example usage:
     * ```ts
@@ -2068,6 +2083,7 @@ export namespace Prisma {
     OpeningBalanceLine: 'OpeningBalanceLine',
     JournalEntry: 'JournalEntry',
     JournalLine: 'JournalLine',
+    RentRecognitionSchedule: 'RentRecognitionSchedule',
     Faq: 'Faq'
   };
 
@@ -2084,7 +2100,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "faq"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "faq"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5122,6 +5138,80 @@ export namespace Prisma {
           }
         }
       }
+      RentRecognitionSchedule: {
+        payload: Prisma.$RentRecognitionSchedulePayload<ExtArgs>
+        fields: Prisma.RentRecognitionScheduleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RentRecognitionScheduleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RentRecognitionScheduleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          findFirst: {
+            args: Prisma.RentRecognitionScheduleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RentRecognitionScheduleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          findMany: {
+            args: Prisma.RentRecognitionScheduleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>[]
+          }
+          create: {
+            args: Prisma.RentRecognitionScheduleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          createMany: {
+            args: Prisma.RentRecognitionScheduleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RentRecognitionScheduleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>[]
+          }
+          delete: {
+            args: Prisma.RentRecognitionScheduleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          update: {
+            args: Prisma.RentRecognitionScheduleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          deleteMany: {
+            args: Prisma.RentRecognitionScheduleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RentRecognitionScheduleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RentRecognitionScheduleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>[]
+          }
+          upsert: {
+            args: Prisma.RentRecognitionScheduleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RentRecognitionSchedulePayload>
+          }
+          aggregate: {
+            args: Prisma.RentRecognitionScheduleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRentRecognitionSchedule>
+          }
+          groupBy: {
+            args: Prisma.RentRecognitionScheduleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RentRecognitionScheduleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RentRecognitionScheduleCountArgs<ExtArgs>
+            result: $Utils.Optional<RentRecognitionScheduleCountAggregateOutputType> | number
+          }
+        }
+      }
       Faq: {
         payload: Prisma.$FaqPayload<ExtArgs>
         fields: Prisma.FaqFieldRefs
@@ -5345,6 +5435,7 @@ export namespace Prisma {
     openingBalanceLine?: OpeningBalanceLineOmit
     journalEntry?: JournalEntryOmit
     journalLine?: JournalLineOmit
+    rentRecognitionSchedule?: RentRecognitionScheduleOmit
     faq?: FaqOmit
   }
 
@@ -5958,6 +6049,7 @@ export namespace Prisma {
     renewRequests: number
     checkoutRequests: number
     depositLedgerEntries: number
+    rentRecognitionSchedules: number
   }
 
   export type StayCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5968,6 +6060,7 @@ export namespace Prisma {
     renewRequests?: boolean | StayCountOutputTypeCountRenewRequestsArgs
     checkoutRequests?: boolean | StayCountOutputTypeCountCheckoutRequestsArgs
     depositLedgerEntries?: boolean | StayCountOutputTypeCountDepositLedgerEntriesArgs
+    rentRecognitionSchedules?: boolean | StayCountOutputTypeCountRentRecognitionSchedulesArgs
   }
 
   // Custom InputTypes
@@ -6028,6 +6121,13 @@ export namespace Prisma {
    */
   export type StayCountOutputTypeCountDepositLedgerEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantDepositLedgerEntryWhereInput
+  }
+
+  /**
+   * StayCountOutputType without action
+   */
+  export type StayCountOutputTypeCountRentRecognitionSchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RentRecognitionScheduleWhereInput
   }
 
 
@@ -6608,12 +6708,14 @@ export namespace Prisma {
     lines: number
     depreciationRuns: number
     fixedAssetLedgerAlignments: number
+    rentRecognitions: number
   }
 
   export type JournalEntryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     lines?: boolean | JournalEntryCountOutputTypeCountLinesArgs
     depreciationRuns?: boolean | JournalEntryCountOutputTypeCountDepreciationRunsArgs
     fixedAssetLedgerAlignments?: boolean | JournalEntryCountOutputTypeCountFixedAssetLedgerAlignmentsArgs
+    rentRecognitions?: boolean | JournalEntryCountOutputTypeCountRentRecognitionsArgs
   }
 
   // Custom InputTypes
@@ -6646,6 +6748,13 @@ export namespace Prisma {
    */
   export type JournalEntryCountOutputTypeCountFixedAssetLedgerAlignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FixedAssetWhereInput
+  }
+
+  /**
+   * JournalEntryCountOutputType without action
+   */
+  export type JournalEntryCountOutputTypeCountRentRecognitionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RentRecognitionScheduleWhereInput
   }
 
 
@@ -13771,6 +13880,7 @@ export namespace Prisma {
     renewRequests?: boolean | Stay$renewRequestsArgs<ExtArgs>
     checkoutRequests?: boolean | Stay$checkoutRequestsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Stay$depositLedgerEntriesArgs<ExtArgs>
+    rentRecognitionSchedules?: boolean | Stay$rentRecognitionSchedulesArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
@@ -13960,6 +14070,7 @@ export namespace Prisma {
     renewRequests?: boolean | Stay$renewRequestsArgs<ExtArgs>
     checkoutRequests?: boolean | Stay$checkoutRequestsArgs<ExtArgs>
     depositLedgerEntries?: boolean | Stay$depositLedgerEntriesArgs<ExtArgs>
+    rentRecognitionSchedules?: boolean | Stay$rentRecognitionSchedulesArgs<ExtArgs>
     _count?: boolean | StayCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type StayIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13992,6 +14103,7 @@ export namespace Prisma {
       renewRequests: Prisma.$RenewRequestPayload<ExtArgs>[]
       checkoutRequests: Prisma.$CheckoutRequestPayload<ExtArgs>[]
       depositLedgerEntries: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
+      rentRecognitionSchedules: Prisma.$RentRecognitionSchedulePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -14451,6 +14563,7 @@ export namespace Prisma {
     renewRequests<T extends Stay$renewRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$renewRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RenewRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     checkoutRequests<T extends Stay$checkoutRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$checkoutRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CheckoutRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     depositLedgerEntries<T extends Stay$depositLedgerEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$depositLedgerEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rentRecognitionSchedules<T extends Stay$rentRecognitionSchedulesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$rentRecognitionSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15154,6 +15267,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TenantDepositLedgerEntryScalarFieldEnum | TenantDepositLedgerEntryScalarFieldEnum[]
+  }
+
+  /**
+   * Stay.rentRecognitionSchedules
+   */
+  export type Stay$rentRecognitionSchedulesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    where?: RentRecognitionScheduleWhereInput
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
   }
 
   /**
@@ -59368,6 +59505,7 @@ export namespace Prisma {
     lines?: boolean | JournalEntry$linesArgs<ExtArgs>
     depreciationRuns?: boolean | JournalEntry$depreciationRunsArgs<ExtArgs>
     fixedAssetLedgerAlignments?: boolean | JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>
+    rentRecognitions?: boolean | JournalEntry$rentRecognitionsArgs<ExtArgs>
     _count?: boolean | JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["journalEntry"]>
 
@@ -59439,6 +59577,7 @@ export namespace Prisma {
     lines?: boolean | JournalEntry$linesArgs<ExtArgs>
     depreciationRuns?: boolean | JournalEntry$depreciationRunsArgs<ExtArgs>
     fixedAssetLedgerAlignments?: boolean | JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>
+    rentRecognitions?: boolean | JournalEntry$rentRecognitionsArgs<ExtArgs>
     _count?: boolean | JournalEntryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JournalEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -59455,6 +59594,7 @@ export namespace Prisma {
       lines: Prisma.$JournalLinePayload<ExtArgs>[]
       depreciationRuns: Prisma.$AssetDepreciationRunPayload<ExtArgs>[]
       fixedAssetLedgerAlignments: Prisma.$FixedAssetPayload<ExtArgs>[]
+      rentRecognitions: Prisma.$RentRecognitionSchedulePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -59872,6 +60012,7 @@ export namespace Prisma {
     lines<T extends JournalEntry$linesArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JournalLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     depreciationRuns<T extends JournalEntry$depreciationRunsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$depreciationRunsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssetDepreciationRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fixedAssetLedgerAlignments<T extends JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$fixedAssetLedgerAlignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FixedAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rentRecognitions<T extends JournalEntry$rentRecognitionsArgs<ExtArgs> = {}>(args?: Subset<T, JournalEntry$rentRecognitionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -60407,6 +60548,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FixedAssetScalarFieldEnum | FixedAssetScalarFieldEnum[]
+  }
+
+  /**
+   * JournalEntry.rentRecognitions
+   */
+  export type JournalEntry$rentRecognitionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    where?: RentRecognitionScheduleWhereInput
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
   }
 
   /**
@@ -61633,6 +61798,1198 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: JournalLineInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RentRecognitionSchedule
+   */
+
+  export type AggregateRentRecognitionSchedule = {
+    _count: RentRecognitionScheduleCountAggregateOutputType | null
+    _avg: RentRecognitionScheduleAvgAggregateOutputType | null
+    _sum: RentRecognitionScheduleSumAggregateOutputType | null
+    _min: RentRecognitionScheduleMinAggregateOutputType | null
+    _max: RentRecognitionScheduleMaxAggregateOutputType | null
+  }
+
+  export type RentRecognitionScheduleAvgAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    periodIndex: number | null
+    scheduledAmountRupiah: number | null
+    journalEntryId: number | null
+  }
+
+  export type RentRecognitionScheduleSumAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    periodIndex: number | null
+    scheduledAmountRupiah: number | null
+    journalEntryId: number | null
+  }
+
+  export type RentRecognitionScheduleMinAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    periodIndex: number | null
+    periodStart: Date | null
+    periodEnd: Date | null
+    scheduledAmountRupiah: number | null
+    recognizedAt: Date | null
+    journalEntryId: number | null
+    createdAt: Date | null
+  }
+
+  export type RentRecognitionScheduleMaxAggregateOutputType = {
+    id: number | null
+    stayId: number | null
+    periodIndex: number | null
+    periodStart: Date | null
+    periodEnd: Date | null
+    scheduledAmountRupiah: number | null
+    recognizedAt: Date | null
+    journalEntryId: number | null
+    createdAt: Date | null
+  }
+
+  export type RentRecognitionScheduleCountAggregateOutputType = {
+    id: number
+    stayId: number
+    periodIndex: number
+    periodStart: number
+    periodEnd: number
+    scheduledAmountRupiah: number
+    recognizedAt: number
+    journalEntryId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type RentRecognitionScheduleAvgAggregateInputType = {
+    id?: true
+    stayId?: true
+    periodIndex?: true
+    scheduledAmountRupiah?: true
+    journalEntryId?: true
+  }
+
+  export type RentRecognitionScheduleSumAggregateInputType = {
+    id?: true
+    stayId?: true
+    periodIndex?: true
+    scheduledAmountRupiah?: true
+    journalEntryId?: true
+  }
+
+  export type RentRecognitionScheduleMinAggregateInputType = {
+    id?: true
+    stayId?: true
+    periodIndex?: true
+    periodStart?: true
+    periodEnd?: true
+    scheduledAmountRupiah?: true
+    recognizedAt?: true
+    journalEntryId?: true
+    createdAt?: true
+  }
+
+  export type RentRecognitionScheduleMaxAggregateInputType = {
+    id?: true
+    stayId?: true
+    periodIndex?: true
+    periodStart?: true
+    periodEnd?: true
+    scheduledAmountRupiah?: true
+    recognizedAt?: true
+    journalEntryId?: true
+    createdAt?: true
+  }
+
+  export type RentRecognitionScheduleCountAggregateInputType = {
+    id?: true
+    stayId?: true
+    periodIndex?: true
+    periodStart?: true
+    periodEnd?: true
+    scheduledAmountRupiah?: true
+    recognizedAt?: true
+    journalEntryId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type RentRecognitionScheduleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RentRecognitionSchedule to aggregate.
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RentRecognitionSchedules to fetch.
+     */
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RentRecognitionSchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RentRecognitionSchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RentRecognitionSchedules
+    **/
+    _count?: true | RentRecognitionScheduleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RentRecognitionScheduleAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RentRecognitionScheduleSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RentRecognitionScheduleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RentRecognitionScheduleMaxAggregateInputType
+  }
+
+  export type GetRentRecognitionScheduleAggregateType<T extends RentRecognitionScheduleAggregateArgs> = {
+        [P in keyof T & keyof AggregateRentRecognitionSchedule]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRentRecognitionSchedule[P]>
+      : GetScalarType<T[P], AggregateRentRecognitionSchedule[P]>
+  }
+
+
+
+
+  export type RentRecognitionScheduleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RentRecognitionScheduleWhereInput
+    orderBy?: RentRecognitionScheduleOrderByWithAggregationInput | RentRecognitionScheduleOrderByWithAggregationInput[]
+    by: RentRecognitionScheduleScalarFieldEnum[] | RentRecognitionScheduleScalarFieldEnum
+    having?: RentRecognitionScheduleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RentRecognitionScheduleCountAggregateInputType | true
+    _avg?: RentRecognitionScheduleAvgAggregateInputType
+    _sum?: RentRecognitionScheduleSumAggregateInputType
+    _min?: RentRecognitionScheduleMinAggregateInputType
+    _max?: RentRecognitionScheduleMaxAggregateInputType
+  }
+
+  export type RentRecognitionScheduleGroupByOutputType = {
+    id: number
+    stayId: number
+    periodIndex: number
+    periodStart: Date
+    periodEnd: Date
+    scheduledAmountRupiah: number
+    recognizedAt: Date | null
+    journalEntryId: number | null
+    createdAt: Date
+    _count: RentRecognitionScheduleCountAggregateOutputType | null
+    _avg: RentRecognitionScheduleAvgAggregateOutputType | null
+    _sum: RentRecognitionScheduleSumAggregateOutputType | null
+    _min: RentRecognitionScheduleMinAggregateOutputType | null
+    _max: RentRecognitionScheduleMaxAggregateOutputType | null
+  }
+
+  type GetRentRecognitionScheduleGroupByPayload<T extends RentRecognitionScheduleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RentRecognitionScheduleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RentRecognitionScheduleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RentRecognitionScheduleGroupByOutputType[P]>
+            : GetScalarType<T[P], RentRecognitionScheduleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RentRecognitionScheduleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    periodIndex?: boolean
+    periodStart?: boolean
+    periodEnd?: boolean
+    scheduledAmountRupiah?: boolean
+    recognizedAt?: boolean
+    journalEntryId?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["rentRecognitionSchedule"]>
+
+  export type RentRecognitionScheduleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    periodIndex?: boolean
+    periodStart?: boolean
+    periodEnd?: boolean
+    scheduledAmountRupiah?: boolean
+    recognizedAt?: boolean
+    journalEntryId?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["rentRecognitionSchedule"]>
+
+  export type RentRecognitionScheduleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stayId?: boolean
+    periodIndex?: boolean
+    periodStart?: boolean
+    periodEnd?: boolean
+    scheduledAmountRupiah?: boolean
+    recognizedAt?: boolean
+    journalEntryId?: boolean
+    createdAt?: boolean
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }, ExtArgs["result"]["rentRecognitionSchedule"]>
+
+  export type RentRecognitionScheduleSelectScalar = {
+    id?: boolean
+    stayId?: boolean
+    periodIndex?: boolean
+    periodStart?: boolean
+    periodEnd?: boolean
+    scheduledAmountRupiah?: boolean
+    recognizedAt?: boolean
+    journalEntryId?: boolean
+    createdAt?: boolean
+  }
+
+  export type RentRecognitionScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "periodIndex" | "periodStart" | "periodEnd" | "scheduledAmountRupiah" | "recognizedAt" | "journalEntryId" | "createdAt", ExtArgs["result"]["rentRecognitionSchedule"]>
+  export type RentRecognitionScheduleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }
+  export type RentRecognitionScheduleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }
+  export type RentRecognitionScheduleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    stay?: boolean | StayDefaultArgs<ExtArgs>
+    journalEntry?: boolean | RentRecognitionSchedule$journalEntryArgs<ExtArgs>
+  }
+
+  export type $RentRecognitionSchedulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RentRecognitionSchedule"
+    objects: {
+      stay: Prisma.$StayPayload<ExtArgs>
+      journalEntry: Prisma.$JournalEntryPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      stayId: number
+      periodIndex: number
+      periodStart: Date
+      periodEnd: Date
+      scheduledAmountRupiah: number
+      recognizedAt: Date | null
+      journalEntryId: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["rentRecognitionSchedule"]>
+    composites: {}
+  }
+
+  type RentRecognitionScheduleGetPayload<S extends boolean | null | undefined | RentRecognitionScheduleDefaultArgs> = $Result.GetResult<Prisma.$RentRecognitionSchedulePayload, S>
+
+  type RentRecognitionScheduleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RentRecognitionScheduleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RentRecognitionScheduleCountAggregateInputType | true
+    }
+
+  export interface RentRecognitionScheduleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RentRecognitionSchedule'], meta: { name: 'RentRecognitionSchedule' } }
+    /**
+     * Find zero or one RentRecognitionSchedule that matches the filter.
+     * @param {RentRecognitionScheduleFindUniqueArgs} args - Arguments to find a RentRecognitionSchedule
+     * @example
+     * // Get one RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RentRecognitionScheduleFindUniqueArgs>(args: SelectSubset<T, RentRecognitionScheduleFindUniqueArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RentRecognitionSchedule that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RentRecognitionScheduleFindUniqueOrThrowArgs} args - Arguments to find a RentRecognitionSchedule
+     * @example
+     * // Get one RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RentRecognitionScheduleFindUniqueOrThrowArgs>(args: SelectSubset<T, RentRecognitionScheduleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RentRecognitionSchedule that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleFindFirstArgs} args - Arguments to find a RentRecognitionSchedule
+     * @example
+     * // Get one RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RentRecognitionScheduleFindFirstArgs>(args?: SelectSubset<T, RentRecognitionScheduleFindFirstArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RentRecognitionSchedule that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleFindFirstOrThrowArgs} args - Arguments to find a RentRecognitionSchedule
+     * @example
+     * // Get one RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RentRecognitionScheduleFindFirstOrThrowArgs>(args?: SelectSubset<T, RentRecognitionScheduleFindFirstOrThrowArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RentRecognitionSchedules that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RentRecognitionSchedules
+     * const rentRecognitionSchedules = await prisma.rentRecognitionSchedule.findMany()
+     * 
+     * // Get first 10 RentRecognitionSchedules
+     * const rentRecognitionSchedules = await prisma.rentRecognitionSchedule.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const rentRecognitionScheduleWithIdOnly = await prisma.rentRecognitionSchedule.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RentRecognitionScheduleFindManyArgs>(args?: SelectSubset<T, RentRecognitionScheduleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RentRecognitionSchedule.
+     * @param {RentRecognitionScheduleCreateArgs} args - Arguments to create a RentRecognitionSchedule.
+     * @example
+     * // Create one RentRecognitionSchedule
+     * const RentRecognitionSchedule = await prisma.rentRecognitionSchedule.create({
+     *   data: {
+     *     // ... data to create a RentRecognitionSchedule
+     *   }
+     * })
+     * 
+     */
+    create<T extends RentRecognitionScheduleCreateArgs>(args: SelectSubset<T, RentRecognitionScheduleCreateArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RentRecognitionSchedules.
+     * @param {RentRecognitionScheduleCreateManyArgs} args - Arguments to create many RentRecognitionSchedules.
+     * @example
+     * // Create many RentRecognitionSchedules
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RentRecognitionScheduleCreateManyArgs>(args?: SelectSubset<T, RentRecognitionScheduleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RentRecognitionSchedules and returns the data saved in the database.
+     * @param {RentRecognitionScheduleCreateManyAndReturnArgs} args - Arguments to create many RentRecognitionSchedules.
+     * @example
+     * // Create many RentRecognitionSchedules
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RentRecognitionSchedules and only return the `id`
+     * const rentRecognitionScheduleWithIdOnly = await prisma.rentRecognitionSchedule.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RentRecognitionScheduleCreateManyAndReturnArgs>(args?: SelectSubset<T, RentRecognitionScheduleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RentRecognitionSchedule.
+     * @param {RentRecognitionScheduleDeleteArgs} args - Arguments to delete one RentRecognitionSchedule.
+     * @example
+     * // Delete one RentRecognitionSchedule
+     * const RentRecognitionSchedule = await prisma.rentRecognitionSchedule.delete({
+     *   where: {
+     *     // ... filter to delete one RentRecognitionSchedule
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RentRecognitionScheduleDeleteArgs>(args: SelectSubset<T, RentRecognitionScheduleDeleteArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RentRecognitionSchedule.
+     * @param {RentRecognitionScheduleUpdateArgs} args - Arguments to update one RentRecognitionSchedule.
+     * @example
+     * // Update one RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RentRecognitionScheduleUpdateArgs>(args: SelectSubset<T, RentRecognitionScheduleUpdateArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RentRecognitionSchedules.
+     * @param {RentRecognitionScheduleDeleteManyArgs} args - Arguments to filter RentRecognitionSchedules to delete.
+     * @example
+     * // Delete a few RentRecognitionSchedules
+     * const { count } = await prisma.rentRecognitionSchedule.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RentRecognitionScheduleDeleteManyArgs>(args?: SelectSubset<T, RentRecognitionScheduleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RentRecognitionSchedules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RentRecognitionSchedules
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RentRecognitionScheduleUpdateManyArgs>(args: SelectSubset<T, RentRecognitionScheduleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RentRecognitionSchedules and returns the data updated in the database.
+     * @param {RentRecognitionScheduleUpdateManyAndReturnArgs} args - Arguments to update many RentRecognitionSchedules.
+     * @example
+     * // Update many RentRecognitionSchedules
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RentRecognitionSchedules and only return the `id`
+     * const rentRecognitionScheduleWithIdOnly = await prisma.rentRecognitionSchedule.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RentRecognitionScheduleUpdateManyAndReturnArgs>(args: SelectSubset<T, RentRecognitionScheduleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RentRecognitionSchedule.
+     * @param {RentRecognitionScheduleUpsertArgs} args - Arguments to update or create a RentRecognitionSchedule.
+     * @example
+     * // Update or create a RentRecognitionSchedule
+     * const rentRecognitionSchedule = await prisma.rentRecognitionSchedule.upsert({
+     *   create: {
+     *     // ... data to create a RentRecognitionSchedule
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RentRecognitionSchedule we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RentRecognitionScheduleUpsertArgs>(args: SelectSubset<T, RentRecognitionScheduleUpsertArgs<ExtArgs>>): Prisma__RentRecognitionScheduleClient<$Result.GetResult<Prisma.$RentRecognitionSchedulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RentRecognitionSchedules.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleCountArgs} args - Arguments to filter RentRecognitionSchedules to count.
+     * @example
+     * // Count the number of RentRecognitionSchedules
+     * const count = await prisma.rentRecognitionSchedule.count({
+     *   where: {
+     *     // ... the filter for the RentRecognitionSchedules we want to count
+     *   }
+     * })
+    **/
+    count<T extends RentRecognitionScheduleCountArgs>(
+      args?: Subset<T, RentRecognitionScheduleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RentRecognitionScheduleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RentRecognitionSchedule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RentRecognitionScheduleAggregateArgs>(args: Subset<T, RentRecognitionScheduleAggregateArgs>): Prisma.PrismaPromise<GetRentRecognitionScheduleAggregateType<T>>
+
+    /**
+     * Group by RentRecognitionSchedule.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RentRecognitionScheduleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RentRecognitionScheduleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RentRecognitionScheduleGroupByArgs['orderBy'] }
+        : { orderBy?: RentRecognitionScheduleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RentRecognitionScheduleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRentRecognitionScheduleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RentRecognitionSchedule model
+   */
+  readonly fields: RentRecognitionScheduleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RentRecognitionSchedule.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RentRecognitionScheduleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    stay<T extends StayDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StayDefaultArgs<ExtArgs>>): Prisma__StayClient<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    journalEntry<T extends RentRecognitionSchedule$journalEntryArgs<ExtArgs> = {}>(args?: Subset<T, RentRecognitionSchedule$journalEntryArgs<ExtArgs>>): Prisma__JournalEntryClient<$Result.GetResult<Prisma.$JournalEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RentRecognitionSchedule model
+   */
+  interface RentRecognitionScheduleFieldRefs {
+    readonly id: FieldRef<"RentRecognitionSchedule", 'Int'>
+    readonly stayId: FieldRef<"RentRecognitionSchedule", 'Int'>
+    readonly periodIndex: FieldRef<"RentRecognitionSchedule", 'Int'>
+    readonly periodStart: FieldRef<"RentRecognitionSchedule", 'DateTime'>
+    readonly periodEnd: FieldRef<"RentRecognitionSchedule", 'DateTime'>
+    readonly scheduledAmountRupiah: FieldRef<"RentRecognitionSchedule", 'Int'>
+    readonly recognizedAt: FieldRef<"RentRecognitionSchedule", 'DateTime'>
+    readonly journalEntryId: FieldRef<"RentRecognitionSchedule", 'Int'>
+    readonly createdAt: FieldRef<"RentRecognitionSchedule", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RentRecognitionSchedule findUnique
+   */
+  export type RentRecognitionScheduleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which RentRecognitionSchedule to fetch.
+     */
+    where: RentRecognitionScheduleWhereUniqueInput
+  }
+
+  /**
+   * RentRecognitionSchedule findUniqueOrThrow
+   */
+  export type RentRecognitionScheduleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which RentRecognitionSchedule to fetch.
+     */
+    where: RentRecognitionScheduleWhereUniqueInput
+  }
+
+  /**
+   * RentRecognitionSchedule findFirst
+   */
+  export type RentRecognitionScheduleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which RentRecognitionSchedule to fetch.
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RentRecognitionSchedules to fetch.
+     */
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RentRecognitionSchedules.
+     */
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RentRecognitionSchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RentRecognitionSchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RentRecognitionSchedules.
+     */
+    distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * RentRecognitionSchedule findFirstOrThrow
+   */
+  export type RentRecognitionScheduleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which RentRecognitionSchedule to fetch.
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RentRecognitionSchedules to fetch.
+     */
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RentRecognitionSchedules.
+     */
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RentRecognitionSchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RentRecognitionSchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RentRecognitionSchedules.
+     */
+    distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * RentRecognitionSchedule findMany
+   */
+  export type RentRecognitionScheduleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter, which RentRecognitionSchedules to fetch.
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RentRecognitionSchedules to fetch.
+     */
+    orderBy?: RentRecognitionScheduleOrderByWithRelationInput | RentRecognitionScheduleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RentRecognitionSchedules.
+     */
+    cursor?: RentRecognitionScheduleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RentRecognitionSchedules from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RentRecognitionSchedules.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RentRecognitionSchedules.
+     */
+    distinct?: RentRecognitionScheduleScalarFieldEnum | RentRecognitionScheduleScalarFieldEnum[]
+  }
+
+  /**
+   * RentRecognitionSchedule create
+   */
+  export type RentRecognitionScheduleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RentRecognitionSchedule.
+     */
+    data: XOR<RentRecognitionScheduleCreateInput, RentRecognitionScheduleUncheckedCreateInput>
+  }
+
+  /**
+   * RentRecognitionSchedule createMany
+   */
+  export type RentRecognitionScheduleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RentRecognitionSchedules.
+     */
+    data: RentRecognitionScheduleCreateManyInput | RentRecognitionScheduleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RentRecognitionSchedule createManyAndReturn
+   */
+  export type RentRecognitionScheduleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * The data used to create many RentRecognitionSchedules.
+     */
+    data: RentRecognitionScheduleCreateManyInput | RentRecognitionScheduleCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RentRecognitionSchedule update
+   */
+  export type RentRecognitionScheduleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RentRecognitionSchedule.
+     */
+    data: XOR<RentRecognitionScheduleUpdateInput, RentRecognitionScheduleUncheckedUpdateInput>
+    /**
+     * Choose, which RentRecognitionSchedule to update.
+     */
+    where: RentRecognitionScheduleWhereUniqueInput
+  }
+
+  /**
+   * RentRecognitionSchedule updateMany
+   */
+  export type RentRecognitionScheduleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RentRecognitionSchedules.
+     */
+    data: XOR<RentRecognitionScheduleUpdateManyMutationInput, RentRecognitionScheduleUncheckedUpdateManyInput>
+    /**
+     * Filter which RentRecognitionSchedules to update
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * Limit how many RentRecognitionSchedules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RentRecognitionSchedule updateManyAndReturn
+   */
+  export type RentRecognitionScheduleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * The data used to update RentRecognitionSchedules.
+     */
+    data: XOR<RentRecognitionScheduleUpdateManyMutationInput, RentRecognitionScheduleUncheckedUpdateManyInput>
+    /**
+     * Filter which RentRecognitionSchedules to update
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * Limit how many RentRecognitionSchedules to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RentRecognitionSchedule upsert
+   */
+  export type RentRecognitionScheduleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RentRecognitionSchedule to update in case it exists.
+     */
+    where: RentRecognitionScheduleWhereUniqueInput
+    /**
+     * In case the RentRecognitionSchedule found by the `where` argument doesn't exist, create a new RentRecognitionSchedule with this data.
+     */
+    create: XOR<RentRecognitionScheduleCreateInput, RentRecognitionScheduleUncheckedCreateInput>
+    /**
+     * In case the RentRecognitionSchedule was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RentRecognitionScheduleUpdateInput, RentRecognitionScheduleUncheckedUpdateInput>
+  }
+
+  /**
+   * RentRecognitionSchedule delete
+   */
+  export type RentRecognitionScheduleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
+    /**
+     * Filter which RentRecognitionSchedule to delete.
+     */
+    where: RentRecognitionScheduleWhereUniqueInput
+  }
+
+  /**
+   * RentRecognitionSchedule deleteMany
+   */
+  export type RentRecognitionScheduleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RentRecognitionSchedules to delete
+     */
+    where?: RentRecognitionScheduleWhereInput
+    /**
+     * Limit how many RentRecognitionSchedules to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RentRecognitionSchedule.journalEntry
+   */
+  export type RentRecognitionSchedule$journalEntryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JournalEntry
+     */
+    select?: JournalEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JournalEntry
+     */
+    omit?: JournalEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JournalEntryInclude<ExtArgs> | null
+    where?: JournalEntryWhereInput
+  }
+
+  /**
+   * RentRecognitionSchedule without action
+   */
+  export type RentRecognitionScheduleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RentRecognitionSchedule
+     */
+    select?: RentRecognitionScheduleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RentRecognitionSchedule
+     */
+    omit?: RentRecognitionScheduleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RentRecognitionScheduleInclude<ExtArgs> | null
   }
 
 
@@ -63586,6 +64943,21 @@ export namespace Prisma {
   export type JournalLineScalarFieldEnum = (typeof JournalLineScalarFieldEnum)[keyof typeof JournalLineScalarFieldEnum]
 
 
+  export const RentRecognitionScheduleScalarFieldEnum: {
+    id: 'id',
+    stayId: 'stayId',
+    periodIndex: 'periodIndex',
+    periodStart: 'periodStart',
+    periodEnd: 'periodEnd',
+    scheduledAmountRupiah: 'scheduledAmountRupiah',
+    recognizedAt: 'recognizedAt',
+    journalEntryId: 'journalEntryId',
+    createdAt: 'createdAt'
+  };
+
+  export type RentRecognitionScheduleScalarFieldEnum = (typeof RentRecognitionScheduleScalarFieldEnum)[keyof typeof RentRecognitionScheduleScalarFieldEnum]
+
+
   export const FaqScalarFieldEnum: {
     id: 'id',
     question: 'question',
@@ -65173,6 +66545,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestListRelationFilter
     checkoutRequests?: CheckoutRequestListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
+    rentRecognitionSchedules?: RentRecognitionScheduleListRelationFilter
   }
 
   export type StayOrderByWithRelationInput = {
@@ -65239,6 +66612,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestOrderByRelationAggregateInput
     checkoutRequests?: CheckoutRequestOrderByRelationAggregateInput
     depositLedgerEntries?: TenantDepositLedgerEntryOrderByRelationAggregateInput
+    rentRecognitionSchedules?: RentRecognitionScheduleOrderByRelationAggregateInput
   }
 
   export type StayWhereUniqueInput = Prisma.AtLeast<{
@@ -65308,6 +66682,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestListRelationFilter
     checkoutRequests?: CheckoutRequestListRelationFilter
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
+    rentRecognitionSchedules?: RentRecognitionScheduleListRelationFilter
   }, "id">
 
   export type StayOrderByWithAggregationInput = {
@@ -69133,6 +70508,7 @@ export namespace Prisma {
     lines?: JournalLineListRelationFilter
     depreciationRuns?: AssetDepreciationRunListRelationFilter
     fixedAssetLedgerAlignments?: FixedAssetListRelationFilter
+    rentRecognitions?: RentRecognitionScheduleListRelationFilter
   }
 
   export type JournalEntryOrderByWithRelationInput = {
@@ -69157,6 +70533,7 @@ export namespace Prisma {
     lines?: JournalLineOrderByRelationAggregateInput
     depreciationRuns?: AssetDepreciationRunOrderByRelationAggregateInput
     fixedAssetLedgerAlignments?: FixedAssetOrderByRelationAggregateInput
+    rentRecognitions?: RentRecognitionScheduleOrderByRelationAggregateInput
   }
 
   export type JournalEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -69184,6 +70561,7 @@ export namespace Prisma {
     lines?: JournalLineListRelationFilter
     depreciationRuns?: AssetDepreciationRunListRelationFilter
     fixedAssetLedgerAlignments?: FixedAssetListRelationFilter
+    rentRecognitions?: RentRecognitionScheduleListRelationFilter
   }, "id" | "entryNumber">
 
   export type JournalEntryOrderByWithAggregationInput = {
@@ -69315,6 +70693,87 @@ export namespace Prisma {
     creditRupiah?: IntWithAggregatesFilter<"JournalLine"> | number
     sortOrder?: IntWithAggregatesFilter<"JournalLine"> | number
     createdAt?: DateTimeWithAggregatesFilter<"JournalLine"> | Date | string
+  }
+
+  export type RentRecognitionScheduleWhereInput = {
+    AND?: RentRecognitionScheduleWhereInput | RentRecognitionScheduleWhereInput[]
+    OR?: RentRecognitionScheduleWhereInput[]
+    NOT?: RentRecognitionScheduleWhereInput | RentRecognitionScheduleWhereInput[]
+    id?: IntFilter<"RentRecognitionSchedule"> | number
+    stayId?: IntFilter<"RentRecognitionSchedule"> | number
+    periodIndex?: IntFilter<"RentRecognitionSchedule"> | number
+    periodStart?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    periodEnd?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    scheduledAmountRupiah?: IntFilter<"RentRecognitionSchedule"> | number
+    recognizedAt?: DateTimeNullableFilter<"RentRecognitionSchedule"> | Date | string | null
+    journalEntryId?: IntNullableFilter<"RentRecognitionSchedule"> | number | null
+    createdAt?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    journalEntry?: XOR<JournalEntryNullableScalarRelationFilter, JournalEntryWhereInput> | null
+  }
+
+  export type RentRecognitionScheduleOrderByWithRelationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    periodStart?: SortOrder
+    periodEnd?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    recognizedAt?: SortOrderInput | SortOrder
+    journalEntryId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    stay?: StayOrderByWithRelationInput
+    journalEntry?: JournalEntryOrderByWithRelationInput
+  }
+
+  export type RentRecognitionScheduleWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    stayId_periodIndex?: RentRecognitionScheduleStayIdPeriodIndexCompoundUniqueInput
+    AND?: RentRecognitionScheduleWhereInput | RentRecognitionScheduleWhereInput[]
+    OR?: RentRecognitionScheduleWhereInput[]
+    NOT?: RentRecognitionScheduleWhereInput | RentRecognitionScheduleWhereInput[]
+    stayId?: IntFilter<"RentRecognitionSchedule"> | number
+    periodIndex?: IntFilter<"RentRecognitionSchedule"> | number
+    periodStart?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    periodEnd?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    scheduledAmountRupiah?: IntFilter<"RentRecognitionSchedule"> | number
+    recognizedAt?: DateTimeNullableFilter<"RentRecognitionSchedule"> | Date | string | null
+    journalEntryId?: IntNullableFilter<"RentRecognitionSchedule"> | number | null
+    createdAt?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    stay?: XOR<StayScalarRelationFilter, StayWhereInput>
+    journalEntry?: XOR<JournalEntryNullableScalarRelationFilter, JournalEntryWhereInput> | null
+  }, "id" | "stayId_periodIndex">
+
+  export type RentRecognitionScheduleOrderByWithAggregationInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    periodStart?: SortOrder
+    periodEnd?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    recognizedAt?: SortOrderInput | SortOrder
+    journalEntryId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: RentRecognitionScheduleCountOrderByAggregateInput
+    _avg?: RentRecognitionScheduleAvgOrderByAggregateInput
+    _max?: RentRecognitionScheduleMaxOrderByAggregateInput
+    _min?: RentRecognitionScheduleMinOrderByAggregateInput
+    _sum?: RentRecognitionScheduleSumOrderByAggregateInput
+  }
+
+  export type RentRecognitionScheduleScalarWhereWithAggregatesInput = {
+    AND?: RentRecognitionScheduleScalarWhereWithAggregatesInput | RentRecognitionScheduleScalarWhereWithAggregatesInput[]
+    OR?: RentRecognitionScheduleScalarWhereWithAggregatesInput[]
+    NOT?: RentRecognitionScheduleScalarWhereWithAggregatesInput | RentRecognitionScheduleScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"RentRecognitionSchedule"> | number
+    stayId?: IntWithAggregatesFilter<"RentRecognitionSchedule"> | number
+    periodIndex?: IntWithAggregatesFilter<"RentRecognitionSchedule"> | number
+    periodStart?: DateTimeWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string
+    periodEnd?: DateTimeWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string
+    scheduledAmountRupiah?: IntWithAggregatesFilter<"RentRecognitionSchedule"> | number
+    recognizedAt?: DateTimeNullableWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string | null
+    journalEntryId?: IntNullableWithAggregatesFilter<"RentRecognitionSchedule"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"RentRecognitionSchedule"> | Date | string
   }
 
   export type FaqWhereInput = {
@@ -70162,6 +71621,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateInput = {
@@ -70223,6 +71683,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayUpdateInput = {
@@ -70283,6 +71744,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateInput = {
@@ -70344,6 +71806,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayCreateManyInput = {
@@ -74485,6 +75948,7 @@ export namespace Prisma {
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateInput = {
@@ -74508,6 +75972,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUpdateInput = {
@@ -74530,6 +75995,7 @@ export namespace Prisma {
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateInput = {
@@ -74553,6 +76019,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryCreateManyInput = {
@@ -74688,6 +76155,85 @@ export namespace Prisma {
     debitRupiah?: IntFieldUpdateOperationsInput | number
     creditRupiah?: IntFieldUpdateOperationsInput | number
     sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleCreateInput = {
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRentRecognitionSchedulesInput
+    journalEntry?: JournalEntryCreateNestedOneWithoutRentRecognitionsInput
+  }
+
+  export type RentRecognitionScheduleUncheckedCreateInput = {
+    id?: number
+    stayId: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    journalEntryId?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RentRecognitionScheduleUpdateInput = {
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRentRecognitionSchedulesNestedInput
+    journalEntry?: JournalEntryUpdateOneWithoutRentRecognitionsNestedInput
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleCreateManyInput = {
+    id?: number
+    stayId: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    journalEntryId?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RentRecognitionScheduleUpdateManyMutationInput = {
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -75666,6 +77212,16 @@ export namespace Prisma {
   export type TenantScalarRelationFilter = {
     is?: TenantWhereInput
     isNot?: TenantWhereInput
+  }
+
+  export type RentRecognitionScheduleListRelationFilter = {
+    every?: RentRecognitionScheduleWhereInput
+    some?: RentRecognitionScheduleWhereInput
+    none?: RentRecognitionScheduleWhereInput
+  }
+
+  export type RentRecognitionScheduleOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type StayCountOrderByAggregateInput = {
@@ -79536,6 +81092,63 @@ export namespace Prisma {
     sortOrder?: SortOrder
   }
 
+  export type RentRecognitionScheduleStayIdPeriodIndexCompoundUniqueInput = {
+    stayId: number
+    periodIndex: number
+  }
+
+  export type RentRecognitionScheduleCountOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    periodStart?: SortOrder
+    periodEnd?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    recognizedAt?: SortOrder
+    journalEntryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RentRecognitionScheduleAvgOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    journalEntryId?: SortOrder
+  }
+
+  export type RentRecognitionScheduleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    periodStart?: SortOrder
+    periodEnd?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    recognizedAt?: SortOrder
+    journalEntryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RentRecognitionScheduleMinOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    periodStart?: SortOrder
+    periodEnd?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    recognizedAt?: SortOrder
+    journalEntryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type RentRecognitionScheduleSumOrderByAggregateInput = {
+    id?: SortOrder
+    stayId?: SortOrder
+    periodIndex?: SortOrder
+    scheduledAmountRupiah?: SortOrder
+    journalEntryId?: SortOrder
+  }
+
   export type FaqCountOrderByAggregateInput = {
     id?: SortOrder
     question?: SortOrder
@@ -81935,6 +83548,13 @@ export namespace Prisma {
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
   }
 
+  export type RentRecognitionScheduleCreateNestedManyWithoutStayInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput> | RentRecognitionScheduleCreateWithoutStayInput[] | RentRecognitionScheduleUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutStayInput | RentRecognitionScheduleCreateOrConnectWithoutStayInput[]
+    createMany?: RentRecognitionScheduleCreateManyStayInputEnvelope
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+  }
+
   export type InvoiceUncheckedCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -81982,6 +83602,13 @@ export namespace Prisma {
     connectOrCreate?: TenantDepositLedgerEntryCreateOrConnectWithoutStayInput | TenantDepositLedgerEntryCreateOrConnectWithoutStayInput[]
     createMany?: TenantDepositLedgerEntryCreateManyStayInputEnvelope
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
+  }
+
+  export type RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput> | RentRecognitionScheduleCreateWithoutStayInput[] | RentRecognitionScheduleUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutStayInput | RentRecognitionScheduleCreateOrConnectWithoutStayInput[]
+    createMany?: RentRecognitionScheduleCreateManyStayInputEnvelope
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
   }
 
   export type EnumStayStatusFieldUpdateOperationsInput = {
@@ -82168,6 +83795,20 @@ export namespace Prisma {
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
   }
 
+  export type RentRecognitionScheduleUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput> | RentRecognitionScheduleCreateWithoutStayInput[] | RentRecognitionScheduleUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutStayInput | RentRecognitionScheduleCreateOrConnectWithoutStayInput[]
+    upsert?: RentRecognitionScheduleUpsertWithWhereUniqueWithoutStayInput | RentRecognitionScheduleUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RentRecognitionScheduleCreateManyStayInputEnvelope
+    set?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    disconnect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    delete?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput | RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+  }
+
   export type InvoiceUncheckedUpdateManyWithoutStayNestedInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -82264,6 +83905,20 @@ export namespace Prisma {
     update?: TenantDepositLedgerEntryUpdateWithWhereUniqueWithoutStayInput | TenantDepositLedgerEntryUpdateWithWhereUniqueWithoutStayInput[]
     updateMany?: TenantDepositLedgerEntryUpdateManyWithWhereWithoutStayInput | TenantDepositLedgerEntryUpdateManyWithWhereWithoutStayInput[]
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput> | RentRecognitionScheduleCreateWithoutStayInput[] | RentRecognitionScheduleUncheckedCreateWithoutStayInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutStayInput | RentRecognitionScheduleCreateOrConnectWithoutStayInput[]
+    upsert?: RentRecognitionScheduleUpsertWithWhereUniqueWithoutStayInput | RentRecognitionScheduleUpsertWithWhereUniqueWithoutStayInput[]
+    createMany?: RentRecognitionScheduleCreateManyStayInputEnvelope
+    set?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    disconnect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    delete?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput[]
+    updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput | RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput[]
+    deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
   }
 
   export type StayCreateNestedOneWithoutDepositLedgerEntriesInput = {
@@ -84914,6 +86569,13 @@ export namespace Prisma {
     connect?: FixedAssetWhereUniqueInput | FixedAssetWhereUniqueInput[]
   }
 
+  export type RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput> | RentRecognitionScheduleCreateWithoutJournalEntryInput[] | RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput | RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput[]
+    createMany?: RentRecognitionScheduleCreateManyJournalEntryInputEnvelope
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+  }
+
   export type JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput = {
     create?: XOR<JournalLineCreateWithoutJournalEntryInput, JournalLineUncheckedCreateWithoutJournalEntryInput> | JournalLineCreateWithoutJournalEntryInput[] | JournalLineUncheckedCreateWithoutJournalEntryInput[]
     connectOrCreate?: JournalLineCreateOrConnectWithoutJournalEntryInput | JournalLineCreateOrConnectWithoutJournalEntryInput[]
@@ -84933,6 +86595,13 @@ export namespace Prisma {
     connectOrCreate?: FixedAssetCreateOrConnectWithoutLedgerAlignmentJournalEntryInput | FixedAssetCreateOrConnectWithoutLedgerAlignmentJournalEntryInput[]
     createMany?: FixedAssetCreateManyLedgerAlignmentJournalEntryInputEnvelope
     connect?: FixedAssetWhereUniqueInput | FixedAssetWhereUniqueInput[]
+  }
+
+  export type RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput> | RentRecognitionScheduleCreateWithoutJournalEntryInput[] | RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput | RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput[]
+    createMany?: RentRecognitionScheduleCreateManyJournalEntryInputEnvelope
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
   }
 
   export type EnumJournalEntryStatusFieldUpdateOperationsInput = {
@@ -84995,6 +86664,20 @@ export namespace Prisma {
     deleteMany?: FixedAssetScalarWhereInput | FixedAssetScalarWhereInput[]
   }
 
+  export type RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput> | RentRecognitionScheduleCreateWithoutJournalEntryInput[] | RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput | RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput[]
+    upsert?: RentRecognitionScheduleUpsertWithWhereUniqueWithoutJournalEntryInput | RentRecognitionScheduleUpsertWithWhereUniqueWithoutJournalEntryInput[]
+    createMany?: RentRecognitionScheduleCreateManyJournalEntryInputEnvelope
+    set?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    disconnect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    delete?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput[]
+    updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput | RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput[]
+    deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+  }
+
   export type JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput = {
     create?: XOR<JournalLineCreateWithoutJournalEntryInput, JournalLineUncheckedCreateWithoutJournalEntryInput> | JournalLineCreateWithoutJournalEntryInput[] | JournalLineUncheckedCreateWithoutJournalEntryInput[]
     connectOrCreate?: JournalLineCreateOrConnectWithoutJournalEntryInput | JournalLineCreateOrConnectWithoutJournalEntryInput[]
@@ -85035,6 +86718,20 @@ export namespace Prisma {
     update?: FixedAssetUpdateWithWhereUniqueWithoutLedgerAlignmentJournalEntryInput | FixedAssetUpdateWithWhereUniqueWithoutLedgerAlignmentJournalEntryInput[]
     updateMany?: FixedAssetUpdateManyWithWhereWithoutLedgerAlignmentJournalEntryInput | FixedAssetUpdateManyWithWhereWithoutLedgerAlignmentJournalEntryInput[]
     deleteMany?: FixedAssetScalarWhereInput | FixedAssetScalarWhereInput[]
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput = {
+    create?: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput> | RentRecognitionScheduleCreateWithoutJournalEntryInput[] | RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput[]
+    connectOrCreate?: RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput | RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput[]
+    upsert?: RentRecognitionScheduleUpsertWithWhereUniqueWithoutJournalEntryInput | RentRecognitionScheduleUpsertWithWhereUniqueWithoutJournalEntryInput[]
+    createMany?: RentRecognitionScheduleCreateManyJournalEntryInputEnvelope
+    set?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    disconnect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    delete?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    connect?: RentRecognitionScheduleWhereUniqueInput | RentRecognitionScheduleWhereUniqueInput[]
+    update?: RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput | RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput[]
+    updateMany?: RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput | RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput[]
+    deleteMany?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
   }
 
   export type JournalEntryCreateNestedOneWithoutLinesInput = {
@@ -85079,6 +86776,36 @@ export namespace Prisma {
     delete?: CashAccountWhereInput | boolean
     connect?: CashAccountWhereUniqueInput
     update?: XOR<XOR<CashAccountUpdateToOneWithWhereWithoutJournalLinesInput, CashAccountUpdateWithoutJournalLinesInput>, CashAccountUncheckedUpdateWithoutJournalLinesInput>
+  }
+
+  export type StayCreateNestedOneWithoutRentRecognitionSchedulesInput = {
+    create?: XOR<StayCreateWithoutRentRecognitionSchedulesInput, StayUncheckedCreateWithoutRentRecognitionSchedulesInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRentRecognitionSchedulesInput
+    connect?: StayWhereUniqueInput
+  }
+
+  export type JournalEntryCreateNestedOneWithoutRentRecognitionsInput = {
+    create?: XOR<JournalEntryCreateWithoutRentRecognitionsInput, JournalEntryUncheckedCreateWithoutRentRecognitionsInput>
+    connectOrCreate?: JournalEntryCreateOrConnectWithoutRentRecognitionsInput
+    connect?: JournalEntryWhereUniqueInput
+  }
+
+  export type StayUpdateOneRequiredWithoutRentRecognitionSchedulesNestedInput = {
+    create?: XOR<StayCreateWithoutRentRecognitionSchedulesInput, StayUncheckedCreateWithoutRentRecognitionSchedulesInput>
+    connectOrCreate?: StayCreateOrConnectWithoutRentRecognitionSchedulesInput
+    upsert?: StayUpsertWithoutRentRecognitionSchedulesInput
+    connect?: StayWhereUniqueInput
+    update?: XOR<XOR<StayUpdateToOneWithWhereWithoutRentRecognitionSchedulesInput, StayUpdateWithoutRentRecognitionSchedulesInput>, StayUncheckedUpdateWithoutRentRecognitionSchedulesInput>
+  }
+
+  export type JournalEntryUpdateOneWithoutRentRecognitionsNestedInput = {
+    create?: XOR<JournalEntryCreateWithoutRentRecognitionsInput, JournalEntryUncheckedCreateWithoutRentRecognitionsInput>
+    connectOrCreate?: JournalEntryCreateOrConnectWithoutRentRecognitionsInput
+    upsert?: JournalEntryUpsertWithoutRentRecognitionsInput
+    disconnect?: JournalEntryWhereInput | boolean
+    delete?: JournalEntryWhereInput | boolean
+    connect?: JournalEntryWhereUniqueInput
+    update?: XOR<XOR<JournalEntryUpdateToOneWithWhereWithoutRentRecognitionsInput, JournalEntryUpdateWithoutRentRecognitionsInput>, JournalEntryUncheckedUpdateWithoutRentRecognitionsInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -86553,6 +88280,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCreatedByInput = {
@@ -86613,6 +88341,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCreatedByInput = {
@@ -86682,6 +88411,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInitialMetersRecordedByInput = {
@@ -86742,6 +88472,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInitialMetersRecordedByInput = {
@@ -88036,6 +89767,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutFledMarkedByInput = {
@@ -88096,6 +89828,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutFledMarkedByInput = {
@@ -89638,6 +91371,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTenantInput = {
@@ -89698,6 +91432,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTenantInput = {
@@ -90352,6 +92087,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRoomInput = {
@@ -90412,6 +92148,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRoomInput = {
@@ -92112,6 +93849,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RentRecognitionScheduleCreateWithoutStayInput = {
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    createdAt?: Date | string
+    journalEntry?: JournalEntryCreateNestedOneWithoutRentRecognitionsInput
+  }
+
+  export type RentRecognitionScheduleUncheckedCreateWithoutStayInput = {
+    id?: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    journalEntryId?: number | null
+    createdAt?: Date | string
+  }
+
+  export type RentRecognitionScheduleCreateOrConnectWithoutStayInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    create: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput>
+  }
+
+  export type RentRecognitionScheduleCreateManyStayInputEnvelope = {
+    data: RentRecognitionScheduleCreateManyStayInput | RentRecognitionScheduleCreateManyStayInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutStaysInput = {
     update: XOR<TenantUpdateWithoutStaysInput, TenantUncheckedUpdateWithoutStaysInput>
     create: XOR<TenantCreateWithoutStaysInput, TenantUncheckedCreateWithoutStaysInput>
@@ -92680,6 +94448,37 @@ export namespace Prisma {
     data: XOR<TenantDepositLedgerEntryUpdateManyMutationInput, TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayInput>
   }
 
+  export type RentRecognitionScheduleUpsertWithWhereUniqueWithoutStayInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    update: XOR<RentRecognitionScheduleUpdateWithoutStayInput, RentRecognitionScheduleUncheckedUpdateWithoutStayInput>
+    create: XOR<RentRecognitionScheduleCreateWithoutStayInput, RentRecognitionScheduleUncheckedCreateWithoutStayInput>
+  }
+
+  export type RentRecognitionScheduleUpdateWithWhereUniqueWithoutStayInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    data: XOR<RentRecognitionScheduleUpdateWithoutStayInput, RentRecognitionScheduleUncheckedUpdateWithoutStayInput>
+  }
+
+  export type RentRecognitionScheduleUpdateManyWithWhereWithoutStayInput = {
+    where: RentRecognitionScheduleScalarWhereInput
+    data: XOR<RentRecognitionScheduleUpdateManyMutationInput, RentRecognitionScheduleUncheckedUpdateManyWithoutStayInput>
+  }
+
+  export type RentRecognitionScheduleScalarWhereInput = {
+    AND?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+    OR?: RentRecognitionScheduleScalarWhereInput[]
+    NOT?: RentRecognitionScheduleScalarWhereInput | RentRecognitionScheduleScalarWhereInput[]
+    id?: IntFilter<"RentRecognitionSchedule"> | number
+    stayId?: IntFilter<"RentRecognitionSchedule"> | number
+    periodIndex?: IntFilter<"RentRecognitionSchedule"> | number
+    periodStart?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    periodEnd?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+    scheduledAmountRupiah?: IntFilter<"RentRecognitionSchedule"> | number
+    recognizedAt?: DateTimeNullableFilter<"RentRecognitionSchedule"> | Date | string | null
+    journalEntryId?: IntNullableFilter<"RentRecognitionSchedule"> | number | null
+    createdAt?: DateTimeFilter<"RentRecognitionSchedule"> | Date | string
+  }
+
   export type StayCreateWithoutDepositLedgerEntriesInput = {
     status?: $Enums.StayStatus
     pricingTerm: $Enums.PricingTerm
@@ -92737,6 +94536,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutDepositLedgerEntriesInput = {
@@ -92797,6 +94597,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutDepositLedgerEntriesInput = {
@@ -93106,6 +94907,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutDepositLedgerEntriesInput = {
@@ -93166,6 +94968,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type TenantUpsertWithoutDepositLedgerEntriesInput = {
@@ -93817,6 +95620,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutInvoicesInput = {
@@ -93877,6 +95681,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutInvoicesInput = {
@@ -94181,6 +95986,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInvoicesInput = {
@@ -94241,6 +96047,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutInvoicesCreatedInput = {
@@ -95052,6 +96859,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -95112,6 +96920,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -95493,6 +97302,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -95553,6 +97363,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type InvoiceUpsertWithoutPaymentSubmissionsInput = {
@@ -96080,6 +97891,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutTicketsInput = {
@@ -96140,6 +97952,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutTicketsInput = {
@@ -96596,6 +98409,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTicketsInput = {
@@ -96656,6 +98470,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutTicketsAssignedInput = {
@@ -102012,6 +103827,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutRenewRequestsInput = {
@@ -102072,6 +103888,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutRenewRequestsInput = {
@@ -102313,6 +104130,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRenewRequestsInput = {
@@ -102373,6 +104191,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type TenantUpsertWithoutRenewRequestsInput = {
@@ -102610,6 +104429,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutCheckoutRequestsInput = {
@@ -102670,6 +104490,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutCheckoutRequestsInput = {
@@ -102841,6 +104662,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCheckoutRequestsInput = {
@@ -102901,6 +104723,7 @@ export namespace Prisma {
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutCheckoutRequestsReviewedInput = {
@@ -103328,6 +105151,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleCreateNestedManyWithoutStayInput
   }
 
   export type StayUncheckedCreateWithoutExpensesInput = {
@@ -103388,6 +105212,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
     checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutStayInput
   }
 
   export type StayCreateOrConnectWithoutExpensesInput = {
@@ -103718,6 +105543,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutExpensesInput = {
@@ -103778,6 +105604,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type UserUpsertWithoutExpensesCreatedInput = {
@@ -104237,6 +106064,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodCreateNestedOneWithoutJournalEntriesInput
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutFixedAssetLedgerAlignmentsInput = {
@@ -104259,6 +106087,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutFixedAssetLedgerAlignmentsInput = {
@@ -104683,6 +106512,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodUpdateOneWithoutJournalEntriesNestedInput
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutFixedAssetLedgerAlignmentsInput = {
@@ -104705,6 +106535,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutFixedAssetInput = {
@@ -104757,6 +106588,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodCreateNestedOneWithoutJournalEntriesInput
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutDepreciationRunsInput = {
@@ -104779,6 +106611,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutDepreciationRunsInput = {
@@ -104943,6 +106776,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodUpdateOneWithoutJournalEntriesNestedInput
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutDepreciationRunsInput = {
@@ -104965,6 +106799,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type UserUpsertWithoutAssetDepreciationRunsCreatedInput = {
@@ -106585,6 +108420,7 @@ export namespace Prisma {
     lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutAccountingPeriodInput = {
@@ -106607,6 +108443,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutAccountingPeriodInput = {
@@ -107223,6 +109060,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RentRecognitionScheduleCreateWithoutJournalEntryInput = {
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    createdAt?: Date | string
+    stay: StayCreateNestedOneWithoutRentRecognitionSchedulesInput
+  }
+
+  export type RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput = {
+    id?: number
+    stayId: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type RentRecognitionScheduleCreateOrConnectWithoutJournalEntryInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    create: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput>
+  }
+
+  export type RentRecognitionScheduleCreateManyJournalEntryInputEnvelope = {
+    data: RentRecognitionScheduleCreateManyJournalEntryInput | RentRecognitionScheduleCreateManyJournalEntryInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AccountingPeriodUpsertWithoutJournalEntriesInput = {
     update: XOR<AccountingPeriodUpdateWithoutJournalEntriesInput, AccountingPeriodUncheckedUpdateWithoutJournalEntriesInput>
     create: XOR<AccountingPeriodCreateWithoutJournalEntriesInput, AccountingPeriodUncheckedCreateWithoutJournalEntriesInput>
@@ -107329,6 +109197,22 @@ export namespace Prisma {
     data: XOR<FixedAssetUpdateManyMutationInput, FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryInput>
   }
 
+  export type RentRecognitionScheduleUpsertWithWhereUniqueWithoutJournalEntryInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    update: XOR<RentRecognitionScheduleUpdateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedUpdateWithoutJournalEntryInput>
+    create: XOR<RentRecognitionScheduleCreateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedCreateWithoutJournalEntryInput>
+  }
+
+  export type RentRecognitionScheduleUpdateWithWhereUniqueWithoutJournalEntryInput = {
+    where: RentRecognitionScheduleWhereUniqueInput
+    data: XOR<RentRecognitionScheduleUpdateWithoutJournalEntryInput, RentRecognitionScheduleUncheckedUpdateWithoutJournalEntryInput>
+  }
+
+  export type RentRecognitionScheduleUpdateManyWithWhereWithoutJournalEntryInput = {
+    where: RentRecognitionScheduleScalarWhereInput
+    data: XOR<RentRecognitionScheduleUpdateManyMutationInput, RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryInput>
+  }
+
   export type JournalEntryCreateWithoutLinesInput = {
     entryNumber: string
     entryDate: Date | string
@@ -107348,6 +109232,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodCreateNestedOneWithoutJournalEntriesInput
     depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryUncheckedCreateWithoutLinesInput = {
@@ -107370,6 +109255,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedCreateNestedManyWithoutJournalEntryInput
   }
 
   export type JournalEntryCreateOrConnectWithoutLinesInput = {
@@ -107485,6 +109371,7 @@ export namespace Prisma {
     accountingPeriod?: AccountingPeriodUpdateOneWithoutJournalEntriesNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutLinesInput = {
@@ -107507,6 +109394,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutJournalLinesInput = {
@@ -107597,6 +109485,370 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StayCreateWithoutRentRecognitionSchedulesInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutRentRecognitionSchedulesInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutRentRecognitionSchedulesInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutRentRecognitionSchedulesInput, StayUncheckedCreateWithoutRentRecognitionSchedulesInput>
+  }
+
+  export type JournalEntryCreateWithoutRentRecognitionsInput = {
+    entryNumber: string
+    entryDate: Date | string
+    status?: $Enums.JournalEntryStatus
+    sourceType?: $Enums.JournalSourceType
+    sourceId?: string | null
+    memo?: string | null
+    totalDebitRupiah?: number
+    totalCreditRupiah?: number
+    isBalanced?: boolean
+    createdById?: number | null
+    postedById?: number | null
+    postedAt?: Date | string | null
+    voidedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    accountingPeriod?: AccountingPeriodCreateNestedOneWithoutJournalEntriesInput
+    lines?: JournalLineCreateNestedManyWithoutJournalEntryInput
+    depreciationRuns?: AssetDepreciationRunCreateNestedManyWithoutJournalEntryInput
+    fixedAssetLedgerAlignments?: FixedAssetCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+  }
+
+  export type JournalEntryUncheckedCreateWithoutRentRecognitionsInput = {
+    id?: number
+    entryNumber: string
+    entryDate: Date | string
+    accountingPeriodId?: number | null
+    status?: $Enums.JournalEntryStatus
+    sourceType?: $Enums.JournalSourceType
+    sourceId?: string | null
+    memo?: string | null
+    totalDebitRupiah?: number
+    totalCreditRupiah?: number
+    isBalanced?: boolean
+    createdById?: number | null
+    postedById?: number | null
+    postedAt?: Date | string | null
+    voidedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: JournalLineUncheckedCreateNestedManyWithoutJournalEntryInput
+    depreciationRuns?: AssetDepreciationRunUncheckedCreateNestedManyWithoutJournalEntryInput
+    fixedAssetLedgerAlignments?: FixedAssetUncheckedCreateNestedManyWithoutLedgerAlignmentJournalEntryInput
+  }
+
+  export type JournalEntryCreateOrConnectWithoutRentRecognitionsInput = {
+    where: JournalEntryWhereUniqueInput
+    create: XOR<JournalEntryCreateWithoutRentRecognitionsInput, JournalEntryUncheckedCreateWithoutRentRecognitionsInput>
+  }
+
+  export type StayUpsertWithoutRentRecognitionSchedulesInput = {
+    update: XOR<StayUpdateWithoutRentRecognitionSchedulesInput, StayUncheckedUpdateWithoutRentRecognitionSchedulesInput>
+    create: XOR<StayCreateWithoutRentRecognitionSchedulesInput, StayUncheckedCreateWithoutRentRecognitionSchedulesInput>
+    where?: StayWhereInput
+  }
+
+  export type StayUpdateToOneWithWhereWithoutRentRecognitionSchedulesInput = {
+    where?: StayWhereInput
+    data: XOR<StayUpdateWithoutRentRecognitionSchedulesInput, StayUncheckedUpdateWithoutRentRecognitionSchedulesInput>
+  }
+
+  export type StayUpdateWithoutRentRecognitionSchedulesInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutRentRecognitionSchedulesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type JournalEntryUpsertWithoutRentRecognitionsInput = {
+    update: XOR<JournalEntryUpdateWithoutRentRecognitionsInput, JournalEntryUncheckedUpdateWithoutRentRecognitionsInput>
+    create: XOR<JournalEntryCreateWithoutRentRecognitionsInput, JournalEntryUncheckedCreateWithoutRentRecognitionsInput>
+    where?: JournalEntryWhereInput
+  }
+
+  export type JournalEntryUpdateToOneWithWhereWithoutRentRecognitionsInput = {
+    where?: JournalEntryWhereInput
+    data: XOR<JournalEntryUpdateWithoutRentRecognitionsInput, JournalEntryUncheckedUpdateWithoutRentRecognitionsInput>
+  }
+
+  export type JournalEntryUpdateWithoutRentRecognitionsInput = {
+    entryNumber?: StringFieldUpdateOperationsInput | string
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumJournalEntryStatusFieldUpdateOperationsInput | $Enums.JournalEntryStatus
+    sourceType?: EnumJournalSourceTypeFieldUpdateOperationsInput | $Enums.JournalSourceType
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalDebitRupiah?: IntFieldUpdateOperationsInput | number
+    totalCreditRupiah?: IntFieldUpdateOperationsInput | number
+    isBalanced?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountingPeriod?: AccountingPeriodUpdateOneWithoutJournalEntriesNestedInput
+    lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
+    depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
+    fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+  }
+
+  export type JournalEntryUncheckedUpdateWithoutRentRecognitionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    entryNumber?: StringFieldUpdateOperationsInput | string
+    entryDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountingPeriodId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumJournalEntryStatusFieldUpdateOperationsInput | $Enums.JournalEntryStatus
+    sourceType?: EnumJournalSourceTypeFieldUpdateOperationsInput | $Enums.JournalSourceType
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    totalDebitRupiah?: IntFieldUpdateOperationsInput | number
+    totalCreditRupiah?: IntFieldUpdateOperationsInput | number
+    isBalanced?: BoolFieldUpdateOperationsInput | boolean
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedById?: NullableIntFieldUpdateOperationsInput | number | null
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
+    depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
+    fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
   }
 
   export type AnnouncementCreateManyCreatedByInput = {
@@ -108391,6 +110643,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutCreatedByInput = {
@@ -108451,6 +110704,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutCreatedByInput = {
@@ -108563,6 +110817,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutInitialMetersRecordedByInput = {
@@ -108623,6 +110878,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutInitialMetersRecordedByInput = {
@@ -110155,6 +112411,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutFledMarkedByInput = {
@@ -110215,6 +112472,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutFledMarkedByInput = {
@@ -110590,6 +112848,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutTenantInput = {
@@ -110650,6 +112909,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutTenantInput = {
@@ -111372,6 +113632,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateWithoutRoomInput = {
@@ -111432,6 +113693,7 @@ export namespace Prisma {
     renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
     checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+    rentRecognitionSchedules?: RentRecognitionScheduleUncheckedUpdateManyWithoutStayNestedInput
   }
 
   export type StayUncheckedUpdateManyWithoutRoomInput = {
@@ -112253,6 +114515,17 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type RentRecognitionScheduleCreateManyStayInput = {
+    id?: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    journalEntryId?: number | null
+    createdAt?: Date | string
+  }
+
   export type InvoiceUpdateWithoutStayInput = {
     invoiceNumber?: StringFieldUpdateOperationsInput | string
     status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -112709,6 +114982,38 @@ export namespace Prisma {
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     note?: NullableStringFieldUpdateOperationsInput | string | null
     metadataJson?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleUpdateWithoutStayInput = {
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    journalEntry?: JournalEntryUpdateOneWithoutRentRecognitionsNestedInput
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateManyWithoutStayInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -114975,6 +117280,7 @@ export namespace Prisma {
     lines?: JournalLineUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateWithoutAccountingPeriodInput = {
@@ -114997,6 +117303,7 @@ export namespace Prisma {
     lines?: JournalLineUncheckedUpdateManyWithoutJournalEntryNestedInput
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
+    rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
   }
 
   export type JournalEntryUncheckedUpdateManyWithoutAccountingPeriodInput = {
@@ -115119,6 +117426,17 @@ export namespace Prisma {
     disposalNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type RentRecognitionScheduleCreateManyJournalEntryInput = {
+    id?: number
+    stayId: number
+    periodIndex: number
+    periodStart: Date | string
+    periodEnd: Date | string
+    scheduledAmountRupiah: number
+    recognizedAt?: Date | string | null
+    createdAt?: Date | string
   }
 
   export type JournalLineUpdateWithoutJournalEntryInput = {
@@ -115312,6 +117630,38 @@ export namespace Prisma {
     disposalNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleUpdateWithoutJournalEntryInput = {
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stay?: StayUpdateOneRequiredWithoutRentRecognitionSchedulesNestedInput
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateWithoutJournalEntryInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    stayId?: IntFieldUpdateOperationsInput | number
+    periodIndex?: IntFieldUpdateOperationsInput | number
+    periodStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    periodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledAmountRupiah?: IntFieldUpdateOperationsInput | number
+    recognizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

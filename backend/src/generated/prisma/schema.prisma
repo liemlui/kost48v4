@@ -685,13 +685,14 @@ model Stay {
   initialMetersRecordedBy User?  @relation("StayInitialMetersRecordedBy", fields: [initialMetersRecordedById], references: [id], onDelete: SetNull)
   fledMarkedBy            User?  @relation("StayFledMarkedBy", fields: [fledMarkedById], references: [id], onDelete: SetNull)
 
-  invoices             Invoice[]
-  tickets              Ticket[]
-  expenses             Expense[]
-  paymentSubmissions   PaymentSubmission[]
-  renewRequests        RenewRequest[]
-  checkoutRequests     CheckoutRequest[]
-  depositLedgerEntries TenantDepositLedgerEntry[]
+  invoices                 Invoice[]
+  tickets                  Ticket[]
+  expenses                 Expense[]
+  paymentSubmissions       PaymentSubmission[]
+  renewRequests            RenewRequest[]
+  checkoutRequests         CheckoutRequest[]
+  depositLedgerEntries     TenantDepositLedgerEntry[]
+  rentRecognitionSchedules RentRecognitionSchedule[]
 
   @@index([tenantId])
   @@index([roomId])
@@ -1638,10 +1639,11 @@ model JournalEntry {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  accountingPeriod           AccountingPeriod?      @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
+  accountingPeriod           AccountingPeriod?         @relation(fields: [accountingPeriodId], references: [id], onDelete: SetNull)
   lines                      JournalLine[]
   depreciationRuns           AssetDepreciationRun[]
-  fixedAssetLedgerAlignments FixedAsset[]           @relation("FixedAssetAlignmentJournalEntry")
+  fixedAssetLedgerAlignments FixedAsset[]              @relation("FixedAssetAlignmentJournalEntry")
+  rentRecognitions           RentRecognitionSchedule[]
 
   @@index([entryDate])
   @@index([accountingPeriodId])
@@ -1667,6 +1669,28 @@ model JournalLine {
   @@index([journalEntryId])
   @@index([chartOfAccountId])
   @@index([cashAccountId])
+}
+
+// F4-1 (PSAK 72): jadwal pengakuan pendapatan sewa panjang (>1 bulan). Sewa ditangguhkan
+// ke akun 2200 (Unearned Revenue) saat invoice diterbitkan, lalu diakui bertahap per
+// bulan (DR 2200 / CR 4000). Satu baris = satu bulan; idempotent per (stayId, periodIndex).
+model RentRecognitionSchedule {
+  id                    Int       @id @default(autoincrement())
+  stayId                Int
+  periodIndex           Int
+  periodStart           DateTime  @db.Date
+  periodEnd             DateTime  @db.Date
+  scheduledAmountRupiah Int
+  recognizedAt          DateTime?
+  journalEntryId        Int?
+  createdAt             DateTime  @default(now())
+
+  stay         Stay          @relation(fields: [stayId], references: [id], onDelete: Cascade)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+
+  @@unique([stayId, periodIndex])
+  @@index([stayId])
+  @@index([recognizedAt])
 }
 
 model Faq {
