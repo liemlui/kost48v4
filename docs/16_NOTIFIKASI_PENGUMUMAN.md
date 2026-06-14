@@ -27,7 +27,7 @@
 | N-02 | ✅ RESOLVED (F3-13, 2026-06-14) | `notifyPublished` menahan notif bila `startsAt` masih di masa depan → tak ada lagi notif instan ke konten yang belum tayang. (Pengiriman tepat di `startsAt` butuh sweeper terjadwal = lanjutan.) | `announcements.service.ts` `notifyPublished` | **F3-13 (N-02 selesai)** |
 | Coverage 5 | 🟡 PARSIAL | payment-submitted→OWNER/ADMIN dan prompt-review tenant sudah selesai; tersisa ticket-assigned→staf, wifi-order, room-ready, dan K-8 penerima. | berbagai | **F3-2 selesai**; lanjut **F3-1** |
 | N-04 | INFO | AppNotification tanpa retensi → tumbuh tanpa batas (broadcast ALL). | `app-notification.service.ts` | **F4-7** pruning >90 hari |
-| B-14 | 🟡 P3 | Reminder exact-match daysLeft → downtime di hari gelombang = gelombang hilang. | `auto-ops.service.ts:451-457` | **F3-13** window `<=` + dedupe gelombang |
+| B-14 | ✅ RESOLVED (F3-13, 2026-06-14) | `runContractEndReminders` pakai window (`daysLeft <= threshold`) + dedupe per (stay, gelombang) via judul stabil `H-{wave}`; downtime sweeper di hari-H gelombang tak lagi menghilangkan reminder. Fallback admin tenant-tanpa-portal ikut per-gelombang. | `auto-ops.service.ts` `runContractEndReminders` | **F3-13 (B-14 selesai)** |
 
 ## 4. Task
 - **F2-2 · FASE 2 (SELESAI 2026-06-14):** notif renew (request→admin, approve/reject→tenant, prompt H-10) + fallback antrean admin untuk tenant tanpa portal. UAT: stay H-10 → notif tenant; tenant non-portal → notif 3 admin.

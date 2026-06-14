@@ -616,13 +616,18 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       take: 200,
     });
 
-    const REMINDER_DAYS = [10, 7, 3, 1, 0]; // F2-1 #3: tambah prompt H-10 keputusan perpanjangan
+    // B-14: gelombang reminder pakai WINDOW (`daysLeft <= threshold`), bukan
+    // exact-match. Bila sweeper mati di hari-H gelombang, reminder tak hilang —
+    // gelombang yang sudah terlewati tetap terkirim sekali (dedupe per gelombang).
+    const REMINDER_THRESHOLDS = [10, 7, 3, 1, 0]; // F2-1 #3: prompt mulai H-10
     let sent = 0;
     for (const stay of stays) {
       const planned = new Date(stay.plannedCheckOutDate as Date);
       planned.setUTCHours(0, 0, 0, 0);
       const daysLeft = Math.round((planned.getTime() - todayWib.getTime()) / 86_400_000);
-      if (!REMINDER_DAYS.includes(daysLeft)) continue;
+      // Gelombang aktif = threshold terkecil yang sudah tercapai (daysLeft <= T).
+      const wave = REMINDER_THRESHOLDS.filter((t) => daysLeft <= t).sort((a, b) => a - b)[0];
+      if (wave === undefined) continue; // daysLeft > 10 (di luar horizon)
 
       const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.id}`;
       const tenantUser = await this.prisma.user.findFirst({
@@ -632,15 +637,17 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       // F2-1 #3 fallback: tenant tanpa akun portal tak bisa diberi notif → beri tahu ADMIN
       // agar dihubungi manual soal perpanjangan/checkout (dedupe per stay per gelombang).
       if (!tenantUser) {
-        await this.notifyAdminsTenantNoPortalContract(stay.id, roomLabel, daysLeft, planned).catch((err) =>
+        await this.notifyAdminsTenantNoPortalContract(stay.id, roomLabel, wave, planned).catch((err) =>
           this.logger.warn(`Notif admin fallback (stay #${stay.id}) gagal: ${err instanceof Error ? err.message : String(err)}`),
         );
         continue;
       }
+      // Judul stabil per gelombang (dedupe per gelombang, bukan per hari exact);
+      // tanggal & sisa hari yang akurat ada di body.
       const title =
-        daysLeft === 0
+        wave === 0
           ? `⏰ Kontrak ${roomLabel} berakhir HARI INI`
-          : `⏰ Kontrak ${roomLabel} berakhir ${daysLeft} hari lagi`;
+          : `⏰ Pengingat kontrak ${roomLabel} (H-${wave})`;
 
       const existing = await (this.prisma as any).appNotification.findFirst({
         where: {
@@ -657,7 +664,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         recipientUserId: tenantUser.id,
         title,
         body:
-          daysLeft === 0
+          daysLeft <= 0
             ? `Kontrak sewa kamar ${roomLabel} berakhir hari ini. Segera ajukan perpanjangan atau checkout sebelum pk 12:00 WIB. Jika tidak ada tindakan hingga besok pk 12:00, sistem akan melakukan checkout otomatis dan barang Anda dikeluarkan oleh staf.`
             : `Kontrak sewa kamar ${roomLabel} berakhir ${daysLeft} hari lagi (${planned.toISOString().slice(0, 10)}). Silakan ajukan perpanjangan lewat portal, atau ajukan checkout. Tanpa tindakan, kamar dilepas otomatis pk 12:00 di hari berakhirnya kontrak.`,
         linkTo: '/portal/stay',
@@ -671,16 +678,16 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** F2-1 #3: fallback — tenant tanpa akun portal → beri tahu ADMIN/OWNER agar dihubungi manual. */
-  private async notifyAdminsTenantNoPortalContract(stayId: number, roomLabel: string, daysLeft: number, planned: Date) {
-    const title = `📭 Tenant tanpa portal — kontrak ${roomLabel} ${daysLeft === 0 ? 'berakhir HARI INI' : `H-${daysLeft}`}`;
-    const todayWib = this.wibToday();
+  private async notifyAdminsTenantNoPortalContract(stayId: number, roomLabel: string, wave: number, planned: Date) {
+    // B-14: judul stabil per gelombang → dedupe per (stay, gelombang), bukan per hari.
+    const title = `📭 Tenant tanpa portal — kontrak ${roomLabel} ${wave === 0 ? 'berakhir HARI INI' : `H-${wave}`}`;
     const admins = await this.prisma.user.findMany({
       where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true },
       select: { id: true },
     });
     for (const admin of admins) {
       const existing = await (this.prisma as any).appNotification.findFirst({
-        where: { recipientUserId: admin.id, entityType: 'Stay', entityId: String(stayId), title, createdAt: { gte: todayWib } },
+        where: { recipientUserId: admin.id, entityType: 'Stay', entityId: String(stayId), title },
         select: { id: true },
       });
       if (existing) continue;
@@ -688,7 +695,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         await this.appNotification.create({
           recipientUserId: admin.id,
           title,
-          body: `Tenant kamar ${roomLabel} TIDAK punya akun portal → tak bisa diberi notifikasi perpanjangan otomatis. Kontrak berakhir ${planned.toISOString().slice(0, 10)} (H-${daysLeft}). Hubungi tenant secara manual untuk konfirmasi perpanjang atau checkout.`,
+          body: `Tenant kamar ${roomLabel} TIDAK punya akun portal → tak bisa diberi notifikasi perpanjangan otomatis. Kontrak berakhir ${planned.toISOString().slice(0, 10)} (H-${wave}). Hubungi tenant secara manual untuk konfirmasi perpanjang atau checkout.`,
           linkTo: '/stays',
           entityType: 'Stay',
           entityId: String(stayId),
