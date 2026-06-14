@@ -122,4 +122,11 @@ export class AutoOpsController {
   async runNotificationPruning(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps pruning notifikasi berhasil dijalankan', data: await this.autoOpsService.runNotificationPruning({ actorUserId: user.id, source: 'MANUAL_NOTIFICATION_PRUNING_RUN' }) };
   }
+
+  // F4-2: trigger manual dispatch Web Push notifikasi PENDING (UAT/ops).
+  @Post('run/push-dispatch')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runPushDispatch(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps dispatch push berhasil dijalankan', data: await this.autoOpsService.runPushDispatch({ actorUserId: user.id, source: 'MANUAL_PUSH_DISPATCH_RUN' }) };
+  }
 }

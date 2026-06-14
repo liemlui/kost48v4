@@ -5,9 +5,10 @@ import { AccountingModule } from '../accounting/accounting.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
 import { AssetsModule } from '../assets/assets.module';
+import { PushModule } from '../push/push.module';
 
 @Module({
-  imports: [AccountingModule, NotificationsModule, DepositLedgerModule, AssetsModule],
+  imports: [AccountingModule, NotificationsModule, DepositLedgerModule, AssetsModule, PushModule],
   controllers: [AutoOpsController],
   providers: [AutoOpsService],
   exports: [AutoOpsService],

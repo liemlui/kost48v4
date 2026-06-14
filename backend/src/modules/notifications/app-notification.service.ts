@@ -24,6 +24,10 @@ export class AppNotificationService {
         linkTo: input.linkTo ?? null,
         entityType: input.entityType ?? null,
         entityId: input.entityId ?? null,
+        // F4-2: setiap notifikasi in-app diantre untuk Web Push (outbox in-place).
+        // Sweeper PushService.dispatchPending memprosesnya; bila VAPID nonaktif /
+        // tenant tak punya device, status diselesaikan tanpa efek samping.
+        pushStatus: 'PENDING',
       },
     });
   }

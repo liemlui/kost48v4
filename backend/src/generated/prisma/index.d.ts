@@ -174,6 +174,11 @@ export type AssetDepreciationLine = $Result.DefaultSelection<Prisma.$AssetDeprec
  */
 export type AppNotification = $Result.DefaultSelection<Prisma.$AppNotificationPayload>
 /**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = $Result.DefaultSelection<Prisma.$PushSubscriptionPayload>
+/**
  * Model AuditLog
  * 
  */
@@ -816,6 +821,16 @@ export const BelongingsStatus: {
 
 export type BelongingsStatus = (typeof BelongingsStatus)[keyof typeof BelongingsStatus]
 
+
+export const PushDeliveryStatus: {
+  NONE: 'NONE',
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED'
+};
+
+export type PushDeliveryStatus = (typeof PushDeliveryStatus)[keyof typeof PushDeliveryStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -1033,6 +1048,10 @@ export const AssetDepreciationRunStatus: typeof $Enums.AssetDepreciationRunStatu
 export type BelongingsStatus = $Enums.BelongingsStatus
 
 export const BelongingsStatus: typeof $Enums.BelongingsStatus
+
+export type PushDeliveryStatus = $Enums.PushDeliveryStatus
+
+export const PushDeliveryStatus: typeof $Enums.PushDeliveryStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1474,6 +1493,16 @@ export class PrismaClient<
     * ```
     */
   get appNotification(): Prisma.AppNotificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pushSubscription`: Exposes CRUD operations for the **PushSubscription** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PushSubscriptions
+    * const pushSubscriptions = await prisma.pushSubscription.findMany()
+    * ```
+    */
+  get pushSubscription(): Prisma.PushSubscriptionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
@@ -2030,6 +2059,7 @@ export namespace Prisma {
     AssetDepreciationRun: 'AssetDepreciationRun',
     AssetDepreciationLine: 'AssetDepreciationLine',
     AppNotification: 'AppNotification',
+    PushSubscription: 'PushSubscription',
     AuditLog: 'AuditLog',
     ChartOfAccount: 'ChartOfAccount',
     CashAccount: 'CashAccount',
@@ -2054,7 +2084,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "faq"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "faq"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4426,6 +4456,80 @@ export namespace Prisma {
           }
         }
       }
+      PushSubscription: {
+        payload: Prisma.$PushSubscriptionPayload<ExtArgs>
+        fields: Prisma.PushSubscriptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PushSubscriptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PushSubscriptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          findFirst: {
+            args: Prisma.PushSubscriptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PushSubscriptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          findMany: {
+            args: Prisma.PushSubscriptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[]
+          }
+          create: {
+            args: Prisma.PushSubscriptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          createMany: {
+            args: Prisma.PushSubscriptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PushSubscriptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[]
+          }
+          delete: {
+            args: Prisma.PushSubscriptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          update: {
+            args: Prisma.PushSubscriptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.PushSubscriptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PushSubscriptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PushSubscriptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.PushSubscriptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>
+          }
+          aggregate: {
+            args: Prisma.PushSubscriptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePushSubscription>
+          }
+          groupBy: {
+            args: Prisma.PushSubscriptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PushSubscriptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PushSubscriptionCountArgs<ExtArgs>
+            result: $Utils.Optional<PushSubscriptionCountAggregateOutputType> | number
+          }
+        }
+      }
       AuditLog: {
         payload: Prisma.$AuditLogPayload<ExtArgs>
         fields: Prisma.AuditLogFieldRefs
@@ -5232,6 +5336,7 @@ export namespace Prisma {
     assetDepreciationRun?: AssetDepreciationRunOmit
     assetDepreciationLine?: AssetDepreciationLineOmit
     appNotification?: AppNotificationOmit
+    pushSubscription?: PushSubscriptionOmit
     auditLog?: AuditLogOmit
     chartOfAccount?: ChartOfAccountOmit
     cashAccount?: CashAccountOmit
@@ -5346,6 +5451,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed: number
     passwordResetTokens: number
     notifications: number
+    pushSubscriptions: number
     staffFieldReportsCreated: number
     staffFieldReportsReviewed: number
     fixedAssetsCreated: number
@@ -5381,6 +5487,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: boolean | UserCountOutputTypeCountPaymentSubmissionsReviewedArgs
     passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+    pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
     staffFieldReportsCreated?: boolean | UserCountOutputTypeCountStaffFieldReportsCreatedArgs
     staffFieldReportsReviewed?: boolean | UserCountOutputTypeCountStaffFieldReportsReviewedArgs
     fixedAssetsCreated?: boolean | UserCountOutputTypeCountFixedAssetsCreatedArgs
@@ -5574,6 +5681,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AppNotificationWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PushSubscriptionWhereInput
   }
 
   /**
@@ -6815,6 +6929,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
+    pushSubscriptions?: boolean | User$pushSubscriptionsArgs<ExtArgs>
     staffFieldReportsCreated?: boolean | User$staffFieldReportsCreatedArgs<ExtArgs>
     staffFieldReportsReviewed?: boolean | User$staffFieldReportsReviewedArgs<ExtArgs>
     fixedAssetsCreated?: boolean | User$fixedAssetsCreatedArgs<ExtArgs>
@@ -6897,6 +7012,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: boolean | User$paymentSubmissionsReviewedArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
+    pushSubscriptions?: boolean | User$pushSubscriptionsArgs<ExtArgs>
     staffFieldReportsCreated?: boolean | User$staffFieldReportsCreatedArgs<ExtArgs>
     staffFieldReportsReviewed?: boolean | User$staffFieldReportsReviewedArgs<ExtArgs>
     fixedAssetsCreated?: boolean | User$fixedAssetsCreatedArgs<ExtArgs>
@@ -6942,6 +7058,7 @@ export namespace Prisma {
       paymentSubmissionsReviewed: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
       passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
       notifications: Prisma.$AppNotificationPayload<ExtArgs>[]
+      pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
       staffFieldReportsCreated: Prisma.$StaffFieldReportPayload<ExtArgs>[]
       staffFieldReportsReviewed: Prisma.$StaffFieldReportPayload<ExtArgs>[]
       fixedAssetsCreated: Prisma.$FixedAssetPayload<ExtArgs>[]
@@ -7382,6 +7499,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed<T extends User$paymentSubmissionsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentSubmissionsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     passwordResetTokens<T extends User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pushSubscriptions<T extends User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staffFieldReportsCreated<T extends User$staffFieldReportsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$staffFieldReportsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffFieldReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     staffFieldReportsReviewed<T extends User$staffFieldReportsReviewedArgs<ExtArgs> = {}>(args?: Subset<T, User$staffFieldReportsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffFieldReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fixedAssetsCreated<T extends User$fixedAssetsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$fixedAssetsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FixedAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8446,6 +8564,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AppNotificationScalarFieldEnum | AppNotificationScalarFieldEnum[]
+  }
+
+  /**
+   * User.pushSubscriptions
+   */
+  export type User$pushSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    where?: PushSubscriptionWhereInput
+    orderBy?: PushSubscriptionOrderByWithRelationInput | PushSubscriptionOrderByWithRelationInput[]
+    cursor?: PushSubscriptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PushSubscriptionScalarFieldEnum | PushSubscriptionScalarFieldEnum[]
   }
 
   /**
@@ -48994,11 +49136,13 @@ export namespace Prisma {
   export type AppNotificationAvgAggregateOutputType = {
     id: number | null
     recipientUserId: number | null
+    pushAttempts: number | null
   }
 
   export type AppNotificationSumAggregateOutputType = {
     id: number | null
     recipientUserId: number | null
+    pushAttempts: number | null
   }
 
   export type AppNotificationMinAggregateOutputType = {
@@ -49011,6 +49155,9 @@ export namespace Prisma {
     entityId: string | null
     isRead: boolean | null
     readAt: Date | null
+    pushStatus: $Enums.PushDeliveryStatus | null
+    pushAttempts: number | null
+    pushedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -49025,6 +49172,9 @@ export namespace Prisma {
     entityId: string | null
     isRead: boolean | null
     readAt: Date | null
+    pushStatus: $Enums.PushDeliveryStatus | null
+    pushAttempts: number | null
+    pushedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -49039,6 +49189,9 @@ export namespace Prisma {
     entityId: number
     isRead: number
     readAt: number
+    pushStatus: number
+    pushAttempts: number
+    pushedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -49048,11 +49201,13 @@ export namespace Prisma {
   export type AppNotificationAvgAggregateInputType = {
     id?: true
     recipientUserId?: true
+    pushAttempts?: true
   }
 
   export type AppNotificationSumAggregateInputType = {
     id?: true
     recipientUserId?: true
+    pushAttempts?: true
   }
 
   export type AppNotificationMinAggregateInputType = {
@@ -49065,6 +49220,9 @@ export namespace Prisma {
     entityId?: true
     isRead?: true
     readAt?: true
+    pushStatus?: true
+    pushAttempts?: true
+    pushedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -49079,6 +49237,9 @@ export namespace Prisma {
     entityId?: true
     isRead?: true
     readAt?: true
+    pushStatus?: true
+    pushAttempts?: true
+    pushedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -49093,6 +49254,9 @@ export namespace Prisma {
     entityId?: true
     isRead?: true
     readAt?: true
+    pushStatus?: true
+    pushAttempts?: true
+    pushedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -49194,6 +49358,9 @@ export namespace Prisma {
     entityId: string | null
     isRead: boolean
     readAt: Date | null
+    pushStatus: $Enums.PushDeliveryStatus
+    pushAttempts: number
+    pushedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: AppNotificationCountAggregateOutputType | null
@@ -49227,6 +49394,9 @@ export namespace Prisma {
     entityId?: boolean
     isRead?: boolean
     readAt?: boolean
+    pushStatus?: boolean
+    pushAttempts?: boolean
+    pushedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recipientUser?: boolean | UserDefaultArgs<ExtArgs>
@@ -49242,6 +49412,9 @@ export namespace Prisma {
     entityId?: boolean
     isRead?: boolean
     readAt?: boolean
+    pushStatus?: boolean
+    pushAttempts?: boolean
+    pushedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recipientUser?: boolean | UserDefaultArgs<ExtArgs>
@@ -49257,6 +49430,9 @@ export namespace Prisma {
     entityId?: boolean
     isRead?: boolean
     readAt?: boolean
+    pushStatus?: boolean
+    pushAttempts?: boolean
+    pushedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recipientUser?: boolean | UserDefaultArgs<ExtArgs>
@@ -49272,11 +49448,14 @@ export namespace Prisma {
     entityId?: boolean
     isRead?: boolean
     readAt?: boolean
+    pushStatus?: boolean
+    pushAttempts?: boolean
+    pushedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AppNotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "recipientUserId" | "title" | "body" | "linkTo" | "entityType" | "entityId" | "isRead" | "readAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appNotification"]>
+  export type AppNotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "recipientUserId" | "title" | "body" | "linkTo" | "entityType" | "entityId" | "isRead" | "readAt" | "pushStatus" | "pushAttempts" | "pushedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appNotification"]>
   export type AppNotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     recipientUser?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -49302,6 +49481,9 @@ export namespace Prisma {
       entityId: string | null
       isRead: boolean
       readAt: Date | null
+      pushStatus: $Enums.PushDeliveryStatus
+      pushAttempts: number
+      pushedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["appNotification"]>
@@ -49737,6 +49919,9 @@ export namespace Prisma {
     readonly entityId: FieldRef<"AppNotification", 'String'>
     readonly isRead: FieldRef<"AppNotification", 'Boolean'>
     readonly readAt: FieldRef<"AppNotification", 'DateTime'>
+    readonly pushStatus: FieldRef<"AppNotification", 'PushDeliveryStatus'>
+    readonly pushAttempts: FieldRef<"AppNotification", 'Int'>
+    readonly pushedAt: FieldRef<"AppNotification", 'DateTime'>
     readonly createdAt: FieldRef<"AppNotification", 'DateTime'>
     readonly updatedAt: FieldRef<"AppNotification", 'DateTime'>
   }
@@ -50155,6 +50340,1159 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AppNotificationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PushSubscription
+   */
+
+  export type AggregatePushSubscription = {
+    _count: PushSubscriptionCountAggregateOutputType | null
+    _avg: PushSubscriptionAvgAggregateOutputType | null
+    _sum: PushSubscriptionSumAggregateOutputType | null
+    _min: PushSubscriptionMinAggregateOutputType | null
+    _max: PushSubscriptionMaxAggregateOutputType | null
+  }
+
+  export type PushSubscriptionAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type PushSubscriptionSumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+  }
+
+  export type PushSubscriptionMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    endpoint: string | null
+    p256dh: string | null
+    auth: string | null
+    userAgent: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    lastUsedAt: Date | null
+  }
+
+  export type PushSubscriptionMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    endpoint: string | null
+    p256dh: string | null
+    auth: string | null
+    userAgent: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    lastUsedAt: Date | null
+  }
+
+  export type PushSubscriptionCountAggregateOutputType = {
+    id: number
+    userId: number
+    endpoint: number
+    p256dh: number
+    auth: number
+    userAgent: number
+    isActive: number
+    createdAt: number
+    lastUsedAt: number
+    _all: number
+  }
+
+
+  export type PushSubscriptionAvgAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type PushSubscriptionSumAggregateInputType = {
+    id?: true
+    userId?: true
+  }
+
+  export type PushSubscriptionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    endpoint?: true
+    p256dh?: true
+    auth?: true
+    userAgent?: true
+    isActive?: true
+    createdAt?: true
+    lastUsedAt?: true
+  }
+
+  export type PushSubscriptionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    endpoint?: true
+    p256dh?: true
+    auth?: true
+    userAgent?: true
+    isActive?: true
+    createdAt?: true
+    lastUsedAt?: true
+  }
+
+  export type PushSubscriptionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    endpoint?: true
+    p256dh?: true
+    auth?: true
+    userAgent?: true
+    isActive?: true
+    createdAt?: true
+    lastUsedAt?: true
+    _all?: true
+  }
+
+  export type PushSubscriptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PushSubscription to aggregate.
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PushSubscriptions to fetch.
+     */
+    orderBy?: PushSubscriptionOrderByWithRelationInput | PushSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PushSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PushSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PushSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PushSubscriptions
+    **/
+    _count?: true | PushSubscriptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PushSubscriptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PushSubscriptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PushSubscriptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PushSubscriptionMaxAggregateInputType
+  }
+
+  export type GetPushSubscriptionAggregateType<T extends PushSubscriptionAggregateArgs> = {
+        [P in keyof T & keyof AggregatePushSubscription]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePushSubscription[P]>
+      : GetScalarType<T[P], AggregatePushSubscription[P]>
+  }
+
+
+
+
+  export type PushSubscriptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PushSubscriptionWhereInput
+    orderBy?: PushSubscriptionOrderByWithAggregationInput | PushSubscriptionOrderByWithAggregationInput[]
+    by: PushSubscriptionScalarFieldEnum[] | PushSubscriptionScalarFieldEnum
+    having?: PushSubscriptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PushSubscriptionCountAggregateInputType | true
+    _avg?: PushSubscriptionAvgAggregateInputType
+    _sum?: PushSubscriptionSumAggregateInputType
+    _min?: PushSubscriptionMinAggregateInputType
+    _max?: PushSubscriptionMaxAggregateInputType
+  }
+
+  export type PushSubscriptionGroupByOutputType = {
+    id: number
+    userId: number
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent: string | null
+    isActive: boolean
+    createdAt: Date
+    lastUsedAt: Date | null
+    _count: PushSubscriptionCountAggregateOutputType | null
+    _avg: PushSubscriptionAvgAggregateOutputType | null
+    _sum: PushSubscriptionSumAggregateOutputType | null
+    _min: PushSubscriptionMinAggregateOutputType | null
+    _max: PushSubscriptionMaxAggregateOutputType | null
+  }
+
+  type GetPushSubscriptionGroupByPayload<T extends PushSubscriptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PushSubscriptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PushSubscriptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PushSubscriptionGroupByOutputType[P]>
+            : GetScalarType<T[P], PushSubscriptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PushSubscriptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    endpoint?: boolean
+    p256dh?: boolean
+    auth?: boolean
+    userAgent?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    lastUsedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pushSubscription"]>
+
+  export type PushSubscriptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    endpoint?: boolean
+    p256dh?: boolean
+    auth?: boolean
+    userAgent?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    lastUsedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pushSubscription"]>
+
+  export type PushSubscriptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    endpoint?: boolean
+    p256dh?: boolean
+    auth?: boolean
+    userAgent?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    lastUsedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pushSubscription"]>
+
+  export type PushSubscriptionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    endpoint?: boolean
+    p256dh?: boolean
+    auth?: boolean
+    userAgent?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    lastUsedAt?: boolean
+  }
+
+  export type PushSubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "endpoint" | "p256dh" | "auth" | "userAgent" | "isActive" | "createdAt" | "lastUsedAt", ExtArgs["result"]["pushSubscription"]>
+  export type PushSubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PushSubscriptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type PushSubscriptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $PushSubscriptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PushSubscription"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number
+      endpoint: string
+      p256dh: string
+      auth: string
+      userAgent: string | null
+      isActive: boolean
+      createdAt: Date
+      lastUsedAt: Date | null
+    }, ExtArgs["result"]["pushSubscription"]>
+    composites: {}
+  }
+
+  type PushSubscriptionGetPayload<S extends boolean | null | undefined | PushSubscriptionDefaultArgs> = $Result.GetResult<Prisma.$PushSubscriptionPayload, S>
+
+  type PushSubscriptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PushSubscriptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PushSubscriptionCountAggregateInputType | true
+    }
+
+  export interface PushSubscriptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PushSubscription'], meta: { name: 'PushSubscription' } }
+    /**
+     * Find zero or one PushSubscription that matches the filter.
+     * @param {PushSubscriptionFindUniqueArgs} args - Arguments to find a PushSubscription
+     * @example
+     * // Get one PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PushSubscriptionFindUniqueArgs>(args: SelectSubset<T, PushSubscriptionFindUniqueArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PushSubscription that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PushSubscriptionFindUniqueOrThrowArgs} args - Arguments to find a PushSubscription
+     * @example
+     * // Get one PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PushSubscriptionFindUniqueOrThrowArgs>(args: SelectSubset<T, PushSubscriptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PushSubscription that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionFindFirstArgs} args - Arguments to find a PushSubscription
+     * @example
+     * // Get one PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PushSubscriptionFindFirstArgs>(args?: SelectSubset<T, PushSubscriptionFindFirstArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PushSubscription that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionFindFirstOrThrowArgs} args - Arguments to find a PushSubscription
+     * @example
+     * // Get one PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PushSubscriptionFindFirstOrThrowArgs>(args?: SelectSubset<T, PushSubscriptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PushSubscriptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PushSubscriptions
+     * const pushSubscriptions = await prisma.pushSubscription.findMany()
+     * 
+     * // Get first 10 PushSubscriptions
+     * const pushSubscriptions = await prisma.pushSubscription.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pushSubscriptionWithIdOnly = await prisma.pushSubscription.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PushSubscriptionFindManyArgs>(args?: SelectSubset<T, PushSubscriptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PushSubscription.
+     * @param {PushSubscriptionCreateArgs} args - Arguments to create a PushSubscription.
+     * @example
+     * // Create one PushSubscription
+     * const PushSubscription = await prisma.pushSubscription.create({
+     *   data: {
+     *     // ... data to create a PushSubscription
+     *   }
+     * })
+     * 
+     */
+    create<T extends PushSubscriptionCreateArgs>(args: SelectSubset<T, PushSubscriptionCreateArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PushSubscriptions.
+     * @param {PushSubscriptionCreateManyArgs} args - Arguments to create many PushSubscriptions.
+     * @example
+     * // Create many PushSubscriptions
+     * const pushSubscription = await prisma.pushSubscription.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PushSubscriptionCreateManyArgs>(args?: SelectSubset<T, PushSubscriptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PushSubscriptions and returns the data saved in the database.
+     * @param {PushSubscriptionCreateManyAndReturnArgs} args - Arguments to create many PushSubscriptions.
+     * @example
+     * // Create many PushSubscriptions
+     * const pushSubscription = await prisma.pushSubscription.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PushSubscriptions and only return the `id`
+     * const pushSubscriptionWithIdOnly = await prisma.pushSubscription.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PushSubscriptionCreateManyAndReturnArgs>(args?: SelectSubset<T, PushSubscriptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PushSubscription.
+     * @param {PushSubscriptionDeleteArgs} args - Arguments to delete one PushSubscription.
+     * @example
+     * // Delete one PushSubscription
+     * const PushSubscription = await prisma.pushSubscription.delete({
+     *   where: {
+     *     // ... filter to delete one PushSubscription
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PushSubscriptionDeleteArgs>(args: SelectSubset<T, PushSubscriptionDeleteArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PushSubscription.
+     * @param {PushSubscriptionUpdateArgs} args - Arguments to update one PushSubscription.
+     * @example
+     * // Update one PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PushSubscriptionUpdateArgs>(args: SelectSubset<T, PushSubscriptionUpdateArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PushSubscriptions.
+     * @param {PushSubscriptionDeleteManyArgs} args - Arguments to filter PushSubscriptions to delete.
+     * @example
+     * // Delete a few PushSubscriptions
+     * const { count } = await prisma.pushSubscription.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PushSubscriptionDeleteManyArgs>(args?: SelectSubset<T, PushSubscriptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PushSubscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PushSubscriptions
+     * const pushSubscription = await prisma.pushSubscription.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PushSubscriptionUpdateManyArgs>(args: SelectSubset<T, PushSubscriptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PushSubscriptions and returns the data updated in the database.
+     * @param {PushSubscriptionUpdateManyAndReturnArgs} args - Arguments to update many PushSubscriptions.
+     * @example
+     * // Update many PushSubscriptions
+     * const pushSubscription = await prisma.pushSubscription.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PushSubscriptions and only return the `id`
+     * const pushSubscriptionWithIdOnly = await prisma.pushSubscription.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PushSubscriptionUpdateManyAndReturnArgs>(args: SelectSubset<T, PushSubscriptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PushSubscription.
+     * @param {PushSubscriptionUpsertArgs} args - Arguments to update or create a PushSubscription.
+     * @example
+     * // Update or create a PushSubscription
+     * const pushSubscription = await prisma.pushSubscription.upsert({
+     *   create: {
+     *     // ... data to create a PushSubscription
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PushSubscription we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PushSubscriptionUpsertArgs>(args: SelectSubset<T, PushSubscriptionUpsertArgs<ExtArgs>>): Prisma__PushSubscriptionClient<$Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PushSubscriptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionCountArgs} args - Arguments to filter PushSubscriptions to count.
+     * @example
+     * // Count the number of PushSubscriptions
+     * const count = await prisma.pushSubscription.count({
+     *   where: {
+     *     // ... the filter for the PushSubscriptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends PushSubscriptionCountArgs>(
+      args?: Subset<T, PushSubscriptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PushSubscriptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PushSubscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PushSubscriptionAggregateArgs>(args: Subset<T, PushSubscriptionAggregateArgs>): Prisma.PrismaPromise<GetPushSubscriptionAggregateType<T>>
+
+    /**
+     * Group by PushSubscription.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PushSubscriptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PushSubscriptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PushSubscriptionGroupByArgs['orderBy'] }
+        : { orderBy?: PushSubscriptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PushSubscriptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPushSubscriptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PushSubscription model
+   */
+  readonly fields: PushSubscriptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PushSubscription.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PushSubscriptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PushSubscription model
+   */
+  interface PushSubscriptionFieldRefs {
+    readonly id: FieldRef<"PushSubscription", 'Int'>
+    readonly userId: FieldRef<"PushSubscription", 'Int'>
+    readonly endpoint: FieldRef<"PushSubscription", 'String'>
+    readonly p256dh: FieldRef<"PushSubscription", 'String'>
+    readonly auth: FieldRef<"PushSubscription", 'String'>
+    readonly userAgent: FieldRef<"PushSubscription", 'String'>
+    readonly isActive: FieldRef<"PushSubscription", 'Boolean'>
+    readonly createdAt: FieldRef<"PushSubscription", 'DateTime'>
+    readonly lastUsedAt: FieldRef<"PushSubscription", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PushSubscription findUnique
+   */
+  export type PushSubscriptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which PushSubscription to fetch.
+     */
+    where: PushSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * PushSubscription findUniqueOrThrow
+   */
+  export type PushSubscriptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which PushSubscription to fetch.
+     */
+    where: PushSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * PushSubscription findFirst
+   */
+  export type PushSubscriptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which PushSubscription to fetch.
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PushSubscriptions to fetch.
+     */
+    orderBy?: PushSubscriptionOrderByWithRelationInput | PushSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PushSubscriptions.
+     */
+    cursor?: PushSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PushSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PushSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PushSubscriptions.
+     */
+    distinct?: PushSubscriptionScalarFieldEnum | PushSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * PushSubscription findFirstOrThrow
+   */
+  export type PushSubscriptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which PushSubscription to fetch.
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PushSubscriptions to fetch.
+     */
+    orderBy?: PushSubscriptionOrderByWithRelationInput | PushSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PushSubscriptions.
+     */
+    cursor?: PushSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PushSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PushSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PushSubscriptions.
+     */
+    distinct?: PushSubscriptionScalarFieldEnum | PushSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * PushSubscription findMany
+   */
+  export type PushSubscriptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter, which PushSubscriptions to fetch.
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PushSubscriptions to fetch.
+     */
+    orderBy?: PushSubscriptionOrderByWithRelationInput | PushSubscriptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PushSubscriptions.
+     */
+    cursor?: PushSubscriptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PushSubscriptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PushSubscriptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PushSubscriptions.
+     */
+    distinct?: PushSubscriptionScalarFieldEnum | PushSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * PushSubscription create
+   */
+  export type PushSubscriptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PushSubscription.
+     */
+    data: XOR<PushSubscriptionCreateInput, PushSubscriptionUncheckedCreateInput>
+  }
+
+  /**
+   * PushSubscription createMany
+   */
+  export type PushSubscriptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PushSubscriptions.
+     */
+    data: PushSubscriptionCreateManyInput | PushSubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PushSubscription createManyAndReturn
+   */
+  export type PushSubscriptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many PushSubscriptions.
+     */
+    data: PushSubscriptionCreateManyInput | PushSubscriptionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PushSubscription update
+   */
+  export type PushSubscriptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PushSubscription.
+     */
+    data: XOR<PushSubscriptionUpdateInput, PushSubscriptionUncheckedUpdateInput>
+    /**
+     * Choose, which PushSubscription to update.
+     */
+    where: PushSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * PushSubscription updateMany
+   */
+  export type PushSubscriptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PushSubscriptions.
+     */
+    data: XOR<PushSubscriptionUpdateManyMutationInput, PushSubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which PushSubscriptions to update
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * Limit how many PushSubscriptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PushSubscription updateManyAndReturn
+   */
+  export type PushSubscriptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * The data used to update PushSubscriptions.
+     */
+    data: XOR<PushSubscriptionUpdateManyMutationInput, PushSubscriptionUncheckedUpdateManyInput>
+    /**
+     * Filter which PushSubscriptions to update
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * Limit how many PushSubscriptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PushSubscription upsert
+   */
+  export type PushSubscriptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PushSubscription to update in case it exists.
+     */
+    where: PushSubscriptionWhereUniqueInput
+    /**
+     * In case the PushSubscription found by the `where` argument doesn't exist, create a new PushSubscription with this data.
+     */
+    create: XOR<PushSubscriptionCreateInput, PushSubscriptionUncheckedCreateInput>
+    /**
+     * In case the PushSubscription was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PushSubscriptionUpdateInput, PushSubscriptionUncheckedUpdateInput>
+  }
+
+  /**
+   * PushSubscription delete
+   */
+  export type PushSubscriptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
+    /**
+     * Filter which PushSubscription to delete.
+     */
+    where: PushSubscriptionWhereUniqueInput
+  }
+
+  /**
+   * PushSubscription deleteMany
+   */
+  export type PushSubscriptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PushSubscriptions to delete
+     */
+    where?: PushSubscriptionWhereInput
+    /**
+     * Limit how many PushSubscriptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PushSubscription without action
+   */
+  export type PushSubscriptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: PushSubscriptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: PushSubscriptionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PushSubscriptionInclude<ExtArgs> | null
   }
 
 
@@ -62074,11 +63412,29 @@ export namespace Prisma {
     entityId: 'entityId',
     isRead: 'isRead',
     readAt: 'readAt',
+    pushStatus: 'pushStatus',
+    pushAttempts: 'pushAttempts',
+    pushedAt: 'pushedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type AppNotificationScalarFieldEnum = (typeof AppNotificationScalarFieldEnum)[keyof typeof AppNotificationScalarFieldEnum]
+
+
+  export const PushSubscriptionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    endpoint: 'endpoint',
+    p256dh: 'p256dh',
+    auth: 'auth',
+    userAgent: 'userAgent',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    lastUsedAt: 'lastUsedAt'
+  };
+
+  export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
   export const AuditLogScalarFieldEnum: {
@@ -63026,6 +64382,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PushDeliveryStatus'
+   */
+  export type EnumPushDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PushDeliveryStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PushDeliveryStatus[]'
+   */
+  export type ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PushDeliveryStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'AccountingAccountType'
    */
   export type EnumAccountingAccountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountingAccountType'>
@@ -63181,6 +64551,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
     notifications?: AppNotificationListRelationFilter
+    pushSubscriptions?: PushSubscriptionListRelationFilter
     staffFieldReportsCreated?: StaffFieldReportListRelationFilter
     staffFieldReportsReviewed?: StaffFieldReportListRelationFilter
     fixedAssetsCreated?: FixedAssetListRelationFilter
@@ -63228,6 +64599,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionOrderByRelationAggregateInput
     passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
     notifications?: AppNotificationOrderByRelationAggregateInput
+    pushSubscriptions?: PushSubscriptionOrderByRelationAggregateInput
     staffFieldReportsCreated?: StaffFieldReportOrderByRelationAggregateInput
     staffFieldReportsReviewed?: StaffFieldReportOrderByRelationAggregateInput
     fixedAssetsCreated?: FixedAssetOrderByRelationAggregateInput
@@ -63278,6 +64650,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
     notifications?: AppNotificationListRelationFilter
+    pushSubscriptions?: PushSubscriptionListRelationFilter
     staffFieldReportsCreated?: StaffFieldReportListRelationFilter
     staffFieldReportsReviewed?: StaffFieldReportListRelationFilter
     fixedAssetsCreated?: FixedAssetListRelationFilter
@@ -66974,6 +68347,9 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"AppNotification"> | string | null
     isRead?: BoolFilter<"AppNotification"> | boolean
     readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFilter<"AppNotification"> | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFilter<"AppNotification"> | number
+    pushedAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
     createdAt?: DateTimeFilter<"AppNotification"> | Date | string
     updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
     recipientUser?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -66989,6 +68365,9 @@ export namespace Prisma {
     entityId?: SortOrderInput | SortOrder
     isRead?: SortOrder
     readAt?: SortOrderInput | SortOrder
+    pushStatus?: SortOrder
+    pushAttempts?: SortOrder
+    pushedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     recipientUser?: UserOrderByWithRelationInput
@@ -67007,6 +68386,9 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"AppNotification"> | string | null
     isRead?: BoolFilter<"AppNotification"> | boolean
     readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFilter<"AppNotification"> | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFilter<"AppNotification"> | number
+    pushedAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
     createdAt?: DateTimeFilter<"AppNotification"> | Date | string
     updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
     recipientUser?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -67022,6 +68404,9 @@ export namespace Prisma {
     entityId?: SortOrderInput | SortOrder
     isRead?: SortOrder
     readAt?: SortOrderInput | SortOrder
+    pushStatus?: SortOrder
+    pushAttempts?: SortOrder
+    pushedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AppNotificationCountOrderByAggregateInput
@@ -67044,8 +68429,88 @@ export namespace Prisma {
     entityId?: StringNullableWithAggregatesFilter<"AppNotification"> | string | null
     isRead?: BoolWithAggregatesFilter<"AppNotification"> | boolean
     readAt?: DateTimeNullableWithAggregatesFilter<"AppNotification"> | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusWithAggregatesFilter<"AppNotification"> | $Enums.PushDeliveryStatus
+    pushAttempts?: IntWithAggregatesFilter<"AppNotification"> | number
+    pushedAt?: DateTimeNullableWithAggregatesFilter<"AppNotification"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"AppNotification"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AppNotification"> | Date | string
+  }
+
+  export type PushSubscriptionWhereInput = {
+    AND?: PushSubscriptionWhereInput | PushSubscriptionWhereInput[]
+    OR?: PushSubscriptionWhereInput[]
+    NOT?: PushSubscriptionWhereInput | PushSubscriptionWhereInput[]
+    id?: IntFilter<"PushSubscription"> | number
+    userId?: IntFilter<"PushSubscription"> | number
+    endpoint?: StringFilter<"PushSubscription"> | string
+    p256dh?: StringFilter<"PushSubscription"> | string
+    auth?: StringFilter<"PushSubscription"> | string
+    userAgent?: StringNullableFilter<"PushSubscription"> | string | null
+    isActive?: BoolFilter<"PushSubscription"> | boolean
+    createdAt?: DateTimeFilter<"PushSubscription"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"PushSubscription"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type PushSubscriptionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    endpoint?: SortOrder
+    p256dh?: SortOrder
+    auth?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type PushSubscriptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    endpoint?: string
+    AND?: PushSubscriptionWhereInput | PushSubscriptionWhereInput[]
+    OR?: PushSubscriptionWhereInput[]
+    NOT?: PushSubscriptionWhereInput | PushSubscriptionWhereInput[]
+    userId?: IntFilter<"PushSubscription"> | number
+    p256dh?: StringFilter<"PushSubscription"> | string
+    auth?: StringFilter<"PushSubscription"> | string
+    userAgent?: StringNullableFilter<"PushSubscription"> | string | null
+    isActive?: BoolFilter<"PushSubscription"> | boolean
+    createdAt?: DateTimeFilter<"PushSubscription"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"PushSubscription"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "endpoint">
+
+  export type PushSubscriptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    endpoint?: SortOrder
+    p256dh?: SortOrder
+    auth?: SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    _count?: PushSubscriptionCountOrderByAggregateInput
+    _avg?: PushSubscriptionAvgOrderByAggregateInput
+    _max?: PushSubscriptionMaxOrderByAggregateInput
+    _min?: PushSubscriptionMinOrderByAggregateInput
+    _sum?: PushSubscriptionSumOrderByAggregateInput
+  }
+
+  export type PushSubscriptionScalarWhereWithAggregatesInput = {
+    AND?: PushSubscriptionScalarWhereWithAggregatesInput | PushSubscriptionScalarWhereWithAggregatesInput[]
+    OR?: PushSubscriptionScalarWhereWithAggregatesInput[]
+    NOT?: PushSubscriptionScalarWhereWithAggregatesInput | PushSubscriptionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PushSubscription"> | number
+    userId?: IntWithAggregatesFilter<"PushSubscription"> | number
+    endpoint?: StringWithAggregatesFilter<"PushSubscription"> | string
+    p256dh?: StringWithAggregatesFilter<"PushSubscription"> | string
+    auth?: StringWithAggregatesFilter<"PushSubscription"> | string
+    userAgent?: StringNullableWithAggregatesFilter<"PushSubscription"> | string | null
+    isActive?: BoolWithAggregatesFilter<"PushSubscription"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"PushSubscription"> | Date | string
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"PushSubscription"> | Date | string | null
   }
 
   export type AuditLogWhereInput = {
@@ -67957,6 +69422,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -68003,6 +69469,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -68048,6 +69515,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -68094,6 +69562,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -72146,6 +73615,9 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipientUser: UserCreateNestedOneWithoutNotificationsInput
@@ -72161,6 +73633,9 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -72173,6 +73648,9 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipientUser?: UserUpdateOneRequiredWithoutNotificationsNestedInput
@@ -72188,6 +73666,9 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -72202,6 +73683,9 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -72214,6 +73698,9 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -72228,8 +73715,91 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PushSubscriptionCreateInput = {
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutPushSubscriptionsInput
+  }
+
+  export type PushSubscriptionUncheckedCreateInput = {
+    id?: number
+    userId: number
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
+  }
+
+  export type PushSubscriptionUpdateInput = {
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput
+  }
+
+  export type PushSubscriptionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PushSubscriptionCreateManyInput = {
+    id?: number
+    userId: number
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
+  }
+
+  export type PushSubscriptionUpdateManyMutationInput = {
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PushSubscriptionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AuditLogCreateInput = {
@@ -73397,6 +74967,12 @@ export namespace Prisma {
     none?: AppNotificationWhereInput
   }
 
+  export type PushSubscriptionListRelationFilter = {
+    every?: PushSubscriptionWhereInput
+    some?: PushSubscriptionWhereInput
+    none?: PushSubscriptionWhereInput
+  }
+
   export type StaffFieldReportListRelationFilter = {
     every?: StaffFieldReportWhereInput
     some?: StaffFieldReportWhereInput
@@ -73513,6 +75089,10 @@ export namespace Prisma {
   }
 
   export type AppNotificationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PushSubscriptionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -77120,6 +78700,13 @@ export namespace Prisma {
     bookValueAfterRupiah?: SortOrder
   }
 
+  export type EnumPushDeliveryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PushDeliveryStatus | EnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPushDeliveryStatusFilter<$PrismaModel> | $Enums.PushDeliveryStatus
+  }
+
   export type AppNotificationCountOrderByAggregateInput = {
     id?: SortOrder
     recipientUserId?: SortOrder
@@ -77130,6 +78717,9 @@ export namespace Prisma {
     entityId?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    pushStatus?: SortOrder
+    pushAttempts?: SortOrder
+    pushedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -77137,6 +78727,7 @@ export namespace Prisma {
   export type AppNotificationAvgOrderByAggregateInput = {
     id?: SortOrder
     recipientUserId?: SortOrder
+    pushAttempts?: SortOrder
   }
 
   export type AppNotificationMaxOrderByAggregateInput = {
@@ -77149,6 +78740,9 @@ export namespace Prisma {
     entityId?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    pushStatus?: SortOrder
+    pushAttempts?: SortOrder
+    pushedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -77163,6 +78757,9 @@ export namespace Prisma {
     entityId?: SortOrder
     isRead?: SortOrder
     readAt?: SortOrder
+    pushStatus?: SortOrder
+    pushAttempts?: SortOrder
+    pushedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -77170,6 +78767,63 @@ export namespace Prisma {
   export type AppNotificationSumOrderByAggregateInput = {
     id?: SortOrder
     recipientUserId?: SortOrder
+    pushAttempts?: SortOrder
+  }
+
+  export type EnumPushDeliveryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PushDeliveryStatus | EnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPushDeliveryStatusWithAggregatesFilter<$PrismaModel> | $Enums.PushDeliveryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPushDeliveryStatusFilter<$PrismaModel>
+    _max?: NestedEnumPushDeliveryStatusFilter<$PrismaModel>
+  }
+
+  export type PushSubscriptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    endpoint?: SortOrder
+    p256dh?: SortOrder
+    auth?: SortOrder
+    userAgent?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    lastUsedAt?: SortOrder
+  }
+
+  export type PushSubscriptionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type PushSubscriptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    endpoint?: SortOrder
+    p256dh?: SortOrder
+    auth?: SortOrder
+    userAgent?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    lastUsedAt?: SortOrder
+  }
+
+  export type PushSubscriptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    endpoint?: SortOrder
+    p256dh?: SortOrder
+    auth?: SortOrder
+    userAgent?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    lastUsedAt?: SortOrder
+  }
+
+  export type PushSubscriptionSumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
   }
 
   export type AuditLogCountOrderByAggregateInput = {
@@ -78106,6 +79760,13 @@ export namespace Prisma {
     connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
   }
 
+  export type PushSubscriptionCreateNestedManyWithoutUserInput = {
+    create?: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput> | PushSubscriptionCreateWithoutUserInput[] | PushSubscriptionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PushSubscriptionCreateOrConnectWithoutUserInput | PushSubscriptionCreateOrConnectWithoutUserInput[]
+    createMany?: PushSubscriptionCreateManyUserInputEnvelope
+    connect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+  }
+
   export type StaffFieldReportCreateNestedManyWithoutReportedByStaffInput = {
     create?: XOR<StaffFieldReportCreateWithoutReportedByStaffInput, StaffFieldReportUncheckedCreateWithoutReportedByStaffInput> | StaffFieldReportCreateWithoutReportedByStaffInput[] | StaffFieldReportUncheckedCreateWithoutReportedByStaffInput[]
     connectOrCreate?: StaffFieldReportCreateOrConnectWithoutReportedByStaffInput | StaffFieldReportCreateOrConnectWithoutReportedByStaffInput[]
@@ -78328,6 +79989,13 @@ export namespace Prisma {
     connectOrCreate?: AppNotificationCreateOrConnectWithoutRecipientUserInput | AppNotificationCreateOrConnectWithoutRecipientUserInput[]
     createMany?: AppNotificationCreateManyRecipientUserInputEnvelope
     connect?: AppNotificationWhereUniqueInput | AppNotificationWhereUniqueInput[]
+  }
+
+  export type PushSubscriptionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput> | PushSubscriptionCreateWithoutUserInput[] | PushSubscriptionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PushSubscriptionCreateOrConnectWithoutUserInput | PushSubscriptionCreateOrConnectWithoutUserInput[]
+    createMany?: PushSubscriptionCreateManyUserInputEnvelope
+    connect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
   }
 
   export type StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput = {
@@ -78757,6 +80425,20 @@ export namespace Prisma {
     update?: AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput[]
     updateMany?: AppNotificationUpdateManyWithWhereWithoutRecipientUserInput | AppNotificationUpdateManyWithWhereWithoutRecipientUserInput[]
     deleteMany?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+  }
+
+  export type PushSubscriptionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput> | PushSubscriptionCreateWithoutUserInput[] | PushSubscriptionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PushSubscriptionCreateOrConnectWithoutUserInput | PushSubscriptionCreateOrConnectWithoutUserInput[]
+    upsert?: PushSubscriptionUpsertWithWhereUniqueWithoutUserInput | PushSubscriptionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PushSubscriptionCreateManyUserInputEnvelope
+    set?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    disconnect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    delete?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    connect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    update?: PushSubscriptionUpdateWithWhereUniqueWithoutUserInput | PushSubscriptionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PushSubscriptionUpdateManyWithWhereWithoutUserInput | PushSubscriptionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PushSubscriptionScalarWhereInput | PushSubscriptionScalarWhereInput[]
   }
 
   export type StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput = {
@@ -79221,6 +80903,20 @@ export namespace Prisma {
     update?: AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput | AppNotificationUpdateWithWhereUniqueWithoutRecipientUserInput[]
     updateMany?: AppNotificationUpdateManyWithWhereWithoutRecipientUserInput | AppNotificationUpdateManyWithWhereWithoutRecipientUserInput[]
     deleteMany?: AppNotificationScalarWhereInput | AppNotificationScalarWhereInput[]
+  }
+
+  export type PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput> | PushSubscriptionCreateWithoutUserInput[] | PushSubscriptionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: PushSubscriptionCreateOrConnectWithoutUserInput | PushSubscriptionCreateOrConnectWithoutUserInput[]
+    upsert?: PushSubscriptionUpsertWithWhereUniqueWithoutUserInput | PushSubscriptionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: PushSubscriptionCreateManyUserInputEnvelope
+    set?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    disconnect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    delete?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    connect?: PushSubscriptionWhereUniqueInput | PushSubscriptionWhereUniqueInput[]
+    update?: PushSubscriptionUpdateWithWhereUniqueWithoutUserInput | PushSubscriptionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: PushSubscriptionUpdateManyWithWhereWithoutUserInput | PushSubscriptionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: PushSubscriptionScalarWhereInput | PushSubscriptionScalarWhereInput[]
   }
 
   export type StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput = {
@@ -82677,12 +84373,30 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type EnumPushDeliveryStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PushDeliveryStatus
+  }
+
   export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
     create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
     upsert?: UserUpsertWithoutNotificationsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationsInput, UserUpdateWithoutNotificationsInput>, UserUncheckedUpdateWithoutNotificationsInput>
+  }
+
+  export type UserCreateNestedOneWithoutPushSubscriptionsInput = {
+    create?: XOR<UserCreateWithoutPushSubscriptionsInput, UserUncheckedCreateWithoutPushSubscriptionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPushSubscriptionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput = {
+    create?: XOR<UserCreateWithoutPushSubscriptionsInput, UserUncheckedCreateWithoutPushSubscriptionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPushSubscriptionsInput
+    upsert?: UserUpsertWithoutPushSubscriptionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPushSubscriptionsInput, UserUpdateWithoutPushSubscriptionsInput>, UserUncheckedUpdateWithoutPushSubscriptionsInput>
   }
 
   export type UserCreateNestedOneWithoutAuditLogsInput = {
@@ -84529,6 +86243,23 @@ export namespace Prisma {
     _max?: NestedEnumAssetDepreciationRunStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumPushDeliveryStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PushDeliveryStatus | EnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPushDeliveryStatusFilter<$PrismaModel> | $Enums.PushDeliveryStatus
+  }
+
+  export type NestedEnumPushDeliveryStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PushDeliveryStatus | EnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PushDeliveryStatus[] | ListEnumPushDeliveryStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPushDeliveryStatusWithAggregatesFilter<$PrismaModel> | $Enums.PushDeliveryStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPushDeliveryStatusFilter<$PrismaModel>
+    _max?: NestedEnumPushDeliveryStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumAccountingAccountTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.AccountingAccountType | EnumAccountingAccountTypeFieldRefInput<$PrismaModel>
     in?: $Enums.AccountingAccountType[] | ListEnumAccountingAccountTypeFieldRefInput<$PrismaModel>
@@ -85885,6 +87616,9 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -85898,6 +87632,9 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -85909,6 +87646,37 @@ export namespace Prisma {
 
   export type AppNotificationCreateManyRecipientUserInputEnvelope = {
     data: AppNotificationCreateManyRecipientUserInput | AppNotificationCreateManyRecipientUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PushSubscriptionCreateWithoutUserInput = {
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
+  }
+
+  export type PushSubscriptionUncheckedCreateWithoutUserInput = {
+    id?: number
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
+  }
+
+  export type PushSubscriptionCreateOrConnectWithoutUserInput = {
+    where: PushSubscriptionWhereUniqueInput
+    create: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput>
+  }
+
+  export type PushSubscriptionCreateManyUserInputEnvelope = {
+    data: PushSubscriptionCreateManyUserInput | PushSubscriptionCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -87325,8 +89093,42 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"AppNotification"> | string | null
     isRead?: BoolFilter<"AppNotification"> | boolean
     readAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFilter<"AppNotification"> | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFilter<"AppNotification"> | number
+    pushedAt?: DateTimeNullableFilter<"AppNotification"> | Date | string | null
     createdAt?: DateTimeFilter<"AppNotification"> | Date | string
     updatedAt?: DateTimeFilter<"AppNotification"> | Date | string
+  }
+
+  export type PushSubscriptionUpsertWithWhereUniqueWithoutUserInput = {
+    where: PushSubscriptionWhereUniqueInput
+    update: XOR<PushSubscriptionUpdateWithoutUserInput, PushSubscriptionUncheckedUpdateWithoutUserInput>
+    create: XOR<PushSubscriptionCreateWithoutUserInput, PushSubscriptionUncheckedCreateWithoutUserInput>
+  }
+
+  export type PushSubscriptionUpdateWithWhereUniqueWithoutUserInput = {
+    where: PushSubscriptionWhereUniqueInput
+    data: XOR<PushSubscriptionUpdateWithoutUserInput, PushSubscriptionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type PushSubscriptionUpdateManyWithWhereWithoutUserInput = {
+    where: PushSubscriptionScalarWhereInput
+    data: XOR<PushSubscriptionUpdateManyMutationInput, PushSubscriptionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type PushSubscriptionScalarWhereInput = {
+    AND?: PushSubscriptionScalarWhereInput | PushSubscriptionScalarWhereInput[]
+    OR?: PushSubscriptionScalarWhereInput[]
+    NOT?: PushSubscriptionScalarWhereInput | PushSubscriptionScalarWhereInput[]
+    id?: IntFilter<"PushSubscription"> | number
+    userId?: IntFilter<"PushSubscription"> | number
+    endpoint?: StringFilter<"PushSubscription"> | string
+    p256dh?: StringFilter<"PushSubscription"> | string
+    auth?: StringFilter<"PushSubscription"> | string
+    userAgent?: StringNullableFilter<"PushSubscription"> | string | null
+    isActive?: BoolFilter<"PushSubscription"> | boolean
+    createdAt?: DateTimeFilter<"PushSubscription"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"PushSubscription"> | Date | string | null
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutReportedByStaffInput = {
@@ -87622,6 +89424,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -87667,6 +89470,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -87717,6 +89521,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -87762,6 +89567,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -88235,6 +90041,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -88280,6 +90087,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -88336,6 +90144,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -88381,6 +90190,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -89672,6 +91482,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -89717,6 +91528,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -89766,6 +91578,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -89811,6 +91624,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -89861,6 +91675,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -89906,6 +91721,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -90492,6 +92308,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -90537,6 +92354,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -90592,6 +92410,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -90637,6 +92456,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -90693,6 +92513,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -90738,6 +92559,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -91156,6 +92978,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -91201,6 +93024,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -91541,6 +93365,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -91586,6 +93411,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -91697,6 +93523,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -91742,6 +93569,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -91876,6 +93704,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -91921,6 +93750,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -92089,6 +93919,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -92134,6 +93965,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -92457,6 +94289,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -92502,6 +94335,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -92750,6 +94584,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -92795,6 +94630,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -92905,6 +94741,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -92950,6 +94787,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -92994,6 +94832,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -93039,6 +94878,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -93099,6 +94939,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -93144,6 +94985,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -93426,6 +95268,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -93471,6 +95314,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -93520,6 +95364,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -93565,6 +95410,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -93881,6 +95727,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -93926,6 +95773,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -93981,6 +95829,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -94026,6 +95875,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -94332,6 +96182,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -94377,6 +96228,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -94852,6 +96704,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -94897,6 +96750,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -95045,6 +96899,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -95090,6 +96945,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -95216,6 +97072,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -95261,6 +97118,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -95377,6 +97235,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -95422,6 +97281,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -95633,6 +97493,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -95678,6 +97539,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -95876,6 +97738,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -95921,6 +97784,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -96125,6 +97989,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -96170,6 +98035,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -96288,6 +98154,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -96333,6 +98200,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -96382,6 +98250,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -96427,6 +98296,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -96487,6 +98357,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -96532,6 +98403,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -96587,6 +98459,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -96632,6 +98505,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -96676,6 +98550,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -96721,6 +98596,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -96781,6 +98657,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -96826,6 +98703,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -96870,6 +98748,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -96915,6 +98794,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -97034,6 +98914,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -97079,6 +98960,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -97139,6 +99021,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -97184,6 +99067,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -97315,6 +99199,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -97360,6 +99245,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -97404,6 +99290,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -97449,6 +99336,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -97509,6 +99397,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -97554,6 +99443,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -98677,6 +100567,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -98722,6 +100613,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -98967,6 +100859,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -99012,6 +100905,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -99341,6 +101235,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
@@ -99386,6 +101281,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
@@ -99435,6 +101331,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
@@ -99480,6 +101377,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
@@ -99866,6 +101764,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
@@ -99911,6 +101810,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -99966,6 +101866,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
@@ -100011,6 +101912,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -100282,6 +102184,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -100327,6 +102230,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -100593,6 +102497,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -100638,6 +102543,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -100806,6 +102712,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -100851,6 +102758,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -101041,6 +102949,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -101086,6 +102995,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -101130,6 +103040,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -101175,6 +103086,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -101235,6 +103147,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -101280,6 +103193,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -101516,6 +103430,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -101561,6 +103476,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -101910,6 +103826,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -101955,6 +103872,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -102200,6 +104118,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
@@ -102245,6 +104164,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
@@ -102632,6 +104552,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
@@ -102677,6 +104598,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -102900,6 +104822,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -102945,6 +104868,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -103090,6 +105014,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -103135,6 +105060,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -103442,6 +105368,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -103487,6 +105414,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -103547,6 +105475,7 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -103592,6 +105521,205 @@ export namespace Prisma {
     paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserCreateWithoutPushSubscriptionsInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPushSubscriptionsInput, UserUncheckedCreateWithoutPushSubscriptionsInput>
+  }
+
+  export type UserUpsertWithoutPushSubscriptionsInput = {
+    update: XOR<UserUpdateWithoutPushSubscriptionsInput, UserUncheckedUpdateWithoutPushSubscriptionsInput>
+    create: XOR<UserCreateWithoutPushSubscriptionsInput, UserUncheckedCreateWithoutPushSubscriptionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPushSubscriptionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPushSubscriptionsInput, UserUncheckedUpdateWithoutPushSubscriptionsInput>
+  }
+
+  export type UserUpdateWithoutPushSubscriptionsInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -103636,6 +105764,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
     notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
@@ -103681,6 +105810,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
     notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
@@ -103741,6 +105871,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
@@ -103786,6 +105917,7 @@ export namespace Prisma {
     paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
     staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -105924,8 +108056,22 @@ export namespace Prisma {
     entityId?: string | null
     isRead?: boolean
     readAt?: Date | string | null
+    pushStatus?: $Enums.PushDeliveryStatus
+    pushAttempts?: number
+    pushedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type PushSubscriptionCreateManyUserInput = {
+    id?: number
+    endpoint: string
+    p256dh: string
+    auth: string
+    userAgent?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    lastUsedAt?: Date | string | null
   }
 
   export type StaffFieldReportCreateManyReportedByStaffInput = {
@@ -107507,6 +109653,9 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -107520,6 +109669,9 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -107533,8 +109685,43 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    pushStatus?: EnumPushDeliveryStatusFieldUpdateOperationsInput | $Enums.PushDeliveryStatus
+    pushAttempts?: IntFieldUpdateOperationsInput | number
+    pushedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PushSubscriptionUpdateWithoutUserInput = {
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PushSubscriptionUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PushSubscriptionUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    endpoint?: StringFieldUpdateOperationsInput | string
+    p256dh?: StringFieldUpdateOperationsInput | string
+    auth?: StringFieldUpdateOperationsInput | string
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type StaffFieldReportUpdateWithoutReportedByStaffInput = {

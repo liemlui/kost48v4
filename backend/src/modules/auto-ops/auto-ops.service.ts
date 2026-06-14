@@ -9,6 +9,7 @@ import { AppNotificationService } from '../notifications/app-notification.servic
 import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
 import { AssetsService } from '../assets/assets.service';
+import { PushService } from '../push/push.service';
 import { jakartaYearMonth, previousJakartaYearMonth } from './auto-ops-period.helper';
 
 type AutoOpsRunResult = {
@@ -21,6 +22,7 @@ type AutoOpsRunResult = {
   recurringExpenseDrafts?: unknown;
   automaticDepreciation?: unknown;
   notificationPruning?: unknown;
+  pushDispatch?: unknown;
 };
 
 @Injectable()
@@ -36,6 +38,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly appNotification: AppNotificationService,
     private readonly depositLedger: DepositLedgerService,
     private readonly assetsService: AssetsService,
+    private readonly pushService: PushService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -118,6 +121,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const automaticDepreciation = await this.runAutomaticDepreciation(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       const notificationPruning = await this.runNotificationPruning(options);
+      const pushDispatch = await this.runPushDispatch(options);
       return {
         expiredBookings: bookingResult.expiredStayIds.length,
         heldForPaymentReview: bookingResult.heldForPaymentReview,
@@ -128,6 +132,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         automaticDepreciation,
         accountingAutoClose,
         notificationPruning,
+        pushDispatch,
       };
     } finally {
       this.running = false;
@@ -654,6 +659,23 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { abandoned };
+  }
+
+  /**
+   * F4-2 (PWA Web Push): kirim notifikasi pushStatus=PENDING ke device aktif penerima.
+   * Best-effort, tak pernah menggagalkan runAll. VAPID nonaktif → di-skip oleh service.
+   */
+  async runPushDispatch(options: { actorUserId?: number | null; source?: string } = {}) {
+    const source = options.source ?? 'AUTO_OPS_PUSH_DISPATCH';
+    const enabled = String(process.env.PUSH_DISPATCH_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { skipped: true, skippedReason: 'PUSH_DISPATCH_DISABLED', source };
+    try {
+      const result = await this.pushService.dispatchPending();
+      return { ...result, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps push dispatch gagal: ${error?.message ?? error}`);
+      return { skipped: true, skippedReason: error?.message ?? 'Push dispatch skipped', source };
+    }
   }
 
   /**

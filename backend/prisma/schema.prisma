@@ -484,6 +484,7 @@ model User {
   paymentSubmissionsReviewed  PaymentSubmission[]  @relation("PaymentSubmissionReviewedBy")
   passwordResetTokens         PasswordResetToken[]
   notifications               AppNotification[]
+  pushSubscriptions           PushSubscription[]
   staffFieldReportsCreated    StaffFieldReport[] @relation("StaffFieldReportCreatedBy")
   staffFieldReportsReviewed   StaffFieldReport[] @relation("StaffFieldReportReviewedBy")
   fixedAssetsCreated          FixedAsset[] @relation("FixedAssetCreatedBy")
@@ -1438,6 +1439,13 @@ model AppNotification {
   entityId        String?
   isRead          Boolean   @default(false)
   readAt          DateTime?
+
+  // F4-2: outbox PWA Web Push (in-place). NONE = tak perlu push; PENDING = antre kirim;
+  // SENT = sudah diproses (terkirim / tak ada device); FAILED = gagal final (lewat batas retry).
+  pushStatus   PushDeliveryStatus @default(NONE)
+  pushAttempts Int                @default(0)
+  pushedAt     DateTime?
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -1445,6 +1453,32 @@ model AppNotification {
 
   @@index([recipientUserId, isRead, createdAt])
   @@index([recipientUserId, createdAt])
+  @@index([pushStatus])
+}
+
+enum PushDeliveryStatus {
+  NONE
+  PENDING
+  SENT
+  FAILED
+}
+
+// F4-2: registrasi endpoint Web Push per browser/device (PushManager.subscribe).
+model PushSubscription {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  endpoint   String    @unique
+  p256dh     String
+  auth       String
+  userAgent  String?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
 }
 
 model AuditLog {

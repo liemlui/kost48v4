@@ -712,8 +712,23 @@ exports.Prisma.AppNotificationScalarFieldEnum = {
   entityId: 'entityId',
   isRead: 'isRead',
   readAt: 'readAt',
+  pushStatus: 'pushStatus',
+  pushAttempts: 'pushAttempts',
+  pushedAt: 'pushedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PushSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  p256dh: 'p256dh',
+  auth: 'auth',
+  userAgent: 'userAgent',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
 };
 
 exports.Prisma.AuditLogScalarFieldEnum = {
@@ -1252,6 +1267,13 @@ exports.AssetDepreciationRunStatus = exports.$Enums.AssetDepreciationRunStatus =
   VOID: 'VOID'
 };
 
+exports.PushDeliveryStatus = exports.$Enums.PushDeliveryStatus = {
+  NONE: 'NONE',
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED'
+};
+
 exports.AccountingAccountType = exports.$Enums.AccountingAccountType = {
   ASSET: 'ASSET',
   LIABILITY: 'LIABILITY',
@@ -1342,6 +1364,7 @@ exports.Prisma.ModelName = {
   AssetDepreciationRun: 'AssetDepreciationRun',
   AssetDepreciationLine: 'AssetDepreciationLine',
   AppNotification: 'AppNotification',
+  PushSubscription: 'PushSubscription',
   AuditLog: 'AuditLog',
   ChartOfAccount: 'ChartOfAccount',
   CashAccount: 'CashAccount',
