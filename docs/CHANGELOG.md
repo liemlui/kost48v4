@@ -10,6 +10,15 @@
 - **Ticket number:** generator memakai PostgreSQL transaction advisory lock dan seluruh caller berjalan dalam transaksi.
 - **Verifikasi terbaru:** backend build lulus; frontend production build + PWA verification lulus (94 chunks); unit test **26/26 lulus**, termasuk regression renewal, deadline payment, refund proof, gross cashflow, dan ticket-number concurrency.
 
+## 2026-06-14 — ui(F3-12): paket chart — palet Okabe-Ito, count risiko n<5, kontras donut, filter publik
+
+- **V-5:** palet Okabe-Ito colorblind-safe terpusat (`frontend/src/components/charts/chartPalette.ts`) dipakai `SmartChartPanel`, `HorizontalBarChart`, `DonutGauge` (warna default), dan `PaymentReviewPage` (semantik danger/warning/success).
+- **V-2:** donut "Level Risiko" di review pembayaran berubah jadi tampilan hitungan saat sampel kecil (n<5) — 1 bukti high-risk tak lagi terbaca sebagai lingkaran 100% merah ("krisis").
+- **V-6:** kontras teks tengah `DonutGauge` via token `--text-main/--text-muted` (terbaca di mobile/dark mode).
+- **UD-07:** filter katalog publik "Semua" → "Semua Kamar" + hint "termasuk kamar terisi & sedang dicek".
+- **V-3 & UD-04** sudah ada sebelumnya (empty-state `SmartChartPanel`; all-zero `OwnerDashboard` Audit U-10). **V-7** (kurangi seri Laba) ditunda — keputusan UX owner (seri Laba Bersih masih berguna, bukan murni redundan).
+- **Verifikasi:** `frontend npm run build` LULUS (95 chunk, PWA verification ok). Terisolasi dari WIP renewal agen lain.
+
 ## 2026-06-14 — feat(F3-1): coverage notifikasi operasional (assign, room-ready, K-6/K-8)
 
 - **Ticket-assign → assignee:** `tickets.service.assign()` mengirim notif ke penerima tugas (best-effort, di luar audit) hanya saat assignee benar-benar berubah; self-assign di-skip.

@@ -71,7 +71,7 @@
 - [ ] **F3-9** Hierarki laporan (F-11/F-12/F-31) — dossier **13** · badge Formal/Estimasi + samakan filter unmapped.
 - [ ] **F3-10** Higiene jurnal (F-13/F-08/F-28) — dossier **13** · forfeit entryDate kejadian; entryNumber suffix VOID; race P2002 as-already-posted.
 - [ ] **F3-11** Lead source dropdown + foto via config (M-08/M-04) — dossier **17**.
-- [ ] **F3-12** Paket chart (V-2/UD-04/V-5/V-7) — dossier **17** · n<5 count, all-zero empty-state, palet Okabe-Ito.
+- [x] **F3-12** Paket chart (SELESAI 2026-06-14, kecuali V-7) — dossier **17**. ✅ **V-5** palet Okabe-Ito colorblind-safe terpusat (`chartPalette.ts` → SmartChartPanel/HorizontalBarChart/DonutGauge/PaymentReview); ✅ **V-2** count saat n<5 di donut "Level Risiko"; ✅ **V-6** kontras teks tengah DonutGauge (dark mode); ✅ **UD-07** filter "Semua"→"Semua Kamar"+hint; ✅ **V-3/UD-04** sudah ada (empty-state SmartChartPanel + all-zero OwnerDashboard Audit U-10). **V-7** ditunda (kurangi seri Laba = keputusan UX owner; seri Laba Bersih masih berguna). `frontend npm run build` LULUS (95 chunk, PWA ok).
 - [ ] **F3-13** Ops-hardening (B-06/B-07/B-11/B-12/B-14/N-02) — dossier **12/13/16** · forced-checkout cancel DRAFT, copy job, reminder window, dll.
 - [ ] **F3-14** 🧬 Tombol admin "tenant kabur" (B2) — dossier **12** · nunggak X hari+tak terhubung → checkout+potong deposit.
 - [ ] **F3-15** 🧬 Lacak barang abandoned 30 hari (B3) — dossier **12** · field `belongingsDeadline`+status ABANDONED+notif.
