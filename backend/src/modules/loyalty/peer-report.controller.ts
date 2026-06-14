@@ -34,6 +34,12 @@ export class PeerReportController {
     return { message: 'Laporan yang Anda buat', data: await this.peer.listMadeBy(this.tenantId(user)) };
   }
 
+  @Get('me/peer-reports/co-tenants')
+  @Roles(UserRole.TENANT)
+  async coTenants(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Penghuni lain', data: await this.peer.listCoTenants(this.tenantId(user)) };
+  }
+
   // ── Tenant (reportee B) — ANONIM ───────────────────
   @Get('me/peer-reports/about-me')
   @Roles(UserRole.TENANT)

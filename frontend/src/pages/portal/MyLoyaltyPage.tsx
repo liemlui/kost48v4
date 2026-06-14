@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getLoyaltyConfig, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
+import { createPeerReport, getCoTenants, getLoyaltyConfig, getMyLoyalty, getMyPeerReportsAboutMe, getMyPeerReportsMade, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
 
 function rupiah(n: number | null | undefined): string {
   return typeof n === 'number' ? `Rp${n.toLocaleString('id-ID')}` : '-';
@@ -18,6 +18,8 @@ const STATUS_VARIANT: Record<string, string> = {
 export default function MyLoyaltyPage() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [reportForm, setReportForm] = useState({ reporteeTenantId: 0, category: '', description: '' });
 
   const loyaltyQuery = useQuery({ queryKey: ['me-loyalty'], queryFn: getMyLoyalty });
   const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false) });
@@ -29,6 +31,17 @@ export default function MyLoyaltyPage() {
   const improveMutation = useMutation({
     mutationFn: (id: number) => markPeerReportImproved(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['peer-about-me'] }),
+  });
+  const madeQuery = useQuery({ queryKey: ['peer-made'], queryFn: getMyPeerReportsMade });
+  const coTenantsQuery = useQuery({ queryKey: ['co-tenants'], queryFn: getCoTenants, enabled: showReport });
+  const reportMutation = useMutation({
+    mutationFn: () => createPeerReport(reportForm),
+    onSuccess: () => {
+      setShowReport(false);
+      setReportForm({ reporteeTenantId: 0, category: '', description: '' });
+      queryClient.invalidateQueries({ queryKey: ['peer-made'] });
+    },
+    onError: (err: any) => setError(err?.response?.data?.message || 'Gagal mengirim laporan.'),
   });
 
   const balance = loyaltyQuery.data?.balance ?? 0;
@@ -90,6 +103,28 @@ export default function MyLoyaltyPage() {
           </Card.Body>
         </Card>
       )}
+
+      <Card className="mb-4">
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <strong>Lapor Masalah dengan Penghuni Lain</strong>
+          <Button size="sm" variant="outline-primary" onClick={() => setShowReport(true)}>+ Lapor</Button>
+        </Card.Header>
+        <Card.Body className="p-0">
+          <p className="text-muted small px-3 pt-2 mb-2">Laporan Anda dirahasiakan — penghuni yang dilaporkan tidak tahu siapa pelapornya. Setelah ia memperbaiki & Anda/admin konfirmasi, ia mendapat poin.</p>
+          {madeQuery.data && madeQuery.data.length === 0 && <p className="text-muted px-3 pb-3 mb-0">Belum ada laporan.</p>}
+          <ul className="list-group list-group-flush">
+            {madeQuery.data?.map((r) => (
+              <li key={r.id} className="list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <span>
+                  <div className="fw-semibold">{r.reportee?.fullName ?? '-'} · {r.category}</div>
+                  <div className="text-muted small">{r.description}</div>
+                </span>
+                <Badge bg={STATUS_VARIANT[r.status] ?? (r.status === 'CONFIRMED' ? 'success' : 'secondary')}>{r.status}</Badge>
+              </li>
+            ))}
+          </ul>
+        </Card.Body>
+      </Card>
 
       <Row className="g-4">
         <Col lg={7}>
@@ -175,6 +210,39 @@ export default function MyLoyaltyPage() {
           </Card>
         </Col>
       </Row>
+
+      <Modal show={showReport} onHide={() => setShowReport(false)}>
+        <Modal.Header closeButton><Modal.Title>Lapor Penghuni Lain</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <p className="text-muted small">Laporan akan dimoderasi admin dulu. Identitas Anda dirahasiakan dari penghuni yang dilaporkan.</p>
+          <Form.Group className="mb-3">
+            <Form.Label>Penghuni</Form.Label>
+            <Form.Select value={reportForm.reporteeTenantId} onChange={(e) => setReportForm({ ...reportForm, reporteeTenantId: Number(e.target.value) })}>
+              <option value={0}>— Pilih penghuni —</option>
+              {coTenantsQuery.data?.map((t) => (
+                <option key={t.id} value={t.id}>{t.fullName}{t.room ? ` (${t.room})` : ''}</option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Kategori</Form.Label>
+            <Form.Select value={reportForm.category} onChange={(e) => setReportForm({ ...reportForm, category: e.target.value })}>
+              <option value="">— Pilih —</option>
+              {['KEBISINGAN', 'KEBERSIHAN', 'PARKIR', 'MEROKOK', 'TAMU', 'LAINNYA'].map((c) => <option key={c} value={c}>{c}</option>)}
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-2">
+            <Form.Label>Penjelasan</Form.Label>
+            <Form.Control as="textarea" rows={3} value={reportForm.description} onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })} placeholder="Ceritakan masalahnya secara singkat & sopan." />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowReport(false)}>Batal</Button>
+          <Button variant="primary" disabled={reportMutation.isPending || !reportForm.reporteeTenantId || !reportForm.category || reportForm.description.trim().length < 5} onClick={() => reportMutation.mutate()}>
+            {reportMutation.isPending ? 'Mengirim...' : 'Kirim Laporan'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

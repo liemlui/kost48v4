@@ -124,6 +124,23 @@ export class PeerReportService {
     });
   }
 
+  /** Daftar penghuni lain (aktif) untuk dipilih saat melapor — minimal (id, nama, kamar). */
+  async listCoTenants(selfTenantId: number) {
+    const stays = await this.prisma.stay.findMany({
+      where: { status: 'ACTIVE' as any, initialMetersPromotedAt: { not: null }, tenantId: { not: selfTenantId } },
+      orderBy: { id: 'desc' },
+      select: { tenant: { select: { id: true, fullName: true } }, room: { select: { code: true, name: true } } },
+    });
+    const seen = new Set<number>();
+    const out: Array<{ id: number; fullName: string; room: string | null }> = [];
+    for (const s of stays) {
+      if (!s.tenant || seen.has(s.tenant.id)) continue;
+      seen.add(s.tenant.id);
+      out.push({ id: s.tenant.id, fullName: s.tenant.fullName, room: s.room?.code || s.room?.name || null });
+    }
+    return out;
+  }
+
   /** Laporan TENTANG tenant ini (reportee) — ANONIM, tak ada info pelapor. */
   async listAboutMe(reporteeTenantId: number) {
     const rows = await this.prisma.peerBehaviorReport.findMany({

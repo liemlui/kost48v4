@@ -131,6 +131,23 @@ export interface PeerReport {
   reportee?: { fullName: string };
 }
 
+export interface CoTenant { id: number; fullName: string; room: string | null }
+
+export async function getCoTenants(): Promise<CoTenant[]> {
+  const res = await client.get<ApiEnvelope<CoTenant[]>>('/me/peer-reports/co-tenants');
+  return res.data.data;
+}
+
+export async function createPeerReport(payload: { reporteeTenantId: number; category: string; description: string }): Promise<unknown> {
+  const res = await client.post<ApiEnvelope<unknown>>('/me/peer-reports', payload);
+  return res.data.data;
+}
+
+export async function getMyPeerReportsMade(): Promise<PeerReport[]> {
+  const res = await client.get<ApiEnvelope<PeerReport[]>>('/me/peer-reports/made');
+  return res.data.data;
+}
+
 export async function getMyPeerReportsAboutMe(): Promise<PeerReport[]> {
   const res = await client.get<ApiEnvelope<PeerReport[]>>('/me/peer-reports/about-me');
   return res.data.data;
