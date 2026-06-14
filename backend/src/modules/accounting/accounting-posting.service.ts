@@ -1159,9 +1159,9 @@ export class AccountingPostingService {
    */
   async postRentDeferralTx(
     tx: any,
-    params: { stayId: number; unearnedAmountRupiah: number; entryDate: Date; createdById?: number | null },
+    params: { stayId: number; unearnedAmountRupiah: number; entryDate: Date; createdById?: number | null; sourceKey?: string },
   ) {
-    const sourceId = `RENT_DEFERRAL:${params.stayId}`;
+    const sourceId = `RENT_DEFERRAL:${params.sourceKey ?? params.stayId}`;
     const amount = rupiah(params.unearnedAmountRupiah);
     if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Nominal deferral 0.");
     const rentRevenue = await findAccountByCodeTx(tx, "4000");

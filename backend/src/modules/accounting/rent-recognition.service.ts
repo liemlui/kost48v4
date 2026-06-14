@@ -3,6 +3,7 @@ import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPostingService } from './accounting-posting.service';
 import { buildRentRecognitionSchedule } from './rent-recognition.helper';
+import { addCalendarMonthsClamped, startOfDay } from '../stays/stays.helpers';
 
 /** Tanggal kalender WIB (UTC+7) sebagai UTC-midnight — bebas timezone server. */
 function wibDateOnly(now: Date): Date {
@@ -155,6 +156,50 @@ export class RentRecognitionService {
       }
     }
     return { recognized, pending };
+  }
+
+  /**
+   * F4-11: jadwalkan pengakuan untuk PRABAYAR multi-bulan (extension). Deferral seluruh
+   * prabayar ke 2200 (keyed per-invoice agar tak bentrok deferral lain stay yang sama),
+   * lalu buat N baris jadwal dengan periodIndex MELANJUTKAN sequence stay (offset).
+   * Dipanggil dalam tx prepay; recognizeDue (sweeper) akan mengakui per bulan.
+   */
+  async scheduleExtension(
+    tx: Prisma.TransactionClient,
+    params: { stayId: number; invoiceId: number; startDate: Date; months: number; monthlyRentRupiah: number; entryDate: Date; createdById?: number | null },
+  ) {
+    const months = Math.max(1, Math.floor(params.months));
+    const monthly = Math.max(0, Math.round(params.monthlyRentRupiah));
+    const total = monthly * months;
+
+    const deferral = await this.posting.postRentDeferralTx(tx, {
+      stayId: params.stayId,
+      unearnedAmountRupiah: total,
+      entryDate: params.entryDate,
+      createdById: params.createdById ?? null,
+      sourceKey: `${params.stayId}:INV${params.invoiceId}`,
+    });
+    const je = (deferral as any)?.journalEntry;
+    if (!((deferral as any)?.posted || je)) {
+      throw new Error('PREPAY_DEFERRAL_NOT_POSTED');
+    }
+
+    const last = await tx.rentRecognitionSchedule.findFirst({
+      where: { stayId: params.stayId },
+      orderBy: { periodIndex: 'desc' },
+      select: { periodIndex: true },
+    });
+    const offset = last?.periodIndex ?? 0;
+    const start0 = startOfDay(params.startDate);
+    const rows = Array.from({ length: months }, (_, i) => ({
+      stayId: params.stayId,
+      periodIndex: offset + i + 1,
+      periodStart: addCalendarMonthsClamped(start0, i),
+      periodEnd: addCalendarMonthsClamped(start0, i + 1),
+      scheduledAmountRupiah: monthly,
+    }));
+    await tx.rentRecognitionSchedule.createMany({ data: rows, skipDuplicates: true });
+    return { months, total, offset };
   }
 
   async run(options: { actorUserId?: number | null; now?: Date } = {}) {

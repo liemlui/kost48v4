@@ -25,3 +25,18 @@ export class TransferRoomDto {
   @IsOptional() @IsString() @MaxLength(500)
   note?: string;
 }
+
+// F4-11: prabayar/perpanjangan N bulan (harga bulanan), dibayar penuh di muka.
+export class PrepayExtensionDto {
+  @IsInt() @Min(1)
+  months!: number;
+
+  @IsOptional() @IsString()
+  method?: string;
+
+  @IsOptional() @IsString()
+  paidAt?: string;
+
+  @IsOptional() @IsString() @MaxLength(500)
+  note?: string;
+}

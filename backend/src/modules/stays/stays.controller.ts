@@ -7,11 +7,12 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CancelStayDto, CompleteStayDto, CreateStayDto, ForcedCheckoutDto, MarkBelongingsDto, ProcessDepositDto, ProcessLossRefundDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
-import { TransferRoomDto } from './dto/room-transfer.dto';
+import { PrepayExtensionDto, TransferRoomDto } from './dto/room-transfer.dto';
 import { StaysQueryDto } from './dto/stays-query.dto';
 import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
 import { RoomTransferService } from './room-transfer.service';
+import { PrepayExtensionService } from './prepay-extension.service';
 
 @ApiTags('stays')
 @ApiBearerAuth()
@@ -22,6 +23,7 @@ export class StaysController {
     private readonly staysService: StaysService,
     private readonly staysQueryService: StaysQueryService,
     private readonly roomTransferService: RoomTransferService,
+    private readonly prepayExtensionService: PrepayExtensionService,
   ) {}
 
   // F4-8: pindah kamar resmi (OWNER/ADMIN; override harga OWNER-only di service).
@@ -33,6 +35,17 @@ export class StaysController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return { message: 'Pindah kamar berhasil', data: await this.roomTransferService.transferRoom(id, dto, user) };
+  }
+
+  // F4-11: prabayar/perpanjangan N bulan (harga bulanan), bayar penuh di muka (OWNER/ADMIN).
+  @Post(':id/prepay-extension')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async prepayExtension(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: PrepayExtensionDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return { message: 'Prabayar perpanjangan berhasil', data: await this.prepayExtensionService.prepayExtension(id, dto, user) };
   }
 
   @Get()
