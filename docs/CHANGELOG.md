@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-13c + F4-13 referral): quest perbaikan sikap anonim + referral teman (S-4)
+
+- **Schema additive S-4** (owner-approve, migration `20260615130000_f4_s4_peer_referral`): `PeerBehaviorReport` + enum `PeerReportStatus`; `TenantReferral` + enum `ReferralStatus`; `Tenant.referralCode @unique`.
+- **F4-13c quest perbaikan sikap (ANONIM):** A lapor B → admin moderasi (`ACKNOWLEDGE` → notif B **tanpa identitas A** / `DISMISS`) → B `markImproved` → konfirmasi oleh **A (pelapor) ATAU admin** → B dapat poin **+40**. **PRIVASI dijaga:** `reporterTenantId` tak pernah diekspos ke reportee (`listAboutMe` select terbatas). `PeerReportService` + `PeerReportController` (tenant: create/made/about-me/improved/confirm; admin: list/moderate). FE: MyLoyaltyPage "Masukan untuk Anda" (+tombol "Sudah saya perbaiki") + LoyaltyAdminPage tabel moderasi (Validasi/Tolak/Konfirmasi).
+- **F4-13 referral teman:** `Tenant.referralCode` (`GET /me/loyalty/referral-code`, auto-generate); teman memasukkan kode saat **booking publik** → `ReferralService.linkReferralTx` membuat `TenantReferral` PENDING; sweeper `AutoOps.runReferralRewards` → saat teman jadi **tenant aktif (promoted)**, referrer dapat **+150** → `REWARDED` (idempotent per referralId). FE: kode referral tampil di MyLoyaltyPage.
+- **Poin default** (env-override): perbaikan sikap +40, referral +150 (reason ADJUSTMENT + sourceType PEER_IMPROVEMENT/REFERRAL).
+- **Gate:** backend `tsc` 0; `node --test` 40/40; FE build + PWA verify; **UAT runtime LULUS** (peer: award B +40 + privasi + CONFIRMED; referral: link PENDING → teman aktif → REWARDED +150). S-4 tercatat di `03_KEPUTUSAN_OWNER`.
+
 ## 2026-06-15 — feat(F4-11 deep): prabayar/perpanjangan multi-bulan + unearned (PSAK 72) — SELESAI
 
 - **`PrepayExtensionService.prepayExtension`** (`POST /stays/:id/prepay-extension`, OWNER/ADMIN): tenant membayar **N bulan ke depan dengan harga BULANAN** (terkunci D-16), **satu invoice PAID di muka** (keputusan owner D-18). Stay diperpanjang `plannedCheckOutDate += N bulan`.

@@ -111,3 +111,47 @@ export async function decideRedemption(id: number, decision: 'APPROVE' | 'REJECT
   const res = await client.post<ApiEnvelope<Redemption>>(`/loyalty/redemptions/${id}/decide`, { decision, note });
   return res.data.data;
 }
+
+// ── F4-13 referral ──────────────────────────────────
+export async function getReferralCode(): Promise<{ code: string | null }> {
+  const res = await client.get<ApiEnvelope<{ code: string | null }>>('/me/loyalty/referral-code');
+  return res.data.data;
+}
+
+// ── F4-13c peer behavior reports ────────────────────
+export interface PeerReport {
+  id: number;
+  category: string;
+  description: string;
+  status: string;
+  acknowledgedAt?: string | null;
+  improvedAt?: string | null;
+  confirmedAt?: string | null;
+  reporter?: { fullName: string };
+  reportee?: { fullName: string };
+}
+
+export async function getMyPeerReportsAboutMe(): Promise<PeerReport[]> {
+  const res = await client.get<ApiEnvelope<PeerReport[]>>('/me/peer-reports/about-me');
+  return res.data.data;
+}
+
+export async function markPeerReportImproved(id: number): Promise<unknown> {
+  const res = await client.post<ApiEnvelope<unknown>>(`/me/peer-reports/${id}/improved`, {});
+  return res.data.data;
+}
+
+export async function getPeerReportsAdmin(status?: string): Promise<PeerReport[]> {
+  const res = await client.get<ApiEnvelope<PeerReport[]>>('/peer-reports', { params: status ? { status } : undefined });
+  return res.data.data;
+}
+
+export async function moderatePeerReport(id: number, decision: 'ACKNOWLEDGE' | 'DISMISS'): Promise<unknown> {
+  const res = await client.post<ApiEnvelope<unknown>>(`/peer-reports/${id}/moderate`, { decision });
+  return res.data.data;
+}
+
+export async function confirmPeerReport(id: number): Promise<unknown> {
+  const res = await client.post<ApiEnvelope<unknown>>(`/peer-reports/${id}/confirm`, {});
+  return res.data.data;
+}

@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Alert, Badge, Button, Card, Form, Modal, Table } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  confirmPeerReport,
   createReward,
   decideRedemption,
   getLoyaltyConfig,
+  getPeerReportsAdmin,
   getRedemptions,
   getRewards,
+  moderatePeerReport,
   updateReward,
   type LoyaltyReward,
   type RewardInput,
@@ -30,6 +33,14 @@ export default function LoyaltyAdminPage() {
   const rewardsQuery = useQuery({ queryKey: ['admin-rewards'], queryFn: () => getRewards(true) });
   const redemptionsQuery = useQuery({ queryKey: ['admin-redemptions'], queryFn: () => getRedemptions() });
   const configQuery = useQuery({ queryKey: ['loyalty-config'], queryFn: getLoyaltyConfig });
+  const peerQuery = useQuery({ queryKey: ['admin-peer-reports'], queryFn: () => getPeerReportsAdmin() });
+
+  const peerMutation = useMutation({
+    mutationFn: (p: { id: number; action: 'ACKNOWLEDGE' | 'DISMISS' | 'CONFIRM' }) =>
+      p.action === 'CONFIRM' ? confirmPeerReport(p.id) : moderatePeerReport(p.id, p.action),
+    onSuccess: () => { setError(null); queryClient.invalidateQueries({ queryKey: ['admin-peer-reports'] }); },
+    onError: (err: any) => setError(err?.response?.data?.message || 'Gagal memproses laporan.'),
+  });
 
   const perPoint = configQuery.data?.pointRupiahValue ?? 100;
   const suggestedCost = form.valueRupiah && perPoint > 0 ? Math.max(1, Math.round(form.valueRupiah / perPoint)) : null;
@@ -94,6 +105,39 @@ export default function LoyaltyAdminPage() {
                         <Button size="sm" variant="outline-danger" disabled={decideMutation.isPending} onClick={() => decideMutation.mutate({ id: r.id, decision: 'REJECT' })}>Tolak</Button>
                       </>
                     ) : <span className="text-muted small">—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Header><strong>Laporan Sikap Antar-Tenant</strong> <small className="text-muted">(moderasi — identitas pelapor dirahasiakan dari terlapor)</small></Card.Header>
+        <Card.Body className="p-0">
+          <Table responsive hover className="mb-0 align-middle">
+            <thead><tr><th>Pelapor</th><th>Terlapor</th><th>Kategori</th><th>Deskripsi</th><th>Status</th><th className="text-end">Aksi</th></tr></thead>
+            <tbody>
+              {peerQuery.data?.length === 0 && <tr><td colSpan={6} className="text-muted text-center py-3">Belum ada laporan.</td></tr>}
+              {peerQuery.data?.map((r) => (
+                <tr key={r.id}>
+                  <td><small>{r.reporter?.fullName ?? '-'}</small></td>
+                  <td><small>{r.reportee?.fullName ?? '-'}</small></td>
+                  <td><small>{r.category}</small></td>
+                  <td><small>{r.description}</small></td>
+                  <td><Badge bg={r.status === 'CONFIRMED' ? 'success' : r.status === 'DISMISSED' ? 'secondary' : 'warning'} text={r.status === 'CONFIRMED' || r.status === 'DISMISSED' ? undefined : 'dark'}>{r.status}</Badge></td>
+                  <td className="text-end">
+                    {r.status === 'PENDING_REVIEW' && (
+                      <>
+                        <Button size="sm" variant="primary" className="me-2" disabled={peerMutation.isPending} onClick={() => peerMutation.mutate({ id: r.id, action: 'ACKNOWLEDGE' })}>Validasi</Button>
+                        <Button size="sm" variant="outline-secondary" disabled={peerMutation.isPending} onClick={() => peerMutation.mutate({ id: r.id, action: 'DISMISS' })}>Tolak</Button>
+                      </>
+                    )}
+                    {r.status === 'IMPROVED' && (
+                      <Button size="sm" variant="success" disabled={peerMutation.isPending} onClick={() => peerMutation.mutate({ id: r.id, action: 'CONFIRM' })}>Konfirmasi membaik (+poin)</Button>
+                    )}
+                    {!['PENDING_REVIEW', 'IMPROVED'].includes(r.status) && <span className="text-muted small">—</span>}
                   </td>
                 </tr>
               ))}

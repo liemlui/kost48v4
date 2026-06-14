@@ -18,12 +18,13 @@
 | Lapor masalah & tervalidasi | tiket PORTAL tenant → CLOSED (divalidasi admin) | +30 | ✅ |
 | Selesai quest onboarding | semua field profil terisi (kecuali KTP) | +200 sekali | ✅ |
 
-### 2b. Sumber poin TAMBAHAN (ide owner 2026-06-15 — backlog F4-9+, perlu mekanisme baru)
-| Ide | Konsep | Catatan kompleksitas |
+### 2b. Sumber poin TAMBAHAN (ide owner 2026-06-15 — SEMUA ✅ SELESAI)
+| Ide | Konsep | Status |
 |---|---|---|
-| **Review saat renewal** | Tiap perpanjangan, tenant beri **review/masukan membangun + cerita keluhan** → dapat poin. | Perlu form review terhubung ke event renewal + 1 poin per renewal (idempotent per renewRequestId). Relatif mudah. |
-| **Referral teman** | Tenant **mengajak teman** yang akhirnya jadi tenant → dapat poin. | Perlu pelacakan referral (kode/relasi tenant→tenant) + pemicu saat tenant baru aktif. Sedang. |
-| **Quest perbaikan sikap** | Tenant A menegur (lapor) keburukan tenant B (**anonim** — B tak tahu siapa pelapor); B mengubah kebiasaan; A **konfirmasi ulang** B sudah membaik → B dapat poin (seperti quest). | KOMPLEKS: butuh alur laporan-antar-tenant anonim + status "perbaikan" + konfirmasi pelapor + privasi (B tak tahu pelapor). Desain hati-hati. |
+| **Review saat renewal** (+30) | Tiap perpanjangan, tenant beri review/masukan → poin. | ✅ F4-13a (idempotent `RENEWAL_REVIEW:id`). |
+| **Referral teman** (+150) | Tenant punya `referralCode`; teman pakai saat booking → referrer dapat poin saat teman jadi tenant aktif. | ✅ F4-13 referral (S-4: `TenantReferral`, sweeper `runReferralRewards`). |
+| **Quest perbaikan sikap** (+40) | A lapor B (**anonim**); admin moderasi; B diberi tahu tanpa identitas A; B perbaiki; **A atau admin** konfirmasi → B dapat poin. | ✅ F4-13c (S-4: `PeerBehaviorReport`, privasi pelapor dijaga). |
+| **Reward → tugas staf** | Reward SERVICE_ADDON yang menukar poin jadi perintah staf (bersihkan area umum/dapur/kamar mandi luar). | ✅ F4-13b (`LoyaltyReward.fulfillmentTaskCategory` → auto-create tiket). |
 
 ## 3. Katalog reward (M2 — contoh, owner finalkan)
 | Reward | Poin | Tipe | Catatan |

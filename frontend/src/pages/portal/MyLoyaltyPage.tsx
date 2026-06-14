@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getLoyaltyConfig, getMyLoyalty, getMyRedemptions, getRewards, requestRedemption } from '../../api/loyalty';
+import { getLoyaltyConfig, getMyLoyalty, getMyPeerReportsAboutMe, getMyRedemptions, getReferralCode, getRewards, markPeerReportImproved, requestRedemption } from '../../api/loyalty';
 
 function rupiah(n: number | null | undefined): string {
   return typeof n === 'number' ? `Rp${n.toLocaleString('id-ID')}` : '-';
@@ -23,9 +23,18 @@ export default function MyLoyaltyPage() {
   const rewardsQuery = useQuery({ queryKey: ['loyalty-rewards'], queryFn: () => getRewards(false) });
   const redemptionsQuery = useQuery({ queryKey: ['me-redemptions'], queryFn: getMyRedemptions });
   const configQuery = useQuery({ queryKey: ['loyalty-config'], queryFn: getLoyaltyConfig });
+  const referralQuery = useQuery({ queryKey: ['referral-code'], queryFn: getReferralCode });
+  const aboutMeQuery = useQuery({ queryKey: ['peer-about-me'], queryFn: getMyPeerReportsAboutMe });
+
+  const improveMutation = useMutation({
+    mutationFn: (id: number) => markPeerReportImproved(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['peer-about-me'] }),
+  });
 
   const balance = loyaltyQuery.data?.balance ?? 0;
   const perPoint = configQuery.data?.pointRupiahValue ?? 100;
+  const referralCode = referralQuery.data?.code;
+  const aboutMe = aboutMeQuery.data ?? [];
 
   const redeemMutation = useMutation({
     mutationFn: (rewardId: number) => requestRedemption(rewardId),
@@ -49,6 +58,38 @@ export default function MyLoyaltyPage() {
       </div>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
+
+      {referralCode && (
+        <Alert variant="info" className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <span>
+            <span role="img" aria-hidden="true">👥</span> <strong>Ajak teman!</strong> Bagikan kode referral Anda — saat teman jadi penghuni, Anda dapat poin.
+          </span>
+          <Badge bg="dark" className="fs-6">{referralCode}</Badge>
+        </Alert>
+      )}
+
+      {aboutMe.length > 0 && (
+        <Card className="mb-4 border-warning">
+          <Card.Header className="bg-warning-subtle"><strong>💬 Masukan untuk Anda</strong> <small className="text-muted">(anonim — kumpulkan poin dengan memperbaiki)</small></Card.Header>
+          <Card.Body className="p-0">
+            <ul className="list-group list-group-flush">
+              {aboutMe.map((r) => (
+                <li key={r.id} className="list-group-item d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                  <span>
+                    <div className="fw-semibold">{r.category}</div>
+                    <div className="text-muted small">{r.description}</div>
+                  </span>
+                  {r.status === 'ACKNOWLEDGED' ? (
+                    <Button size="sm" variant="success" disabled={improveMutation.isPending} onClick={() => improveMutation.mutate(r.id)}>Sudah saya perbaiki</Button>
+                  ) : (
+                    <Badge bg={r.status === 'CONFIRMED' ? 'success' : 'secondary'}>{r.status === 'IMPROVED' ? 'Menunggu konfirmasi' : r.status === 'CONFIRMED' ? 'Selesai (+poin)' : r.status}</Badge>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card.Body>
+        </Card>
+      )}
 
       <Row className="g-4">
         <Col lg={7}>
