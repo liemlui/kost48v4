@@ -104,6 +104,18 @@
 - [x] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15** (SELESAI 2026-06-15). `TicketsService.pickStaffAssigneeTx` di `createTicketRecord`: staf=0→none, staf=1→satu staf (dorman), staf≥2→**round-robin berbasis beban** (tiket aktif paling sedikit). Otomatis aktif saat staf bertambah.
 - [x] **F3-5** Leaderboard antar-staf — dossier **15** (SELESAI 2026-06-15). `getLeaderboard` (peringkat skor KPI) + `GET /admin/staff-performance/leaderboard` + kartu di AdminStaffPerformancePage; **`active=false` saat staf <2** (tampil catatan; kartu rumus skor per staf TETAP jalan), auto-aktif saat staf ≥ 2.
 
+## 🔍 TINDAK LANJUT AUDIT FORENSIK (2026-06-15 — `docs/AUDIT_FASE4_FINAL.md`)
+**Hasil:** TIDAK ada 🔴 bug baru dari Fase 4; app boot OK (tanpa circular-dep), migration konsisten, trial balance seimbang. Berikut celah/over-confidence yang dicatat:
+- [ ] **AUD-1 🟠 (C-1)** Pindah kamar (F4-8): utilitas **kamar LAMA** belum diselesaikan saat pindah → pemakaian listrik/air periode berjalan bisa tak tertagih. Perlu: snapshot meter akhir kamar lama + tagih sebelum pindah. **(perlu keputusan owner)**
+- [ ] **AUD-2 🟠 (D-5)** Tip staf (F4-14): **TAK ada UI input** info e-wallet staf (form user belum punya field tip) → fitur tip tak bisa dipakai sampai UI ada. Perlu: tambah field tip di form user / endpoint self-service staf.
+- [ ] **AUD-3 🟡 over-confidence (C-4)** Cuci AC (F4-15): acuan **kWh/jam dari watt** BELUM diimplementasi; hanya interval hari. `acWattage` tersimpan tapi tak dipakai. **(perlu keputusan: cukup interval atau implement kWh)**
+- [ ] **AUD-4 🟡 over-confidence (D-4)** FAQ/manual (F4-12): "**generate dari aturan flow**" = kurasi MANUAL, bukan auto-generate. Perlu: seed FAQ awal dari `03_KEPUTUSAN_OWNER`/dossier bila owner mau.
+- [ ] **AUD-5 🟡 (C-6)** Round-robin (F2-10): hanya tiket portal/backoffice; tiket **sistem-auto** (inspeksi/AC/reward/transfer) belum round-robin. **(perlu keputusan)**
+- [ ] **AUD-6 🟠 (A-1)** Recognition/deferral (F4-1/F4-11) bisa **stranded** bila periode akuntansi tutup sebelum sweeper memproses. Mitigasi ada (sweeper 5 mnt). Saran: larang tutup periode dengan baris recognition jatuh-tempo belum diakui.
+- [ ] **AUD-7 🟡 race minor** (risiko rendah, 1 admin): overspend poin (B-1), stok reward negatif (B-2), toRoom tak di-lock (C-2). Fix saat skala naik: row lock / serializable.
+- [ ] **AUD-8 🟠 WARISAN (A-8, di luar Fase 4)** Auto-journal **best-effort** di flow lama (invoice issue/payment/cancel/expense/wifi/deposit-received) — bila posting gagal, operasi tetap jalan tanpa jurnal. Pertimbangkan blocking + reconciliation otomatis (R1/R2 audit lama `FLOW_AUDIT_LAPORAN.md`).
+> **Abu-abu menunggu jawaban owner:** prabayar tarif non-MONTHLY (A-5), blok prabayar saat ada tunggakan (A-6), poin saat prabayar (A-7), ON_TIME_PAYMENT tiap invoice vs sewa saja (B-4), referral via admin/portal (B-9), staf set tip sendiri (D-6).
+
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
 
 <!-- KOST48_DOCS_SYNC_20260613_CHECKLIST_DOSSIER -->
