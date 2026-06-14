@@ -1210,6 +1210,36 @@ export class AccountingPostingService {
     });
   }
 
+  /**
+   * F4-9 (M4): reward loyalitas terjurnal saat FULFILLED — beban promosi + utang reward
+   * (diselesaikan saat reward fisik dibeli / diskon diterapkan via flow normal).
+   * DR 6300 Marketing / CR 2100 Accounts Payable. Idempotent per (ADJUSTMENT,
+   * REWARD_FULFILL:redemptionId). Reward tanpa nilai (mis. BADGE) tidak menjurnal.
+   */
+  async postRewardFulfillmentTx(
+    tx: any,
+    params: { redemptionId: number; valueRupiah: number; entryDate: Date; createdById?: number | null; memo?: string },
+  ) {
+    const sourceId = `REWARD_FULFILL:${params.redemptionId}`;
+    const amount = rupiah(params.valueRupiah);
+    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Reward tanpa nilai rupiah; tak menjurnal.");
+    const expense = await findAccountByCodeTx(tx, "6300");
+    const payable = await findAccountByCodeTx(tx, "2100");
+    if (!expense || !payable)
+      return this.skip("ADJUSTMENT", sourceId, "COA 6300/2100 belum tersedia.");
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(params.entryDate),
+      memo: params.memo ?? `Reward loyalitas redemption #${params.redemptionId}`,
+      createdById: params.createdById ?? null,
+      lines: [
+        { chartOfAccountId: expense.id, description: "Beban reward loyalitas", debitRupiah: amount, creditRupiah: 0, sortOrder: 0 },
+        { chartOfAccountId: payable.id, description: "Utang reward loyalitas", debitRupiah: 0, creditRupiah: amount, sortOrder: 1 },
+      ],
+    });
+  }
+
   private async postBySourceType(
     sourceType: AutoSourceType,
     sourceId: number,
