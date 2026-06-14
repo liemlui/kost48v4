@@ -11,6 +11,10 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — fix(F2-14): staff-routines startOfLocalDate → WIB (F2-14 SELESAI)
+
+`staff-routines.startOfLocalDate` (dipakai `today` & `parseDate`) kini menghitung tanggal kalender **WIB (UTC+7) sebagai UTC-midnight**, bebas timezone server (cPanel UTC) — sebelumnya `new Date(y,m,d)` local-time → due-date rutinitas bisa bergeser di server UTC. `getDate()/getDay()/formatDateKey` tetap membaca tanggal WIB pada server UTC maupun WIB (geseran 0–7 jam tak pernah lewat hari). `tsc` 0; `getToday` tanpa regresi (di server WIB hasil identik). → **F2-14 (dateOnly + staff-performance + staff-routines) SELESAI.**
+
 ## 2026-06-14 — docs(F2-1): sinkron dossier 11 dgn keputusan owner hibrida → F2-1 SELESAI
 
 Reconcile dossier 11 dgn keputusan owner 2026-06-14: **FORFEITED = ditandai + notif admin; forced checkout & potong deposit MANUAL admin** (override sengaja R5 auto) — bukan bug. Status renewal dossier 11 → 🟢; state machine, sweeper hibrida, deadline-gate command (R3), prompt H-10 + fallback portal semua tercatat. **F2-1 (Renewal DP penuh, GAP #2) ditandai SELESAI** di checklist (semua sub-keputusan owner terpenuhi/terdokumentasi).

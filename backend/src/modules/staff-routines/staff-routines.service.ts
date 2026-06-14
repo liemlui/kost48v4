@@ -9,8 +9,11 @@ import { CompleteRoutineDto, StaffRoutineProgressQueryDto, StaffRoutineTemplateD
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function startOfLocalDate(input = new Date()) {
-  const date = new Date(input);
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  // F2-14/E-6: "hari ini" = tanggal kalender WIB (UTC+7) sebagai UTC-midnight, bebas timezone
+  // server (cPanel umumnya UTC). getDate()/getDay()/formatDateKey tetap membaca tanggal WIB pada
+  // server UTC maupun WIB karena geseran 0–7 jam tak pernah lewat hari.
+  const wib = new Date(new Date(input).getTime() + 7 * 60 * 60 * 1000);
+  return new Date(Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth(), wib.getUTCDate()));
 }
 
 function parseDate(value?: string) {
