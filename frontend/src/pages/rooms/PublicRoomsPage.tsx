@@ -413,10 +413,12 @@ export default function PublicRoomsPage() {
             <div className="rm-filter-bar">
               <div className="rm-filter-group">
                 <span className="rm-filter-label">Ketersediaan</span>
-                <FilterChip label="Semua" active={!avail} onClick={() => update({ avail: "" })} />
+                {/* UD-07: "Semua Kamar" lebih jujur — termasuk kamar terisi & yang sedang dicek (tidak semua bisa diajukan). */}
+                <FilterChip label="Semua Kamar" active={!avail} onClick={() => update({ avail: "" })} />
                 <FilterChip label="Bisa diajukan" active={avail === "bookable"} onClick={() => update({ avail: "bookable" })} />
                 <FilterChip label="Sedang dicek" active={avail === "checking"} onClick={() => update({ avail: "checking" })} />
                 <FilterChip label="Terisi" active={avail === "occupied"} onClick={() => update({ avail: "occupied" })} />
+                {!avail && <span className="rm-filter-hint">Termasuk kamar terisi &amp; yang sedang dicek</span>}
               </div>
               <div className="rm-filter-divider" aria-hidden="true" />
               <div className="rm-filter-group">

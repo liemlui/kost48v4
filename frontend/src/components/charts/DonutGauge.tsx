@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { OKABE_ITO } from './chartPalette';
 
 type DonutGaugeProps = {
   value: number;
@@ -28,8 +29,8 @@ export default function DonutGauge({
   size = 190,
   innerRadius = 66,
   outerRadius = 92,
-  color = '#2563eb',
-  trackColor = 'rgba(37, 99, 235, 0.10)',
+  color = OKABE_ITO.blue,
+  trackColor = 'rgba(148, 163, 184, 0.18)',
   className = '',
   centerClassName = '',
 }: DonutGaugeProps) {

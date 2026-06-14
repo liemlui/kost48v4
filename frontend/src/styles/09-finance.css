@@ -1151,6 +1151,17 @@
 .payment-risk-pill.danger { color:#991b1b; background:#fee2e2; border-color:#fecaca; }
 .payment-risk-pill.info { color:#1d4ed8; background:#eff6ff; border-color:#bfdbfe; }
 .payment-row-risk-high td { background:linear-gradient(90deg, rgba(254,226,226,0.55), rgba(255,255,255,0)); }
+/* F3-12 (V-2): hitungan risiko untuk sampel kecil (n<5) — ganti donat proporsi
+   yang menyesatkan dgn angka eksplisit. */
+.payment-risk-count-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-top:0.25rem; }
+.payment-risk-count-item {
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:0.15rem; padding:0.6rem 0.4rem; border:1px solid rgba(148,163,184,0.22);
+  border-radius:12px; background:rgba(248,250,252,0.6);
+}
+.payment-risk-count-item strong { font-size:1.5rem; line-height:1; color:var(--text-main,#0f172a); }
+.payment-risk-count-dot { width:10px; height:10px; border-radius:50%; }
+.payment-risk-count-label { font-size:0.7rem; color:var(--text-muted,#64748b); }
 .payment-safety-card { border:1px solid #dbeafe; background:#f8fbff; }
 .payment-safety-message-list { display:grid; gap:0.65rem; }
 .payment-safety-message {

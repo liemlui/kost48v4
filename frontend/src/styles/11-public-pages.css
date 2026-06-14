@@ -1146,6 +1146,13 @@
   white-space: nowrap;
 }
 
+/* UD-07: catatan kecil saat filter "Semua Kamar" aktif */
+.rm-filter-hint {
+  font-size: .72rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
 .rm-filter-divider {
   width: 1px;
   height: 1.5rem;

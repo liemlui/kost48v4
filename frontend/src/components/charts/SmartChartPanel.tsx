@@ -3,6 +3,7 @@ import { Button, Card, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import HorizontalBarChart from './HorizontalBarChart';
+import { CHART_PALETTE } from './chartPalette';
 
 export type SmartChartMode = 'summary' | 'donut' | 'bar' | 'table';
 export type SmartChartPoint = {
@@ -27,7 +28,7 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat('id-ID').format(Math.round(value || 0));
 }
 
-const CHART_COLORS = ['#2563eb', '#0ea5e9', '#f59e0b', '#ef4444', '#16a34a', '#7c3aed'];
+const CHART_COLORS = CHART_PALETTE; // F3-12 (V-5): palet Okabe-Ito colorblind-safe
 
 export default function SmartChartPanel({ title, subtitle, points, defaultMode = 'summary', availableModes = ['summary', 'donut', 'bar', 'table'], totalLabel = 'Total', ctaLabel, ctaTo }: SmartChartPanelProps) {
   const navigate = useNavigate();

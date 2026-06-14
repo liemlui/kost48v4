@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { CHART_PALETTE } from './chartPalette';
 
 export type HorizontalBarPoint = {
   label: string;
@@ -29,7 +30,7 @@ type HorizontalBarChartProps<T extends HorizontalBarPoint> = {
   isPointClickable?: (point: T) => boolean;
 };
 
-const DEFAULT_COLORS = ['#2563eb', '#0ea5e9', '#16a34a', '#f59e0b', '#ef4444', '#7c3aed'];
+const DEFAULT_COLORS = CHART_PALETTE; // F3-12 (V-5): palet Okabe-Ito colorblind-safe
 
 function defaultFormatter(value: number) {
   return new Intl.NumberFormat('id-ID').format(Math.round(value || 0));

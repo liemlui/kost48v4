@@ -782,6 +782,16 @@
   text-align: center;
 }
 
+/* F3-12 (V-6): kontras teks tengah donut gauge — terbaca di mobile & dark mode
+   (sebelumnya warna diwariskan → bisa nyaris tak terbaca di latar gelap). */
+.recharts-donut-center strong {
+  color: var(--text-main, #0f172a);
+}
+
+.recharts-donut-center span {
+  color: var(--text-muted, #64748b);
+}
+
 .recharts-horizontal-bars {
   width: 100%;
   min-width: 0;

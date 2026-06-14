@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row, Spinner, Table } from 'react-bootstrap';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DonutGauge from '../../components/charts/DonutGauge';
+import { CHART_PALETTE, CHART_SEMANTIC } from '../../components/charts/chartPalette';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import AuthenticatedFileLink from '../../components/common/AuthenticatedFileLink';
@@ -69,16 +70,16 @@ function PaymentAnalyticsPanel({ items, pendingAmount, proofCount, missingProofC
   depositCount: number;
 }) {
   const riskData = [
-    { name: 'Risiko Tinggi', value: highRiskCount, color: '#ef4444' },
-    { name: 'Perlu Checklist', value: manualRiskCount, color: '#f59e0b' },
-    { name: 'Aman', value: Math.max(0, items.length - highRiskCount - manualRiskCount), color: '#16a34a' },
+    { name: 'Risiko Tinggi', value: highRiskCount, color: CHART_SEMANTIC.danger },
+    { name: 'Perlu Checklist', value: manualRiskCount, color: CHART_SEMANTIC.warning },
+    { name: 'Aman', value: Math.max(0, items.length - highRiskCount - manualRiskCount), color: CHART_SEMANTIC.success },
   ].filter((d) => d.value > 0);
 
   const proofRate = items.length > 0 ? Math.round((proofCount / items.length) * 100) : 0;
 
   const targetData = [
-    { name: 'Invoice', value: invoiceCount, color: '#2563eb' },
-    { name: 'Deposit', value: depositCount, color: '#7c3aed' },
+    { name: 'Invoice', value: invoiceCount, color: CHART_PALETTE[0] },
+    { name: 'Deposit', value: depositCount, color: CHART_PALETTE[5] },
   ].filter((d) => d.value > 0);
 
   const methodData = useMemo(() => {
@@ -88,9 +89,13 @@ function PaymentAnalyticsPanel({ items, pendingAmount, proofCount, missingProofC
       const label = method === 'TRANSFER' ? 'Transfer' : method === 'CASH' ? 'Tunai' : method === 'QRIS' ? 'QRIS' : method === 'EWALLET' ? 'E-Wallet' : method;
       counts[label] = (counts[label] ?? 0) + 1;
     });
-    const colors = ['#2563eb', '#0ea5e9', '#16a34a', '#7c3aed'];
-    return Object.entries(counts).map(([label, value], i) => ({ label, value, color: colors[i % colors.length] })).sort((a, b) => b.value - a.value);
+    return Object.entries(counts).map(([label, value], i) => ({ label, value, color: CHART_PALETTE[i % CHART_PALETTE.length] })).sort((a, b) => b.value - a.value);
   }, [items]);
+
+  // F3-12 (V-2): untuk sampel kecil (n<5) sebuah donat proporsi menyesatkan —
+  // 1 bukti high-risk jadi lingkaran 100% merah = terbaca "krisis". Tampilkan
+  // hitungan eksplisit, donat hanya saat sampel cukup besar.
+  const useRiskCounts = items.length < 5;
 
   if (items.length === 0) return null;
 
@@ -109,7 +114,7 @@ function PaymentAnalyticsPanel({ items, pendingAmount, proofCount, missingProofC
                 size={120}
                 innerRadius={38}
                 outerRadius={54}
-                color={proofRate >= 80 ? '#16a34a' : proofRate >= 50 ? '#f59e0b' : '#ef4444'}
+                color={proofRate >= 80 ? CHART_SEMANTIC.success : proofRate >= 50 ? CHART_SEMANTIC.warning : CHART_SEMANTIC.danger}
                 trackColor="rgba(148,163,184,0.15)"
               />
             </div>
@@ -127,21 +132,37 @@ function PaymentAnalyticsPanel({ items, pendingAmount, proofCount, missingProofC
         <Card className="content-card border-0 h-100">
           <Card.Body>
             <div className="panel-title mb-1">Level Risiko</div>
-            <div className="panel-subtitle mb-2">Distribusi risiko bukti yang masuk</div>
-            <div className="stay-analytics-donut-wrap">
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie data={riskData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={44} outerRadius={64} paddingAngle={2} stroke="none">
-                    {riskData.map((d) => <Cell key={d.name} fill={d.color} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: unknown, name: unknown) => [`${Number(v ?? 0)} bukti`, String(name ?? '')]} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="stay-analytics-donut-center"><strong>{items.length}</strong><span>Total</span></div>
+            <div className="panel-subtitle mb-2">
+              {useRiskCounts ? `Hitungan risiko dari ${items.length} bukti` : 'Distribusi risiko bukti yang masuk'}
             </div>
-            <div className="stay-analytics-legend">
-              {riskData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
-            </div>
+            {useRiskCounts ? (
+              <div className="payment-risk-count-grid">
+                {riskData.map((d) => (
+                  <div key={d.name} className="payment-risk-count-item">
+                    <span className="payment-risk-count-dot" style={{ background: d.color }} />
+                    <strong>{d.value}</strong>
+                    <span className="payment-risk-count-label">{d.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="stay-analytics-donut-wrap">
+                  <ResponsiveContainer width="100%" height={150}>
+                    <PieChart>
+                      <Pie data={riskData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={44} outerRadius={64} paddingAngle={2} stroke="none">
+                        {riskData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: unknown, name: unknown) => [`${Number(v ?? 0)} bukti`, String(name ?? '')]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="stay-analytics-donut-center"><strong>{items.length}</strong><span>Total</span></div>
+                </div>
+                <div className="stay-analytics-legend">
+                  {riskData.map((d) => <span key={d.name}><i style={{ background: d.color }} />{d.name}: {d.value}</span>)}
+                </div>
+              </>
+            )}
           </Card.Body>
         </Card>
       </Col>
