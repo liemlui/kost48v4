@@ -90,6 +90,10 @@
 - [ ] **F4-9** 🧬 Gamifikasi/loyalitas tenant — dossier **19** (desain lengkap) · schema TenantPoint/RewardCatalog/Redemption · bangun setelah inti sehat.
 - [x] **F4-10** Standarisasi pembulatan Rupiah (F-31) — dossier **13** (SELESAI 2026-06-14). Helper terpusat `common/business/money.helper.ts` (`roundRupiah`/`rupiahAmount`, tie half-away-from-zero) menggantikan `Math.round` mentah di 8 call-site Rupiah (util/DP/depresiasi/revenue-per-kamar + helper `rupiah` posting). `accounting-period-close` (DO-NOT-TOUCH) sengaja dilewati. tsc 0 · `node --test` 32/32 · UAT TB seimbang + akun 2000 saldo kredit.
 
+## 🆕 BACKLOG IDE OWNER (2026-06-14 — belum dijadwalkan, perlu desain)
+- [ ] **F4-11** Renewal/prabayar fleksibel kapan saja — tenant boleh perpanjang/bayar **2-4 bulan ke depan harga bulanan** TANPA menunggu kontrak habis (bukan hanya prompt H-10). Dossier **11**. **Terkait F4-1 unearned revenue** (prabayar >1 bln = pendapatan diterima di muka). Selaras rent-loyalty D-16.
+- [ ] **F4-12** FAQ detail + "manual book" tenant app — generate FAQ dari semua aturan/flow (`03_KEPUTUSAN_OWNER` + dossier) → menu **Panduan/Aturan** di tenant app (openness, ringkas, jangan bikin pusing). Input tambahan: interview owner / analisa percakapan WhatsApp. Fondasi `FaqsModule` sudah ada. Dossier **17** (+16).
+
 ## ⏸️ DITUNDA (1 staf — aktifkan saat staf ≥ 2)
 - [ ] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15**.
 - [ ] **F3-5** Leaderboard antar-staf (kartu rumus skor TETAP jalan) — dossier **15**.
