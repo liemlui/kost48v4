@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — chore(migration): squash baseline → `migrate deploy` end-to-end berfungsi
+
+- **Masalah:** rantai migration lama tak lengkap (tabel `RenewRequest` dll. ditambah lewat `db push` tanpa create-migration) → `migrate deploy`/`migrate diff --from-migrations` GAGAL replay dari kosong.
+- **Squash baseline:** 13 migration lama dipindah ke `prisma/_archive_migrations_pre_baseline/`; dibuat satu **`prisma/migrations/00000000000000_baseline/migration.sql`** = SELURUH schema saat ini (41 tabel, 54 enum, 192 index, 90 FK) via `migrate diff --from-empty --to-schema`. Migration F3 additive ikut terserap ke baseline.
+- **Divalidasi:** (a) `migrate diff --from-migrations(baseline) --to-schema` = **empty** (baseline == schema); (b) `migrate deploy` ke DB kosong baru = **42 tabel terbuat, sukses**; (c) UAT 5433 ledger `_prisma_migrations` di-reset ke baseline-applied → `migrate status` = **"up to date"**.
+- **Deploy prod kini 2 opsi setara:** (1) `prisma migrate deploy` (baseline) **atau** (2) `prisma db push` — **keduanya WAJIB diikuti `sql/bootstrap.sql`** (trigger, CHECK constraint, advisory lock, index tambahan, carve-out guard F3-16 — TIDAK ada di schema Prisma). `prisma.config.ts` dukung `shadowDatabaseUrl` (env) untuk `migrate dev` ke depan.
+
 ## 2026-06-14 — chore(migration): migration resmi F3 additive + dukungan shadow DB
 
 - **Migration baru** `prisma/migrations/20260614210000_f3_admin_safety/migration.sql` — additive untuk F3-14/15/17/19: enum `BelongingsStatus`; `Tenant.ktp*` (8 kolom) + FK `Tenant_ktpVerifiedById_fkey`; `Stay.fled*`+`belongings*` (6 kolom) + FK `Stay_fledMarkedById_fkey`; `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt`; 3 index. Semua nullable/ber-default → zero-risk.
