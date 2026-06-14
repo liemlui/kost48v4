@@ -41,9 +41,9 @@
 - **F1-8 · FASE 1:** guard settlement deposit (cek receipt journal) — spec di dossier 13.
 - **F2-6 · FASE 2:** auto-tiket inspeksi saat `stays.cancel` stay promoted (salin dari `complete`). (B-08)
 - **F3-13 · FASE 3:** B-07 (exclude+auto-cancel DRAFT saat forced checkout), B-06 (copy/meta).
-- **F3-14 · FASE 3 (BARU):** tombol admin "tenant kabur" → checkout dini + potong deposit. Pemicu: nunggak X hari + tak terhubung. Field `Stay.fledMarkedAt`+reason+konfig X. (B2)
+- **F3-14 · FASE 3 (SELESAI 2026-06-14, schema approved + UAT LULUS):** DIGABUNG dgn F3-16 → `POST /stays/:id/forced-checkout` reason `TENANT_KABUR` mengisi `Stay.fledMarkedAt/fledMarkedById/fledReason`. Ambang nunggak X hari = konstanta kode. (B2)
 - **F3-15 · FASE 3 (SELESAI 2026-06-14, schema approved):** `Stay.belongingsStatus/belongingsDeadline/belongingsResolvedAt` + enum `BelongingsStatus`. Deadline = checkout+30 hari (di `complete` & `forceCheckoutOverstay`); sweeper `runBelongingsAbandonment` (PENDING & lewat deadline WIB → ABANDONED + notif OWNER/ADMIN dedupe) + endpoint `run/belongings-abandonment`; admin `POST /stays/:id/belongings` (CLAIMED/ABANDONED + catatan). Tindakan fisik tetap manual. (B3)
-- **F3-16 · FASE 3 (BARU):** admin paksa-checkout overstay nunggak + potong sisa dari deposit; **deposit kurang → buat AR (piutang) atas tenant**. Jurnal: 2000 menutup sebagian, sisa tetap AR 1100.
+- **F3-16 · FASE 3 (SELESAI 2026-06-14, UAT LULUS):** `POST /stays/:id/forced-checkout` (OWNER, gabung F3-14). Deposit menutup tunggakan → jurnal **DR 2000 / CR 1100** (`postForcedCheckoutDepositSettlementTx`); **deposit kurang → sisa TETAP jadi PIUTANG AR 1100** (bukan write-off); kelebihan deposit refund kas. Invoice tertutup via pembayaran non-kas (OTHER). Guard `guard_stay_deposit_processing` carve-out via GUC sesi-tx; jurnal settlement diposting dulu (tolak bila penerimaan deposit tak terjurnal). **UAT runtime 12/12 PASS** (stay 8: applied 500k, shortfall 734.200 jadi AR, trial balance seimbang selisih 0, deposit FORFEITED, ledger HELD→FORFEIT net 0).
 
 ## 5. Invarian & UAT
 - **Invarian:** kamar tak pernah AVAILABLE tanpa tiket inspeksi ditutup (KECUALI lubang B-08 — diperbaiki F2-6); deposit diproses tepat 1× (blocking); Σ ledger = paid − refund − deduction; selama grace renewal sah, tenant lama tak kena overstay enforcement.

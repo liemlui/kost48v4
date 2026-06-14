@@ -777,8 +777,27 @@ export class StaysService {
       const excess = depositHeld - applied;
       const shortfall = outstanding - applied;
 
-      // 3. Terapkan deposit ke invoice (oldest first) — pembayaran NON-KAS (method
-      //    OTHER + catatan); AR di-clear lewat jurnal offset, bukan jurnal kas.
+      // 3. Jurnal settlement deposit DULU (DR 2000 / CR 1100 applied / CR kas excess).
+      //    Bila penerimaan deposit tak pernah terjurnal (F-24), settlement di-skip —
+      //    jangan setengah-terapkan (tolak agar tak ada state tak konsisten).
+      let depositSettlement: any = null;
+      if (depositHeld > 0) {
+        depositSettlement = await this.accountingPosting.postForcedCheckoutDepositSettlementTx(
+          tx,
+          id,
+          applied,
+          excess,
+          actor.id,
+        );
+        if (!depositSettlement?.posted) {
+          throw new ConflictException(
+            `Settlement deposit gagal/di-skip (${depositSettlement?.reason ?? 'penerimaan deposit belum terjurnal'}). Perbaiki jurnal penerimaan deposit atau proses manual; forced-checkout dibatalkan agar buku tetap konsisten.`,
+          );
+        }
+      }
+
+      // 4. Terapkan deposit ke invoice (oldest first) — pembayaran NON-KAS (method
+      //    OTHER + catatan); AR sudah di-clear lewat jurnal offset di atas.
       let left = applied;
       for (const inv of withRemaining) {
         if (left <= 0) break;
@@ -801,18 +820,6 @@ export class StaysService {
               : { status: InvoiceStatus.PARTIAL },
         });
         left -= cover;
-      }
-
-      // 4. Jurnal settlement deposit forced-checkout (DR 2000 / CR 1100 applied / CR kas excess).
-      let depositSettlement: any = null;
-      if (depositHeld > 0) {
-        depositSettlement = await this.accountingPosting.postForcedCheckoutDepositSettlementTx(
-          tx,
-          id,
-          applied,
-          excess,
-          actor.id,
-        );
       }
 
       // 5. Tentukan status deposit (patuh stay_deposit_status_consistency_chk).

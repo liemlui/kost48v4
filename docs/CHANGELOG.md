@@ -2,13 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
-## 2026-06-14 — feat(F3-14/F3-16): forced-checkout admin (kabur/overstay) + deposit→AR [UAT runtime pending]
+## 2026-06-14 — feat(F3-14/F3-16): forced-checkout admin (kabur/overstay) + deposit→AR (SELESAI, UAT LULUS)
 
 - **Gabung F3-14+F3-16 (keputusan owner):** satu endpoint `POST /stays/:id/forced-checkout` (OWNER) beralasan `OVERSTAY_NUNGGAK`/`TENANT_KABUR`.
 - **Akuntansi (disetujui owner):** deposit menutup tunggakan → jurnal **DR 2000 / CR 1100** (`postForcedCheckoutDepositSettlementTx`, BEDA dari settlement damages yg kredit 4400); sisa tunggakan **TETAP jadi piutang AR 1100** (bukan write-off); kelebihan deposit di-refund kas. Invoice tertutup ditandai PAID/PARTIAL via pembayaran NON-KAS (method OTHER) agar aging konsisten.
 - **Guard carve-out (disetujui owner):** trigger `guard_stay_deposit_processing` (sql/bootstrap.sql) menambah carve-out via GUC sesi-transaksi `app.allow_deposit_with_open_invoices` — settlement deposit boleh jalan saat ada invoice terbuka HANYA dalam forced-checkout; flow normal `processDeposit` tetap terproteksi penuh.
 - **Lifecycle:** stay COMPLETED + `fled*` (jika kabur) + `belongingsDeadline` (F3-15) + kamar MAINTENANCE + tiket inspeksi; status deposit patuh `stay_deposit_status_consistency_chk`; ledger via `recordDepositSettlementTx`; KTP PDP cleanup; audit `FORCED_CHECKOUT`.
-- **Verifikasi:** backend `tsc` 0; unit 26/26. **⏳ UAT runtime (trial balance seimbang + AR sisa + deposit reconciliation) sedang dijalankan** — belum dicentang SELESAI sampai UAT lulus.
+- **Robustness:** jurnal settlement diposting DULU; bila penerimaan deposit tak terjurnal (F-24 skip), forced-checkout DITOLAK (tx rollback) agar tak ada state setengah-jadi.
+- **Verifikasi — UAT runtime LULUS (DB UAT 5433, backend live, stay 8):** outstanding 1.234.200 vs deposit 500.000 → applied 500.000, **shortfall 734.200 TETAP jadi AR**. **12/12 assertions PASS:** trial balance tetap seimbang (selisih 0); AR 1100 turun 500.000; deposit 2000 turun 500.000 (debit); invoice → PARTIAL/paid 500.000; stay COMPLETED + deposit FORFEITED (deduction 500.000); offset journal `FORCED_CHECKOUT_DEPOSIT:8` POSTED; deposit ledger HELD→FORFEIT net 0. backend `tsc` 0; unit 26/26.
 
 ## 2026-06-14 — ui(F3-9): hierarki laporan — badge Formal/Estimasi
 
