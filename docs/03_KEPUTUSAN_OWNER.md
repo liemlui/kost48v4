@@ -1,5 +1,5 @@
-# KEPUTUSAN OWNER — 2026-06-13
-**Sumber:** wawancara owner 2026-06-13. Dokumen ini MENGIKAT; bila konflik dengan dokumen lain, file ini menang. Dossier menjelaskan status kode dan cara implementasi, bukan mengganti keputusan bisnis di sini.
+# KEPUTUSAN OWNER — 2026-06-13 (+ addendum 2026-06-14: D-18/D-19, S-2)
+**Sumber:** wawancara owner 2026-06-13 + catatan owner 2026-06-14. Dokumen ini MENGIKAT; bila konflik dengan dokumen lain, file ini menang. Dossier menjelaskan status kode dan cara implementasi, bukan mengganti keputusan bisnis di sini.
 
 ## 🔴 TEMUAN BESAR DARI WAWANCARA — D-06: DATABASE MASIH DATA TESTING, BELUM PUBLISH
 > Kutipan owner: *"Itu hanya testing, lebih baik data dihapus semua juga tidak masalah sebab kita belum publish kok."*
@@ -12,7 +12,7 @@
 
 ---
 
-## D — KEPUTUSAN UTAMA (D-01 s/d D-17)
+## D — KEPUTUSAN UTAMA (D-01 s/d D-19)
 
 | ID | Keputusan | Dampak |
 |----|-----------|--------|
@@ -33,6 +33,8 @@
 | D-15 | **Occupancy heatmap = prioritas visualisasi #1.** 12 bulan ke belakang + 3 bulan ke depan, grid kalender CSS. | Task F3-12. |
 | D-16 | **RENT-LOYALTY — tenant yang perpanjang (renew) tanpa putus kontrak TIDAK mengalami kenaikan harga sewa.** Harga hanya bisa naik setelah gagal-bayar atau re-kontrak baru (tenant keluar lalu booking baru). Memperkuat retensi — tenant loyal dilindungi dari inflasi sewa. | Cross-ref dossier 11, 17, 19. |
 | D-17 | **Empat area OWNER-only:** tutup/buka periode akuntansi; hapus/nonaktif user atau staf; setelan kamar dan harga; proses deposit/refund settlement. ADMIN hanya boleh membaca atau menjalankan operasi lain yang secara eksplisit diizinkan. | Task F2-16. |
+| D-18 | **RENEWAL/PRABAYAR FLEKSIBEL KAPAN SAJA** (2026-06-14). Tenant boleh perpanjang / **bayar di muka 2-4 bulan ke depan dengan harga BULANAN**, KAPAN SAJA — **tak harus menunggu kontrak lama habis**. Ini menambah jalur "prabayar/perpanjang lebih awal" di samping renewal akhir-kontrak (R1-R5, prompt H-10). Prabayar >1 bulan = **pendapatan diterima di muka** (akui bertahap → F4-1 unearned revenue). Rent-lock D-16 tetap berlaku (harga tak naik selama renew berlanjut). | Backlog **F4-11**; terkait F4-1. |
+| D-19 | **FAQ DETAIL + "MANUAL BOOK" DI TENANT APP** (2026-06-14). Semua aturan/flow kos di-generate jadi **FAQ sangat detail** lalu disajikan sebagai **menu "Panduan/Aturan" di tenant app** — tenant bisa baca manual aturan kos secara mandiri. **Openness, TAPI jangan bikin tenant pusing** (ringkas, terstruktur, berkategori). Sumber konten: `03_KEPUTUSAN_OWNER` + dossier flow; input tambahan via **interview owner** atau **analisa percakapan WhatsApp** (pertanyaan & keluhan tenant yang sering). Fondasi `FaqsModule` sudah ada. | Backlog **F4-12**; dossier 17/16. |
 
 ---
 
@@ -88,9 +90,28 @@
 
 - **D-16:** Rent-loyalty — no rent hike while renewing (cross-ref D-16 di atas).
 
-## S — APPROVAL SCHEMA (2026-06-13)
+## S — APPROVAL SCHEMA
 
-- **S-1: Owner MENYETUJUI seluruh perubahan schema ADDITIVE** untuk task ber-marker 🧬/[SCHEMA]: F2-1 (RenewRequest +status/+field), F2-3b (bukti refund), F2-18 (StaffReview.status), F3-14 (Stay.fledMarkedAt), F3-15 (Stay.belongingsDeadline+ABANDONED), F3-17 (Tenant.ktp*), F4-9 (LoyaltyPoint/Reward/Redemption). Dikerjakan berurutan sesuai prioritas `08_CHECKLIST`. **Hanya additive** (tambah enum value/kolom nullable); tak menghapus/mengubah kolom lama. Deploy fresh → schema masuk `schema.prisma` (+ `sql/bootstrap.sql` bila perlu constraint).
+- **S-1 (2026-06-13): Owner MENYETUJUI seluruh perubahan schema ADDITIVE** untuk task ber-marker 🧬/[SCHEMA]: F2-1 (RenewRequest +status/+field), F2-3b (bukti refund), F2-18 (StaffReview.status), F3-14 (Stay.fledMarkedAt), F3-15 (Stay.belongingsDeadline+ABANDONED), F3-17 (Tenant.ktp*), F4-9 (LoyaltyPoint/Reward/Redemption). Dikerjakan berurutan sesuai prioritas `08_CHECKLIST`. **Hanya additive** (tambah enum value/kolom nullable); tak menghapus/mengubah kolom lama. Deploy fresh → schema masuk `schema.prisma` (+ `sql/bootstrap.sql` bila perlu constraint).
+- **S-2 (2026-06-14): Owner MENYETUJUI seluruh schema additive Fase 4** (proposal `docs/_PROPOSAL_SCHEMA_F4.md`): **F4-2** (PushSubscription + enum PushDeliveryStatus + AppNotification.pushStatus/pushAttempts/pushedAt), **F4-1** (RentRecognitionSchedule, pakai COA 2200), **F4-9** (LoyaltyPoint/LoyaltyReward/Redemption + 3 enum), **F4-8** (RoomTransfer). Plus **izin dependency npm `web-push`** (F4-2) dan pola **outbox in-place** (kolom di AppNotification, bukan tabel terpisah). Urutan eksekusi: **F4-2 → F4-1 → F4-9 → F4-8**.
+
+---
+
+## D-18/D-19 — DETAIL TAMBAHAN (2026-06-14)
+
+### D-18 — Renewal / prabayar fleksibel kapan saja (backlog F4-11)
+- **Aturan:** tenant boleh memperpanjang atau **membayar di muka untuk 2-4 bulan ke depan** dengan **harga bulanan**, **kapan saja** — tidak harus menunggu kontrak lama hampir/sudah habis.
+- **Hubungan dengan renewal yang ada (R1-R5):** ini jalur TAMBAHAN ("early renewal / prepay"), bukan pengganti. Prompt H-10 + prioritas tenant lama (R1) tetap berlaku untuk renewal mendekati akhir kontrak; D-18 memperluas agar tenant bisa inisiatif lebih awal.
+- **Akuntansi:** prabayar lebih dari 1 bulan = **pendapatan diterima di muka (unearned revenue, COA 2200)** → diakui bertahap per bulan. **Terikat ke F4-1** (RentRecognitionSchedule). Jangan akui seluruh prabayar sebagai pendapatan bulan berjalan.
+- **Harga:** mengikuti **rent-lock D-16** — selama tenant terus renew tanpa putus kontrak, harga tidak naik.
+- **Desain yang perlu (saat F4-11 dimulai):** titik masuk UI kapan saja (tenant app), pilih jumlah bulan, hitung total = bulan × tarif bulanan, alur pembayaran (no-partial D-02), perpanjangan `plannedCheckOutDate` stay, dan penjadwalan pengakuan pendapatan.
+
+### D-19 — FAQ detail + "manual book" tenant app (backlog F4-12)
+- **Tujuan:** tenant dapat membaca **manual/aturan kos** secara mandiri di tenant app → transparansi (openness) + mengurangi pertanyaan berulang ke admin/staf (selaras filosofi tenant-pengawas).
+- **Konten:** FAQ **sangat detail**, di-generate dari **semua aturan/flow** (`03_KEPUTUSAN_OWNER` + dossier 10-19) — pembayaran, DP vs deposit, booking, renewal, checkout, deposit refund, overstay, KTP, tiket/keluhan, dll.
+- **Penyajian:** menu **"Panduan / Aturan"** di tenant app, **ringkas & berkategori**, JANGAN bikin tenant pusing (hindari tembok teks; pakai kategori + ekspandable + bahasa sederhana).
+- **Sumber input tambahan:** (a) **interview owner** soal kemungkinan pertanyaan tenant; (b) owner **paste percakapan WhatsApp** untuk dianalisa (pertanyaan & keluhan yang sering muncul) → diangkat jadi FAQ.
+- **Fondasi teknis:** `FaqsModule` (backend `src/modules/faqs/`) sudah ada. Dossier acuan: 17 (publik/UIUX) + 16 (komunikasi).
 
 ---
 

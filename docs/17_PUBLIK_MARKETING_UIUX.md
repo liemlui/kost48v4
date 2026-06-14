@@ -2,6 +2,7 @@
 **Domain:** katalog publik, SEO, funnel akuisisi, social proof, UI/UX seluruh app, visualisasi/chart. **Flow 2-publik + frontend.**
 **Status:** Funnel & UX 🟢 baik. SEO dasar dan social proof selesai diimplementasikan 2026-06-14; validasi Lighthouse SEO masih tertunda dan database lokal belum memiliki ulasan visible.
 **File inti:** `marketing-public-rooms.service.ts` (304), `frontend/index.html`, `PublicRoomsPage.tsx`, `PublicRoomDetailPage.tsx`, `PublicGuestDashboardPage.tsx`, `App.tsx`, 13 file pakai Recharts.
+**🆕 Backlog (D-19 / F4-12, 2026-06-14):** menu **"Panduan/Aturan" (manual book) di tenant app** — FAQ detail di-generate dari semua aturan/flow (`03_KEPUTUSAN_OWNER` + dossier), disajikan ringkas & berkategori (openness, jangan bikin tenant pusing). Input: interview owner / analisa WhatsApp. Fondasi `FaqsModule` ada. Detail di `03_KEPUTUSAN_OWNER §D-19`.
 
 ---
 ## 1. Aturan bisnis / konteks

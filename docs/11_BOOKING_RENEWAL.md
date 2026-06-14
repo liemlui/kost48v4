@@ -2,6 +2,7 @@
 **Domain:** booking publik & portal (DP 30%, first-paid-wins) + perpanjangan kontrak (GAP #2). **Flow 2 & 5.**
 **Status:** Booking 🟢 KUAT (A18). Renewal 🟢 (2026-06-14) — state machine, invoice DP terpisah, rent-loyalty, notif siklus + prompt H-10 + fallback portal, sweeper hibrida, dan **deadline-gate command service (R3)** lengkap. Catatan: FORFEITED = **flag+notif (forced checkout & potong deposit MANUAL admin)** per keputusan owner hibrida — SENGAJA override R5 auto; publikasi kamar TIDAK/EXPIRED via flow checkout normal (keputusan owner #2).
 **File inti:** `tenant-bookings.service.ts` (36.9KB), `public-bookings.service.ts` (16.7KB), `renew-requests.service.ts` (194), `stays.service.ts:997` renewStayInTransaction.
+**🆕 Backlog (D-18 / F4-11, 2026-06-14):** tambah jalur **renewal/prabayar fleksibel KAPAN SAJA** — tenant boleh bayar di muka 2-4 bulan ke depan (harga bulanan) tanpa menunggu kontrak habis. Prabayar >1 bulan = unearned revenue (terikat F4-1, COA 2200). Rent-lock D-16 berlaku. Detail di `03_KEPUTUSAN_OWNER §D-18`.
 
 ---
 ## 1. Aturan bisnis
