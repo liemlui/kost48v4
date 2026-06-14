@@ -51,5 +51,7 @@ test('createOnce membuat notifikasi ketika dedupe belum ada', async () => {
     linkTo: '/payment-submissions/review',
     entityType: 'PaymentSubmission',
     entityId: '42',
+    // F4-2: setiap notifikasi in-app diantre untuk Web Push (outbox in-place).
+    pushStatus: 'PENDING',
   });
 });
