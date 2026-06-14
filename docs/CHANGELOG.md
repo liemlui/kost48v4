@@ -2,6 +2,17 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(backlog S-3): F4-11/12/13a/13b/14/15 — implementasi backlog ide owner
+
+- **Schema additive S-3** (owner-approve, migration `20260615120000_f4_backlog_s3`): Room (hasAc/acWattage/acLastCleanedAt/acCleanIntervalDays), LoyaltyReward (fulfillmentTaskCategory/Title), User (tipGopay/Ovo/Dana/Bank), RenewRequest (prepaidMonths/isEarly/tenantReview/tenantReviewAt). **F4-13c (quest sikap anonim) DITUNDA.**
+- **F4-12 FAQ/manual** (tanpa schema): `MyManualPage` (`/portal/manual`) menampilkan FAQ publik per kategori (Accordion ringkas) — manual book aturan kos untuk tenant. Nav tenant "Panduan & Aturan".
+- **F4-15 cuci AC:** sweeper `AutoOps.runAcCleaningSchedule` — kamar ber-AC yang lewat `acCleanIntervalDays` (default 90) sejak `acLastCleanedAt` → tiket `AC_CLEANING` (dedupe) + assign STAFF. Endpoint manual `POST /auto-ops/run/ac-cleaning`. Tiket AC ditutup → reset `acLastCleanedAt`. Biaya cuci dicatat Expense (flow normal, ditanggung bisnis). Admin set AC via Room DTO.
+- **F4-13b reward → tugas staf:** reward ber-`fulfillmentTaskCategory` → saat redemption APPROVE/FULFILLED, auto-create tiket tugas staf (mis. bersihkan kamar mandi luar/area umum/dapur umum) selain jurnal reward M4. Admin form + UAT runtime LULUS (ticket dibuat, redemption FULFILLED).
+- **F4-14 tip staf P2P:** `User.tip*` (GoPay/OVO/DANA/Bank) settable via user DTO/service; query tiket mengekspos tip assignee; tenant melihat link tip di tiket DONE/CLOSED (`MyTicketsPage`). **Tip langsung tenant→staf, TIDAK dijurnal/direkap** di buku kos (P2P).
+- **F4-13a review-renewal:** `CreateRenewRequestDto.tenantReview` → disimpan + award poin (skor VALIDATED_REPORT +30, idempotent `RENEWAL_REVIEW:id`).
+- **F4-11 (data capture):** `RenewRequest.prepaidMonths/isEarly` disimpan saat create (early request enabled). **Alur multi-bulan prabayar penuh** (invoice N bulan + unearned via F4-1) = lanjutan finance terpisah.
+- **Gate:** backend `tsc` 0; `node --test` 40/40; FE build + PWA verify (99 chunk). S-3 (03_KEPUTUSAN_OWNER) tercatat.
+
 ## 2026-06-15 — feat(F4-9): Gamifikasi & Loyalitas tenant — SELESAI (schema S-2, dossier 19)
 
 - **Schema additive (S-2):** `LoyaltyPoint` (ledger append-only, unique sourceType+sourceId) + `LoyaltyReward` (katalog) + `Redemption` (penukaran, wajib approve, journalEntryId) + 3 enum (`LoyaltyPointReason`/`LoyaltyRewardType`/`RedemptionStatus`) + back-rel Tenant/JournalEntry. Migration `20260615100000_f4_9_loyalty`.
