@@ -108,6 +108,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
       { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Laporan Saya', icon: '🎫', hint: 'Buat laporan bantuan dan pantau progresnya.' },
       { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Kumpulkan poin loyalitas dan tukar dengan reward.' },
+      { to: '/portal/manual', label: 'Panduan & Aturan', icon: '📖', hint: 'Manual lengkap aturan, pembayaran, dan layanan kos.' },
       { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
     ],
   }];
