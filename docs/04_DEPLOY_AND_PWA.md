@@ -13,6 +13,7 @@
 - [ ] Fase 1 di `08_CHECKLIST.md` selesai, termasuk harness finance dan rekonsiliasi.
 - [ ] Owner mengonfirmasi database target masih kosong/testing dan menyetujui pembuatan ulang. Snapshot `pg_dump` boleh dibuat sebagai pengaman, tetapi **tidak untuk dimigrasikan** ke produksi baru.
 - [ ] Env produksi WAJIB: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (domain frontend — backend tolak start tanpa ini), `NODE_ENV=production`, `FRONTEND_URL`, `BREVO_API_KEY` + `MAIL_FROM_*`. Auto-ops: **VPS/always-on** → `AUTO_OPS_ENABLED=true` (+`AUTO_OPS_INTERVAL_MINUTES`); **shared hosting/Passenger (mis. IDwebhost)** → `AUTO_OPS_ENABLED=false` + `AUTO_OPS_CRON_TOKEN` + cPanel Cron ke `GET /api/auto-ops/cron` (Bagian D).
+- [ ] **F4-2 PWA Web Push (opsional tapi disarankan):** set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:owner@...`). Generate sekali: `node -e "console.log(require('web-push').generateVAPIDKeys())"` (dependency `web-push` sudah terpasang). **Tanpa env ini push otomatis NONAKTIF** (notif in-app tetap jalan, tak error). Dispatch push ikut sweeper auto-ops (`runPushDispatch`) → di shared hosting pastikan cPanel Cron `GET /api/auto-ops/cron` aktif. Frontend butuh HTTPS (service worker) agar tenant bisa opt-in.
 - [ ] Canonical frontend: `https://app.kost48surabaya.com`. `CORS_ORIGIN` dan `FRONTEND_URL` pakai host ini.
 
 ### 1. Build

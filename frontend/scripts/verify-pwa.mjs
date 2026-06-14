@@ -144,10 +144,22 @@ for (const sensitivePath of [
     `Sensitive media path must not be cached: ${sensitivePath}`,
   );
 }
+// F4-2: Web Push kini AKTIF (backend punya consent/lifecycle/idempotency/retry).
+assert.match(
+  serviceWorker,
+  /addEventListener\(\s*['"]push['"]/,
+  'Service worker must handle push events (F4-2).',
+);
+assert.match(
+  serviceWorker,
+  /addEventListener\(\s*['"]notificationclick['"]/,
+  'Service worker must handle notification clicks (F4-2).',
+);
+// Background sync/periodic sync masih sengaja TIDAK diimplementasi.
 assert.doesNotMatch(
   serviceWorker,
-  /addEventListener\(\s*['"](?:push|sync|periodicsync)['"]/,
-  'Push/background sync must remain disabled until backend controls exist.',
+  /addEventListener\(\s*['"](?:sync|periodicsync)['"]/,
+  'Background sync must remain disabled until backend controls exist.',
 );
 assert.match(offlineHtml, /<html[^>]+lang="id"/i, 'Offline page must declare Indonesian.');
 assert.match(offlineHtml, /<title>[^<]+<\/title>/i, 'Offline page needs a title.');

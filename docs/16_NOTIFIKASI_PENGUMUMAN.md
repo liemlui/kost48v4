@@ -1,14 +1,14 @@
 # DOSSIER 16 — NOTIFIKASI & PENGUMUMAN
 **Domain:** notifikasi in-app, pengumuman, coverage event, rencana push (PWA Phase 3). **Flow 14.**
-**Status:** 🟢 Coverage solid — notif siklus renewal, copy A17 dua-varian, inbox payment-submitted, prompt review tenant, prompt renewal H-10, fallback admin tenant tanpa portal, booking-dibatalkan-sweeper, **dan F3-1 (ticket-assign→assignee, room-ready→OWNER/ADMIN, K-6/K-8 BARANG_PINDAH→staf assignee)** sudah SELESAI (2026-06-14). wifi-order = lewat WhatsApp, tak ada event in-app. Tersisa: hanya N-02/B-14 (F3-13) + push PWA (F4-2).
+**Status:** 🟢 Coverage solid — notif siklus renewal, copy A17 dua-varian, inbox payment-submitted, prompt review tenant, prompt renewal H-10, fallback admin tenant tanpa portal, booking-dibatalkan-sweeper, **dan F3-1 (ticket-assign→assignee, room-ready→OWNER/ADMIN, K-6/K-8 BARANG_PINDAH→staf assignee)** sudah SELESAI (2026-06-14). wifi-order = lewat WhatsApp, tak ada event in-app. **F4-2 PWA Web Push SELESAI (2026-06-15)** — semua notif in-app diantre & dikirim sebagai push. Coverage notifikasi domain ini LENGKAP.
 **File inti:** `app-notification.service.ts` (104), `announcements.service.ts` (:100-260), notif inline di payment-submissions/tenant-bookings/checkout-requests/auto-ops/tickets.
 
 ---
 ## 1. Aturan bisnis
-- **Notif in-app saja** (D2); PWA push direncanakan Phase 3.
+- **Notif in-app + PWA Web Push** (D2; push AKTIF sejak F4-2, 2026-06-15). Tenant/staf aktifkan via menu Notifikasi (opt-in, izin browser).
 - **Pengumuman: Admin + Owner** boleh publish (J-c). Audiens TENANT = hanya yang OCCUPIED (N-03/D-10: tenant booking TIDAK terima — kode benar).
 - **Reminder kontrak: H-10, H-7, H-3, H-1, H-day** (B1 — ✅ SELESAI 2026-06-14, `runContractEndReminders` REMINDER_DAYS `[10,7,3,1,0]`).
-- **Push Phase 3 (J-d): 4 kelompok event prioritas** — (1) pengingat kontrak, (2) pembayaran disetujui/ditolak, (3) booking dibatalkan/DP hangus/kalah cepat, (4) tiket baru utk staf + ajakan tenant menilai. Selaras model tenant-pengawas.
+- **Push (J-d) SELESAI (F4-2): 4 kelompok event prioritas** — (1) pengingat kontrak, (2) pembayaran disetujui/ditolak, (3) booking dibatalkan/DP hangus/kalah cepat, (4) tiket baru utk staf + ajakan tenant menilai. Implementasi memush SEMUA notif in-app (pushStatus=PENDING saat create) → cakupan ≥ 4 kelompok. Selaras model tenant-pengawas.
 - Notif TIDAK pernah ditulis di dalam tx yang bisa rollback (pola forced-checkout di LUAR tx).
 
 ## 2. Coverage matrix (verifikasi grep)
@@ -36,7 +36,7 @@
 - **F3-1 · FASE 3:** coverage tersisa (ticket-assign+K-8 penerima, wifi, room-ready, sweeper) best-effort+dedupe.
 - **F3-2 · FASE 3 (SELESAI 2026-06-14):** submission pembayaran yang sudah commit mengirim inbox dedupe ke seluruh OWNER/ADMIN aktif dengan deep-link review. UAT rollback: 3 penerima, dua pemanggilan tetap 3 notifikasi, residu 0.
 - **F3-20 · FASE 3 (SELESAI 2026-06-14):** tiket tenant ber-assignee STAFF pada DONE/CLOSED mengirim ajakan review dedupe ke portal tenant. UAT rollback tiket #12: dua pemanggilan tetap 1 notifikasi, residu 0.
-- **F3-13:** N-02 + B-14. **F4-7 (SELESAI 2026-06-14):** pruning notif >90 hari (sweeper `runNotificationPruning`). **F4-2 (Phase 3):** push 4 kelompok (J-d) via outbox.
+- **F3-13:** N-02 + B-14. **F4-7 (SELESAI 2026-06-14):** pruning notif >90 hari (sweeper `runNotificationPruning`). **F4-2 (SELESAI 2026-06-15):** PWA Web Push — `PushSubscription` + outbox in-place (`AppNotification.pushStatus/pushAttempts/pushedAt`) + sweeper `runPushDispatch` (VAPID, web-push) + service worker push/notificationclick + UI opt-in `PushToggle`. Endpoint: `GET /push/vapid-public-key`, `POST /push/subscribe`, `POST /push/unsubscribe`, `POST /auto-ops/run/push-dispatch`.
 
 ## 5. Konvensi & invarian
 - **Konvensi event baru:** penerima eksplisit; linkTo terdalam relevan; dedupe key (recipient, entityType, entityId, title); best-effort never-throw; di LUAR tx bila pasca-commit.

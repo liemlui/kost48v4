@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-2): PWA Web Push (4 kelompok event J-d) — SELESAI, schema S-2 approved
+
+- **Schema additive (owner-approve S-2):** `PushSubscription` (endpoint unik/device) + enum `PushDeliveryStatus` + `AppNotification.pushStatus/pushAttempts/pushedAt` (**outbox in-place**, bukan tabel terpisah) + `User.pushSubscriptions`. Migration `20260614220000_f4_2_push` (zero-risk). Dependency baru `web-push@3.6.7` (+@types) — diizinkan owner.
+- **Backend `PushModule`:** `GET /push/vapid-public-key`, `POST /push/subscribe` (upsert by endpoint), `POST /push/unsubscribe` (deactivate). `PushService` baca VAPID dari env (`VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT`); **nonaktif otomatis bila env kosong** (notif in-app tetap jalan). `AppNotification.create` menandai `pushStatus=PENDING` → SEMUA notif in-app diantre push (cakupan ≥ 4 kelompok J-d).
+- **Sweeper `AutoOps.runPushDispatch`** (akhir `runAll`, best-effort) + endpoint manual `POST /auto-ops/run/push-dispatch`: kirim PENDING ke device aktif via `web-push`. Tanpa device → `SENT` (no-op); endpoint mati (404/410) → subscription dinonaktifkan; gagal sementara → retry s/d 3× lalu `FAILED`.
+- **Frontend:** service worker (`public/sw.js`) handler `push` + `notificationclick` (buka `linkTo`); hook `usePushNotifications` (izin browser, `PushManager.subscribe`, kirim ke API); kartu opt-in `PushToggle` di `NotificationsPage` (Aktifkan/Matikan, status, blokir-browser handling). Guard `verify-pwa.mjs` diperbarui: kini WAJIB ada handler push/notificationclick; `sync`/`periodicsync` tetap dilarang.
+- **UAT backend runtime (offline, DB 5433):** VAPID aktif; no-device→SENT+pushedAt; subscribe persist (active, user benar); dead-endpoint PENDING/1→PENDING/2→FAILED/3 (retry cap); unsubscribe→deactivate; after-unsub→SENT. Residu UAT dibersihkan. backend `tsc` 0; frontend build + **PWA verify LULUS** (95 chunk).
+- **Deploy:** set VAPID env di prod (lihat `04_DEPLOY §0`); push ikut sweeper auto-ops (cron di shared hosting); butuh HTTPS untuk service worker.
+
 ## 2026-06-14 — fix(F4-10): standarisasi pembulatan Rupiah (F-31) — helper terpusat
 
 - **Masalah (F-31):** pembulatan Rupiah tersebar (`Math.round` mentah di util/DP/depresiasi/revenue-per-kamar + helper `rupiah` duplikat di modul akuntansi) → tak ada satu definisi pembulatan, rawan drift pecahan yang me-masking selisih trial balance.

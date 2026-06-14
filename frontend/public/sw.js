@@ -216,5 +216,54 @@ async function handleNavigation(request, url, preloadResponse) {
   }
 }
 
-// Push and background sync are intentionally absent until the backend has
-// explicit consent, subscription lifecycle, idempotency, and retry controls.
+// F4-2 — Web Push. Backend kini menyediakan consent (subscribe/unsubscribe),
+// subscription lifecycle (deactivate endpoint mati), idempotency (1 notif = 1 baris
+// outbox), dan retry controls (sweeper PENDING→SENT/FAILED).
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: 'KOST48', body: event.data ? event.data.text() : '' };
+  }
+
+  const title = data.title || 'KOST48';
+  const options = {
+    body: data.body || '',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    data: {
+      linkTo: data.linkTo || '/notifications',
+      notificationId: data.notificationId,
+    },
+    tag: data.notificationId ? `kost48-notif-${data.notificationId}` : undefined,
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const linkTo = event.notification.data?.linkTo || '/notifications';
+  const targetUrl = new URL(linkTo, self.location.origin).href;
+
+  event.waitUntil((async () => {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of allClients) {
+      if ('focus' in client) {
+        if ('navigate' in client) {
+          try {
+            await client.navigate(targetUrl);
+          } catch {
+            // safe: cross-origin/invalid navigate falls through to focus
+          }
+        }
+        return client.focus();
+      }
+    }
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(targetUrl);
+    }
+    return undefined;
+  })());
+});

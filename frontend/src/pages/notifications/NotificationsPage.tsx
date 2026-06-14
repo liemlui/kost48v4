@@ -3,6 +3,7 @@ import { Alert, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { AppNotificationItem } from '../../api/notifications';
+import PushToggle from '../../components/notifications/PushToggle';
 
 function relativeTime(dateString: string): string {
   const now = Date.now();
@@ -86,6 +87,8 @@ export default function NotificationsPage() {
           </Button>
         )}
       </div>
+
+      <PushToggle />
 
       {isLoading && (
         <div className="d-flex justify-content-center py-5">

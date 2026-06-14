@@ -84,7 +84,7 @@
 
 ## FASE 4 — FUTURE
 - [ ] **F4-1** 🧬 Unearned revenue PSAK 72 (F-15, sewa panjang) — dossier **13** · desain dulu.
-- [ ] **F4-2** PWA Web Push (4 kelompok event J-d) — dossier **16** · outbox+VAPID.
+- [x] **F4-2** PWA Web Push (4 kelompok event J-d) — dossier **16** (SELESAI 2026-06-15, schema S-2 approved). Backend: `PushSubscription` + outbox in-place (`AppNotification.pushStatus/pushAttempts/pushedAt`) + `PushService` (web-push/VAPID) + sweeper `runPushDispatch` + endpoint subscribe/unsubscribe/vapid-key/manual-dispatch. Frontend: service worker push/notificationclick + hook `usePushNotifications` + UI opt-in `PushToggle` di NotificationsPage. **UAT backend LULUS** (no-device→SENT; dead-endpoint retry→FAILED; unsubscribe→deactivate). tsc 0 · frontend build + PWA verify LULUS. ⚙️ Prod: set `VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT` di env (lihat 04_DEPLOY).
 - [x] **F4-7** Pruning notifikasi >90 hari (N-04) — dossier **16** (SELESAI 2026-06-14). `AppNotificationService.pruneOlderThan(90, batch 5000)` + sweeper `runNotificationPruning` di akhir `runAll` (env `NOTIFICATION_RETENTION_DAYS`/`NOTIFICATION_PRUNING_ENABLED`) + endpoint `POST /auto-ops/run/notification-pruning`. **UAT (ROLLBACK):** umur 100hr terhapus, 10hr tetap. tsc 0.
 - [ ] **F4-8** 🧬 Flow pindah kamar resmi (E4) — desain dulu.
 - [ ] **F4-9** 🧬 Gamifikasi/loyalitas tenant — dossier **19** (desain lengkap) · schema TenantPoint/RewardCatalog/Redemption · bangun setelah inti sehat.
