@@ -8,7 +8,7 @@ import { Prisma } from "../../generated/prisma";
 import { AuditLogService } from "../../audit-log/audit-log.service";
 import { AdminDecision, UserRole } from "../../common/enums/app.enums";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
-import { syncRoomItemTx } from "../../common/utils/room-booking.util";
+import { assertRoomItemQtyAvailableTx, syncRoomItemTx } from "../../common/utils/room-booking.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
   AdminReviewStaffFieldReportDto,
@@ -481,6 +481,17 @@ export class StaffFieldReportsService {
       if (dto.createMovement) {
         const movementRoomId =
           dto.createMovement.roomId ?? existing.roomId ?? undefined;
+        // F2-5 (ghost-stock): RETURN_FROM_ROOM wajib divalidasi+lock terhadap qty kamar di DALAM tx,
+        // agar RETURN melebihi stok kamar ditolak (409) — bukan diam-diam menghapus RoomItem &
+        // menambah stok gudang fiktif. (validateMovement pra-tx tak mengecek qty kamar.)
+        if (dto.createMovement.movementType === "RETURN_FROM_ROOM" && movementRoomId) {
+          await assertRoomItemQtyAvailableTx(
+            tx,
+            dto.createMovement.inventoryItemId,
+            movementRoomId,
+            dto.createMovement.qty,
+          );
+        }
         movement = await tx.inventoryMovement.create({
           data: {
             itemId: dto.createMovement.inventoryItemId,

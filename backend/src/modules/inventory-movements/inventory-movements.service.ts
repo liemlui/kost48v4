@@ -4,7 +4,7 @@ import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { InventoryMovementType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { syncRoomItemTx } from '../../common/utils/room-booking.util';
+import { assertRoomItemQtyAvailableTx, syncRoomItemTx } from '../../common/utils/room-booking.util';
 import { CreateInventoryMovementDto, UpdateInventoryMovementDto } from './dto/inventory-movement.dto';
 import { InventoryMovementsQueryDto } from './dto/inventory-movements-query.dto';
 
@@ -48,7 +48,7 @@ export class InventoryMovementsService {
     const created = await this.prisma.$transaction(async (tx) => {
       const beforeQty = await this.lockInventoryQtyTx(tx, dto.itemId);
       if (dto.movementType === InventoryMovementType.RETURN_FROM_ROOM && dto.roomId) {
-        await this.assertRoomItemQtyAvailableTx(tx, dto.itemId, dto.roomId, dto.qty);
+        await assertRoomItemQtyAvailableTx(tx, dto.itemId, dto.roomId, dto.qty);
       }
       const movement = await tx.inventoryMovement.create({
         data: {
@@ -92,16 +92,6 @@ export class InventoryMovementsService {
     return Number(rows[0].qtyOnHand ?? 0);
   }
 
-  private async assertRoomItemQtyAvailableTx(tx: any, itemId: number, roomId: number, qty: string) {
-    const rows = await tx.$queryRaw<Array<{ id: number; qty: any }>>`
-      SELECT id, qty FROM "RoomItem" WHERE "itemId" = ${itemId} AND "roomId" = ${roomId} FOR UPDATE
-    `;
-    const roomQty = Number(rows[0]?.qty ?? 0);
-    const requestedQty = Number(qty);
-    if (!rows.length || roomQty < requestedQty) {
-      throw new ConflictException(`Barang di kamar tidak cukup untuk dikembalikan. Tersedia ${roomQty}, diminta ${qty}.`);
-    }
-  }
 
   private async ensureInventoryQtySyncedTx(tx: any, itemId: number, expectedQty: number) {
     if (!Number.isFinite(expectedQty)) return;

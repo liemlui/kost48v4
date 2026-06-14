@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import type { Prisma } from '../../generated/prisma';
 import { RoomStatus } from '../enums/app.enums';
 
@@ -25,6 +26,22 @@ export async function releaseRoomAfterBookingCancelTx(tx: Prisma.TransactionClie
  * RETURN_FROM_ROOM → kurangi qty, status RoomItem dipertahankan. qty ≤ 0 → hapus baris.
  * (Menyatukan 2 salinan yang sempat berbeda: inventory-movements dulu tak set status.)
  */
+/**
+ * F2-5 / X-03: validasi (dengan LOCK FOR UPDATE) bahwa qty barang di kamar cukup untuk
+ * RETURN_FROM_ROOM. Mencegah ghost-stock: RETURN melebihi stok kamar → 409 (bukan diam-diam
+ * menghapus RoomItem & menambah stok gudang fiktif). Dipakai inventory-movements & staff-field-reports.
+ */
+export async function assertRoomItemQtyAvailableTx(tx: any, itemId: number, roomId: number, qty: string | number) {
+  const rows = await tx.$queryRaw<Array<{ id: number; qty: any }>>`
+    SELECT id, qty FROM "RoomItem" WHERE "itemId" = ${itemId} AND "roomId" = ${roomId} FOR UPDATE
+  `;
+  const roomQty = Number(rows[0]?.qty ?? 0);
+  const requestedQty = Number(qty);
+  if (!rows.length || roomQty < requestedQty) {
+    throw new ConflictException(`Barang di kamar tidak cukup untuk dikembalikan. Tersedia ${roomQty}, diminta ${qty}.`);
+  }
+}
+
 export async function syncRoomItemTx(
   tx: any,
   itemId: number,

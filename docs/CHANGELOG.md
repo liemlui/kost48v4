@@ -2,6 +2,23 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — Fase 3 independen: visibilitas dan otomasi operasional
+
+- Menambahkan SEO dasar guest page: metadata, OpenGraph/Twitter Card, canonical, JSON-LD, `robots.txt`, dan `sitemap.xml`. Implementasi lulus build; skor Lighthouse belum diukur karena konektor browser lokal gagal dijalankan.
+- Menambahkan social proof publik dengan pembatasan privasi, agregat rating, ulasan visible terbaru, dan count penghuni aktif.
+- Menambahkan laporan okupansi harian beserta kalender owner 12 bulan historis dan 3 bulan proyeksi.
+- Menambahkan draft biaya rutin bulanan yang idempotent, tidak masuk laporan/jurnal sebelum dikonfirmasi, serta konfirmasi-posting atomik.
+- Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
+- **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
+
+## 2026-06-14 — fix(F2-5): tutup ghost-stock RETURN_FROM_ROOM (lock + 409 di dua jalur)
+
+Tindak lanjut temuan audit: `staff-field-reports.adminReview` membuat movement `RETURN_FROM_ROOM` tanpa validasi/lock qty kamar → bila RETURN > stok kamar, `syncRoomItemTx` menghapus RoomItem (qty≤0) sambil menambah stok gudang fiktif (ghost-stock).
+- **`assertRoomItemQtyAvailableTx`** (lock `SELECT … FOR UPDATE` + `ConflictException` bila stok kamar < diminta) diekstrak ke `common/utils/room-booking.util.ts`.
+- Dipakai **DI DALAM transaksi** oleh `inventory-movements.create` (sebelumnya private, kini util) **dan** `staff-field-reports.adminReview` (sebelumnya TIDAK ada cek → lubang ghost-stock kini tertutup). `validateMovement` pra-tx tetap, tapi guard otoritatif kini in-tx + ber-lock.
+- **UAT runtime:** RETURN 999 unit dari kamar berstok 2 → **409** (`tsc` 0).
+- Sisa F2-5: `generateTicketNumber` 4 salinan beda-signature belum disatukan.
+
 ## 2026-06-14 — Audit ulang checklist terhadap kode aktual
 
 - Mengembalikan `F2-1`, `F2-2`, `F2-5`, `F2-6`, `F2-18`, `F2-11`, dan `F2-14` ke `[ ]` karena lingkup task belum lengkap atau verifikasinya belum selesai.
