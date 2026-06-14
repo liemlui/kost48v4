@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — feat(F3-1): coverage notifikasi operasional (assign, room-ready, K-6/K-8)
+
+- **Ticket-assign → assignee:** `tickets.service.assign()` mengirim notif ke penerima tugas (best-effort, di luar audit) hanya saat assignee benar-benar berubah; self-assign di-skip.
+- **K-6/K-8 BARANG_PINDAH:** notif tiket pindah barang yang ditutup kini menuju **staf assignee** (sebelumnya keliru ke `actor.id` = admin penutup) dan dipindah ke LUAR transaksi (best-effort).
+- **Room-ready:** penutupan tiket `CHECKOUT_INSPECTION` yang membuat kamar `AVAILABLE` kini memberi tahu OWNER/ADMIN (dedupe `createOnce`, entity `RoomReady`).
+- **Wifi-order:** dikonfirmasi tidak ada event in-app — pemesanan WiFi tenant lewat WhatsApp (`WifiOrderPage`), jadi tidak ada notif yang perlu dipasang.
+- **Verifikasi:** perubahan terisolasi di `tickets.service.ts`, `tsc` 0 untuk file ini (build penuh tertunda karena WIP renewal agen lain di tree). Notif tetap best-effort never-throw.
+
 ## 2026-06-14 — ops(F1-11): verifikasi booking expiry 3 jam flat
 
 - Kedua helper booking (`expireBookingTx` di `auto-ops.service.ts` dan `cancelCompetingUnpaidBookingsTx` di `payment-submissions.service.ts`) memakai konstanta `AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`, default 3 jam. Nilai diverifikasi 2026-06-13.

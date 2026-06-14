@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import { Prisma } from "../../generated/prisma";
@@ -25,6 +26,8 @@ const STAFF_ACTIVE_TICKET_STATUSES = ["OPEN", "IN_PROGRESS", "DONE"] as const;
 
 @Injectable()
 export class TicketsService {
+  private readonly logger = new Logger(TicketsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
@@ -432,6 +435,11 @@ export class TicketsService {
       newData: updated,
       meta: { assigneeId: dto.assignedToId },
     });
+    // F3-1: beri tahu penerima tugas (di luar audit, best-effort) hanya saat
+    // assignee benar-benar berubah — hindari notif duplikat untuk reassign no-op.
+    if (ticket.assignedToId !== dto.assignedToId) {
+      await this.notifyTicketAssigned(updated.id, dto.assignedToId, actor.id);
+    }
     return updated;
   }
 
@@ -525,6 +533,7 @@ export class TicketsService {
       newData: updated,
     });
 
+    await this.notifyTenantReviewPrompt(updated.id);
     return updated;
   }
 
@@ -649,25 +658,6 @@ export class TicketsService {
           data: { status: "CLOSED" as any },
         });
 
-        // BARANG_PINDAH: log movement completion in audit metadata
-        if (ticket.category === "BARANG_PINDAH") {
-          const moveDesc = ticket.description || '';
-          const fromMatch = moveDesc.match(/Dari:\s*(.+)/i);
-          const toMatch = moveDesc.match(/Ke:\s*(.+)/i);
-          const itemMatch = moveDesc.match(/Barang:\s*(.+?)\s*\(/i);
-          const qtyMatch = moveDesc.match(/\((\d+)\s*unit\)/i);
-          if (fromMatch || toMatch || itemMatch) {
-            await this.notification.create({
-              recipientUserId: actor.id,
-              title: '📦 Tiket Pindah Barang Selesai',
-              body: `Tiket "${ticket.title}" ditutup. ${itemMatch?.[1] ? `Barang: ${itemMatch[1]}` : ''} ${fromMatch?.[1] ? `dari ${fromMatch[1]}` : ''} ${toMatch?.[1] ? `ke ${toMatch[1]}` : ''}. Catatan: ${dto.finalAdminNote}`,
-              linkTo: `/tickets`,
-              entityType: 'Ticket',
-              entityId: String(closed.id),
-            });
-          }
-        }
-
         if (ticket.category === "CHECKOUT_INSPECTION" && ticket.roomId) {
           // Bedakan penghuni aktif (promoted) dari booking baru yang belum huni:
           // kamar bekas overstay boleh dipesan saat masih dibersihkan, jadi
@@ -741,6 +731,24 @@ export class TicketsService {
         },
       });
 
+      await this.notifyTenantReviewPrompt(updated.id);
+      // F3-1: notif pasca-commit (best-effort, di luar tx) —
+      // K-6/K-8: pindah barang selesai → penerima = staf assignee (bukan actor);
+      // room-ready: inspeksi checkout membuat kamar AVAILABLE → OWNER/ADMIN.
+      if (ticket.category === "BARANG_PINDAH") {
+        await this.notifyBarangPindahClosed(
+          {
+            id: ticket.id,
+            title: ticket.title,
+            description: ticket.description,
+            assignedToId: ticket.assignedToId,
+          },
+          dto.finalAdminNote,
+        );
+      }
+      if (roomMarkedReady && ticket.roomId) {
+        await this.notifyRoomReady(ticket.roomId, updated.id);
+      }
       return updated;
     }
 
@@ -808,6 +816,190 @@ export class TicketsService {
     return { stayId: resolvedStayId, roomId: resolvedRoomId };
   }
 
+  private async notifyTenantReviewPrompt(ticketId: number) {
+    try {
+      const ticket = await this.prisma.ticket.findUnique({
+        where: { id: ticketId },
+        select: {
+          id: true,
+          ticketNumber: true,
+          title: true,
+          status: true,
+          tenant: {
+            select: {
+              user: {
+                select: { id: true, isActive: true },
+              },
+            },
+          },
+          assignedTo: {
+            select: { fullName: true, role: true },
+          },
+        },
+      });
+
+      const tenantUser = ticket?.tenant?.user;
+      if (
+        !ticket ||
+        !["DONE", "CLOSED"].includes(String(ticket.status)) ||
+        !tenantUser?.isActive ||
+        ticket.assignedTo?.role !== UserRole.STAFF
+      ) {
+        return;
+      }
+
+      const ticketLabel = ticket.title || ticket.ticketNumber || `Tiket #${ticket.id}`;
+      const staffLabel = ticket.assignedTo.fullName || "staff";
+      await this.notification.createOnce({
+        recipientUserId: tenantUser.id,
+        title: "Nilai Hasil Pekerjaan",
+        body: `Pekerjaan "${ticketLabel}" oleh ${staffLabel} sudah selesai. Beri rating untuk membantu menjaga kualitas layanan.`,
+        linkTo: "/portal/tickets",
+        entityType: "TicketReviewPrompt",
+        entityId: String(ticket.id),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim ajakan review tenant untuk ticket #${ticketId}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
+
+
+  // F3-1: penerima tugas tiket diberi tahu (best-effort, di luar tx).
+  private async notifyTicketAssigned(
+    ticketId: number,
+    assigneeId: number,
+    actorId: number,
+  ) {
+    // Jangan beri notif bila seseorang menugaskan tiket ke dirinya sendiri.
+    if (assigneeId === actorId) return;
+    try {
+      const [assignee, ticket] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: assigneeId },
+          select: { id: true, isActive: true },
+        }),
+        this.prisma.ticket.findUnique({
+          where: { id: ticketId },
+          select: {
+            id: true,
+            ticketNumber: true,
+            title: true,
+            room: { select: { code: true, name: true } },
+          },
+        }),
+      ]);
+      if (!assignee?.isActive || !ticket) return;
+
+      const ticketLabel =
+        ticket.title || ticket.ticketNumber || `Tiket #${ticket.id}`;
+      const roomLabel = ticket.room?.code
+        ? ` Kamar ${ticket.room.code}${ticket.room.name ? ` - ${ticket.room.name}` : ""}.`
+        : "";
+      await this.notification.create({
+        recipientUserId: assignee.id,
+        title: "Tiket Ditugaskan ke Anda",
+        body: `Anda ditugaskan menangani "${ticketLabel}".${roomLabel}`,
+        linkTo: "/tickets",
+        entityType: "Ticket",
+        entityId: String(ticket.id),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi penugasan tiket #${ticketId}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
+
+  // F3-1 (K-6/K-8): tiket pindah barang yang ditutup memberi tahu staf
+  // assignee yang melakukan pemindahan — bukan admin yang menutup.
+  private async notifyBarangPindahClosed(
+    ticket: {
+      id: number;
+      title: string | null;
+      description: string | null;
+      assignedToId: number | null;
+    },
+    finalAdminNote?: string,
+  ) {
+    if (!ticket.assignedToId) return;
+    try {
+      const moveDesc = ticket.description || "";
+      const fromMatch = moveDesc.match(/Dari:\s*(.+)/i);
+      const toMatch = moveDesc.match(/Ke:\s*(.+)/i);
+      const itemMatch = moveDesc.match(/Barang:\s*(.+?)\s*\(/i);
+      if (!fromMatch && !toMatch && !itemMatch) return;
+
+      const assignee = await this.prisma.user.findUnique({
+        where: { id: ticket.assignedToId },
+        select: { id: true, isActive: true },
+      });
+      if (!assignee?.isActive) return;
+
+      const detail = [
+        itemMatch?.[1] ? `Barang: ${itemMatch[1]}` : null,
+        fromMatch?.[1] ? `dari ${fromMatch[1]}` : null,
+        toMatch?.[1] ? `ke ${toMatch[1]}` : null,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      await this.notification.create({
+        recipientUserId: assignee.id,
+        title: "📦 Tiket Pindah Barang Selesai",
+        body: `Tiket "${ticket.title}" ditutup. ${detail}. Catatan: ${finalAdminNote ?? "-"}`,
+        linkTo: "/tickets",
+        entityType: "Ticket",
+        entityId: String(ticket.id),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi pindah barang untuk tiket #${ticket.id}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
+
+  // F3-1: kamar kembali AVAILABLE setelah inspeksi checkout → OWNER/ADMIN.
+  private async notifyRoomReady(roomId: number, ticketId: number) {
+    try {
+      const [ownerAdminUsers, room] = await Promise.all([
+        this.prisma.user.findMany({
+          where: {
+            role: { in: [UserRole.OWNER, UserRole.ADMIN] },
+            isActive: true,
+          },
+          select: { id: true },
+        }),
+        this.prisma.room.findUnique({
+          where: { id: roomId },
+          select: { code: true, name: true },
+        }),
+      ]);
+      if (ownerAdminUsers.length === 0 || !room) return;
+
+      const roomLabel = `${room.code}${room.name ? ` - ${room.name}` : ""}`;
+      await Promise.allSettled(
+        ownerAdminUsers.map((user) =>
+          this.notification.createOnce({
+            recipientUserId: user.id,
+            title: "Kamar Siap Dihuni",
+            body: `Inspeksi checkout selesai. Kamar ${roomLabel} kini AVAILABLE dan siap dipasarkan/dihuni.`,
+            linkTo: "/rooms",
+            entityType: "RoomReady",
+            entityId: String(ticketId),
+          }),
+        ),
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Gagal mengirim notifikasi kamar siap untuk room #${roomId} (tiket #${ticketId})`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
 
   private async createTicketRecord(input: {
     tenantId: number | null;
@@ -837,30 +1029,14 @@ export class TicketsService {
       issueImageMimeType: input.issueImageMimeType,
       issueImageFileSizeBytes: input.issueImageFileSizeBytes,
     };
-    const primaryTicketNumber = await generateTicketNumberTx(this.prisma);
-
-    try {
-      return await this.prisma.ticket.create({
+    return this.prisma.$transaction(async (tx) => {
+      const ticketNumber = await generateTicketNumberTx(tx);
+      return tx.ticket.create({
         data: {
-          ticketNumber: primaryTicketNumber,
+          ticketNumber,
           ...baseData,
         },
       });
-    } catch (error) {
-      if (
-        !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-        error.code !== "P2002"
-      ) {
-        throw error;
-      }
-
-      const fallbackTicketNumber = `TIC-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
-      return this.prisma.ticket.create({
-        data: {
-          ticketNumber: fallbackTicketNumber,
-          ...baseData,
-        },
-      });
-    }
+    });
   }
 }

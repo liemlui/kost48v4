@@ -1,6 +1,6 @@
 # DOSSIER 16 — NOTIFIKASI & PENGUMUMAN
 **Domain:** notifikasi in-app, pengumuman, coverage event, rencana push (PWA Phase 3). **Flow 14.**
-**Status:** 🟢 Coverage solid — notif siklus renewal, copy A17 dua-varian, inbox payment-submitted, prompt review tenant, prompt renewal H-10, fallback admin tenant tanpa portal, dan booking-dibatalkan-sweeper sudah SELESAI. Tersisa event operasional (ticket-assign, wifi, room-ready, K-8 penerima).
+**Status:** 🟢 Coverage solid — notif siklus renewal, copy A17 dua-varian, inbox payment-submitted, prompt review tenant, prompt renewal H-10, fallback admin tenant tanpa portal, booking-dibatalkan-sweeper, **dan F3-1 (ticket-assign→assignee, room-ready→OWNER/ADMIN, K-6/K-8 BARANG_PINDAH→staf assignee)** sudah SELESAI (2026-06-14). wifi-order = lewat WhatsApp, tak ada event in-app. Tersisa: hanya N-02/B-14 (F3-13) + push PWA (F4-2).
 **File inti:** `app-notification.service.ts` (104), `announcements.service.ts` (:100-260), notif inline di payment-submissions/tenant-bookings/checkout-requests/auto-ops/tickets.
 
 ---
@@ -13,9 +13,10 @@
 
 ## 2. Coverage matrix (verifikasi grep)
 ✅ ada: payment approved/rejected, booking approved/rejected, checkout created/approved/rejected, reminder H-10/H-7/H-3/H-1/H-day, forced-checkout, A17 dua-varian, notif siklus renewal, booking-dibatalkan-sweeper, announcement, review ≤2, overstay-blocked admin, prompt renewal H-10 + fallback admin tenant tanpa portal.
-❌ bolong: room-ready, ticket-assigned→staf, wifi-order.
+✅ baru (F3-1): ticket-assigned→assignee (saat assignee berubah, skip self), room-ready→OWNER/ADMIN (CHECKOUT_INSPECTION close → kamar AVAILABLE, dedupe).
+❌ bolong: wifi-order TIDAK ADA event in-app (tenant pesan via WhatsApp di `WifiOrderPage`).
 ✅ baru: payment-submitted→OWNER/ADMIN dan prompt-review tenant setelah tiket selesai, keduanya best-effort + dedupe.
-🟡 cacat: ticket-closed BARANG_PINDAH penerima salah (K-8).
+✅ RESOLVED (K-6/K-8): ticket-closed BARANG_PINDAH kini ke staf assignee (di luar tx).
 
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
