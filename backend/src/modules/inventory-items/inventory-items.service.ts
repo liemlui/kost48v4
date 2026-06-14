@@ -7,6 +7,7 @@ import { InventoryItemsQueryDto } from './dto/inventory-items-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { InventoryItemStatus, InventoryMovementType, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { generateTicketNumberTx } from '../../common/utils/ticket-number.util';
 
 const STAFF_ALLOWED_INVENTORY_STATUSES = new Set<InventoryItemStatus>([
   InventoryItemStatus.LOW_STOCK,
@@ -285,7 +286,7 @@ export class InventoryItemsService {
           })
         : await tx.ticket.create({
             data: {
-              ticketNumber: await this.generateTicketNumber(tx),
+              ticketNumber: await generateTicketNumberTx(tx),
               tenantId: null,
               roomId: null,
               stayId: null,
@@ -356,13 +357,5 @@ export class InventoryItemsService {
     });
 
     return result;
-  }
-
-  private async generateTicketNumber(tx: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-    const count = await tx.ticket.count({ where: { ticketNumber: { startsWith: `TIC-${year}-` } } });
-    const primary = `TIC-${year}-${String(count + 1).padStart(4, '0')}`;
-    const exists = await tx.ticket.findUnique({ where: { ticketNumber: primary }, select: { id: true } });
-    return exists ? `TIC-${year}-${Date.now().toString().slice(-6)}` : primary;
   }
 }

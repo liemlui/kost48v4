@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { RoomItemStatus, UserRole } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { generateTicketNumberTx } from '../../common/utils/ticket-number.util';
 import { CreateRoomItemDto, StaffUpdateRoomItemStatusDto, UpdateRoomItemDto } from './dto/room-item.dto';
 
 const STAFF_ALLOWED_ROOM_ITEM_STATUSES = new Set<RoomItemStatus>([
@@ -199,7 +200,7 @@ export class RoomItemsService {
           })
         : await tx.ticket.create({
             data: {
-              ticketNumber: await this.generateTicketNumber(tx),
+              ticketNumber: await generateTicketNumberTx(tx),
               tenantId: activeStay?.tenantId ?? null,
               roomId: existing.roomId,
               stayId: activeStay?.id ?? null,
@@ -271,13 +272,5 @@ export class RoomItemsService {
     });
 
     return result;
-  }
-
-  private async generateTicketNumber(tx: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-    const count = await tx.ticket.count({ where: { ticketNumber: { startsWith: `TIC-${year}-` } } });
-    const primary = `TIC-${year}-${String(count + 1).padStart(4, '0')}`;
-    const exists = await tx.ticket.findUnique({ where: { ticketNumber: primary }, select: { id: true } });
-    return exists ? `TIC-${year}-${Date.now().toString().slice(-6)}` : primary;
   }
 }

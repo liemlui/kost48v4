@@ -11,6 +11,10 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — refactor(F2-5): satukan generateTicketNumber (4 salinan → 1 util) → F2-5 SELESAI
+
+`common/utils/ticket-number.util.ts` `generateTicketNumberTx(db)` (db = `Prisma.TransactionClient` atau `PrismaService`) menyatukan 4 salinan `generateTicketNumber` (tickets / inventory-items / room-items / staff-field-reports). 3 salinan identik (count + fallback tabrakan ke suffix waktu); `tickets.service` yang dulu TANPA fallback kini ikut terlindungi. Method privat duplikat dihapus. **UAT:** buat tiket backoffice → `TIC-2026-0003`. `tsc` 0. → **F2-5 (konsolidasi util X-03 + ghost-stock) SELESAI.**
+
 ## 2026-06-14 — fix(F2-14): staff-routines startOfLocalDate → WIB (F2-14 SELESAI)
 
 `staff-routines.startOfLocalDate` (dipakai `today` & `parseDate`) kini menghitung tanggal kalender **WIB (UTC+7) sebagai UTC-midnight**, bebas timezone server (cPanel UTC) — sebelumnya `new Date(y,m,d)` local-time → due-date rutinitas bisa bergeser di server UTC. `getDate()/getDay()/formatDateKey` tetap membaca tanggal WIB pada server UTC maupun WIB (geseran 0–7 jam tak pernah lewat hari). `tsc` 0; `getToday` tanpa regresi (di server WIB hasil identik). → **F2-14 (dateOnly + staff-performance + staff-routines) SELESAI.**

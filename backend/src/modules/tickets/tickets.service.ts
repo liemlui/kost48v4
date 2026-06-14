@@ -10,6 +10,7 @@ import { CurrentUserPayload } from "../../common/interfaces/current-user.interfa
 import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums";
+import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
 import { AppNotificationService } from "../notifications/app-notification.service";
 import {
   AssignTicketDto,
@@ -807,13 +808,6 @@ export class TicketsService {
     return { stayId: resolvedStayId, roomId: resolvedRoomId };
   }
 
-  private async generateTicketNumber() {
-    const year = new Date().getFullYear();
-    const count = await this.prisma.ticket.count({
-      where: { ticketNumber: { startsWith: `TIC-${year}-` } },
-    });
-    return `TIC-${year}-${String(count + 1).padStart(4, "0")}`;
-  }
 
   private async createTicketRecord(input: {
     tenantId: number | null;
@@ -843,7 +837,7 @@ export class TicketsService {
       issueImageMimeType: input.issueImageMimeType,
       issueImageFileSizeBytes: input.issueImageFileSizeBytes,
     };
-    const primaryTicketNumber = await this.generateTicketNumber();
+    const primaryTicketNumber = await generateTicketNumberTx(this.prisma);
 
     try {
       return await this.prisma.ticket.create({

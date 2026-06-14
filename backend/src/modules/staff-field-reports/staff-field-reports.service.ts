@@ -9,6 +9,7 @@ import { AuditLogService } from "../../audit-log/audit-log.service";
 import { AdminDecision, UserRole } from "../../common/enums/app.enums";
 import { CurrentUserPayload } from "../../common/interfaces/current-user.interface";
 import { assertRoomItemQtyAvailableTx, syncRoomItemTx } from "../../common/utils/room-booking.util";
+import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
   AdminReviewStaffFieldReportDto,
@@ -217,7 +218,7 @@ export class StaffFieldReportsService {
           : null;
         ticket = await tx.ticket.create({
           data: {
-            ticketNumber: await this.generateTicketNumber(tx),
+            ticketNumber: await generateTicketNumberTx(tx),
             tenantId: activeStay?.tenantId ?? null,
             roomId: resolvedRoomId,
             stayId: activeStay?.id ?? null,
@@ -608,16 +609,4 @@ Movement stok #${movement.id} sudah dicatat.`
     }
   }
 
-  private async generateTicketNumber(tx: Prisma.TransactionClient) {
-    const year = new Date().getFullYear();
-    const count = await tx.ticket.count({
-      where: { ticketNumber: { startsWith: `TIC-${year}-` } },
-    });
-    const primary = `TIC-${year}-${String(count + 1).padStart(4, "0")}`;
-    const exists = await tx.ticket.findUnique({
-      where: { ticketNumber: primary },
-      select: { id: true },
-    });
-    return exists ? `TIC-${year}-${Date.now().toString().slice(-6)}` : primary;
-  }
 }
