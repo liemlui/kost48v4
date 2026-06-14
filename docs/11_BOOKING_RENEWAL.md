@@ -1,6 +1,6 @@
 # DOSSIER 11 — BOOKING & RENEWAL
 **Domain:** booking publik & portal (DP 30%, first-paid-wins) + perpanjangan kontrak (GAP #2). **Flow 2 & 5.**
-**Status:** Booking 🟢 KUAT (A18). Renewal 🟡 PARSIAL — state machine, invoice DP, rent-loyalty, dan notif siklus sudah ada; deadline command, publikasi kamar R5, serta forced checkout/deposit R3 belum lengkap.
+**Status:** Booking 🟢 KUAT (A18). Renewal 🟢 (2026-06-14) — state machine, invoice DP terpisah, rent-loyalty, notif siklus + prompt H-10 + fallback portal, sweeper hibrida, dan **deadline-gate command service (R3)** lengkap. Catatan: FORFEITED = **flag+notif (forced checkout & potong deposit MANUAL admin)** per keputusan owner hibrida — SENGAJA override R5 auto; publikasi kamar TIDAK/EXPIRED via flow checkout normal (keputusan owner #2).
 **File inti:** `tenant-bookings.service.ts` (36.9KB), `public-bookings.service.ts` (16.7KB), `renew-requests.service.ts` (194), `stays.service.ts:997` renewStayInTransaction.
 
 ---
@@ -42,7 +42,7 @@
 - **F2-2 · FASE 2:** notif renew (request→admin, approve/reject→tenant + prompt H-10 "perpanjang?") — salin `checkout-requests.service.ts:294-422`.
 
 ## 5. DESAIN RENEWAL (deliverable F2-1 — state machine penuh)
-**State RenewRequest:** `PENDING_DECISION → (YA) AWAITING_DP → (DP≤hari-H) DP_SECURED → (lunas≤H+7) COMPLETED`; cabang: `(TIDAK) REJECTED_BY_TENANT → kamar dibuka`; `(hari-H tanpa DP) EXPIRED_PRIORITY → kamar dibuka first-paid`; `(gagal lunas H+7) FORFEITED → forced checkout + DP hangus + potong deposit`.
+**State RenewRequest:** `PENDING_DECISION → (YA) AWAITING_DP → (DP≤hari-H) DP_SECURED → (lunas≤H+7) COMPLETED`; cabang: `(TIDAK) REJECTED_BY_TENANT → kamar dibuka`; `(hari-H tanpa DP) EXPIRED_PRIORITY → kamar dibuka first-paid`; `(gagal lunas H+7) FORFEITED → ditandai + notif admin; forced checkout + DP hangus + potong deposit = MANUAL admin (owner hibrida 2026-06-14, override R5 auto)`.
 **Aturan per fase:**
 1. Prompt H-10..H-day "perpanjang?" (notif) ATAU tenant ajukan sendiri.
 2. YA → AWAITING_DP, invoice DP 30%, kamar TIDAK dibuka publik (prioritas tenant lama s/d hari-H). **Rent-loyalty (D-16):** harga sewa renewal = harga saat ini (tidak naik).
@@ -52,7 +52,8 @@
 6. Pelunasan ≤ H+7 → `renewStayInTransaction` (periode menyambung, meter checkpoint).
 7. Grace H+7 lewat kontrak → tenant tetap huni; gagal lunas → forced checkout + DP hangus + potong deposit.
 **Schema additive (owner-approve):** RenewRequest.status (+5 status), downPaymentPaidAt, downPaymentDueDate(=hari-H), settlementDueDate(=DP+7).
-**Sweeper baru (auto-ops):** AWAITING_DP lewat hari-H → EXPIRED_PRIORITY; DP_SECURED gagal lunas H+7 → FORFEITED.
+**Sweeper baru (auto-ops):** AWAITING_DP lewat hari-H → EXPIRED_PRIORITY (OTOMATIS: batalkan invoice DP belum-bayar + reversal jurnal + notif tenant); DP_SECURED gagal lunas H+7 → FORFEITED.
+> **KEPUTUSAN OWNER HIBRIDA (2026-06-14) — override R5 auto:** FORFEITED **hanya DITANDAI + notif admin**; forced checkout & potong deposit dilakukan **admin MANUAL lewat flow checkout normal** (BUKAN otomatis sweeper). DP terbayar = hangus (tetap revenue invoice DP PAID). Deadline juga digate di **command service** (R3): `confirmDownPayment` tolak >hari-H, `approveRequest` tolak >H+7. Prompt keputusan mulai **H-10** + fallback admin utk tenant tanpa portal.
 **Invarian:** periode menyambung tanpa gap/overlap; pemesan baru tak pernah mulai < tanggal checkout; kamar tak dibuka selama prioritas tenant lama; DP hangus hanya bila gagal lunas H+7; **rent-loyalty: harga tetap untuk tenant renew.**
 **UAT (7 skenario):** (1) YA+DP H-2+lunas H+5 mulus; (2) DP hari-H persis sah; (3) tak DP s/d hari-H → kamar dibuka+overstay; (4) gagal lunas H+7 → forfeit+forced checkout; (5) TIDAK → kamar langsung publik; (6) 2 orang baru → first-paid; (7) race tenant-lama-DP vs buka-kamar → lock prioritas.
 

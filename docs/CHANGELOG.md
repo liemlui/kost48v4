@@ -11,6 +11,10 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — docs(F2-1): sinkron dossier 11 dgn keputusan owner hibrida → F2-1 SELESAI
+
+Reconcile dossier 11 dgn keputusan owner 2026-06-14: **FORFEITED = ditandai + notif admin; forced checkout & potong deposit MANUAL admin** (override sengaja R5 auto) — bukan bug. Status renewal dossier 11 → 🟢; state machine, sweeper hibrida, deadline-gate command (R3), prompt H-10 + fallback portal semua tercatat. **F2-1 (Renewal DP penuh, GAP #2) ditandai SELESAI** di checklist (semua sub-keputusan owner terpenuhi/terdokumentasi).
+
 ## 2026-06-14 — feat(F2-2/#3): prompt renewal H-10 + fallback admin tenant tanpa portal
 
 `auto-ops.runContractEndReminders`: REMINDER_DAYS `[7,3,1,0]` → **`[10,7,3,1,0]`** (horizon +10) sehingga tenant promoted dapat **prompt keputusan perpanjangan mulai H-10**. **Fallback portal-less:** bila tenant tak punya akun portal aktif, kini tak di-skip diam-diam — `notifyAdminsTenantNoPortalContract` memberi tahu OWNER/ADMIN (dedupe harian) agar tenant dihubungi manual. Endpoint manual baru `POST /auto-ops/run/contract-reminders` (UAT/ops).
