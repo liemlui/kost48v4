@@ -1,5 +1,5 @@
-import { useMemo, useState, type CSSProperties } from 'react';
-import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
+import { useEffect, useState, type CSSProperties } from 'react';
+import { useAuthenticatedMediaUrl } from '../../hooks/useAuthenticatedMediaUrl';
 
 type SafeImageProps = {
   src?: string | null;
@@ -23,12 +23,14 @@ export default function SafeImage({
   resolveUrl = true,
 }: SafeImageProps) {
   const [failed, setFailed] = useState(false);
-  const resolvedSrc = useMemo(() => {
-    if (!src || failed) return null;
-    return resolveUrl ? (resolveAbsoluteFileUrl(src) ?? src) : src;
-  }, [src, failed, resolveUrl]);
+  const media = useAuthenticatedMediaUrl(resolveUrl ? src : null);
+  const resolvedSrc = resolveUrl ? media.url : src;
 
-  if (!resolvedSrc) {
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!resolvedSrc || failed || media.failed) {
     return (
       <div
         className={placeholderClassName ? `safe-image-placeholder ${placeholderClassName}` : 'safe-image-placeholder'}
@@ -36,9 +38,9 @@ export default function SafeImage({
         role="img"
         aria-label={fallbackTitle}
       >
-        <span aria-hidden="true">🖼️</span>
-        <strong>{fallbackTitle}</strong>
-        <small>{fallbackDescription}</small>
+        <span aria-hidden="true">Foto</span>
+        <strong>{media.loading ? 'Memuat foto' : fallbackTitle}</strong>
+        <small>{media.loading ? 'Mengambil gambar secara aman.' : fallbackDescription}</small>
       </div>
     );
   }

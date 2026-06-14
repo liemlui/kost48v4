@@ -268,6 +268,9 @@ export function getResourceFilterDefinitions(configPath: string, items: Array<Re
   ];
   if (configPath === '/expenses') return [
     { id: 'ALL', label: 'Semua Biaya', count: items.length, tone: 'info' as const },
+    { id: 'DRAFT', label: 'Perlu Konfirmasi', count: count((item) => asString(item.status) === 'DRAFT'), tone: 'warning' as const },
+    { id: 'CONFIRMED', label: 'Terkonfirmasi', count: count((item) => asString(item.status) === 'CONFIRMED'), tone: 'success' as const },
+    { id: 'CANCELLED', label: 'Dibatalkan', count: count((item) => asString(item.status) === 'CANCELLED'), tone: 'neutral' as const },
     { id: 'FIXED', label: 'Tetap', count: count((item) => asString(item.type) === 'FIXED'), tone: 'info' as const },
     { id: 'VARIABLE', label: 'Variabel', count: count((item) => asString(item.type) === 'VARIABLE'), tone: 'warning' as const },
     { id: 'MAINTENANCE', label: 'Perawatan', count: count((item) => asString(item.category) === 'MAINTENANCE'), tone: 'warning' as const },
@@ -309,6 +312,7 @@ export function applyResourceFilter(configPath: string, item: Record<string, unk
     if (filter === 'PINNED') return Boolean(item.isPinned);
   }
   if (configPath === '/expenses') {
+    if (['DRAFT', 'CONFIRMED', 'CANCELLED'].includes(filter)) return asString(item.status) === filter;
     if (filter === 'MAINTENANCE') return asString(item.category) === 'MAINTENANCE';
     if (filter === 'COGS_SERVICE') return ['INTERNET', 'CLEANING', 'SUPPLIES'].includes(asString(item.category));
     if (filter === 'ADMIN_COST') return ['TAX', 'MARKETING', 'OTHER'].includes(asString(item.category));

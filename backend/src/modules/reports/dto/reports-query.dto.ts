@@ -62,3 +62,11 @@ export class OccupancyQueryDto {
   @Type(() => Number)
   month!: number;
 }
+
+export class OccupancyDailyQueryDto {
+  @IsDateString()
+  from!: string;
+
+  @IsDateString()
+  to!: string;
+}

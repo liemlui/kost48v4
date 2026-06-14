@@ -51,6 +51,13 @@ enum DepositStatus {
   FORFEITED
 }
 
+// F2-3b: status refund untuk tenant yang KALAH first-paid-wins padahal sudah transfer.
+enum RefundStatus {
+  NONE // tidak ada kewajiban refund (default)
+  PENDING // wajib direfund, menunggu admin proses + bukti transfer balik
+  COMPLETED // sudah direfund (bukti tercatat)
+}
+
 enum UtilityType {
   ELECTRICITY
   WATER
@@ -122,6 +129,14 @@ enum RenewRequestStatus {
   PENDING
   APPROVED
   REJECTED
+  // F2-1 (GAP #2) state machine renewal DP penuh — owner-approved S-1 (2026-06-13, additive).
+  PENDING_DECISION // H-10..H-day: tenant ditanya perpanjang?
+  AWAITING_DP // tenant jawab YA → tunggu DP 30% (prioritas s/d hari-H)
+  DP_SECURED // DP 30% diterima ≤ hari-H → kamar aman, tunggu pelunasan ≤ H+7
+  COMPLETED // pelunasan ≤ H+7 → stay diperpanjang (renewStayInTransaction)
+  REJECTED_BY_TENANT // tenant jawab TIDAK → kamar dibuka publik
+  EXPIRED_PRIORITY // hari-H lewat tanpa DP → prioritas hilang, kamar dibuka first-paid
+  FORFEITED // gagal lunas H+7 → forced checkout + DP hangus + potong deposit
 }
 
 enum CheckoutRequestStatus {
@@ -236,6 +251,7 @@ enum StaffReviewStatus {
   VISIBLE
   HIDDEN
   FLAGGED
+  PENDING_VERIFICATION // F2-18: review tenant menunggu verifikasi owner sebelum tampil (workflow menyusul)
 }
 
 enum StaffPerformanceEventType {
@@ -284,6 +300,12 @@ enum StayPurpose {
 enum ExpenseType {
   FIXED
   VARIABLE
+}
+
+enum ExpenseStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
 }
 
 enum ExpenseCategory {
@@ -594,6 +616,17 @@ model Stay {
   downPaymentPaidRupiah   Int       @default(0)
   downPaymentPaidAt       DateTime?
   downPaymentForfeitedAt  DateTime?
+
+  // F2-3b: refund tenant yang KALAH first-paid-wins padahal sudah transfer (BEDA dari
+  // deposit refund jaminan & DP forfeit). Auto-set PENDING saat booking loser dibatalkan;
+  // OWNER memproses + unggah bukti transfer balik → COMPLETED.
+  lossRefundStatus        RefundStatus @default(NONE)
+  lossRefundAmountRupiah  Int          @default(0)
+  lossRefundProofUrl      String?
+  lossRefundProofFileKey  String?
+  lossRefundNote          String?
+  lossRefundProcessedAt   DateTime?
+  lossRefundProcessedById Int?
 
   electricityTariffPerKwhRupiah Int @default(0)
   waterTariffPerM3Rupiah        Int @default(0)
@@ -1148,18 +1181,24 @@ model StaffFieldReport {
 }
 
 model RenewRequest {
-  id                    Int                @id @default(autoincrement())
-  stayId                Int
-  tenantId              Int
-  requestedTerm         PricingTerm
-  requestedCheckOutDate DateTime?          @db.Date
-  status                RenewRequestStatus @default(PENDING)
-  requestNotes          String?
-  reviewNotes           String?
-  reviewedById          Int?
-  reviewedAt            DateTime?
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  id                      Int                @id @default(autoincrement())
+  stayId                  Int
+  tenantId                Int
+  requestedTerm           PricingTerm
+  requestedCheckOutDate   DateTime?          @db.Date
+  status                  RenewRequestStatus @default(PENDING)
+  requestNotes            String?
+  reviewNotes             String?
+  reviewedById            Int?
+  reviewedAt              DateTime?
+  // F2-1 (GAP #2) — owner-approved S-1, additive. DP 30% perpanjangan + grace H+7.
+  downPaymentAmountRupiah Int?
+  downPaymentPaidAt       DateTime?
+  downPaymentDueDate      DateTime?          @db.Date // = hari-H (plannedCheckOutDate lama)
+  settlementDueDate       DateTime?          @db.Date // = downPaymentPaidAt + 7 hari
+  downPaymentInvoiceId    Int? // F2-1 inc.2b: invoice DP 30% terpisah (dibayar penuh sblm DP_SECURED)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
 
   stay       Stay   @relation(fields: [stayId], references: [id], onDelete: Cascade)
   tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
@@ -1211,9 +1250,11 @@ model Expense {
   id           Int             @id @default(autoincrement())
   expenseDate  DateTime        @db.Date
   type         ExpenseType
+  status       ExpenseStatus   @default(CONFIRMED)
   category     ExpenseCategory
   description  String
   amountRupiah Int
+  recurringKey String?         @unique
   vendorName   String?
   roomId       Int?
   stayId       Int?
@@ -1229,6 +1270,7 @@ model Expense {
 
   @@index([expenseDate])
   @@index([type])
+  @@index([status])
   @@index([category])
   @@index([roomId])
   @@index([stayId])

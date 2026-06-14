@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { ExpenseCategory, ExpenseType } from '../../../common/enums/app.enums';
+import { ExpenseCategory, ExpenseStatus, ExpenseType } from '../../../common/enums/app.enums';
 
 export class CreateExpenseDto {
   @IsDateString() expenseDate!: string;
@@ -15,6 +15,7 @@ export class CreateExpenseDto {
 export class UpdateExpenseDto {
   @IsOptional() @IsDateString() expenseDate?: string;
   @IsOptional() @IsEnum(ExpenseType) type?: ExpenseType;
+  @IsOptional() @IsEnum(ExpenseStatus) status?: ExpenseStatus;
   @IsOptional() @IsEnum(ExpenseCategory) category?: ExpenseCategory;
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsInt() @Min(0) amountRupiah?: number;

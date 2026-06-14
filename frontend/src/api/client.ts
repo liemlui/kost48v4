@@ -10,6 +10,7 @@ const client = axios.create({
 
 function clearAuthAndRedirect() {
   localStorage.removeItem('kost48_access_token');
+  sessionStorage.removeItem('kost48_last_authenticated_user');
 
   if (typeof window === 'undefined') return;
   const currentPath = window.location.pathname;
@@ -19,6 +20,16 @@ function clearAuthAndRedirect() {
 }
 
 client.interceptors.request.use((config) => {
+  const method = String(config.method ?? 'get').toLowerCase();
+  const isReadOnly = ['get', 'head', 'options'].includes(method);
+  if (typeof navigator !== 'undefined' && !navigator.onLine && !isReadOnly) {
+    throw new axios.AxiosError(
+      'Tidak ada koneksi. Data belum dikirim untuk mencegah transaksi ganda.',
+      'ERR_NETWORK_OFFLINE',
+      config,
+    );
+  }
+
   const token = localStorage.getItem('kost48_access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

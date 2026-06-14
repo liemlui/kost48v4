@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import SafeImage from '../common/SafeImage';
+import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
 import { formatRupiahWithoutSymbol } from '../../utils/formatCurrency';
 import { getBookingInvoiceRemaining } from '../../utils/invoiceTotals';
 import { getDeadlineMeta } from '../../utils/dateTime';
@@ -309,11 +310,11 @@ export default function SubmitPaymentModal({
 
             <Form.Group className="mb-3">
               <Form.Label>File Bukti Pembayaran</Form.Label>
-              <Form.Control
-                type="file"
+              <CameraOrGalleryInput
                 accept={TENANT_PAYMENT_PROOF_ACCEPT}
                 onChange={handleFileChange}
                 disabled={isPendingBlocked || isFullyPaid || submitting || uploading}
+                helpText="Foto bukti langsung atau pilih screenshot dari galeri. JPG, PNG, atau WebP maksimal 2MB."
               />
               <Form.Text muted>
                 Format bukti pembayaran: JPG, PNG, atau WebP maksimal 2MB. Gambar akan dikompres dulu di browser jika memungkinkan.

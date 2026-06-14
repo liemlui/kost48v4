@@ -641,4 +641,37 @@
     padding: 0.48rem 0.68rem;
   }
 }
+.pwa-status-stack {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 1090;
+  display: grid;
+  width: min(28rem, calc(100vw - 2rem));
+  gap: .75rem;
+}
 
+.pwa-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(14, 165, 233, .2);
+  box-shadow: 0 .75rem 2rem rgba(15, 23, 42, .14);
+}
+
+.pwa-status-card > div:first-child {
+  min-width: 0;
+}
+
+@media (max-width: 575.98px) {
+  .pwa-status-stack {
+    right: 1rem;
+    bottom: max(.75rem, env(safe-area-inset-bottom));
+  }
+
+  .pwa-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

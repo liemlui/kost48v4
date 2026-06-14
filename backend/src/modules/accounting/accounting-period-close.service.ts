@@ -588,7 +588,7 @@ export class AccountingPeriodCloseService {
     const [invoiceCount, paymentCount, expenseCount, wifiSaleCount, depositCount] = await Promise.all([
       db.invoice.count({ where: { status: { notIn: ['DRAFT', 'CANCELLED'] as any }, id: { notIn: mappedInvoices }, OR: [{ issuedAt: { gte: startDate, lte: endDate } }, { issuedAt: null, createdAt: { gte: startDate, lte: endDate } }] } }),
       db.invoicePayment.count({ where: { id: { notIn: mappedPayments }, paymentDate: { gte: startDate, lte: endDate } } }),
-      db.expense.count({ where: { id: { notIn: mappedExpenses }, expenseDate: { gte: startDate, lte: endDate } } }),
+      db.expense.count({ where: { status: 'CONFIRMED' as any, id: { notIn: mappedExpenses }, expenseDate: { gte: startDate, lte: endDate } } }),
       db.wifiSale.count({ where: { id: { notIn: mappedWifiSales }, saleDate: { gte: startDate, lte: endDate } } }),
       db.stay.count({ where: { depositPaidAmountRupiah: { gt: 0 }, id: { notIn: mappedDeposits }, createdAt: { lte: endDate } } }),
     ]);

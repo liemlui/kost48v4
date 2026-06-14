@@ -5,12 +5,14 @@ import { createResource, listResource } from '../../api/resources';
 import { uploadTicketImage } from '../../api/mediaUploads';
 import EmptyState from '../../components/common/EmptyState';
 import SafeImage from '../../components/common/SafeImage';
+import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantStaffReviewPrompt from '../../components/tenant/TenantStaffReviewPrompt';
 import { AssistantPanel, type AssistantItem } from '../../components/command-center';
 import { tenantCategoryLabel } from '../../utils/tenantCopy';
 import { toTenantFriendlyError } from '../../utils/tenantErrorCopy';
+import { compressImageFile } from '../../utils/compressImageFile';
 
 type PortalTicket = {
   issueImageUrl?: string | null;
@@ -58,23 +60,6 @@ const ticketCategoryOptions = [
   { value: 'EMERGENCY', label: 'Darurat' },
   { value: 'OTHER', label: 'Lainnya' },
 ];
-
-async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
-}
 
 export default function MyTicketsPage() {
   const queryClient = useQueryClient();
@@ -241,7 +226,7 @@ export default function MyTicketsPage() {
           </Form.Group>
           <Form.Group>
             <Form.Label>Foto Masalah (opsional)</Form.Label>
-            <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleTicketImage} disabled={uploadingImage} />
+            <CameraOrGalleryInput onChange={handleTicketImage} disabled={uploadingImage} />
             <Form.Text muted>Preview akan dibuat kecil. Klik setelah laporan dibuat untuk melihat hasil di daftar tiket.</Form.Text>
             {imagePreview ? (
               <div className="mt-2">

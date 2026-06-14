@@ -1,14 +1,42 @@
 {
+  "id": "/",
   "name": "KOST48 Surabaya",
   "short_name": "KOST48",
-  "description": "Portal hunian dan manajemen Kost48 Surabaya Barat — booking kamar, tagihan, dan operasional kos",
-  "start_url": "/rooms",
+  "description": "Portal hunian dan manajemen Kost48 Surabaya Barat untuk booking kamar, tagihan, dan operasional kos",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "display_override": ["standalone", "minimal-ui"],
   "theme_color": "#0ea5e9",
   "background_color": "#ffffff",
   "lang": "id-ID",
+  "categories": ["business", "finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Lihat Kamar",
+      "short_name": "Kamar",
+      "url": "/rooms?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Buka Portal",
+      "short_name": "Portal",
+      "url": "/login?source=pwa-shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-72.png",

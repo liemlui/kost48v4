@@ -5,6 +5,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { listPublicRooms } from '../../api/bookings';
 import { fetchPublicFaqs } from '../../api/faqs';
+import { fetchPublicSocialProof } from '../../api/marketing';
 import HorizontalBarChart from '../../components/charts/HorizontalBarChart';
 import Kost48LogoMark from '../../components/common/Kost48LogoMark';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,7 @@ const NAV_LINKS = [
   { href: '#fasilitas', label: 'Fasilitas' },
   { href: '#cek-kamar', label: 'Cek Kamar' },
   { href: '#pilihan-kamar', label: 'Pilihan Kamar' },
+  { href: '#ulasan', label: 'Ulasan' },
   { href: '#faq', label: 'FAQ' },
   { href: '#hubungi-kami', label: 'Hubungi Kami' },
 ];
@@ -197,6 +199,12 @@ export default function PublicGuestDashboardPage() {
   const faqQuery = useQuery({
     queryKey: ['public-faqs'],
     queryFn: fetchPublicFaqs,
+    staleTime: 5 * 60_000,
+  });
+
+  const socialProofQuery = useQuery({
+    queryKey: ['public-social-proof'],
+    queryFn: fetchPublicSocialProof,
     staleTime: 5 * 60_000,
   });
 
@@ -404,6 +412,51 @@ export default function PublicGuestDashboardPage() {
       </section>
 
       {/* ══ PHOTO DIVIDER ══ */}
+      <section className="gx-social-proof-section" id="ulasan">
+        <Container fluid="xl">
+          <div className="gx-social-proof-head">
+            <div className="gx-section-head">
+              <div className="gx-label">Cerita Penghuni</div>
+              <h2>Pengalaman nyata, ditampilkan tanpa membuka identitas.</h2>
+              <p>Hanya ulasan terverifikasi dengan nilai minimal 4 yang ditampilkan dari sistem KOST48.</p>
+            </div>
+            <div className="gx-social-proof-summary" aria-label="Ringkasan social proof">
+              <div>
+                <strong>{socialProofQuery.isLoading ? '...' : socialProofQuery.data?.averageRating || '-'}</strong>
+                <span>rating rata-rata</span>
+              </div>
+              <div>
+                <strong>{socialProofQuery.isLoading ? '...' : socialProofQuery.data?.occupantCount ?? '-'}</strong>
+                <span>penghuni aktif</span>
+              </div>
+            </div>
+          </div>
+
+          {socialProofQuery.isLoading ? (
+            <div className="gx-social-proof-state"><Spinner animation="border" size="sm" /> Memuat ulasan penghuni</div>
+          ) : socialProofQuery.isError ? (
+            <div className="gx-social-proof-state">Ulasan belum dapat dimuat saat ini.</div>
+          ) : socialProofQuery.data?.reviews.length ? (
+            <div className="gx-review-grid">
+              {socialProofQuery.data.reviews.map((review, index) => (
+                <article className="gx-review-card" key={`${review.initials}-${review.createdAt}-${index}`}>
+                  <div className="gx-review-card-head">
+                    <span className="gx-review-avatar">{review.initials}</span>
+                    <div>
+                      <strong>Penghuni {review.initials}</strong>
+                      <span>{review.rating.toFixed(1)} / 5</span>
+                    </div>
+                  </div>
+                  <p>{review.comment || 'Memberikan penilaian positif untuk layanan KOST48.'}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="gx-social-proof-state">Belum ada ulasan publik yang memenuhi kriteria.</div>
+          )}
+        </Container>
+      </section>
+
       <div className="gx-photo-divider" style={{ backgroundImage: `url(/room-images/kamar-a-1.webp)` }} aria-hidden="true" />
 
       {/* ══ FASILITAS ══ */}

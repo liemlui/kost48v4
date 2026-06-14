@@ -82,6 +82,24 @@ export class AnnouncementsService {
     return item;
   }
 
+  async canAccessImage(fileKey: string, user: CurrentUserPayload) {
+    const announcement = await this.prisma.announcement.findFirst({
+      where: {
+        OR: [
+          { imageFileKey: fileKey },
+          { imageUrl: { endsWith: `/${fileKey}` } },
+        ],
+      },
+      select: { id: true },
+    });
+
+    // A newly uploaded image can be previewed before the announcement record
+    // is saved. The filename is random and this endpoint still requires auth.
+    if (!announcement) return true;
+    await this.findOne(announcement.id, user);
+    return true;
+  }
+
   async create(dto: CreateAnnouncementDto, actor: CurrentUserPayload) {
     this.validateWindow(dto.startsAt, dto.expiresAt);
     const isPublishing = !!dto.isPublished;

@@ -13,6 +13,7 @@ import {
   fetchProfitLoss,
   fetchFinancialRatios,
   fetchOccupancy,
+  fetchOccupancyDaily,
   MonthlyIncome,
   OverdueAging,
   DepositLiability,
@@ -21,6 +22,7 @@ import {
   ProfitLoss,
   FinancialRatios,
   Occupancy,
+  OccupancyDaily,
 } from '../../api/reports';
 import UnlockedFormalReports from './UnlockedFormalReports';
 import { fetchBalanceSheetDraft, fetchFormalRatiosReadiness, type BalanceSheetDraft, type FinanceReadiness } from '../../api/finance';
@@ -68,6 +70,20 @@ function formatCompactRupiah(value: number): string {
 function currentYearMonth(): { year: number; month: number } {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
+function toLocalDateOnly(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function occupancyHeatmapRange(): { from: string; to: string } {
+  const today = new Date();
+  const from = new Date(today.getFullYear(), today.getMonth() - 12, today.getDate());
+  const to = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+  return { from: toLocalDateOnly(from), to: toLocalDateOnly(to) };
 }
 
 function monthLabel(ym: { year: number; month: number }) {
@@ -127,6 +143,7 @@ export default function ReportsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [ym, setYm] = useState<{ year: number; month: number }>(currentYearMonth());
   const [activeTab, setActiveTab] = useState<ReportTab>(() => normalizeReportTab(searchParams.get('tab')));
+  const heatmapRange = useMemo(occupancyHeatmapRange, []);
   const changeTab = (tab: ReportTab) => {
     setActiveTab(tab);
     setSearchParams((current) => {
@@ -144,6 +161,11 @@ export default function ReportsPage() {
   const profitLoss = useQuery({ queryKey: ['reports', 'profit-loss', ym], queryFn: () => fetchProfitLoss(ym.year, ym.month) });
   const financialRatios = useQuery({ queryKey: ['reports', 'financial-ratios', ym], queryFn: () => fetchFinancialRatios(ym.year, ym.month) });
   const occupancy = useQuery({ queryKey: ['reports', 'occupancy', ym], queryFn: () => fetchOccupancy(ym.year, ym.month) });
+  const occupancyDaily = useQuery({
+    queryKey: ['reports', 'occupancy-daily', heatmapRange],
+    queryFn: () => fetchOccupancyDaily(heatmapRange.from, heatmapRange.to),
+    staleTime: 5 * 60_000,
+  });
   const financeReadiness = useQuery({ queryKey: ['finance', 'formal-readiness'], queryFn: () => fetchFormalRatiosReadiness(), staleTime: 120_000, retry: 1 });
   const balanceSheetDraft = useQuery({ queryKey: ['finance', 'balance-sheet-draft', ym], queryFn: () => fetchBalanceSheetDraft(ym.year, ym.month), staleTime: 120_000, retry: 1 });
 
@@ -314,6 +336,17 @@ export default function ReportsPage() {
 
           {activeTab === 'operations' && (
             <Row className="g-3">
+              <Col xs={12}>
+                <ReportSection title="Heatmap Okupansi Harian" badge="12 bulan historis + 3 bulan proyeksi">
+                  {occupancyDaily.isLoading ? (
+                    <div className="occupancy-calendar-state"><Spinner animation="border" size="sm" /> Memuat heatmap...</div>
+                  ) : occupancyDaily.isError || !occupancyDaily.data ? (
+                    <Alert variant="warning" className="mb-0">Heatmap okupansi belum dapat dimuat.</Alert>
+                  ) : (
+                    <OccupancyDailyHeatmap data={occupancyDaily.data} />
+                  )}
+                </ReportSection>
+              </Col>
               <Col xl={5}><ReportSection title="Okupansi & Pendapatan per Kamar" badge={`${occupancy.data!.occupancyRatePercent}%`}><OccupancyTable data={occupancy.data!} /></ReportSection></Col>
               <Col xl={7}><ReportSection title="Ringkasan Operasional" badge="Terkini"><OperationsBars occupancy={occupancy.data!} monthlyIncome={monthlyIncome.data!} depositLiability={depositLiability.data!} /></ReportSection></Col>
             </Row>
@@ -365,6 +398,72 @@ function ReportSection({ title, badge, children }: { title: string; badge?: stri
       </Card.Header>
       <Card.Body>{children}</Card.Body>
     </Card>
+  );
+}
+
+function OccupancyDailyHeatmap({ data }: { data: OccupancyDaily }) {
+  const months = useMemo(() => {
+    const grouped = new Map<string, OccupancyDaily['days']>();
+    data.days.forEach((day) => {
+      const key = day.date.slice(0, 7);
+      grouped.set(key, [...(grouped.get(key) ?? []), day]);
+    });
+    return Array.from(grouped.entries());
+  }, [data.days]);
+
+  const heatLevel = (rate: number) => {
+    if (rate <= 0) return 0;
+    if (rate < 35) return 1;
+    if (rate < 65) return 2;
+    if (rate < 90) return 3;
+    return 4;
+  };
+
+  return (
+    <div className="occupancy-calendar">
+      <div className="occupancy-calendar-meta">
+        <span>{data.from} sampai {data.to}</span>
+        <span>{data.totalOperableRooms} kamar operasional saat ini</span>
+      </div>
+      <div className="occupancy-calendar-months">
+        {months.map(([monthKey, days]) => {
+          const firstWeekday = new Date(`${monthKey}-01T00:00:00.000Z`).getUTCDay();
+          const monthName = new Date(`${monthKey}-01T00:00:00.000Z`).toLocaleDateString('id-ID', {
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC',
+          });
+          return (
+            <article className="occupancy-calendar-month" key={monthKey}>
+              <h3>{monthName}</h3>
+              <div className="occupancy-calendar-weekdays" aria-hidden="true">
+                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((label) => <span key={label}>{label}</span>)}
+              </div>
+              <div className="occupancy-calendar-grid">
+                {Array.from({ length: firstWeekday }, (_, index) => <span className="occupancy-day-empty" key={`blank-${index}`} />)}
+                {days.map((day) => (
+                  <div
+                    className={`occupancy-day occupancy-level-${heatLevel(day.occupancyRatePercent)}${day.isProjection ? ' is-projection' : ''}`}
+                    key={day.date}
+                    title={`${day.date}: ${day.occupiedRooms}/${day.totalOperableRooms} kamar (${day.occupancyRatePercent}%)${day.isProjection ? ' - proyeksi' : ''}`}
+                  >
+                    <span>{Number(day.date.slice(-2))}</span>
+                    <small>{Math.round(day.occupancyRatePercent)}%</small>
+                  </div>
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      <div className="occupancy-calendar-legend">
+        <span>Rendah</span>
+        {[0, 1, 2, 3, 4].map((level) => <i className={`occupancy-level-${level}`} key={level} />)}
+        <span>Tinggi</span>
+        <em>Garis putus-putus = proyeksi</em>
+      </div>
+      <p className="occupancy-calendar-note">{data.note}</p>
+    </div>
   );
 }
 

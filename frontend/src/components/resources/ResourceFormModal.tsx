@@ -8,25 +8,12 @@ import type { PortalUserSummary } from '../../types';
 import CurrencyInput from '../common/CurrencyInput';
 import PasswordInput from '../common/PasswordInput';
 import SearchableSelect from '../common/SearchableSelect';
+import SafeImage from '../common/SafeImage';
 import { uploadAnnouncementImage, uploadRoomImage } from '../../api/mediaUploads';
+import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  const nextName = file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg';
-  return new File([blob], nextName, { type: 'image/jpeg' });
+  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
 
 function resolveAbsoluteFileUrl(fileUrl?: string | null) {
@@ -368,6 +355,10 @@ export default function ResourceFormModal({
               return null;
             }
 
+            if (config.path === '/expenses' && field.name === 'status' && !editingItem) {
+              return null;
+            }
+
             const handleRoomImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
@@ -485,7 +476,7 @@ export default function ResourceFormModal({
                             return (
                               <div key={`${url}-${index}`} className={`room-image-card ${isCover ? 'is-cover' : ''}`}>
                                 <button type="button" className="room-image-preview" onClick={() => setZoomImageUrl(absoluteUrl ?? url)}>
-                                  <img src={absoluteUrl ?? url} alt={`Foto kamar ${index + 1}`} />
+                                  <SafeImage src={absoluteUrl ?? url} alt={`Foto kamar ${index + 1}`} />
                                 </button>
                                 <div className="room-image-badge">{isCover ? 'Foto utama' : `Foto detail ${index}`}</div>
                                 <div className="room-image-actions">
@@ -509,7 +500,7 @@ export default function ResourceFormModal({
                       {typeof currentValue === 'string' && currentValue ? (() => { const absoluteUrl = resolveAbsoluteFileUrl(currentValue); return (
                         <div className="mt-3" style={{ width: 140 }}>
                           <button type="button" className="btn btn-link p-0 border rounded overflow-hidden w-100 bg-white" onClick={() => setZoomImageUrl(absoluteUrl ?? currentValue)}>
-                            <img src={absoluteUrl ?? currentValue} alt="Gambar pengumuman" style={{ width: '100%', height: 96, objectFit: 'cover', display: 'block' }} />
+                            <SafeImage src={absoluteUrl ?? currentValue} alt="Gambar pengumuman" style={{ width: '100%', height: 96, objectFit: 'cover', display: 'block' }} />
                           </button>
                           <Button size="sm" variant="outline-danger" className="w-100 mt-1" onClick={() => setFormState({ ...formState, imageUrl: '', imageFileKey: '', imageOriginalFilename: '', imageMimeType: '', imageFileSizeBytes: '' })}>Hapus</Button>
                         </div>
@@ -707,7 +698,7 @@ export default function ResourceFormModal({
         <Modal.Title>Preview Gambar Kamar</Modal.Title>
       </Modal.Header>
       <Modal.Body className="text-center">
-        {zoomImageUrl ? <img src={zoomImageUrl} alt="Preview gambar kamar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
+        {zoomImageUrl ? <SafeImage src={zoomImageUrl} alt="Preview gambar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
       </Modal.Body>
     </Modal>
     </>

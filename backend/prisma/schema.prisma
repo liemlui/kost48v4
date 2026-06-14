@@ -302,6 +302,12 @@ enum ExpenseType {
   VARIABLE
 }
 
+enum ExpenseStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
 enum ExpenseCategory {
   RENT_BUILDING
   SALARY
@@ -1248,9 +1254,11 @@ model Expense {
   id           Int             @id @default(autoincrement())
   expenseDate  DateTime        @db.Date
   type         ExpenseType
+  status       ExpenseStatus   @default(CONFIRMED)
   category     ExpenseCategory
   description  String
   amountRupiah Int
+  recurringKey String?         @unique
   vendorName   String?
   roomId       Int?
   stayId       Int?
@@ -1266,6 +1274,7 @@ model Expense {
 
   @@index([expenseDate])
   @@index([type])
+  @@index([status])
   @@index([category])
   @@index([roomId])
   @@index([stayId])

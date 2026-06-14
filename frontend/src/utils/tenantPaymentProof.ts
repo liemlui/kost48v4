@@ -8,10 +8,6 @@ export function formatTenantProofFileSize(bytes: number) {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-function fileBaseName(fileName: string) {
-  return (fileName || 'bukti-pembayaran').replace(/\.(png|webp|jpeg|jpg)$/i, '');
-}
-
 export function validateTenantPaymentProofFile(file: File) {
   if (!TENANT_PAYMENT_PROOF_ALLOWED_TYPES.includes(file.type)) {
     return 'Bukti pembayaran hanya menerima JPG, PNG, atau WebP. PDF belum didukung untuk bukti pembayaran.';
@@ -27,24 +23,7 @@ export async function compressTenantPaymentProof(file: File): Promise<File> {
     throw new Error('Bukti pembayaran hanya menerima JPG, PNG, atau WebP.');
   }
 
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    bitmap.close();
-    return file;
-  }
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  const compressed = new File([blob], `${fileBaseName(file.name)}.jpg`, { type: 'image/jpeg' });
+  const compressed = await compressImageFile(file, { maxSide: 1600, quality: 0.78 });
   return compressed.size < file.size ? compressed : file;
 }
 
@@ -70,3 +49,4 @@ export async function prepareTenantPaymentProof(file: File): Promise<File> {
 export function tenantPaymentProofReadyLabel(file: File) {
   return `${file.name} (${formatTenantProofFileSize(file.size)})`;
 }
+import { compressImageFile } from './compressImageFile';

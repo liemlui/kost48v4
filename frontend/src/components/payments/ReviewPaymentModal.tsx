@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Badge, Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge from '../common/StatusBadge';
+import AuthenticatedFileLink from '../common/AuthenticatedFileLink';
+import SafeImage from '../common/SafeImage';
 import type { PaymentSubmission } from '../../types';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
 import AiAssistButton from '../ai/AiAssistButton';
@@ -192,10 +194,12 @@ export default function ReviewPaymentModal({
                     </div>
                     {absoluteFileUrl ? (
                       <div className="mt-3 small">
-                        Bukti bayar:{' '}
-                        <a href={absoluteFileUrl} target="_blank" rel="noreferrer">
-                          {submission.originalFilename ?? 'Buka file'}
-                        </a>
+                        <span className="me-2">Bukti bayar:</span>
+                        <AuthenticatedFileLink
+                          src={submission.fileUrl}
+                          label={submission.originalFilename ?? 'Buka file'}
+                          fileName={submission.originalFilename ?? undefined}
+                        />
                         {submission.mimeType ? <span className="text-muted ms-1">({submission.mimeType}{submission.fileSizeBytes ? ` · ${Math.round(submission.fileSizeBytes / 1024)} KB` : ''})</span> : null}
                       </div>
                     ) : <Alert variant="warning" className="small mt-3 mb-0">Tidak ada bukti. Approve nonaktif.</Alert>}
@@ -211,7 +215,7 @@ export default function ReviewPaymentModal({
                         <Button size="sm" variant="outline-primary" onClick={() => setShowZoom(true)}>Zoom</Button>
                       </div>
                       <button type="button" className="payment-proof-preview-btn" onClick={() => setShowZoom(true)}>
-                        <img src={absoluteFileUrl ?? ''} alt="Bukti bayar" />
+                        <SafeImage src={submission.fileUrl} alt="Bukti bayar" />
                       </button>
                     </div>
                   ) : null}
@@ -374,7 +378,7 @@ export default function ReviewPaymentModal({
           <Modal.Title>Zoom Bukti Bayar</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-center">
-          {canPreviewImage ? <img src={absoluteFileUrl ?? ''} alt="Zoom bukti bayar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
+          {canPreviewImage ? <SafeImage src={submission?.fileUrl} alt="Zoom bukti bayar" style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} /> : null}
         </Modal.Body>
       </Modal>
     </>

@@ -17,6 +17,8 @@ import PaginationControls from "../../components/common/PaginationControls";
 import EmptyState from "../../components/common/EmptyState";
 import { TableSkeleton } from "../../components/common/SkeletonLoader";
 import StatusBadge from "../../components/common/StatusBadge";
+import CameraOrGalleryInput from "../../components/common/CameraOrGalleryInput";
+import SafeImage from "../../components/common/SafeImage";
 import AdminStaffFieldReportQueue from "../../components/staff/AdminStaffFieldReportQueue";
 import { inventoryItemFinalStatusOptions, roomItemFinalStatusOptions } from "../../constants/staffRepairOptions";
 import { listResource, postAction } from "../../api/resources";
@@ -465,14 +467,10 @@ export default function TicketsPage() {
             </Form.Group>
             <Form.Group>
               <Form.Label>Foto bukti selesai</Form.Label>
-              <Form.Control
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleResolutionImage}
-              />
+              <CameraOrGalleryInput onChange={handleResolutionImage} />
               {resolutionPreview ? (
                 <div className="mt-2">
-                  <img
+                  <SafeImage
                     src={resolutionPreview}
                     alt="Foto yang dipilih"
                     style={{
@@ -723,7 +721,7 @@ export default function TicketsPage() {
                       </div>
                       {item.issueImageUrl ? (
                         <div className="mt-1">
-                          <img
+                          <SafeImage
                             src={item.issueImageUrl}
                             alt="Foto masalah"
                             style={{
@@ -737,7 +735,7 @@ export default function TicketsPage() {
                       ) : null}
                       {item.resolutionImageUrl ? (
                         <div className="mt-1">
-                          <img
+                          <SafeImage
                             src={item.resolutionImageUrl}
                             alt="Foto selesai"
                             style={{
@@ -966,14 +964,10 @@ export default function TicketsPage() {
           </Form.Group>
           <Form.Group>
             <Form.Label>Foto bukti selesai</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleResolutionImage}
-            />
+            <CameraOrGalleryInput onChange={handleResolutionImage} />
             {resolutionPreview ? (
               <div className="mt-2">
-                <img
+                <SafeImage
                   src={resolutionPreview}
                   alt="Foto yang dipilih"
                   style={{

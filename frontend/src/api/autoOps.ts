@@ -34,6 +34,8 @@ export type AutoOpsRunResult = {
   releasedRoomIds?: Array<number | string>;
   releasedRoomsIds?: Array<number | string>;
   orphanReleasedRoomIds?: Array<number | string>;
+  recurringExpenseDrafts?: unknown;
+  automaticDepreciation?: unknown;
   accountingAutoClose?: unknown;
 };
 

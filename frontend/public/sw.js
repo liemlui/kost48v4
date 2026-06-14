@@ -1,11 +1,15 @@
-// KOST48 PWA — Safe Service Worker MVP
-// Cache policy: static app shell only. No API/auth/private data caching.
-// Cache name versioned for easy cleanup on updates.
-const CACHE_NAME = 'kost48-pwa-v2';
+// KOST48 PWA service worker.
+// Only the public app shell and explicitly public static assets are cached.
+// API responses, authenticated requests, and business mutations stay network-only.
+const CACHE_PREFIX = 'kost48-pwa-';
+const BUILD_ID = '__KOST48_BUILD_ID__';
+const PRECACHE_NAME = `${CACHE_PREFIX}precache-${BUILD_ID}`;
+const STATIC_NAME = `${CACHE_PREFIX}static-${BUILD_ID}`;
+const NAVIGATION_TIMEOUT_MS = 8000;
+const MAX_CACHEABLE_ASSET_BYTES = 10 * 1024 * 1024;
 
-// Static assets to precache on install (best-effort).
-const PRECACHE_URLS = [
-  '/rooms',
+const CORE_ASSETS = [
+  '/offline.html',
   '/manifest.webmanifest',
   '/icons/favicon-32.png',
   '/icons/apple-touch-icon.png',
@@ -14,116 +18,203 @@ const PRECACHE_URLS = [
   '/icons/icon-512-maskable.png',
 ];
 
-// ---------------------------------------------------------------------------
-// Install — precache static public assets (best-effort, ignore failures)
-// ---------------------------------------------------------------------------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
-        PRECACHE_URLS.map((url) =>
-          cache.add(url).catch(() => {
-            // Silently skip if a URL can't be cached (e.g. dev server returns HTML for /rooms)
-          })
-        )
-      );
-    }).then(() => self.skipWaiting())
+    caches.open(PRECACHE_NAME).then(async (cache) => {
+      await precacheCoreAssets(cache);
+      await precachePublicShell(cache);
+    }),
   );
 });
 
-// ---------------------------------------------------------------------------
-// Activate — remove old caches, take control immediately
-// ---------------------------------------------------------------------------
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
+    Promise.all([
+      cleanupOldCaches(),
+      self.registration.navigationPreload?.enable(),
+    ]).then(() => self.clients.claim()),
   );
 });
 
-// ---------------------------------------------------------------------------
-// Fetch — network-only for API/auth; cache-first for static; network-first for navigation
-// ---------------------------------------------------------------------------
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // --- RULE 1: NEVER cache /api/* — always network-only ---
-  if (url.pathname.startsWith('/api/')) {
-    // Do not call event.respondWith — browser handles normally.
+  const publicRoomImage = url.pathname.startsWith('/uploads/room-images/')
+    || url.pathname.startsWith('/api/uploads/room-images/');
+
+  // Never intercept private/API traffic. The one API-prefix exception is the
+  // explicitly public room-marketing image alias.
+  if (
+    request.headers.has('Authorization')
+    || (url.pathname.startsWith('/api/') && !publicRoomImage)
+  ) {
     return;
   }
 
-  // --- RULE 2: NEVER cache requests with Authorization header ---
-  if (request.headers.has('Authorization')) {
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigation(request, url, event.preloadResponse));
     return;
   }
 
-  // --- RULE 3: Cache-first for known static assets (icons, manifest, built JS/CSS) ---
-  // We capture any same-origin GET that looks like a static resource.
-  if (request.method === 'GET' && url.origin === self.location.origin) {
-    // Don't cache navigation requests here — they get special handling below.
-    if (request.mode === 'navigate') {
-      event.respondWith(navigationHandler(request));
-      return;
-    }
-
-    // Cache-first for static assets.
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          // Only cache successful same-origin static responses.
-          if (response.ok && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        });
-      })
-    );
-    return;
+  if (isPublicStaticAsset(url.pathname)) {
+    event.respondWith(cacheFirstPublicAsset(request));
   }
-
-  // --- RULE 4: All other requests — browser default (network) ---
-  // Service worker does not intercept cross-origin or non-GET requests.
 });
 
-// ---------------------------------------------------------------------------
-// Navigation handler — network-first, fallback to cached /rooms, then to /
-// ---------------------------------------------------------------------------
-async function navigationHandler(request) {
-  try {
-    const networkResponse = await fetch(request);
-    // Cache the successful navigation response for offline fallback.
-    if (networkResponse.ok) {
-      const clone = networkResponse.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+function isPublicStaticAsset(pathname) {
+  return pathname === '/manifest.webmanifest'
+    || pathname.startsWith('/assets/')
+    || pathname.startsWith('/icons/')
+    || pathname.startsWith('/uploads/room-images/')
+    || pathname.startsWith('/api/uploads/room-images/');
+}
+
+async function cleanupOldCaches() {
+  const keys = await caches.keys();
+  await Promise.all(
+    keys
+      .filter((key) => key.startsWith(CACHE_PREFIX))
+      .filter((key) => key !== PRECACHE_NAME && key !== STATIC_NAME)
+      .map((key) => caches.delete(key)),
+  );
+}
+
+async function precacheCoreAssets(cache) {
+  await Promise.all(CORE_ASSETS.map(async (path) => {
+    const response = await fetch(path, { cache: 'no-store' });
+    if (!isExpectedCoreAsset(path, response)) {
+      throw new Error(`Unable to precache valid core asset: ${path}`);
     }
-    return networkResponse;
-  } catch (error) {
-    // Network failed — try cached version of the request first.
-    const cached = await caches.match(request);
-    if (cached) return cached;
+    await cache.put(path, response);
+  }));
+}
 
-    // Fallback to cached /rooms.
-    const roomsCached = await caches.match('/rooms');
-    if (roomsCached) return roomsCached;
+function isExpectedCoreAsset(path, response) {
+  if (!response.ok || response.type !== 'basic') return false;
+  const contentType = response.headers.get('Content-Type') || '';
 
-    // Final fallback to cached /.
-    const rootCached = await caches.match('/');
-    if (rootCached) return rootCached;
+  if (path.endsWith('.html')) return contentType.includes('text/html');
+  if (path.endsWith('.webmanifest')) {
+    return contentType.includes('json') || contentType.includes('manifest');
+  }
+  if (path.endsWith('.png')) return contentType.startsWith('image/png');
+  return false;
+}
 
-    // Nothing available — let browser show its offline page.
-    throw error;
+async function precachePublicShell(precache) {
+  const response = await fetch('/rooms', { cache: 'no-store' });
+  const contentType = response.headers.get('Content-Type') || '';
+  if (!response.ok || !contentType.includes('text/html')) {
+    throw new Error(`Unable to precache app shell: ${response.status}`);
+  }
+
+  const html = await response.clone().text();
+  await precache.put('/rooms', response.clone());
+  await precache.put('/', response);
+
+  const assetPaths = [...html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+)["']/g)]
+    .map((match) => match[1]);
+  if (assetPaths.length) {
+    const staticCache = await caches.open(STATIC_NAME);
+    await staticCache.addAll([...new Set(assetPaths)]);
   }
 }
 
-// No push event listener.
-// No sync event listener.
-// No notification logic.
-// No IndexedDB.
-// No API JSON cache.
+function isPublicNavigation(pathname) {
+  return pathname === '/'
+    || pathname === '/rooms'
+    || pathname === '/login'
+    || pathname === '/forgot-password'
+    || pathname === '/reset-password'
+    || /^\/rooms\/[^/]+\/detail$/.test(pathname)
+    || /^\/booking\/[^/]+$/.test(pathname);
+}
+
+async function cacheFirstPublicAsset(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (isCacheablePublicAsset(request, response)) {
+    const cache = await caches.open(STATIC_NAME);
+    await cache.put(request, response.clone());
+  }
+  return response;
+}
+
+function isCacheablePublicAsset(request, response) {
+  if (!response.ok || response.type !== 'basic') return false;
+
+  const cacheControl = response.headers.get('Cache-Control') || '';
+  if (/\b(?:no-store|private)\b/i.test(cacheControl)) return false;
+
+  const contentLength = Number(response.headers.get('Content-Length'));
+  if (Number.isFinite(contentLength) && contentLength > MAX_CACHEABLE_ASSET_BYTES) {
+    return false;
+  }
+
+  const contentType = response.headers.get('Content-Type') || '';
+  const pathname = new URL(request.url).pathname;
+  if (pathname.startsWith('/icons/') || pathname.includes('/room-images/')) {
+    return contentType.startsWith('image/');
+  }
+  if (pathname.endsWith('.webmanifest')) {
+    return contentType.includes('json') || contentType.includes('manifest');
+  }
+  if (request.destination === 'script') {
+    return contentType.includes('javascript');
+  }
+  if (request.destination === 'style') {
+    return contentType.includes('text/css');
+  }
+  return pathname.startsWith('/assets/');
+}
+
+async function fetchWithTimeout(request, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(new Request(request, { signal: controller.signal }));
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function handleNavigation(request, url, preloadResponse) {
+  try {
+    const response = await preloadResponse || await fetchWithTimeout(
+      request,
+      NAVIGATION_TIMEOUT_MS,
+    );
+    if (response.ok && isPublicNavigation(url.pathname)) {
+      const cache = await caches.open(PRECACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const exact = isPublicNavigation(url.pathname)
+      ? await caches.match(request)
+      : null;
+    if (exact) return exact;
+
+    // The cached public SPA shell contains no user data. It can safely boot a
+    // protected route offline while API/data requests remain network-only.
+    const shell = await caches.match('/rooms') || await caches.match('/');
+    if (shell) return shell;
+
+    return caches.match('/offline.html');
+  }
+}
+
+// Push and background sync are intentionally absent until the backend has
+// explicit consent, subscription lifecycle, idempotency, and retry controls.

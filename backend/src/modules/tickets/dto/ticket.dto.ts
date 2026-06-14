@@ -5,6 +5,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
   MinLength,
 } from "class-validator";
 import {
@@ -16,22 +20,33 @@ import {
 export class TicketImageFieldsDto {
   @IsOptional()
   @IsString()
+  @MaxLength(500)
+  @Matches(
+    /^\/(?:api\/tickets\/images|uploads\/ticket-images)\/[\w.-]+\.(jpg|jpeg|png|webp)$/i,
+    { message: "issueImageUrl harus berupa path foto tiket yang valid" },
+  )
   issueImageUrl?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(255)
+  @Matches(/^[\w.-]+\.(jpg|jpeg|png|webp)$/i, { message: "issueImageFileKey tidak valid" })
   issueImageFileKey?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   issueImageOriginalFilename?: string;
 
   @IsOptional()
   @IsString()
+  @IsIn(["image/jpeg", "image/png", "image/webp"])
   issueImageMimeType?: string;
 
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(2 * 1024 * 1024)
   issueImageFileSizeBytes?: number;
 }
 
@@ -99,22 +114,33 @@ export class ResolutionDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
+  @Matches(
+    /^\/(?:api\/tickets\/images|uploads\/ticket-images)\/[\w.-]+\.(jpg|jpeg|png|webp)$/i,
+    { message: "resolutionImageUrl harus berupa path foto tiket yang valid" },
+  )
   resolutionImageUrl?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(255)
+  @Matches(/^[\w.-]+\.(jpg|jpeg|png|webp)$/i, { message: "resolutionImageFileKey tidak valid" })
   resolutionImageFileKey?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   resolutionImageOriginalFilename?: string;
 
   @IsOptional()
   @IsString()
+  @IsIn(["image/jpeg", "image/png", "image/webp"])
   resolutionImageMimeType?: string;
 
   @IsOptional()
   @IsInt()
+  @Min(0)
+  @Max(2 * 1024 * 1024)
   resolutionImageFileSizeBytes?: number;
 }
 

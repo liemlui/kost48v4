@@ -58,6 +58,30 @@ export class AutoOpsController {
     return { message: 'AutoOps room healer berhasil dijalankan', data: await this.autoOpsService.runRoomHealer({ actorUserId: user.id, source: 'MANUAL_ROOM_HEALER_RUN' }) };
   }
 
+  @Post('run/recurring-expenses')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runRecurringExpenses(@CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'AutoOps draft expense rutin berhasil dijalankan',
+      data: await this.autoOpsService.runRecurringExpenseDrafts({
+        actorUserId: user.id,
+        source: 'MANUAL_RECURRING_EXPENSE_DRAFTS_RUN',
+      }),
+    };
+  }
+
+  @Post('run/depreciation')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runDepreciation(@CurrentUser() user: CurrentUserPayload) {
+    return {
+      message: 'AutoOps depresiasi berhasil dijalankan',
+      data: await this.autoOpsService.runAutomaticDepreciation({
+        actorUserId: user.id,
+        source: 'MANUAL_ASSET_DEPRECIATION_RUN',
+      }),
+    };
+  }
+
   // F2-1 inc.3: trigger manual sweeper renewal (UAT/ops).
   @Post('run/renewal-expiry')
   @Roles(UserRole.OWNER, UserRole.ADMIN)

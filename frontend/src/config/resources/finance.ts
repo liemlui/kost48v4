@@ -118,6 +118,7 @@ export const financeConfigs = {
       { key: 'id', label: 'ID' },
       { key: 'expenseDate', label: 'Tanggal' },
       { key: 'type', label: 'Tipe' },
+      { key: 'status', label: 'Status' },
       { key: 'category', label: 'Kategori' },
       { key: 'description', label: 'Deskripsi' },
       { key: 'amountRupiah', label: 'Nominal' },
@@ -139,6 +140,16 @@ export const financeConfigs = {
           { value: 'VARIABLE', label: 'Variabel' },
         ],
         required: true,
+      },
+      {
+        name: 'status',
+        label: 'Status Draft',
+        type: 'select' as const,
+        options: [
+          { value: 'DRAFT', label: 'Draft - perlu konfirmasi' },
+          { value: 'CONFIRMED', label: 'Confirmed - posting jurnal' },
+          { value: 'CANCELLED', label: 'Dibatalkan' },
+        ],
       },
       {
         name: 'category',

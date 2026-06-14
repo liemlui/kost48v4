@@ -6,6 +6,7 @@ import { getResource } from '../../api/resources';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import SafeImage from '../../components/common/SafeImage';
+import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import TenantPriorityBoard from '../../components/tenant/TenantPriorityBoard';
@@ -575,10 +576,10 @@ export default function TenantInvoiceDetailPage() {
               <Col md={12}>
                 <Form.Group>
                   <Form.Label className="fw-semibold">Bukti pembayaran</Form.Label>
-                  <Form.Control
-                    type="file"
+                  <CameraOrGalleryInput
                     accept={TENANT_PAYMENT_PROOF_ACCEPT}
                     onChange={handlePayFileChange}
+                    helpText="Foto bukti langsung atau pilih screenshot dari galeri."
                   />
                   <Form.Text className="text-muted">JPG/PNG/WebP, maksimal 2MB.</Form.Text>
                   {payFileLabel ? <div className="small mt-2">File siap dikirim: <strong>{payFileLabel}</strong></div> : null}

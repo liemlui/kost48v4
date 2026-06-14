@@ -127,7 +127,7 @@ export class AccountingReportsService {
         take: 25,
       }),
       (this.prisma as any).expense.findMany({
-        where: { id: { notIn: mappedExpenses } },
+        where: { status: 'CONFIRMED' as any, id: { notIn: mappedExpenses } },
         select: { id: true, expenseDate: true, category: true, description: true, amountRupiah: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         take: 25,
@@ -510,6 +510,7 @@ export class AccountingReportsService {
       (this.prisma as any).inventoryMovement.count({ where: { movementType: { in: ['IN', 'ASSIGN_TO_ROOM'] as any } } }),
       (this.prisma as any).expense.findMany({
         where: {
+          status: 'CONFIRMED' as any,
           category: { in: ['MAINTENANCE', 'SUPPLIES', 'OTHER'] as any },
           amountRupiah: { gte: 500000 },
         },

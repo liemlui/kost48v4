@@ -21,7 +21,7 @@ export class AnalyticsService {
       this.prisma.invoice.aggregate({ _sum: { totalAmountRupiah: true } }),
       this.prisma.invoicePayment.aggregate({ _sum: { amountRupiah: true } }),
       this.prisma.wifiSale.aggregate({ _sum: { soldPriceRupiah: true } }),
-      this.prisma.expense.aggregate({ _sum: { amountRupiah: true } }),
+      this.prisma.expense.aggregate({ _sum: { amountRupiah: true }, where: { status: 'CONFIRMED' as any } }),
       this.prisma.invoice.count({ where: { status: { in: [InvoiceStatus.ISSUED, InvoiceStatus.PARTIAL] }, dueDate: { lt: new Date() } } }),
     ]);
     return { totalBilledRupiah: invoiceAgg._sum.totalAmountRupiah ?? 0, totalPaidRupiah: paymentAgg._sum.amountRupiah ?? 0, totalWifiRevenueRupiah: wifiAgg._sum.soldPriceRupiah ?? 0, totalExpenseRupiah: expenseAgg._sum.amountRupiah ?? 0, overdueCount };

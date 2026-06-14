@@ -19,6 +19,8 @@ type NormalizedRunResult = {
   releasedRooms: number;
   expiredStayIds: Array<string | number>;
   releasedRoomIds: Array<string | number>;
+  recurringExpenseDrafts?: unknown;
+  automaticDepreciation?: unknown;
   accountingAutoClose?: unknown;
 };
 
@@ -83,8 +85,22 @@ function normalizeRunResult(result: AutoOpsRunResult | null): NormalizedRunResul
     releasedRooms: pickNumber(source, ['releasedRooms', 'orphanReleasedRooms', 'releasedRoomCount']) || releasedRoomIds.length,
     expiredStayIds,
     releasedRoomIds,
+    recurringExpenseDrafts: source.recurringExpenseDrafts,
+    automaticDepreciation: source.automaticDepreciation,
     accountingAutoClose: source.accountingAutoClose,
   };
+}
+
+function describeFinanceAutomation(result: NormalizedRunResult | null) {
+  const drafts = result?.recurringExpenseDrafts as any;
+  const depreciation = result?.automaticDepreciation as any;
+  const draftText = drafts?.skipped
+    ? `Draft rutin safe-skip: ${drafts.skippedReason ?? 'tidak dijalankan'}.`
+    : `${Number(drafts?.createdCount ?? 0)} draft expense rutin dibuat.`;
+  const depreciationText = depreciation?.posted
+    ? `Depresiasi ${depreciation.year}-${String(depreciation.month).padStart(2, '0')} berhasil diposting.`
+    : `Depresiasi safe-skip: ${depreciation?.skippedReason ?? 'tidak ada hasil'}.`;
+  return `${draftText} ${depreciationText}`;
 }
 
 function describeAccountingAutoClose(result: NormalizedRunResult | null) {
@@ -138,6 +154,9 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
         queryClient.invalidateQueries({ queryKey: ['auto-ops-status'] }),
         queryClient.invalidateQueries({ queryKey: ['stays'] }),
         queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['assets'] }),
+        queryClient.invalidateQueries({ queryKey: ['reports'] }),
         queryClient.invalidateQueries({ queryKey: ['payment-review'] }),
       ]);
       onCompleted?.();
@@ -219,6 +238,9 @@ export default function AutoOpsControlPanel({ status, role, onCompleted }: Props
             </div>
             <Alert variant="light" className="mt-2 mb-0 small">
               {describeAccountingAutoClose(lastResult)}
+            </Alert>
+            <Alert variant="light" className="mt-2 mb-0 small">
+              {describeFinanceAutomation(lastResult)}
             </Alert>
           </div>
         ) : null}

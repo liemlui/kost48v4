@@ -8,6 +8,8 @@ import { AccountingPostingService } from '../accounting/accounting-posting.servi
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
+import { AssetsService } from '../assets/assets.service';
+import { jakartaYearMonth, previousJakartaYearMonth } from './auto-ops-period.helper';
 
 type AutoOpsRunResult = {
   expiredBookings: number;
@@ -16,6 +18,8 @@ type AutoOpsRunResult = {
   expiredStayIds: number[];
   releasedRoomIds: number[];
   accountingAutoClose?: unknown;
+  recurringExpenseDrafts?: unknown;
+  automaticDepreciation?: unknown;
 };
 
 @Injectable()
@@ -30,6 +34,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly accountingPosting: AccountingPostingService,
     private readonly appNotification: AppNotificationService,
     private readonly depositLedger: DepositLedgerService,
+    private readonly assetsService: AssetsService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -106,6 +111,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const noonResult = await this.runRoomReleaseAtNoon(options);
       const roomResult = await this.runRoomHealer(options);
       const overstayResult = await this.runOverstayEnforcement(options);
+      const recurringExpenseDrafts = await this.runRecurringExpenseDrafts(options);
+      const automaticDepreciation = await this.runAutomaticDepreciation(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       return {
         expiredBookings: bookingResult.expiredStayIds.length,
@@ -113,10 +120,123 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         releasedRooms: roomResult.releasedRoomIds.length + noonResult.releasedRoomIds.length,
         expiredStayIds: bookingResult.expiredStayIds,
         releasedRoomIds: [...roomResult.releasedRoomIds, ...noonResult.releasedRoomIds],
+        recurringExpenseDrafts,
+        automaticDepreciation,
         accountingAutoClose,
       };
     } finally {
       this.running = false;
+    }
+  }
+
+  async runRecurringExpenseDrafts(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
+    const enabled = String(process.env.RECURRING_EXPENSE_DRAFTS_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const source = options.source ?? 'AUTO_OPS_RECURRING_EXPENSE_DRAFTS';
+    if (!enabled) return { createdCount: 0, skipped: true, skippedReason: 'RECURRING_EXPENSE_DRAFTS_DISABLED', source };
+
+    try {
+    const { year, month } = jakartaYearMonth(options.now ?? new Date());
+    const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+    const expenseDate = new Date(Date.UTC(year, month - 1, 1));
+    const categories = [
+      { category: 'SALARY', label: 'Gaji', type: 'FIXED' },
+      { category: 'ELECTRICITY', label: 'Listrik', type: 'VARIABLE' },
+      { category: 'WATER', label: 'Air', type: 'VARIABLE' },
+      { category: 'INTERNET', label: 'Internet', type: 'FIXED' },
+      { category: 'RENT_BUILDING', label: 'Sewa gedung', type: 'FIXED' },
+      { category: 'TAX', label: 'Pajak', type: 'FIXED' },
+    ] as const;
+
+    const createdIds: number[] = [];
+    for (const item of categories) {
+      const recurringKey = `RECURRING-${monthKey}-${item.category}`;
+      const existing = await this.prisma.expense.findUnique({ where: { recurringKey }, select: { id: true } });
+      if (existing) continue;
+
+      const latest = await this.prisma.expense.findFirst({
+        where: {
+          category: item.category as any,
+          status: 'CONFIRMED' as any,
+          expenseDate: { lt: expenseDate },
+        },
+        orderBy: [{ expenseDate: 'desc' }, { id: 'desc' }],
+        select: { amountRupiah: true, vendorName: true, type: true, description: true },
+      });
+
+      try {
+        const created = await this.prisma.expense.create({
+          data: {
+            expenseDate,
+            type: (latest?.type ?? item.type) as any,
+            status: 'DRAFT' as any,
+            category: item.category as any,
+            description: `Draft rutin ${item.label} ${monthKey}`,
+            amountRupiah: latest?.amountRupiah ?? 0,
+            vendorName: latest?.vendorName ?? null,
+            recurringKey,
+            note: latest
+              ? `Dibuat otomatis dari expense terkonfirmasi terakhir. Konfirmasi nominal sebelum posting. Sumber: ${latest.description}`
+              : 'Dibuat otomatis tanpa histori nominal. Isi nominal lalu konfirmasi.',
+            createdById: options.actorUserId ?? null,
+          },
+          select: { id: true },
+        });
+        createdIds.push(created.id);
+      } catch (error: any) {
+        if (String(error?.code) !== 'P2002') {
+          this.logger.warn(`AutoOps recurring expense ${recurringKey} gagal: ${error?.message ?? error}`);
+        }
+      }
+    }
+
+    return {
+      period: monthKey,
+      createdCount: createdIds.length,
+      createdIds,
+      skipped: false,
+      source,
+    };
+    } catch (error: any) {
+      return {
+        createdCount: 0,
+        skipped: true,
+        skippedReason: error?.message ?? 'Recurring expense drafts skipped',
+        source,
+      };
+    }
+  }
+
+  async runAutomaticDepreciation(options: { actorUserId?: number | null; source?: string; now?: Date } = {}) {
+    const enabled = String(process.env.ASSET_DEPRECIATION_AUTO_ENABLED ?? 'true').toLowerCase() !== 'false';
+    const source = options.source ?? 'AUTO_OPS_ASSET_DEPRECIATION';
+    if (!enabled) return { posted: false, skipped: true, skippedReason: 'ASSET_DEPRECIATION_AUTO_DISABLED', source };
+
+    const { year, month } = previousJakartaYearMonth(options.now ?? new Date());
+
+    try {
+      const preview = await this.assetsService.depreciationPreview({ year, month });
+      if (preview.alreadyPosted) {
+        return { posted: false, skipped: true, skippedReason: 'DEPRECIATION_ALREADY_POSTED', year, month, source };
+      }
+      if (!preview.eligibleLines.length) {
+        return { posted: false, skipped: true, skippedReason: 'NO_ELIGIBLE_ASSETS', year, month, source };
+      }
+      const result = await this.assetsService.runDepreciationForPeriod(
+        year,
+        month,
+        options.actorUserId ?? null,
+        `AUTO_DEPRECIATION: diproses oleh ${source}.`,
+      );
+      return { posted: true, skipped: false, year, month, source, result };
+    } catch (error: any) {
+      return {
+        posted: false,
+        skipped: true,
+        skippedReason: error?.message ?? 'Automatic depreciation skipped',
+        year,
+        month,
+        source,
+      };
     }
   }
 

@@ -7,8 +7,11 @@ import { listStaffFieldReports } from '../../api/staffFieldReports';
 import { fieldReportStatusLabels, getTicketStatusLabel } from '../../constants/staffRepairOptions';
 import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
 import PaginationControls from '../common/PaginationControls';
+import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
+import SafeImage from '../common/SafeImage';
 import { useClientPagination } from '../../hooks/useClientPagination';
 import type { StaffFieldReport, Ticket } from '../../types';
+import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 type WorkType = 'CLEANING' | 'REPAIR' | 'ROOM' | 'WAREHOUSE' | 'METER' | 'OTHER';
 type WorkStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'WAITING_CHECK' | 'NEED_HELP';
@@ -166,21 +169,7 @@ function buildWorkItems(routines: StaffRoutineItem[], tickets: Ticket[]): WorkIt
 }
 
 async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1400;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+  return compressBrowserImage(file, { maxSide: 1400, quality: 0.78 });
 }
 
 export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, onUpdated }: Props) {
@@ -478,8 +467,8 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
               </Form.Group>
               <Form.Group>
                 <Form.Label>Foto bukti</Form.Label>
-                <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} />
-                {photoPreview ? <img className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
+                <CameraOrGalleryInput onChange={handlePhoto} />
+                {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
               </Form.Group>
             </>
           ) : null}

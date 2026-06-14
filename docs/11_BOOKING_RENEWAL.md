@@ -1,6 +1,6 @@
 # DOSSIER 11 — BOOKING & RENEWAL
 **Domain:** booking publik & portal (DP 30%, first-paid-wins) + perpanjangan kontrak (GAP #2). **Flow 2 & 5.**
-**Status:** Booking 🟢 KUAT (A18). Renewal 🔴 BELUM ada fase DP — satu-satunya aturan owner yang belum diimplementasi.
+**Status:** Booking 🟢 KUAT (A18). Renewal 🟡 PARSIAL — state machine, invoice DP, rent-loyalty, dan notif siklus sudah ada; deadline command, publikasi kamar R5, serta forced checkout/deposit R3 belum lengkap.
 **File inti:** `tenant-bookings.service.ts` (36.9KB), `public-bookings.service.ts` (16.7KB), `renew-requests.service.ts` (194), `stays.service.ts:997` renewStayInTransaction.
 
 ---

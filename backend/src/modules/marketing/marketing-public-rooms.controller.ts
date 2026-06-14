@@ -18,6 +18,14 @@ export class MarketingPublicRoomsController {
     };
   }
 
+  @Get('social-proof')
+  async socialProof() {
+    return {
+      message: 'Social proof publik berhasil diambil',
+      data: await this.publicRoomsService.getPublicSocialProof(),
+    };
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return {

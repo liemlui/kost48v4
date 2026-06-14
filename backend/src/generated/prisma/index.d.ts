@@ -284,6 +284,15 @@ export const DepositStatus: {
 export type DepositStatus = (typeof DepositStatus)[keyof typeof DepositStatus]
 
 
+export const RefundStatus: {
+  NONE: 'NONE',
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED'
+};
+
+export type RefundStatus = (typeof RefundStatus)[keyof typeof RefundStatus]
+
+
 export const UtilityType: {
   ELECTRICITY: 'ELECTRICITY',
   WATER: 'WATER'
@@ -381,7 +390,14 @@ export type TenantDepositLedgerDirection = (typeof TenantDepositLedgerDirection)
 export const RenewRequestStatus: {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  PENDING_DECISION: 'PENDING_DECISION',
+  AWAITING_DP: 'AWAITING_DP',
+  DP_SECURED: 'DP_SECURED',
+  COMPLETED: 'COMPLETED',
+  REJECTED_BY_TENANT: 'REJECTED_BY_TENANT',
+  EXPIRED_PRIORITY: 'EXPIRED_PRIORITY',
+  FORFEITED: 'FORFEITED'
 };
 
 export type RenewRequestStatus = (typeof RenewRequestStatus)[keyof typeof RenewRequestStatus]
@@ -537,7 +553,8 @@ export type StaffAuditResult = (typeof StaffAuditResult)[keyof typeof StaffAudit
 export const StaffReviewStatus: {
   VISIBLE: 'VISIBLE',
   HIDDEN: 'HIDDEN',
-  FLAGGED: 'FLAGGED'
+  FLAGGED: 'FLAGGED',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION'
 };
 
 export type StaffReviewStatus = (typeof StaffReviewStatus)[keyof typeof StaffReviewStatus]
@@ -604,6 +621,15 @@ export const ExpenseType: {
 };
 
 export type ExpenseType = (typeof ExpenseType)[keyof typeof ExpenseType]
+
+
+export const ExpenseStatus: {
+  DRAFT: 'DRAFT',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type ExpenseStatus = (typeof ExpenseStatus)[keyof typeof ExpenseStatus]
 
 
 export const ExpenseCategory: {
@@ -807,6 +833,10 @@ export type DepositStatus = $Enums.DepositStatus
 
 export const DepositStatus: typeof $Enums.DepositStatus
 
+export type RefundStatus = $Enums.RefundStatus
+
+export const RefundStatus: typeof $Enums.RefundStatus
+
 export type UtilityType = $Enums.UtilityType
 
 export const UtilityType: typeof $Enums.UtilityType
@@ -922,6 +952,10 @@ export const StayPurpose: typeof $Enums.StayPurpose
 export type ExpenseType = $Enums.ExpenseType
 
 export const ExpenseType: typeof $Enums.ExpenseType
+
+export type ExpenseStatus = $Enums.ExpenseStatus
+
+export const ExpenseStatus: typeof $Enums.ExpenseStatus
 
 export type ExpenseCategory = $Enums.ExpenseCategory
 
@@ -12732,6 +12766,8 @@ export namespace Prisma {
     depositRefundedRupiah: number | null
     downPaymentAmountRupiah: number | null
     downPaymentPaidRupiah: number | null
+    lossRefundAmountRupiah: number | null
+    lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     createdById: number | null
@@ -12751,6 +12787,8 @@ export namespace Prisma {
     depositRefundedRupiah: number | null
     downPaymentAmountRupiah: number | null
     downPaymentPaidRupiah: number | null
+    lossRefundAmountRupiah: number | null
+    lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     createdById: number | null
@@ -12782,6 +12820,13 @@ export namespace Prisma {
     downPaymentPaidRupiah: number | null
     downPaymentPaidAt: Date | null
     downPaymentForfeitedAt: Date | null
+    lossRefundStatus: $Enums.RefundStatus | null
+    lossRefundAmountRupiah: number | null
+    lossRefundProofUrl: string | null
+    lossRefundProofFileKey: string | null
+    lossRefundNote: string | null
+    lossRefundProcessedAt: Date | null
+    lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     bookingSource: $Enums.LeadSource | null
@@ -12823,6 +12868,13 @@ export namespace Prisma {
     downPaymentPaidRupiah: number | null
     downPaymentPaidAt: Date | null
     downPaymentForfeitedAt: Date | null
+    lossRefundStatus: $Enums.RefundStatus | null
+    lossRefundAmountRupiah: number | null
+    lossRefundProofUrl: string | null
+    lossRefundProofFileKey: string | null
+    lossRefundNote: string | null
+    lossRefundProcessedAt: Date | null
+    lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
     bookingSource: $Enums.LeadSource | null
@@ -12864,6 +12916,13 @@ export namespace Prisma {
     downPaymentPaidRupiah: number
     downPaymentPaidAt: number
     downPaymentForfeitedAt: number
+    lossRefundStatus: number
+    lossRefundAmountRupiah: number
+    lossRefundProofUrl: number
+    lossRefundProofFileKey: number
+    lossRefundNote: number
+    lossRefundProcessedAt: number
+    lossRefundProcessedById: number
     electricityTariffPerKwhRupiah: number
     waterTariffPerM3Rupiah: number
     bookingSource: number
@@ -12895,6 +12954,8 @@ export namespace Prisma {
     depositRefundedRupiah?: true
     downPaymentAmountRupiah?: true
     downPaymentPaidRupiah?: true
+    lossRefundAmountRupiah?: true
+    lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     createdById?: true
@@ -12914,6 +12975,8 @@ export namespace Prisma {
     depositRefundedRupiah?: true
     downPaymentAmountRupiah?: true
     downPaymentPaidRupiah?: true
+    lossRefundAmountRupiah?: true
+    lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     createdById?: true
@@ -12945,6 +13008,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: true
     downPaymentPaidAt?: true
     downPaymentForfeitedAt?: true
+    lossRefundStatus?: true
+    lossRefundAmountRupiah?: true
+    lossRefundProofUrl?: true
+    lossRefundProofFileKey?: true
+    lossRefundNote?: true
+    lossRefundProcessedAt?: true
+    lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     bookingSource?: true
@@ -12986,6 +13056,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: true
     downPaymentPaidAt?: true
     downPaymentForfeitedAt?: true
+    lossRefundStatus?: true
+    lossRefundAmountRupiah?: true
+    lossRefundProofUrl?: true
+    lossRefundProofFileKey?: true
+    lossRefundNote?: true
+    lossRefundProcessedAt?: true
+    lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     bookingSource?: true
@@ -13027,6 +13104,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: true
     downPaymentPaidAt?: true
     downPaymentForfeitedAt?: true
+    lossRefundStatus?: true
+    lossRefundAmountRupiah?: true
+    lossRefundProofUrl?: true
+    lossRefundProofFileKey?: true
+    lossRefundNote?: true
+    lossRefundProcessedAt?: true
+    lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
     bookingSource?: true
@@ -13155,6 +13239,13 @@ export namespace Prisma {
     downPaymentPaidRupiah: number
     downPaymentPaidAt: Date | null
     downPaymentForfeitedAt: Date | null
+    lossRefundStatus: $Enums.RefundStatus
+    lossRefundAmountRupiah: number
+    lossRefundProofUrl: string | null
+    lossRefundProofFileKey: string | null
+    lossRefundNote: string | null
+    lossRefundProcessedAt: Date | null
+    lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number
     waterTariffPerM3Rupiah: number
     bookingSource: $Enums.LeadSource | null
@@ -13215,6 +13306,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: boolean
     downPaymentPaidAt?: boolean
     downPaymentForfeitedAt?: boolean
+    lossRefundStatus?: boolean
+    lossRefundAmountRupiah?: boolean
+    lossRefundProofUrl?: boolean
+    lossRefundProofFileKey?: boolean
+    lossRefundNote?: boolean
+    lossRefundProcessedAt?: boolean
+    lossRefundProcessedById?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
     bookingSource?: boolean
@@ -13268,6 +13366,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: boolean
     downPaymentPaidAt?: boolean
     downPaymentForfeitedAt?: boolean
+    lossRefundStatus?: boolean
+    lossRefundAmountRupiah?: boolean
+    lossRefundProofUrl?: boolean
+    lossRefundProofFileKey?: boolean
+    lossRefundNote?: boolean
+    lossRefundProcessedAt?: boolean
+    lossRefundProcessedById?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
     bookingSource?: boolean
@@ -13313,6 +13418,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: boolean
     downPaymentPaidAt?: boolean
     downPaymentForfeitedAt?: boolean
+    lossRefundStatus?: boolean
+    lossRefundAmountRupiah?: boolean
+    lossRefundProofUrl?: boolean
+    lossRefundProofFileKey?: boolean
+    lossRefundNote?: boolean
+    lossRefundProcessedAt?: boolean
+    lossRefundProcessedById?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
     bookingSource?: boolean
@@ -13358,6 +13470,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: boolean
     downPaymentPaidAt?: boolean
     downPaymentForfeitedAt?: boolean
+    lossRefundStatus?: boolean
+    lossRefundAmountRupiah?: boolean
+    lossRefundProofUrl?: boolean
+    lossRefundProofFileKey?: boolean
+    lossRefundNote?: boolean
+    lossRefundProcessedAt?: boolean
+    lossRefundProcessedById?: boolean
     electricityTariffPerKwhRupiah?: boolean
     waterTariffPerM3Rupiah?: boolean
     bookingSource?: boolean
@@ -13376,7 +13495,7 @@ export namespace Prisma {
     initialMetersPromotedAt?: boolean
   }
 
-  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "downPaymentAmountRupiah" | "downPaymentPaidRupiah" | "downPaymentPaidAt" | "downPaymentForfeitedAt" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "cancelReason" | "notes" | "createdById" | "createdAt" | "updatedAt" | "initialElectricityKwhPending" | "initialWaterM3Pending" | "initialMetersRecordedAt" | "initialMetersRecordedById" | "initialMetersPromotedAt", ExtArgs["result"]["stay"]>
+  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "downPaymentAmountRupiah" | "downPaymentPaidRupiah" | "downPaymentPaidAt" | "downPaymentForfeitedAt" | "lossRefundStatus" | "lossRefundAmountRupiah" | "lossRefundProofUrl" | "lossRefundProofFileKey" | "lossRefundNote" | "lossRefundProcessedAt" | "lossRefundProcessedById" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "cancelReason" | "notes" | "createdById" | "createdAt" | "updatedAt" | "initialElectricityKwhPending" | "initialWaterM3Pending" | "initialMetersRecordedAt" | "initialMetersRecordedById" | "initialMetersPromotedAt", ExtArgs["result"]["stay"]>
   export type StayInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
@@ -13442,6 +13561,13 @@ export namespace Prisma {
       downPaymentPaidRupiah: number
       downPaymentPaidAt: Date | null
       downPaymentForfeitedAt: Date | null
+      lossRefundStatus: $Enums.RefundStatus
+      lossRefundAmountRupiah: number
+      lossRefundProofUrl: string | null
+      lossRefundProofFileKey: string | null
+      lossRefundNote: string | null
+      lossRefundProcessedAt: Date | null
+      lossRefundProcessedById: number | null
       electricityTariffPerKwhRupiah: number
       waterTariffPerM3Rupiah: number
       bookingSource: $Enums.LeadSource | null
@@ -13914,6 +14040,13 @@ export namespace Prisma {
     readonly downPaymentPaidRupiah: FieldRef<"Stay", 'Int'>
     readonly downPaymentPaidAt: FieldRef<"Stay", 'DateTime'>
     readonly downPaymentForfeitedAt: FieldRef<"Stay", 'DateTime'>
+    readonly lossRefundStatus: FieldRef<"Stay", 'RefundStatus'>
+    readonly lossRefundAmountRupiah: FieldRef<"Stay", 'Int'>
+    readonly lossRefundProofUrl: FieldRef<"Stay", 'String'>
+    readonly lossRefundProofFileKey: FieldRef<"Stay", 'String'>
+    readonly lossRefundNote: FieldRef<"Stay", 'String'>
+    readonly lossRefundProcessedAt: FieldRef<"Stay", 'DateTime'>
+    readonly lossRefundProcessedById: FieldRef<"Stay", 'Int'>
     readonly electricityTariffPerKwhRupiah: FieldRef<"Stay", 'Int'>
     readonly waterTariffPerM3Rupiah: FieldRef<"Stay", 'Int'>
     readonly bookingSource: FieldRef<"Stay", 'LeadSource'>
@@ -39156,6 +39289,8 @@ export namespace Prisma {
     stayId: number | null
     tenantId: number | null
     reviewedById: number | null
+    downPaymentAmountRupiah: number | null
+    downPaymentInvoiceId: number | null
   }
 
   export type RenewRequestSumAggregateOutputType = {
@@ -39163,6 +39298,8 @@ export namespace Prisma {
     stayId: number | null
     tenantId: number | null
     reviewedById: number | null
+    downPaymentAmountRupiah: number | null
+    downPaymentInvoiceId: number | null
   }
 
   export type RenewRequestMinAggregateOutputType = {
@@ -39176,6 +39313,11 @@ export namespace Prisma {
     reviewNotes: string | null
     reviewedById: number | null
     reviewedAt: Date | null
+    downPaymentAmountRupiah: number | null
+    downPaymentPaidAt: Date | null
+    downPaymentDueDate: Date | null
+    settlementDueDate: Date | null
+    downPaymentInvoiceId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -39191,6 +39333,11 @@ export namespace Prisma {
     reviewNotes: string | null
     reviewedById: number | null
     reviewedAt: Date | null
+    downPaymentAmountRupiah: number | null
+    downPaymentPaidAt: Date | null
+    downPaymentDueDate: Date | null
+    settlementDueDate: Date | null
+    downPaymentInvoiceId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -39206,6 +39353,11 @@ export namespace Prisma {
     reviewNotes: number
     reviewedById: number
     reviewedAt: number
+    downPaymentAmountRupiah: number
+    downPaymentPaidAt: number
+    downPaymentDueDate: number
+    settlementDueDate: number
+    downPaymentInvoiceId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -39217,6 +39369,8 @@ export namespace Prisma {
     stayId?: true
     tenantId?: true
     reviewedById?: true
+    downPaymentAmountRupiah?: true
+    downPaymentInvoiceId?: true
   }
 
   export type RenewRequestSumAggregateInputType = {
@@ -39224,6 +39378,8 @@ export namespace Prisma {
     stayId?: true
     tenantId?: true
     reviewedById?: true
+    downPaymentAmountRupiah?: true
+    downPaymentInvoiceId?: true
   }
 
   export type RenewRequestMinAggregateInputType = {
@@ -39237,6 +39393,11 @@ export namespace Prisma {
     reviewNotes?: true
     reviewedById?: true
     reviewedAt?: true
+    downPaymentAmountRupiah?: true
+    downPaymentPaidAt?: true
+    downPaymentDueDate?: true
+    settlementDueDate?: true
+    downPaymentInvoiceId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -39252,6 +39413,11 @@ export namespace Prisma {
     reviewNotes?: true
     reviewedById?: true
     reviewedAt?: true
+    downPaymentAmountRupiah?: true
+    downPaymentPaidAt?: true
+    downPaymentDueDate?: true
+    settlementDueDate?: true
+    downPaymentInvoiceId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -39267,6 +39433,11 @@ export namespace Prisma {
     reviewNotes?: true
     reviewedById?: true
     reviewedAt?: true
+    downPaymentAmountRupiah?: true
+    downPaymentPaidAt?: true
+    downPaymentDueDate?: true
+    settlementDueDate?: true
+    downPaymentInvoiceId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -39369,6 +39540,11 @@ export namespace Prisma {
     reviewNotes: string | null
     reviewedById: number | null
     reviewedAt: Date | null
+    downPaymentAmountRupiah: number | null
+    downPaymentPaidAt: Date | null
+    downPaymentDueDate: Date | null
+    settlementDueDate: Date | null
+    downPaymentInvoiceId: number | null
     createdAt: Date
     updatedAt: Date
     _count: RenewRequestCountAggregateOutputType | null
@@ -39403,6 +39579,11 @@ export namespace Prisma {
     reviewNotes?: boolean
     reviewedById?: boolean
     reviewedAt?: boolean
+    downPaymentAmountRupiah?: boolean
+    downPaymentPaidAt?: boolean
+    downPaymentDueDate?: boolean
+    settlementDueDate?: boolean
+    downPaymentInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39421,6 +39602,11 @@ export namespace Prisma {
     reviewNotes?: boolean
     reviewedById?: boolean
     reviewedAt?: boolean
+    downPaymentAmountRupiah?: boolean
+    downPaymentPaidAt?: boolean
+    downPaymentDueDate?: boolean
+    settlementDueDate?: boolean
+    downPaymentInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39439,6 +39625,11 @@ export namespace Prisma {
     reviewNotes?: boolean
     reviewedById?: boolean
     reviewedAt?: boolean
+    downPaymentAmountRupiah?: boolean
+    downPaymentPaidAt?: boolean
+    downPaymentDueDate?: boolean
+    settlementDueDate?: boolean
+    downPaymentInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39457,11 +39648,16 @@ export namespace Prisma {
     reviewNotes?: boolean
     reviewedById?: boolean
     reviewedAt?: boolean
+    downPaymentAmountRupiah?: boolean
+    downPaymentPaidAt?: boolean
+    downPaymentDueDate?: boolean
+    settlementDueDate?: boolean
+    downPaymentInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
+  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "downPaymentAmountRupiah" | "downPaymentPaidAt" | "downPaymentDueDate" | "settlementDueDate" | "downPaymentInvoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
   export type RenewRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
@@ -39496,6 +39692,11 @@ export namespace Prisma {
       reviewNotes: string | null
       reviewedById: number | null
       reviewedAt: Date | null
+      downPaymentAmountRupiah: number | null
+      downPaymentPaidAt: Date | null
+      downPaymentDueDate: Date | null
+      settlementDueDate: Date | null
+      downPaymentInvoiceId: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["renewRequest"]>
@@ -39934,6 +40135,11 @@ export namespace Prisma {
     readonly reviewNotes: FieldRef<"RenewRequest", 'String'>
     readonly reviewedById: FieldRef<"RenewRequest", 'Int'>
     readonly reviewedAt: FieldRef<"RenewRequest", 'DateTime'>
+    readonly downPaymentAmountRupiah: FieldRef<"RenewRequest", 'Int'>
+    readonly downPaymentPaidAt: FieldRef<"RenewRequest", 'DateTime'>
+    readonly downPaymentDueDate: FieldRef<"RenewRequest", 'DateTime'>
+    readonly settlementDueDate: FieldRef<"RenewRequest", 'DateTime'>
+    readonly downPaymentInvoiceId: FieldRef<"RenewRequest", 'Int'>
     readonly createdAt: FieldRef<"RenewRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"RenewRequest", 'DateTime'>
   }
@@ -42792,9 +42998,11 @@ export namespace Prisma {
     id: number | null
     expenseDate: Date | null
     type: $Enums.ExpenseType | null
+    status: $Enums.ExpenseStatus | null
     category: $Enums.ExpenseCategory | null
     description: string | null
     amountRupiah: number | null
+    recurringKey: string | null
     vendorName: string | null
     roomId: number | null
     stayId: number | null
@@ -42808,9 +43016,11 @@ export namespace Prisma {
     id: number | null
     expenseDate: Date | null
     type: $Enums.ExpenseType | null
+    status: $Enums.ExpenseStatus | null
     category: $Enums.ExpenseCategory | null
     description: string | null
     amountRupiah: number | null
+    recurringKey: string | null
     vendorName: string | null
     roomId: number | null
     stayId: number | null
@@ -42824,9 +43034,11 @@ export namespace Prisma {
     id: number
     expenseDate: number
     type: number
+    status: number
     category: number
     description: number
     amountRupiah: number
+    recurringKey: number
     vendorName: number
     roomId: number
     stayId: number
@@ -42858,9 +43070,11 @@ export namespace Prisma {
     id?: true
     expenseDate?: true
     type?: true
+    status?: true
     category?: true
     description?: true
     amountRupiah?: true
+    recurringKey?: true
     vendorName?: true
     roomId?: true
     stayId?: true
@@ -42874,9 +43088,11 @@ export namespace Prisma {
     id?: true
     expenseDate?: true
     type?: true
+    status?: true
     category?: true
     description?: true
     amountRupiah?: true
+    recurringKey?: true
     vendorName?: true
     roomId?: true
     stayId?: true
@@ -42890,9 +43106,11 @@ export namespace Prisma {
     id?: true
     expenseDate?: true
     type?: true
+    status?: true
     category?: true
     description?: true
     amountRupiah?: true
+    recurringKey?: true
     vendorName?: true
     roomId?: true
     stayId?: true
@@ -42993,9 +43211,11 @@ export namespace Prisma {
     id: number
     expenseDate: Date
     type: $Enums.ExpenseType
+    status: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey: string | null
     vendorName: string | null
     roomId: number | null
     stayId: number | null
@@ -43028,9 +43248,11 @@ export namespace Prisma {
     id?: boolean
     expenseDate?: boolean
     type?: boolean
+    status?: boolean
     category?: boolean
     description?: boolean
     amountRupiah?: boolean
+    recurringKey?: boolean
     vendorName?: boolean
     roomId?: boolean
     stayId?: boolean
@@ -43049,9 +43271,11 @@ export namespace Prisma {
     id?: boolean
     expenseDate?: boolean
     type?: boolean
+    status?: boolean
     category?: boolean
     description?: boolean
     amountRupiah?: boolean
+    recurringKey?: boolean
     vendorName?: boolean
     roomId?: boolean
     stayId?: boolean
@@ -43068,9 +43292,11 @@ export namespace Prisma {
     id?: boolean
     expenseDate?: boolean
     type?: boolean
+    status?: boolean
     category?: boolean
     description?: boolean
     amountRupiah?: boolean
+    recurringKey?: boolean
     vendorName?: boolean
     roomId?: boolean
     stayId?: boolean
@@ -43087,9 +43313,11 @@ export namespace Prisma {
     id?: boolean
     expenseDate?: boolean
     type?: boolean
+    status?: boolean
     category?: boolean
     description?: boolean
     amountRupiah?: boolean
+    recurringKey?: boolean
     vendorName?: boolean
     roomId?: boolean
     stayId?: boolean
@@ -43099,7 +43327,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expenseDate" | "type" | "category" | "description" | "amountRupiah" | "vendorName" | "roomId" | "stayId" | "note" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["expense"]>
+  export type ExpenseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expenseDate" | "type" | "status" | "category" | "description" | "amountRupiah" | "recurringKey" | "vendorName" | "roomId" | "stayId" | "note" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["expense"]>
   export type ExpenseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     room?: boolean | Expense$roomArgs<ExtArgs>
     stay?: boolean | Expense$stayArgs<ExtArgs>
@@ -43130,9 +43358,11 @@ export namespace Prisma {
       id: number
       expenseDate: Date
       type: $Enums.ExpenseType
+      status: $Enums.ExpenseStatus
       category: $Enums.ExpenseCategory
       description: string
       amountRupiah: number
+      recurringKey: string | null
       vendorName: string | null
       roomId: number | null
       stayId: number | null
@@ -43570,9 +43800,11 @@ export namespace Prisma {
     readonly id: FieldRef<"Expense", 'Int'>
     readonly expenseDate: FieldRef<"Expense", 'DateTime'>
     readonly type: FieldRef<"Expense", 'ExpenseType'>
+    readonly status: FieldRef<"Expense", 'ExpenseStatus'>
     readonly category: FieldRef<"Expense", 'ExpenseCategory'>
     readonly description: FieldRef<"Expense", 'String'>
     readonly amountRupiah: FieldRef<"Expense", 'Int'>
+    readonly recurringKey: FieldRef<"Expense", 'String'>
     readonly vendorName: FieldRef<"Expense", 'String'>
     readonly roomId: FieldRef<"Expense", 'Int'>
     readonly stayId: FieldRef<"Expense", 'Int'>
@@ -60841,6 +61073,13 @@ export namespace Prisma {
     downPaymentPaidRupiah: 'downPaymentPaidRupiah',
     downPaymentPaidAt: 'downPaymentPaidAt',
     downPaymentForfeitedAt: 'downPaymentForfeitedAt',
+    lossRefundStatus: 'lossRefundStatus',
+    lossRefundAmountRupiah: 'lossRefundAmountRupiah',
+    lossRefundProofUrl: 'lossRefundProofUrl',
+    lossRefundProofFileKey: 'lossRefundProofFileKey',
+    lossRefundNote: 'lossRefundNote',
+    lossRefundProcessedAt: 'lossRefundProcessedAt',
+    lossRefundProcessedById: 'lossRefundProcessedById',
     electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
     waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
     bookingSource: 'bookingSource',
@@ -61247,6 +61486,11 @@ export namespace Prisma {
     reviewNotes: 'reviewNotes',
     reviewedById: 'reviewedById',
     reviewedAt: 'reviewedAt',
+    downPaymentAmountRupiah: 'downPaymentAmountRupiah',
+    downPaymentPaidAt: 'downPaymentPaidAt',
+    downPaymentDueDate: 'downPaymentDueDate',
+    settlementDueDate: 'settlementDueDate',
+    downPaymentInvoiceId: 'downPaymentInvoiceId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -61290,9 +61534,11 @@ export namespace Prisma {
     id: 'id',
     expenseDate: 'expenseDate',
     type: 'type',
+    status: 'status',
     category: 'category',
     description: 'description',
     amountRupiah: 'amountRupiah',
+    recurringKey: 'recurringKey',
     vendorName: 'vendorName',
     roomId: 'roomId',
     stayId: 'stayId',
@@ -61755,6 +62001,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'RefundStatus'
+   */
+  export type EnumRefundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RefundStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RefundStatus[]'
+   */
+  export type ListEnumRefundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RefundStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'LeadSource'
    */
   export type EnumLeadSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadSource'>
@@ -62171,6 +62431,20 @@ export namespace Prisma {
    * Reference to a field of type 'ExpenseType[]'
    */
   export type ListEnumExpenseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseStatus'
+   */
+  export type EnumExpenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExpenseStatus[]'
+   */
+  export type ListEnumExpenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpenseStatus[]'>
     
 
 
@@ -62985,6 +63259,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFilter<"Stay"> | number
     downPaymentPaidAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     downPaymentForfeitedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFilter<"Stay"> | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFilter<"Stay"> | number
+    lossRefundProofUrl?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProofFileKey?: StringNullableFilter<"Stay"> | string | null
+    lossRefundNote?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProcessedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundProcessedById?: IntNullableFilter<"Stay"> | number | null
     electricityTariffPerKwhRupiah?: IntFilter<"Stay"> | number
     waterTariffPerM3Rupiah?: IntFilter<"Stay"> | number
     bookingSource?: EnumLeadSourceNullableFilter<"Stay"> | $Enums.LeadSource | null
@@ -63037,6 +63318,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: SortOrder
     downPaymentPaidAt?: SortOrderInput | SortOrder
     downPaymentForfeitedAt?: SortOrderInput | SortOrder
+    lossRefundStatus?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProofUrl?: SortOrderInput | SortOrder
+    lossRefundProofFileKey?: SortOrderInput | SortOrder
+    lossRefundNote?: SortOrderInput | SortOrder
+    lossRefundProcessedAt?: SortOrderInput | SortOrder
+    lossRefundProcessedById?: SortOrderInput | SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     bookingSource?: SortOrderInput | SortOrder
@@ -63092,6 +63380,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFilter<"Stay"> | number
     downPaymentPaidAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     downPaymentForfeitedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFilter<"Stay"> | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFilter<"Stay"> | number
+    lossRefundProofUrl?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProofFileKey?: StringNullableFilter<"Stay"> | string | null
+    lossRefundNote?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProcessedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundProcessedById?: IntNullableFilter<"Stay"> | number | null
     electricityTariffPerKwhRupiah?: IntFilter<"Stay"> | number
     waterTariffPerM3Rupiah?: IntFilter<"Stay"> | number
     bookingSource?: EnumLeadSourceNullableFilter<"Stay"> | $Enums.LeadSource | null
@@ -63144,6 +63439,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: SortOrder
     downPaymentPaidAt?: SortOrderInput | SortOrder
     downPaymentForfeitedAt?: SortOrderInput | SortOrder
+    lossRefundStatus?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProofUrl?: SortOrderInput | SortOrder
+    lossRefundProofFileKey?: SortOrderInput | SortOrder
+    lossRefundNote?: SortOrderInput | SortOrder
+    lossRefundProcessedAt?: SortOrderInput | SortOrder
+    lossRefundProcessedById?: SortOrderInput | SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     bookingSource?: SortOrderInput | SortOrder
@@ -63193,6 +63495,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntWithAggregatesFilter<"Stay"> | number
     downPaymentPaidAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
     downPaymentForfeitedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
+    lossRefundStatus?: EnumRefundStatusWithAggregatesFilter<"Stay"> | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntWithAggregatesFilter<"Stay"> | number
+    lossRefundProofUrl?: StringNullableWithAggregatesFilter<"Stay"> | string | null
+    lossRefundProofFileKey?: StringNullableWithAggregatesFilter<"Stay"> | string | null
+    lossRefundNote?: StringNullableWithAggregatesFilter<"Stay"> | string | null
+    lossRefundProcessedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
+    lossRefundProcessedById?: IntNullableWithAggregatesFilter<"Stay"> | number | null
     electricityTariffPerKwhRupiah?: IntWithAggregatesFilter<"Stay"> | number
     waterTariffPerM3Rupiah?: IntWithAggregatesFilter<"Stay"> | number
     bookingSource?: EnumLeadSourceNullableWithAggregatesFilter<"Stay"> | $Enums.LeadSource | null
@@ -65284,6 +65593,11 @@ export namespace Prisma {
     reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
     reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
     reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentAmountRupiah?: IntNullableFilter<"RenewRequest"> | number | null
+    downPaymentPaidAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -65302,6 +65616,11 @@ export namespace Prisma {
     reviewNotes?: SortOrderInput | SortOrder
     reviewedById?: SortOrderInput | SortOrder
     reviewedAt?: SortOrderInput | SortOrder
+    downPaymentAmountRupiah?: SortOrderInput | SortOrder
+    downPaymentPaidAt?: SortOrderInput | SortOrder
+    downPaymentDueDate?: SortOrderInput | SortOrder
+    settlementDueDate?: SortOrderInput | SortOrder
+    downPaymentInvoiceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stay?: StayOrderByWithRelationInput
@@ -65323,6 +65642,11 @@ export namespace Prisma {
     reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
     reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
     reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentAmountRupiah?: IntNullableFilter<"RenewRequest"> | number | null
+    downPaymentPaidAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -65341,6 +65665,11 @@ export namespace Prisma {
     reviewNotes?: SortOrderInput | SortOrder
     reviewedById?: SortOrderInput | SortOrder
     reviewedAt?: SortOrderInput | SortOrder
+    downPaymentAmountRupiah?: SortOrderInput | SortOrder
+    downPaymentPaidAt?: SortOrderInput | SortOrder
+    downPaymentDueDate?: SortOrderInput | SortOrder
+    settlementDueDate?: SortOrderInput | SortOrder
+    downPaymentInvoiceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RenewRequestCountOrderByAggregateInput
@@ -65364,6 +65693,11 @@ export namespace Prisma {
     reviewNotes?: StringNullableWithAggregatesFilter<"RenewRequest"> | string | null
     reviewedById?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
     reviewedAt?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    downPaymentAmountRupiah?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
+    downPaymentPaidAt?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    downPaymentDueDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    settlementDueDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
+    downPaymentInvoiceId?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
   }
@@ -65542,9 +65876,11 @@ export namespace Prisma {
     id?: IntFilter<"Expense"> | number
     expenseDate?: DateTimeFilter<"Expense"> | Date | string
     type?: EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
+    status?: EnumExpenseStatusFilter<"Expense"> | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFilter<"Expense"> | $Enums.ExpenseCategory
     description?: StringFilter<"Expense"> | string
     amountRupiah?: IntFilter<"Expense"> | number
+    recurringKey?: StringNullableFilter<"Expense"> | string | null
     vendorName?: StringNullableFilter<"Expense"> | string | null
     roomId?: IntNullableFilter<"Expense"> | number | null
     stayId?: IntNullableFilter<"Expense"> | number | null
@@ -65562,9 +65898,11 @@ export namespace Prisma {
     id?: SortOrder
     expenseDate?: SortOrder
     type?: SortOrder
+    status?: SortOrder
     category?: SortOrder
     description?: SortOrder
     amountRupiah?: SortOrder
+    recurringKey?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     roomId?: SortOrderInput | SortOrder
     stayId?: SortOrderInput | SortOrder
@@ -65580,11 +65918,13 @@ export namespace Prisma {
 
   export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    recurringKey?: string
     AND?: ExpenseWhereInput | ExpenseWhereInput[]
     OR?: ExpenseWhereInput[]
     NOT?: ExpenseWhereInput | ExpenseWhereInput[]
     expenseDate?: DateTimeFilter<"Expense"> | Date | string
     type?: EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
+    status?: EnumExpenseStatusFilter<"Expense"> | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFilter<"Expense"> | $Enums.ExpenseCategory
     description?: StringFilter<"Expense"> | string
     amountRupiah?: IntFilter<"Expense"> | number
@@ -65599,15 +65939,17 @@ export namespace Prisma {
     stay?: XOR<StayNullableScalarRelationFilter, StayWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     fixedAssets?: FixedAssetListRelationFilter
-  }, "id">
+  }, "id" | "recurringKey">
 
   export type ExpenseOrderByWithAggregationInput = {
     id?: SortOrder
     expenseDate?: SortOrder
     type?: SortOrder
+    status?: SortOrder
     category?: SortOrder
     description?: SortOrder
     amountRupiah?: SortOrder
+    recurringKey?: SortOrderInput | SortOrder
     vendorName?: SortOrderInput | SortOrder
     roomId?: SortOrderInput | SortOrder
     stayId?: SortOrderInput | SortOrder
@@ -65629,9 +65971,11 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Expense"> | number
     expenseDate?: DateTimeWithAggregatesFilter<"Expense"> | Date | string
     type?: EnumExpenseTypeWithAggregatesFilter<"Expense"> | $Enums.ExpenseType
+    status?: EnumExpenseStatusWithAggregatesFilter<"Expense"> | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryWithAggregatesFilter<"Expense"> | $Enums.ExpenseCategory
     description?: StringWithAggregatesFilter<"Expense"> | string
     amountRupiah?: IntWithAggregatesFilter<"Expense"> | number
+    recurringKey?: StringNullableWithAggregatesFilter<"Expense"> | string | null
     vendorName?: StringNullableWithAggregatesFilter<"Expense"> | string | null
     roomId?: IntNullableWithAggregatesFilter<"Expense"> | number | null
     stayId?: IntNullableWithAggregatesFilter<"Expense"> | number | null
@@ -67690,6 +68034,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -67740,6 +68091,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -67785,6 +68143,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -67835,6 +68200,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -67883,6 +68255,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -67921,6 +68300,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -67960,6 +68346,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -70167,6 +70560,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -70185,6 +70583,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -70196,6 +70599,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -70214,6 +70622,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -70229,6 +70642,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -70240,6 +70658,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -70255,6 +70678,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -70435,9 +70863,11 @@ export namespace Prisma {
   export type ExpenseCreateInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     note?: string | null
     createdAt?: Date | string
@@ -70452,9 +70882,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     stayId?: number | null
@@ -70468,9 +70900,11 @@ export namespace Prisma {
   export type ExpenseUpdateInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70485,9 +70919,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70502,9 +70938,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     stayId?: number | null
@@ -70517,9 +70955,11 @@ export namespace Prisma {
   export type ExpenseUpdateManyMutationInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -70530,9 +70970,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72867,6 +73309,13 @@ export namespace Prisma {
     not?: NestedEnumDepositStatusFilter<$PrismaModel> | $Enums.DepositStatus
   }
 
+  export type EnumRefundStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RefundStatus | EnumRefundStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRefundStatusFilter<$PrismaModel> | $Enums.RefundStatus
+  }
+
   export type EnumLeadSourceNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.LeadSource | EnumLeadSourceFieldRefInput<$PrismaModel> | null
     in?: $Enums.LeadSource[] | ListEnumLeadSourceFieldRefInput<$PrismaModel> | null
@@ -72920,6 +73369,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: SortOrder
     downPaymentPaidAt?: SortOrder
     downPaymentForfeitedAt?: SortOrder
+    lossRefundStatus?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProofUrl?: SortOrder
+    lossRefundProofFileKey?: SortOrder
+    lossRefundNote?: SortOrder
+    lossRefundProcessedAt?: SortOrder
+    lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     bookingSource?: SortOrder
@@ -72949,6 +73405,8 @@ export namespace Prisma {
     depositRefundedRupiah?: SortOrder
     downPaymentAmountRupiah?: SortOrder
     downPaymentPaidRupiah?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     createdById?: SortOrder
@@ -72980,6 +73438,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: SortOrder
     downPaymentPaidAt?: SortOrder
     downPaymentForfeitedAt?: SortOrder
+    lossRefundStatus?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProofUrl?: SortOrder
+    lossRefundProofFileKey?: SortOrder
+    lossRefundNote?: SortOrder
+    lossRefundProcessedAt?: SortOrder
+    lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     bookingSource?: SortOrder
@@ -73021,6 +73486,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: SortOrder
     downPaymentPaidAt?: SortOrder
     downPaymentForfeitedAt?: SortOrder
+    lossRefundStatus?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProofUrl?: SortOrder
+    lossRefundProofFileKey?: SortOrder
+    lossRefundNote?: SortOrder
+    lossRefundProcessedAt?: SortOrder
+    lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     bookingSource?: SortOrder
@@ -73050,6 +73522,8 @@ export namespace Prisma {
     depositRefundedRupiah?: SortOrder
     downPaymentAmountRupiah?: SortOrder
     downPaymentPaidRupiah?: SortOrder
+    lossRefundAmountRupiah?: SortOrder
+    lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
     createdById?: SortOrder
@@ -73096,6 +73570,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDepositStatusFilter<$PrismaModel>
     _max?: NestedEnumDepositStatusFilter<$PrismaModel>
+  }
+
+  export type EnumRefundStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RefundStatus | EnumRefundStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRefundStatusWithAggregatesFilter<$PrismaModel> | $Enums.RefundStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRefundStatusFilter<$PrismaModel>
+    _max?: NestedEnumRefundStatusFilter<$PrismaModel>
   }
 
   export type EnumLeadSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -75070,6 +75554,11 @@ export namespace Prisma {
     reviewNotes?: SortOrder
     reviewedById?: SortOrder
     reviewedAt?: SortOrder
+    downPaymentAmountRupiah?: SortOrder
+    downPaymentPaidAt?: SortOrder
+    downPaymentDueDate?: SortOrder
+    settlementDueDate?: SortOrder
+    downPaymentInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75079,6 +75568,8 @@ export namespace Prisma {
     stayId?: SortOrder
     tenantId?: SortOrder
     reviewedById?: SortOrder
+    downPaymentAmountRupiah?: SortOrder
+    downPaymentInvoiceId?: SortOrder
   }
 
   export type RenewRequestMaxOrderByAggregateInput = {
@@ -75092,6 +75583,11 @@ export namespace Prisma {
     reviewNotes?: SortOrder
     reviewedById?: SortOrder
     reviewedAt?: SortOrder
+    downPaymentAmountRupiah?: SortOrder
+    downPaymentPaidAt?: SortOrder
+    downPaymentDueDate?: SortOrder
+    settlementDueDate?: SortOrder
+    downPaymentInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75107,6 +75603,11 @@ export namespace Prisma {
     reviewNotes?: SortOrder
     reviewedById?: SortOrder
     reviewedAt?: SortOrder
+    downPaymentAmountRupiah?: SortOrder
+    downPaymentPaidAt?: SortOrder
+    downPaymentDueDate?: SortOrder
+    settlementDueDate?: SortOrder
+    downPaymentInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75116,6 +75617,8 @@ export namespace Prisma {
     stayId?: SortOrder
     tenantId?: SortOrder
     reviewedById?: SortOrder
+    downPaymentAmountRupiah?: SortOrder
+    downPaymentInvoiceId?: SortOrder
   }
 
   export type EnumRenewRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -75254,6 +75757,13 @@ export namespace Prisma {
     not?: NestedEnumExpenseTypeFilter<$PrismaModel> | $Enums.ExpenseType
   }
 
+  export type EnumExpenseStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseStatus | EnumExpenseStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseStatusFilter<$PrismaModel> | $Enums.ExpenseStatus
+  }
+
   export type EnumExpenseCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseCategory | EnumExpenseCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseCategory[] | ListEnumExpenseCategoryFieldRefInput<$PrismaModel>
@@ -75265,9 +75775,11 @@ export namespace Prisma {
     id?: SortOrder
     expenseDate?: SortOrder
     type?: SortOrder
+    status?: SortOrder
     category?: SortOrder
     description?: SortOrder
     amountRupiah?: SortOrder
+    recurringKey?: SortOrder
     vendorName?: SortOrder
     roomId?: SortOrder
     stayId?: SortOrder
@@ -75289,9 +75801,11 @@ export namespace Prisma {
     id?: SortOrder
     expenseDate?: SortOrder
     type?: SortOrder
+    status?: SortOrder
     category?: SortOrder
     description?: SortOrder
     amountRupiah?: SortOrder
+    recurringKey?: SortOrder
     vendorName?: SortOrder
     roomId?: SortOrder
     stayId?: SortOrder
@@ -75305,9 +75819,11 @@ export namespace Prisma {
     id?: SortOrder
     expenseDate?: SortOrder
     type?: SortOrder
+    status?: SortOrder
     category?: SortOrder
     description?: SortOrder
     amountRupiah?: SortOrder
+    recurringKey?: SortOrder
     vendorName?: SortOrder
     roomId?: SortOrder
     stayId?: SortOrder
@@ -75333,6 +75849,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseTypeFilter<$PrismaModel>
     _max?: NestedEnumExpenseTypeFilter<$PrismaModel>
+  }
+
+  export type EnumExpenseStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseStatus | EnumExpenseStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseStatusFilter<$PrismaModel>
   }
 
   export type EnumExpenseCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -78881,6 +79407,10 @@ export namespace Prisma {
     set?: $Enums.DepositStatus
   }
 
+  export type EnumRefundStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RefundStatus
+  }
+
   export type NullableEnumLeadSourceFieldUpdateOperationsInput = {
     set?: $Enums.LeadSource | null
   }
@@ -80876,6 +81406,10 @@ export namespace Prisma {
     set?: $Enums.ExpenseType
   }
 
+  export type EnumExpenseStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ExpenseStatus
+  }
+
   export type EnumExpenseCategoryFieldUpdateOperationsInput = {
     set?: $Enums.ExpenseCategory
   }
@@ -82202,6 +82736,13 @@ export namespace Prisma {
     not?: NestedEnumDepositStatusFilter<$PrismaModel> | $Enums.DepositStatus
   }
 
+  export type NestedEnumRefundStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RefundStatus | EnumRefundStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRefundStatusFilter<$PrismaModel> | $Enums.RefundStatus
+  }
+
   export type NestedEnumLeadSourceNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.LeadSource | EnumLeadSourceFieldRefInput<$PrismaModel> | null
     in?: $Enums.LeadSource[] | ListEnumLeadSourceFieldRefInput<$PrismaModel> | null
@@ -82265,6 +82806,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDepositStatusFilter<$PrismaModel>
     _max?: NestedEnumDepositStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRefundStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RefundStatus | EnumRefundStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RefundStatus[] | ListEnumRefundStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRefundStatusWithAggregatesFilter<$PrismaModel> | $Enums.RefundStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRefundStatusFilter<$PrismaModel>
+    _max?: NestedEnumRefundStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumLeadSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -82870,6 +83421,13 @@ export namespace Prisma {
     not?: NestedEnumExpenseTypeFilter<$PrismaModel> | $Enums.ExpenseType
   }
 
+  export type NestedEnumExpenseStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseStatus | EnumExpenseStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseStatusFilter<$PrismaModel> | $Enums.ExpenseStatus
+  }
+
   export type NestedEnumExpenseCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.ExpenseCategory | EnumExpenseCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.ExpenseCategory[] | ListEnumExpenseCategoryFieldRefInput<$PrismaModel>
@@ -82885,6 +83443,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExpenseTypeFilter<$PrismaModel>
     _max?: NestedEnumExpenseTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExpenseStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExpenseStatus | EnumExpenseStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ExpenseStatus[] | ListEnumExpenseStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumExpenseStatusWithAggregatesFilter<$PrismaModel> | $Enums.ExpenseStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumExpenseStatusFilter<$PrismaModel>
+    _max?: NestedEnumExpenseStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumExpenseCategoryWithAggregatesFilter<$PrismaModel = never> = {
@@ -83273,6 +83841,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -83322,6 +83897,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -83376,6 +83958,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -83425,6 +84014,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -83996,9 +84592,11 @@ export namespace Prisma {
   export type ExpenseCreateWithoutCreatedByInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     note?: string | null
     createdAt?: Date | string
@@ -84012,9 +84610,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     stayId?: number | null
@@ -84041,6 +84641,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -84057,6 +84662,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -84764,6 +85374,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFilter<"Stay"> | number
     downPaymentPaidAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     downPaymentForfeitedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFilter<"Stay"> | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFilter<"Stay"> | number
+    lossRefundProofUrl?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProofFileKey?: StringNullableFilter<"Stay"> | string | null
+    lossRefundNote?: StringNullableFilter<"Stay"> | string | null
+    lossRefundProcessedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    lossRefundProcessedById?: IntNullableFilter<"Stay"> | number | null
     electricityTariffPerKwhRupiah?: IntFilter<"Stay"> | number
     waterTariffPerM3Rupiah?: IntFilter<"Stay"> | number
     bookingSource?: EnumLeadSourceNullableFilter<"Stay"> | $Enums.LeadSource | null
@@ -85262,9 +85879,11 @@ export namespace Prisma {
     id?: IntFilter<"Expense"> | number
     expenseDate?: DateTimeFilter<"Expense"> | Date | string
     type?: EnumExpenseTypeFilter<"Expense"> | $Enums.ExpenseType
+    status?: EnumExpenseStatusFilter<"Expense"> | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFilter<"Expense"> | $Enums.ExpenseCategory
     description?: StringFilter<"Expense"> | string
     amountRupiah?: IntFilter<"Expense"> | number
+    recurringKey?: StringNullableFilter<"Expense"> | string | null
     vendorName?: StringNullableFilter<"Expense"> | string | null
     roomId?: IntNullableFilter<"Expense"> | number | null
     stayId?: IntNullableFilter<"Expense"> | number | null
@@ -85304,6 +85923,11 @@ export namespace Prisma {
     reviewNotes?: StringNullableFilter<"RenewRequest"> | string | null
     reviewedById?: IntNullableFilter<"RenewRequest"> | number | null
     reviewedAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentAmountRupiah?: IntNullableFilter<"RenewRequest"> | number | null
+    downPaymentPaidAt?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
+    downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
   }
@@ -85802,6 +86426,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -85850,6 +86481,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -86030,6 +86668,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -86046,6 +86689,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -86362,6 +87010,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -86410,6 +87065,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -86653,9 +87315,11 @@ export namespace Prisma {
   export type ExpenseCreateWithoutRoomInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     note?: string | null
     createdAt?: Date | string
@@ -86669,9 +87333,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     stayId?: number | null
     note?: string | null
@@ -87747,9 +88413,11 @@ export namespace Prisma {
   export type ExpenseCreateWithoutStayInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     note?: string | null
     createdAt?: Date | string
@@ -87763,9 +88431,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     note?: string | null
@@ -87855,6 +88525,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant: TenantCreateNestedOneWithoutRenewRequestsInput
@@ -87871,6 +88546,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -88431,6 +89111,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -88480,6 +89167,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -88752,6 +89446,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -88801,6 +89502,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -89403,6 +90111,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -89452,6 +90167,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -89735,6 +90457,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -89784,6 +90513,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -90550,6 +91286,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -90599,6 +91342,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -90937,6 +91687,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -90986,6 +91743,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -91454,6 +92218,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -91503,6 +92274,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -91922,6 +92700,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -91971,6 +92756,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -97098,6 +97890,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -97147,6 +97946,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -97351,6 +98157,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -97400,6 +98213,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -97600,6 +98420,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -97649,6 +98476,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -97799,6 +98633,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -97848,6 +98689,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -98242,6 +99090,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -98291,6 +99146,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -98600,6 +99462,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -98649,6 +99518,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -98932,9 +99808,11 @@ export namespace Prisma {
   export type ExpenseCreateWithoutFixedAssetsInput = {
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     note?: string | null
     createdAt?: Date | string
@@ -98948,9 +99826,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     stayId?: number | null
@@ -99350,9 +100230,11 @@ export namespace Prisma {
   export type ExpenseUpdateWithoutFixedAssetsInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99366,9 +100248,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -102274,6 +103158,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -102314,6 +103205,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -102531,9 +103429,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     stayId?: number | null
@@ -102552,6 +103452,11 @@ export namespace Prisma {
     requestNotes?: string | null
     reviewNotes?: string | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -102856,6 +103761,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -102905,6 +103817,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -102952,6 +103871,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -102989,6 +103915,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -103038,6 +103971,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -103085,6 +104025,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -103695,9 +104642,11 @@ export namespace Prisma {
   export type ExpenseUpdateWithoutCreatedByInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103711,9 +104660,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -103727,9 +104678,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -103745,6 +104698,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -103761,6 +104719,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -103775,6 +104738,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -104467,6 +105435,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -104554,6 +105529,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -104614,6 +105594,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -104662,6 +105649,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -104709,6 +105703,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -104911,6 +105912,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -104927,6 +105933,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -104941,6 +105952,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -105073,6 +106089,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: number
     downPaymentPaidAt?: Date | string | null
     downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
     electricityTariffPerKwhRupiah?: number
     waterTariffPerM3Rupiah?: number
     bookingSource?: $Enums.LeadSource | null
@@ -105170,9 +106193,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     stayId?: number | null
     note?: string | null
@@ -105308,6 +106333,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -105356,6 +106388,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -105403,6 +106442,13 @@ export namespace Prisma {
     downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
     downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
     electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
     waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
     bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
@@ -105654,9 +106700,11 @@ export namespace Prisma {
   export type ExpenseUpdateWithoutRoomInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -105670,9 +106718,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105686,9 +106736,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     stayId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106070,9 +107122,11 @@ export namespace Prisma {
     id?: number
     expenseDate: Date | string
     type: $Enums.ExpenseType
+    status?: $Enums.ExpenseStatus
     category: $Enums.ExpenseCategory
     description: string
     amountRupiah: number
+    recurringKey?: string | null
     vendorName?: string | null
     roomId?: number | null
     note?: string | null
@@ -106118,6 +107172,11 @@ export namespace Prisma {
     reviewNotes?: string | null
     reviewedById?: number | null
     reviewedAt?: Date | string | null
+    downPaymentAmountRupiah?: number | null
+    downPaymentPaidAt?: Date | string | null
+    downPaymentDueDate?: Date | string | null
+    settlementDueDate?: Date | string | null
+    downPaymentInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -106313,9 +107372,11 @@ export namespace Prisma {
   export type ExpenseUpdateWithoutStayInput = {
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106329,9 +107390,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106345,9 +107408,11 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     expenseDate?: DateTimeFieldUpdateOperationsInput | Date | string
     type?: EnumExpenseTypeFieldUpdateOperationsInput | $Enums.ExpenseType
+    status?: EnumExpenseStatusFieldUpdateOperationsInput | $Enums.ExpenseStatus
     category?: EnumExpenseCategoryFieldUpdateOperationsInput | $Enums.ExpenseCategory
     description?: StringFieldUpdateOperationsInput | string
     amountRupiah?: IntFieldUpdateOperationsInput | number
+    recurringKey?: NullableStringFieldUpdateOperationsInput | string | null
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     roomId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106443,6 +107508,11 @@ export namespace Prisma {
     requestNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -106459,6 +107529,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -106473,6 +107548,11 @@ export namespace Prisma {
     reviewNotes?: NullableStringFieldUpdateOperationsInput | string | null
     reviewedById?: NullableIntFieldUpdateOperationsInput | number | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentAmountRupiah?: NullableIntFieldUpdateOperationsInput | number | null
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

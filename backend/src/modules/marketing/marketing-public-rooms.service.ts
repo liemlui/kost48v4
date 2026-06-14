@@ -60,6 +60,57 @@ export class MarketingPublicRoomsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async getPublicSocialProof() {
+    const [reviews, reviewAggregate, activeStays] = await this.prisma.$transaction([
+      this.prisma.staffReview.findMany({
+        where: {
+          status: 'VISIBLE' as any,
+          rating: { gte: 4 },
+        },
+        select: {
+          rating: true,
+          comment: true,
+          createdAt: true,
+          tenant: { select: { fullName: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 6,
+      }),
+      this.prisma.staffReview.aggregate({
+        where: {
+          status: 'VISIBLE' as any,
+          rating: { gte: 4 },
+        },
+        _avg: { rating: true },
+        _count: { id: true },
+      }),
+      this.prisma.stay.findMany({
+        where: {
+          status: 'ACTIVE' as any,
+          initialMetersPromotedAt: { not: null },
+        },
+        select: { tenantId: true },
+      }),
+    ]);
+
+    const occupantCount = new Set(activeStays.map((stay) => stay.tenantId)).size;
+    const averageRating = reviewAggregate._avg.rating
+      ? Math.round(reviewAggregate._avg.rating * 10) / 10
+      : 0;
+
+    return {
+      occupantCount,
+      averageRating,
+      reviewCount: reviewAggregate._count.id,
+      reviews: reviews.map((review) => ({
+        initials: this.toInitials(review.tenant.fullName),
+        rating: review.rating,
+        comment: review.comment?.trim().slice(0, 280) || null,
+        createdAt: review.createdAt,
+      })),
+    };
+  }
+
   async getPublicRooms(query: PublicRoomsQueryDto) {
     const { page, limit, skip, take } = buildPagination(query.page, query.limit);
 
@@ -89,6 +140,13 @@ export class MarketingPublicRoomsService {
       items: serializePrismaResult(items.map((room) => this.toPublicRoomDto(room, query.pricingTerm, facilitiesByRoomId.get(room.id) ?? []))),
       meta: buildMeta(page, limit, totalItems),
     };
+  }
+
+  private toInitials(fullName: string): string {
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'P';
+    const selected = parts.length === 1 ? parts : [parts[0], parts[parts.length - 1]];
+    return selected.map((part) => part.charAt(0).toUpperCase()).join('');
   }
 
   async getPublicRoomDetail(id: number) {

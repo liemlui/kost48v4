@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card, Table } from 'react-bootstrap';
 import PaginationControls from '../common/PaginationControls';
+import SafeImage from '../common/SafeImage';
 import type { StaffPerformanceSummary } from '../../api/staffPerformance';
 
 type Props = { performance?: StaffPerformanceSummary | null };
@@ -93,7 +94,7 @@ export default function StaffMonthlyEvidenceTable({ performance }: Props) {
                   <td>{row.type}</td>
                   <td><div className="fw-semibold">{row.title}</div></td>
                   <td>{row.location}</td>
-                  <td>{row.proof ? <img src={row.proof} alt="Bukti kerja" className="staff-evidence-thumb" /> : <span className={`staff-proof-state${row.proofRequired ? ' warning' : ''}`}>{row.proofRequired ? 'Perlu foto' : 'Tidak wajib'}</span>}</td>
+                  <td>{row.proof ? <SafeImage src={row.proof} alt="Bukti kerja" className="staff-evidence-thumb" /> : <span className={`staff-proof-state${row.proofRequired ? ' warning' : ''}`}>{row.proofRequired ? 'Perlu foto' : 'Tidak wajib'}</span>}</td>
                   <td><span className={`staff-status-pill status-${statusClass(row.status)}`}>{statusText(row.status)}</span></td>
                 </tr>
               ))}

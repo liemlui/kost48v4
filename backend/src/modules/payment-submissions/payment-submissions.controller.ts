@@ -92,7 +92,8 @@ export class PaymentSubmissionsController {
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Vary', 'Authorization');
 
     const stream = createReadStream(filePath);
     return new StreamableFile(stream);

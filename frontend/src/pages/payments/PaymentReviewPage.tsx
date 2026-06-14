@@ -6,6 +6,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import DonutGauge from '../../components/charts/DonutGauge';
 import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
+import AuthenticatedFileLink from '../../components/common/AuthenticatedFileLink';
 import StatusBadge, { getStatusLabel } from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import ReviewPaymentModal from '../../components/payments/ReviewPaymentModal';
@@ -401,7 +402,7 @@ export default function PaymentReviewPage() {
                       </td>
                       <td data-label="Bukti">
                         {resolveAbsoluteFileUrl(item.fileUrl) ? (
-                          <Button as="a" href={resolveAbsoluteFileUrl(item.fileUrl) as string} target="_blank" rel="noreferrer" size="sm" variant="outline-secondary">Buka Bukti</Button>
+                          <AuthenticatedFileLink src={item.fileUrl} label="Buka Bukti" fileName={item.originalFilename ?? undefined} />
                         ) : <span className="amount-tone-pill warning">Tanpa file</span>}
                       </td>
                       <td data-label="Status"><StatusBadge status={item.status} domain="payment" /></td>

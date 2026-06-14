@@ -89,7 +89,7 @@ export class FinanceService {
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
         _count: { id: true },
-        where: { expenseDate: { gte: start, lt: end } },
+        where: { status: 'CONFIRMED' as any, expenseDate: { gte: start, lt: end } },
       }),
       this.prisma.paymentSubmission.count({ where: { status: PaymentSubmissionStatus.PENDING_REVIEW as any } }),
       this.prisma.renewRequest.count({ where: { status: RenewRequestStatus.PENDING as any } }),
@@ -337,12 +337,12 @@ export class FinanceService {
       // Current month expense
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
-        where: { expenseDate: { gte: start, lt: end } },
+        where: { status: 'CONFIRMED' as any, expenseDate: { gte: start, lt: end } },
       }),
       // Prev month expense
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
-        where: { expenseDate: { gte: prevStart, lt: prevEnd } },
+        where: { status: 'CONFIRMED' as any, expenseDate: { gte: prevStart, lt: prevEnd } },
       }),
       // Open invoices
       this.prisma.invoice.aggregate({
@@ -452,7 +452,7 @@ export class FinanceService {
         }),
         this.prisma.expense.aggregate({
           _sum: { amountRupiah: true },
-          where: { expenseDate: { gte: trendStart, lt: trendEnd } },
+          where: { status: 'CONFIRMED' as any, expenseDate: { gte: trendStart, lt: trendEnd } },
         }),
         this.prisma.wifiSale.aggregate({
           _sum: { soldPriceRupiah: true },

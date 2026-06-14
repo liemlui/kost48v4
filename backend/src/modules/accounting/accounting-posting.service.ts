@@ -421,6 +421,8 @@ export class AccountingPostingService {
     const expense = await tx.expense.findUnique({ where: { id: expenseId } });
     if (!expense)
       return this.skip("EXPENSE", expenseId, "Expense tidak ditemukan.");
+    if (expense.status && expense.status !== "CONFIRMED")
+      return this.skip("EXPENSE", expenseId, "Hanya expense CONFIRMED yang boleh dijurnal.");
 
     const amount = rupiah(expense.amountRupiah);
     if (amount <= 0)
@@ -1105,7 +1107,7 @@ export class AccountingPostingService {
     }
     if (sourceType === "EXPENSE") {
       const rows = await (this.prisma as any).expense.findMany({
-        where: { id: { notIn: mapped } },
+        where: { status: "CONFIRMED" as any, id: { notIn: mapped } },
         select: { id: true },
         orderBy: { id: "asc" },
         take: limit,

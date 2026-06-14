@@ -140,6 +140,22 @@ export interface Occupancy {
   revenueNote: string;
 }
 
+export interface OccupancyDailyDay {
+  date: string;
+  occupiedRooms: number;
+  totalOperableRooms: number;
+  occupancyRatePercent: number;
+  isProjection: boolean;
+}
+
+export interface OccupancyDaily {
+  from: string;
+  to: string;
+  totalOperableRooms: number;
+  days: OccupancyDailyDay[];
+  note: string;
+}
+
 export async function fetchProfitLoss(year: number, month: number): Promise<ProfitLoss> {
   const params = new URLSearchParams({ year: String(year), month: String(month) });
   const res = await apiClient.get(`/reports/profit-loss?${params}`);
@@ -155,5 +171,11 @@ export async function fetchFinancialRatios(year: number, month: number): Promise
 export async function fetchOccupancy(year: number, month: number): Promise<Occupancy> {
   const params = new URLSearchParams({ year: String(year), month: String(month) });
   const res = await apiClient.get(`/reports/occupancy?${params}`);
+  return res.data.data;
+}
+
+export async function fetchOccupancyDaily(from: string, to: string): Promise<OccupancyDaily> {
+  const params = new URLSearchParams({ from, to });
+  const res = await apiClient.get(`/reports/occupancy-daily?${params}`);
   return res.data.data;
 }

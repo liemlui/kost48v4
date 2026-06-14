@@ -11,6 +11,7 @@ import {
   ExpenseSummaryQueryDto,
   CashFlowQueryDto,
   OccupancyQueryDto,
+  OccupancyDailyQueryDto,
 } from './dto/reports-query.dto';
 
 @ApiTags('reports')
@@ -74,6 +75,14 @@ export class ReportsController {
     return {
       message: 'Rasio keuangan berhasil diambil',
       data: await this.reportsService.financialRatios(query.year, query.month),
+    };
+  }
+
+  @Get('occupancy-daily')
+  async occupancyDaily(@Query() query: OccupancyDailyQueryDto) {
+    return {
+      message: 'Heatmap okupansi harian berhasil diambil',
+      data: await this.reportsService.occupancyDaily(query.from, query.to),
     };
   }
 

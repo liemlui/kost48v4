@@ -11,6 +11,9 @@ import {
   type StaffRoutineTodayResponse,
 } from '../../api/staffRoutines';
 import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
+import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
+import SafeImage from '../common/SafeImage';
+import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 type Props = {
   today?: StaffRoutineTodayResponse | null;
@@ -131,21 +134,7 @@ function nextActionLabel(item: StaffRoutineItem) {
 }
 
 async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1400;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+  return compressBrowserImage(file, { maxSide: 1400, quality: 0.78 });
 }
 
 function FrequencyCard({ summary, active, onClick }: { summary: FrequencySummary; active: boolean; onClick: () => void }) {
@@ -356,8 +345,8 @@ export default function StaffRoutineChecklist({ today, isLoading, onUpdated }: P
               </Form.Group>
               <Form.Group>
                 <Form.Label>Foto bukti{modalState?.item.requiresPhoto && modalState.action === 'DONE' ? ' wajib' : ''}</Form.Label>
-                <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhoto} />
-                {photoPreview ? <img className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
+                <CameraOrGalleryInput onChange={handlePhoto} />
+                {photoPreview ? <SafeImage className="staff-proof-preview" src={photoPreview} alt="Foto bukti" /> : null}
               </Form.Group>
             </>
           ) : null}

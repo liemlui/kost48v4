@@ -30,7 +30,7 @@
 | B-09 | 🟡 P3 | Kebijakan posting jurnal tak konsisten: issue MELEMPAR bila gagal, tapi check-in/renew MENELAN error → invoice gagal-jurnal hanya tertangkap readiness. | `invoices.service.ts:136-137` vs `stays.service.ts:361-368` | Satukan pakai `resolveInvoiceAccountingMetadata` |
 | B-11 | 🟡 P3 | Promosi meter dedupe per (room,utility,tanggal) — bila ada reading lama di tanggal sama (rebooking sehari), snapshot meter baru dibuang diam-diam → tagihan utilitas pertama bisa salah. | `payment-submissions.service.ts:630-674` | Log + flag di response approve |
 | F-29 | 🟡 INFO | `postPaymentReversalTx` = DEAD CODE (0 pemanggil); remove payment berjurnal kini diblokir. FLOW_MAP §4 lama menyebutnya → drift. | `accounting-posting.service.ts:741` | Hapus / dokumentasikan |
-| B-02 | 🟡 P3 | Notif "kalah-cepat" (pesaing dibatalkan saat pemenang di-approve, first-paid-wins) memakai copy yang bisa menyesatkan: untuk loser yang masih PENDING_REVIEW, klaim "tidak ada dana terpotong" belum tentu benar (tenant mungkin sudah transfer & buktinya sedang direview). | `payment-submissions.service.ts:736` cancelCompeting + notif A17 dedupe `:832` | Bedakan copy loser belum-bayar vs sudah-upload-bukti; arahkan ke klarifikasi/refund. Cross-ref **dossier 16 (N-01)**. |
+| B-02 | ✅ RESOLVED | Notif kalah-cepat sudah dua varian: tenant yang punya PaymentSubmission/DP tercatat diarahkan ke refund; tenant yang belum transfer diarahkan memilih kamar lain. Pencatatan bukti refund tetap F2-3b. | `payment-submissions.notifyLosingTenants` | **F2-3 selesai; F2-3b belum** |
 | B-13 | ✅ positif | Tarif TERKUNCI setelah DP dibayar (tak bisa diubah saat approve) — cegah manipulasi. | `tenant-bookings.service.ts:326-344` | pertahankan |
 
 ## 4. Task (urutan & spec lengkap)

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /owner-dashboard
+Disallow: /portal/
+Disallow: /reports
+Disallow: /settings
+
+Sitemap: https://app.kost48surabaya.com/sitemap.xml

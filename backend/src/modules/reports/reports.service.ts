@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InvoiceStatus } from '../../common/enums/app.enums';
+import { isStayOccupiedOnDate } from './occupancy-daily.helper';
 
 @Injectable()
 export class ReportsService {
@@ -212,6 +213,7 @@ export class ReportsService {
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
         where: {
+          status: 'CONFIRMED' as any,
           expenseDate: { gte: start, lt: end },
         },
       }),
@@ -220,6 +222,7 @@ export class ReportsService {
         _sum: { amountRupiah: true },
         _count: { id: true },
         where: {
+          status: 'CONFIRMED' as any,
           expenseDate: { gte: start, lt: end },
         },
       }),
@@ -265,6 +268,7 @@ export class ReportsService {
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
         where: {
+          status: 'CONFIRMED' as any,
           expenseDate: { gte: start, lt: end },
         },
       }),
@@ -321,6 +325,7 @@ export class ReportsService {
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
         where: {
+          status: 'CONFIRMED' as any,
           expenseDate: { gte: start, lt: end },
         },
       }),
@@ -329,6 +334,7 @@ export class ReportsService {
         _sum: { amountRupiah: true },
         _count: { id: true },
         where: {
+          status: 'CONFIRMED' as any,
           expenseDate: { gte: start, lt: end },
         },
       }),
@@ -387,7 +393,7 @@ export class ReportsService {
       }),
       this.prisma.expense.aggregate({
         _sum: { amountRupiah: true },
-        where: { expenseDate: { gte: start, lt: end } },
+        where: { status: 'CONFIRMED' as any, expenseDate: { gte: start, lt: end } },
       }),
       this.prisma.invoicePayment.aggregate({
         _sum: { amountRupiah: true },
@@ -513,5 +519,98 @@ export class ReportsService {
       revenueNote:
         'Total tagihan bulan ini dibagi jumlah kamar terisi saat ini (estimasi kasar, bukan revenue per room-day)',
     };
+  }
+
+  async occupancyDaily(fromInput: string, toInput: string) {
+    const from = this.parseDateOnly(fromInput, 'from');
+    const to = this.parseDateOnly(toInput, 'to');
+    const dayMs = 24 * 60 * 60 * 1000;
+    const totalDays = Math.floor((to.getTime() - from.getTime()) / dayMs) + 1;
+
+    if (totalDays < 1) {
+      throw new BadRequestException('Tanggal from harus sebelum atau sama dengan to');
+    }
+    if (totalDays > 550) {
+      throw new BadRequestException('Rentang heatmap maksimal 550 hari');
+    }
+
+    const operableRooms = await this.prisma.room.findMany({
+      where: {
+        isActive: true,
+        status: { notIn: ['MAINTENANCE', 'INACTIVE'] as any },
+      },
+      select: { id: true },
+    });
+    const operableRoomIds = operableRooms.map((room) => room.id);
+
+    const stays = operableRoomIds.length
+      ? await this.prisma.stay.findMany({
+          where: {
+            roomId: { in: operableRoomIds },
+            status: { not: 'CANCELLED' as any },
+            initialMetersPromotedAt: { not: null },
+            checkInDate: { lte: to },
+          },
+          select: {
+            roomId: true,
+            status: true,
+            checkInDate: true,
+            plannedCheckOutDate: true,
+            actualCheckOutDate: true,
+            initialMetersPromotedAt: true,
+          },
+        })
+      : [];
+
+    const todayWib = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const todayBoundary = new Date(`${todayWib}T00:00:00.000Z`);
+    const days = Array.from({ length: totalDays }, (_, index) => {
+      const date = new Date(from.getTime() + index * dayMs);
+      const dateKey = date.toISOString().slice(0, 10);
+      const occupiedRoomIds = new Set<number>();
+
+      for (const stay of stays) {
+        if (isStayOccupiedOnDate({
+          ...stay,
+          status: String(stay.status),
+          initialMetersPromotedAt: stay.initialMetersPromotedAt as Date,
+        }, date, todayBoundary)) {
+          occupiedRoomIds.add(stay.roomId);
+        }
+      }
+
+      const occupiedRooms = occupiedRoomIds.size;
+      const occupancyRatePercent = operableRoomIds.length
+        ? Math.round((occupiedRooms / operableRoomIds.length) * 10000) / 100
+        : 0;
+
+      return {
+        date: dateKey,
+        occupiedRooms,
+        totalOperableRooms: operableRoomIds.length,
+        occupancyRatePercent,
+        isProjection: dateKey > todayWib,
+      };
+    });
+
+    return {
+      from: fromInput.slice(0, 10),
+      to: toInput.slice(0, 10),
+      totalOperableRooms: operableRoomIds.length,
+      days,
+      note:
+        'Historis memakai stay promoted dan tanggal checkout aktual. Hari mendatang memakai checkout rencana stay aktif; denominator memakai kamar operasional saat ini.',
+    };
+  }
+
+  private parseDateOnly(value: string, field: string): Date {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new BadRequestException(`${field} harus berformat YYYY-MM-DD`);
+    }
+    const parsed = new Date(`${value}T00:00:00.000Z`);
+    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+      throw new BadRequestException(`${field} bukan tanggal yang valid`);
+    }
+    return parsed;
   }
 }

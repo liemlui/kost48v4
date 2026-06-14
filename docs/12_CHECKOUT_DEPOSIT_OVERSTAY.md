@@ -28,7 +28,7 @@
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
-| B-08 | 🟠 P2 | `cancel` stay promoted → kamar MAINTENANCE TANPA tiket inspeksi → kamar tersangkut, tak pernah dibuka kembali sampai admin sadar. | `stays.service.ts:768-790` | **F2-6** salin blok tiket dari `complete` |
+| B-08 | 🟡 KODE FIXED/UAT PENDING | `stays.cancel` sudah membuat tiket CHECKOUT_INSPECTION untuk stay promoted dan dedupe tiket terbuka. UAT runtime cancel→MAINTENANCE+tiket belum tercatat. | `stays.service.ts` `cancel()` | **F2-6 belum boleh dicentang sebelum UAT** |
 | B-07 | 🟡 P3 | Forced checkout diblokir oleh SEMUA invoice non-PAID termasuk DRAFT → 1 draft terlupakan = overstay tak pernah auto-checkout + alert merah tiap hari. Owner: checkout jalan + cancel DRAFT (D-03). | `auto-ops.service.ts:548-554` | **F3-13** exclude+auto-cancel DRAFT |
 | B-06 | 🟡 P3 | Job H+1 cancel & meta menulis "DP hangus" padahal mode non-forfeit tak menghanguskan apa pun → copy/audit menyesatkan. | `auto-ops.service.ts:857,:361` | **F3-13** perbaiki copy+meta |
 | F-24 | 🔴 P1(akuntansi) | Settlement deposit tanpa cek receipt journal → akun 2000 bisa debit permanen. (Detail di dossier 13.) | `accounting-posting.service.ts:602` | **F1-8** (dossier 13) |

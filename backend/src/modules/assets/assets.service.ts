@@ -382,8 +382,17 @@ export class AssetsService {
   }
 
   async runDepreciation(dto: RunDepreciationDto, actor: CurrentUserPayload) {
-    const year = Number(dto.year);
-    const month = Number(dto.month);
+    return this.runDepreciationForPeriod(dto.year, dto.month, actor.id, dto.notes);
+  }
+
+  async runDepreciationForPeriod(
+    yearInput: number,
+    monthInput: number,
+    actorUserId: number | null,
+    notes?: string,
+  ) {
+    const year = Number(yearInput);
+    const month = Number(monthInput);
     if (month < 1 || month > 12) throw new ConflictException('Bulan depresiasi harus 1-12.');
     const preview = await this.buildDepreciationPreview(year, month);
     if (!preview.eligibleLines.length) throw new ConflictException('Tidak ada aset eligible untuk depresiasi bulan ini.');
@@ -400,9 +409,9 @@ export class AssetsService {
           runDate: preview.runDate,
           status: 'POSTED' as any,
           totalDepreciationRupiah: preview.totalDepreciationRupiah,
-          createdById: actor.id,
+          createdById: actorUserId,
           postedAt: new Date(),
-          notes: dto.notes,
+          notes,
           lines: {
             create: preview.eligibleLines.map((line: any) => ({
               fixedAssetId: line.fixedAssetId,
@@ -422,7 +431,7 @@ export class AssetsService {
         run.id,
         preview.runDate,
         preview.totalDepreciationRupiah,
-        actor.id,
+        actorUserId,
       );
       if (!journalResult?.posted) throw new ConflictException(journalResult?.reason ?? 'Journal depresiasi tidak berhasil dibuat.');
 
@@ -647,8 +656,12 @@ export class AssetsService {
       if (dto.roomId && exists.roomId !== Number(dto.roomId)) throw new ConflictException('Room item tidak sesuai dengan kamar aset.');
     }
     if (dto.expenseId) {
-      const exists = await (this.prisma as any).expense.findUnique({ where: { id: Number(dto.expenseId) }, select: { id: true } });
+      const exists = await (this.prisma as any).expense.findUnique({
+        where: { id: Number(dto.expenseId) },
+        select: { id: true, status: true },
+      });
       if (!exists) throw new NotFoundException('Expense sumber aset tidak ditemukan');
+      if (exists.status !== 'CONFIRMED') throw new ConflictException('Expense sumber aset harus berstatus CONFIRMED.');
     }
   }
 

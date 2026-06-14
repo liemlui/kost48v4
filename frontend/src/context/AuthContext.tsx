@@ -4,6 +4,35 @@ import { login as loginRequest, me as meRequest } from '../api/auth';
 import { queryClient } from '../lib/queryClient';
 
 const TENANT_SESSION_KEYS = ['portal-bookings-success-message'];
+const AUTH_TOKEN_KEY = 'kost48_access_token';
+const AUTH_USER_CACHE_KEY = 'kost48_last_authenticated_user';
+
+function readCachedUser(): AuthUser | null {
+  try {
+    const value = sessionStorage.getItem(AUTH_USER_CACHE_KEY);
+    if (!value) return null;
+    const parsed = JSON.parse(value) as Partial<AuthUser>;
+    if (
+      typeof parsed.id !== 'number'
+      || typeof parsed.fullName !== 'string'
+      || typeof parsed.email !== 'string'
+      || !['OWNER', 'ADMIN', 'STAFF', 'TENANT'].includes(String(parsed.role))
+    ) {
+      return null;
+    }
+    return parsed as AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+function cacheUser(user: AuthUser | null) {
+  if (user) {
+    sessionStorage.setItem(AUTH_USER_CACHE_KEY, JSON.stringify(user));
+  } else {
+    sessionStorage.removeItem(AUTH_USER_CACHE_KEY);
+  }
+}
 
 function clearTenantSessionStorage() {
   TENANT_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
@@ -21,8 +50,8 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('kost48_access_token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem(AUTH_TOKEN_KEY));
+  const [user, setUser] = useState<AuthUser | null>(() => (token ? readCachedUser() : null));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,10 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const me = await meRequest();
         setUser(me);
-      } catch {
-        localStorage.removeItem('kost48_access_token');
-        setToken(null);
-        setUser(null);
+        cacheUser(me);
+      } catch (error: any) {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem(AUTH_TOKEN_KEY);
+          cacheUser(null);
+          setToken(null);
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -53,13 +87,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearTenantSessionStorage();
       queryClient.clear();
       const result = await loginRequest(identifier, password);
-      localStorage.setItem('kost48_access_token', result.accessToken);
+      localStorage.setItem(AUTH_TOKEN_KEY, result.accessToken);
+      cacheUser(result.user);
       setToken(result.accessToken);
       setUser(result.user);
       return result.user;
     },
     logout() {
-      localStorage.removeItem('kost48_access_token');
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      cacheUser(null);
       clearTenantSessionStorage();
       queryClient.clear();
       setToken(null);
@@ -67,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     async refreshMe() {
       const me = await meRequest();
+      cacheUser(me);
       setUser(me);
     },
   }), [user, token, loading]);

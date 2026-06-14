@@ -2208,6 +2208,135 @@
 }
 
 /* ── Photo divider ── */
+.gx-social-proof-section {
+  scroll-margin-top: 72px;
+  padding: 5rem 0;
+  background: #ffffff;
+}
+
+.gx-social-proof-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.gx-social-proof-head .gx-section-head {
+  margin-bottom: 0;
+}
+
+.gx-social-proof-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: .65rem;
+}
+
+.gx-social-proof-summary div {
+  display: grid;
+  gap: .2rem;
+  min-width: 130px;
+  padding: .9rem 1rem;
+  border: 1px solid #bae6fd;
+  border-radius: 16px;
+  background: #f0f9ff;
+}
+
+.gx-social-proof-summary strong {
+  color: #0369a1;
+  font-family: 'Cormorant Garant', 'Plus Jakarta Sans', serif;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.gx-social-proof-summary span {
+  color: #64748b;
+  font-size: .72rem;
+  font-weight: 750;
+}
+
+.gx-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .9rem;
+}
+
+.gx-review-card {
+  display: grid;
+  align-content: start;
+  gap: .85rem;
+  min-height: 170px;
+  padding: 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.gx-review-card-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.gx-review-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  background: #0ea5e9;
+  color: #ffffff;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.gx-review-card-head div {
+  display: grid;
+  gap: .15rem;
+}
+
+.gx-review-card-head strong {
+  color: #0f172a;
+  font-size: .86rem;
+}
+
+.gx-review-card-head div span {
+  color: #d97706;
+  font-size: .75rem;
+  font-weight: 850;
+}
+
+.gx-review-card p {
+  margin: 0;
+  color: #475569;
+  font-size: .84rem;
+  line-height: 1.65;
+}
+
+.gx-social-proof-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 150px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+  color: #64748b;
+  font-size: .84rem;
+}
+
+@media (max-width: 900px) {
+  .gx-social-proof-head { display: grid; align-items: start; }
+  .gx-review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .gx-social-proof-summary { grid-template-columns: 1fr 1fr; width: 100%; }
+  .gx-social-proof-summary div { min-width: 0; }
+  .gx-review-grid { grid-template-columns: 1fr; }
+}
+
 .gx-photo-divider {
   height: 340px;
   background-size: cover;

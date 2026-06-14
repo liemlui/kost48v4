@@ -56,6 +56,8 @@
 - **F1-9 · FASE 1:** exclude deposit dari operating cashflow, pisahkan ke section liabilitas titipan. (F-10)
 - **F1-8 · FASE 1:** guard settlement deposit — cek receipt journal. (F-24)
 - **F2-8 · FASE 1:** nonaktifkan endpoint/UI pembuatan jurnal draft manual; draft opening balance tetap terpisah dan terkontrol.
+- **F3-18 · FASE 3 (SELESAI 2026-06-14):** buat draft biaya rutin bulanan idempotent untuk gaji/listrik/air/internet/sewa/pajak; draft dikecualikan dari laporan dan jurnal hingga dikonfirmasi.
+- **F3-21 · FASE 3 (SELESAI 2026-06-14):** jalankan depresiasi bulan WIB sebelumnya sebelum accounting auto-close, memakai service dan idempotency yang sama dengan proses manual.
 - **F4-10 · FASE 4:** standarisasi pembulatan.
 
 ## 5. Invarian & UAT
@@ -83,3 +85,9 @@ Lokasi: `accounting-reports.service.ts` `financialRatios()` (grep `async financi
 - **F1-6 occupancy (F-04):** *before* `occupancyRate = bs.statement?.occupancyRate ?? 0` (balanceSheet tak punya field itu → selalu 0). *after* hitung INLINE: `operable = kamar isActive − (MAINTENANCE+INACTIVE)`, huni = `stay ACTIVE & initialMetersPromotedAt!=null` → `occupancyRatePercent(huni, operable)`. Konsisten `finance.service` occupancySummary. Test: 5/10→50, operable 0→0.
 
 **Lintas-dossier:** jurnal booking/payment → dossier 10; jurnal deposit → dossier 12; keputusan owner → `03_KEPUTUSAN_OWNER.md`.
+
+## 8. F3-18/F3-21 — otomasi bulanan (SELESAI 2026-06-14)
+- **Expense draft:** `Expense.status` membedakan `DRAFT`, `CONFIRMED`, dan `CANCELLED`; `recurringKey` unik mencegah draft kategori-bulan ganda. Pembuatan manual tetap langsung `CONFIRMED`.
+- **Batas akuntansi:** semua laporan, readiness, analytics, finance, dan posting jurnal hanya memakai expense `CONFIRMED`. Konfirmasi draft dan posting jurnal berjalan dalam satu transaksi.
+- **AutoOps:** setiap bulan membuat maksimal enam draft biaya rutin dari nilai confirmed terbaru, lalu menjalankan depresiasi bulan sebelumnya sebelum auto-close. Kedua proses dapat dipicu manual oleh OWNER/ADMIN dan aman dijalankan ulang.
+- **UAT:** transaksi rollback membuat tepat enam draft tanpa residu data; depresiasi pada 14 Juni 2026 menargetkan Mei 2026 dan safe-skip `NO_ELIGIBLE_ASSETS`. Migration Prisma deployed; backend build dan 18/18 unit test lulus.

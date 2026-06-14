@@ -2,6 +2,7 @@ import { Badge, Button, Card } from 'react-bootstrap';
 import type { PaymentSubmission, PaymentTargetType, TenantBooking } from '../../types';
 import CurrencyDisplay from '../common/CurrencyDisplay';
 import StatusBadge from '../common/StatusBadge';
+import AuthenticatedFileLink from '../common/AuthenticatedFileLink';
 import { formatDateId, getBookingExpiryMeta } from '../../utils/bookingExpiry';
 import { formatDateTimeWib, getCreatedToDeadlineLabel } from '../../utils/dateTime';
 import { resolveAbsoluteFileUrl } from '../../utils/resolveAbsoluteFileUrl';
@@ -306,16 +307,11 @@ export default function BookingCard({
                     <div className="d-flex gap-2 flex-wrap align-items-start">
                       <StatusBadge status={submission.status} tone="tenant" domain="payment" />
                       {resolveAbsoluteFileUrl(submission.fileUrl) ? (
-                        <Button
-                          as="a"
-                          href={resolveAbsoluteFileUrl(submission.fileUrl) as string}
-                          target="_blank"
-                          rel="noreferrer"
-                          size="sm"
-                          variant="outline-secondary"
-                        >
-                          Buka Bukti
-                        </Button>
+                        <AuthenticatedFileLink
+                          src={submission.fileUrl}
+                          label="Buka Bukti"
+                          fileName={submission.originalFilename ?? undefined}
+                        />
                       ) : null}
                     </div>
                   </div>

@@ -1,10 +1,11 @@
+import { lazy } from 'react';
 import { Spinner } from 'react-bootstrap';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
-import { resourceConfigs } from '../../config/resources';
-import SimpleCrudPage from '../resources/SimpleCrudPage';
 import PublicRoomsPage from './PublicRoomsPage';
-import StaffRoomsPage from './StaffRoomsPage';
+
+const ConfiguredResourcePage = lazy(() => import('../resources/ConfiguredResourcePage'));
+const StaffRoomsPage = lazy(() => import('./StaffRoomsPage'));
 
 export default function RoomsRouteEntry() {
   const { user, loading } = useAuth();
@@ -28,7 +29,7 @@ export default function RoomsRouteEntry() {
   if (user && ['OWNER', 'ADMIN'].includes(user.role)) {
     return (
       <AppLayout>
-        <SimpleCrudPage config={resourceConfigs.rooms} />
+        <ConfiguredResourcePage resource="rooms" />
       </AppLayout>
     );
   }

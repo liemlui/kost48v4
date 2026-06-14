@@ -43,6 +43,7 @@ export class RateLimitGuard implements CanActivate {
     publicBooking: { maxRequests: 5, windowMs: 10 * 60 * 1000 },
     // Authenticated tenant file uploads — prevent disk exhaustion abuse.
     tenantUpload: { maxRequests: 10, windowMs: 60 * 60 * 1000 },
+    imageUpload: { maxRequests: 60, windowMs: 60 * 60 * 1000 },
   };
 
   canActivate(context: ExecutionContext): boolean {
@@ -60,7 +61,8 @@ export class RateLimitGuard implements CanActivate {
       return true; // no limit for unlisted routes
     }
 
-    const key = `${bucket}:${ip}`;
+    const identity = request.user?.id ? `user-${request.user.id}` : `ip-${ip}`;
+    const key = `${bucket}:${identity}`;
     const now = Date.now();
     const existing = RateLimitGuard.store.get(key);
 

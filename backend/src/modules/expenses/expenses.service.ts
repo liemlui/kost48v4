@@ -6,6 +6,7 @@ import { ExpensesQueryDto } from './dto/expenses-query.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { ExpenseStatus } from '../../common/enums/app.enums';
 
 @Injectable()
 export class ExpensesService {
@@ -21,6 +22,7 @@ export class ExpensesService {
       AND: [
         query.search ? { OR: [{ description: { contains: query.search, mode: 'insensitive' } }, { vendorName: { contains: query.search, mode: 'insensitive' } }] } : {},
         query.type ? { type: query.type } : {},
+        query.status ? { status: query.status } : {},
         query.category ? { category: query.category } : {},
         query.roomId ? { roomId: Number(query.roomId) } : {},
         query.stayId ? { stayId: Number(query.stayId) } : {},
@@ -48,7 +50,14 @@ export class ExpensesService {
 
   async create(dto: CreateExpenseDto, actor: CurrentUserPayload) {
     await this.validateRelations(dto.roomId, dto.stayId);
-    const created = await this.prisma.expense.create({ data: { ...dto, expenseDate: new Date(dto.expenseDate), createdById: actor.id } });
+    const created = await this.prisma.expense.create({
+      data: {
+        ...dto,
+        status: ExpenseStatus.CONFIRMED as any,
+        expenseDate: new Date(dto.expenseDate),
+        createdById: actor.id,
+      },
+    });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Expense', entityId: String(created.id), newData: created });
     await this.accountingPosting.postExpense(created.id, actor.id).catch(() => undefined);
     return created;
@@ -57,6 +66,14 @@ export class ExpensesService {
   async update(id: number, dto: UpdateExpenseDto, actor: CurrentUserPayload) {
     const existing = await this.prisma.expense.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Expense tidak ditemukan');
+    const currentStatus = String(existing.status);
+    const nextStatus = String(dto.status ?? existing.status);
+    if (currentStatus === ExpenseStatus.CONFIRMED && nextStatus !== ExpenseStatus.CONFIRMED) {
+      throw new ConflictException('Expense CONFIRMED tidak dapat dikembalikan ke draft atau dibatalkan dari form ini.');
+    }
+    if (currentStatus === ExpenseStatus.CANCELLED) {
+      throw new ConflictException('Expense CANCELLED tidak dapat diubah.');
+    }
     // Audit M-33: data finansial yang sudah terjurnal tidak boleh berubah senyap.
     const changingFinancials =
       (dto.amountRupiah !== undefined && dto.amountRupiah !== existing.amountRupiah) ||
@@ -64,7 +81,26 @@ export class ExpensesService {
       (dto.category !== undefined && dto.category !== existing.category);
     await this.assertExpenseJournalAllowsChange(id, changingFinancials);
     await this.validateRelations(dto.roomId ?? existing.roomId ?? undefined, dto.stayId ?? existing.stayId ?? undefined);
-    const updated = await this.prisma.expense.update({ where: { id }, data: { ...dto, expenseDate: dto.expenseDate ? new Date(dto.expenseDate) : undefined } });
+    const confirmingDraft = currentStatus === ExpenseStatus.DRAFT && nextStatus === ExpenseStatus.CONFIRMED;
+    const nextAmount = dto.amountRupiah ?? existing.amountRupiah;
+    if (confirmingDraft && nextAmount <= 0) {
+      throw new ConflictException('Isi nominal lebih dari Rp0 sebelum mengonfirmasi draft expense.');
+    }
+
+    const updateData = {
+      ...dto,
+      expenseDate: dto.expenseDate ? new Date(dto.expenseDate) : undefined,
+    };
+    const updated = confirmingDraft
+      ? await this.prisma.$transaction(async (tx) => {
+          const confirmed = await tx.expense.update({ where: { id }, data: updateData });
+          const journalResult = await this.accountingPosting.postExpenseTx(tx, id, actor.id);
+          if (!journalResult?.posted) {
+            throw new ConflictException(journalResult?.reason ?? 'Jurnal expense tidak berhasil dibuat.');
+          }
+          return confirmed;
+        })
+      : await this.prisma.expense.update({ where: { id }, data: updateData });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Expense', entityId: String(updated.id), oldData: existing, newData: updated });
     return updated;
   }

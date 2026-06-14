@@ -1,6 +1,6 @@
 import { IsBooleanString, IsDateString, IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
-import { ExpenseCategory, ExpenseType } from '../../../common/enums/app.enums';
+import { ExpenseCategory, ExpenseStatus, ExpenseType } from '../../../common/enums/app.enums';
 
 export class ExpensesQueryDto extends PaginationQueryDto {
   @IsOptional()
@@ -10,6 +10,10 @@ export class ExpensesQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsEnum(ExpenseType)
   type?: ExpenseType;
+
+  @IsOptional()
+  @IsEnum(ExpenseStatus)
+  status?: ExpenseStatus;
 
   @IsOptional()
   @IsEnum(ExpenseCategory)

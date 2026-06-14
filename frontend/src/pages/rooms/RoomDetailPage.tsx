@@ -8,11 +8,14 @@ import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUpload
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
+import SafeImage from '../../components/common/SafeImage';
+import CameraOrGalleryInput from '../../components/common/CameraOrGalleryInput';
 import MeterTab from '../../components/stays/MeterTab';
 import StaffInventoryStatusModal from '../../components/staff/StaffInventoryStatusModal';
 import FacilityManager from '../../components/rooms/FacilityManager';
 import { useAuth } from '../../context/AuthContext';
 import type { Room, RoomItem, Stay } from '../../types';
+import { compressImageFile } from '../../utils/compressImageFile';
 
 function formatValue(value?: string | null) {
   return value && value.trim() ? value : '-';
@@ -120,7 +123,9 @@ export default function RoomDetailPage() {
   const handleRoomConditionPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const uploaded = await uploadTicketImage(file);
+    const uploaded = await uploadTicketImage(
+      await compressImageFile(file, { maxSide: 1600, quality: 0.78 }),
+    );
     setRoomConditionPhoto(uploaded);
     setRoomConditionPreview(uploaded.fileUrl);
     event.target.value = '';
@@ -375,8 +380,8 @@ export default function RoomDetailPage() {
                     </Form.Group>
                     <Form.Group>
                       <Form.Label>Foto pendukung</Form.Label>
-                      <Form.Control type="file" accept="image/jpeg,image/png,image/webp" onChange={handleRoomConditionPhoto} />
-                      {roomConditionPreview ? <img className="staff-proof-preview" src={roomConditionPreview} alt="Foto kondisi kamar" /> : null}
+                      <CameraOrGalleryInput onChange={handleRoomConditionPhoto} />
+                      {roomConditionPreview ? <SafeImage className="staff-proof-preview" src={roomConditionPreview} alt="Foto kondisi kamar" /> : null}
                     </Form.Group>
                     <Button onClick={() => roomConditionMutation.mutate()} disabled={roomConditionMutation.isPending || !roomConditionNote.trim()}>
                       {roomConditionMutation.isPending ? 'Mengirim...' : 'Kirim catatan kamar'}

@@ -210,6 +210,13 @@ exports.Prisma.StayScalarFieldEnum = {
   downPaymentPaidRupiah: 'downPaymentPaidRupiah',
   downPaymentPaidAt: 'downPaymentPaidAt',
   downPaymentForfeitedAt: 'downPaymentForfeitedAt',
+  lossRefundStatus: 'lossRefundStatus',
+  lossRefundAmountRupiah: 'lossRefundAmountRupiah',
+  lossRefundProofUrl: 'lossRefundProofUrl',
+  lossRefundProofFileKey: 'lossRefundProofFileKey',
+  lossRefundNote: 'lossRefundNote',
+  lossRefundProcessedAt: 'lossRefundProcessedAt',
+  lossRefundProcessedById: 'lossRefundProcessedById',
   electricityTariffPerKwhRupiah: 'electricityTariffPerKwhRupiah',
   waterTariffPerM3Rupiah: 'waterTariffPerM3Rupiah',
   bookingSource: 'bookingSource',
@@ -556,6 +563,11 @@ exports.Prisma.RenewRequestScalarFieldEnum = {
   reviewNotes: 'reviewNotes',
   reviewedById: 'reviewedById',
   reviewedAt: 'reviewedAt',
+  downPaymentAmountRupiah: 'downPaymentAmountRupiah',
+  downPaymentPaidAt: 'downPaymentPaidAt',
+  downPaymentDueDate: 'downPaymentDueDate',
+  settlementDueDate: 'settlementDueDate',
+  downPaymentInvoiceId: 'downPaymentInvoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -590,9 +602,11 @@ exports.Prisma.ExpenseScalarFieldEnum = {
   id: 'id',
   expenseDate: 'expenseDate',
   type: 'type',
+  status: 'status',
   category: 'category',
   description: 'description',
   amountRupiah: 'amountRupiah',
+  recurringKey: 'recurringKey',
   vendorName: 'vendorName',
   roomId: 'roomId',
   stayId: 'stayId',
@@ -893,6 +907,12 @@ exports.DepositStatus = exports.$Enums.DepositStatus = {
   FORFEITED: 'FORFEITED'
 };
 
+exports.RefundStatus = exports.$Enums.RefundStatus = {
+  NONE: 'NONE',
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED'
+};
+
 exports.LeadSource = exports.$Enums.LeadSource = {
   GOOGLE_MAPS: 'GOOGLE_MAPS',
   WALK_IN: 'WALK_IN',
@@ -1062,7 +1082,8 @@ exports.StaffPerformanceEventType = exports.$Enums.StaffPerformanceEventType = {
 exports.StaffReviewStatus = exports.$Enums.StaffReviewStatus = {
   VISIBLE: 'VISIBLE',
   HIDDEN: 'HIDDEN',
-  FLAGGED: 'FLAGGED'
+  FLAGGED: 'FLAGGED',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION'
 };
 
 exports.AnnouncementAudience = exports.$Enums.AnnouncementAudience = {
@@ -1108,7 +1129,14 @@ exports.StaffFieldReportStatus = exports.$Enums.StaffFieldReportStatus = {
 exports.RenewRequestStatus = exports.$Enums.RenewRequestStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  PENDING_DECISION: 'PENDING_DECISION',
+  AWAITING_DP: 'AWAITING_DP',
+  DP_SECURED: 'DP_SECURED',
+  COMPLETED: 'COMPLETED',
+  REJECTED_BY_TENANT: 'REJECTED_BY_TENANT',
+  EXPIRED_PRIORITY: 'EXPIRED_PRIORITY',
+  FORFEITED: 'FORFEITED'
 };
 
 exports.CheckoutRequestStatus = exports.$Enums.CheckoutRequestStatus = {
@@ -1120,6 +1148,12 @@ exports.CheckoutRequestStatus = exports.$Enums.CheckoutRequestStatus = {
 exports.ExpenseType = exports.$Enums.ExpenseType = {
   FIXED: 'FIXED',
   VARIABLE: 'VARIABLE'
+};
+
+exports.ExpenseStatus = exports.$Enums.ExpenseStatus = {
+  DRAFT: 'DRAFT',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED'
 };
 
 exports.ExpenseCategory = exports.$Enums.ExpenseCategory = {

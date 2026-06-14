@@ -16,6 +16,9 @@ import {
 } from "../../constants/staffRepairOptions";
 import type { InventoryItem, RoomItem } from "../../types";
 import { getInventoryHealth } from "../../utils/inventoryHealth";
+import CameraOrGalleryInput from "../common/CameraOrGalleryInput";
+import SafeImage from "../common/SafeImage";
+import { compressImageFile as compressBrowserImage } from "../../utils/compressImageFile";
 
 type Target =
   | { type: "room-item"; item: RoomItem }
@@ -79,27 +82,7 @@ const roomHandlingCopy: Record<
 };
 
 async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", 0.78),
-  );
-  bitmap.close();
-  if (!blob) return file;
-  return new File(
-    [blob],
-    file.name.replace(/\.(png|webp|jpeg|jpg)$/i, "") + ".jpg",
-    { type: "image/jpeg" },
-  );
+  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
 
 function targetTitle(target: Target | null) {
@@ -636,13 +619,9 @@ export default function StaffInventoryStatusModal({
         <div className="staff-evidence-panel mt-3">
           <Form.Group className="mb-3">
             <Form.Label>Foto bukti</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleImage}
-            />
+            <CameraOrGalleryInput onChange={handleImage} />
             {preview ? (
-              <img
+              <SafeImage
                 className="staff-proof-preview"
                 src={preview}
                 alt="Foto bukti"

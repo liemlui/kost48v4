@@ -1,4 +1,5 @@
 import { getTicketStatusLabel } from '../../constants/staffRepairOptions';
+import { compressImageFile as compressBrowserImage } from '../../utils/compressImageFile';
 
 export type TicketItem = {
   issueImageUrl?: string | null;
@@ -47,21 +48,7 @@ export function formatRelations(item: TicketItem): string {
 }
 
 export async function compressImageFile(file: File): Promise<File> {
-  const bitmap = await createImageBitmap(file);
-  const maxSide = 1600;
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return file;
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.78));
-  bitmap.close();
-  if (!blob) return file;
-  return new File([blob], file.name.replace(/\.(png|webp|jpeg|jpg)$/i, '') + '.jpg', { type: 'image/jpeg' });
+  return compressBrowserImage(file, { maxSide: 1600, quality: 0.78 });
 }
 
 export function getStaffStatusText(status: string) {

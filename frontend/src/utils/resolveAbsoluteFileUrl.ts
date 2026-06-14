@@ -9,7 +9,9 @@ export function resolveAbsoluteFileUrl(fileUrl?: string | null): string | null {
   // only /api/* still show room/logo assets correctly.
   const normalizedFileUrl = fileUrl.startsWith('/uploads/room-images/')
     ? `/api${fileUrl}`
-    : fileUrl;
+    : fileUrl.startsWith('/uploads/ticket-images/')
+      ? fileUrl.replace('/uploads/ticket-images/', '/api/tickets/images/')
+      : fileUrl;
 
   return `${origin}${normalizedFileUrl.startsWith('/') ? '' : '/'}${normalizedFileUrl}`;
 }
