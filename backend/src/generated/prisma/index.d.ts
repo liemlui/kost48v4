@@ -807,6 +807,15 @@ export const AssetDepreciationRunStatus: {
 
 export type AssetDepreciationRunStatus = (typeof AssetDepreciationRunStatus)[keyof typeof AssetDepreciationRunStatus]
 
+
+export const BelongingsStatus: {
+  PENDING: 'PENDING',
+  CLAIMED: 'CLAIMED',
+  ABANDONED: 'ABANDONED'
+};
+
+export type BelongingsStatus = (typeof BelongingsStatus)[keyof typeof BelongingsStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -1020,6 +1029,10 @@ export const FixedAssetLedgerAlignmentMethod: typeof $Enums.FixedAssetLedgerAlig
 export type AssetDepreciationRunStatus = $Enums.AssetDepreciationRunStatus
 
 export const AssetDepreciationRunStatus: typeof $Enums.AssetDepreciationRunStatus
+
+export type BelongingsStatus = $Enums.BelongingsStatus
+
+export const BelongingsStatus: typeof $Enums.BelongingsStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -5338,6 +5351,8 @@ export namespace Prisma {
     fixedAssetsCreated: number
     assetDepreciationRunsCreated: number
     depositLedgerEntriesActed: number
+    staysFledMarked: number
+    tenantsKtpVerified: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5371,6 +5386,8 @@ export namespace Prisma {
     fixedAssetsCreated?: boolean | UserCountOutputTypeCountFixedAssetsCreatedArgs
     assetDepreciationRunsCreated?: boolean | UserCountOutputTypeCountAssetDepreciationRunsCreatedArgs
     depositLedgerEntriesActed?: boolean | UserCountOutputTypeCountDepositLedgerEntriesActedArgs
+    staysFledMarked?: boolean | UserCountOutputTypeCountStaysFledMarkedArgs
+    tenantsKtpVerified?: boolean | UserCountOutputTypeCountTenantsKtpVerifiedArgs
   }
 
   // Custom InputTypes
@@ -5592,6 +5609,20 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountDepositLedgerEntriesActedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TenantDepositLedgerEntryWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaysFledMarkedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StayWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTenantsKtpVerifiedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TenantWhereInput
   }
 
 
@@ -6789,6 +6820,8 @@ export namespace Prisma {
     fixedAssetsCreated?: boolean | User$fixedAssetsCreatedArgs<ExtArgs>
     assetDepreciationRunsCreated?: boolean | User$assetDepreciationRunsCreatedArgs<ExtArgs>
     depositLedgerEntriesActed?: boolean | User$depositLedgerEntriesActedArgs<ExtArgs>
+    staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
+    tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -6869,6 +6902,8 @@ export namespace Prisma {
     fixedAssetsCreated?: boolean | User$fixedAssetsCreatedArgs<ExtArgs>
     assetDepreciationRunsCreated?: boolean | User$assetDepreciationRunsCreatedArgs<ExtArgs>
     depositLedgerEntriesActed?: boolean | User$depositLedgerEntriesActedArgs<ExtArgs>
+    staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
+    tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6912,6 +6947,8 @@ export namespace Prisma {
       fixedAssetsCreated: Prisma.$FixedAssetPayload<ExtArgs>[]
       assetDepreciationRunsCreated: Prisma.$AssetDepreciationRunPayload<ExtArgs>[]
       depositLedgerEntriesActed: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
+      staysFledMarked: Prisma.$StayPayload<ExtArgs>[]
+      tenantsKtpVerified: Prisma.$TenantPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7350,6 +7387,8 @@ export namespace Prisma {
     fixedAssetsCreated<T extends User$fixedAssetsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$fixedAssetsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FixedAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     assetDepreciationRunsCreated<T extends User$assetDepreciationRunsCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$assetDepreciationRunsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AssetDepreciationRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     depositLedgerEntriesActed<T extends User$depositLedgerEntriesActedArgs<ExtArgs> = {}>(args?: Subset<T, User$depositLedgerEntriesActedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    staysFledMarked<T extends User$staysFledMarkedArgs<ExtArgs> = {}>(args?: Subset<T, User$staysFledMarkedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    tenantsKtpVerified<T extends User$tenantsKtpVerifiedArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsKtpVerifiedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8530,6 +8569,54 @@ export namespace Prisma {
   }
 
   /**
+   * User.staysFledMarked
+   */
+  export type User$staysFledMarkedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Stay
+     */
+    select?: StaySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Stay
+     */
+    omit?: StayOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StayInclude<ExtArgs> | null
+    where?: StayWhereInput
+    orderBy?: StayOrderByWithRelationInput | StayOrderByWithRelationInput[]
+    cursor?: StayWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StayScalarFieldEnum | StayScalarFieldEnum[]
+  }
+
+  /**
+   * User.tenantsKtpVerified
+   */
+  export type User$tenantsKtpVerifiedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tenant
+     */
+    select?: TenantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tenant
+     */
+    omit?: TenantOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantInclude<ExtArgs> | null
+    where?: TenantWhereInput
+    orderBy?: TenantOrderByWithRelationInput | TenantOrderByWithRelationInput[]
+    cursor?: TenantWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TenantScalarFieldEnum | TenantScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8562,10 +8649,14 @@ export namespace Prisma {
 
   export type TenantAvgAggregateOutputType = {
     id: number | null
+    ktpImageFileSizeBytes: number | null
+    ktpVerifiedById: number | null
   }
 
   export type TenantSumAggregateOutputType = {
     id: number | null
+    ktpImageFileSizeBytes: number | null
+    ktpVerifiedById: number | null
   }
 
   export type TenantMinAggregateOutputType = {
@@ -8574,6 +8665,14 @@ export namespace Prisma {
     phone: string | null
     email: string | null
     identityNumber: string | null
+    ktpImageUrl: string | null
+    ktpImageFileKey: string | null
+    ktpImageOriginalFilename: string | null
+    ktpImageMimeType: string | null
+    ktpImageFileSizeBytes: number | null
+    ktpVerifiedAt: Date | null
+    ktpVerifiedById: number | null
+    ktpDeletedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -8593,6 +8692,14 @@ export namespace Prisma {
     phone: string | null
     email: string | null
     identityNumber: string | null
+    ktpImageUrl: string | null
+    ktpImageFileKey: string | null
+    ktpImageOriginalFilename: string | null
+    ktpImageMimeType: string | null
+    ktpImageFileSizeBytes: number | null
+    ktpVerifiedAt: Date | null
+    ktpVerifiedById: number | null
+    ktpDeletedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -8612,6 +8719,14 @@ export namespace Prisma {
     phone: number
     email: number
     identityNumber: number
+    ktpImageUrl: number
+    ktpImageFileKey: number
+    ktpImageOriginalFilename: number
+    ktpImageMimeType: number
+    ktpImageFileSizeBytes: number
+    ktpVerifiedAt: number
+    ktpVerifiedById: number
+    ktpDeletedAt: number
     gender: number
     birthDate: number
     originCity: number
@@ -8629,10 +8744,14 @@ export namespace Prisma {
 
   export type TenantAvgAggregateInputType = {
     id?: true
+    ktpImageFileSizeBytes?: true
+    ktpVerifiedById?: true
   }
 
   export type TenantSumAggregateInputType = {
     id?: true
+    ktpImageFileSizeBytes?: true
+    ktpVerifiedById?: true
   }
 
   export type TenantMinAggregateInputType = {
@@ -8641,6 +8760,14 @@ export namespace Prisma {
     phone?: true
     email?: true
     identityNumber?: true
+    ktpImageUrl?: true
+    ktpImageFileKey?: true
+    ktpImageOriginalFilename?: true
+    ktpImageMimeType?: true
+    ktpImageFileSizeBytes?: true
+    ktpVerifiedAt?: true
+    ktpVerifiedById?: true
+    ktpDeletedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -8660,6 +8787,14 @@ export namespace Prisma {
     phone?: true
     email?: true
     identityNumber?: true
+    ktpImageUrl?: true
+    ktpImageFileKey?: true
+    ktpImageOriginalFilename?: true
+    ktpImageMimeType?: true
+    ktpImageFileSizeBytes?: true
+    ktpVerifiedAt?: true
+    ktpVerifiedById?: true
+    ktpDeletedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -8679,6 +8814,14 @@ export namespace Prisma {
     phone?: true
     email?: true
     identityNumber?: true
+    ktpImageUrl?: true
+    ktpImageFileKey?: true
+    ktpImageOriginalFilename?: true
+    ktpImageMimeType?: true
+    ktpImageFileSizeBytes?: true
+    ktpVerifiedAt?: true
+    ktpVerifiedById?: true
+    ktpDeletedAt?: true
     gender?: true
     birthDate?: true
     originCity?: true
@@ -8785,6 +8928,14 @@ export namespace Prisma {
     phone: string
     email: string | null
     identityNumber: string | null
+    ktpImageUrl: string | null
+    ktpImageFileKey: string | null
+    ktpImageOriginalFilename: string | null
+    ktpImageMimeType: string | null
+    ktpImageFileSizeBytes: number | null
+    ktpVerifiedAt: Date | null
+    ktpVerifiedById: number | null
+    ktpDeletedAt: Date | null
     gender: $Enums.Gender | null
     birthDate: Date | null
     originCity: string | null
@@ -8823,6 +8974,14 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     identityNumber?: boolean
+    ktpImageUrl?: boolean
+    ktpImageFileKey?: boolean
+    ktpImageOriginalFilename?: boolean
+    ktpImageMimeType?: boolean
+    ktpImageFileSizeBytes?: boolean
+    ktpVerifiedAt?: boolean
+    ktpVerifiedById?: boolean
+    ktpDeletedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -8835,6 +8994,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Tenant$userArgs<ExtArgs>
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
     paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
@@ -8850,6 +9010,14 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     identityNumber?: boolean
+    ktpImageUrl?: boolean
+    ktpImageFileKey?: boolean
+    ktpImageOriginalFilename?: boolean
+    ktpImageMimeType?: boolean
+    ktpImageFileSizeBytes?: boolean
+    ktpVerifiedAt?: boolean
+    ktpVerifiedById?: boolean
+    ktpDeletedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -8861,6 +9029,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -8869,6 +9038,14 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     identityNumber?: boolean
+    ktpImageUrl?: boolean
+    ktpImageFileKey?: boolean
+    ktpImageOriginalFilename?: boolean
+    ktpImageMimeType?: boolean
+    ktpImageFileSizeBytes?: boolean
+    ktpVerifiedAt?: boolean
+    ktpVerifiedById?: boolean
+    ktpDeletedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -8880,6 +9057,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectScalar = {
@@ -8888,6 +9066,14 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     identityNumber?: boolean
+    ktpImageUrl?: boolean
+    ktpImageFileKey?: boolean
+    ktpImageOriginalFilename?: boolean
+    ktpImageMimeType?: boolean
+    ktpImageFileSizeBytes?: boolean
+    ktpVerifiedAt?: boolean
+    ktpVerifiedById?: boolean
+    ktpDeletedAt?: boolean
     gender?: boolean
     birthDate?: boolean
     originCity?: boolean
@@ -8901,9 +9087,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "ktpImageUrl" | "ktpImageFileKey" | "ktpImageOriginalFilename" | "ktpImageMimeType" | "ktpImageFileSizeBytes" | "ktpVerifiedAt" | "ktpVerifiedById" | "ktpDeletedAt" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Tenant$userArgs<ExtArgs>
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
     stays?: boolean | Tenant$staysArgs<ExtArgs>
     tickets?: boolean | Tenant$ticketsArgs<ExtArgs>
     paymentSubmissions?: boolean | Tenant$paymentSubmissionsArgs<ExtArgs>
@@ -8912,13 +9099,18 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type TenantIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
+  }
+  export type TenantIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
+  }
 
   export type $TenantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tenant"
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
+      ktpVerifiedBy: Prisma.$UserPayload<ExtArgs> | null
       stays: Prisma.$StayPayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       paymentSubmissions: Prisma.$PaymentSubmissionPayload<ExtArgs>[]
@@ -8932,6 +9124,14 @@ export namespace Prisma {
       phone: string
       email: string | null
       identityNumber: string | null
+      ktpImageUrl: string | null
+      ktpImageFileKey: string | null
+      ktpImageOriginalFilename: string | null
+      ktpImageMimeType: string | null
+      ktpImageFileSizeBytes: number | null
+      ktpVerifiedAt: Date | null
+      ktpVerifiedById: number | null
+      ktpDeletedAt: Date | null
       gender: $Enums.Gender | null
       birthDate: Date | null
       originCity: string | null
@@ -9338,6 +9538,7 @@ export namespace Prisma {
   export interface Prisma__TenantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Tenant$userArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    ktpVerifiedBy<T extends Tenant$ktpVerifiedByArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$ktpVerifiedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     stays<T extends Tenant$staysArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$staysArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Tenant$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     paymentSubmissions<T extends Tenant$paymentSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$paymentSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9378,6 +9579,14 @@ export namespace Prisma {
     readonly phone: FieldRef<"Tenant", 'String'>
     readonly email: FieldRef<"Tenant", 'String'>
     readonly identityNumber: FieldRef<"Tenant", 'String'>
+    readonly ktpImageUrl: FieldRef<"Tenant", 'String'>
+    readonly ktpImageFileKey: FieldRef<"Tenant", 'String'>
+    readonly ktpImageOriginalFilename: FieldRef<"Tenant", 'String'>
+    readonly ktpImageMimeType: FieldRef<"Tenant", 'String'>
+    readonly ktpImageFileSizeBytes: FieldRef<"Tenant", 'Int'>
+    readonly ktpVerifiedAt: FieldRef<"Tenant", 'DateTime'>
+    readonly ktpVerifiedById: FieldRef<"Tenant", 'Int'>
+    readonly ktpDeletedAt: FieldRef<"Tenant", 'DateTime'>
     readonly gender: FieldRef<"Tenant", 'Gender'>
     readonly birthDate: FieldRef<"Tenant", 'DateTime'>
     readonly originCity: FieldRef<"Tenant", 'String'>
@@ -9643,6 +9852,10 @@ export namespace Prisma {
      */
     data: TenantCreateManyInput | TenantCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9713,6 +9926,10 @@ export namespace Prisma {
      * Limit how many Tenants to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9785,6 +10002,25 @@ export namespace Prisma {
    * Tenant.user
    */
   export type Tenant$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Tenant.ktpVerifiedBy
+   */
+  export type Tenant$ktpVerifiedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -12770,6 +13006,7 @@ export namespace Prisma {
     lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
+    fledMarkedById: number | null
     createdById: number | null
     initialElectricityKwhPending: Decimal | null
     initialWaterM3Pending: Decimal | null
@@ -12791,6 +13028,7 @@ export namespace Prisma {
     lossRefundProcessedById: number | null
     electricityTariffPerKwhRupiah: number | null
     waterTariffPerM3Rupiah: number | null
+    fledMarkedById: number | null
     createdById: number | null
     initialElectricityKwhPending: Decimal | null
     initialWaterM3Pending: Decimal | null
@@ -12834,6 +13072,12 @@ export namespace Prisma {
     stayPurpose: $Enums.StayPurpose | null
     checkoutReason: string | null
     cancelReason: string | null
+    fledMarkedAt: Date | null
+    fledMarkedById: number | null
+    fledReason: string | null
+    belongingsStatus: $Enums.BelongingsStatus | null
+    belongingsDeadline: Date | null
+    belongingsResolvedAt: Date | null
     notes: string | null
     createdById: number | null
     createdAt: Date | null
@@ -12882,6 +13126,12 @@ export namespace Prisma {
     stayPurpose: $Enums.StayPurpose | null
     checkoutReason: string | null
     cancelReason: string | null
+    fledMarkedAt: Date | null
+    fledMarkedById: number | null
+    fledReason: string | null
+    belongingsStatus: $Enums.BelongingsStatus | null
+    belongingsDeadline: Date | null
+    belongingsResolvedAt: Date | null
     notes: string | null
     createdById: number | null
     createdAt: Date | null
@@ -12930,6 +13180,12 @@ export namespace Prisma {
     stayPurpose: number
     checkoutReason: number
     cancelReason: number
+    fledMarkedAt: number
+    fledMarkedById: number
+    fledReason: number
+    belongingsStatus: number
+    belongingsDeadline: number
+    belongingsResolvedAt: number
     notes: number
     createdById: number
     createdAt: number
@@ -12958,6 +13214,7 @@ export namespace Prisma {
     lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
+    fledMarkedById?: true
     createdById?: true
     initialElectricityKwhPending?: true
     initialWaterM3Pending?: true
@@ -12979,6 +13236,7 @@ export namespace Prisma {
     lossRefundProcessedById?: true
     electricityTariffPerKwhRupiah?: true
     waterTariffPerM3Rupiah?: true
+    fledMarkedById?: true
     createdById?: true
     initialElectricityKwhPending?: true
     initialWaterM3Pending?: true
@@ -13022,6 +13280,12 @@ export namespace Prisma {
     stayPurpose?: true
     checkoutReason?: true
     cancelReason?: true
+    fledMarkedAt?: true
+    fledMarkedById?: true
+    fledReason?: true
+    belongingsStatus?: true
+    belongingsDeadline?: true
+    belongingsResolvedAt?: true
     notes?: true
     createdById?: true
     createdAt?: true
@@ -13070,6 +13334,12 @@ export namespace Prisma {
     stayPurpose?: true
     checkoutReason?: true
     cancelReason?: true
+    fledMarkedAt?: true
+    fledMarkedById?: true
+    fledReason?: true
+    belongingsStatus?: true
+    belongingsDeadline?: true
+    belongingsResolvedAt?: true
     notes?: true
     createdById?: true
     createdAt?: true
@@ -13118,6 +13388,12 @@ export namespace Prisma {
     stayPurpose?: true
     checkoutReason?: true
     cancelReason?: true
+    fledMarkedAt?: true
+    fledMarkedById?: true
+    fledReason?: true
+    belongingsStatus?: true
+    belongingsDeadline?: true
+    belongingsResolvedAt?: true
     notes?: true
     createdById?: true
     createdAt?: true
@@ -13253,6 +13529,12 @@ export namespace Prisma {
     stayPurpose: $Enums.StayPurpose | null
     checkoutReason: string | null
     cancelReason: string | null
+    fledMarkedAt: Date | null
+    fledMarkedById: number | null
+    fledReason: string | null
+    belongingsStatus: $Enums.BelongingsStatus
+    belongingsDeadline: Date | null
+    belongingsResolvedAt: Date | null
     notes: string | null
     createdById: number | null
     createdAt: Date
@@ -13320,6 +13602,12 @@ export namespace Prisma {
     stayPurpose?: boolean
     checkoutReason?: boolean
     cancelReason?: boolean
+    fledMarkedAt?: boolean
+    fledMarkedById?: boolean
+    fledReason?: boolean
+    belongingsStatus?: boolean
+    belongingsDeadline?: boolean
+    belongingsResolvedAt?: boolean
     notes?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -13333,6 +13621,7 @@ export namespace Prisma {
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
@@ -13380,6 +13669,12 @@ export namespace Prisma {
     stayPurpose?: boolean
     checkoutReason?: boolean
     cancelReason?: boolean
+    fledMarkedAt?: boolean
+    fledMarkedById?: boolean
+    fledReason?: boolean
+    belongingsStatus?: boolean
+    belongingsDeadline?: boolean
+    belongingsResolvedAt?: boolean
     notes?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -13393,6 +13688,7 @@ export namespace Prisma {
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
   export type StaySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -13432,6 +13728,12 @@ export namespace Prisma {
     stayPurpose?: boolean
     checkoutReason?: boolean
     cancelReason?: boolean
+    fledMarkedAt?: boolean
+    fledMarkedById?: boolean
+    fledReason?: boolean
+    belongingsStatus?: boolean
+    belongingsDeadline?: boolean
+    belongingsResolvedAt?: boolean
     notes?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -13445,6 +13747,7 @@ export namespace Prisma {
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
   }, ExtArgs["result"]["stay"]>
 
   export type StaySelectScalar = {
@@ -13484,6 +13787,12 @@ export namespace Prisma {
     stayPurpose?: boolean
     checkoutReason?: boolean
     cancelReason?: boolean
+    fledMarkedAt?: boolean
+    fledMarkedById?: boolean
+    fledReason?: boolean
+    belongingsStatus?: boolean
+    belongingsDeadline?: boolean
+    belongingsResolvedAt?: boolean
     notes?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -13495,12 +13804,13 @@ export namespace Prisma {
     initialMetersPromotedAt?: boolean
   }
 
-  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "downPaymentAmountRupiah" | "downPaymentPaidRupiah" | "downPaymentPaidAt" | "downPaymentForfeitedAt" | "lossRefundStatus" | "lossRefundAmountRupiah" | "lossRefundProofUrl" | "lossRefundProofFileKey" | "lossRefundNote" | "lossRefundProcessedAt" | "lossRefundProcessedById" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "cancelReason" | "notes" | "createdById" | "createdAt" | "updatedAt" | "initialElectricityKwhPending" | "initialWaterM3Pending" | "initialMetersRecordedAt" | "initialMetersRecordedById" | "initialMetersPromotedAt", ExtArgs["result"]["stay"]>
+  export type StayOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "roomId" | "status" | "pricingTerm" | "agreedRentAmountRupiah" | "checkInDate" | "plannedCheckOutDate" | "actualCheckOutDate" | "expiresAt" | "depositAmountRupiah" | "depositPaidAmountRupiah" | "depositPaymentStatus" | "depositStatus" | "depositDeductionRupiah" | "depositRefundedRupiah" | "depositRefundedAt" | "depositNote" | "downPaymentAmountRupiah" | "downPaymentPaidRupiah" | "downPaymentPaidAt" | "downPaymentForfeitedAt" | "lossRefundStatus" | "lossRefundAmountRupiah" | "lossRefundProofUrl" | "lossRefundProofFileKey" | "lossRefundNote" | "lossRefundProcessedAt" | "lossRefundProcessedById" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "bookingSource" | "bookingSourceDetail" | "stayPurpose" | "checkoutReason" | "cancelReason" | "fledMarkedAt" | "fledMarkedById" | "fledReason" | "belongingsStatus" | "belongingsDeadline" | "belongingsResolvedAt" | "notes" | "createdById" | "createdAt" | "updatedAt" | "initialElectricityKwhPending" | "initialWaterM3Pending" | "initialMetersRecordedAt" | "initialMetersRecordedById" | "initialMetersPromotedAt", ExtArgs["result"]["stay"]>
   export type StayInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
     invoices?: boolean | Stay$invoicesArgs<ExtArgs>
     tickets?: boolean | Stay$ticketsArgs<ExtArgs>
     expenses?: boolean | Stay$expensesArgs<ExtArgs>
@@ -13515,12 +13825,14 @@ export namespace Prisma {
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
   }
   export type StayIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     room?: boolean | RoomDefaultArgs<ExtArgs>
     createdBy?: boolean | Stay$createdByArgs<ExtArgs>
     initialMetersRecordedBy?: boolean | Stay$initialMetersRecordedByArgs<ExtArgs>
+    fledMarkedBy?: boolean | Stay$fledMarkedByArgs<ExtArgs>
   }
 
   export type $StayPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13530,6 +13842,7 @@ export namespace Prisma {
       room: Prisma.$RoomPayload<ExtArgs>
       createdBy: Prisma.$UserPayload<ExtArgs> | null
       initialMetersRecordedBy: Prisma.$UserPayload<ExtArgs> | null
+      fledMarkedBy: Prisma.$UserPayload<ExtArgs> | null
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
       expenses: Prisma.$ExpensePayload<ExtArgs>[]
@@ -13575,6 +13888,12 @@ export namespace Prisma {
       stayPurpose: $Enums.StayPurpose | null
       checkoutReason: string | null
       cancelReason: string | null
+      fledMarkedAt: Date | null
+      fledMarkedById: number | null
+      fledReason: string | null
+      belongingsStatus: $Enums.BelongingsStatus
+      belongingsDeadline: Date | null
+      belongingsResolvedAt: Date | null
       notes: string | null
       createdById: number | null
       createdAt: Date
@@ -13982,6 +14301,7 @@ export namespace Prisma {
     room<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends Stay$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Stay$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     initialMetersRecordedBy<T extends Stay$initialMetersRecordedByArgs<ExtArgs> = {}>(args?: Subset<T, Stay$initialMetersRecordedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    fledMarkedBy<T extends Stay$fledMarkedByArgs<ExtArgs> = {}>(args?: Subset<T, Stay$fledMarkedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     invoices<T extends Stay$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends Stay$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Stay$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     expenses<T extends Stay$expensesArgs<ExtArgs> = {}>(args?: Subset<T, Stay$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -14054,6 +14374,12 @@ export namespace Prisma {
     readonly stayPurpose: FieldRef<"Stay", 'StayPurpose'>
     readonly checkoutReason: FieldRef<"Stay", 'String'>
     readonly cancelReason: FieldRef<"Stay", 'String'>
+    readonly fledMarkedAt: FieldRef<"Stay", 'DateTime'>
+    readonly fledMarkedById: FieldRef<"Stay", 'Int'>
+    readonly fledReason: FieldRef<"Stay", 'String'>
+    readonly belongingsStatus: FieldRef<"Stay", 'BelongingsStatus'>
+    readonly belongingsDeadline: FieldRef<"Stay", 'DateTime'>
+    readonly belongingsResolvedAt: FieldRef<"Stay", 'DateTime'>
     readonly notes: FieldRef<"Stay", 'String'>
     readonly createdById: FieldRef<"Stay", 'Int'>
     readonly createdAt: FieldRef<"Stay", 'DateTime'>
@@ -14486,6 +14812,25 @@ export namespace Prisma {
    * Stay.initialMetersRecordedBy
    */
   export type Stay$initialMetersRecordedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Stay.fledMarkedBy
+   */
+  export type Stay$fledMarkedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -23582,6 +23927,7 @@ export namespace Prisma {
     assignedToId: number | null
     linkedRoomItemId: number | null
     linkedInventoryItemId: number | null
+    escalationLevel: number | null
   }
 
   export type TicketSumAggregateOutputType = {
@@ -23594,6 +23940,7 @@ export namespace Prisma {
     assignedToId: number | null
     linkedRoomItemId: number | null
     linkedInventoryItemId: number | null
+    escalationLevel: number | null
   }
 
   export type TicketMinAggregateOutputType = {
@@ -23625,6 +23972,10 @@ export namespace Prisma {
     resolutionNote: string | null
     resolvedAt: Date | null
     closedAt: Date | null
+    assignedAt: Date | null
+    dueAt: Date | null
+    escalationLevel: number | null
+    escalatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -23658,6 +24009,10 @@ export namespace Prisma {
     resolutionNote: string | null
     resolvedAt: Date | null
     closedAt: Date | null
+    assignedAt: Date | null
+    dueAt: Date | null
+    escalationLevel: number | null
+    escalatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -23691,6 +24046,10 @@ export namespace Prisma {
     resolutionNote: number
     resolvedAt: number
     closedAt: number
+    assignedAt: number
+    dueAt: number
+    escalationLevel: number
+    escalatedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -23707,6 +24066,7 @@ export namespace Prisma {
     assignedToId?: true
     linkedRoomItemId?: true
     linkedInventoryItemId?: true
+    escalationLevel?: true
   }
 
   export type TicketSumAggregateInputType = {
@@ -23719,6 +24079,7 @@ export namespace Prisma {
     assignedToId?: true
     linkedRoomItemId?: true
     linkedInventoryItemId?: true
+    escalationLevel?: true
   }
 
   export type TicketMinAggregateInputType = {
@@ -23750,6 +24111,10 @@ export namespace Prisma {
     resolutionNote?: true
     resolvedAt?: true
     closedAt?: true
+    assignedAt?: true
+    dueAt?: true
+    escalationLevel?: true
+    escalatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23783,6 +24148,10 @@ export namespace Prisma {
     resolutionNote?: true
     resolvedAt?: true
     closedAt?: true
+    assignedAt?: true
+    dueAt?: true
+    escalationLevel?: true
+    escalatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23816,6 +24185,10 @@ export namespace Prisma {
     resolutionNote?: true
     resolvedAt?: true
     closedAt?: true
+    assignedAt?: true
+    dueAt?: true
+    escalationLevel?: true
+    escalatedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -23936,6 +24309,10 @@ export namespace Prisma {
     resolutionNote: string | null
     resolvedAt: Date | null
     closedAt: Date | null
+    assignedAt: Date | null
+    dueAt: Date | null
+    escalationLevel: number
+    escalatedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: TicketCountAggregateOutputType | null
@@ -23988,6 +24365,10 @@ export namespace Prisma {
     resolutionNote?: boolean
     resolvedAt?: boolean
     closedAt?: boolean
+    assignedAt?: boolean
+    dueAt?: boolean
+    escalationLevel?: boolean
+    escalatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -24029,6 +24410,10 @@ export namespace Prisma {
     resolutionNote?: boolean
     resolvedAt?: boolean
     closedAt?: boolean
+    assignedAt?: boolean
+    dueAt?: boolean
+    escalationLevel?: boolean
+    escalatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -24068,6 +24453,10 @@ export namespace Prisma {
     resolutionNote?: boolean
     resolvedAt?: boolean
     closedAt?: boolean
+    assignedAt?: boolean
+    dueAt?: boolean
+    escalationLevel?: boolean
+    escalatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -24107,11 +24496,15 @@ export namespace Prisma {
     resolutionNote?: boolean
     resolvedAt?: boolean
     closedAt?: boolean
+    assignedAt?: boolean
+    dueAt?: boolean
+    escalationLevel?: boolean
+    escalatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "issueImageUrl" | "issueImageFileKey" | "issueImageOriginalFilename" | "issueImageMimeType" | "issueImageFileSizeBytes" | "resolutionImageUrl" | "resolutionImageFileKey" | "resolutionImageOriginalFilename" | "resolutionImageMimeType" | "resolutionImageFileSizeBytes" | "status" | "assignedToId" | "linkedRoomItemId" | "linkedInventoryItemId" | "finalRoomItemStatus" | "finalInventoryItemStatus" | "finalAdminNote" | "resolutionNote" | "resolvedAt" | "closedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "issueImageUrl" | "issueImageFileKey" | "issueImageOriginalFilename" | "issueImageMimeType" | "issueImageFileSizeBytes" | "resolutionImageUrl" | "resolutionImageFileKey" | "resolutionImageOriginalFilename" | "resolutionImageMimeType" | "resolutionImageFileSizeBytes" | "status" | "assignedToId" | "linkedRoomItemId" | "linkedInventoryItemId" | "finalRoomItemStatus" | "finalInventoryItemStatus" | "finalAdminNote" | "resolutionNote" | "resolvedAt" | "closedAt" | "assignedAt" | "dueAt" | "escalationLevel" | "escalatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
     room?: boolean | Ticket$roomArgs<ExtArgs>
@@ -24179,6 +24572,10 @@ export namespace Prisma {
       resolutionNote: string | null
       resolvedAt: Date | null
       closedAt: Date | null
+      assignedAt: Date | null
+      dueAt: Date | null
+      escalationLevel: number
+      escalatedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["ticket"]>
@@ -24639,6 +25036,10 @@ export namespace Prisma {
     readonly resolutionNote: FieldRef<"Ticket", 'String'>
     readonly resolvedAt: FieldRef<"Ticket", 'DateTime'>
     readonly closedAt: FieldRef<"Ticket", 'DateTime'>
+    readonly assignedAt: FieldRef<"Ticket", 'DateTime'>
+    readonly dueAt: FieldRef<"Ticket", 'DateTime'>
+    readonly escalationLevel: FieldRef<"Ticket", 'Int'>
+    readonly escalatedAt: FieldRef<"Ticket", 'DateTime'>
     readonly createdAt: FieldRef<"Ticket", 'DateTime'>
     readonly updatedAt: FieldRef<"Ticket", 'DateTime'>
   }
@@ -61011,6 +61412,14 @@ export namespace Prisma {
     phone: 'phone',
     email: 'email',
     identityNumber: 'identityNumber',
+    ktpImageUrl: 'ktpImageUrl',
+    ktpImageFileKey: 'ktpImageFileKey',
+    ktpImageOriginalFilename: 'ktpImageOriginalFilename',
+    ktpImageMimeType: 'ktpImageMimeType',
+    ktpImageFileSizeBytes: 'ktpImageFileSizeBytes',
+    ktpVerifiedAt: 'ktpVerifiedAt',
+    ktpVerifiedById: 'ktpVerifiedById',
+    ktpDeletedAt: 'ktpDeletedAt',
     gender: 'gender',
     birthDate: 'birthDate',
     originCity: 'originCity',
@@ -61104,6 +61513,12 @@ export namespace Prisma {
     stayPurpose: 'stayPurpose',
     checkoutReason: 'checkoutReason',
     cancelReason: 'cancelReason',
+    fledMarkedAt: 'fledMarkedAt',
+    fledMarkedById: 'fledMarkedById',
+    fledReason: 'fledReason',
+    belongingsStatus: 'belongingsStatus',
+    belongingsDeadline: 'belongingsDeadline',
+    belongingsResolvedAt: 'belongingsResolvedAt',
     notes: 'notes',
     createdById: 'createdById',
     createdAt: 'createdAt',
@@ -61285,6 +61700,10 @@ export namespace Prisma {
     resolutionNote: 'resolutionNote',
     resolvedAt: 'resolvedAt',
     closedAt: 'closedAt',
+    assignedAt: 'assignedAt',
+    dueAt: 'dueAt',
+    escalationLevel: 'escalationLevel',
+    escalatedAt: 'escalatedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -62061,6 +62480,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'BelongingsStatus'
+   */
+  export type EnumBelongingsStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BelongingsStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'BelongingsStatus[]'
+   */
+  export type ListEnumBelongingsStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BelongingsStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -62753,6 +63186,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetListRelationFilter
     assetDepreciationRunsCreated?: AssetDepreciationRunListRelationFilter
     depositLedgerEntriesActed?: TenantDepositLedgerEntryListRelationFilter
+    staysFledMarked?: StayListRelationFilter
+    tenantsKtpVerified?: TenantListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -62798,6 +63233,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetOrderByRelationAggregateInput
     assetDepreciationRunsCreated?: AssetDepreciationRunOrderByRelationAggregateInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryOrderByRelationAggregateInput
+    staysFledMarked?: StayOrderByRelationAggregateInput
+    tenantsKtpVerified?: TenantOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -62846,6 +63283,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetListRelationFilter
     assetDepreciationRunsCreated?: AssetDepreciationRunListRelationFilter
     depositLedgerEntriesActed?: TenantDepositLedgerEntryListRelationFilter
+    staysFledMarked?: StayListRelationFilter
+    tenantsKtpVerified?: TenantListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -62893,6 +63332,14 @@ export namespace Prisma {
     phone?: StringFilter<"Tenant"> | string
     email?: StringNullableFilter<"Tenant"> | string | null
     identityNumber?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageUrl?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileKey?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageOriginalFilename?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageMimeType?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
+    ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableFilter<"Tenant"> | string | null
@@ -62905,6 +63352,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    ktpVerifiedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
@@ -62919,6 +63367,14 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrderInput | SortOrder
     identityNumber?: SortOrderInput | SortOrder
+    ktpImageUrl?: SortOrderInput | SortOrder
+    ktpImageFileKey?: SortOrderInput | SortOrder
+    ktpImageOriginalFilename?: SortOrderInput | SortOrder
+    ktpImageMimeType?: SortOrderInput | SortOrder
+    ktpImageFileSizeBytes?: SortOrderInput | SortOrder
+    ktpVerifiedAt?: SortOrderInput | SortOrder
+    ktpVerifiedById?: SortOrderInput | SortOrder
+    ktpDeletedAt?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     originCity?: SortOrderInput | SortOrder
@@ -62931,6 +63387,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    ktpVerifiedBy?: UserOrderByWithRelationInput
     stays?: StayOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     paymentSubmissions?: PaymentSubmissionOrderByRelationAggregateInput
@@ -62948,6 +63405,14 @@ export namespace Prisma {
     phone?: StringFilter<"Tenant"> | string
     email?: StringNullableFilter<"Tenant"> | string | null
     identityNumber?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageUrl?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileKey?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageOriginalFilename?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageMimeType?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
+    ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableFilter<"Tenant"> | string | null
@@ -62960,6 +63425,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    ktpVerifiedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     stays?: StayListRelationFilter
     tickets?: TicketListRelationFilter
     paymentSubmissions?: PaymentSubmissionListRelationFilter
@@ -62974,6 +63440,14 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrderInput | SortOrder
     identityNumber?: SortOrderInput | SortOrder
+    ktpImageUrl?: SortOrderInput | SortOrder
+    ktpImageFileKey?: SortOrderInput | SortOrder
+    ktpImageOriginalFilename?: SortOrderInput | SortOrder
+    ktpImageMimeType?: SortOrderInput | SortOrder
+    ktpImageFileSizeBytes?: SortOrderInput | SortOrder
+    ktpVerifiedAt?: SortOrderInput | SortOrder
+    ktpVerifiedById?: SortOrderInput | SortOrder
+    ktpDeletedAt?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     originCity?: SortOrderInput | SortOrder
@@ -63001,6 +63475,14 @@ export namespace Prisma {
     phone?: StringWithAggregatesFilter<"Tenant"> | string
     email?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     identityNumber?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    ktpImageUrl?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    ktpImageFileKey?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    ktpImageOriginalFilename?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    ktpImageMimeType?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
+    ktpImageFileSizeBytes?: IntNullableWithAggregatesFilter<"Tenant"> | number | null
+    ktpVerifiedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
+    ktpVerifiedById?: IntNullableWithAggregatesFilter<"Tenant"> | number | null
+    ktpDeletedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     gender?: EnumGenderNullableWithAggregatesFilter<"Tenant"> | $Enums.Gender | null
     birthDate?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     originCity?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
@@ -63291,6 +63773,12 @@ export namespace Prisma {
     stayPurpose?: EnumStayPurposeNullableFilter<"Stay"> | $Enums.StayPurpose | null
     checkoutReason?: StringNullableFilter<"Stay"> | string | null
     cancelReason?: StringNullableFilter<"Stay"> | string | null
+    fledMarkedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    fledMarkedById?: IntNullableFilter<"Stay"> | number | null
+    fledReason?: StringNullableFilter<"Stay"> | string | null
+    belongingsStatus?: EnumBelongingsStatusFilter<"Stay"> | $Enums.BelongingsStatus
+    belongingsDeadline?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    belongingsResolvedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     notes?: StringNullableFilter<"Stay"> | string | null
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
@@ -63304,6 +63792,7 @@ export namespace Prisma {
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     initialMetersRecordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    fledMarkedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -63350,6 +63839,12 @@ export namespace Prisma {
     stayPurpose?: SortOrderInput | SortOrder
     checkoutReason?: SortOrderInput | SortOrder
     cancelReason?: SortOrderInput | SortOrder
+    fledMarkedAt?: SortOrderInput | SortOrder
+    fledMarkedById?: SortOrderInput | SortOrder
+    fledReason?: SortOrderInput | SortOrder
+    belongingsStatus?: SortOrder
+    belongingsDeadline?: SortOrderInput | SortOrder
+    belongingsResolvedAt?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -63363,6 +63858,7 @@ export namespace Prisma {
     room?: RoomOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
     initialMetersRecordedBy?: UserOrderByWithRelationInput
+    fledMarkedBy?: UserOrderByWithRelationInput
     invoices?: InvoiceOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
     expenses?: ExpenseOrderByRelationAggregateInput
@@ -63412,6 +63908,12 @@ export namespace Prisma {
     stayPurpose?: EnumStayPurposeNullableFilter<"Stay"> | $Enums.StayPurpose | null
     checkoutReason?: StringNullableFilter<"Stay"> | string | null
     cancelReason?: StringNullableFilter<"Stay"> | string | null
+    fledMarkedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    fledMarkedById?: IntNullableFilter<"Stay"> | number | null
+    fledReason?: StringNullableFilter<"Stay"> | string | null
+    belongingsStatus?: EnumBelongingsStatusFilter<"Stay"> | $Enums.BelongingsStatus
+    belongingsDeadline?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    belongingsResolvedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     notes?: StringNullableFilter<"Stay"> | string | null
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
@@ -63425,6 +63927,7 @@ export namespace Prisma {
     room?: XOR<RoomScalarRelationFilter, RoomWhereInput>
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     initialMetersRecordedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    fledMarkedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     invoices?: InvoiceListRelationFilter
     tickets?: TicketListRelationFilter
     expenses?: ExpenseListRelationFilter
@@ -63471,6 +63974,12 @@ export namespace Prisma {
     stayPurpose?: SortOrderInput | SortOrder
     checkoutReason?: SortOrderInput | SortOrder
     cancelReason?: SortOrderInput | SortOrder
+    fledMarkedAt?: SortOrderInput | SortOrder
+    fledMarkedById?: SortOrderInput | SortOrder
+    fledReason?: SortOrderInput | SortOrder
+    belongingsStatus?: SortOrder
+    belongingsDeadline?: SortOrderInput | SortOrder
+    belongingsResolvedAt?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -63527,6 +64036,12 @@ export namespace Prisma {
     stayPurpose?: EnumStayPurposeNullableWithAggregatesFilter<"Stay"> | $Enums.StayPurpose | null
     checkoutReason?: StringNullableWithAggregatesFilter<"Stay"> | string | null
     cancelReason?: StringNullableWithAggregatesFilter<"Stay"> | string | null
+    fledMarkedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
+    fledMarkedById?: IntNullableWithAggregatesFilter<"Stay"> | number | null
+    fledReason?: StringNullableWithAggregatesFilter<"Stay"> | string | null
+    belongingsStatus?: EnumBelongingsStatusWithAggregatesFilter<"Stay"> | $Enums.BelongingsStatus
+    belongingsDeadline?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
+    belongingsResolvedAt?: DateTimeNullableWithAggregatesFilter<"Stay"> | Date | string | null
     notes?: StringNullableWithAggregatesFilter<"Stay"> | string | null
     createdById?: IntNullableWithAggregatesFilter<"Stay"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Stay"> | Date | string
@@ -64314,6 +64829,10 @@ export namespace Prisma {
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     closedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    assignedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    escalationLevel?: IntFilter<"Ticket"> | number
+    escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -64354,6 +64873,10 @@ export namespace Prisma {
     resolutionNote?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     closedAt?: SortOrderInput | SortOrder
+    assignedAt?: SortOrderInput | SortOrder
+    dueAt?: SortOrderInput | SortOrder
+    escalationLevel?: SortOrder
+    escalatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tenant?: TenantOrderByWithRelationInput
@@ -64397,6 +64920,10 @@ export namespace Prisma {
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     closedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    assignedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    escalationLevel?: IntFilter<"Ticket"> | number
+    escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -64437,6 +64964,10 @@ export namespace Prisma {
     resolutionNote?: SortOrderInput | SortOrder
     resolvedAt?: SortOrderInput | SortOrder
     closedAt?: SortOrderInput | SortOrder
+    assignedAt?: SortOrderInput | SortOrder
+    dueAt?: SortOrderInput | SortOrder
+    escalationLevel?: SortOrder
+    escalatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TicketCountOrderByAggregateInput
@@ -64478,6 +65009,10 @@ export namespace Prisma {
     resolutionNote?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     resolvedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     closedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    assignedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    dueAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    escalationLevel?: IntWithAggregatesFilter<"Ticket"> | number
+    escalatedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   }
@@ -67427,6 +67962,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -67471,6 +68008,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUpdateInput = {
@@ -67514,6 +68053,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -67558,6 +68099,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -67605,6 +68148,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -67617,6 +68167,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
@@ -67631,6 +68182,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -67656,6 +68215,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67668,6 +68234,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
@@ -67682,6 +68249,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67708,6 +68283,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -67726,6 +68309,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67745,6 +68335,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68071,6 +68669,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -68082,6 +68685,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -68128,6 +68732,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -68180,6 +68790,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -68191,6 +68806,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -68237,6 +68853,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -68292,6 +68914,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -68337,6 +68965,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -68383,6 +69016,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -69212,6 +69851,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -69252,6 +69895,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -69279,6 +69926,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -69319,6 +69970,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -69353,6 +70008,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -69379,6 +70038,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -69412,6 +70075,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -72754,6 +73421,12 @@ export namespace Prisma {
     none?: TenantDepositLedgerEntryWhereInput
   }
 
+  export type TenantListRelationFilter = {
+    every?: TenantWhereInput
+    some?: TenantWhereInput
+    none?: TenantWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -72856,6 +73529,10 @@ export namespace Prisma {
   }
 
   export type TenantDepositLedgerEntryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TenantOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -73040,6 +73717,14 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     identityNumber?: SortOrder
+    ktpImageUrl?: SortOrder
+    ktpImageFileKey?: SortOrder
+    ktpImageOriginalFilename?: SortOrder
+    ktpImageMimeType?: SortOrder
+    ktpImageFileSizeBytes?: SortOrder
+    ktpVerifiedAt?: SortOrder
+    ktpVerifiedById?: SortOrder
+    ktpDeletedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -73055,6 +73740,8 @@ export namespace Prisma {
 
   export type TenantAvgOrderByAggregateInput = {
     id?: SortOrder
+    ktpImageFileSizeBytes?: SortOrder
+    ktpVerifiedById?: SortOrder
   }
 
   export type TenantMaxOrderByAggregateInput = {
@@ -73063,6 +73750,14 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     identityNumber?: SortOrder
+    ktpImageUrl?: SortOrder
+    ktpImageFileKey?: SortOrder
+    ktpImageOriginalFilename?: SortOrder
+    ktpImageMimeType?: SortOrder
+    ktpImageFileSizeBytes?: SortOrder
+    ktpVerifiedAt?: SortOrder
+    ktpVerifiedById?: SortOrder
+    ktpDeletedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -73082,6 +73777,14 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     identityNumber?: SortOrder
+    ktpImageUrl?: SortOrder
+    ktpImageFileKey?: SortOrder
+    ktpImageOriginalFilename?: SortOrder
+    ktpImageMimeType?: SortOrder
+    ktpImageFileSizeBytes?: SortOrder
+    ktpVerifiedAt?: SortOrder
+    ktpVerifiedById?: SortOrder
+    ktpDeletedAt?: SortOrder
     gender?: SortOrder
     birthDate?: SortOrder
     originCity?: SortOrder
@@ -73097,6 +73800,8 @@ export namespace Prisma {
 
   export type TenantSumOrderByAggregateInput = {
     id?: SortOrder
+    ktpImageFileSizeBytes?: SortOrder
+    ktpVerifiedById?: SortOrder
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -73360,6 +74065,13 @@ export namespace Prisma {
     not?: NestedEnumStayPurposeNullableFilter<$PrismaModel> | $Enums.StayPurpose | null
   }
 
+  export type EnumBelongingsStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BelongingsStatus | EnumBelongingsStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBelongingsStatusFilter<$PrismaModel> | $Enums.BelongingsStatus
+  }
+
   export type DecimalNullableFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
@@ -73413,6 +74125,12 @@ export namespace Prisma {
     stayPurpose?: SortOrder
     checkoutReason?: SortOrder
     cancelReason?: SortOrder
+    fledMarkedAt?: SortOrder
+    fledMarkedById?: SortOrder
+    fledReason?: SortOrder
+    belongingsStatus?: SortOrder
+    belongingsDeadline?: SortOrder
+    belongingsResolvedAt?: SortOrder
     notes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -73439,6 +74157,7 @@ export namespace Prisma {
     lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    fledMarkedById?: SortOrder
     createdById?: SortOrder
     initialElectricityKwhPending?: SortOrder
     initialWaterM3Pending?: SortOrder
@@ -73482,6 +74201,12 @@ export namespace Prisma {
     stayPurpose?: SortOrder
     checkoutReason?: SortOrder
     cancelReason?: SortOrder
+    fledMarkedAt?: SortOrder
+    fledMarkedById?: SortOrder
+    fledReason?: SortOrder
+    belongingsStatus?: SortOrder
+    belongingsDeadline?: SortOrder
+    belongingsResolvedAt?: SortOrder
     notes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -73530,6 +74255,12 @@ export namespace Prisma {
     stayPurpose?: SortOrder
     checkoutReason?: SortOrder
     cancelReason?: SortOrder
+    fledMarkedAt?: SortOrder
+    fledMarkedById?: SortOrder
+    fledReason?: SortOrder
+    belongingsStatus?: SortOrder
+    belongingsDeadline?: SortOrder
+    belongingsResolvedAt?: SortOrder
     notes?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -73556,6 +74287,7 @@ export namespace Prisma {
     lossRefundProcessedById?: SortOrder
     electricityTariffPerKwhRupiah?: SortOrder
     waterTariffPerM3Rupiah?: SortOrder
+    fledMarkedById?: SortOrder
     createdById?: SortOrder
     initialElectricityKwhPending?: SortOrder
     initialWaterM3Pending?: SortOrder
@@ -73630,6 +74362,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
     _max?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumBelongingsStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BelongingsStatus | EnumBelongingsStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBelongingsStatusWithAggregatesFilter<$PrismaModel> | $Enums.BelongingsStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBelongingsStatusFilter<$PrismaModel>
+    _max?: NestedEnumBelongingsStatusFilter<$PrismaModel>
   }
 
   export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -74484,6 +75226,10 @@ export namespace Prisma {
     resolutionNote?: SortOrder
     resolvedAt?: SortOrder
     closedAt?: SortOrder
+    assignedAt?: SortOrder
+    dueAt?: SortOrder
+    escalationLevel?: SortOrder
+    escalatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -74498,6 +75244,7 @@ export namespace Prisma {
     assignedToId?: SortOrder
     linkedRoomItemId?: SortOrder
     linkedInventoryItemId?: SortOrder
+    escalationLevel?: SortOrder
   }
 
   export type TicketMaxOrderByAggregateInput = {
@@ -74529,6 +75276,10 @@ export namespace Prisma {
     resolutionNote?: SortOrder
     resolvedAt?: SortOrder
     closedAt?: SortOrder
+    assignedAt?: SortOrder
+    dueAt?: SortOrder
+    escalationLevel?: SortOrder
+    escalatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -74562,6 +75313,10 @@ export namespace Prisma {
     resolutionNote?: SortOrder
     resolvedAt?: SortOrder
     closedAt?: SortOrder
+    assignedAt?: SortOrder
+    dueAt?: SortOrder
+    escalationLevel?: SortOrder
+    escalatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -74576,6 +75331,7 @@ export namespace Prisma {
     assignedToId?: SortOrder
     linkedRoomItemId?: SortOrder
     linkedInventoryItemId?: SortOrder
+    escalationLevel?: SortOrder
   }
 
   export type EnumTicketStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -77385,6 +78141,20 @@ export namespace Prisma {
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
   }
 
+  export type StayCreateNestedManyWithoutFledMarkedByInput = {
+    create?: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput> | StayCreateWithoutFledMarkedByInput[] | StayUncheckedCreateWithoutFledMarkedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutFledMarkedByInput | StayCreateOrConnectWithoutFledMarkedByInput[]
+    createMany?: StayCreateManyFledMarkedByInputEnvelope
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+  }
+
+  export type TenantCreateNestedManyWithoutKtpVerifiedByInput = {
+    create?: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput> | TenantCreateWithoutKtpVerifiedByInput[] | TenantUncheckedCreateWithoutKtpVerifiedByInput[]
+    connectOrCreate?: TenantCreateOrConnectWithoutKtpVerifiedByInput | TenantCreateOrConnectWithoutKtpVerifiedByInput[]
+    createMany?: TenantCreateManyKtpVerifiedByInputEnvelope
+    connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -77593,6 +78363,20 @@ export namespace Prisma {
     connectOrCreate?: TenantDepositLedgerEntryCreateOrConnectWithoutActorUserInput | TenantDepositLedgerEntryCreateOrConnectWithoutActorUserInput[]
     createMany?: TenantDepositLedgerEntryCreateManyActorUserInputEnvelope
     connect?: TenantDepositLedgerEntryWhereUniqueInput | TenantDepositLedgerEntryWhereUniqueInput[]
+  }
+
+  export type StayUncheckedCreateNestedManyWithoutFledMarkedByInput = {
+    create?: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput> | StayCreateWithoutFledMarkedByInput[] | StayUncheckedCreateWithoutFledMarkedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutFledMarkedByInput | StayCreateOrConnectWithoutFledMarkedByInput[]
+    createMany?: StayCreateManyFledMarkedByInputEnvelope
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+  }
+
+  export type TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput = {
+    create?: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput> | TenantCreateWithoutKtpVerifiedByInput[] | TenantUncheckedCreateWithoutKtpVerifiedByInput[]
+    connectOrCreate?: TenantCreateOrConnectWithoutKtpVerifiedByInput | TenantCreateOrConnectWithoutKtpVerifiedByInput[]
+    createMany?: TenantCreateManyKtpVerifiedByInputEnvelope
+    connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -78045,6 +78829,34 @@ export namespace Prisma {
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
   }
 
+  export type StayUpdateManyWithoutFledMarkedByNestedInput = {
+    create?: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput> | StayCreateWithoutFledMarkedByInput[] | StayUncheckedCreateWithoutFledMarkedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutFledMarkedByInput | StayCreateOrConnectWithoutFledMarkedByInput[]
+    upsert?: StayUpsertWithWhereUniqueWithoutFledMarkedByInput | StayUpsertWithWhereUniqueWithoutFledMarkedByInput[]
+    createMany?: StayCreateManyFledMarkedByInputEnvelope
+    set?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    disconnect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    delete?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    update?: StayUpdateWithWhereUniqueWithoutFledMarkedByInput | StayUpdateWithWhereUniqueWithoutFledMarkedByInput[]
+    updateMany?: StayUpdateManyWithWhereWithoutFledMarkedByInput | StayUpdateManyWithWhereWithoutFledMarkedByInput[]
+    deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
+  }
+
+  export type TenantUpdateManyWithoutKtpVerifiedByNestedInput = {
+    create?: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput> | TenantCreateWithoutKtpVerifiedByInput[] | TenantUncheckedCreateWithoutKtpVerifiedByInput[]
+    connectOrCreate?: TenantCreateOrConnectWithoutKtpVerifiedByInput | TenantCreateOrConnectWithoutKtpVerifiedByInput[]
+    upsert?: TenantUpsertWithWhereUniqueWithoutKtpVerifiedByInput | TenantUpsertWithWhereUniqueWithoutKtpVerifiedByInput[]
+    createMany?: TenantCreateManyKtpVerifiedByInputEnvelope
+    set?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    disconnect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    delete?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    update?: TenantUpdateWithWhereUniqueWithoutKtpVerifiedByInput | TenantUpdateWithWhereUniqueWithoutKtpVerifiedByInput[]
+    updateMany?: TenantUpdateManyWithWhereWithoutKtpVerifiedByInput | TenantUpdateManyWithWhereWithoutKtpVerifiedByInput[]
+    deleteMany?: TenantScalarWhereInput | TenantScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -78481,9 +79293,43 @@ export namespace Prisma {
     deleteMany?: TenantDepositLedgerEntryScalarWhereInput | TenantDepositLedgerEntryScalarWhereInput[]
   }
 
+  export type StayUncheckedUpdateManyWithoutFledMarkedByNestedInput = {
+    create?: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput> | StayCreateWithoutFledMarkedByInput[] | StayUncheckedCreateWithoutFledMarkedByInput[]
+    connectOrCreate?: StayCreateOrConnectWithoutFledMarkedByInput | StayCreateOrConnectWithoutFledMarkedByInput[]
+    upsert?: StayUpsertWithWhereUniqueWithoutFledMarkedByInput | StayUpsertWithWhereUniqueWithoutFledMarkedByInput[]
+    createMany?: StayCreateManyFledMarkedByInputEnvelope
+    set?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    disconnect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    delete?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    connect?: StayWhereUniqueInput | StayWhereUniqueInput[]
+    update?: StayUpdateWithWhereUniqueWithoutFledMarkedByInput | StayUpdateWithWhereUniqueWithoutFledMarkedByInput[]
+    updateMany?: StayUpdateManyWithWhereWithoutFledMarkedByInput | StayUpdateManyWithWhereWithoutFledMarkedByInput[]
+    deleteMany?: StayScalarWhereInput | StayScalarWhereInput[]
+  }
+
+  export type TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput = {
+    create?: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput> | TenantCreateWithoutKtpVerifiedByInput[] | TenantUncheckedCreateWithoutKtpVerifiedByInput[]
+    connectOrCreate?: TenantCreateOrConnectWithoutKtpVerifiedByInput | TenantCreateOrConnectWithoutKtpVerifiedByInput[]
+    upsert?: TenantUpsertWithWhereUniqueWithoutKtpVerifiedByInput | TenantUpsertWithWhereUniqueWithoutKtpVerifiedByInput[]
+    createMany?: TenantCreateManyKtpVerifiedByInputEnvelope
+    set?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    disconnect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    delete?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    connect?: TenantWhereUniqueInput | TenantWhereUniqueInput[]
+    update?: TenantUpdateWithWhereUniqueWithoutKtpVerifiedByInput | TenantUpdateWithWhereUniqueWithoutKtpVerifiedByInput[]
+    updateMany?: TenantUpdateManyWithWhereWithoutKtpVerifiedByInput | TenantUpdateManyWithWhereWithoutKtpVerifiedByInput[]
+    deleteMany?: TenantScalarWhereInput | TenantScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutTenantsKtpVerifiedInput = {
+    create?: XOR<UserCreateWithoutTenantsKtpVerifiedInput, UserUncheckedCreateWithoutTenantsKtpVerifiedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTenantsKtpVerifiedInput
     connect?: UserWhereUniqueInput
   }
 
@@ -78593,6 +79439,16 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTenantInput, UserUpdateWithoutTenantInput>, UserUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type UserUpdateOneWithoutTenantsKtpVerifiedNestedInput = {
+    create?: XOR<UserCreateWithoutTenantsKtpVerifiedInput, UserUncheckedCreateWithoutTenantsKtpVerifiedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTenantsKtpVerifiedInput
+    upsert?: UserUpsertWithoutTenantsKtpVerifiedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTenantsKtpVerifiedInput, UserUpdateWithoutTenantsKtpVerifiedInput>, UserUncheckedUpdateWithoutTenantsKtpVerifiedInput>
   }
 
   export type StayUpdateManyWithoutTenantNestedInput = {
@@ -79328,6 +80184,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutStaysFledMarkedInput = {
+    create?: XOR<UserCreateWithoutStaysFledMarkedInput, UserUncheckedCreateWithoutStaysFledMarkedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaysFledMarkedInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type InvoiceCreateNestedManyWithoutStayInput = {
     create?: XOR<InvoiceCreateWithoutStayInput, InvoiceUncheckedCreateWithoutStayInput> | InvoiceCreateWithoutStayInput[] | InvoiceUncheckedCreateWithoutStayInput[]
     connectOrCreate?: InvoiceCreateOrConnectWithoutStayInput | InvoiceCreateOrConnectWithoutStayInput[]
@@ -79454,6 +80316,10 @@ export namespace Prisma {
     set?: $Enums.StayPurpose | null
   }
 
+  export type EnumBelongingsStatusFieldUpdateOperationsInput = {
+    set?: $Enums.BelongingsStatus
+  }
+
   export type NullableDecimalFieldUpdateOperationsInput = {
     set?: Decimal | DecimalJsLike | number | string | null
     increment?: Decimal | DecimalJsLike | number | string
@@ -79496,6 +80362,16 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaysInitialMetersRecordedInput, UserUpdateWithoutStaysInitialMetersRecordedInput>, UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput>
+  }
+
+  export type UserUpdateOneWithoutStaysFledMarkedNestedInput = {
+    create?: XOR<UserCreateWithoutStaysFledMarkedInput, UserUncheckedCreateWithoutStaysFledMarkedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaysFledMarkedInput
+    upsert?: UserUpsertWithoutStaysFledMarkedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaysFledMarkedInput, UserUpdateWithoutStaysFledMarkedInput>, UserUncheckedUpdateWithoutStaysFledMarkedInput>
   }
 
   export type InvoiceUpdateManyWithoutStayNestedInput = {
@@ -82792,6 +83668,13 @@ export namespace Prisma {
     not?: NestedEnumStayPurposeNullableFilter<$PrismaModel> | $Enums.StayPurpose | null
   }
 
+  export type NestedEnumBelongingsStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BelongingsStatus | EnumBelongingsStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBelongingsStatusFilter<$PrismaModel> | $Enums.BelongingsStatus
+  }
+
   export type NestedDecimalNullableFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
@@ -82871,6 +83754,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
     _max?: NestedEnumStayPurposeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBelongingsStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BelongingsStatus | EnumBelongingsStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BelongingsStatus[] | ListEnumBelongingsStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBelongingsStatusWithAggregatesFilter<$PrismaModel> | $Enums.BelongingsStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBelongingsStatusFilter<$PrismaModel>
+    _max?: NestedEnumBelongingsStatusFilter<$PrismaModel>
   }
 
   export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -83760,6 +84653,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -83771,6 +84671,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
@@ -83785,6 +84686,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -83890,6 +84799,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -83900,6 +84814,7 @@ export namespace Prisma {
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -83946,6 +84861,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84007,6 +84928,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -84017,6 +84943,7 @@ export namespace Prisma {
     tenant: TenantCreateNestedOneWithoutStaysInput
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -84063,6 +84990,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -84194,6 +85127,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -84232,6 +85169,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -85270,6 +86211,210 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type StayCreateWithoutFledMarkedByInput = {
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersPromotedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutStaysInput
+    room: RoomCreateNestedOneWithoutStaysInput
+    createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
+    initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    invoices?: InvoiceCreateNestedManyWithoutStayInput
+    tickets?: TicketCreateNestedManyWithoutStayInput
+    expenses?: ExpenseCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutStayInput
+  }
+
+  export type StayUncheckedCreateWithoutFledMarkedByInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutStayInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutStayInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutStayInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutStayInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutStayInput
+    checkoutRequests?: CheckoutRequestUncheckedCreateNestedManyWithoutStayInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutStayInput
+  }
+
+  export type StayCreateOrConnectWithoutFledMarkedByInput = {
+    where: StayWhereUniqueInput
+    create: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput>
+  }
+
+  export type StayCreateManyFledMarkedByInputEnvelope = {
+    data: StayCreateManyFledMarkedByInput | StayCreateManyFledMarkedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TenantCreateWithoutKtpVerifiedByInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutTenantInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantUncheckedCreateWithoutKtpVerifiedByInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+  }
+
+  export type TenantCreateOrConnectWithoutKtpVerifiedByInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput>
+  }
+
+  export type TenantCreateManyKtpVerifiedByInputEnvelope = {
+    data: TenantCreateManyKtpVerifiedByInput | TenantCreateManyKtpVerifiedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutUserInput = {
     update: XOR<TenantUpdateWithoutUserInput, TenantUncheckedUpdateWithoutUserInput>
     create: XOR<TenantCreateWithoutUserInput, TenantUncheckedCreateWithoutUserInput>
@@ -85286,6 +86431,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85297,6 +86449,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
@@ -85311,6 +86464,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85425,6 +86586,12 @@ export namespace Prisma {
     stayPurpose?: EnumStayPurposeNullableFilter<"Stay"> | $Enums.StayPurpose | null
     checkoutReason?: StringNullableFilter<"Stay"> | string | null
     cancelReason?: StringNullableFilter<"Stay"> | string | null
+    fledMarkedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    fledMarkedById?: IntNullableFilter<"Stay"> | number | null
+    fledReason?: StringNullableFilter<"Stay"> | string | null
+    belongingsStatus?: EnumBelongingsStatusFilter<"Stay"> | $Enums.BelongingsStatus
+    belongingsDeadline?: DateTimeNullableFilter<"Stay"> | Date | string | null
+    belongingsResolvedAt?: DateTimeNullableFilter<"Stay"> | Date | string | null
     notes?: StringNullableFilter<"Stay"> | string | null
     createdById?: IntNullableFilter<"Stay"> | number | null
     createdAt?: DateTimeFilter<"Stay"> | Date | string
@@ -85569,6 +86736,10 @@ export namespace Prisma {
     resolutionNote?: StringNullableFilter<"Ticket"> | string | null
     resolvedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     closedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    assignedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    escalationLevel?: IntFilter<"Ticket"> | number
+    escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
   }
@@ -86354,6 +87525,68 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TenantDepositLedgerEntry"> | Date | string
   }
 
+  export type StayUpsertWithWhereUniqueWithoutFledMarkedByInput = {
+    where: StayWhereUniqueInput
+    update: XOR<StayUpdateWithoutFledMarkedByInput, StayUncheckedUpdateWithoutFledMarkedByInput>
+    create: XOR<StayCreateWithoutFledMarkedByInput, StayUncheckedCreateWithoutFledMarkedByInput>
+  }
+
+  export type StayUpdateWithWhereUniqueWithoutFledMarkedByInput = {
+    where: StayWhereUniqueInput
+    data: XOR<StayUpdateWithoutFledMarkedByInput, StayUncheckedUpdateWithoutFledMarkedByInput>
+  }
+
+  export type StayUpdateManyWithWhereWithoutFledMarkedByInput = {
+    where: StayScalarWhereInput
+    data: XOR<StayUpdateManyMutationInput, StayUncheckedUpdateManyWithoutFledMarkedByInput>
+  }
+
+  export type TenantUpsertWithWhereUniqueWithoutKtpVerifiedByInput = {
+    where: TenantWhereUniqueInput
+    update: XOR<TenantUpdateWithoutKtpVerifiedByInput, TenantUncheckedUpdateWithoutKtpVerifiedByInput>
+    create: XOR<TenantCreateWithoutKtpVerifiedByInput, TenantUncheckedCreateWithoutKtpVerifiedByInput>
+  }
+
+  export type TenantUpdateWithWhereUniqueWithoutKtpVerifiedByInput = {
+    where: TenantWhereUniqueInput
+    data: XOR<TenantUpdateWithoutKtpVerifiedByInput, TenantUncheckedUpdateWithoutKtpVerifiedByInput>
+  }
+
+  export type TenantUpdateManyWithWhereWithoutKtpVerifiedByInput = {
+    where: TenantScalarWhereInput
+    data: XOR<TenantUpdateManyMutationInput, TenantUncheckedUpdateManyWithoutKtpVerifiedByInput>
+  }
+
+  export type TenantScalarWhereInput = {
+    AND?: TenantScalarWhereInput | TenantScalarWhereInput[]
+    OR?: TenantScalarWhereInput[]
+    NOT?: TenantScalarWhereInput | TenantScalarWhereInput[]
+    id?: IntFilter<"Tenant"> | number
+    fullName?: StringFilter<"Tenant"> | string
+    phone?: StringFilter<"Tenant"> | string
+    email?: StringNullableFilter<"Tenant"> | string | null
+    identityNumber?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageUrl?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileKey?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageOriginalFilename?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageMimeType?: StringNullableFilter<"Tenant"> | string | null
+    ktpImageFileSizeBytes?: IntNullableFilter<"Tenant"> | number | null
+    ktpVerifiedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    ktpVerifiedById?: IntNullableFilter<"Tenant"> | number | null
+    ktpDeletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    gender?: EnumGenderNullableFilter<"Tenant"> | $Enums.Gender | null
+    birthDate?: DateTimeNullableFilter<"Tenant"> | Date | string | null
+    originCity?: StringNullableFilter<"Tenant"> | string | null
+    occupation?: StringNullableFilter<"Tenant"> | string | null
+    companyOrCampus?: StringNullableFilter<"Tenant"> | string | null
+    emergencyContactName?: StringNullableFilter<"Tenant"> | string | null
+    emergencyContactPhone?: StringNullableFilter<"Tenant"> | string | null
+    notes?: StringNullableFilter<"Tenant"> | string | null
+    isActive?: BoolFilter<"Tenant"> | boolean
+    createdAt?: DateTimeFilter<"Tenant"> | Date | string
+    updatedAt?: DateTimeFilter<"Tenant"> | Date | string
+  }
+
   export type UserCreateWithoutTenantInput = {
     fullName: string
     email: string
@@ -86394,6 +87627,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -86437,11 +87672,107 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
+  }
+
+  export type UserCreateWithoutTenantsKtpVerifiedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+  }
+
+  export type UserUncheckedCreateWithoutTenantsKtpVerifiedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+  }
+
+  export type UserCreateOrConnectWithoutTenantsKtpVerifiedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTenantsKtpVerifiedInput, UserUncheckedCreateWithoutTenantsKtpVerifiedInput>
   }
 
   export type StayCreateWithoutTenantInput = {
@@ -86478,6 +87809,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -86488,6 +87824,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -86533,6 +87870,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -86583,6 +87926,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     room?: RoomCreateNestedOneWithoutTicketsInput
@@ -86621,6 +87968,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -86889,6 +88240,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -86932,6 +88285,108 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserUpsertWithoutTenantsKtpVerifiedInput = {
+    update: XOR<UserUpdateWithoutTenantsKtpVerifiedInput, UserUncheckedUpdateWithoutTenantsKtpVerifiedInput>
+    create: XOR<UserCreateWithoutTenantsKtpVerifiedInput, UserUncheckedCreateWithoutTenantsKtpVerifiedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTenantsKtpVerifiedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTenantsKtpVerifiedInput, UserUncheckedUpdateWithoutTenantsKtpVerifiedInput>
+  }
+
+  export type UserUpdateWithoutTenantsKtpVerifiedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTenantsKtpVerifiedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -87064,6 +88519,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -87074,6 +88534,7 @@ export namespace Prisma {
     tenant: TenantCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -87119,6 +88580,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -87198,6 +88665,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -87236,6 +88707,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -88029,6 +89504,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -88041,6 +89523,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
@@ -88054,6 +89537,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -88186,6 +89677,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -88229,6 +89722,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -88276,6 +89771,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysInitialMetersRecordedInput = {
@@ -88319,11 +89816,107 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysInitialMetersRecordedInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutStaysInitialMetersRecordedInput, UserUncheckedCreateWithoutStaysInitialMetersRecordedInput>
+  }
+
+  export type UserCreateWithoutStaysFledMarkedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserUncheckedCreateWithoutStaysFledMarkedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+  }
+
+  export type UserCreateOrConnectWithoutStaysFledMarkedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaysFledMarkedInput, UserUncheckedCreateWithoutStaysFledMarkedInput>
   }
 
   export type InvoiceCreateWithoutStayInput = {
@@ -88397,6 +89990,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -88435,6 +90032,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -88711,6 +90312,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88723,6 +90331,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
@@ -88736,6 +90345,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88880,6 +90497,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -88923,6 +90542,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUpsertWithoutStaysInitialMetersRecordedInput = {
@@ -88976,6 +90597,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput = {
@@ -89019,6 +90642,108 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserUpsertWithoutStaysFledMarkedInput = {
+    update: XOR<UserUpdateWithoutStaysFledMarkedInput, UserUncheckedUpdateWithoutStaysFledMarkedInput>
+    create: XOR<UserCreateWithoutStaysFledMarkedInput, UserUncheckedCreateWithoutStaysFledMarkedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaysFledMarkedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaysFledMarkedInput, UserUncheckedUpdateWithoutStaysFledMarkedInput>
+  }
+
+  export type UserUpdateWithoutStaysFledMarkedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaysFledMarkedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -89167,6 +90892,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -89178,6 +90908,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -89223,6 +90954,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -89250,6 +90987,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -89262,6 +91006,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
@@ -89275,6 +91020,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -89407,6 +91160,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutDepositLedgerEntriesActedInput = {
@@ -89450,6 +91205,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutDepositLedgerEntriesActedInput = {
@@ -89502,6 +91259,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -89513,6 +91275,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -89558,6 +91321,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -89591,6 +91360,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89603,6 +91379,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
@@ -89616,6 +91393,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -89760,6 +91545,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDepositLedgerEntriesActedInput = {
@@ -89803,6 +91590,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -89913,6 +91702,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -89956,6 +91747,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -90088,6 +91881,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -90131,6 +91926,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -90167,6 +91964,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -90178,6 +91980,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -90223,6 +92026,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -90285,6 +92094,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -90328,6 +92139,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -90513,6 +92326,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -90524,6 +92342,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -90569,6 +92388,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -90637,6 +92462,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -90680,6 +92507,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -90926,6 +92755,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -90969,6 +92800,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -91077,6 +92910,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -91120,6 +92955,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -91162,6 +92999,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -91205,6 +93044,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -91263,6 +93104,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -91306,6 +93149,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type StayCreateWithoutPaymentSubmissionsInput = {
@@ -91342,6 +93187,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -91353,6 +93203,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -91398,6 +93249,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -91469,6 +93326,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -91481,6 +93345,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
@@ -91494,6 +93359,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -91558,6 +93431,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
@@ -91601,6 +93476,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
@@ -91648,6 +93525,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
@@ -91691,6 +93570,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
@@ -91743,6 +93624,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -91754,6 +93640,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -91799,6 +93686,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -91882,6 +93775,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91894,6 +93794,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
@@ -91907,6 +93808,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -91977,6 +93886,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
@@ -92020,6 +93931,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
@@ -92073,6 +93986,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
@@ -92116,6 +94031,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -92123,6 +94040,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -92135,6 +94059,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
     renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
@@ -92148,6 +94073,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -92274,6 +94207,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -92285,6 +94223,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -92330,6 +94269,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -92392,6 +94337,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -92435,6 +94382,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -92593,6 +94542,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -92605,6 +94561,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
     renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
@@ -92618,6 +94575,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -92756,6 +94721,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -92767,6 +94737,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -92812,6 +94783,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -92880,6 +94857,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -92923,6 +94902,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomItemUpsertWithoutLinkedTicketsInput = {
@@ -93069,6 +95050,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -93112,6 +95095,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput = {
@@ -93236,6 +95221,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -93279,6 +95266,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -93393,6 +95382,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
@@ -93436,6 +95427,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
@@ -93645,6 +95638,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
@@ -93688,6 +95683,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineAssignmentsInput = {
@@ -93884,6 +95881,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineCompletionsInput = {
@@ -93927,6 +95926,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineCompletionsInput = {
@@ -94129,6 +96130,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
@@ -94172,6 +96175,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineCompletionsInput = {
@@ -94288,6 +96293,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsInput = {
@@ -94331,6 +96338,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsInput = {
@@ -94378,6 +96387,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsMadeInput = {
@@ -94421,6 +96432,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsMadeInput = {
@@ -94479,6 +96492,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsInput = {
@@ -94522,6 +96537,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUpsertWithoutStaffPerformanceAuditsMadeInput = {
@@ -94575,6 +96592,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsMadeInput = {
@@ -94618,6 +96637,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutStaffPerformanceEventsInput = {
@@ -94660,6 +96681,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceEventsInput = {
@@ -94703,6 +96726,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceEventsInput = {
@@ -94761,6 +96786,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceEventsInput = {
@@ -94804,6 +96831,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutStaffReviewsReceivedInput = {
@@ -94846,6 +96875,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsReceivedInput = {
@@ -94889,6 +96920,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsReceivedInput = {
@@ -94901,6 +96934,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -94913,6 +96953,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
@@ -94926,6 +96967,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -94990,6 +97039,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsModeratedInput = {
@@ -95033,6 +97084,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsModeratedInput = {
@@ -95091,6 +97144,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsReceivedInput = {
@@ -95134,6 +97189,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type TenantUpsertWithoutStaffReviewsInput = {
@@ -95152,6 +97209,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -95164,6 +97228,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
@@ -95177,6 +97242,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -95247,6 +97320,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsModeratedInput = {
@@ -95290,6 +97365,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -95332,6 +97409,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -95375,6 +97454,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -95433,6 +97514,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -95476,6 +97559,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -95568,6 +97653,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -95606,6 +97695,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -96056,6 +98149,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -96094,6 +98191,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -96581,6 +98682,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -96624,6 +98727,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -96867,6 +98972,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -96910,6 +99017,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutRelatedMovementInput = {
@@ -96950,6 +99059,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -96989,6 +99102,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -97228,6 +99345,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsCreatedInput = {
@@ -97271,6 +99390,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsCreatedInput = {
@@ -97318,6 +99439,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsReviewedInput = {
@@ -97361,6 +99484,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsReviewedInput = {
@@ -97429,6 +99554,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -97468,6 +99597,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -97737,6 +99870,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsCreatedInput = {
@@ -97780,6 +99915,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUpsertWithoutStaffFieldReportsReviewedInput = {
@@ -97833,6 +99970,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsReviewedInput = {
@@ -97876,6 +100015,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type InventoryMovementUpsertWithoutFieldReportsInput = {
@@ -97946,6 +100087,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -97957,6 +100103,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -98002,6 +100149,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -98029,6 +100182,13 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -98041,6 +100201,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
@@ -98054,6 +100215,14 @@ export namespace Prisma {
     phone: string
     email?: string | null
     identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
     gender?: $Enums.Gender | null
     birthDate?: Date | string | null
     originCity?: string | null
@@ -98118,6 +100287,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutRenewRequestsReviewedInput = {
@@ -98161,6 +100332,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutRenewRequestsReviewedInput = {
@@ -98213,6 +100386,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -98224,6 +100402,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -98269,6 +100448,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -98302,6 +100487,13 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98314,6 +100506,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
@@ -98327,6 +100520,14 @@ export namespace Prisma {
     phone?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     originCity?: NullableStringFieldUpdateOperationsInput | string | null
@@ -98397,6 +100598,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRenewRequestsReviewedInput = {
@@ -98440,6 +100643,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type StayCreateWithoutCheckoutRequestsInput = {
@@ -98476,6 +100681,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -98487,6 +100697,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     expenses?: ExpenseCreateNestedManyWithoutStayInput
@@ -98532,6 +100743,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -98594,6 +100811,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutCheckoutRequestsReviewedInput = {
@@ -98637,6 +100856,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutCheckoutRequestsReviewedInput = {
@@ -98689,6 +100910,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -98700,6 +100926,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -98745,6 +100972,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -98813,6 +101046,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCheckoutRequestsReviewedInput = {
@@ -98856,6 +101091,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -98898,6 +101135,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -98941,6 +101180,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -98999,6 +101240,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -99042,6 +101285,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -99146,6 +101391,11 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -99157,6 +101407,7 @@ export namespace Prisma {
     room: RoomCreateNestedOneWithoutStaysInput
     createdBy?: UserCreateNestedOneWithoutStaysCreatedInput
     initialMetersRecordedBy?: UserCreateNestedOneWithoutStaysInitialMetersRecordedInput
+    fledMarkedBy?: UserCreateNestedOneWithoutStaysFledMarkedInput
     invoices?: InvoiceCreateNestedManyWithoutStayInput
     tickets?: TicketCreateNestedManyWithoutStayInput
     paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutStayInput
@@ -99202,6 +101453,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -99264,6 +101521,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -99307,6 +101566,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -99518,6 +101779,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99529,6 +101795,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
@@ -99574,6 +101841,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99642,6 +101915,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -99685,6 +101960,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type FixedAssetUpsertWithWhereUniqueWithoutExpenseInput = {
@@ -99927,6 +102204,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutFixedAssetsCreatedInput = {
@@ -99970,6 +102249,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutFixedAssetsCreatedInput = {
@@ -100355,6 +102636,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFixedAssetsCreatedInput = {
@@ -100398,6 +102681,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutFixedAssetAlignmentCreditsInput = {
@@ -100619,6 +102904,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAssetDepreciationRunsCreatedInput = {
@@ -100662,6 +102949,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAssetDepreciationRunsCreatedInput = {
@@ -100805,6 +103094,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssetDepreciationRunsCreatedInput = {
@@ -100848,6 +103139,8 @@ export namespace Prisma {
     staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutRunInput = {
@@ -101154,6 +103447,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -101197,6 +103492,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -101255,6 +103552,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -101298,6 +103597,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -101340,6 +103641,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -101383,6 +103686,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -101441,6 +103746,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -101484,6 +103791,8 @@ export namespace Prisma {
     fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
     assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
   }
 
   export type ChartOfAccountCreateWithoutChildrenInput = {
@@ -103214,6 +105523,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -103261,6 +105576,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -103328,6 +105649,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -103728,6 +106053,85 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type StayCreateManyFledMarkedByInput = {
+    id?: number
+    tenantId: number
+    roomId: number
+    status?: $Enums.StayStatus
+    pricingTerm: $Enums.PricingTerm
+    agreedRentAmountRupiah: number
+    checkInDate: Date | string
+    plannedCheckOutDate?: Date | string | null
+    actualCheckOutDate?: Date | string | null
+    expiresAt?: Date | string | null
+    depositAmountRupiah?: number
+    depositPaidAmountRupiah?: number
+    depositPaymentStatus?: $Enums.BookingDepositPaymentStatus
+    depositStatus?: $Enums.DepositStatus
+    depositDeductionRupiah?: number
+    depositRefundedRupiah?: number
+    depositRefundedAt?: Date | string | null
+    depositNote?: string | null
+    downPaymentAmountRupiah?: number
+    downPaymentPaidRupiah?: number
+    downPaymentPaidAt?: Date | string | null
+    downPaymentForfeitedAt?: Date | string | null
+    lossRefundStatus?: $Enums.RefundStatus
+    lossRefundAmountRupiah?: number
+    lossRefundProofUrl?: string | null
+    lossRefundProofFileKey?: string | null
+    lossRefundNote?: string | null
+    lossRefundProcessedAt?: Date | string | null
+    lossRefundProcessedById?: number | null
+    electricityTariffPerKwhRupiah?: number
+    waterTariffPerM3Rupiah?: number
+    bookingSource?: $Enums.LeadSource | null
+    bookingSourceDetail?: string | null
+    stayPurpose?: $Enums.StayPurpose | null
+    checkoutReason?: string | null
+    cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
+    notes?: string | null
+    createdById?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    initialElectricityKwhPending?: Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: Date | string | null
+    initialMetersRecordedById?: number | null
+    initialMetersPromotedAt?: Date | string | null
+  }
+
+  export type TenantCreateManyKtpVerifiedByInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AnnouncementUpdateWithoutCreatedByInput = {
     title?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
@@ -103818,6 +106222,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103828,6 +106237,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -103874,6 +106284,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103928,6 +106344,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103972,6 +106394,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -103982,6 +106409,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -104028,6 +106456,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -104082,6 +106516,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -104205,6 +106645,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -104243,6 +106687,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -104276,6 +106724,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -105459,6 +107911,269 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type StayUpdateWithoutFledMarkedByInput = {
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
+    room?: RoomUpdateOneRequiredWithoutStaysNestedInput
+    createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
+    initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    invoices?: InvoiceUpdateManyWithoutStayNestedInput
+    tickets?: TicketUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateWithoutFledMarkedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutStayNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutStayNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutStayNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutStayNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutStayNestedInput
+    checkoutRequests?: CheckoutRequestUncheckedUpdateManyWithoutStayNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutStayNestedInput
+  }
+
+  export type StayUncheckedUpdateManyWithoutFledMarkedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    tenantId?: IntFieldUpdateOperationsInput | number
+    roomId?: IntFieldUpdateOperationsInput | number
+    status?: EnumStayStatusFieldUpdateOperationsInput | $Enums.StayStatus
+    pricingTerm?: EnumPricingTermFieldUpdateOperationsInput | $Enums.PricingTerm
+    agreedRentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    checkInDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    plannedCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualCheckOutDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaidAmountRupiah?: IntFieldUpdateOperationsInput | number
+    depositPaymentStatus?: EnumBookingDepositPaymentStatusFieldUpdateOperationsInput | $Enums.BookingDepositPaymentStatus
+    depositStatus?: EnumDepositStatusFieldUpdateOperationsInput | $Enums.DepositStatus
+    depositDeductionRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedRupiah?: IntFieldUpdateOperationsInput | number
+    depositRefundedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depositNote?: NullableStringFieldUpdateOperationsInput | string | null
+    downPaymentAmountRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidRupiah?: IntFieldUpdateOperationsInput | number
+    downPaymentPaidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    downPaymentForfeitedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundStatus?: EnumRefundStatusFieldUpdateOperationsInput | $Enums.RefundStatus
+    lossRefundAmountRupiah?: IntFieldUpdateOperationsInput | number
+    lossRefundProofUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProofFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundNote?: NullableStringFieldUpdateOperationsInput | string | null
+    lossRefundProcessedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lossRefundProcessedById?: NullableIntFieldUpdateOperationsInput | number | null
+    electricityTariffPerKwhRupiah?: IntFieldUpdateOperationsInput | number
+    waterTariffPerM3Rupiah?: IntFieldUpdateOperationsInput | number
+    bookingSource?: NullableEnumLeadSourceFieldUpdateOperationsInput | $Enums.LeadSource | null
+    bookingSourceDetail?: NullableStringFieldUpdateOperationsInput | string | null
+    stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
+    checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    initialElectricityKwhPending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialWaterM3Pending?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    initialMetersRecordedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    initialMetersRecordedById?: NullableIntFieldUpdateOperationsInput | number | null
+    initialMetersPromotedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TenantUpdateWithoutKtpVerifiedByInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutTenantNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutKtpVerifiedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+  }
+
+  export type TenantUncheckedUpdateManyWithoutKtpVerifiedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StayCreateManyTenantInput = {
     id?: number
     roomId: number
@@ -105495,6 +108210,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -105534,6 +108255,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -105655,6 +108380,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -105665,6 +108395,7 @@ export namespace Prisma {
     room?: RoomUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -105710,6 +108441,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -105764,6 +108501,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -105797,6 +108540,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     room?: RoomUpdateOneWithoutTicketsNestedInput
@@ -105835,6 +108582,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -105868,6 +108619,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -106153,6 +108908,12 @@ export namespace Prisma {
     stayPurpose?: $Enums.StayPurpose | null
     checkoutReason?: string | null
     cancelReason?: string | null
+    fledMarkedAt?: Date | string | null
+    fledMarkedById?: number | null
+    fledReason?: string | null
+    belongingsStatus?: $Enums.BelongingsStatus
+    belongingsDeadline?: Date | string | null
+    belongingsResolvedAt?: Date | string | null
     notes?: string | null
     createdById?: number | null
     createdAt?: Date | string
@@ -106202,6 +108963,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -106397,6 +109162,11 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106407,6 +109177,7 @@ export namespace Prisma {
     tenant?: TenantUpdateOneRequiredWithoutStaysNestedInput
     createdBy?: UserUpdateOneWithoutStaysCreatedNestedInput
     initialMetersRecordedBy?: UserUpdateOneWithoutStaysInitialMetersRecordedNestedInput
+    fledMarkedBy?: UserUpdateOneWithoutStaysFledMarkedNestedInput
     invoices?: InvoiceUpdateManyWithoutStayNestedInput
     tickets?: TicketUpdateManyWithoutStayNestedInput
     expenses?: ExpenseUpdateManyWithoutStayNestedInput
@@ -106452,6 +109223,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106506,6 +109283,12 @@ export namespace Prisma {
     stayPurpose?: NullableEnumStayPurposeFieldUpdateOperationsInput | $Enums.StayPurpose | null
     checkoutReason?: NullableStringFieldUpdateOperationsInput | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    fledMarkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fledMarkedById?: NullableIntFieldUpdateOperationsInput | number | null
+    fledReason?: NullableStringFieldUpdateOperationsInput | string | null
+    belongingsStatus?: EnumBelongingsStatusFieldUpdateOperationsInput | $Enums.BelongingsStatus
+    belongingsDeadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    belongingsResolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106568,6 +109351,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -106606,6 +109393,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -106639,6 +109430,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -107164,6 +109959,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -107345,6 +110144,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -107383,6 +110186,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -107416,6 +110223,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -108218,6 +111029,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -108400,6 +111215,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -108438,6 +111257,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -108471,6 +111294,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -108763,6 +111590,10 @@ export namespace Prisma {
     resolutionNote?: string | null
     resolvedAt?: Date | string | null
     closedAt?: Date | string | null
+    assignedAt?: Date | string | null
+    dueAt?: Date | string | null
+    escalationLevel?: number
+    escalatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -108851,6 +111682,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -108889,6 +111724,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -108922,6 +111761,10 @@ export namespace Prisma {
     resolutionNote?: NullableStringFieldUpdateOperationsInput | string | null
     resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    escalationLevel?: IntFieldUpdateOperationsInput | number
+    escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -436,6 +436,13 @@ enum AssetDepreciationRunStatus {
   VOID
 }
 
+// F3-15: status barang tenant yang ditinggal pasca-checkout.
+enum BelongingsStatus {
+  PENDING
+  CLAIMED
+  ABANDONED
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   fullName          String
@@ -480,6 +487,8 @@ model User {
   fixedAssetsCreated           FixedAsset[]               @relation("FixedAssetCreatedBy")
   assetDepreciationRunsCreated AssetDepreciationRun[]     @relation("AssetDepreciationRunCreatedBy")
   depositLedgerEntriesActed    TenantDepositLedgerEntry[] @relation("DepositLedgerActor")
+  staysFledMarked              Stay[]                     @relation("StayFledMarkedBy")
+  tenantsKtpVerified           Tenant[]                   @relation("TenantKtpVerifiedBy")
 
   @@index([role])
   @@index([isActive])
@@ -491,6 +500,16 @@ model Tenant {
   phone          String
   email          String?
   identityNumber String?
+
+  // F3-17: foto KTP terproteksi + jejak verifikasi + hapus saat keluar (UU PDP).
+  ktpImageUrl              String?
+  ktpImageFileKey          String?
+  ktpImageOriginalFilename String?
+  ktpImageMimeType         String?
+  ktpImageFileSizeBytes    Int?
+  ktpVerifiedAt            DateTime?
+  ktpVerifiedById          Int?
+  ktpDeletedAt             DateTime?
 
   gender          Gender?
   birthDate       DateTime?
@@ -506,6 +525,7 @@ model Tenant {
   updatedAt             DateTime @updatedAt
 
   user                 User?
+  ktpVerifiedBy        User?                      @relation("TenantKtpVerifiedBy", fields: [ktpVerifiedById], references: [id], onDelete: SetNull)
   stays                Stay[]
   tickets              Ticket[]
   paymentSubmissions   PaymentSubmission[]
@@ -637,6 +657,16 @@ model Stay {
   checkoutReason      String?
   cancelReason        String?
 
+  // F3-14/F3-16: penandaan "kabur" + jejak forced-checkout admin.
+  fledMarkedAt   DateTime?
+  fledMarkedById Int?
+  fledReason     String?
+
+  // F3-15: pelacakan barang tenant pasca-checkout (abandoned 30 hari).
+  belongingsStatus     BelongingsStatus @default(PENDING)
+  belongingsDeadline   DateTime?
+  belongingsResolvedAt DateTime?
+
   notes       String?
   createdById Int?
   createdAt   DateTime @default(now())
@@ -652,6 +682,7 @@ model Stay {
   room                    Room   @relation(fields: [roomId], references: [id], onDelete: Restrict)
   createdBy               User?  @relation("StayCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   initialMetersRecordedBy User?  @relation("StayInitialMetersRecordedBy", fields: [initialMetersRecordedById], references: [id], onDelete: SetNull)
+  fledMarkedBy            User?  @relation("StayFledMarkedBy", fields: [fledMarkedById], references: [id], onDelete: SetNull)
 
   invoices             Invoice[]
   tickets              Ticket[]
@@ -670,6 +701,7 @@ model Stay {
   @@index([expiresAt])
   @@index([bookingSource])
   @@index([stayPurpose])
+  @@index([belongingsStatus, belongingsDeadline])
 }
 
 model TenantDepositLedgerEntry {
@@ -883,6 +915,11 @@ model Ticket {
   resolutionNote                  String?
   resolvedAt                      DateTime?
   closedAt                        DateTime?
+  // F3-19: SLA per kategori + dasar waktu adil (assignedAt) + eskalasi staf->admin->owner.
+  assignedAt                      DateTime?
+  dueAt                           DateTime?
+  escalationLevel                 Int                  @default(0)
+  escalatedAt                     DateTime?
   createdAt                       DateTime             @default(now())
   updatedAt                       DateTime             @updatedAt
 
@@ -900,6 +937,8 @@ model Ticket {
   @@index([status])
   @@index([linkedRoomItemId])
   @@index([linkedInventoryItemId])
+  @@index([dueAt])
+  @@index([status, dueAt])
 }
 
 model StaffRoutineTemplate {

@@ -140,6 +140,14 @@ exports.Prisma.TenantScalarFieldEnum = {
   phone: 'phone',
   email: 'email',
   identityNumber: 'identityNumber',
+  ktpImageUrl: 'ktpImageUrl',
+  ktpImageFileKey: 'ktpImageFileKey',
+  ktpImageOriginalFilename: 'ktpImageOriginalFilename',
+  ktpImageMimeType: 'ktpImageMimeType',
+  ktpImageFileSizeBytes: 'ktpImageFileSizeBytes',
+  ktpVerifiedAt: 'ktpVerifiedAt',
+  ktpVerifiedById: 'ktpVerifiedById',
+  ktpDeletedAt: 'ktpDeletedAt',
   gender: 'gender',
   birthDate: 'birthDate',
   originCity: 'originCity',
@@ -224,6 +232,12 @@ exports.Prisma.StayScalarFieldEnum = {
   stayPurpose: 'stayPurpose',
   checkoutReason: 'checkoutReason',
   cancelReason: 'cancelReason',
+  fledMarkedAt: 'fledMarkedAt',
+  fledMarkedById: 'fledMarkedById',
+  fledReason: 'fledReason',
+  belongingsStatus: 'belongingsStatus',
+  belongingsDeadline: 'belongingsDeadline',
+  belongingsResolvedAt: 'belongingsResolvedAt',
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -381,6 +395,10 @@ exports.Prisma.TicketScalarFieldEnum = {
   resolutionNote: 'resolutionNote',
   resolvedAt: 'resolvedAt',
   closedAt: 'closedAt',
+  assignedAt: 'assignedAt',
+  dueAt: 'dueAt',
+  escalationLevel: 'escalationLevel',
+  escalatedAt: 'escalatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -935,6 +953,12 @@ exports.StayPurpose = exports.$Enums.StayPurpose = {
   MEDICAL: 'MEDICAL',
   PROJECT: 'PROJECT',
   OTHER: 'OTHER'
+};
+
+exports.BelongingsStatus = exports.$Enums.BelongingsStatus = {
+  PENDING: 'PENDING',
+  CLAIMED: 'CLAIMED',
+  ABANDONED: 'ABANDONED'
 };
 
 exports.TenantDepositLedgerEntryType = exports.$Enums.TenantDepositLedgerEntryType = {
