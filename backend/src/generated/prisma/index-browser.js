@@ -162,7 +162,8 @@ exports.Prisma.TenantScalarFieldEnum = {
   notes: 'notes',
   isActive: 'isActive',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  referralCode: 'referralCode'
 };
 
 exports.Prisma.RoomScalarFieldEnum = {
@@ -934,6 +935,32 @@ exports.Prisma.RedemptionScalarFieldEnum = {
   note: 'note'
 };
 
+exports.Prisma.PeerBehaviorReportScalarFieldEnum = {
+  id: 'id',
+  reporterTenantId: 'reporterTenantId',
+  reporteeTenantId: 'reporteeTenantId',
+  category: 'category',
+  description: 'description',
+  status: 'status',
+  moderatedById: 'moderatedById',
+  acknowledgedAt: 'acknowledgedAt',
+  improvedAt: 'improvedAt',
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TenantReferralScalarFieldEnum = {
+  id: 'id',
+  referrerTenantId: 'referrerTenantId',
+  referredTenantId: 'referredTenantId',
+  status: 'status',
+  rewardedAt: 'rewardedAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FaqScalarFieldEnum = {
   id: 'id',
   question: 'question',
@@ -1434,6 +1461,21 @@ exports.RedemptionStatus = exports.$Enums.RedemptionStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.PeerReportStatus = exports.$Enums.PeerReportStatus = {
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  ACKNOWLEDGED: 'ACKNOWLEDGED',
+  IMPROVED: 'IMPROVED',
+  CONFIRMED: 'CONFIRMED',
+  DISMISSED: 'DISMISSED'
+};
+
+exports.ReferralStatus = exports.$Enums.ReferralStatus = {
+  PENDING: 'PENDING',
+  JOINED: 'JOINED',
+  REWARDED: 'REWARDED',
+  CANCELLED: 'CANCELLED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Tenant: 'Tenant',
@@ -1481,6 +1523,8 @@ exports.Prisma.ModelName = {
   LoyaltyPoint: 'LoyaltyPoint',
   LoyaltyReward: 'LoyaltyReward',
   Redemption: 'Redemption',
+  PeerBehaviorReport: 'PeerBehaviorReport',
+  TenantReferral: 'TenantReferral',
   Faq: 'Faq'
 };
 

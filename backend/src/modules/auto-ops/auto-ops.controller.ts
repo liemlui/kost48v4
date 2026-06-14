@@ -143,4 +143,11 @@ export class AutoOpsController {
   async runAcCleaning(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps jadwal cuci AC berhasil dijalankan', data: await this.autoOpsService.runAcCleaningSchedule({ actorUserId: user.id, source: 'MANUAL_AC_CLEANING_RUN' }) };
   }
+
+  // F4-13: trigger manual pemberian poin referral (UAT/ops).
+  @Post('run/referral-rewards')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runReferralRewards(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps reward referral berhasil dijalankan', data: await this.autoOpsService.runReferralRewards({ actorUserId: user.id, source: 'MANUAL_REFERRAL_REWARDS_RUN' }) };
+  }
 }

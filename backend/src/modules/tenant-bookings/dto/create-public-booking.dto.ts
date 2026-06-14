@@ -55,4 +55,10 @@ export class CreatePublicBookingDto {
   @IsString()
   @MaxLength(100)
   website?: string;
+
+  // F4-13: kode referral teman (opsional) → referrer dapat poin saat tenant ini aktif.
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  referralCode?: string;
 }

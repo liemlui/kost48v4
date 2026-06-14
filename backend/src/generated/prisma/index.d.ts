@@ -244,6 +244,16 @@ export type LoyaltyReward = $Result.DefaultSelection<Prisma.$LoyaltyRewardPayloa
  */
 export type Redemption = $Result.DefaultSelection<Prisma.$RedemptionPayload>
 /**
+ * Model PeerBehaviorReport
+ * 
+ */
+export type PeerBehaviorReport = $Result.DefaultSelection<Prisma.$PeerBehaviorReportPayload>
+/**
+ * Model TenantReferral
+ * 
+ */
+export type TenantReferral = $Result.DefaultSelection<Prisma.$TenantReferralPayload>
+/**
  * Model Faq
  * 
  */
@@ -890,6 +900,27 @@ export const RedemptionStatus: {
 
 export type RedemptionStatus = (typeof RedemptionStatus)[keyof typeof RedemptionStatus]
 
+
+export const PeerReportStatus: {
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  ACKNOWLEDGED: 'ACKNOWLEDGED',
+  IMPROVED: 'IMPROVED',
+  CONFIRMED: 'CONFIRMED',
+  DISMISSED: 'DISMISSED'
+};
+
+export type PeerReportStatus = (typeof PeerReportStatus)[keyof typeof PeerReportStatus]
+
+
+export const ReferralStatus: {
+  PENDING: 'PENDING',
+  JOINED: 'JOINED',
+  REWARDED: 'REWARDED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type ReferralStatus = (typeof ReferralStatus)[keyof typeof ReferralStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -1123,6 +1154,14 @@ export const LoyaltyRewardType: typeof $Enums.LoyaltyRewardType
 export type RedemptionStatus = $Enums.RedemptionStatus
 
 export const RedemptionStatus: typeof $Enums.RedemptionStatus
+
+export type PeerReportStatus = $Enums.PeerReportStatus
+
+export const PeerReportStatus: typeof $Enums.PeerReportStatus
+
+export type ReferralStatus = $Enums.ReferralStatus
+
+export const ReferralStatus: typeof $Enums.ReferralStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1706,6 +1745,26 @@ export class PrismaClient<
   get redemption(): Prisma.RedemptionDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.peerBehaviorReport`: Exposes CRUD operations for the **PeerBehaviorReport** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PeerBehaviorReports
+    * const peerBehaviorReports = await prisma.peerBehaviorReport.findMany()
+    * ```
+    */
+  get peerBehaviorReport(): Prisma.PeerBehaviorReportDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tenantReferral`: Exposes CRUD operations for the **TenantReferral** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TenantReferrals
+    * const tenantReferrals = await prisma.tenantReferral.findMany()
+    * ```
+    */
+  get tenantReferral(): Prisma.TenantReferralDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.faq`: Exposes CRUD operations for the **Faq** model.
     * Example usage:
     * ```ts
@@ -2194,6 +2253,8 @@ export namespace Prisma {
     LoyaltyPoint: 'LoyaltyPoint',
     LoyaltyReward: 'LoyaltyReward',
     Redemption: 'Redemption',
+    PeerBehaviorReport: 'PeerBehaviorReport',
+    TenantReferral: 'TenantReferral',
     Faq: 'Faq'
   };
 
@@ -2210,7 +2271,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "roomTransfer" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "faq"
+      modelProps: "user" | "tenant" | "room" | "roomFacility" | "stay" | "tenantDepositLedgerEntry" | "meterReading" | "invoice" | "invoiceLine" | "invoicePayment" | "passwordResetToken" | "paymentSubmission" | "ticket" | "staffRoutineTemplate" | "staffRoutineAssignment" | "staffRoutineCompletion" | "staffWorkAudit" | "staffPerformanceEvent" | "staffReview" | "announcement" | "inventoryItem" | "roomItem" | "inventoryMovement" | "staffFieldReport" | "renewRequest" | "checkoutRequest" | "wifiSale" | "expense" | "fixedAsset" | "assetDepreciationRun" | "assetDepreciationLine" | "appNotification" | "pushSubscription" | "auditLog" | "chartOfAccount" | "cashAccount" | "accountingPeriod" | "openingBalanceBatch" | "openingBalanceLine" | "journalEntry" | "journalLine" | "rentRecognitionSchedule" | "roomTransfer" | "loyaltyPoint" | "loyaltyReward" | "redemption" | "peerBehaviorReport" | "tenantReferral" | "faq"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5618,6 +5679,154 @@ export namespace Prisma {
           }
         }
       }
+      PeerBehaviorReport: {
+        payload: Prisma.$PeerBehaviorReportPayload<ExtArgs>
+        fields: Prisma.PeerBehaviorReportFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PeerBehaviorReportFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PeerBehaviorReportFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          findFirst: {
+            args: Prisma.PeerBehaviorReportFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PeerBehaviorReportFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          findMany: {
+            args: Prisma.PeerBehaviorReportFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>[]
+          }
+          create: {
+            args: Prisma.PeerBehaviorReportCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          createMany: {
+            args: Prisma.PeerBehaviorReportCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PeerBehaviorReportCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>[]
+          }
+          delete: {
+            args: Prisma.PeerBehaviorReportDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          update: {
+            args: Prisma.PeerBehaviorReportUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          deleteMany: {
+            args: Prisma.PeerBehaviorReportDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PeerBehaviorReportUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PeerBehaviorReportUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>[]
+          }
+          upsert: {
+            args: Prisma.PeerBehaviorReportUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PeerBehaviorReportPayload>
+          }
+          aggregate: {
+            args: Prisma.PeerBehaviorReportAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePeerBehaviorReport>
+          }
+          groupBy: {
+            args: Prisma.PeerBehaviorReportGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PeerBehaviorReportGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PeerBehaviorReportCountArgs<ExtArgs>
+            result: $Utils.Optional<PeerBehaviorReportCountAggregateOutputType> | number
+          }
+        }
+      }
+      TenantReferral: {
+        payload: Prisma.$TenantReferralPayload<ExtArgs>
+        fields: Prisma.TenantReferralFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TenantReferralFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TenantReferralFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          findFirst: {
+            args: Prisma.TenantReferralFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TenantReferralFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          findMany: {
+            args: Prisma.TenantReferralFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>[]
+          }
+          create: {
+            args: Prisma.TenantReferralCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          createMany: {
+            args: Prisma.TenantReferralCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TenantReferralCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>[]
+          }
+          delete: {
+            args: Prisma.TenantReferralDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          update: {
+            args: Prisma.TenantReferralUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          deleteMany: {
+            args: Prisma.TenantReferralDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TenantReferralUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TenantReferralUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>[]
+          }
+          upsert: {
+            args: Prisma.TenantReferralUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TenantReferralPayload>
+          }
+          aggregate: {
+            args: Prisma.TenantReferralAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTenantReferral>
+          }
+          groupBy: {
+            args: Prisma.TenantReferralGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TenantReferralGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TenantReferralCountArgs<ExtArgs>
+            result: $Utils.Optional<TenantReferralCountAggregateOutputType> | number
+          }
+        }
+      }
       Faq: {
         payload: Prisma.$FaqPayload<ExtArgs>
         fields: Prisma.FaqFieldRefs
@@ -5846,6 +6055,8 @@ export namespace Prisma {
     loyaltyPoint?: LoyaltyPointOmit
     loyaltyReward?: LoyaltyRewardOmit
     redemption?: RedemptionOmit
+    peerBehaviorReport?: PeerBehaviorReportOmit
+    tenantReferral?: TenantReferralOmit
     faq?: FaqOmit
   }
 
@@ -5961,6 +6172,7 @@ export namespace Prisma {
     staysFledMarked: number
     tenantsKtpVerified: number
     roomTransfersCreated: number
+    peerReportsModerated: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5998,6 +6210,7 @@ export namespace Prisma {
     staysFledMarked?: boolean | UserCountOutputTypeCountStaysFledMarkedArgs
     tenantsKtpVerified?: boolean | UserCountOutputTypeCountTenantsKtpVerifiedArgs
     roomTransfersCreated?: boolean | UserCountOutputTypeCountRoomTransfersCreatedArgs
+    peerReportsModerated?: boolean | UserCountOutputTypeCountPeerReportsModeratedArgs
   }
 
   // Custom InputTypes
@@ -6249,6 +6462,13 @@ export namespace Prisma {
     where?: RoomTransferWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPeerReportsModeratedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PeerBehaviorReportWhereInput
+  }
+
 
   /**
    * Count Type TenantCountOutputType
@@ -6263,6 +6483,9 @@ export namespace Prisma {
     depositLedgerEntries: number
     loyaltyPoints: number
     redemptions: number
+    referralsMade: number
+    peerReportsMade: number
+    peerReportsReceived: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6274,6 +6497,9 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | TenantCountOutputTypeCountDepositLedgerEntriesArgs
     loyaltyPoints?: boolean | TenantCountOutputTypeCountLoyaltyPointsArgs
     redemptions?: boolean | TenantCountOutputTypeCountRedemptionsArgs
+    referralsMade?: boolean | TenantCountOutputTypeCountReferralsMadeArgs
+    peerReportsMade?: boolean | TenantCountOutputTypeCountPeerReportsMadeArgs
+    peerReportsReceived?: boolean | TenantCountOutputTypeCountPeerReportsReceivedArgs
   }
 
   // Custom InputTypes
@@ -6341,6 +6567,27 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RedemptionWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountReferralsMadeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TenantReferralWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountPeerReportsMadeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PeerBehaviorReportWhereInput
+  }
+
+  /**
+   * TenantCountOutputType without action
+   */
+  export type TenantCountOutputTypeCountPeerReportsReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PeerBehaviorReportWhereInput
   }
 
 
@@ -7583,6 +7830,7 @@ export namespace Prisma {
     staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
+    peerReportsModerated?: boolean | User$peerReportsModeratedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -7679,6 +7927,7 @@ export namespace Prisma {
     staysFledMarked?: boolean | User$staysFledMarkedArgs<ExtArgs>
     tenantsKtpVerified?: boolean | User$tenantsKtpVerifiedArgs<ExtArgs>
     roomTransfersCreated?: boolean | User$roomTransfersCreatedArgs<ExtArgs>
+    peerReportsModerated?: boolean | User$peerReportsModeratedArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7726,6 +7975,7 @@ export namespace Prisma {
       staysFledMarked: Prisma.$StayPayload<ExtArgs>[]
       tenantsKtpVerified: Prisma.$TenantPayload<ExtArgs>[]
       roomTransfersCreated: Prisma.$RoomTransferPayload<ExtArgs>[]
+      peerReportsModerated: Prisma.$PeerBehaviorReportPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8172,6 +8422,7 @@ export namespace Prisma {
     staysFledMarked<T extends User$staysFledMarkedArgs<ExtArgs> = {}>(args?: Subset<T, User$staysFledMarkedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tenantsKtpVerified<T extends User$tenantsKtpVerifiedArgs<ExtArgs> = {}>(args?: Subset<T, User$tenantsKtpVerifiedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     roomTransfersCreated<T extends User$roomTransfersCreatedArgs<ExtArgs> = {}>(args?: Subset<T, User$roomTransfersCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomTransferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    peerReportsModerated<T extends User$peerReportsModeratedArgs<ExtArgs> = {}>(args?: Subset<T, User$peerReportsModeratedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9452,6 +9703,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.peerReportsModerated
+   */
+  export type User$peerReportsModeratedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    where?: PeerBehaviorReportWhereInput
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9519,6 +9794,7 @@ export namespace Prisma {
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    referralCode: string | null
   }
 
   export type TenantMaxAggregateOutputType = {
@@ -9546,6 +9822,7 @@ export namespace Prisma {
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    referralCode: string | null
   }
 
   export type TenantCountAggregateOutputType = {
@@ -9573,6 +9850,7 @@ export namespace Prisma {
     isActive: number
     createdAt: number
     updatedAt: number
+    referralCode: number
     _all: number
   }
 
@@ -9614,6 +9892,7 @@ export namespace Prisma {
     isActive?: true
     createdAt?: true
     updatedAt?: true
+    referralCode?: true
   }
 
   export type TenantMaxAggregateInputType = {
@@ -9641,6 +9920,7 @@ export namespace Prisma {
     isActive?: true
     createdAt?: true
     updatedAt?: true
+    referralCode?: true
   }
 
   export type TenantCountAggregateInputType = {
@@ -9668,6 +9948,7 @@ export namespace Prisma {
     isActive?: true
     createdAt?: true
     updatedAt?: true
+    referralCode?: true
     _all?: true
   }
 
@@ -9782,6 +10063,7 @@ export namespace Prisma {
     isActive: boolean
     createdAt: Date
     updatedAt: Date
+    referralCode: string | null
     _count: TenantCountAggregateOutputType | null
     _avg: TenantAvgAggregateOutputType | null
     _sum: TenantSumAggregateOutputType | null
@@ -9828,6 +10110,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    referralCode?: boolean
     user?: boolean | Tenant$userArgs<ExtArgs>
     ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
     stays?: boolean | Tenant$staysArgs<ExtArgs>
@@ -9838,6 +10121,10 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
     loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
     redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
+    referralsMade?: boolean | Tenant$referralsMadeArgs<ExtArgs>
+    referredReferral?: boolean | Tenant$referredReferralArgs<ExtArgs>
+    peerReportsMade?: boolean | Tenant$peerReportsMadeArgs<ExtArgs>
+    peerReportsReceived?: boolean | Tenant$peerReportsReceivedArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -9866,6 +10153,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    referralCode?: boolean
     ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -9894,6 +10182,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    referralCode?: boolean
     ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -9922,9 +10211,10 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    referralCode?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "ktpImageUrl" | "ktpImageFileKey" | "ktpImageOriginalFilename" | "ktpImageMimeType" | "ktpImageFileSizeBytes" | "ktpVerifiedAt" | "ktpVerifiedById" | "ktpDeletedAt" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "phone" | "email" | "identityNumber" | "ktpImageUrl" | "ktpImageFileKey" | "ktpImageOriginalFilename" | "ktpImageMimeType" | "ktpImageFileSizeBytes" | "ktpVerifiedAt" | "ktpVerifiedById" | "ktpDeletedAt" | "gender" | "birthDate" | "originCity" | "occupation" | "companyOrCampus" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "isActive" | "createdAt" | "updatedAt" | "referralCode", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Tenant$userArgs<ExtArgs>
     ktpVerifiedBy?: boolean | Tenant$ktpVerifiedByArgs<ExtArgs>
@@ -9936,6 +10226,10 @@ export namespace Prisma {
     depositLedgerEntries?: boolean | Tenant$depositLedgerEntriesArgs<ExtArgs>
     loyaltyPoints?: boolean | Tenant$loyaltyPointsArgs<ExtArgs>
     redemptions?: boolean | Tenant$redemptionsArgs<ExtArgs>
+    referralsMade?: boolean | Tenant$referralsMadeArgs<ExtArgs>
+    referredReferral?: boolean | Tenant$referredReferralArgs<ExtArgs>
+    peerReportsMade?: boolean | Tenant$peerReportsMadeArgs<ExtArgs>
+    peerReportsReceived?: boolean | Tenant$peerReportsReceivedArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9958,6 +10252,10 @@ export namespace Prisma {
       depositLedgerEntries: Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>[]
       loyaltyPoints: Prisma.$LoyaltyPointPayload<ExtArgs>[]
       redemptions: Prisma.$RedemptionPayload<ExtArgs>[]
+      referralsMade: Prisma.$TenantReferralPayload<ExtArgs>[]
+      referredReferral: Prisma.$TenantReferralPayload<ExtArgs> | null
+      peerReportsMade: Prisma.$PeerBehaviorReportPayload<ExtArgs>[]
+      peerReportsReceived: Prisma.$PeerBehaviorReportPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -9984,6 +10282,7 @@ export namespace Prisma {
       isActive: boolean
       createdAt: Date
       updatedAt: Date
+      referralCode: string | null
     }, ExtArgs["result"]["tenant"]>
     composites: {}
   }
@@ -10388,6 +10687,10 @@ export namespace Prisma {
     depositLedgerEntries<T extends Tenant$depositLedgerEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$depositLedgerEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantDepositLedgerEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     loyaltyPoints<T extends Tenant$loyaltyPointsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$loyaltyPointsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LoyaltyPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     redemptions<T extends Tenant$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    referralsMade<T extends Tenant$referralsMadeArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$referralsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    referredReferral<T extends Tenant$referredReferralArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$referredReferralArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    peerReportsMade<T extends Tenant$peerReportsMadeArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$peerReportsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    peerReportsReceived<T extends Tenant$peerReportsReceivedArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$peerReportsReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10441,6 +10744,7 @@ export namespace Prisma {
     readonly isActive: FieldRef<"Tenant", 'Boolean'>
     readonly createdAt: FieldRef<"Tenant", 'DateTime'>
     readonly updatedAt: FieldRef<"Tenant", 'DateTime'>
+    readonly referralCode: FieldRef<"Tenant", 'String'>
   }
     
 
@@ -11069,6 +11373,97 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RedemptionScalarFieldEnum | RedemptionScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.referralsMade
+   */
+  export type Tenant$referralsMadeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    where?: TenantReferralWhereInput
+    orderBy?: TenantReferralOrderByWithRelationInput | TenantReferralOrderByWithRelationInput[]
+    cursor?: TenantReferralWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TenantReferralScalarFieldEnum | TenantReferralScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.referredReferral
+   */
+  export type Tenant$referredReferralArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    where?: TenantReferralWhereInput
+  }
+
+  /**
+   * Tenant.peerReportsMade
+   */
+  export type Tenant$peerReportsMadeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    where?: PeerBehaviorReportWhereInput
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
+  }
+
+  /**
+   * Tenant.peerReportsReceived
+   */
+  export type Tenant$peerReportsReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    where?: PeerBehaviorReportWhereInput
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
   }
 
   /**
@@ -68694,6 +69089,2412 @@ export namespace Prisma {
 
 
   /**
+   * Model PeerBehaviorReport
+   */
+
+  export type AggregatePeerBehaviorReport = {
+    _count: PeerBehaviorReportCountAggregateOutputType | null
+    _avg: PeerBehaviorReportAvgAggregateOutputType | null
+    _sum: PeerBehaviorReportSumAggregateOutputType | null
+    _min: PeerBehaviorReportMinAggregateOutputType | null
+    _max: PeerBehaviorReportMaxAggregateOutputType | null
+  }
+
+  export type PeerBehaviorReportAvgAggregateOutputType = {
+    id: number | null
+    reporterTenantId: number | null
+    reporteeTenantId: number | null
+    moderatedById: number | null
+  }
+
+  export type PeerBehaviorReportSumAggregateOutputType = {
+    id: number | null
+    reporterTenantId: number | null
+    reporteeTenantId: number | null
+    moderatedById: number | null
+  }
+
+  export type PeerBehaviorReportMinAggregateOutputType = {
+    id: number | null
+    reporterTenantId: number | null
+    reporteeTenantId: number | null
+    category: string | null
+    description: string | null
+    status: $Enums.PeerReportStatus | null
+    moderatedById: number | null
+    acknowledgedAt: Date | null
+    improvedAt: Date | null
+    confirmedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PeerBehaviorReportMaxAggregateOutputType = {
+    id: number | null
+    reporterTenantId: number | null
+    reporteeTenantId: number | null
+    category: string | null
+    description: string | null
+    status: $Enums.PeerReportStatus | null
+    moderatedById: number | null
+    acknowledgedAt: Date | null
+    improvedAt: Date | null
+    confirmedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PeerBehaviorReportCountAggregateOutputType = {
+    id: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: number
+    description: number
+    status: number
+    moderatedById: number
+    acknowledgedAt: number
+    improvedAt: number
+    confirmedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PeerBehaviorReportAvgAggregateInputType = {
+    id?: true
+    reporterTenantId?: true
+    reporteeTenantId?: true
+    moderatedById?: true
+  }
+
+  export type PeerBehaviorReportSumAggregateInputType = {
+    id?: true
+    reporterTenantId?: true
+    reporteeTenantId?: true
+    moderatedById?: true
+  }
+
+  export type PeerBehaviorReportMinAggregateInputType = {
+    id?: true
+    reporterTenantId?: true
+    reporteeTenantId?: true
+    category?: true
+    description?: true
+    status?: true
+    moderatedById?: true
+    acknowledgedAt?: true
+    improvedAt?: true
+    confirmedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PeerBehaviorReportMaxAggregateInputType = {
+    id?: true
+    reporterTenantId?: true
+    reporteeTenantId?: true
+    category?: true
+    description?: true
+    status?: true
+    moderatedById?: true
+    acknowledgedAt?: true
+    improvedAt?: true
+    confirmedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PeerBehaviorReportCountAggregateInputType = {
+    id?: true
+    reporterTenantId?: true
+    reporteeTenantId?: true
+    category?: true
+    description?: true
+    status?: true
+    moderatedById?: true
+    acknowledgedAt?: true
+    improvedAt?: true
+    confirmedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PeerBehaviorReportAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PeerBehaviorReport to aggregate.
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PeerBehaviorReports to fetch.
+     */
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PeerBehaviorReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PeerBehaviorReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PeerBehaviorReports
+    **/
+    _count?: true | PeerBehaviorReportCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PeerBehaviorReportAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PeerBehaviorReportSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PeerBehaviorReportMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PeerBehaviorReportMaxAggregateInputType
+  }
+
+  export type GetPeerBehaviorReportAggregateType<T extends PeerBehaviorReportAggregateArgs> = {
+        [P in keyof T & keyof AggregatePeerBehaviorReport]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePeerBehaviorReport[P]>
+      : GetScalarType<T[P], AggregatePeerBehaviorReport[P]>
+  }
+
+
+
+
+  export type PeerBehaviorReportGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PeerBehaviorReportWhereInput
+    orderBy?: PeerBehaviorReportOrderByWithAggregationInput | PeerBehaviorReportOrderByWithAggregationInput[]
+    by: PeerBehaviorReportScalarFieldEnum[] | PeerBehaviorReportScalarFieldEnum
+    having?: PeerBehaviorReportScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PeerBehaviorReportCountAggregateInputType | true
+    _avg?: PeerBehaviorReportAvgAggregateInputType
+    _sum?: PeerBehaviorReportSumAggregateInputType
+    _min?: PeerBehaviorReportMinAggregateInputType
+    _max?: PeerBehaviorReportMaxAggregateInputType
+  }
+
+  export type PeerBehaviorReportGroupByOutputType = {
+    id: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status: $Enums.PeerReportStatus
+    moderatedById: number | null
+    acknowledgedAt: Date | null
+    improvedAt: Date | null
+    confirmedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: PeerBehaviorReportCountAggregateOutputType | null
+    _avg: PeerBehaviorReportAvgAggregateOutputType | null
+    _sum: PeerBehaviorReportSumAggregateOutputType | null
+    _min: PeerBehaviorReportMinAggregateOutputType | null
+    _max: PeerBehaviorReportMaxAggregateOutputType | null
+  }
+
+  type GetPeerBehaviorReportGroupByPayload<T extends PeerBehaviorReportGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PeerBehaviorReportGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PeerBehaviorReportGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PeerBehaviorReportGroupByOutputType[P]>
+            : GetScalarType<T[P], PeerBehaviorReportGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PeerBehaviorReportSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    reporterTenantId?: boolean
+    reporteeTenantId?: boolean
+    category?: boolean
+    description?: boolean
+    status?: boolean
+    moderatedById?: boolean
+    acknowledgedAt?: boolean
+    improvedAt?: boolean
+    confirmedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }, ExtArgs["result"]["peerBehaviorReport"]>
+
+  export type PeerBehaviorReportSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    reporterTenantId?: boolean
+    reporteeTenantId?: boolean
+    category?: boolean
+    description?: boolean
+    status?: boolean
+    moderatedById?: boolean
+    acknowledgedAt?: boolean
+    improvedAt?: boolean
+    confirmedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }, ExtArgs["result"]["peerBehaviorReport"]>
+
+  export type PeerBehaviorReportSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    reporterTenantId?: boolean
+    reporteeTenantId?: boolean
+    category?: boolean
+    description?: boolean
+    status?: boolean
+    moderatedById?: boolean
+    acknowledgedAt?: boolean
+    improvedAt?: boolean
+    confirmedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }, ExtArgs["result"]["peerBehaviorReport"]>
+
+  export type PeerBehaviorReportSelectScalar = {
+    id?: boolean
+    reporterTenantId?: boolean
+    reporteeTenantId?: boolean
+    category?: boolean
+    description?: boolean
+    status?: boolean
+    moderatedById?: boolean
+    acknowledgedAt?: boolean
+    improvedAt?: boolean
+    confirmedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PeerBehaviorReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reporterTenantId" | "reporteeTenantId" | "category" | "description" | "status" | "moderatedById" | "acknowledgedAt" | "improvedAt" | "confirmedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["peerBehaviorReport"]>
+  export type PeerBehaviorReportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }
+  export type PeerBehaviorReportIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }
+  export type PeerBehaviorReportIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    reporter?: boolean | TenantDefaultArgs<ExtArgs>
+    reportee?: boolean | TenantDefaultArgs<ExtArgs>
+    moderatedBy?: boolean | PeerBehaviorReport$moderatedByArgs<ExtArgs>
+  }
+
+  export type $PeerBehaviorReportPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PeerBehaviorReport"
+    objects: {
+      reporter: Prisma.$TenantPayload<ExtArgs>
+      reportee: Prisma.$TenantPayload<ExtArgs>
+      moderatedBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      reporterTenantId: number
+      reporteeTenantId: number
+      category: string
+      description: string
+      status: $Enums.PeerReportStatus
+      moderatedById: number | null
+      acknowledgedAt: Date | null
+      improvedAt: Date | null
+      confirmedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["peerBehaviorReport"]>
+    composites: {}
+  }
+
+  type PeerBehaviorReportGetPayload<S extends boolean | null | undefined | PeerBehaviorReportDefaultArgs> = $Result.GetResult<Prisma.$PeerBehaviorReportPayload, S>
+
+  type PeerBehaviorReportCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PeerBehaviorReportFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PeerBehaviorReportCountAggregateInputType | true
+    }
+
+  export interface PeerBehaviorReportDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PeerBehaviorReport'], meta: { name: 'PeerBehaviorReport' } }
+    /**
+     * Find zero or one PeerBehaviorReport that matches the filter.
+     * @param {PeerBehaviorReportFindUniqueArgs} args - Arguments to find a PeerBehaviorReport
+     * @example
+     * // Get one PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PeerBehaviorReportFindUniqueArgs>(args: SelectSubset<T, PeerBehaviorReportFindUniqueArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PeerBehaviorReport that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PeerBehaviorReportFindUniqueOrThrowArgs} args - Arguments to find a PeerBehaviorReport
+     * @example
+     * // Get one PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PeerBehaviorReportFindUniqueOrThrowArgs>(args: SelectSubset<T, PeerBehaviorReportFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PeerBehaviorReport that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportFindFirstArgs} args - Arguments to find a PeerBehaviorReport
+     * @example
+     * // Get one PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PeerBehaviorReportFindFirstArgs>(args?: SelectSubset<T, PeerBehaviorReportFindFirstArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PeerBehaviorReport that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportFindFirstOrThrowArgs} args - Arguments to find a PeerBehaviorReport
+     * @example
+     * // Get one PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PeerBehaviorReportFindFirstOrThrowArgs>(args?: SelectSubset<T, PeerBehaviorReportFindFirstOrThrowArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PeerBehaviorReports that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PeerBehaviorReports
+     * const peerBehaviorReports = await prisma.peerBehaviorReport.findMany()
+     * 
+     * // Get first 10 PeerBehaviorReports
+     * const peerBehaviorReports = await prisma.peerBehaviorReport.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const peerBehaviorReportWithIdOnly = await prisma.peerBehaviorReport.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PeerBehaviorReportFindManyArgs>(args?: SelectSubset<T, PeerBehaviorReportFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PeerBehaviorReport.
+     * @param {PeerBehaviorReportCreateArgs} args - Arguments to create a PeerBehaviorReport.
+     * @example
+     * // Create one PeerBehaviorReport
+     * const PeerBehaviorReport = await prisma.peerBehaviorReport.create({
+     *   data: {
+     *     // ... data to create a PeerBehaviorReport
+     *   }
+     * })
+     * 
+     */
+    create<T extends PeerBehaviorReportCreateArgs>(args: SelectSubset<T, PeerBehaviorReportCreateArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PeerBehaviorReports.
+     * @param {PeerBehaviorReportCreateManyArgs} args - Arguments to create many PeerBehaviorReports.
+     * @example
+     * // Create many PeerBehaviorReports
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PeerBehaviorReportCreateManyArgs>(args?: SelectSubset<T, PeerBehaviorReportCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PeerBehaviorReports and returns the data saved in the database.
+     * @param {PeerBehaviorReportCreateManyAndReturnArgs} args - Arguments to create many PeerBehaviorReports.
+     * @example
+     * // Create many PeerBehaviorReports
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PeerBehaviorReports and only return the `id`
+     * const peerBehaviorReportWithIdOnly = await prisma.peerBehaviorReport.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PeerBehaviorReportCreateManyAndReturnArgs>(args?: SelectSubset<T, PeerBehaviorReportCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PeerBehaviorReport.
+     * @param {PeerBehaviorReportDeleteArgs} args - Arguments to delete one PeerBehaviorReport.
+     * @example
+     * // Delete one PeerBehaviorReport
+     * const PeerBehaviorReport = await prisma.peerBehaviorReport.delete({
+     *   where: {
+     *     // ... filter to delete one PeerBehaviorReport
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PeerBehaviorReportDeleteArgs>(args: SelectSubset<T, PeerBehaviorReportDeleteArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PeerBehaviorReport.
+     * @param {PeerBehaviorReportUpdateArgs} args - Arguments to update one PeerBehaviorReport.
+     * @example
+     * // Update one PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PeerBehaviorReportUpdateArgs>(args: SelectSubset<T, PeerBehaviorReportUpdateArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PeerBehaviorReports.
+     * @param {PeerBehaviorReportDeleteManyArgs} args - Arguments to filter PeerBehaviorReports to delete.
+     * @example
+     * // Delete a few PeerBehaviorReports
+     * const { count } = await prisma.peerBehaviorReport.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PeerBehaviorReportDeleteManyArgs>(args?: SelectSubset<T, PeerBehaviorReportDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PeerBehaviorReports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PeerBehaviorReports
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PeerBehaviorReportUpdateManyArgs>(args: SelectSubset<T, PeerBehaviorReportUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PeerBehaviorReports and returns the data updated in the database.
+     * @param {PeerBehaviorReportUpdateManyAndReturnArgs} args - Arguments to update many PeerBehaviorReports.
+     * @example
+     * // Update many PeerBehaviorReports
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PeerBehaviorReports and only return the `id`
+     * const peerBehaviorReportWithIdOnly = await prisma.peerBehaviorReport.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PeerBehaviorReportUpdateManyAndReturnArgs>(args: SelectSubset<T, PeerBehaviorReportUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PeerBehaviorReport.
+     * @param {PeerBehaviorReportUpsertArgs} args - Arguments to update or create a PeerBehaviorReport.
+     * @example
+     * // Update or create a PeerBehaviorReport
+     * const peerBehaviorReport = await prisma.peerBehaviorReport.upsert({
+     *   create: {
+     *     // ... data to create a PeerBehaviorReport
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PeerBehaviorReport we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PeerBehaviorReportUpsertArgs>(args: SelectSubset<T, PeerBehaviorReportUpsertArgs<ExtArgs>>): Prisma__PeerBehaviorReportClient<$Result.GetResult<Prisma.$PeerBehaviorReportPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PeerBehaviorReports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportCountArgs} args - Arguments to filter PeerBehaviorReports to count.
+     * @example
+     * // Count the number of PeerBehaviorReports
+     * const count = await prisma.peerBehaviorReport.count({
+     *   where: {
+     *     // ... the filter for the PeerBehaviorReports we want to count
+     *   }
+     * })
+    **/
+    count<T extends PeerBehaviorReportCountArgs>(
+      args?: Subset<T, PeerBehaviorReportCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PeerBehaviorReportCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PeerBehaviorReport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PeerBehaviorReportAggregateArgs>(args: Subset<T, PeerBehaviorReportAggregateArgs>): Prisma.PrismaPromise<GetPeerBehaviorReportAggregateType<T>>
+
+    /**
+     * Group by PeerBehaviorReport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PeerBehaviorReportGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PeerBehaviorReportGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PeerBehaviorReportGroupByArgs['orderBy'] }
+        : { orderBy?: PeerBehaviorReportGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PeerBehaviorReportGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPeerBehaviorReportGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PeerBehaviorReport model
+   */
+  readonly fields: PeerBehaviorReportFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PeerBehaviorReport.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PeerBehaviorReportClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    reporter<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    reportee<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    moderatedBy<T extends PeerBehaviorReport$moderatedByArgs<ExtArgs> = {}>(args?: Subset<T, PeerBehaviorReport$moderatedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PeerBehaviorReport model
+   */
+  interface PeerBehaviorReportFieldRefs {
+    readonly id: FieldRef<"PeerBehaviorReport", 'Int'>
+    readonly reporterTenantId: FieldRef<"PeerBehaviorReport", 'Int'>
+    readonly reporteeTenantId: FieldRef<"PeerBehaviorReport", 'Int'>
+    readonly category: FieldRef<"PeerBehaviorReport", 'String'>
+    readonly description: FieldRef<"PeerBehaviorReport", 'String'>
+    readonly status: FieldRef<"PeerBehaviorReport", 'PeerReportStatus'>
+    readonly moderatedById: FieldRef<"PeerBehaviorReport", 'Int'>
+    readonly acknowledgedAt: FieldRef<"PeerBehaviorReport", 'DateTime'>
+    readonly improvedAt: FieldRef<"PeerBehaviorReport", 'DateTime'>
+    readonly confirmedAt: FieldRef<"PeerBehaviorReport", 'DateTime'>
+    readonly createdAt: FieldRef<"PeerBehaviorReport", 'DateTime'>
+    readonly updatedAt: FieldRef<"PeerBehaviorReport", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PeerBehaviorReport findUnique
+   */
+  export type PeerBehaviorReportFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter, which PeerBehaviorReport to fetch.
+     */
+    where: PeerBehaviorReportWhereUniqueInput
+  }
+
+  /**
+   * PeerBehaviorReport findUniqueOrThrow
+   */
+  export type PeerBehaviorReportFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter, which PeerBehaviorReport to fetch.
+     */
+    where: PeerBehaviorReportWhereUniqueInput
+  }
+
+  /**
+   * PeerBehaviorReport findFirst
+   */
+  export type PeerBehaviorReportFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter, which PeerBehaviorReport to fetch.
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PeerBehaviorReports to fetch.
+     */
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PeerBehaviorReports.
+     */
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PeerBehaviorReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PeerBehaviorReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PeerBehaviorReports.
+     */
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
+  }
+
+  /**
+   * PeerBehaviorReport findFirstOrThrow
+   */
+  export type PeerBehaviorReportFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter, which PeerBehaviorReport to fetch.
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PeerBehaviorReports to fetch.
+     */
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PeerBehaviorReports.
+     */
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PeerBehaviorReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PeerBehaviorReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PeerBehaviorReports.
+     */
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
+  }
+
+  /**
+   * PeerBehaviorReport findMany
+   */
+  export type PeerBehaviorReportFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter, which PeerBehaviorReports to fetch.
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PeerBehaviorReports to fetch.
+     */
+    orderBy?: PeerBehaviorReportOrderByWithRelationInput | PeerBehaviorReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PeerBehaviorReports.
+     */
+    cursor?: PeerBehaviorReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PeerBehaviorReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PeerBehaviorReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PeerBehaviorReports.
+     */
+    distinct?: PeerBehaviorReportScalarFieldEnum | PeerBehaviorReportScalarFieldEnum[]
+  }
+
+  /**
+   * PeerBehaviorReport create
+   */
+  export type PeerBehaviorReportCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PeerBehaviorReport.
+     */
+    data: XOR<PeerBehaviorReportCreateInput, PeerBehaviorReportUncheckedCreateInput>
+  }
+
+  /**
+   * PeerBehaviorReport createMany
+   */
+  export type PeerBehaviorReportCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PeerBehaviorReports.
+     */
+    data: PeerBehaviorReportCreateManyInput | PeerBehaviorReportCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PeerBehaviorReport createManyAndReturn
+   */
+  export type PeerBehaviorReportCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * The data used to create many PeerBehaviorReports.
+     */
+    data: PeerBehaviorReportCreateManyInput | PeerBehaviorReportCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PeerBehaviorReport update
+   */
+  export type PeerBehaviorReportUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PeerBehaviorReport.
+     */
+    data: XOR<PeerBehaviorReportUpdateInput, PeerBehaviorReportUncheckedUpdateInput>
+    /**
+     * Choose, which PeerBehaviorReport to update.
+     */
+    where: PeerBehaviorReportWhereUniqueInput
+  }
+
+  /**
+   * PeerBehaviorReport updateMany
+   */
+  export type PeerBehaviorReportUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PeerBehaviorReports.
+     */
+    data: XOR<PeerBehaviorReportUpdateManyMutationInput, PeerBehaviorReportUncheckedUpdateManyInput>
+    /**
+     * Filter which PeerBehaviorReports to update
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * Limit how many PeerBehaviorReports to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PeerBehaviorReport updateManyAndReturn
+   */
+  export type PeerBehaviorReportUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * The data used to update PeerBehaviorReports.
+     */
+    data: XOR<PeerBehaviorReportUpdateManyMutationInput, PeerBehaviorReportUncheckedUpdateManyInput>
+    /**
+     * Filter which PeerBehaviorReports to update
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * Limit how many PeerBehaviorReports to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PeerBehaviorReport upsert
+   */
+  export type PeerBehaviorReportUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PeerBehaviorReport to update in case it exists.
+     */
+    where: PeerBehaviorReportWhereUniqueInput
+    /**
+     * In case the PeerBehaviorReport found by the `where` argument doesn't exist, create a new PeerBehaviorReport with this data.
+     */
+    create: XOR<PeerBehaviorReportCreateInput, PeerBehaviorReportUncheckedCreateInput>
+    /**
+     * In case the PeerBehaviorReport was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PeerBehaviorReportUpdateInput, PeerBehaviorReportUncheckedUpdateInput>
+  }
+
+  /**
+   * PeerBehaviorReport delete
+   */
+  export type PeerBehaviorReportDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+    /**
+     * Filter which PeerBehaviorReport to delete.
+     */
+    where: PeerBehaviorReportWhereUniqueInput
+  }
+
+  /**
+   * PeerBehaviorReport deleteMany
+   */
+  export type PeerBehaviorReportDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PeerBehaviorReports to delete
+     */
+    where?: PeerBehaviorReportWhereInput
+    /**
+     * Limit how many PeerBehaviorReports to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PeerBehaviorReport.moderatedBy
+   */
+  export type PeerBehaviorReport$moderatedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * PeerBehaviorReport without action
+   */
+  export type PeerBehaviorReportDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PeerBehaviorReport
+     */
+    select?: PeerBehaviorReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PeerBehaviorReport
+     */
+    omit?: PeerBehaviorReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PeerBehaviorReportInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TenantReferral
+   */
+
+  export type AggregateTenantReferral = {
+    _count: TenantReferralCountAggregateOutputType | null
+    _avg: TenantReferralAvgAggregateOutputType | null
+    _sum: TenantReferralSumAggregateOutputType | null
+    _min: TenantReferralMinAggregateOutputType | null
+    _max: TenantReferralMaxAggregateOutputType | null
+  }
+
+  export type TenantReferralAvgAggregateOutputType = {
+    id: number | null
+    referrerTenantId: number | null
+    referredTenantId: number | null
+  }
+
+  export type TenantReferralSumAggregateOutputType = {
+    id: number | null
+    referrerTenantId: number | null
+    referredTenantId: number | null
+  }
+
+  export type TenantReferralMinAggregateOutputType = {
+    id: number | null
+    referrerTenantId: number | null
+    referredTenantId: number | null
+    status: $Enums.ReferralStatus | null
+    rewardedAt: Date | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TenantReferralMaxAggregateOutputType = {
+    id: number | null
+    referrerTenantId: number | null
+    referredTenantId: number | null
+    status: $Enums.ReferralStatus | null
+    rewardedAt: Date | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TenantReferralCountAggregateOutputType = {
+    id: number
+    referrerTenantId: number
+    referredTenantId: number
+    status: number
+    rewardedAt: number
+    note: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TenantReferralAvgAggregateInputType = {
+    id?: true
+    referrerTenantId?: true
+    referredTenantId?: true
+  }
+
+  export type TenantReferralSumAggregateInputType = {
+    id?: true
+    referrerTenantId?: true
+    referredTenantId?: true
+  }
+
+  export type TenantReferralMinAggregateInputType = {
+    id?: true
+    referrerTenantId?: true
+    referredTenantId?: true
+    status?: true
+    rewardedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TenantReferralMaxAggregateInputType = {
+    id?: true
+    referrerTenantId?: true
+    referredTenantId?: true
+    status?: true
+    rewardedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TenantReferralCountAggregateInputType = {
+    id?: true
+    referrerTenantId?: true
+    referredTenantId?: true
+    status?: true
+    rewardedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TenantReferralAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TenantReferral to aggregate.
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TenantReferrals to fetch.
+     */
+    orderBy?: TenantReferralOrderByWithRelationInput | TenantReferralOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TenantReferralWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TenantReferrals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TenantReferrals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TenantReferrals
+    **/
+    _count?: true | TenantReferralCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TenantReferralAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TenantReferralSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TenantReferralMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TenantReferralMaxAggregateInputType
+  }
+
+  export type GetTenantReferralAggregateType<T extends TenantReferralAggregateArgs> = {
+        [P in keyof T & keyof AggregateTenantReferral]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTenantReferral[P]>
+      : GetScalarType<T[P], AggregateTenantReferral[P]>
+  }
+
+
+
+
+  export type TenantReferralGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TenantReferralWhereInput
+    orderBy?: TenantReferralOrderByWithAggregationInput | TenantReferralOrderByWithAggregationInput[]
+    by: TenantReferralScalarFieldEnum[] | TenantReferralScalarFieldEnum
+    having?: TenantReferralScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TenantReferralCountAggregateInputType | true
+    _avg?: TenantReferralAvgAggregateInputType
+    _sum?: TenantReferralSumAggregateInputType
+    _min?: TenantReferralMinAggregateInputType
+    _max?: TenantReferralMaxAggregateInputType
+  }
+
+  export type TenantReferralGroupByOutputType = {
+    id: number
+    referrerTenantId: number
+    referredTenantId: number | null
+    status: $Enums.ReferralStatus
+    rewardedAt: Date | null
+    note: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TenantReferralCountAggregateOutputType | null
+    _avg: TenantReferralAvgAggregateOutputType | null
+    _sum: TenantReferralSumAggregateOutputType | null
+    _min: TenantReferralMinAggregateOutputType | null
+    _max: TenantReferralMaxAggregateOutputType | null
+  }
+
+  type GetTenantReferralGroupByPayload<T extends TenantReferralGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TenantReferralGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TenantReferralGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TenantReferralGroupByOutputType[P]>
+            : GetScalarType<T[P], TenantReferralGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TenantReferralSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    referrerTenantId?: boolean
+    referredTenantId?: boolean
+    status?: boolean
+    rewardedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }, ExtArgs["result"]["tenantReferral"]>
+
+  export type TenantReferralSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    referrerTenantId?: boolean
+    referredTenantId?: boolean
+    status?: boolean
+    rewardedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }, ExtArgs["result"]["tenantReferral"]>
+
+  export type TenantReferralSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    referrerTenantId?: boolean
+    referredTenantId?: boolean
+    status?: boolean
+    rewardedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }, ExtArgs["result"]["tenantReferral"]>
+
+  export type TenantReferralSelectScalar = {
+    id?: boolean
+    referrerTenantId?: boolean
+    referredTenantId?: boolean
+    status?: boolean
+    rewardedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TenantReferralOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "referrerTenantId" | "referredTenantId" | "status" | "rewardedAt" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["tenantReferral"]>
+  export type TenantReferralInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }
+  export type TenantReferralIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }
+  export type TenantReferralIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    referrer?: boolean | TenantDefaultArgs<ExtArgs>
+    referred?: boolean | TenantReferral$referredArgs<ExtArgs>
+  }
+
+  export type $TenantReferralPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TenantReferral"
+    objects: {
+      referrer: Prisma.$TenantPayload<ExtArgs>
+      referred: Prisma.$TenantPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      referrerTenantId: number
+      referredTenantId: number | null
+      status: $Enums.ReferralStatus
+      rewardedAt: Date | null
+      note: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["tenantReferral"]>
+    composites: {}
+  }
+
+  type TenantReferralGetPayload<S extends boolean | null | undefined | TenantReferralDefaultArgs> = $Result.GetResult<Prisma.$TenantReferralPayload, S>
+
+  type TenantReferralCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TenantReferralFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TenantReferralCountAggregateInputType | true
+    }
+
+  export interface TenantReferralDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TenantReferral'], meta: { name: 'TenantReferral' } }
+    /**
+     * Find zero or one TenantReferral that matches the filter.
+     * @param {TenantReferralFindUniqueArgs} args - Arguments to find a TenantReferral
+     * @example
+     * // Get one TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TenantReferralFindUniqueArgs>(args: SelectSubset<T, TenantReferralFindUniqueArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TenantReferral that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TenantReferralFindUniqueOrThrowArgs} args - Arguments to find a TenantReferral
+     * @example
+     * // Get one TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TenantReferralFindUniqueOrThrowArgs>(args: SelectSubset<T, TenantReferralFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TenantReferral that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralFindFirstArgs} args - Arguments to find a TenantReferral
+     * @example
+     * // Get one TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TenantReferralFindFirstArgs>(args?: SelectSubset<T, TenantReferralFindFirstArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TenantReferral that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralFindFirstOrThrowArgs} args - Arguments to find a TenantReferral
+     * @example
+     * // Get one TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TenantReferralFindFirstOrThrowArgs>(args?: SelectSubset<T, TenantReferralFindFirstOrThrowArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TenantReferrals that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TenantReferrals
+     * const tenantReferrals = await prisma.tenantReferral.findMany()
+     * 
+     * // Get first 10 TenantReferrals
+     * const tenantReferrals = await prisma.tenantReferral.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tenantReferralWithIdOnly = await prisma.tenantReferral.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TenantReferralFindManyArgs>(args?: SelectSubset<T, TenantReferralFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TenantReferral.
+     * @param {TenantReferralCreateArgs} args - Arguments to create a TenantReferral.
+     * @example
+     * // Create one TenantReferral
+     * const TenantReferral = await prisma.tenantReferral.create({
+     *   data: {
+     *     // ... data to create a TenantReferral
+     *   }
+     * })
+     * 
+     */
+    create<T extends TenantReferralCreateArgs>(args: SelectSubset<T, TenantReferralCreateArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TenantReferrals.
+     * @param {TenantReferralCreateManyArgs} args - Arguments to create many TenantReferrals.
+     * @example
+     * // Create many TenantReferrals
+     * const tenantReferral = await prisma.tenantReferral.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TenantReferralCreateManyArgs>(args?: SelectSubset<T, TenantReferralCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TenantReferrals and returns the data saved in the database.
+     * @param {TenantReferralCreateManyAndReturnArgs} args - Arguments to create many TenantReferrals.
+     * @example
+     * // Create many TenantReferrals
+     * const tenantReferral = await prisma.tenantReferral.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TenantReferrals and only return the `id`
+     * const tenantReferralWithIdOnly = await prisma.tenantReferral.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TenantReferralCreateManyAndReturnArgs>(args?: SelectSubset<T, TenantReferralCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TenantReferral.
+     * @param {TenantReferralDeleteArgs} args - Arguments to delete one TenantReferral.
+     * @example
+     * // Delete one TenantReferral
+     * const TenantReferral = await prisma.tenantReferral.delete({
+     *   where: {
+     *     // ... filter to delete one TenantReferral
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TenantReferralDeleteArgs>(args: SelectSubset<T, TenantReferralDeleteArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TenantReferral.
+     * @param {TenantReferralUpdateArgs} args - Arguments to update one TenantReferral.
+     * @example
+     * // Update one TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TenantReferralUpdateArgs>(args: SelectSubset<T, TenantReferralUpdateArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TenantReferrals.
+     * @param {TenantReferralDeleteManyArgs} args - Arguments to filter TenantReferrals to delete.
+     * @example
+     * // Delete a few TenantReferrals
+     * const { count } = await prisma.tenantReferral.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TenantReferralDeleteManyArgs>(args?: SelectSubset<T, TenantReferralDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TenantReferrals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TenantReferrals
+     * const tenantReferral = await prisma.tenantReferral.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TenantReferralUpdateManyArgs>(args: SelectSubset<T, TenantReferralUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TenantReferrals and returns the data updated in the database.
+     * @param {TenantReferralUpdateManyAndReturnArgs} args - Arguments to update many TenantReferrals.
+     * @example
+     * // Update many TenantReferrals
+     * const tenantReferral = await prisma.tenantReferral.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TenantReferrals and only return the `id`
+     * const tenantReferralWithIdOnly = await prisma.tenantReferral.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TenantReferralUpdateManyAndReturnArgs>(args: SelectSubset<T, TenantReferralUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TenantReferral.
+     * @param {TenantReferralUpsertArgs} args - Arguments to update or create a TenantReferral.
+     * @example
+     * // Update or create a TenantReferral
+     * const tenantReferral = await prisma.tenantReferral.upsert({
+     *   create: {
+     *     // ... data to create a TenantReferral
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TenantReferral we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TenantReferralUpsertArgs>(args: SelectSubset<T, TenantReferralUpsertArgs<ExtArgs>>): Prisma__TenantReferralClient<$Result.GetResult<Prisma.$TenantReferralPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TenantReferrals.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralCountArgs} args - Arguments to filter TenantReferrals to count.
+     * @example
+     * // Count the number of TenantReferrals
+     * const count = await prisma.tenantReferral.count({
+     *   where: {
+     *     // ... the filter for the TenantReferrals we want to count
+     *   }
+     * })
+    **/
+    count<T extends TenantReferralCountArgs>(
+      args?: Subset<T, TenantReferralCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TenantReferralCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TenantReferral.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TenantReferralAggregateArgs>(args: Subset<T, TenantReferralAggregateArgs>): Prisma.PrismaPromise<GetTenantReferralAggregateType<T>>
+
+    /**
+     * Group by TenantReferral.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TenantReferralGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TenantReferralGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TenantReferralGroupByArgs['orderBy'] }
+        : { orderBy?: TenantReferralGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TenantReferralGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTenantReferralGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TenantReferral model
+   */
+  readonly fields: TenantReferralFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TenantReferral.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TenantReferralClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    referrer<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    referred<T extends TenantReferral$referredArgs<ExtArgs> = {}>(args?: Subset<T, TenantReferral$referredArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TenantReferral model
+   */
+  interface TenantReferralFieldRefs {
+    readonly id: FieldRef<"TenantReferral", 'Int'>
+    readonly referrerTenantId: FieldRef<"TenantReferral", 'Int'>
+    readonly referredTenantId: FieldRef<"TenantReferral", 'Int'>
+    readonly status: FieldRef<"TenantReferral", 'ReferralStatus'>
+    readonly rewardedAt: FieldRef<"TenantReferral", 'DateTime'>
+    readonly note: FieldRef<"TenantReferral", 'String'>
+    readonly createdAt: FieldRef<"TenantReferral", 'DateTime'>
+    readonly updatedAt: FieldRef<"TenantReferral", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TenantReferral findUnique
+   */
+  export type TenantReferralFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter, which TenantReferral to fetch.
+     */
+    where: TenantReferralWhereUniqueInput
+  }
+
+  /**
+   * TenantReferral findUniqueOrThrow
+   */
+  export type TenantReferralFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter, which TenantReferral to fetch.
+     */
+    where: TenantReferralWhereUniqueInput
+  }
+
+  /**
+   * TenantReferral findFirst
+   */
+  export type TenantReferralFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter, which TenantReferral to fetch.
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TenantReferrals to fetch.
+     */
+    orderBy?: TenantReferralOrderByWithRelationInput | TenantReferralOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TenantReferrals.
+     */
+    cursor?: TenantReferralWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TenantReferrals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TenantReferrals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TenantReferrals.
+     */
+    distinct?: TenantReferralScalarFieldEnum | TenantReferralScalarFieldEnum[]
+  }
+
+  /**
+   * TenantReferral findFirstOrThrow
+   */
+  export type TenantReferralFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter, which TenantReferral to fetch.
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TenantReferrals to fetch.
+     */
+    orderBy?: TenantReferralOrderByWithRelationInput | TenantReferralOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TenantReferrals.
+     */
+    cursor?: TenantReferralWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TenantReferrals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TenantReferrals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TenantReferrals.
+     */
+    distinct?: TenantReferralScalarFieldEnum | TenantReferralScalarFieldEnum[]
+  }
+
+  /**
+   * TenantReferral findMany
+   */
+  export type TenantReferralFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter, which TenantReferrals to fetch.
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TenantReferrals to fetch.
+     */
+    orderBy?: TenantReferralOrderByWithRelationInput | TenantReferralOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TenantReferrals.
+     */
+    cursor?: TenantReferralWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TenantReferrals from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TenantReferrals.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TenantReferrals.
+     */
+    distinct?: TenantReferralScalarFieldEnum | TenantReferralScalarFieldEnum[]
+  }
+
+  /**
+   * TenantReferral create
+   */
+  export type TenantReferralCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TenantReferral.
+     */
+    data: XOR<TenantReferralCreateInput, TenantReferralUncheckedCreateInput>
+  }
+
+  /**
+   * TenantReferral createMany
+   */
+  export type TenantReferralCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TenantReferrals.
+     */
+    data: TenantReferralCreateManyInput | TenantReferralCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TenantReferral createManyAndReturn
+   */
+  export type TenantReferralCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * The data used to create many TenantReferrals.
+     */
+    data: TenantReferralCreateManyInput | TenantReferralCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TenantReferral update
+   */
+  export type TenantReferralUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TenantReferral.
+     */
+    data: XOR<TenantReferralUpdateInput, TenantReferralUncheckedUpdateInput>
+    /**
+     * Choose, which TenantReferral to update.
+     */
+    where: TenantReferralWhereUniqueInput
+  }
+
+  /**
+   * TenantReferral updateMany
+   */
+  export type TenantReferralUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TenantReferrals.
+     */
+    data: XOR<TenantReferralUpdateManyMutationInput, TenantReferralUncheckedUpdateManyInput>
+    /**
+     * Filter which TenantReferrals to update
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * Limit how many TenantReferrals to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TenantReferral updateManyAndReturn
+   */
+  export type TenantReferralUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * The data used to update TenantReferrals.
+     */
+    data: XOR<TenantReferralUpdateManyMutationInput, TenantReferralUncheckedUpdateManyInput>
+    /**
+     * Filter which TenantReferrals to update
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * Limit how many TenantReferrals to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TenantReferral upsert
+   */
+  export type TenantReferralUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TenantReferral to update in case it exists.
+     */
+    where: TenantReferralWhereUniqueInput
+    /**
+     * In case the TenantReferral found by the `where` argument doesn't exist, create a new TenantReferral with this data.
+     */
+    create: XOR<TenantReferralCreateInput, TenantReferralUncheckedCreateInput>
+    /**
+     * In case the TenantReferral was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TenantReferralUpdateInput, TenantReferralUncheckedUpdateInput>
+  }
+
+  /**
+   * TenantReferral delete
+   */
+  export type TenantReferralDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+    /**
+     * Filter which TenantReferral to delete.
+     */
+    where: TenantReferralWhereUniqueInput
+  }
+
+  /**
+   * TenantReferral deleteMany
+   */
+  export type TenantReferralDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TenantReferrals to delete
+     */
+    where?: TenantReferralWhereInput
+    /**
+     * Limit how many TenantReferrals to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TenantReferral.referred
+   */
+  export type TenantReferral$referredArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tenant
+     */
+    select?: TenantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tenant
+     */
+    omit?: TenantOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantInclude<ExtArgs> | null
+    where?: TenantWhereInput
+  }
+
+  /**
+   * TenantReferral without action
+   */
+  export type TenantReferralDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TenantReferral
+     */
+    select?: TenantReferralSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TenantReferral
+     */
+    omit?: TenantReferralOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TenantReferralInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Faq
    */
 
@@ -69829,7 +72630,8 @@ export namespace Prisma {
     notes: 'notes',
     isActive: 'isActive',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    referralCode: 'referralCode'
   };
 
   export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
@@ -70734,6 +73536,38 @@ export namespace Prisma {
   };
 
   export type RedemptionScalarFieldEnum = (typeof RedemptionScalarFieldEnum)[keyof typeof RedemptionScalarFieldEnum]
+
+
+  export const PeerBehaviorReportScalarFieldEnum: {
+    id: 'id',
+    reporterTenantId: 'reporterTenantId',
+    reporteeTenantId: 'reporteeTenantId',
+    category: 'category',
+    description: 'description',
+    status: 'status',
+    moderatedById: 'moderatedById',
+    acknowledgedAt: 'acknowledgedAt',
+    improvedAt: 'improvedAt',
+    confirmedAt: 'confirmedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PeerBehaviorReportScalarFieldEnum = (typeof PeerBehaviorReportScalarFieldEnum)[keyof typeof PeerBehaviorReportScalarFieldEnum]
+
+
+  export const TenantReferralScalarFieldEnum: {
+    id: 'id',
+    referrerTenantId: 'referrerTenantId',
+    referredTenantId: 'referredTenantId',
+    status: 'status',
+    rewardedAt: 'rewardedAt',
+    note: 'note',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TenantReferralScalarFieldEnum = (typeof TenantReferralScalarFieldEnum)[keyof typeof TenantReferralScalarFieldEnum]
 
 
   export const FaqScalarFieldEnum: {
@@ -71686,6 +74520,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PeerReportStatus'
+   */
+  export type EnumPeerReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PeerReportStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'PeerReportStatus[]'
+   */
+  export type ListEnumPeerReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PeerReportStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ReferralStatus'
+   */
+  export type EnumReferralStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReferralStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ReferralStatus[]'
+   */
+  export type ListEnumReferralStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReferralStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -71756,6 +74618,7 @@ export namespace Prisma {
     staysFledMarked?: StayListRelationFilter
     tenantsKtpVerified?: TenantListRelationFilter
     roomTransfersCreated?: RoomTransferListRelationFilter
+    peerReportsModerated?: PeerBehaviorReportListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -71809,6 +74672,7 @@ export namespace Prisma {
     staysFledMarked?: StayOrderByRelationAggregateInput
     tenantsKtpVerified?: TenantOrderByRelationAggregateInput
     roomTransfersCreated?: RoomTransferOrderByRelationAggregateInput
+    peerReportsModerated?: PeerBehaviorReportOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -71865,6 +74729,7 @@ export namespace Prisma {
     staysFledMarked?: StayListRelationFilter
     tenantsKtpVerified?: TenantListRelationFilter
     roomTransfersCreated?: RoomTransferListRelationFilter
+    peerReportsModerated?: PeerBehaviorReportListRelationFilter
   }, "id" | "email" | "tenantId">
 
   export type UserOrderByWithAggregationInput = {
@@ -71939,6 +74804,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"Tenant"> | boolean
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
+    referralCode?: StringNullableFilter<"Tenant"> | string | null
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     ktpVerifiedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     stays?: StayListRelationFilter
@@ -71949,6 +74815,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     loyaltyPoints?: LoyaltyPointListRelationFilter
     redemptions?: RedemptionListRelationFilter
+    referralsMade?: TenantReferralListRelationFilter
+    referredReferral?: XOR<TenantReferralNullableScalarRelationFilter, TenantReferralWhereInput> | null
+    peerReportsMade?: PeerBehaviorReportListRelationFilter
+    peerReportsReceived?: PeerBehaviorReportListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
@@ -71976,6 +74846,7 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    referralCode?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     ktpVerifiedBy?: UserOrderByWithRelationInput
     stays?: StayOrderByRelationAggregateInput
@@ -71986,10 +74857,15 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryOrderByRelationAggregateInput
     loyaltyPoints?: LoyaltyPointOrderByRelationAggregateInput
     redemptions?: RedemptionOrderByRelationAggregateInput
+    referralsMade?: TenantReferralOrderByRelationAggregateInput
+    referredReferral?: TenantReferralOrderByWithRelationInput
+    peerReportsMade?: PeerBehaviorReportOrderByRelationAggregateInput
+    peerReportsReceived?: PeerBehaviorReportOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    referralCode?: string
     AND?: TenantWhereInput | TenantWhereInput[]
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
@@ -72026,7 +74902,11 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryListRelationFilter
     loyaltyPoints?: LoyaltyPointListRelationFilter
     redemptions?: RedemptionListRelationFilter
-  }, "id">
+    referralsMade?: TenantReferralListRelationFilter
+    referredReferral?: XOR<TenantReferralNullableScalarRelationFilter, TenantReferralWhereInput> | null
+    peerReportsMade?: PeerBehaviorReportListRelationFilter
+    peerReportsReceived?: PeerBehaviorReportListRelationFilter
+  }, "id" | "referralCode">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
@@ -72053,6 +74933,7 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    referralCode?: SortOrderInput | SortOrder
     _count?: TenantCountOrderByAggregateInput
     _avg?: TenantAvgOrderByAggregateInput
     _max?: TenantMaxOrderByAggregateInput
@@ -72088,6 +74969,7 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"Tenant"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
+    referralCode?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
   }
 
   export type RoomWhereInput = {
@@ -77031,6 +79913,179 @@ export namespace Prisma {
     note?: StringNullableWithAggregatesFilter<"Redemption"> | string | null
   }
 
+  export type PeerBehaviorReportWhereInput = {
+    AND?: PeerBehaviorReportWhereInput | PeerBehaviorReportWhereInput[]
+    OR?: PeerBehaviorReportWhereInput[]
+    NOT?: PeerBehaviorReportWhereInput | PeerBehaviorReportWhereInput[]
+    id?: IntFilter<"PeerBehaviorReport"> | number
+    reporterTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    reporteeTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    category?: StringFilter<"PeerBehaviorReport"> | string
+    description?: StringFilter<"PeerBehaviorReport"> | string
+    status?: EnumPeerReportStatusFilter<"PeerBehaviorReport"> | $Enums.PeerReportStatus
+    moderatedById?: IntNullableFilter<"PeerBehaviorReport"> | number | null
+    acknowledgedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    improvedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    confirmedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    createdAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
+    updatedAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
+    reporter?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reportee?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    moderatedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type PeerBehaviorReportOrderByWithRelationInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    category?: SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    moderatedById?: SortOrderInput | SortOrder
+    acknowledgedAt?: SortOrderInput | SortOrder
+    improvedAt?: SortOrderInput | SortOrder
+    confirmedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    reporter?: TenantOrderByWithRelationInput
+    reportee?: TenantOrderByWithRelationInput
+    moderatedBy?: UserOrderByWithRelationInput
+  }
+
+  export type PeerBehaviorReportWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: PeerBehaviorReportWhereInput | PeerBehaviorReportWhereInput[]
+    OR?: PeerBehaviorReportWhereInput[]
+    NOT?: PeerBehaviorReportWhereInput | PeerBehaviorReportWhereInput[]
+    reporterTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    reporteeTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    category?: StringFilter<"PeerBehaviorReport"> | string
+    description?: StringFilter<"PeerBehaviorReport"> | string
+    status?: EnumPeerReportStatusFilter<"PeerBehaviorReport"> | $Enums.PeerReportStatus
+    moderatedById?: IntNullableFilter<"PeerBehaviorReport"> | number | null
+    acknowledgedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    improvedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    confirmedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    createdAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
+    updatedAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
+    reporter?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    reportee?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    moderatedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type PeerBehaviorReportOrderByWithAggregationInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    category?: SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    moderatedById?: SortOrderInput | SortOrder
+    acknowledgedAt?: SortOrderInput | SortOrder
+    improvedAt?: SortOrderInput | SortOrder
+    confirmedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PeerBehaviorReportCountOrderByAggregateInput
+    _avg?: PeerBehaviorReportAvgOrderByAggregateInput
+    _max?: PeerBehaviorReportMaxOrderByAggregateInput
+    _min?: PeerBehaviorReportMinOrderByAggregateInput
+    _sum?: PeerBehaviorReportSumOrderByAggregateInput
+  }
+
+  export type PeerBehaviorReportScalarWhereWithAggregatesInput = {
+    AND?: PeerBehaviorReportScalarWhereWithAggregatesInput | PeerBehaviorReportScalarWhereWithAggregatesInput[]
+    OR?: PeerBehaviorReportScalarWhereWithAggregatesInput[]
+    NOT?: PeerBehaviorReportScalarWhereWithAggregatesInput | PeerBehaviorReportScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PeerBehaviorReport"> | number
+    reporterTenantId?: IntWithAggregatesFilter<"PeerBehaviorReport"> | number
+    reporteeTenantId?: IntWithAggregatesFilter<"PeerBehaviorReport"> | number
+    category?: StringWithAggregatesFilter<"PeerBehaviorReport"> | string
+    description?: StringWithAggregatesFilter<"PeerBehaviorReport"> | string
+    status?: EnumPeerReportStatusWithAggregatesFilter<"PeerBehaviorReport"> | $Enums.PeerReportStatus
+    moderatedById?: IntNullableWithAggregatesFilter<"PeerBehaviorReport"> | number | null
+    acknowledgedAt?: DateTimeNullableWithAggregatesFilter<"PeerBehaviorReport"> | Date | string | null
+    improvedAt?: DateTimeNullableWithAggregatesFilter<"PeerBehaviorReport"> | Date | string | null
+    confirmedAt?: DateTimeNullableWithAggregatesFilter<"PeerBehaviorReport"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"PeerBehaviorReport"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PeerBehaviorReport"> | Date | string
+  }
+
+  export type TenantReferralWhereInput = {
+    AND?: TenantReferralWhereInput | TenantReferralWhereInput[]
+    OR?: TenantReferralWhereInput[]
+    NOT?: TenantReferralWhereInput | TenantReferralWhereInput[]
+    id?: IntFilter<"TenantReferral"> | number
+    referrerTenantId?: IntFilter<"TenantReferral"> | number
+    referredTenantId?: IntNullableFilter<"TenantReferral"> | number | null
+    status?: EnumReferralStatusFilter<"TenantReferral"> | $Enums.ReferralStatus
+    rewardedAt?: DateTimeNullableFilter<"TenantReferral"> | Date | string | null
+    note?: StringNullableFilter<"TenantReferral"> | string | null
+    createdAt?: DateTimeFilter<"TenantReferral"> | Date | string
+    updatedAt?: DateTimeFilter<"TenantReferral"> | Date | string
+    referrer?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    referred?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
+  }
+
+  export type TenantReferralOrderByWithRelationInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rewardedAt?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    referrer?: TenantOrderByWithRelationInput
+    referred?: TenantOrderByWithRelationInput
+  }
+
+  export type TenantReferralWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    referredTenantId?: number
+    AND?: TenantReferralWhereInput | TenantReferralWhereInput[]
+    OR?: TenantReferralWhereInput[]
+    NOT?: TenantReferralWhereInput | TenantReferralWhereInput[]
+    referrerTenantId?: IntFilter<"TenantReferral"> | number
+    status?: EnumReferralStatusFilter<"TenantReferral"> | $Enums.ReferralStatus
+    rewardedAt?: DateTimeNullableFilter<"TenantReferral"> | Date | string | null
+    note?: StringNullableFilter<"TenantReferral"> | string | null
+    createdAt?: DateTimeFilter<"TenantReferral"> | Date | string
+    updatedAt?: DateTimeFilter<"TenantReferral"> | Date | string
+    referrer?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    referred?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
+  }, "id" | "referredTenantId">
+
+  export type TenantReferralOrderByWithAggregationInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    rewardedAt?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TenantReferralCountOrderByAggregateInput
+    _avg?: TenantReferralAvgOrderByAggregateInput
+    _max?: TenantReferralMaxOrderByAggregateInput
+    _min?: TenantReferralMinOrderByAggregateInput
+    _sum?: TenantReferralSumOrderByAggregateInput
+  }
+
+  export type TenantReferralScalarWhereWithAggregatesInput = {
+    AND?: TenantReferralScalarWhereWithAggregatesInput | TenantReferralScalarWhereWithAggregatesInput[]
+    OR?: TenantReferralScalarWhereWithAggregatesInput[]
+    NOT?: TenantReferralScalarWhereWithAggregatesInput | TenantReferralScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"TenantReferral"> | number
+    referrerTenantId?: IntWithAggregatesFilter<"TenantReferral"> | number
+    referredTenantId?: IntNullableWithAggregatesFilter<"TenantReferral"> | number | null
+    status?: EnumReferralStatusWithAggregatesFilter<"TenantReferral"> | $Enums.ReferralStatus
+    rewardedAt?: DateTimeNullableWithAggregatesFilter<"TenantReferral"> | Date | string | null
+    note?: StringNullableWithAggregatesFilter<"TenantReferral"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TenantReferral"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TenantReferral"> | Date | string
+  }
+
   export type FaqWhereInput = {
     AND?: FaqWhereInput | FaqWhereInput[]
     OR?: FaqWhereInput[]
@@ -77149,6 +80204,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -77201,6 +80257,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUpdateInput = {
@@ -77252,6 +80309,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -77304,6 +80362,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -77381,6 +80440,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -77391,6 +80451,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateInput = {
@@ -77418,6 +80482,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -77427,6 +80492,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUpdateInput = {
@@ -77452,6 +80521,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -77462,6 +80532,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
@@ -77489,6 +80563,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -77498,6 +80573,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantCreateManyInput = {
@@ -77525,6 +80604,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
   }
 
   export type TenantUpdateManyMutationInput = {
@@ -77550,6 +80630,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TenantUncheckedUpdateManyInput = {
@@ -77577,6 +80658,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RoomCreateInput = {
@@ -82966,6 +86048,177 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type PeerBehaviorReportCreateInput = {
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    reporter: TenantCreateNestedOneWithoutPeerReportsMadeInput
+    reportee: TenantCreateNestedOneWithoutPeerReportsReceivedInput
+    moderatedBy?: UserCreateNestedOneWithoutPeerReportsModeratedInput
+  }
+
+  export type PeerBehaviorReportUncheckedCreateInput = {
+    id?: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportUpdateInput = {
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reporter?: TenantUpdateOneRequiredWithoutPeerReportsMadeNestedInput
+    reportee?: TenantUpdateOneRequiredWithoutPeerReportsReceivedNestedInput
+    moderatedBy?: UserUpdateOneWithoutPeerReportsModeratedNestedInput
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportCreateManyInput = {
+    id?: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportUpdateManyMutationInput = {
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantReferralCreateInput = {
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referrer: TenantCreateNestedOneWithoutReferralsMadeInput
+    referred?: TenantCreateNestedOneWithoutReferredReferralInput
+  }
+
+  export type TenantReferralUncheckedCreateInput = {
+    id?: number
+    referrerTenantId: number
+    referredTenantId?: number | null
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TenantReferralUpdateInput = {
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referrer?: TenantUpdateOneRequiredWithoutReferralsMadeNestedInput
+    referred?: TenantUpdateOneWithoutReferredReferralNestedInput
+  }
+
+  export type TenantReferralUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    referrerTenantId?: IntFieldUpdateOperationsInput | number
+    referredTenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantReferralCreateManyInput = {
+    id?: number
+    referrerTenantId: number
+    referredTenantId?: number | null
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TenantReferralUpdateManyMutationInput = {
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantReferralUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    referrerTenantId?: IntFieldUpdateOperationsInput | number
+    referredTenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FaqCreateInput = {
     question: string
     answer: string
@@ -83299,6 +86552,12 @@ export namespace Prisma {
     none?: RoomTransferWhereInput
   }
 
+  export type PeerBehaviorReportListRelationFilter = {
+    every?: PeerBehaviorReportWhereInput
+    some?: PeerBehaviorReportWhereInput
+    none?: PeerBehaviorReportWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -83413,6 +86672,10 @@ export namespace Prisma {
   }
 
   export type RoomTransferOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PeerBehaviorReportOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -83618,11 +86881,26 @@ export namespace Prisma {
     none?: RedemptionWhereInput
   }
 
+  export type TenantReferralListRelationFilter = {
+    every?: TenantReferralWhereInput
+    some?: TenantReferralWhereInput
+    none?: TenantReferralWhereInput
+  }
+
+  export type TenantReferralNullableScalarRelationFilter = {
+    is?: TenantReferralWhereInput | null
+    isNot?: TenantReferralWhereInput | null
+  }
+
   export type LoyaltyPointOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type RedemptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TenantReferralOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -83651,6 +86929,7 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    referralCode?: SortOrder
   }
 
   export type TenantAvgOrderByAggregateInput = {
@@ -83684,6 +86963,7 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    referralCode?: SortOrder
   }
 
   export type TenantMinOrderByAggregateInput = {
@@ -83711,6 +86991,7 @@ export namespace Prisma {
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    referralCode?: SortOrder
   }
 
   export type TenantSumOrderByAggregateInput = {
@@ -88239,6 +91520,144 @@ export namespace Prisma {
     _max?: NestedEnumRedemptionStatusFilter<$PrismaModel>
   }
 
+  export type EnumPeerReportStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PeerReportStatus | EnumPeerReportStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPeerReportStatusFilter<$PrismaModel> | $Enums.PeerReportStatus
+  }
+
+  export type PeerBehaviorReportCountOrderByAggregateInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    category?: SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    moderatedById?: SortOrder
+    acknowledgedAt?: SortOrder
+    improvedAt?: SortOrder
+    confirmedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PeerBehaviorReportAvgOrderByAggregateInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    moderatedById?: SortOrder
+  }
+
+  export type PeerBehaviorReportMaxOrderByAggregateInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    category?: SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    moderatedById?: SortOrder
+    acknowledgedAt?: SortOrder
+    improvedAt?: SortOrder
+    confirmedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PeerBehaviorReportMinOrderByAggregateInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    category?: SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    moderatedById?: SortOrder
+    acknowledgedAt?: SortOrder
+    improvedAt?: SortOrder
+    confirmedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PeerBehaviorReportSumOrderByAggregateInput = {
+    id?: SortOrder
+    reporterTenantId?: SortOrder
+    reporteeTenantId?: SortOrder
+    moderatedById?: SortOrder
+  }
+
+  export type EnumPeerReportStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PeerReportStatus | EnumPeerReportStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPeerReportStatusWithAggregatesFilter<$PrismaModel> | $Enums.PeerReportStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPeerReportStatusFilter<$PrismaModel>
+    _max?: NestedEnumPeerReportStatusFilter<$PrismaModel>
+  }
+
+  export type EnumReferralStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ReferralStatus | EnumReferralStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumReferralStatusFilter<$PrismaModel> | $Enums.ReferralStatus
+  }
+
+  export type TenantReferralCountOrderByAggregateInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrder
+    status?: SortOrder
+    rewardedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TenantReferralAvgOrderByAggregateInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrder
+  }
+
+  export type TenantReferralMaxOrderByAggregateInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrder
+    status?: SortOrder
+    rewardedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TenantReferralMinOrderByAggregateInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrder
+    status?: SortOrder
+    rewardedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TenantReferralSumOrderByAggregateInput = {
+    id?: SortOrder
+    referrerTenantId?: SortOrder
+    referredTenantId?: SortOrder
+  }
+
+  export type EnumReferralStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ReferralStatus | EnumReferralStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumReferralStatusWithAggregatesFilter<$PrismaModel> | $Enums.ReferralStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumReferralStatusFilter<$PrismaModel>
+    _max?: NestedEnumReferralStatusFilter<$PrismaModel>
+  }
+
   export type FaqCountOrderByAggregateInput = {
     id?: SortOrder
     question?: SortOrder
@@ -88526,6 +91945,13 @@ export namespace Prisma {
     connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
   }
 
+  export type PeerBehaviorReportCreateNestedManyWithoutModeratedByInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput> | PeerBehaviorReportCreateWithoutModeratedByInput[] | PeerBehaviorReportUncheckedCreateWithoutModeratedByInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutModeratedByInput | PeerBehaviorReportCreateOrConnectWithoutModeratedByInput[]
+    createMany?: PeerBehaviorReportCreateManyModeratedByInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+  }
+
   export type AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput = {
     create?: XOR<AnnouncementCreateWithoutCreatedByInput, AnnouncementUncheckedCreateWithoutCreatedByInput> | AnnouncementCreateWithoutCreatedByInput[] | AnnouncementUncheckedCreateWithoutCreatedByInput[]
     connectOrCreate?: AnnouncementCreateOrConnectWithoutCreatedByInput | AnnouncementCreateOrConnectWithoutCreatedByInput[]
@@ -88762,6 +92188,13 @@ export namespace Prisma {
     connectOrCreate?: RoomTransferCreateOrConnectWithoutCreatedByInput | RoomTransferCreateOrConnectWithoutCreatedByInput[]
     createMany?: RoomTransferCreateManyCreatedByInputEnvelope
     connect?: RoomTransferWhereUniqueInput | RoomTransferWhereUniqueInput[]
+  }
+
+  export type PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput> | PeerBehaviorReportCreateWithoutModeratedByInput[] | PeerBehaviorReportUncheckedCreateWithoutModeratedByInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutModeratedByInput | PeerBehaviorReportCreateOrConnectWithoutModeratedByInput[]
+    createMany?: PeerBehaviorReportCreateManyModeratedByInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -89274,6 +92707,20 @@ export namespace Prisma {
     deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
   }
 
+  export type PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput> | PeerBehaviorReportCreateWithoutModeratedByInput[] | PeerBehaviorReportUncheckedCreateWithoutModeratedByInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutModeratedByInput | PeerBehaviorReportCreateOrConnectWithoutModeratedByInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutModeratedByInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutModeratedByInput[]
+    createMany?: PeerBehaviorReportCreateManyModeratedByInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutModeratedByInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutModeratedByInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutModeratedByInput | PeerBehaviorReportUpdateManyWithWhereWithoutModeratedByInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -89766,6 +93213,20 @@ export namespace Prisma {
     deleteMany?: RoomTransferScalarWhereInput | RoomTransferScalarWhereInput[]
   }
 
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput> | PeerBehaviorReportCreateWithoutModeratedByInput[] | PeerBehaviorReportUncheckedCreateWithoutModeratedByInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutModeratedByInput | PeerBehaviorReportCreateOrConnectWithoutModeratedByInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutModeratedByInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutModeratedByInput[]
+    createMany?: PeerBehaviorReportCreateManyModeratedByInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutModeratedByInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutModeratedByInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutModeratedByInput | PeerBehaviorReportUpdateManyWithWhereWithoutModeratedByInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -89834,6 +93295,33 @@ export namespace Prisma {
     connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
   }
 
+  export type TenantReferralCreateNestedManyWithoutReferrerInput = {
+    create?: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput> | TenantReferralCreateWithoutReferrerInput[] | TenantReferralUncheckedCreateWithoutReferrerInput[]
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferrerInput | TenantReferralCreateOrConnectWithoutReferrerInput[]
+    createMany?: TenantReferralCreateManyReferrerInputEnvelope
+    connect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+  }
+
+  export type TenantReferralCreateNestedOneWithoutReferredInput = {
+    create?: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferredInput
+    connect?: TenantReferralWhereUniqueInput
+  }
+
+  export type PeerBehaviorReportCreateNestedManyWithoutReporterInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput> | PeerBehaviorReportCreateWithoutReporterInput[] | PeerBehaviorReportUncheckedCreateWithoutReporterInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporterInput | PeerBehaviorReportCreateOrConnectWithoutReporterInput[]
+    createMany?: PeerBehaviorReportCreateManyReporterInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+  }
+
+  export type PeerBehaviorReportCreateNestedManyWithoutReporteeInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput> | PeerBehaviorReportCreateWithoutReporteeInput[] | PeerBehaviorReportUncheckedCreateWithoutReporteeInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporteeInput | PeerBehaviorReportCreateOrConnectWithoutReporteeInput[]
+    createMany?: PeerBehaviorReportCreateManyReporteeInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedOneWithoutTenantInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -89894,6 +93382,33 @@ export namespace Prisma {
     connectOrCreate?: RedemptionCreateOrConnectWithoutTenantInput | RedemptionCreateOrConnectWithoutTenantInput[]
     createMany?: RedemptionCreateManyTenantInputEnvelope
     connect?: RedemptionWhereUniqueInput | RedemptionWhereUniqueInput[]
+  }
+
+  export type TenantReferralUncheckedCreateNestedManyWithoutReferrerInput = {
+    create?: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput> | TenantReferralCreateWithoutReferrerInput[] | TenantReferralUncheckedCreateWithoutReferrerInput[]
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferrerInput | TenantReferralCreateOrConnectWithoutReferrerInput[]
+    createMany?: TenantReferralCreateManyReferrerInputEnvelope
+    connect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+  }
+
+  export type TenantReferralUncheckedCreateNestedOneWithoutReferredInput = {
+    create?: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferredInput
+    connect?: TenantReferralWhereUniqueInput
+  }
+
+  export type PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput> | PeerBehaviorReportCreateWithoutReporterInput[] | PeerBehaviorReportUncheckedCreateWithoutReporterInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporterInput | PeerBehaviorReportCreateOrConnectWithoutReporterInput[]
+    createMany?: PeerBehaviorReportCreateManyReporterInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+  }
+
+  export type PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput> | PeerBehaviorReportCreateWithoutReporteeInput[] | PeerBehaviorReportUncheckedCreateWithoutReporteeInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporteeInput | PeerBehaviorReportCreateOrConnectWithoutReporteeInput[]
+    createMany?: PeerBehaviorReportCreateManyReporteeInputEnvelope
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
   }
 
   export type NullableEnumGenderFieldUpdateOperationsInput = {
@@ -90032,6 +93547,58 @@ export namespace Prisma {
     deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
   }
 
+  export type TenantReferralUpdateManyWithoutReferrerNestedInput = {
+    create?: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput> | TenantReferralCreateWithoutReferrerInput[] | TenantReferralUncheckedCreateWithoutReferrerInput[]
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferrerInput | TenantReferralCreateOrConnectWithoutReferrerInput[]
+    upsert?: TenantReferralUpsertWithWhereUniqueWithoutReferrerInput | TenantReferralUpsertWithWhereUniqueWithoutReferrerInput[]
+    createMany?: TenantReferralCreateManyReferrerInputEnvelope
+    set?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    disconnect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    delete?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    connect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    update?: TenantReferralUpdateWithWhereUniqueWithoutReferrerInput | TenantReferralUpdateWithWhereUniqueWithoutReferrerInput[]
+    updateMany?: TenantReferralUpdateManyWithWhereWithoutReferrerInput | TenantReferralUpdateManyWithWhereWithoutReferrerInput[]
+    deleteMany?: TenantReferralScalarWhereInput | TenantReferralScalarWhereInput[]
+  }
+
+  export type TenantReferralUpdateOneWithoutReferredNestedInput = {
+    create?: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferredInput
+    upsert?: TenantReferralUpsertWithoutReferredInput
+    disconnect?: TenantReferralWhereInput | boolean
+    delete?: TenantReferralWhereInput | boolean
+    connect?: TenantReferralWhereUniqueInput
+    update?: XOR<XOR<TenantReferralUpdateToOneWithWhereWithoutReferredInput, TenantReferralUpdateWithoutReferredInput>, TenantReferralUncheckedUpdateWithoutReferredInput>
+  }
+
+  export type PeerBehaviorReportUpdateManyWithoutReporterNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput> | PeerBehaviorReportCreateWithoutReporterInput[] | PeerBehaviorReportUncheckedCreateWithoutReporterInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporterInput | PeerBehaviorReportCreateOrConnectWithoutReporterInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutReporterInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutReporterInput[]
+    createMany?: PeerBehaviorReportCreateManyReporterInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutReporterInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutReporterInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutReporterInput | PeerBehaviorReportUpdateManyWithWhereWithoutReporterInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+  }
+
+  export type PeerBehaviorReportUpdateManyWithoutReporteeNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput> | PeerBehaviorReportCreateWithoutReporteeInput[] | PeerBehaviorReportUncheckedCreateWithoutReporteeInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporteeInput | PeerBehaviorReportCreateOrConnectWithoutReporteeInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutReporteeInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutReporteeInput[]
+    createMany?: PeerBehaviorReportCreateManyReporteeInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutReporteeInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutReporteeInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutReporteeInput | PeerBehaviorReportUpdateManyWithWhereWithoutReporteeInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateOneWithoutTenantNestedInput = {
     create?: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
     connectOrCreate?: UserCreateOrConnectWithoutTenantInput
@@ -90152,6 +93719,58 @@ export namespace Prisma {
     update?: RedemptionUpdateWithWhereUniqueWithoutTenantInput | RedemptionUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: RedemptionUpdateManyWithWhereWithoutTenantInput | RedemptionUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: RedemptionScalarWhereInput | RedemptionScalarWhereInput[]
+  }
+
+  export type TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput = {
+    create?: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput> | TenantReferralCreateWithoutReferrerInput[] | TenantReferralUncheckedCreateWithoutReferrerInput[]
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferrerInput | TenantReferralCreateOrConnectWithoutReferrerInput[]
+    upsert?: TenantReferralUpsertWithWhereUniqueWithoutReferrerInput | TenantReferralUpsertWithWhereUniqueWithoutReferrerInput[]
+    createMany?: TenantReferralCreateManyReferrerInputEnvelope
+    set?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    disconnect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    delete?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    connect?: TenantReferralWhereUniqueInput | TenantReferralWhereUniqueInput[]
+    update?: TenantReferralUpdateWithWhereUniqueWithoutReferrerInput | TenantReferralUpdateWithWhereUniqueWithoutReferrerInput[]
+    updateMany?: TenantReferralUpdateManyWithWhereWithoutReferrerInput | TenantReferralUpdateManyWithWhereWithoutReferrerInput[]
+    deleteMany?: TenantReferralScalarWhereInput | TenantReferralScalarWhereInput[]
+  }
+
+  export type TenantReferralUncheckedUpdateOneWithoutReferredNestedInput = {
+    create?: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+    connectOrCreate?: TenantReferralCreateOrConnectWithoutReferredInput
+    upsert?: TenantReferralUpsertWithoutReferredInput
+    disconnect?: TenantReferralWhereInput | boolean
+    delete?: TenantReferralWhereInput | boolean
+    connect?: TenantReferralWhereUniqueInput
+    update?: XOR<XOR<TenantReferralUpdateToOneWithWhereWithoutReferredInput, TenantReferralUpdateWithoutReferredInput>, TenantReferralUncheckedUpdateWithoutReferredInput>
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput> | PeerBehaviorReportCreateWithoutReporterInput[] | PeerBehaviorReportUncheckedCreateWithoutReporterInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporterInput | PeerBehaviorReportCreateOrConnectWithoutReporterInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutReporterInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutReporterInput[]
+    createMany?: PeerBehaviorReportCreateManyReporterInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutReporterInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutReporterInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutReporterInput | PeerBehaviorReportUpdateManyWithWhereWithoutReporterInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput = {
+    create?: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput> | PeerBehaviorReportCreateWithoutReporteeInput[] | PeerBehaviorReportUncheckedCreateWithoutReporteeInput[]
+    connectOrCreate?: PeerBehaviorReportCreateOrConnectWithoutReporteeInput | PeerBehaviorReportCreateOrConnectWithoutReporteeInput[]
+    upsert?: PeerBehaviorReportUpsertWithWhereUniqueWithoutReporteeInput | PeerBehaviorReportUpsertWithWhereUniqueWithoutReporteeInput[]
+    createMany?: PeerBehaviorReportCreateManyReporteeInputEnvelope
+    set?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    disconnect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    delete?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    connect?: PeerBehaviorReportWhereUniqueInput | PeerBehaviorReportWhereUniqueInput[]
+    update?: PeerBehaviorReportUpdateWithWhereUniqueWithoutReporteeInput | PeerBehaviorReportUpdateWithWhereUniqueWithoutReporteeInput[]
+    updateMany?: PeerBehaviorReportUpdateManyWithWhereWithoutReporteeInput | PeerBehaviorReportUpdateManyWithWhereWithoutReporteeInput[]
+    deleteMany?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
   }
 
   export type RoomCreateimagesInput = {
@@ -94362,6 +97981,88 @@ export namespace Prisma {
     update?: XOR<XOR<JournalEntryUpdateToOneWithWhereWithoutRedemptionsInput, JournalEntryUpdateWithoutRedemptionsInput>, JournalEntryUncheckedUpdateWithoutRedemptionsInput>
   }
 
+  export type TenantCreateNestedOneWithoutPeerReportsMadeInput = {
+    create?: XOR<TenantCreateWithoutPeerReportsMadeInput, TenantUncheckedCreateWithoutPeerReportsMadeInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPeerReportsMadeInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutPeerReportsReceivedInput = {
+    create?: XOR<TenantCreateWithoutPeerReportsReceivedInput, TenantUncheckedCreateWithoutPeerReportsReceivedInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPeerReportsReceivedInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutPeerReportsModeratedInput = {
+    create?: XOR<UserCreateWithoutPeerReportsModeratedInput, UserUncheckedCreateWithoutPeerReportsModeratedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPeerReportsModeratedInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumPeerReportStatusFieldUpdateOperationsInput = {
+    set?: $Enums.PeerReportStatus
+  }
+
+  export type TenantUpdateOneRequiredWithoutPeerReportsMadeNestedInput = {
+    create?: XOR<TenantCreateWithoutPeerReportsMadeInput, TenantUncheckedCreateWithoutPeerReportsMadeInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPeerReportsMadeInput
+    upsert?: TenantUpsertWithoutPeerReportsMadeInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutPeerReportsMadeInput, TenantUpdateWithoutPeerReportsMadeInput>, TenantUncheckedUpdateWithoutPeerReportsMadeInput>
+  }
+
+  export type TenantUpdateOneRequiredWithoutPeerReportsReceivedNestedInput = {
+    create?: XOR<TenantCreateWithoutPeerReportsReceivedInput, TenantUncheckedCreateWithoutPeerReportsReceivedInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutPeerReportsReceivedInput
+    upsert?: TenantUpsertWithoutPeerReportsReceivedInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutPeerReportsReceivedInput, TenantUpdateWithoutPeerReportsReceivedInput>, TenantUncheckedUpdateWithoutPeerReportsReceivedInput>
+  }
+
+  export type UserUpdateOneWithoutPeerReportsModeratedNestedInput = {
+    create?: XOR<UserCreateWithoutPeerReportsModeratedInput, UserUncheckedCreateWithoutPeerReportsModeratedInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPeerReportsModeratedInput
+    upsert?: UserUpsertWithoutPeerReportsModeratedInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPeerReportsModeratedInput, UserUpdateWithoutPeerReportsModeratedInput>, UserUncheckedUpdateWithoutPeerReportsModeratedInput>
+  }
+
+  export type TenantCreateNestedOneWithoutReferralsMadeInput = {
+    create?: XOR<TenantCreateWithoutReferralsMadeInput, TenantUncheckedCreateWithoutReferralsMadeInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutReferralsMadeInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type TenantCreateNestedOneWithoutReferredReferralInput = {
+    create?: XOR<TenantCreateWithoutReferredReferralInput, TenantUncheckedCreateWithoutReferredReferralInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutReferredReferralInput
+    connect?: TenantWhereUniqueInput
+  }
+
+  export type EnumReferralStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ReferralStatus
+  }
+
+  export type TenantUpdateOneRequiredWithoutReferralsMadeNestedInput = {
+    create?: XOR<TenantCreateWithoutReferralsMadeInput, TenantUncheckedCreateWithoutReferralsMadeInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutReferralsMadeInput
+    upsert?: TenantUpsertWithoutReferralsMadeInput
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutReferralsMadeInput, TenantUpdateWithoutReferralsMadeInput>, TenantUncheckedUpdateWithoutReferralsMadeInput>
+  }
+
+  export type TenantUpdateOneWithoutReferredReferralNestedInput = {
+    create?: XOR<TenantCreateWithoutReferredReferralInput, TenantUncheckedCreateWithoutReferredReferralInput>
+    connectOrCreate?: TenantCreateOrConnectWithoutReferredReferralInput
+    upsert?: TenantUpsertWithoutReferredReferralInput
+    disconnect?: TenantWhereInput | boolean
+    delete?: TenantWhereInput | boolean
+    connect?: TenantWhereUniqueInput
+    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutReferredReferralInput, TenantUpdateWithoutReferredReferralInput>, TenantUncheckedUpdateWithoutReferredReferralInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -95711,6 +99412,40 @@ export namespace Prisma {
     _max?: NestedEnumRedemptionStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumPeerReportStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PeerReportStatus | EnumPeerReportStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPeerReportStatusFilter<$PrismaModel> | $Enums.PeerReportStatus
+  }
+
+  export type NestedEnumPeerReportStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PeerReportStatus | EnumPeerReportStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PeerReportStatus[] | ListEnumPeerReportStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPeerReportStatusWithAggregatesFilter<$PrismaModel> | $Enums.PeerReportStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPeerReportStatusFilter<$PrismaModel>
+    _max?: NestedEnumPeerReportStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumReferralStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ReferralStatus | EnumReferralStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumReferralStatusFilter<$PrismaModel> | $Enums.ReferralStatus
+  }
+
+  export type NestedEnumReferralStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ReferralStatus | EnumReferralStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ReferralStatus[] | ListEnumReferralStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumReferralStatusWithAggregatesFilter<$PrismaModel> | $Enums.ReferralStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumReferralStatusFilter<$PrismaModel>
+    _max?: NestedEnumReferralStatusFilter<$PrismaModel>
+  }
+
   export type TenantCreateWithoutUserInput = {
     fullName: string
     phone: string
@@ -95734,6 +99469,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
@@ -95743,6 +99479,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutUserInput = {
@@ -95770,6 +99510,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
@@ -95778,6 +99519,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutUserInput = {
@@ -97487,6 +101232,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     stays?: StayCreateNestedManyWithoutTenantInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
@@ -97496,6 +101242,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutKtpVerifiedByInput = {
@@ -97522,6 +101272,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -97531,6 +101282,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutKtpVerifiedByInput = {
@@ -97578,6 +101333,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PeerBehaviorReportCreateWithoutModeratedByInput = {
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    reporter: TenantCreateNestedOneWithoutPeerReportsMadeInput
+    reportee: TenantCreateNestedOneWithoutPeerReportsReceivedInput
+  }
+
+  export type PeerBehaviorReportUncheckedCreateWithoutModeratedByInput = {
+    id?: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateOrConnectWithoutModeratedByInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    create: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput>
+  }
+
+  export type PeerBehaviorReportCreateManyModeratedByInputEnvelope = {
+    data: PeerBehaviorReportCreateManyModeratedByInput | PeerBehaviorReportCreateManyModeratedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TenantUpsertWithoutUserInput = {
     update: XOR<TenantUpdateWithoutUserInput, TenantUncheckedUpdateWithoutUserInput>
     create: XOR<TenantCreateWithoutUserInput, TenantUncheckedCreateWithoutUserInput>
@@ -97612,6 +101404,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
@@ -97621,6 +101414,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutUserInput = {
@@ -97648,6 +101445,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
@@ -97656,6 +101454,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type AnnouncementUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -98790,6 +102592,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"Tenant"> | boolean
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
+    referralCode?: StringNullableFilter<"Tenant"> | string | null
   }
 
   export type RoomTransferUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -98823,6 +102626,40 @@ export namespace Prisma {
     note?: StringNullableFilter<"RoomTransfer"> | string | null
     createdById?: IntNullableFilter<"RoomTransfer"> | number | null
     createdAt?: DateTimeFilter<"RoomTransfer"> | Date | string
+  }
+
+  export type PeerBehaviorReportUpsertWithWhereUniqueWithoutModeratedByInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    update: XOR<PeerBehaviorReportUpdateWithoutModeratedByInput, PeerBehaviorReportUncheckedUpdateWithoutModeratedByInput>
+    create: XOR<PeerBehaviorReportCreateWithoutModeratedByInput, PeerBehaviorReportUncheckedCreateWithoutModeratedByInput>
+  }
+
+  export type PeerBehaviorReportUpdateWithWhereUniqueWithoutModeratedByInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    data: XOR<PeerBehaviorReportUpdateWithoutModeratedByInput, PeerBehaviorReportUncheckedUpdateWithoutModeratedByInput>
+  }
+
+  export type PeerBehaviorReportUpdateManyWithWhereWithoutModeratedByInput = {
+    where: PeerBehaviorReportScalarWhereInput
+    data: XOR<PeerBehaviorReportUpdateManyMutationInput, PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByInput>
+  }
+
+  export type PeerBehaviorReportScalarWhereInput = {
+    AND?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+    OR?: PeerBehaviorReportScalarWhereInput[]
+    NOT?: PeerBehaviorReportScalarWhereInput | PeerBehaviorReportScalarWhereInput[]
+    id?: IntFilter<"PeerBehaviorReport"> | number
+    reporterTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    reporteeTenantId?: IntFilter<"PeerBehaviorReport"> | number
+    category?: StringFilter<"PeerBehaviorReport"> | string
+    description?: StringFilter<"PeerBehaviorReport"> | string
+    status?: EnumPeerReportStatusFilter<"PeerBehaviorReport"> | $Enums.PeerReportStatus
+    moderatedById?: IntNullableFilter<"PeerBehaviorReport"> | number | null
+    acknowledgedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    improvedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    confirmedAt?: DateTimeNullableFilter<"PeerBehaviorReport"> | Date | string | null
+    createdAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
+    updatedAt?: DateTimeFilter<"PeerBehaviorReport"> | Date | string
   }
 
   export type UserCreateWithoutTenantInput = {
@@ -98873,6 +102710,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantInput = {
@@ -98924,6 +102762,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantInput = {
@@ -98979,6 +102818,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutTenantsKtpVerifiedInput = {
@@ -99030,6 +102870,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutTenantsKtpVerifiedInput = {
@@ -99527,6 +103368,133 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TenantReferralCreateWithoutReferrerInput = {
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referred?: TenantCreateNestedOneWithoutReferredReferralInput
+  }
+
+  export type TenantReferralUncheckedCreateWithoutReferrerInput = {
+    id?: number
+    referredTenantId?: number | null
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TenantReferralCreateOrConnectWithoutReferrerInput = {
+    where: TenantReferralWhereUniqueInput
+    create: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput>
+  }
+
+  export type TenantReferralCreateManyReferrerInputEnvelope = {
+    data: TenantReferralCreateManyReferrerInput | TenantReferralCreateManyReferrerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TenantReferralCreateWithoutReferredInput = {
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referrer: TenantCreateNestedOneWithoutReferralsMadeInput
+  }
+
+  export type TenantReferralUncheckedCreateWithoutReferredInput = {
+    id?: number
+    referrerTenantId: number
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TenantReferralCreateOrConnectWithoutReferredInput = {
+    where: TenantReferralWhereUniqueInput
+    create: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+  }
+
+  export type PeerBehaviorReportCreateWithoutReporterInput = {
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    reportee: TenantCreateNestedOneWithoutPeerReportsReceivedInput
+    moderatedBy?: UserCreateNestedOneWithoutPeerReportsModeratedInput
+  }
+
+  export type PeerBehaviorReportUncheckedCreateWithoutReporterInput = {
+    id?: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateOrConnectWithoutReporterInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    create: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput>
+  }
+
+  export type PeerBehaviorReportCreateManyReporterInputEnvelope = {
+    data: PeerBehaviorReportCreateManyReporterInput | PeerBehaviorReportCreateManyReporterInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PeerBehaviorReportCreateWithoutReporteeInput = {
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    reporter: TenantCreateNestedOneWithoutPeerReportsMadeInput
+    moderatedBy?: UserCreateNestedOneWithoutPeerReportsModeratedInput
+  }
+
+  export type PeerBehaviorReportUncheckedCreateWithoutReporteeInput = {
+    id?: number
+    reporterTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateOrConnectWithoutReporteeInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    create: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput>
+  }
+
+  export type PeerBehaviorReportCreateManyReporteeInputEnvelope = {
+    data: PeerBehaviorReportCreateManyReporteeInput | PeerBehaviorReportCreateManyReporteeInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutTenantInput = {
     update: XOR<UserUpdateWithoutTenantInput, UserUncheckedUpdateWithoutTenantInput>
     create: XOR<UserCreateWithoutTenantInput, UserUncheckedCreateWithoutTenantInput>
@@ -99586,6 +103554,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantInput = {
@@ -99637,6 +103606,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutTenantsKtpVerifiedInput = {
@@ -99698,6 +103668,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTenantsKtpVerifiedInput = {
@@ -99749,6 +103720,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StayUpsertWithWhereUniqueWithoutTenantInput = {
@@ -99908,6 +103880,98 @@ export namespace Prisma {
     decidedById?: IntNullableFilter<"Redemption"> | number | null
     journalEntryId?: IntNullableFilter<"Redemption"> | number | null
     note?: StringNullableFilter<"Redemption"> | string | null
+  }
+
+  export type TenantReferralUpsertWithWhereUniqueWithoutReferrerInput = {
+    where: TenantReferralWhereUniqueInput
+    update: XOR<TenantReferralUpdateWithoutReferrerInput, TenantReferralUncheckedUpdateWithoutReferrerInput>
+    create: XOR<TenantReferralCreateWithoutReferrerInput, TenantReferralUncheckedCreateWithoutReferrerInput>
+  }
+
+  export type TenantReferralUpdateWithWhereUniqueWithoutReferrerInput = {
+    where: TenantReferralWhereUniqueInput
+    data: XOR<TenantReferralUpdateWithoutReferrerInput, TenantReferralUncheckedUpdateWithoutReferrerInput>
+  }
+
+  export type TenantReferralUpdateManyWithWhereWithoutReferrerInput = {
+    where: TenantReferralScalarWhereInput
+    data: XOR<TenantReferralUpdateManyMutationInput, TenantReferralUncheckedUpdateManyWithoutReferrerInput>
+  }
+
+  export type TenantReferralScalarWhereInput = {
+    AND?: TenantReferralScalarWhereInput | TenantReferralScalarWhereInput[]
+    OR?: TenantReferralScalarWhereInput[]
+    NOT?: TenantReferralScalarWhereInput | TenantReferralScalarWhereInput[]
+    id?: IntFilter<"TenantReferral"> | number
+    referrerTenantId?: IntFilter<"TenantReferral"> | number
+    referredTenantId?: IntNullableFilter<"TenantReferral"> | number | null
+    status?: EnumReferralStatusFilter<"TenantReferral"> | $Enums.ReferralStatus
+    rewardedAt?: DateTimeNullableFilter<"TenantReferral"> | Date | string | null
+    note?: StringNullableFilter<"TenantReferral"> | string | null
+    createdAt?: DateTimeFilter<"TenantReferral"> | Date | string
+    updatedAt?: DateTimeFilter<"TenantReferral"> | Date | string
+  }
+
+  export type TenantReferralUpsertWithoutReferredInput = {
+    update: XOR<TenantReferralUpdateWithoutReferredInput, TenantReferralUncheckedUpdateWithoutReferredInput>
+    create: XOR<TenantReferralCreateWithoutReferredInput, TenantReferralUncheckedCreateWithoutReferredInput>
+    where?: TenantReferralWhereInput
+  }
+
+  export type TenantReferralUpdateToOneWithWhereWithoutReferredInput = {
+    where?: TenantReferralWhereInput
+    data: XOR<TenantReferralUpdateWithoutReferredInput, TenantReferralUncheckedUpdateWithoutReferredInput>
+  }
+
+  export type TenantReferralUpdateWithoutReferredInput = {
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referrer?: TenantUpdateOneRequiredWithoutReferralsMadeNestedInput
+  }
+
+  export type TenantReferralUncheckedUpdateWithoutReferredInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    referrerTenantId?: IntFieldUpdateOperationsInput | number
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUpsertWithWhereUniqueWithoutReporterInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    update: XOR<PeerBehaviorReportUpdateWithoutReporterInput, PeerBehaviorReportUncheckedUpdateWithoutReporterInput>
+    create: XOR<PeerBehaviorReportCreateWithoutReporterInput, PeerBehaviorReportUncheckedCreateWithoutReporterInput>
+  }
+
+  export type PeerBehaviorReportUpdateWithWhereUniqueWithoutReporterInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    data: XOR<PeerBehaviorReportUpdateWithoutReporterInput, PeerBehaviorReportUncheckedUpdateWithoutReporterInput>
+  }
+
+  export type PeerBehaviorReportUpdateManyWithWhereWithoutReporterInput = {
+    where: PeerBehaviorReportScalarWhereInput
+    data: XOR<PeerBehaviorReportUpdateManyMutationInput, PeerBehaviorReportUncheckedUpdateManyWithoutReporterInput>
+  }
+
+  export type PeerBehaviorReportUpsertWithWhereUniqueWithoutReporteeInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    update: XOR<PeerBehaviorReportUpdateWithoutReporteeInput, PeerBehaviorReportUncheckedUpdateWithoutReporteeInput>
+    create: XOR<PeerBehaviorReportCreateWithoutReporteeInput, PeerBehaviorReportUncheckedCreateWithoutReporteeInput>
+  }
+
+  export type PeerBehaviorReportUpdateWithWhereUniqueWithoutReporteeInput = {
+    where: PeerBehaviorReportWhereUniqueInput
+    data: XOR<PeerBehaviorReportUpdateWithoutReporteeInput, PeerBehaviorReportUncheckedUpdateWithoutReporteeInput>
+  }
+
+  export type PeerBehaviorReportUpdateManyWithWhereWithoutReporteeInput = {
+    where: PeerBehaviorReportScalarWhereInput
+    data: XOR<PeerBehaviorReportUpdateManyMutationInput, PeerBehaviorReportUncheckedUpdateManyWithoutReporteeInput>
   }
 
   export type StayCreateWithoutRoomInput = {
@@ -101077,6 +105141,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     tickets?: TicketCreateNestedManyWithoutTenantInput
@@ -101086,6 +105151,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutStaysInput = {
@@ -101113,6 +105182,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
@@ -101121,6 +105191,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutStaysInput = {
@@ -101256,6 +105330,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysCreatedInput = {
@@ -101307,6 +105382,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysCreatedInput = {
@@ -101362,6 +105438,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysInitialMetersRecordedInput = {
@@ -101413,6 +105490,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysInitialMetersRecordedInput = {
@@ -101468,6 +105546,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaysFledMarkedInput = {
@@ -101519,6 +105598,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaysFledMarkedInput = {
@@ -102011,6 +106091,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
@@ -102020,6 +106101,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaysInput = {
@@ -102047,6 +106132,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
@@ -102055,6 +106141,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type RoomUpsertWithoutStaysInput = {
@@ -102202,6 +106292,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysCreatedInput = {
@@ -102253,6 +106344,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutStaysInitialMetersRecordedInput = {
@@ -102314,6 +106406,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysInitialMetersRecordedInput = {
@@ -102365,6 +106458,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutStaysFledMarkedInput = {
@@ -102426,6 +106520,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaysFledMarkedInput = {
@@ -102477,6 +106572,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutStayInput = {
@@ -102789,6 +106885,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -102798,6 +106895,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutDepositLedgerEntriesInput = {
@@ -102825,6 +106926,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -102833,6 +106935,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutDepositLedgerEntriesInput = {
@@ -102968,6 +107074,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutDepositLedgerEntriesActedInput = {
@@ -103019,6 +107126,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutDepositLedgerEntriesActedInput = {
@@ -103194,6 +107302,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -103203,6 +107312,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutDepositLedgerEntriesInput = {
@@ -103230,6 +107343,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -103238,6 +107352,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type RoomUpsertWithoutDepositLedgerEntriesInput = {
@@ -103385,6 +107503,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDepositLedgerEntriesActedInput = {
@@ -103436,6 +107555,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomCreateWithoutMeterReadingsInput = {
@@ -103566,6 +107686,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutMeterReadingsRecordedInput = {
@@ -103617,6 +107738,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutMeterReadingsRecordedInput = {
@@ -103769,6 +107891,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMeterReadingsRecordedInput = {
@@ -103820,6 +107943,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StayCreateWithoutInvoicesInput = {
@@ -103998,6 +108122,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutInvoicesCreatedInput = {
@@ -104049,6 +108174,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutInvoicesCreatedInput = {
@@ -104382,6 +108508,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvoicesCreatedInput = {
@@ -104433,6 +108560,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type InvoiceLineUpsertWithWhereUniqueWithoutInvoiceInput = {
@@ -104687,6 +108815,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsCapturedInput = {
@@ -104738,6 +108867,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsCapturedInput = {
@@ -104854,6 +108984,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsCapturedInput = {
@@ -104905,6 +109036,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -104955,6 +109087,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -105006,6 +109139,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -105072,6 +109206,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -105123,6 +109258,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StayCreateWithoutPaymentSubmissionsInput = {
@@ -105320,6 +109456,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -105329,6 +109466,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutPaymentSubmissionsInput = {
@@ -105356,6 +109497,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -105364,6 +109506,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutPaymentSubmissionsInput = {
@@ -105419,6 +109565,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsSubmittedInput = {
@@ -105470,6 +109617,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsSubmittedInput = {
@@ -105525,6 +109673,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutPaymentSubmissionsReviewedInput = {
@@ -105576,6 +109725,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutPaymentSubmissionsReviewedInput = {
@@ -105801,6 +109951,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -105810,6 +109961,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutPaymentSubmissionsInput = {
@@ -105837,6 +109992,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -105845,6 +110001,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsSubmittedInput = {
@@ -105906,6 +110066,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsSubmittedInput = {
@@ -105957,6 +110118,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutPaymentSubmissionsReviewedInput = {
@@ -106018,6 +110180,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentSubmissionsReviewedInput = {
@@ -106069,6 +110232,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type TenantCreateWithoutTicketsInput = {
@@ -106094,6 +110258,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -106103,6 +110268,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutTicketsInput = {
@@ -106130,6 +110299,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
@@ -106138,6 +110308,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutTicketsInput = {
@@ -106401,6 +110575,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutTicketsAssignedInput = {
@@ -106452,6 +110627,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutTicketsAssignedInput = {
@@ -106628,6 +110804,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -106637,6 +110814,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutTicketsInput = {
@@ -106664,6 +110845,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
@@ -106672,6 +110854,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type RoomUpsertWithoutTicketsInput = {
@@ -106953,6 +111139,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTicketsAssignedInput = {
@@ -107004,6 +111191,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomItemUpsertWithoutLinkedTicketsInput = {
@@ -107158,6 +111346,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -107209,6 +111398,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineTemplatesCreatedInput = {
@@ -107341,6 +111531,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineTemplatesCreatedInput = {
@@ -107392,6 +111583,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StaffRoutineAssignmentUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -107514,6 +111706,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineAssignmentsInput = {
@@ -107565,6 +111758,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineAssignmentsInput = {
@@ -107794,6 +111988,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineAssignmentsInput = {
@@ -107845,6 +112040,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineAssignmentsInput = {
@@ -108061,6 +112257,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffRoutineCompletionsInput = {
@@ -108112,6 +112309,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffRoutineCompletionsInput = {
@@ -108334,6 +112532,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffRoutineCompletionsInput = {
@@ -108385,6 +112584,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomUpsertWithoutStaffRoutineCompletionsInput = {
@@ -108521,6 +112721,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsInput = {
@@ -108572,6 +112773,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsInput = {
@@ -108627,6 +112829,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceAuditsMadeInput = {
@@ -108678,6 +112881,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceAuditsMadeInput = {
@@ -108744,6 +112948,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsInput = {
@@ -108795,6 +113000,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutStaffPerformanceAuditsMadeInput = {
@@ -108856,6 +113062,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceAuditsMadeInput = {
@@ -108907,6 +113114,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutStaffPerformanceEventsInput = {
@@ -108957,6 +113165,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffPerformanceEventsInput = {
@@ -109008,6 +113217,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffPerformanceEventsInput = {
@@ -109074,6 +113284,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffPerformanceEventsInput = {
@@ -109125,6 +113336,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutStaffReviewsReceivedInput = {
@@ -109175,6 +113387,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsReceivedInput = {
@@ -109226,6 +113439,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsReceivedInput = {
@@ -109256,6 +113470,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -109265,6 +113480,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutStaffReviewsInput = {
@@ -109292,6 +113511,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -109300,6 +113520,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutStaffReviewsInput = {
@@ -109355,6 +113579,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffReviewsModeratedInput = {
@@ -109406,6 +113631,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffReviewsModeratedInput = {
@@ -109472,6 +113698,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsReceivedInput = {
@@ -109523,6 +113750,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type TenantUpsertWithoutStaffReviewsInput = {
@@ -109559,6 +113787,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -109568,6 +113797,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutStaffReviewsInput = {
@@ -109595,6 +113828,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -109603,6 +113837,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type UserUpsertWithoutStaffReviewsModeratedInput = {
@@ -109664,6 +113902,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffReviewsModeratedInput = {
@@ -109715,6 +113954,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutAnnouncementsCreatedInput = {
@@ -109765,6 +114005,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutAnnouncementsCreatedInput = {
@@ -109816,6 +114057,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutAnnouncementsCreatedInput = {
@@ -109882,6 +114124,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnnouncementsCreatedInput = {
@@ -109933,6 +114176,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomItemCreateWithoutItemInput = {
@@ -111098,6 +115342,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryMovementsCreatedInput = {
@@ -111149,6 +115394,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryMovementsCreatedInput = {
@@ -111412,6 +115658,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryMovementsCreatedInput = {
@@ -111463,6 +115710,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StaffFieldReportUpsertWithWhereUniqueWithoutRelatedMovementInput = {
@@ -111809,6 +116057,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsCreatedInput = {
@@ -111860,6 +116109,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsCreatedInput = {
@@ -111915,6 +116165,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffFieldReportsReviewedInput = {
@@ -111966,6 +116217,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffFieldReportsReviewedInput = {
@@ -112370,6 +116622,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsCreatedInput = {
@@ -112421,6 +116674,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUpsertWithoutStaffFieldReportsReviewedInput = {
@@ -112482,6 +116736,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffFieldReportsReviewedInput = {
@@ -112533,6 +116788,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type InventoryMovementUpsertWithoutFieldReportsInput = {
@@ -112720,6 +116976,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -112729,6 +116986,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutRenewRequestsInput = {
@@ -112756,6 +117017,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -112764,6 +117026,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutRenewRequestsInput = {
@@ -112819,6 +117085,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutRenewRequestsReviewedInput = {
@@ -112870,6 +117137,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutRenewRequestsReviewedInput = {
@@ -113045,6 +117313,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -113054,6 +117323,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutRenewRequestsInput = {
@@ -113081,6 +117354,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -113089,6 +117363,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type UserUpsertWithoutRenewRequestsReviewedInput = {
@@ -113150,6 +117428,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRenewRequestsReviewedInput = {
@@ -113201,6 +117480,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type StayCreateWithoutCheckoutRequestsInput = {
@@ -113379,6 +117659,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutCheckoutRequestsReviewedInput = {
@@ -113430,6 +117711,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutCheckoutRequestsReviewedInput = {
@@ -113630,6 +117912,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCheckoutRequestsReviewedInput = {
@@ -113681,6 +117964,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutWifiSalesCreatedInput = {
@@ -113731,6 +118015,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutWifiSalesCreatedInput = {
@@ -113782,6 +118067,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutWifiSalesCreatedInput = {
@@ -113848,6 +118134,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWifiSalesCreatedInput = {
@@ -113899,6 +118186,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type RoomCreateWithoutExpensesInput = {
@@ -114157,6 +118445,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutExpensesCreatedInput = {
@@ -114208,6 +118497,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutExpensesCreatedInput = {
@@ -114579,6 +118869,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExpensesCreatedInput = {
@@ -114630,6 +118921,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type FixedAssetUpsertWithWhereUniqueWithoutExpenseInput = {
@@ -114892,6 +119184,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutFixedAssetsCreatedInput = {
@@ -114943,6 +119236,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutFixedAssetsCreatedInput = {
@@ -115352,6 +119646,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFixedAssetsCreatedInput = {
@@ -115403,6 +119698,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type ChartOfAccountUpsertWithoutFixedAssetAlignmentCreditsInput = {
@@ -115640,6 +119936,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutAssetDepreciationRunsCreatedInput = {
@@ -115691,6 +119988,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutAssetDepreciationRunsCreatedInput = {
@@ -115846,6 +120144,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssetDepreciationRunsCreatedInput = {
@@ -115897,6 +120196,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type AssetDepreciationLineUpsertWithWhereUniqueWithoutRunInput = {
@@ -116211,6 +120511,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -116262,6 +120563,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -116328,6 +120630,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -116379,6 +120682,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutPushSubscriptionsInput = {
@@ -116429,6 +120733,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -116480,6 +120785,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -116546,6 +120852,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -116597,6 +120904,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -116647,6 +120955,7 @@ export namespace Prisma {
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -116698,6 +121007,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
     roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -116764,6 +121074,7 @@ export namespace Prisma {
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -116815,6 +121126,7 @@ export namespace Prisma {
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
     roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type ChartOfAccountCreateWithoutChildrenInput = {
@@ -119305,6 +123617,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    peerReportsModerated?: PeerBehaviorReportCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserUncheckedCreateWithoutRoomTransfersCreatedInput = {
@@ -119356,6 +123669,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
     staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
     tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedCreateNestedManyWithoutModeratedByInput
   }
 
   export type UserCreateOrConnectWithoutRoomTransfersCreatedInput = {
@@ -119728,6 +124042,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUpdateManyWithoutModeratedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRoomTransfersCreatedInput = {
@@ -119779,6 +124094,7 @@ export namespace Prisma {
     depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
     staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
     tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    peerReportsModerated?: PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByNestedInput
   }
 
   export type TenantCreateWithoutLoyaltyPointsInput = {
@@ -119804,6 +124120,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -119813,6 +124130,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutLoyaltyPointsInput = {
@@ -119840,6 +124161,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -119848,6 +124170,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutLoyaltyPointsInput = {
@@ -119889,6 +124215,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -119898,6 +124225,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutLoyaltyPointsInput = {
@@ -119925,6 +124256,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -119933,6 +124265,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type RedemptionCreateWithoutRewardInput = {
@@ -120007,6 +124343,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserCreateNestedOneWithoutTenantInput
     ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
     stays?: StayCreateNestedManyWithoutTenantInput
@@ -120016,6 +124353,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantUncheckedCreateWithoutRedemptionsInput = {
@@ -120043,6 +124384,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
     user?: UserUncheckedCreateNestedOneWithoutTenantInput
     stays?: StayUncheckedCreateNestedManyWithoutTenantInput
     tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
@@ -120051,6 +124393,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
     loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
   }
 
   export type TenantCreateOrConnectWithoutRedemptionsInput = {
@@ -120178,6 +124524,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
@@ -120187,6 +124534,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutRedemptionsInput = {
@@ -120214,6 +124565,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -120222,6 +124574,10 @@ export namespace Prisma {
     staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type LoyaltyRewardUpsertWithoutRedemptionsInput = {
@@ -120320,6 +124676,924 @@ export namespace Prisma {
     depreciationRuns?: AssetDepreciationRunUncheckedUpdateManyWithoutJournalEntryNestedInput
     fixedAssetLedgerAlignments?: FixedAssetUncheckedUpdateManyWithoutLedgerAlignmentJournalEntryNestedInput
     rentRecognitions?: RentRecognitionScheduleUncheckedUpdateManyWithoutJournalEntryNestedInput
+  }
+
+  export type TenantCreateWithoutPeerReportsMadeInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantUncheckedCreateWithoutPeerReportsMadeInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantCreateOrConnectWithoutPeerReportsMadeInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutPeerReportsMadeInput, TenantUncheckedCreateWithoutPeerReportsMadeInput>
+  }
+
+  export type TenantCreateWithoutPeerReportsReceivedInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+  }
+
+  export type TenantUncheckedCreateWithoutPeerReportsReceivedInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+  }
+
+  export type TenantCreateOrConnectWithoutPeerReportsReceivedInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutPeerReportsReceivedInput, TenantUncheckedCreateWithoutPeerReportsReceivedInput>
+  }
+
+  export type UserCreateWithoutPeerReportsModeratedInput = {
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    tenant?: TenantCreateNestedOneWithoutUserInput
+    announcementsCreated?: AnnouncementCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserUncheckedCreateWithoutPeerReportsModeratedInput = {
+    id?: number
+    fullName: string
+    email: string
+    passwordHash: string
+    role: $Enums.UserRole
+    tenantId?: number | null
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    passwordChangedAt?: Date | string | null
+    tipGopay?: string | null
+    tipOvo?: string | null
+    tipDana?: string | null
+    tipBank?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    announcementsCreated?: AnnouncementUncheckedCreateNestedManyWithoutCreatedByInput
+    staysCreated?: StayUncheckedCreateNestedManyWithoutCreatedByInput
+    staysInitialMetersRecorded?: StayUncheckedCreateNestedManyWithoutInitialMetersRecordedByInput
+    invoicesCreated?: InvoiceUncheckedCreateNestedManyWithoutCreatedByInput
+    paymentsCaptured?: InvoicePaymentUncheckedCreateNestedManyWithoutCapturedByInput
+    ticketsAssigned?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedCreateNestedManyWithoutStaffUserInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedCreateNestedManyWithoutStaffUserInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedCreateNestedManyWithoutStaffInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedCreateNestedManyWithoutAuditedByInput
+    staffReviewsReceived?: StaffReviewUncheckedCreateNestedManyWithoutStaffInput
+    staffReviewsModerated?: StaffReviewUncheckedCreateNestedManyWithoutModeratedByInput
+    meterReadingsRecorded?: MeterReadingUncheckedCreateNestedManyWithoutRecordedByInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedCreateNestedManyWithoutCreatedByInput
+    wifiSalesCreated?: WifiSaleUncheckedCreateNestedManyWithoutCreatedByInput
+    expensesCreated?: ExpenseUncheckedCreateNestedManyWithoutCreatedByInput
+    renewRequestsReviewed?: RenewRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedCreateNestedManyWithoutReviewedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutActorUserInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    notifications?: AppNotificationUncheckedCreateNestedManyWithoutRecipientUserInput
+    pushSubscriptions?: PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedCreateNestedManyWithoutReportedByStaffInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedCreateNestedManyWithoutAdminReviewedByInput
+    fixedAssetsCreated?: FixedAssetUncheckedCreateNestedManyWithoutCreatedByInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedCreateNestedManyWithoutCreatedByInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutActorUserInput
+    staysFledMarked?: StayUncheckedCreateNestedManyWithoutFledMarkedByInput
+    tenantsKtpVerified?: TenantUncheckedCreateNestedManyWithoutKtpVerifiedByInput
+    roomTransfersCreated?: RoomTransferUncheckedCreateNestedManyWithoutCreatedByInput
+  }
+
+  export type UserCreateOrConnectWithoutPeerReportsModeratedInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPeerReportsModeratedInput, UserUncheckedCreateWithoutPeerReportsModeratedInput>
+  }
+
+  export type TenantUpsertWithoutPeerReportsMadeInput = {
+    update: XOR<TenantUpdateWithoutPeerReportsMadeInput, TenantUncheckedUpdateWithoutPeerReportsMadeInput>
+    create: XOR<TenantCreateWithoutPeerReportsMadeInput, TenantUncheckedCreateWithoutPeerReportsMadeInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutPeerReportsMadeInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutPeerReportsMadeInput, TenantUncheckedUpdateWithoutPeerReportsMadeInput>
+  }
+
+  export type TenantUpdateWithoutPeerReportsMadeInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutPeerReportsMadeInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUpsertWithoutPeerReportsReceivedInput = {
+    update: XOR<TenantUpdateWithoutPeerReportsReceivedInput, TenantUncheckedUpdateWithoutPeerReportsReceivedInput>
+    create: XOR<TenantCreateWithoutPeerReportsReceivedInput, TenantUncheckedCreateWithoutPeerReportsReceivedInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutPeerReportsReceivedInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutPeerReportsReceivedInput, TenantUncheckedUpdateWithoutPeerReportsReceivedInput>
+  }
+
+  export type TenantUpdateWithoutPeerReportsReceivedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutPeerReportsReceivedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+  }
+
+  export type UserUpsertWithoutPeerReportsModeratedInput = {
+    update: XOR<UserUpdateWithoutPeerReportsModeratedInput, UserUncheckedUpdateWithoutPeerReportsModeratedInput>
+    create: XOR<UserCreateWithoutPeerReportsModeratedInput, UserUncheckedCreateWithoutPeerReportsModeratedInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPeerReportsModeratedInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPeerReportsModeratedInput, UserUncheckedUpdateWithoutPeerReportsModeratedInput>
+  }
+
+  export type UserUpdateWithoutPeerReportsModeratedInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tenant?: TenantUpdateOneWithoutUserNestedInput
+    announcementsCreated?: AnnouncementUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPeerReportsModeratedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    tenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipGopay?: NullableStringFieldUpdateOperationsInput | string | null
+    tipOvo?: NullableStringFieldUpdateOperationsInput | string | null
+    tipDana?: NullableStringFieldUpdateOperationsInput | string | null
+    tipBank?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    announcementsCreated?: AnnouncementUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysCreated?: StayUncheckedUpdateManyWithoutCreatedByNestedInput
+    staysInitialMetersRecorded?: StayUncheckedUpdateManyWithoutInitialMetersRecordedByNestedInput
+    invoicesCreated?: InvoiceUncheckedUpdateManyWithoutCreatedByNestedInput
+    paymentsCaptured?: InvoicePaymentUncheckedUpdateManyWithoutCapturedByNestedInput
+    ticketsAssigned?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    staffRoutineTemplatesCreated?: StaffRoutineTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+    staffRoutineAssignments?: StaffRoutineAssignmentUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffRoutineCompletions?: StaffRoutineCompletionUncheckedUpdateManyWithoutStaffUserNestedInput
+    staffPerformanceEvents?: StaffPerformanceEventUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAudits?: StaffWorkAuditUncheckedUpdateManyWithoutStaffNestedInput
+    staffPerformanceAuditsMade?: StaffWorkAuditUncheckedUpdateManyWithoutAuditedByNestedInput
+    staffReviewsReceived?: StaffReviewUncheckedUpdateManyWithoutStaffNestedInput
+    staffReviewsModerated?: StaffReviewUncheckedUpdateManyWithoutModeratedByNestedInput
+    meterReadingsRecorded?: MeterReadingUncheckedUpdateManyWithoutRecordedByNestedInput
+    inventoryMovementsCreated?: InventoryMovementUncheckedUpdateManyWithoutCreatedByNestedInput
+    wifiSalesCreated?: WifiSaleUncheckedUpdateManyWithoutCreatedByNestedInput
+    expensesCreated?: ExpenseUncheckedUpdateManyWithoutCreatedByNestedInput
+    renewRequestsReviewed?: RenewRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    checkoutRequestsReviewed?: CheckoutRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutActorUserNestedInput
+    paymentSubmissionsSubmitted?: PaymentSubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+    paymentSubmissionsReviewed?: PaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: AppNotificationUncheckedUpdateManyWithoutRecipientUserNestedInput
+    pushSubscriptions?: PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    staffFieldReportsCreated?: StaffFieldReportUncheckedUpdateManyWithoutReportedByStaffNestedInput
+    staffFieldReportsReviewed?: StaffFieldReportUncheckedUpdateManyWithoutAdminReviewedByNestedInput
+    fixedAssetsCreated?: FixedAssetUncheckedUpdateManyWithoutCreatedByNestedInput
+    assetDepreciationRunsCreated?: AssetDepreciationRunUncheckedUpdateManyWithoutCreatedByNestedInput
+    depositLedgerEntriesActed?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutActorUserNestedInput
+    staysFledMarked?: StayUncheckedUpdateManyWithoutFledMarkedByNestedInput
+    tenantsKtpVerified?: TenantUncheckedUpdateManyWithoutKtpVerifiedByNestedInput
+    roomTransfersCreated?: RoomTransferUncheckedUpdateManyWithoutCreatedByNestedInput
+  }
+
+  export type TenantCreateWithoutReferralsMadeInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referredReferral?: TenantReferralCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantUncheckedCreateWithoutReferralsMadeInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referredReferral?: TenantReferralUncheckedCreateNestedOneWithoutReferredInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantCreateOrConnectWithoutReferralsMadeInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutReferralsMadeInput, TenantUncheckedCreateWithoutReferralsMadeInput>
+  }
+
+  export type TenantCreateWithoutReferredReferralInput = {
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserCreateNestedOneWithoutTenantInput
+    ktpVerifiedBy?: UserCreateNestedOneWithoutTenantsKtpVerifiedInput
+    stays?: StayCreateNestedManyWithoutTenantInput
+    tickets?: TicketCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralCreateNestedManyWithoutReferrerInput
+    peerReportsMade?: PeerBehaviorReportCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantUncheckedCreateWithoutReferredReferralInput = {
+    id?: number
+    fullName: string
+    phone: string
+    email?: string | null
+    identityNumber?: string | null
+    ktpImageUrl?: string | null
+    ktpImageFileKey?: string | null
+    ktpImageOriginalFilename?: string | null
+    ktpImageMimeType?: string | null
+    ktpImageFileSizeBytes?: number | null
+    ktpVerifiedAt?: Date | string | null
+    ktpVerifiedById?: number | null
+    ktpDeletedAt?: Date | string | null
+    gender?: $Enums.Gender | null
+    birthDate?: Date | string | null
+    originCity?: string | null
+    occupation?: string | null
+    companyOrCampus?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    notes?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referralCode?: string | null
+    user?: UserUncheckedCreateNestedOneWithoutTenantInput
+    stays?: StayUncheckedCreateNestedManyWithoutTenantInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutTenantInput
+    paymentSubmissions?: PaymentSubmissionUncheckedCreateNestedManyWithoutTenantInput
+    renewRequests?: RenewRequestUncheckedCreateNestedManyWithoutTenantInput
+    staffReviews?: StaffReviewUncheckedCreateNestedManyWithoutTenantInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedCreateNestedManyWithoutTenantInput
+    loyaltyPoints?: LoyaltyPointUncheckedCreateNestedManyWithoutTenantInput
+    redemptions?: RedemptionUncheckedCreateNestedManyWithoutTenantInput
+    referralsMade?: TenantReferralUncheckedCreateNestedManyWithoutReferrerInput
+    peerReportsMade?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporterInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedCreateNestedManyWithoutReporteeInput
+  }
+
+  export type TenantCreateOrConnectWithoutReferredReferralInput = {
+    where: TenantWhereUniqueInput
+    create: XOR<TenantCreateWithoutReferredReferralInput, TenantUncheckedCreateWithoutReferredReferralInput>
+  }
+
+  export type TenantUpsertWithoutReferralsMadeInput = {
+    update: XOR<TenantUpdateWithoutReferralsMadeInput, TenantUncheckedUpdateWithoutReferralsMadeInput>
+    create: XOR<TenantCreateWithoutReferralsMadeInput, TenantUncheckedCreateWithoutReferralsMadeInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutReferralsMadeInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutReferralsMadeInput, TenantUncheckedUpdateWithoutReferralsMadeInput>
+  }
+
+  export type TenantUpdateWithoutReferralsMadeInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutReferralsMadeInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUpsertWithoutReferredReferralInput = {
+    update: XOR<TenantUpdateWithoutReferredReferralInput, TenantUncheckedUpdateWithoutReferredReferralInput>
+    create: XOR<TenantCreateWithoutReferredReferralInput, TenantUncheckedCreateWithoutReferredReferralInput>
+    where?: TenantWhereInput
+  }
+
+  export type TenantUpdateToOneWithWhereWithoutReferredReferralInput = {
+    where?: TenantWhereInput
+    data: XOR<TenantUpdateWithoutReferredReferralInput, TenantUncheckedUpdateWithoutReferredReferralInput>
+  }
+
+  export type TenantUpdateWithoutReferredReferralInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneWithoutTenantNestedInput
+    ktpVerifiedBy?: UserUpdateOneWithoutTenantsKtpVerifiedNestedInput
+    stays?: StayUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
+  }
+
+  export type TenantUncheckedUpdateWithoutReferredReferralInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    identityNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileKey?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageOriginalFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageMimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    ktpImageFileSizeBytes?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ktpVerifiedById?: NullableIntFieldUpdateOperationsInput | number | null
+    ktpDeletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    companyOrCampus?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    emergencyContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUncheckedUpdateOneWithoutTenantNestedInput
+    stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
+    paymentSubmissions?: PaymentSubmissionUncheckedUpdateManyWithoutTenantNestedInput
+    renewRequests?: RenewRequestUncheckedUpdateManyWithoutTenantNestedInput
+    staffReviews?: StaffReviewUncheckedUpdateManyWithoutTenantNestedInput
+    depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
+    loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
+    redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type AnnouncementCreateManyCreatedByInput = {
@@ -121003,6 +126277,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    referralCode?: string | null
   }
 
   export type RoomTransferCreateManyCreatedByInput = {
@@ -121016,6 +126291,20 @@ export namespace Prisma {
     rentAfterRupiah: number
     note?: string | null
     createdAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateManyModeratedByInput = {
+    id?: number
+    reporterTenantId: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type AnnouncementUpdateWithoutCreatedByInput = {
@@ -123057,6 +128346,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutTenantNestedInput
     stays?: StayUpdateManyWithoutTenantNestedInput
     tickets?: TicketUpdateManyWithoutTenantNestedInput
@@ -123066,6 +128356,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutKtpVerifiedByInput = {
@@ -123092,6 +128386,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUncheckedUpdateOneWithoutTenantNestedInput
     stays?: StayUncheckedUpdateManyWithoutTenantNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutTenantNestedInput
@@ -123101,6 +128396,10 @@ export namespace Prisma {
     depositLedgerEntries?: TenantDepositLedgerEntryUncheckedUpdateManyWithoutTenantNestedInput
     loyaltyPoints?: LoyaltyPointUncheckedUpdateManyWithoutTenantNestedInput
     redemptions?: RedemptionUncheckedUpdateManyWithoutTenantNestedInput
+    referralsMade?: TenantReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredReferral?: TenantReferralUncheckedUpdateOneWithoutReferredNestedInput
+    peerReportsMade?: PeerBehaviorReportUncheckedUpdateManyWithoutReporterNestedInput
+    peerReportsReceived?: PeerBehaviorReportUncheckedUpdateManyWithoutReporteeNestedInput
   }
 
   export type TenantUncheckedUpdateManyWithoutKtpVerifiedByInput = {
@@ -123127,6 +128426,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RoomTransferUpdateWithoutCreatedByInput = {
@@ -123165,6 +128465,47 @@ export namespace Prisma {
     rentAfterRupiah?: IntFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUpdateWithoutModeratedByInput = {
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reporter?: TenantUpdateOneRequiredWithoutPeerReportsMadeNestedInput
+    reportee?: TenantUpdateOneRequiredWithoutPeerReportsReceivedNestedInput
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateWithoutModeratedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutModeratedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StayCreateManyTenantInput = {
@@ -123364,6 +128705,44 @@ export namespace Prisma {
     decidedById?: number | null
     journalEntryId?: number | null
     note?: string | null
+  }
+
+  export type TenantReferralCreateManyReferrerInput = {
+    id?: number
+    referredTenantId?: number | null
+    status?: $Enums.ReferralStatus
+    rewardedAt?: Date | string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateManyReporterInput = {
+    id?: number
+    reporteeTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PeerBehaviorReportCreateManyReporteeInput = {
+    id?: number
+    reporterTenantId: number
+    category: string
+    description: string
+    status?: $Enums.PeerReportStatus
+    moderatedById?: number | null
+    acknowledgedAt?: Date | string | null
+    improvedAt?: Date | string | null
+    confirmedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type StayUpdateWithoutTenantInput = {
@@ -123973,6 +129352,117 @@ export namespace Prisma {
     decidedById?: NullableIntFieldUpdateOperationsInput | number | null
     journalEntryId?: NullableIntFieldUpdateOperationsInput | number | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TenantReferralUpdateWithoutReferrerInput = {
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referred?: TenantUpdateOneWithoutReferredReferralNestedInput
+  }
+
+  export type TenantReferralUncheckedUpdateWithoutReferrerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    referredTenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TenantReferralUncheckedUpdateManyWithoutReferrerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    referredTenantId?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: EnumReferralStatusFieldUpdateOperationsInput | $Enums.ReferralStatus
+    rewardedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUpdateWithoutReporterInput = {
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportee?: TenantUpdateOneRequiredWithoutPeerReportsReceivedNestedInput
+    moderatedBy?: UserUpdateOneWithoutPeerReportsModeratedNestedInput
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateWithoutReporterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutReporterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporteeTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUpdateWithoutReporteeInput = {
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reporter?: TenantUpdateOneRequiredWithoutPeerReportsMadeNestedInput
+    moderatedBy?: UserUpdateOneWithoutPeerReportsModeratedNestedInput
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateWithoutReporteeInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PeerBehaviorReportUncheckedUpdateManyWithoutReporteeInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    reporterTenantId?: IntFieldUpdateOperationsInput | number
+    category?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    status?: EnumPeerReportStatusFieldUpdateOperationsInput | $Enums.PeerReportStatus
+    moderatedById?: NullableIntFieldUpdateOperationsInput | number | null
+    acknowledgedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    improvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StayCreateManyRoomInput = {

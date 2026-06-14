@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { LoyaltyService } from './loyalty.service';
 import { RedemptionService } from './redemption.service';
+import { ReferralService } from './referral.service';
 import { RequestRedemptionDto } from './dto/loyalty.dto';
 
 @ApiTags('Me - Loyalty')
@@ -15,7 +16,14 @@ export class LoyaltyController {
   constructor(
     private readonly loyalty: LoyaltyService,
     private readonly redemption: RedemptionService,
+    private readonly referral: ReferralService,
   ) {}
+
+  @Get('referral-code')
+  async referralCode(@CurrentUser() user: CurrentUserPayload) {
+    if (!user.tenantId) return { message: 'Kode referral', data: { code: null } };
+    return { message: 'Kode referral', data: await this.referral.getOrCreateCode(user.tenantId) };
+  }
 
   @Get()
   async mine(@CurrentUser() user: CurrentUserPayload) {

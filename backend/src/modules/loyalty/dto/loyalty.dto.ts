@@ -73,3 +73,20 @@ export class DecideRedemptionDto {
   @IsOptional() @IsString() @MaxLength(500)
   note?: string;
 }
+
+// F4-13c: laporan perbaikan sikap antar-tenant (anonim).
+export class CreatePeerReportDto {
+  @IsInt() @Min(1)
+  reporteeTenantId!: number;
+
+  @IsString() @MaxLength(60)
+  category!: string;
+
+  @IsString() @MaxLength(500)
+  description!: string;
+}
+
+export class ModeratePeerReportDto {
+  @IsIn(['ACKNOWLEDGE', 'DISMISS'])
+  decision!: 'ACKNOWLEDGE' | 'DISMISS';
+}

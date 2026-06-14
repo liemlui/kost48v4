@@ -9,6 +9,10 @@ export const LOYALTY_POINTS = {
 
 export type EarnReason = keyof typeof LOYALTY_POINTS;
 
+// F4-13c / F4-13 (S-4): sumber poin tambahan (reason ADJUSTMENT + sourceType khusus).
+export const LOYALTY_POINTS_PEER_IMPROVEMENT = Number(process.env.LOYALTY_POINTS_PEER_IMPROVEMENT ?? 40);
+export const LOYALTY_POINTS_REFERRAL = Number(process.env.LOYALTY_POINTS_REFERRAL ?? 150);
+
 // F4-9: estimasi nilai 1 poin dalam Rupiah (setelan owner, env-override). Dipakai untuk
 // menyarankan biaya poin sebuah reward dari nilai rupiahnya → owner fleksibel mengatur
 // reward (mis. layanan in-house: pembersihan/cat ulang kamar, voucher WiFi).

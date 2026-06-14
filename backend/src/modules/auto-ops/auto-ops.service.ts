@@ -11,6 +11,7 @@ import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
 import { AssetsService } from '../assets/assets.service';
 import { PushService } from '../push/push.service';
+import { ReferralService } from '../loyalty/referral.service';
 import { jakartaYearMonth, previousJakartaYearMonth } from './auto-ops-period.helper';
 
 type AutoOpsRunResult = {
@@ -43,6 +44,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly assetsService: AssetsService,
     private readonly pushService: PushService,
     private readonly rentRecognitionService: RentRecognitionService,
+    private readonly referralService: ReferralService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -125,6 +127,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const automaticDepreciation = await this.runAutomaticDepreciation(options);
       const rentRecognition = await this.runRentRecognition(options);
       const acCleaning = await this.runAcCleaningSchedule(options);
+      await this.runReferralRewards(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       const notificationPruning = await this.runNotificationPruning(options);
       const pushDispatch = await this.runPushDispatch(options);
@@ -667,6 +670,23 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { abandoned };
+  }
+
+  /**
+   * F4-13: pemberian poin referral — referral PENDING yang teman-nya sudah tenant aktif.
+   * Best-effort; nonaktif via env REFERRAL_REWARDS_ENABLED=false.
+   */
+  async runReferralRewards(options: { actorUserId?: number | null; source?: string } = {}) {
+    const source = options.source ?? 'AUTO_OPS_REFERRAL_REWARDS';
+    const enabled = String(process.env.REFERRAL_REWARDS_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { skipped: true, skippedReason: 'REFERRAL_REWARDS_DISABLED', source };
+    try {
+      const result = await this.referralService.rewardEligible({ actorUserId: options.actorUserId ?? null });
+      return { ...result, skipped: false, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps referral rewards gagal: ${error?.message ?? error}`);
+      return { skipped: true, skippedReason: error?.message ?? 'Referral rewards skipped', source };
+    }
   }
 
   /**

@@ -496,6 +496,7 @@ model User {
   staysFledMarked              Stay[]                     @relation("StayFledMarkedBy")
   tenantsKtpVerified           Tenant[]                   @relation("TenantKtpVerifiedBy")
   roomTransfersCreated         RoomTransfer[]             @relation("RoomTransferCreatedBy")
+  peerReportsModerated         PeerBehaviorReport[]       @relation("PeerReportModeratedBy")
 
   @@index([role])
   @@index([isActive])
@@ -541,6 +542,12 @@ model Tenant {
   depositLedgerEntries TenantDepositLedgerEntry[]
   loyaltyPoints        LoyaltyPoint[]
   redemptions          Redemption[]
+  // F4-13/S-4: referral + quest perbaikan sikap.
+  referralCode         String?                    @unique
+  referralsMade        TenantReferral[]           @relation("ReferralReferrer")
+  referredReferral     TenantReferral?            @relation("ReferralReferred")
+  peerReportsMade      PeerBehaviorReport[]       @relation("PeerReportReporter")
+  peerReportsReceived  PeerBehaviorReport[]       @relation("PeerReportReportee")
 
   @@index([fullName])
   @@index([phone])
@@ -1825,6 +1832,64 @@ model Redemption {
   journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
+  @@index([status])
+}
+
+// F4-13c (S-4): quest perbaikan sikap antar-tenant ANONIM. reporter dirahasiakan dari
+// reportee; konfirmasi membaik oleh A atau admin; B dapat poin saat CONFIRMED.
+enum PeerReportStatus {
+  PENDING_REVIEW
+  ACKNOWLEDGED
+  IMPROVED
+  CONFIRMED
+  DISMISSED
+}
+
+model PeerBehaviorReport {
+  id               Int              @id @default(autoincrement())
+  reporterTenantId Int
+  reporteeTenantId Int
+  category         String
+  description      String
+  status           PeerReportStatus @default(PENDING_REVIEW)
+  moderatedById    Int?
+  acknowledgedAt   DateTime?
+  improvedAt       DateTime?
+  confirmedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  reporter    Tenant @relation("PeerReportReporter", fields: [reporterTenantId], references: [id], onDelete: Cascade)
+  reportee    Tenant @relation("PeerReportReportee", fields: [reporteeTenantId], references: [id], onDelete: Cascade)
+  moderatedBy User?  @relation("PeerReportModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
+
+  @@index([reporteeTenantId, status])
+  @@index([reporterTenantId])
+  @@index([status])
+}
+
+// F4-13 (S-4): referral teman via KODE saat booking. Referrer dapat poin saat teman aktif.
+enum ReferralStatus {
+  PENDING
+  JOINED
+  REWARDED
+  CANCELLED
+}
+
+model TenantReferral {
+  id               Int            @id @default(autoincrement())
+  referrerTenantId Int
+  referredTenantId Int?           @unique
+  status           ReferralStatus @default(PENDING)
+  rewardedAt       DateTime?
+  note             String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  referrer Tenant  @relation("ReferralReferrer", fields: [referrerTenantId], references: [id], onDelete: Cascade)
+  referred Tenant? @relation("ReferralReferred", fields: [referredTenantId], references: [id], onDelete: SetNull)
+
+  @@index([referrerTenantId])
   @@index([status])
 }
 

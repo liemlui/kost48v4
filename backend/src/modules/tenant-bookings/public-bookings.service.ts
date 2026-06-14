@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import { LeadSource, PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
 import { roundRupiah } from '../../common/business/money.helper';
+import { ReferralService } from '../loyalty/referral.service';
 import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops.constants';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
@@ -110,7 +111,10 @@ const BOOKING_SELECT = Prisma.sql`
 
 @Injectable()
 export class PublicBookingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly referral: ReferralService,
+  ) {}
 
   // ---------------------------------------------------------------------------
   // PUBLIC: createPublicBooking
@@ -265,6 +269,11 @@ export class PublicBookingsService {
             },
             include: { user: { select: { id: true, isActive: true } } },
           });
+
+          // F4-13: tautkan referral bila teman memasukkan kode (di dalam tx pembuatan tenant).
+          if (dto.referralCode) {
+            await this.referral.linkReferralTx(tx, { referralCode: dto.referralCode, referredTenantId: tenant.id });
+          }
         }
 
         let portalUser = tenant.user ?? null;
