@@ -39,6 +39,8 @@ const MyBookingsPage = lazy(() => import('./pages/portal/MyBookingsPage'));
 const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
 const MyStayPage = lazy(() => import('./pages/portal/MyStayPage'));
 const MyTicketsPage = lazy(() => import('./pages/portal/MyTicketsPage'));
+const MyLoyaltyPage = lazy(() => import('./pages/portal/MyLoyaltyPage'));
+const LoyaltyAdminPage = lazy(() => import('./pages/loyalty/LoyaltyAdminPage'));
 const WifiOrderPage = lazy(() => import('./pages/portal/WifiOrderPage'));
 const ConfiguredResourcePage = lazy(() => import('./pages/resources/ConfiguredResourcePage'));
 const BookingPage = lazy(() => import('./pages/bookings/BookingPage'));
@@ -172,6 +174,8 @@ export default function App() {
           <Route path="/portal/invoices" element={<RequireRoles allowed={['TENANT']}><MyInvoicesPage /></RequireRoles>} />
           <Route path="/portal/invoices/:id" element={<RequireRoles allowed={['TENANT']}><TenantInvoiceDetailPage /></RequireRoles>} />
           <Route path="/portal/tickets" element={<RequireRoles allowed={['TENANT']}><MyTicketsPage /></RequireRoles>} />
+          <Route path="/portal/loyalty" element={<RequireRoles allowed={['TENANT']}><MyLoyaltyPage /></RequireRoles>} />
+          <Route path="/loyalty" element={<RequireRoles allowed={['OWNER', 'ADMIN']}><LoyaltyAdminPage /></RequireRoles>} />
           <Route path="/portal/wifi" element={<RequireRoles allowed={['TENANT']}><WifiOrderPage /></RequireRoles>} />
           </Route>
         </Route>

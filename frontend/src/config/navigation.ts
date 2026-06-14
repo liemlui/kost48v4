@@ -39,6 +39,7 @@ const ownerSections: NavigationSection[] = [
     links: [
       { to: '/staff-performance', label: 'Kinerja Staff', icon: '📋', hint: 'KPI staff, audit, review, tiket, dan rutinitas kerja.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Buat dan kelola pengumuman untuk penghuni.' },
+      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Katalog reward, kelola poin, dan setujui penukaran tenant.' },
     ],
   },
   {
@@ -62,6 +63,7 @@ const adminSections: NavigationSection[] = [
       { to: '/invoices', label: 'Keuangan', icon: '🧾', hint: 'Tagihan, review pembayaran, voucher WiFi, pendapatan tambahan, dan pengeluaran.', activePaths: ['/invoices', '/invoice-payments', '/payment-submissions/review', '/wifi-sales', '/ancillary-revenue', '/expenses', '/finance/accounting-setup', '/finance/assets'] },
       { to: '/tickets', label: 'Staff & Tiket', icon: '👷', hint: 'Tiket operasional, staff, checklist, laporan lapangan, dan kinerja.', activePaths: ['/tickets', '/staff-routines', '/staff-performance'] },
       { to: '/rooms', label: 'Kamar & Stok', icon: '🏘️', hint: 'Status kamar, barang kamar, stok gudang, dan mutasi stok.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
+      { to: '/loyalty', label: 'Loyalitas & Reward', icon: '🎁', hint: 'Setujui penukaran reward tenant dan lihat katalog.' },
     ],
   },
 ];
@@ -105,6 +107,7 @@ function getTenantSections(stage: TenantPortalStage = 'occupied'): NavigationSec
       { to: '/portal/stay', label: 'Panduan Kos Saya', icon: '🏠', hint: 'Kamar, masa sewa, tagihan, dan aksi berikutnya.' },
       { to: '/portal/invoices', label: 'Tagihan Saya', icon: '🧾', hint: 'Tagihan, status, dan tindak lanjut pembayaran.' },
       { to: '/portal/tickets', label: 'Laporan Saya', icon: '🎫', hint: 'Buat laporan bantuan dan pantau progresnya.' },
+      { to: '/portal/loyalty', label: 'Poin & Reward', icon: '🎁', hint: 'Kumpulkan poin loyalitas dan tukar dengan reward.' },
       { to: '/portal/wifi', label: 'Pesan WiFi', icon: '📶', hint: 'Lihat prosedur pembelian paket WiFi melalui WhatsApp.' },
     ],
   }];

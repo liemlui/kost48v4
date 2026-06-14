@@ -1,6 +1,6 @@
 # DOSSIER 19 — GAMIFIKASI & LOYALITAS TENANT
 **Domain:** program poin loyalitas tenant + reward (retensi). **Fitur BARU (F4-9) — belum ada di kode.** Ide owner.
-**Status:** 📅 FASE 4 (bangun setelah sistem inti sehat & publish). Desain siap.
+**Status:** 🟢 SELESAI (F4-9, 2026-06-15) — schema + poin (4 trigger) + katalog + redemption (jurnal M4) + frontend tenant/admin. Ide perluasan = §2b (backlog F4-13/F4-14).
 **Tujuan:** retensi (CLV ↑) + kumpulkan data marketing sukarela ("kayak game biar happy") + onboarding minimal (nama+HP+KTP, sisanya via quest).
 
 ---

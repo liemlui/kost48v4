@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-9): Gamifikasi & Loyalitas tenant — SELESAI (schema S-2, dossier 19)
+
+- **Schema additive (S-2):** `LoyaltyPoint` (ledger append-only, unique sourceType+sourceId) + `LoyaltyReward` (katalog) + `Redemption` (penukaran, wajib approve, journalEntryId) + 3 enum (`LoyaltyPointReason`/`LoyaltyRewardType`/`RedemptionStatus`) + back-rel Tenant/JournalEntry. Migration `20260615100000_f4_9_loyalty`.
+- **Poin (default dossier 19, env-override):** `LoyaltyService.award/earn/earnSafe` (idempotent per sourceType+sourceId), `balance`, `history`. **4 trigger earn:** RENEWAL +100 (renew COMPLETED), ON_TIME_PAYMENT +50 (invoice PAID & paidAt≤dueDate), VALIDATED_REPORT +30 (tiket PORTAL tenant → CLOSED, cek AuditLog source=PORTAL), ONBOARDING_QUEST +200 sekali (profil lengkap kecuali KTP). Semua best-effort di luar tx.
+- **Redemption (M3/M4):** `RedemptionService` — katalog CRUD (OWNER) + `requestRedemption` (potong poin saat ajukan + kurangi stok + guard anti-overspend, atomik) + `decideRedemption` (REJECT→refund poin+kembalikan stok; APPROVE→FULFILLED + **jurnal reward DR 6300 Marketing / CR 2100 AP** untuk reward bernilai). Endpoint tenant `/me/loyalty(+/redemptions)`, admin `/loyalty/rewards|redemptions(+/decide)`.
+- **Frontend:** `MyLoyaltyPage` (saldo + katalog + tukar + riwayat + penukaran saya) + `LoyaltyAdminPage` (kelola reward modal CRUD OWNER + approve/reject penukaran OWNER/ADMIN) + nav `🎁 Poin & Reward`/`Loyalitas & Reward` (tenant/owner/admin) + route `/portal/loyalty` & `/loyalty`.
+- **Gate LULUS:** `tsc` 0; `node --test` **39/39** (+`loyalty.constants.test.js`); FE build + PWA verify (98 chunk). **UAT runtime (DB 5433):** award idempotent (dup di-skip, saldo 100+50=150, redeem −30→120); redemption request −500/stok−, reject +500/stok+, approve→FULFILLED + jurnal DR6300/CR2100=200000 **trial balance seimbang**; ONBOARDING_QUEST parsial=0/lengkap=+200/idempotent. Semua residu UAT dibersihkan.
+- **Ide perluasan owner → backlog F4-13** (review-renewal/referral/quest-sikap) **& F4-14** (tip staf P2P, tidak dijurnal).
+
 ## 2026-06-15 — feat(F4-8): Pindah kamar resmi (E4) — SELESAI, schema S-2 + 5 keputusan desain owner
 
 - **Keputusan desain owner (D-20, 2026-06-15):** Stay **SAMA** (roomId diperbarui, tak putus kontrak); **deposit ikut apa adanya**; **harga dikunci** (rent-loyalty D-16) **kecuali override OWNER** (D-17, ADMIN dilarang ubah harga); **meter kamar baru di-snapshot**; kamar lama→MAINTENANCE+inspeksi, kamar baru→OCCUPIED.
