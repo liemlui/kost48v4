@@ -24,6 +24,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { calculatePeriodEnd } from '../stays/stays.helpers';
 import { UserRole } from '../../common/enums/app.enums';
@@ -48,6 +49,7 @@ export class PaymentSubmissionsService {
     private readonly appNotificationService: AppNotificationService,
     private readonly accountingPosting: AccountingPostingService,
     private readonly depositLedger: DepositLedgerService,
+    private readonly loyalty: LoyaltyService,
   ) {}
 
   async createSubmission(user: CurrentUserPayload, dto: CreatePaymentSubmissionDto) {
@@ -356,6 +358,7 @@ export class PaymentSubmissionsService {
 
   async approveSubmission(user: CurrentUserPayload, submissionId: number) {
     let losingTenants: Array<{ stayId: number; tenantId: number }> = [];
+    let paidInvoiceId: number | null = null; // F4-9: dipakai untuk poin ON_TIME_PAYMENT pasca-commit
     try {
       const approved = await this.prisma.$transaction(async (tx) => {
         const submission = await this.lockSubmissionTx(tx, submissionId);
@@ -515,6 +518,11 @@ export class PaymentSubmissionsService {
             paidAt: nextPaidAt,
           },
         });
+
+        // F4-9: tandai invoice yang LUNAS untuk evaluasi poin bayar-tepat-waktu (pasca-commit).
+        if (nextInvoiceStatus === InvoiceStatus.PAID) {
+          paidInvoiceId = submission.invoiceId;
+        }
 
         try {
           await this.accountingPosting.postInvoiceIssuedTx(tx, submission.invoiceId, user.id);
@@ -778,6 +786,26 @@ export class PaymentSubmissionsService {
       this.notifyPaymentApproved(approved.tenantId, submissionId).catch(() => {});
       if (losingTenants.length > 0) {
         this.notifyLosingTenants(losingTenants).catch(() => {});
+      }
+
+      // F4-9: poin bayar-tepat-waktu (best-effort, idempotent per invoiceId, di luar tx).
+      // On-time = dibayar pada/atau sebelum jatuh tempo (atau invoice tanpa dueDate).
+      if (paidInvoiceId != null && approved.tenantId) {
+        const tenantId = approved.tenantId;
+        const invoiceId = paidInvoiceId;
+        this.prisma.invoice
+          .findUnique({ where: { id: invoiceId }, select: { dueDate: true, paidAt: true } })
+          .then((inv) => {
+            const onTime = !inv?.dueDate || (inv.paidAt != null && new Date(inv.paidAt) <= new Date(inv.dueDate));
+            if (onTime) {
+              return this.loyalty.earnSafe(tenantId, 'ON_TIME_PAYMENT', String(invoiceId), {
+                note: `Pembayaran tepat waktu invoice #${invoiceId}`,
+                createdById: user.id,
+              });
+            }
+            return undefined;
+          })
+          .catch(() => undefined);
       }
       return result;
     } catch (error) {

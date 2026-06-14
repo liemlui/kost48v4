@@ -14,6 +14,7 @@ import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums
 import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
 import { computeTicketDueAt } from "./ticket-sla";
 import { AppNotificationService } from "../notifications/app-notification.service";
+import { LoyaltyService } from "../loyalty/loyalty.service";
 import {
   AssignTicketDto,
   CloseTicketDto,
@@ -33,6 +34,7 @@ export class TicketsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
     private readonly notification: AppNotificationService,
+    private readonly loyalty: LoyaltyService,
   ) {}
 
   async findAll(query: TicketsQueryDto, actor?: CurrentUserPayload) {
@@ -746,6 +748,34 @@ export class TicketsService {
       });
 
       await this.notifyTenantReviewPrompt(updated.id);
+
+      // F4-9: poin lapor-masalah-tervalidasi — HANYA tiket yang dibuat tenant via portal
+      // (sumber PORTAL di audit) dan kini ditutup (divalidasi admin). Idempotent per
+      // ticketId, best-effort di luar tx.
+      if (ticket.tenantId) {
+        const tenantId = ticket.tenantId;
+        this.prisma.auditLog
+          .findFirst({
+            where: {
+              entityType: 'Ticket',
+              entityId: String(ticket.id),
+              action: 'CREATE',
+              meta: { path: ['source'], equals: 'PORTAL' },
+            },
+            select: { id: true },
+          })
+          .then((portalCreate) => {
+            if (portalCreate) {
+              return this.loyalty.earnSafe(tenantId, 'VALIDATED_REPORT', String(ticket.id), {
+                note: `Laporan tervalidasi tiket ${ticket.ticketNumber}`,
+                createdById: actor.id,
+              });
+            }
+            return undefined;
+          })
+          .catch(() => undefined);
+      }
+
       // F3-1: notif pasca-commit (best-effort, di luar tx) —
       // K-6/K-8: pindah barang selesai → penerima = staf assignee (bukan actor);
       // room-ready: inspeksi checkout membuat kamar AVAILABLE → OWNER/ADMIN.

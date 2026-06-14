@@ -10,6 +10,7 @@ import { TogglePortalAccessDto } from './dto/toggle-portal-access.dto';
 import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
 import { TenantProfileOnboardingDto } from './dto/tenant-profile-onboarding.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { UserRole } from '../../common/enums/app.enums';
 
@@ -27,7 +28,11 @@ type OnboardingField = typeof ONBOARDING_FIELDS[number];
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly loyalty: LoyaltyService,
+  ) {}
 
   private attachPortalSummary<T extends { id: number }>(tenant: T, portalUser?: { id: number; email: string; isActive: boolean; lastLoginAt: Date | null } | null) {
     return {
@@ -228,6 +233,20 @@ export class TenantsService {
     await this.validateTenantUniqueness(data, id);
     const updated = await this.prisma.tenant.update({ where: { id }, data: data as Prisma.TenantUpdateInput });
     await this.audit.log({ actorUserId: actor.id, action: 'UPDATE', entityType: 'Tenant', entityId: String(updated.id), oldData: existing, newData: updated });
+
+    // F4-9: poin quest onboarding — sekali, saat seluruh field profil (kecuali KTP) terisi.
+    // Idempotent per tenantId (earnSafe), best-effort.
+    const onboardingComplete = ONBOARDING_FIELDS.every((field) => {
+      const value = (updated as Record<string, unknown>)[field];
+      return value !== null && value !== undefined && String(value).trim() !== '';
+    });
+    if (onboardingComplete) {
+      await this.loyalty.earnSafe(updated.id, 'ONBOARDING_QUEST', String(updated.id), {
+        note: 'Profil onboarding lengkap',
+        createdById: actor.id,
+      });
+    }
+
     return updated;
   }
 
