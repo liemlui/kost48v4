@@ -24,13 +24,22 @@ cd ../frontend; npm ci; npm run build   # tsc + vite build -> dist/
 ### 2. Database Bersih, Skema & Pagar DB
 Provision database produksi kosong `kost48_v3`. Bila database bernama sama sudah berisi data, berhenti dan minta persetujuan owner sebelum drop/recreate.
 
+**Skema = 2 opsi SETARA** (pilih salah satu), **lalu WAJIB jalankan `bootstrap.sql` + addendum**:
 ```powershell
 cd backend
-npx prisma db push
+# --- Opsi A (disarankan utk prod, sejak squash baseline 2026-06-14): replay migration ---
+npx prisma migrate deploy        # buat seluruh schema dari migrations/00000000000000_baseline
+# --- Opsi B (lama, tetap valid): db push ---
+# npx prisma db push             # schema.prisma langsung ke DB (tanpa ledger migration)
+
+# --- WAJIB sesudahnya (kedua opsi) — pagar DB di LUAR schema Prisma ---
 psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap.sql
 psql -h <host> -p 5432 -U postgres -d kost48_v3 -f sql/bootstrap_v4_addendum.sql
 ```
-bootstrap.sql idempotent (DROP IF EXISTS lalu CREATE). **Rehearsal 2026-06-13 (DB throwaway 5433): `prisma db push`→41 tabel + `bootstrap.sql`+addendum apply BERSIH (0 error), 2 unique index + 7 check constraint + 8 trigger + 231 index terbentuk.** Aman dijalankan di produksi.
+- **Squash baseline (2026-06-14):** rantai migration lama (tak lengkap) di-arsip ke `prisma/_archive_migrations_pre_baseline/`; kini ada **1 baseline** `prisma/migrations/00000000000000_baseline/migration.sql` = SELURUH schema (41 tabel/54 enum/192 index/90 FK). Terverifikasi: `migrate deploy` ke DB kosong → 42 tabel sukses; `migrate diff` baseline vs schema = empty.
+- **`bootstrap.sql` WAJIB** baik pakai Opsi A maupun B: trigger, CHECK constraint (mis. konsistensi deposit), advisory lock generate ticket-number, index tambahan, dan **carve-out guard deposit F3-16** TIDAK ada di schema Prisma. Idempotent (DROP IF EXISTS lalu CREATE).
+- **Rehearsal 2026-06-13 (DB throwaway 5433): `db push`→41 tabel + `bootstrap.sql`+addendum apply BERSIH (0 error), 2 unique index + 7 check constraint + 8 trigger + 231 index terbentuk.** Aman di produksi.
+- **DB yang sudah ada tapi dibangun via `db push` (mis. UAT lama):** ledger `_prisma_migrations` tak sinkron. Selaraskan sekali: `DELETE FROM "_prisma_migrations"` lalu `npx prisma migrate resolve --applied 00000000000000_baseline` → `migrate status` "up to date". (Prod fresh tak perlu ini.)
 
 **Tidak ada backfill E-2 atau migrasi data UAT.** Seed hanya data fondasi: COA, periode OPEN, opening balance produksi, dan CashAccount.
 
@@ -228,7 +237,7 @@ New-NetFirewallRule -DisplayName "KOST48 LAN frontend 5173" -Direction Inbound -
 4. **Setup Node.js App**: pilih versi Node, set **Application startup file = `dist/main.js`**.
 5. **SSH (di Node venv): `npm run cpanel:setup`** → `npm ci` + build (prisma generate engine Linux + tsc) + `prune --omit=dev` (ramping). `frontend/node_modules` TIDAK perlu di server.
 6. **Env** (cPanel "Environment Variables"): `DATABASE_URL`(postgres cPanel), `JWT_SECRET`(baru, kuat), `NODE_ENV=production`, `CORS_ORIGIN=https://domain` (same-origin → domain saja), **`AUTO_OPS_ENABLED=false`** (shared hosting: digerakkan cron, bukan setInterval), **`AUTO_OPS_CRON_TOKEN=<rahasia panjang>`**. (PORT diatur Passenger.)
-7. **Schema+seed (SSH, sekali): `npm run cpanel:migrate`** (= `prisma db push`) → `psql "<DATABASE_URL>" -f sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` → seed **OWNER** (INSERT bcryptjs) → login OWNER lalu seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount.
+7. **Schema+seed (SSH, sekali): `npm run cpanel:migrate`** (= `prisma db push`; alternatif sejak baseline 2026-06-14: `npx prisma migrate deploy`) → **WAJIB** `psql "<DATABASE_URL>" -f sql/bootstrap.sql` + `bootstrap_v4_addendum.sql` (trigger/CHECK/carve-out F3-16 di luar schema Prisma) → seed **OWNER** (INSERT bcryptjs) → login OWNER lalu seed COA (`POST /api/accounting/default-coa/seed`) + periode OPEN + CashAccount.
 8. **Restart App** (Passenger pakai `dist/main.js`). **AutoSSL** domain → HTTPS (PWA penuh).
 9. **Auto-ops**: pasang cPanel **Cron Job** tiap 5–10 menit memanggil `GET /api/auto-ops/cron` dgn `X-Cron-Token` (perintah lengkap di "Status kode" atas). Verifikasi: jalankan manual sekali → cek notif/sweeper berjalan.
 10. Smoke: `https://domain/` (frontend) · `https://domain/api/public/rooms` 200 · login OWNER · trial-balance balanced · reconciliation-lite mismatch=0.
