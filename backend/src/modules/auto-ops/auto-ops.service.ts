@@ -101,6 +101,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       // paralel menimbulkan race double-cancel dengan hasil DP/jaminan berbeda.
       const bookingResult = await this.runBookingExpiry(options);
       await this.runContractEndReminders(options);
+      await this.runTicketSlaEscalation(options);
       // F2-1 inc.3: sweeper renewal (hibrida) — expiry prioritas OTOMATIS, forfeit DITANDAI.
       await this.runRenewalPriorityExpiry(options);
       await this.runRenewalSettlementForfeit(options);
@@ -593,6 +594,73 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
    * Notifikasi in-app ke tenant promoted yang plannedCheckOutDate-nya mendekat,
    * dedupe per stay per gelombang lewat judul notifikasi.
    */
+  /**
+   * F3-19: eskalasi tiket yang melewati SLA (dueAt) dan belum selesai.
+   * L0->1 (staf lewat SLA) → notif ADMIN+OWNER; L1->2 (setelah grace) → notif OWNER.
+   * escalationLevel mencegah pemrosesan ulang; createOnce mencegah notif ganda.
+   */
+  async runTicketSlaEscalation(options: { actorUserId?: number | null; source?: string } = {}) {
+    void options;
+    const now = new Date();
+    const overdue = await this.prisma.ticket.findMany({
+      where: {
+        dueAt: { not: null, lt: now },
+        status: { in: ['OPEN', 'IN_PROGRESS'] as any },
+        escalationLevel: { lt: 2 },
+      },
+      select: {
+        id: true,
+        ticketNumber: true,
+        title: true,
+        dueAt: true,
+        escalationLevel: true,
+        room: { select: { code: true, name: true } },
+        assignedTo: { select: { fullName: true } },
+      },
+      take: 200,
+    });
+    if (overdue.length === 0) return { escalated: 0 };
+
+    const ownerGraceMs = 24 * 60 * 60 * 1000; // L1->2 hanya setelah 1 hari tambahan
+    let escalated = 0;
+    for (const t of overdue) {
+      const due = t.dueAt as Date;
+      const nextLevel = t.escalationLevel === 0 ? 1 : 2;
+      if (nextLevel === 2 && now.getTime() < due.getTime() + ownerGraceMs) continue;
+
+      await this.prisma.ticket.update({
+        where: { id: t.id },
+        data: { escalationLevel: nextLevel, escalatedAt: now },
+      });
+      escalated += 1;
+
+      const roomLabel = t.room?.code || t.room?.name || '';
+      const ticketLabel = t.title || t.ticketNumber || `Tiket #${t.id}`;
+      const targetRoles = nextLevel === 1 ? ['ADMIN', 'OWNER'] : ['OWNER'];
+      const recipients = await this.prisma.user.findMany({
+        where: { role: { in: targetRoles as any }, isActive: true },
+        select: { id: true },
+      });
+      const title = `⚠️ SLA tiket terlewat (eskalasi L${nextLevel}) — ${ticketLabel}`;
+      const body = `Tiket "${ticketLabel}"${roomLabel ? ` (kamar ${roomLabel})` : ''} melewati batas SLA ${due.toISOString().slice(0, 10)}${t.assignedTo?.fullName ? `, PJ ${t.assignedTo.fullName}` : ''}. ${nextLevel === 1 ? 'Mohon ditindaklanjuti.' : 'Eskalasi ke OWNER — perlu perhatian segera.'}`;
+      for (const u of recipients) {
+        await this.appNotification
+          .createOnce({
+            recipientUserId: u.id,
+            title,
+            body,
+            linkTo: '/tickets',
+            entityType: 'TicketSla',
+            entityId: `${t.id}:L${nextLevel}`,
+          })
+          .catch((err) =>
+            this.logger.warn(`Notif eskalasi SLA tiket #${t.id} gagal: ${err instanceof Error ? err.message : String(err)}`),
+          );
+      }
+    }
+    return { escalated };
+  }
+
   async runContractEndReminders(options: { actorUserId?: number | null; source?: string } = {}) {
     void options;
     const now = new Date();

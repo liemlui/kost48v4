@@ -101,4 +101,11 @@ export class AutoOpsController {
   async runContractReminders(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps contract-end reminders berhasil dijalankan', data: await this.autoOpsService.runContractEndReminders({ actorUserId: user.id, source: 'MANUAL_CONTRACT_REMINDERS_RUN' }) };
   }
+
+  // F3-19: trigger manual eskalasi SLA tiket (UAT/ops).
+  @Post('run/ticket-sla')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runTicketSla(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps eskalasi SLA tiket berhasil dijalankan', data: await this.autoOpsService.runTicketSlaEscalation({ actorUserId: user.id, source: 'MANUAL_TICKET_SLA_RUN' }) };
+  }
 }

@@ -230,6 +230,34 @@ export class StaffPerformanceService {
     const roomChecks = tickets.filter((item) => String(item.category ?? '').toUpperCase().includes('CEK_KAMAR'));
     const missingRoutineProof = routineDone.filter((item) => item.template.requiresPhoto && !item.photoUrl).length;
     const missingTicketProof = ticketsDone.filter((item) => !item.resolutionImageUrl).length;
+    // F3-19: metrik SLA & waktu penyelesaian ADIL — dihitung dari assignedAt
+    // (bukan createdAt), sehingga idle di antrean tak menghukum staf. Hanya
+    // diekspos (tidak mengubah formula skor) agar owner bisa menilai dulu.
+    const ticketsWithSla = ticketsDone.filter(
+      (item) => item.dueAt != null && item.resolvedAt != null,
+    );
+    const slaBreached = ticketsWithSla.filter(
+      (item) => (item.resolvedAt as Date) > (item.dueAt as Date),
+    ).length;
+    const slaOnTime = ticketsWithSla.length - slaBreached;
+    const resolutionHours = ticketsDone
+      .filter((item) => item.assignedAt != null && item.resolvedAt != null)
+      .map(
+        (item) =>
+          ((item.resolvedAt as Date).getTime() - (item.assignedAt as Date).getTime()) /
+          3_600_000,
+      );
+    const avgResolutionHours = resolutionHours.length
+      ? Math.round((resolutionHours.reduce((a, b) => a + b, 0) / resolutionHours.length) * 10) / 10
+      : null;
+    const ticketsDoneByCategory = ticketsDone.reduce<Record<string, number>>(
+      (acc, item) => {
+        const key = (item.category ?? 'LAINNYA').toUpperCase();
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
     const auditPass = audits.filter((item) => item.result === StaffAuditResult.PASS).length;
     const auditNeedsFix = audits.filter((item) => item.result === StaffAuditResult.NEEDS_FIX).length;
     const auditFailed = audits.filter((item) => item.result === StaffAuditResult.FAILED).length;
@@ -269,6 +297,10 @@ export class StaffPerformanceService {
         routineDone: routineDone.length,
         routineNeedHelp: routineNeedHelp.length,
         ticketsDone: ticketsDone.length,
+        slaOnTime,
+        slaBreached,
+        avgResolutionHours,
+        ticketsDoneByCategory,
         meterCount: meters.length,
         stockReports: stockReports.length,
         roomChecks: roomChecks.length,

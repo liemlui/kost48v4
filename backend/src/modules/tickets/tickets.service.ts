@@ -12,6 +12,7 @@ import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums";
 import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
+import { computeTicketDueAt } from "./ticket-sla";
 import { AppNotificationService } from "../notifications/app-notification.service";
 import {
   AssignTicketDto,
@@ -422,9 +423,15 @@ export class TicketsService {
       throw new ConflictException("Assignee tidak valid untuk role ticketing");
     }
 
+    // F3-19: set assignedAt + dueAt (SLA) saat penugasan PERTAMA (clock SLA mulai
+    // dari penugasan, bukan pembuatan). Re-assign tak me-reset jam SLA.
+    const slaPatch =
+      ticket.assignedAt == null
+        ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
+        : {};
     const updated = await this.prisma.ticket.update({
       where: { id },
-      data: { assignedToId: dto.assignedToId },
+      data: { assignedToId: dto.assignedToId, ...slaPatch },
     });
     await this.audit.log({
       actorUserId: actor.id,
@@ -481,11 +488,18 @@ export class TicketsService {
       }
     }
 
+    // F3-19: bila tiket dikerjakan tanpa pernah di-assign formal (mis. STAFF
+    // mulai langsung), mulai jam SLA sekarang.
+    const slaPatch =
+      ticket.assignedAt == null
+        ? { assignedAt: new Date(), dueAt: computeTicketDueAt(ticket.category, new Date()) }
+        : {};
     const updated = await this.prisma.ticket.update({
       where: { id },
       data: {
         status: "IN_PROGRESS",
         ...(actor.role === "STAFF" ? { assignedToId: actor.id } : {}),
+        ...slaPatch,
       },
     });
     await this.audit.log({

@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — feat(F3-19): SLA tiket — dueAt per kategori, resolved-time adil, eskalasi
+
+- **Schema (approved):** `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt` + index `dueAt`.
+- **SLA per kategori (`ticket-sla.ts`):** `dueAt = assignedAt + window` — **24 jam** EMERGENCY/SECURITY/KUNCI · **3 hari** KERUSAKAN/MAINTENANCE/KEBERSIHAN/CHECKOUT_INSPECTION · **7 hari** INVENTARIS/AUDIT/PEMERIKSAAN/BARANG_PINDAH (+default 7 hari). Di-set saat penugasan PERTAMA (`assign`/`start`); re-assign tak me-reset jam.
+- **KPI adil (K-1):** waktu penyelesaian dihitung dari `assignedAt` (bukan `createdAt`) → idle antrean tak menghukum staf. Staff summary kini ekspos `slaOnTime`, `slaBreached`, `avgResolutionHours`, dan `ticketsDoneByCategory` (breakdown K-3). Formula skor TIDAK diubah (hanya diekspos).
+- **Eskalasi (K-2):** sweeper `runTicketSlaEscalation` (di `runAll` + endpoint `POST /auto-ops/run/ticket-sla`) — tiket lewat `dueAt` & belum selesai: L0→1 notif ADMIN+OWNER; L1→2 (setelah grace 1 hari) notif OWNER. Dedupe per (tiket, level) via `escalationLevel` + `createOnce`.
+- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau. (Tampilan dashboard metrik baru = polish frontend lanjutan.)
+
 ## 2026-06-14 — ops(F3-13): hardening checkout/notif (B-06/B-07/B-11/B-12/B-14/N-02) SELESAI
 
 - **B-07 (D-03):** forced-checkout overstay tak lagi diblokir tagihan **DRAFT** (belum terbit, tanpa jurnal). `forceCheckoutOverstay` mengecualikan DRAFT dari blocker pra-tx & re-cek in-tx, lalu membatalkan DRAFT yang tersisa di dalam tx (aman, tanpa reversal). Sebelumnya 1 DRAFT terlupakan = overstay tak pernah auto-checkout + alert merah harian.

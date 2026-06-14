@@ -24,9 +24,9 @@
 ## 3. Temuan audit
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
-| K-1 | 🟠 P2 | Ticket resolved time dihitung dari `createdAt` bukan `assignedAt` — idle time in queue masuk KPI staf. | `staff-performance.service.ts` | bagian **F3-19** |
-| K-2 | 🟡 P3 | SLA monitoring belum ada. | — | **F3-19** |
-| K-3 | 🟡 P3 | Dashboard mencampur kategori tiket yang tidak sebanding. | Frontend KPI dashboard | bagian **F3-19** |
+| K-1 | ✅ RESOLVED (F3-19, 2026-06-14) | Waktu penyelesaian KPI dihitung dari `assignedAt` (bukan `createdAt`) via `avgResolutionHours` di staff summary — idle antrean tak menghukum staf. | `staff-performance.service.ts` | **F3-19** |
+| K-2 | ✅ RESOLVED (F3-19, 2026-06-14) | SLA per kategori (`Ticket.dueAt`, `ticket-sla.ts`) + eskalasi `runTicketSlaEscalation` (L0→1 admin, L1→2 owner). | `tickets.service.ts`, `auto-ops.service.ts` | **F3-19** |
+| K-3 | 🟡 BACKEND DONE / FE polish (F3-19) | Backend ekspos `ticketsDoneByCategory` + `slaOnTime/slaBreached`; tampilan breakdown di dashboard FE = polish lanjutan. | `staff-performance.service.ts` (+FE) | **F3-19** |
 | K-4 | 🟡 P3 | Review tenant ≤2⭐ wajib kategori komplain — verified OK (V5.10.0). | `TenantStaffReviewPrompt` | pertahankan |
 | K-5 | 🟡 P3 | **MonthRange menggunakan UTC/server time, bukan WIB** sehingga laporan bulanan bisa bergeser hari. | `staff-performance.service.ts`/rutinitas | **F2-14** |
 | K-6 | 🟡 P3 | Ticket BARANG_PINDAH closed → penerima notif salah. | `tickets.service.ts` notif | **F3-1** |
@@ -38,7 +38,7 @@
 - **F2-14 · FASE 2:** monthRange WIB timezone fix. (K-5)
 - **F2-18 · FASE 2:** model tenant-pengawas dan staff boleh close inspeksi dengan guard keselamatan.
 - **F3-1 · FASE 3:** fix notification recipient untuk ticket BARANG_PINDAH. (K-6/K-8)
-- **F3-19 · FASE 3:** resolved time dari `assignedAt`, breakdown kategori, SLA, dan escalation.
+- **F3-19 · FASE 3 (SELESAI backend 2026-06-14):** `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt`. SLA per kategori (`ticket-sla.ts`, 24j/3h/7h) di-set saat assign pertama (`assign`/`start`); KPI resolved-time dari `assignedAt` + `slaOnTime/slaBreached/avgResolutionHours/ticketsDoneByCategory`; eskalasi sweeper `runTicketSlaEscalation` (L0→1 admin, L1→2 owner, dedupe per level) + endpoint `POST /auto-ops/run/ticket-sla`. tsc 0 · unit 26/26. (Tampilan FE = polish.)
 - **F3-20 · FASE 3 (SELESAI 2026-06-14):** tiket tenant ber-assignee STAFF memicu notifikasi ajakan review pada DONE dan CLOSED. Dedupe memakai recipient+title+entity; deep-link membuka `/portal/tickets`, tempat `TenantStaffReviewPrompt` mengambil tiket eligible.
 - **F2-10/F3-5 · DITUNDA:** round-robin dan leaderboard antar-staf selama staf hanya satu.
 
