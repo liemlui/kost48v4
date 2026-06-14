@@ -9,6 +9,7 @@ import { Prisma } from '../../generated/prisma';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import { LeadSource, PricingTerm, RoomStatus, StayStatus, UserRole } from '../../common/enums/app.enums';
+import { roundRupiah } from '../../common/business/money.helper';
 import { AUTO_OPS_DEADLINES, hoursFromNow } from '../../common/business/auto-ops.constants';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { normalizePhone } from '../../common/utils/phone.util';
@@ -331,7 +332,7 @@ export class PublicBookingsService {
             ${plannedCheckOutDate},
             ${expiresAt},
             ${room.defaultDepositRupiah ?? 0},
-            ${Math.round((agreedRentAmountRupiah * 30) / 100)},
+            ${roundRupiah((agreedRentAmountRupiah * 30) / 100)},
             ${room.electricityTariffPerKwhRupiah ?? 0},
             ${room.waterTariffPerM3Rupiah ?? 0},
             CAST(${LeadSource.WEBSITE} AS "LeadSource"),

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Prisma } from "../../generated/prisma";
 import { PrismaService } from "../../prisma/prisma.service";
+import { rupiahAmount } from "../../common/business/money.helper";
 import {
   type AutoSourceType,
   dateOnly,
@@ -34,11 +35,9 @@ type PostJournalInput = {
   lines: JournalLineInput[];
 };
 
+// F4-10: delegasikan ke helper Rupiah terpusat (satu sumber pembulatan).
 function rupiah(value?: number | null) {
-  const numberValue = Number(value ?? 0);
-  return Number.isFinite(numberValue)
-    ? Math.max(0, Math.round(numberValue))
-    : 0;
+  return rupiahAmount(value);
 }
 
 function sourceEntryNumber(sourceType: string, sourceId: string) {

@@ -88,6 +88,7 @@
 - [x] **F4-7** Pruning notifikasi >90 hari (N-04) — dossier **16** (SELESAI 2026-06-14). `AppNotificationService.pruneOlderThan(90, batch 5000)` + sweeper `runNotificationPruning` di akhir `runAll` (env `NOTIFICATION_RETENTION_DAYS`/`NOTIFICATION_PRUNING_ENABLED`) + endpoint `POST /auto-ops/run/notification-pruning`. **UAT (ROLLBACK):** umur 100hr terhapus, 10hr tetap. tsc 0.
 - [ ] **F4-8** 🧬 Flow pindah kamar resmi (E4) — desain dulu.
 - [ ] **F4-9** 🧬 Gamifikasi/loyalitas tenant — dossier **19** (desain lengkap) · schema TenantPoint/RewardCatalog/Redemption · bangun setelah inti sehat.
+- [x] **F4-10** Standarisasi pembulatan Rupiah (F-31) — dossier **13** (SELESAI 2026-06-14). Helper terpusat `common/business/money.helper.ts` (`roundRupiah`/`rupiahAmount`, tie half-away-from-zero) menggantikan `Math.round` mentah di 8 call-site Rupiah (util/DP/depresiasi/revenue-per-kamar + helper `rupiah` posting). `accounting-period-close` (DO-NOT-TOUCH) sengaja dilewati. tsc 0 · `node --test` 32/32 · UAT TB seimbang + akun 2000 saldo kredit.
 
 ## ⏸️ DITUNDA (1 staf — aktifkan saat staf ≥ 2)
 - [ ] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15**.

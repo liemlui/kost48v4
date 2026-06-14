@@ -6,10 +6,11 @@ import { AccountingPostingService } from '../accounting/accounting-posting.servi
 import { CreateFixedAssetDto, RunDepreciationDto, UpdateFixedAssetDto } from './dto/asset.dto';
 import { AssetLedgerAlignmentDto } from './dto/asset-ledger-alignment.dto';
 import { DepreciationPreviewQueryDto, FixedAssetsQueryDto } from './dto/asset-query.dto';
+import { roundRupiah, rupiahAmount } from '../../common/business/money.helper';
 
+// F4-10: delegasikan ke helper Rupiah terpusat (satu sumber pembulatan).
 function rupiah(value?: number | null) {
-  const parsed = Number(value ?? 0);
-  return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+  return rupiahAmount(value);
 }
 
 function dateOnly(value: Date | string) {
@@ -484,7 +485,7 @@ export class AssetsService {
       const accumulatedBefore = rupiah(asset.accumulatedDepreciationRupiah);
       const depreciableBase = Math.max(cost - salvage, 0);
       const remaining = Math.max(depreciableBase - accumulatedBefore, 0);
-      const monthly = Math.max(1, Math.round(depreciableBase / Math.max(Number(asset.usefulLifeMonths || 1), 1)));
+      const monthly = Math.max(1, roundRupiah(depreciableBase / Math.max(Number(asset.usefulLifeMonths || 1), 1)));
       const depreciationAmount = Math.min(monthly, remaining);
       const accumulatedAfter = accumulatedBefore + depreciationAmount;
       const bookValueBefore = Math.max(cost - accumulatedBefore, 0);
@@ -686,7 +687,7 @@ export class AssetsService {
       accumulatedDepreciationRupiah: accumulated,
       bookValueRupiah: Math.max(cost - accumulated, salvage),
       depreciableBaseRupiah: Math.max(cost - salvage, 0),
-      monthlyDepreciationRupiah: Math.max(0, Math.round(Math.max(cost - salvage, 0) / Math.max(Number(asset.usefulLifeMonths || 1), 1))),
+      monthlyDepreciationRupiah: rupiahAmount(Math.max(cost - salvage, 0) / Math.max(Number(asset.usefulLifeMonths || 1), 1)),
       ledgerAlignment: this.formatLedgerAlignmentState(asset),
       depreciationHistory: includeHistory ? (asset.depreciationLines ?? []) : undefined,
     };

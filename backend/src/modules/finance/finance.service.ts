@@ -2,6 +2,7 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { CheckoutRequestStatus, InvoiceStatus, PaymentSubmissionStatus, RenewRequestStatus, RoomStatus, StayStatus, TicketStatus } from '../../common/enums/app.enums';
 import { FinancePeriodQueryDto } from './dto/finance-query.dto';
+import { roundRupiah } from '../../common/business/money.helper';
 
 type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'BLOCKER';
 
@@ -231,7 +232,7 @@ export class FinanceService {
       maintenanceRooms,
       occupancyRatePercent,
       totalBilledRupiah,
-      revenuePerOccupiedRoomRupiah: occupiedRooms > 0 ? Math.round(totalBilledRupiah / occupiedRooms) : 0,
+      revenuePerOccupiedRoomRupiah: occupiedRooms > 0 ? roundRupiah(totalBilledRupiah / occupiedRooms) : 0,
       openTicketCount: openTickets,
       points: [
         { label: 'Terisi', value: occupiedRooms, route: '/reports?tab=operations' },

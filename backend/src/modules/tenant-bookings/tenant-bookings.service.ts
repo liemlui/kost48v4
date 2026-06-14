@@ -13,6 +13,7 @@ import {
   StayStatus,
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
+import { roundRupiah } from '../../common/business/money.helper';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { serializePrismaResult } from '../../common/utils/serialization';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -154,7 +155,7 @@ export class TenantBookingsService {
 
         // A18: DP (uang muka pesan kamar) = 30% × sewa sesuai pricingTerm (G4=B),
         // non-refundable, bagian dari harga sewa. TERPISAH dari deposit jaminan.
-        const downPaymentAmountRupiah = Math.round((agreedRentAmountRupiah * 30) / 100);
+        const downPaymentAmountRupiah = roundRupiah((agreedRentAmountRupiah * 30) / 100);
         // Deposit jaminan (refundable, dicek saat checkout) dari konfigurasi kamar.
         const depositAmountRupiah = room.defaultDepositRupiah ?? 0;
 
@@ -341,7 +342,7 @@ export class TenantBookingsService {
             // F1-10 (C3/D-05): deposit jaminan SELALU = Room.defaultDepositRupiah (di-snapshot saat
             // booking dibuat, tenant-bookings.create:159). Admin tak boleh override → abaikan dto.depositAmountRupiah.
             ...(dpPaidSoFar === 0
-              ? { downPaymentAmountRupiah: Math.round((dto.agreedRentAmountRupiah * 30) / 100) }
+              ? { downPaymentAmountRupiah: roundRupiah((dto.agreedRentAmountRupiah * 30) / 100) }
               : {}),
           },
         });

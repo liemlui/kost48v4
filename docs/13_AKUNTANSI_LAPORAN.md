@@ -44,7 +44,7 @@
 | F-24 | 🔴 P1 | Settlement deposit TANPA cek receipt journal → akun liabilitas 2000 bisa debit permanen (uang titipan hilang dari buku). | `accounting-posting.service.ts:602` | **F1-8**: guard cek journal receipt sebelum settlement |
 | F-29 | 🟡 INFO | `postPaymentReversalTx` = DEAD CODE (0 pemanggil) — remove payment berjurnal kini diblokir A8. | `accounting-posting.service.ts:741` | Hapus / dokumentasikan |
 | F-30 | 🟡 P3 | Ledger deposit sourceId fallback stayId → setoran jaminan manual ke-2 kena dedupe → kurang catat. | `deposit-ledger.service.ts:184` | Sertakan invoicePaymentId di sourceId |
-| F-31 | 🟡 P3 | Trial balance imbalance 0.01 akibat pembulatan → masking error di akun kecil. | Rounding di berbagai modul | **F4-10**: standarisasi pembulatan Rupiah |
+| F-31 | ✅ RESOLVED (F4-10, 2026-06-14) | Pembulatan Rupiah tersebar di banyak modul (util/DP/depresiasi/revenue-per-kamar + helper `rupiah` duplikat) → potensi drift pecahan. Disentralkan ke `common/business/money.helper.ts` (`roundRupiah`/`rupiahAmount`, tie half-away-from-zero). | `money.helper.ts` + 8 call-site | **F4-10 selesai** |
 | (sehat) | ✅ | 10 auto-journal posting idempotent + readiness gate auto-close bulanan = engine sehat. Trial balance runtime seimbang, deposit mismatch=0. | — | pertahankan |
 
 ## 4. Task (urutan & spec lengkap)
@@ -59,7 +59,7 @@
 - **F3-18 · FASE 3 (SELESAI 2026-06-14):** buat draft biaya rutin bulanan idempotent untuk gaji/listrik/air/internet/sewa/pajak; draft dikecualikan dari laporan dan jurnal hingga dikonfirmasi.
 - **F3-21 · FASE 3 (SELESAI 2026-06-14):** jalankan depresiasi bulan WIB sebelumnya sebelum accounting auto-close, memakai service dan idempotency yang sama dengan proses manual.
 - **F3-10 · FASE 3 (SELESAI 2026-06-14):** higiene jurnal. **race P2002** — 7 entrypoint posting ber-transaksi-sendiri dibungkus `runIdempotentPosting`: duplikat akibat dua proses paralel (entryNumber `@unique`) diperlakukan sebagai sudah-terposting di LUAR tx (catch P2002 di dalam tx mustahil karena Postgres meng-abort tx). **entryNumber suffix VOID = N/A** (tak ada jalur `journalEntry`→`VOID`). **forfeit entryDate** sudah = tanggal kejadian (post oleh sweeper).
-- **F4-10 · FASE 4:** standarisasi pembulatan.
+- **F4-10 · FASE 4 (SELESAI 2026-06-14):** standarisasi pembulatan Rupiah. Helper terpusat `common/business/money.helper.ts` — `roundRupiah(v)` (bilangan bulat terdekat, tie 0,5 menjauhi nol → simetri debit/kredit, NaN/∞→0) + `rupiahAmount(v)` (clamp ≥0). Diwiring ke 8 call-site Rupiah: posting helper `rupiah` (di luar rentang DO-NOT-TOUCH), util line (stays ×2), DP 30% (renew + tenant-bookings ×2 + public-bookings raw-SQL), depresiasi bulanan (assets ×2 + helper lokal), revenue-per-kamar (finance + reports). **DO-NOT-TOUCH `accounting-period-close.service.ts` SENGAJA tak disentuh** (helper lokalnya dibiarkan). Nilai preserved (untuk input ≥0 identik `Math.round`, dibuktikan unit test). Gate: tsc 0; `node --test` 32/32; runtime UAT TB seimbang + akun 2000 saldo kredit.
 
 ## 5. Invarian & UAT
 - **Invarian:** trial balance seimbang; jurnal idempotent per sourceType+sourceId; DRAFT tidak masuk laporan; deposit excluded dari operating cashflow.

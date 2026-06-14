@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InvoiceStatus } from '../../common/enums/app.enums';
 import { isStayOccupiedOnDate } from './occupancy-daily.helper';
+import { roundRupiah } from '../../common/business/money.helper';
 
 @Injectable()
 export class ReportsService {
@@ -503,7 +504,7 @@ export class ReportsService {
       ? Math.round((occupiedCount / operableCount) * 10000) / 100
       : 0;
     const revenuePerOccupied = occupiedCount > 0
-      ? Math.round(totalBilled / occupiedCount)
+      ? roundRupiah(totalBilled / occupiedCount)
       : 0;
 
     return {

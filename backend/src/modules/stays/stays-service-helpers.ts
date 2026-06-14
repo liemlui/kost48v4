@@ -8,6 +8,7 @@ import {
 } from '../../common/enums/app.enums';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { endOfDay } from '../../common/utils/date.util';
+import { roundRupiah } from '../../common/business/money.helper';
 
 export function assertCoreLifecycleActor(actor: CurrentUserPayload, actionLabel: string) {
   if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role)) {
@@ -104,7 +105,7 @@ export async function createRenewUtilityCheckpointLineTx(
     throw new ConflictException(`Tarif ${params.label} belum diatur, tidak bisa menghitung tagihan perpanjangan`);
   }
 
-  const lineAmount = Math.round(billingQty.toNumber() * tariff);
+  const lineAmount = roundRupiah(billingQty.toNumber() * tariff);
 
   const reading = await tx.meterReading.create({
     data: {

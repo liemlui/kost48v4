@@ -1,6 +1,7 @@
 import { Prisma } from '../../generated/prisma';
 import { AUTO_OPS_DEADLINES, hoursAfter } from '../../common/business/auto-ops.constants';
 import { calculateRentByPricingTerm } from '../tenant-bookings/pricing.helper';
+import { roundRupiah } from '../../common/business/money.helper';
 
 export function normalizeStayForResponse<T extends Record<string, any>>(stay: T): T & { cancelReason: string | null } {
   return {
@@ -33,7 +34,7 @@ export function buildUtilitySuggestion(input: {
     qty: usage.toFixed(3),
     unit: input.unit,
     unitPriceRupiah: input.unitPriceRupiah,
-    lineAmountRupiah: Math.round(usageNumber * input.unitPriceRupiah),
+    lineAmountRupiah: roundRupiah(usageNumber * input.unitPriceRupiah),
     sortOrder: input.sortOrder,
     source: input.source,
     meterPeriod: {

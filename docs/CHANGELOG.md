@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — fix(F4-10): standarisasi pembulatan Rupiah (F-31) — helper terpusat
+
+- **Masalah (F-31):** pembulatan Rupiah tersebar (`Math.round` mentah di util/DP/depresiasi/revenue-per-kamar + helper `rupiah` duplikat di modul akuntansi) → tak ada satu definisi pembulatan, rawan drift pecahan yang me-masking selisih trial balance.
+- **Helper terpusat baru** `backend/src/common/business/money.helper.ts`: `roundRupiah(v)` (bilangan bulat terdekat; tie tepat 0,5 dibulatkan MENJAUHI nol agar debit/kredit berlawanan tanda saling meniadakan simetris, hindari asimetri `Math.round` pada negatif; NaN/±∞→0) + `rupiahAmount(v)` (clamp ≥0 untuk debit/kredit/line amount).
+- **Wiring 8 call-site Rupiah:** posting helper `rupiah` (`accounting-posting`, di LUAR rentang DO-NOT-TOUCH 128-849/1110-1216) · util line amount (`stays-service-helpers`, `stays.helpers`) · DP 30% (`renew-requests`, `tenant-bookings` ×2, `public-bookings` raw-SQL) · depresiasi bulanan (`assets` ×2 + helper lokal) · revenue-per-kamar (`finance`, `reports`).
+- **DO-NOT-TOUCH dihormati:** `accounting-period-close.service.ts` (tutup buku, paling matang) SENGAJA tidak disentuh; helper lokalnya dibiarkan. Rasio/persen (bukan Rupiah) tidak diubah.
+- **Preservasi nilai:** untuk input non-negatif (seluruh kasus runtime) `roundRupiah` ≡ `Math.round` → nominal terpersist tidak berubah; dibuktikan unit test ekuivalensi.
+- **Gate keuangan LULUS:** `tsc --noEmit` 0; `node --test` **32/32** (26 lama + 6 baru `money.helper.test.js`); runtime UAT (DB 5433): trial balance **seimbang** (2.123.996.855 = 2.123.996.855), akun deposit 2000 saldo **kredit** (−8.000.000, bukan debit).
+
 ## 2026-06-14 — ops(F4-7): pruning notifikasi >90 hari (N-04) — retensi AppNotification
 
 - **Masalah (N-04):** `AppNotification` tak punya retensi → tumbuh tanpa batas, terutama untuk broadcast ALL ke banyak penerima.
