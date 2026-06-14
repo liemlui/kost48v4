@@ -28,7 +28,25 @@ type PortalTicket = {
   updatedAt?: string;
   lastMessage?: string;
   category?: string | null;
+  assignedTo?: {
+    id: number;
+    fullName: string;
+    role: string;
+    tipGopay?: string | null;
+    tipOvo?: string | null;
+    tipDana?: string | null;
+    tipBank?: string | null;
+  } | null;
 };
+
+function tipLines(staff: NonNullable<PortalTicket['assignedTo']>): { label: string; value: string }[] {
+  const out: { label: string; value: string }[] = [];
+  if (staff.tipGopay) out.push({ label: 'GoPay', value: staff.tipGopay });
+  if (staff.tipOvo) out.push({ label: 'OVO', value: staff.tipOvo });
+  if (staff.tipDana) out.push({ label: 'DANA', value: staff.tipDana });
+  if (staff.tipBank) out.push({ label: 'Bank', value: staff.tipBank });
+  return out;
+}
 
 function formatDate(value?: string) {
   if (!value) return '-';
@@ -164,6 +182,16 @@ export default function MyTicketsPage() {
                   {ticket.priority ? <StatusBadge status="SECONDARY" customLabel={ticket.priority} /> : null}
                 </div>
               </div>
+              {['DONE', 'CLOSED'].includes((ticket.status ?? '').toUpperCase()) && ticket.assignedTo && tipLines(ticket.assignedTo).length > 0 ? (
+                <Alert variant="light" className="border py-2 px-3 mb-2 small">
+                  <span role="img" aria-hidden="true">🙏</span> Puas dengan kerja <strong>{ticket.assignedTo.fullName}</strong>? Beri tip langsung (opsional, di luar pembayaran kos):
+                  <div className="d-flex flex-wrap gap-2 mt-1">
+                    {tipLines(ticket.assignedTo).map((t) => (
+                      <span key={t.label} className="badge bg-success-subtle text-success border">{t.label}: {t.value}</span>
+                    ))}
+                  </div>
+                </Alert>
+              ) : null}
               {ticket.issueImageUrl ? (
                 <div className="mb-2">
                   <SafeImage

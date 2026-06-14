@@ -22,6 +22,11 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional() @IsString() tipGopay?: string;
+  @IsOptional() @IsString() tipOvo?: string;
+  @IsOptional() @IsString() tipDana?: string;
+  @IsOptional() @IsString() tipBank?: string;
 }
 
 export class UpdateUserDto {
@@ -49,4 +54,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // F4-14: info tip P2P staf (e-wallet/bank) — tip langsung tenant→staf, TIDAK dijurnal.
+  @IsOptional() @IsString() tipGopay?: string;
+  @IsOptional() @IsString() tipOvo?: string;
+  @IsOptional() @IsString() tipDana?: string;
+  @IsOptional() @IsString() tipBank?: string;
 }

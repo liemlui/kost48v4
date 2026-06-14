@@ -93,8 +93,21 @@ export class RenewRequestsService {
         status: RenewRequestStatus.PENDING_DECISION,
         downPaymentAmountRupiah,
         downPaymentDueDate: stay.plannedCheckOutDate ?? undefined, // hari-H = batas prioritas tenant lama
+        // F4-11: prabayar fleksibel (jumlah bulan + penanda early). F4-13a: review tenant.
+        prepaidMonths: dto.prepaidMonths ?? undefined,
+        isEarly: stay.plannedCheckOutDate ? new Date() < new Date(stay.plannedCheckOutDate) : false,
+        tenantReview: dto.tenantReview ?? undefined,
+        tenantReviewAt: dto.tenantReview ? new Date() : undefined,
       },
     });
+
+    // F4-13a: poin review saat perpanjang (best-effort, idempotent per renewRequestId).
+    if (dto.tenantReview && actor.tenantId) {
+      await this.loyalty.earnSafe(actor.tenantId, 'VALIDATED_REPORT', `RENEWAL_REVIEW:${request.id}`, {
+        note: 'Review/masukan saat perpanjangan',
+        createdById: actor.id,
+      });
+    }
 
     const ctx = await this.loadStayNotifContext(stay.id);
     await this.notifyAdminsRenew(

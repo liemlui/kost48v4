@@ -212,7 +212,7 @@ export class TicketsService {
           room: true,
           stay: true,
           assignedTo: {
-            select: { id: true, fullName: true, role: true },
+            select: { id: true, fullName: true, role: true, tipGopay: true, tipOvo: true, tipDana: true, tipBank: true },
           },
           linkedRoomItem: { include: { item: true, room: true } },
           linkedInventoryItem: true,
