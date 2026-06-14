@@ -86,6 +86,25 @@ export class StaffPerformanceService {
   }
 
 
+  /**
+   * F3-5: leaderboard antar-staf (peringkat berdasar skor KPI). DISIAPKAN tapi DORMAN
+   * saat staf < 2 (`active=false`) — kartu rumus skor per staf tetap jalan. Aktif otomatis
+   * begitu staf ≥ 2 (ide owner 2026-06-15).
+   */
+  async getLeaderboard(month?: string) {
+    const data = await this.getAdminMonthly(month);
+    const ranked = [...data.items]
+      .map((it: any) => ({ staffId: it.staff?.id, fullName: it.staff?.fullName, score: it.score?.final ?? 0, category: it.category }))
+      .sort((a, b) => b.score - a.score)
+      .map((it, idx) => ({ ...it, rank: idx + 1 }));
+    return {
+      period: data.period,
+      active: ranked.length >= 2,
+      totalStaff: ranked.length,
+      items: ranked,
+    };
+  }
+
   async getAuditSuggestions(month?: string) {
     const range = monthRange(month);
     const staff = await this.prisma.user.findMany({

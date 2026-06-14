@@ -22,6 +22,13 @@ export class AdminStaffPerformanceController {
     return { message: 'Ringkasan kinerja staf berhasil diambil', data: await this.service.getAdminMonthly(query.month) };
   }
 
+  // F3-5: leaderboard antar-staf (dorman saat staf < 2 → active=false).
+  @Get('leaderboard')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async leaderboard(@Query() query: StaffPerformanceMonthQueryDto) {
+    return { message: 'Leaderboard kinerja staf', data: await this.service.getLeaderboard(query.month) };
+  }
+
   @Get('audit-suggestions')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async auditSuggestions(@Query() query: StaffPerformanceMonthQueryDto) {

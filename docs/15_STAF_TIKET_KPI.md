@@ -11,7 +11,7 @@
 - **Auto-created:** CHECKOUT_INSPECTION (setelah final checkout), EVICT_OVERSTAY (H-day overstay).
 - **Staff boleh close** tiket CHECKOUT_INSPECTION → room MAINTENANCE → AVAILABLE (guard keselamatan tetap).
 - **Room readiness gate:** tidak AVAILABLE jika: active stay lain, room ≠ MAINTENANCE, kondisi tidak aman.
-- **Round-robin assignment:** DEFERRED (hanya 1 staf).
+- **Round-robin assignment (F2-10):** ✅ DISIAPKAN & DORMAN (2026-06-15). `pickStaffAssigneeTx` di `createTicketRecord` — 1 staf → semua ke dia; **≥2 staf → round-robin berbasis beban** (otomatis aktif). **Leaderboard (F3-5):** ✅ `getLeaderboard` + `GET /admin/staff-performance/leaderboard` (`active=false` saat <2 staf; auto-aktif ≥2).
 
 ## 2. Peta kode
 | Aksi | Lokasi |

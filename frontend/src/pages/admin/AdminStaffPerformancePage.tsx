@@ -8,7 +8,7 @@ import PaginationControls from '../../components/common/PaginationControls';
 import StaffAuditModal from '../../components/admin/StaffAuditModal';
 import AdminSmartAuditPanel from '../../components/admin/AdminSmartAuditPanel';
 import DonutGauge from '../../components/charts/DonutGauge';
-import { fetchAdminStaffAuditSuggestions, fetchAdminStaffPerformance, type StaffPerformanceSummary } from '../../api/staffPerformance';
+import { fetchAdminStaffAuditSuggestions, fetchAdminStaffPerformance, fetchStaffLeaderboard, type StaffPerformanceSummary } from '../../api/staffPerformance';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Sangat Baik': '#16a34a',
@@ -167,6 +167,7 @@ export default function AdminStaffPerformancePage() {
   const PAGE_SIZE = 10;
   const query = useQuery({ queryKey: ['admin-staff-performance', month], queryFn: () => fetchAdminStaffPerformance(month), staleTime: 60_000 });
   const suggestionsQuery = useQuery({ queryKey: ['admin-staff-audit-suggestions', month], queryFn: () => fetchAdminStaffAuditSuggestions(month), staleTime: 60_000 });
+  const leaderboardQuery = useQuery({ queryKey: ['admin-staff-leaderboard', month], queryFn: () => fetchStaffLeaderboard(month), staleTime: 60_000 });
   const items = query.data?.items ?? [];
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const visibleItems = useMemo(() => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [items, page]);
@@ -194,6 +195,33 @@ export default function AdminStaffPerformancePage() {
           <Card className="border-0"><Card.Body><span>Perlu dibantu/diawasi</span><strong>{query.data.summary.needWatch}</strong><small>Butuh follow-up</small></Card.Body></Card>
           <Card className="border-0"><Card.Body><span>Sinyal negatif</span><strong>{query.data.summary.negativeValue}</strong><small>Audit gagal/bukti kurang</small></Card.Body></Card>
         </div>
+      ) : null}
+
+      {leaderboardQuery.data ? (
+        <Card className="content-card border-0 mt-3">
+          <Card.Body>
+            <div className="panel-title mb-1">🏆 Leaderboard Staff</div>
+            {leaderboardQuery.data.active ? (
+              <Table responsive hover className="mb-0 align-middle mt-2">
+                <thead><tr><th>#</th><th>Staff</th><th>Skor</th><th>Kategori</th></tr></thead>
+                <tbody>
+                  {leaderboardQuery.data.items.map((it) => (
+                    <tr key={it.staffId}>
+                      <td><strong>{it.rank}</strong></td>
+                      <td>{it.fullName}</td>
+                      <td>{it.score}</td>
+                      <td>{it.category?.label ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <Alert variant="light" className="border mb-0 mt-2">
+                Leaderboard aktif otomatis saat jumlah staf ≥ 2. Saat ini {leaderboardQuery.data.totalStaff} staf — kartu rumus skor per staf tetap berjalan di bawah.
+              </Alert>
+            )}
+          </Card.Body>
+        </Card>
       ) : null}
 
       {query.data && items.length > 0 && (

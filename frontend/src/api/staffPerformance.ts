@@ -79,6 +79,18 @@ export async function fetchMyStaffPerformanceEvidence(month?: string) {
   return response.data.data;
 }
 
+export interface StaffLeaderboard {
+  active: boolean;
+  totalStaff: number;
+  period: { month: string };
+  items: Array<{ staffId: number; fullName: string; score: number; rank: number; category?: { label: string; tone: string } }>;
+}
+
+export async function fetchStaffLeaderboard(month?: string) {
+  const response = await client.get<ApiEnvelope<StaffLeaderboard>>('/admin/staff-performance/leaderboard', { params: { month } });
+  return response.data.data;
+}
+
 export async function fetchAdminStaffPerformance(month?: string) {
   const response = await client.get<ApiEnvelope<AdminStaffPerformanceResponse>>('/admin/staff-performance/monthly', { params: { month } });
   return response.data.data;

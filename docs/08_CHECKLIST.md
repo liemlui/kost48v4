@@ -100,9 +100,9 @@
 - [x] **F4-14** Tip ke staf P2P — SELESAI (2026-06-15). `User.tip*` settable; tenant lihat link tip assignee di tiket DONE/CLOSED (MyTicketsPage). **TIDAK dijurnal/direkap** (P2P, di luar buku kos).
 - [x] **F4-15** Penjadwalan cuci AC — SELESAI (2026-06-15). `Room.hasAc/acWattage/acLastCleanedAt/acCleanIntervalDays`; sweeper `runAcCleaningSchedule` (overdue interval → tiket `AC_CLEANING` dedupe) + endpoint manual + reset saat tiket AC ditutup. Biaya cuci → Expense (flow normal). (Estimasi jam dari kWh = refinement; trigger utama interval hari.)
 
-## ⏸️ DITUNDA (1 staf — aktifkan saat staf ≥ 2)
-- [ ] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15**.
-- [ ] **F3-5** Leaderboard antar-staf (kartu rumus skor TETAP jalan) — dossier **15**.
+## ✅ DISIAPKAN, DORMAN saat 1 staf (auto-aktif saat staf ≥ 2 — ide owner 2026-06-15)
+- [x] **F2-10** Round-robin penugasan tiket (K-4) — dossier **15** (SELESAI 2026-06-15). `TicketsService.pickStaffAssigneeTx` di `createTicketRecord`: staf=0→none, staf=1→satu staf (dorman), staf≥2→**round-robin berbasis beban** (tiket aktif paling sedikit). Otomatis aktif saat staf bertambah.
+- [x] **F3-5** Leaderboard antar-staf — dossier **15** (SELESAI 2026-06-15). `getLeaderboard` (peringkat skor KPI) + `GET /admin/staff-performance/leaderboard` + kartu di AdminStaffPerformancePage; **`active=false` saat staf <2** (tampil catatan; kartu rumus skor per staf TETAP jalan), auto-aktif saat staf ≥ 2.
 
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
 

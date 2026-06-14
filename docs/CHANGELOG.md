@@ -2,6 +2,13 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F2-10 + F3-5): round-robin tiket + leaderboard staf (disiapkan, dorman saat 1 staf)
+
+- **Ide owner:** siapkan round-robin & leaderboard meski staf masih 1; aktif otomatis saat staf ≥ 2. **Tanpa schema baru.**
+- **F2-10 round-robin** (K-4): `TicketsService.pickStaffAssigneeTx` dipakai di `createTicketRecord` saat tiket belum ber-assignee — staf=0 → tanpa assignee; staf=1 → ke satu-satunya staf (dorman); **staf≥2 → round-robin berbasis beban** (staf dengan tiket aktif OPEN/IN_PROGRESS/DONE paling sedikit). Aktif otomatis begitu staf bertambah.
+- **F3-5 leaderboard:** `StaffPerformanceService.getLeaderboard` (peringkat skor KPI desc, reuse `getAdminMonthly`) + `GET /admin/staff-performance/leaderboard` (OWNER/ADMIN). FE: kartu "🏆 Leaderboard Staff" di `AdminStaffPerformancePage` — **`active=false` saat staf <2** (tampil catatan, kartu rumus skor per staf tetap jalan); tabel peringkat saat ≥2.
+- **Gate:** backend `tsc` 0; `node --test` 40/40; FE build + PWA verify (99 chunk).
+
 ## 2026-06-15 — feat(F4-13c + F4-13 referral): quest perbaikan sikap anonim + referral teman (S-4)
 
 - **Schema additive S-4** (owner-approve, migration `20260615130000_f4_s4_peer_referral`): `PeerBehaviorReport` + enum `PeerReportStatus`; `TenantReferral` + enum `ReferralStatus`; `Tenant.referralCode @unique`.

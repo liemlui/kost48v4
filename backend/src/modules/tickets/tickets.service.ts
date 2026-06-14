@@ -1080,12 +1080,42 @@ export class TicketsService {
     };
     return this.prisma.$transaction(async (tx) => {
       const ticketNumber = await generateTicketNumberTx(tx);
+      // F2-10 (K-4): round-robin penugasan bila belum ada assignee.
+      const assignedToId = input.assignedToId ?? (await this.pickStaffAssigneeTx(tx));
       return tx.ticket.create({
         data: {
           ticketNumber,
           ...baseData,
+          assignedToId,
         },
       });
     });
+  }
+
+  /**
+   * F2-10 (K-4): pilih staf penerima tiket. DISIAPKAN tapi DORMAN saat staf < 2
+   * (semua tiket ke satu-satunya staf). Saat staf ≥ 2 → round-robin berbasis beban:
+   * staf dengan tiket aktif paling sedikit. (Ide owner 2026-06-15.)
+   */
+  private async pickStaffAssigneeTx(tx: any): Promise<number | undefined> {
+    const staff = await tx.user.findMany({
+      where: { role: UserRole.STAFF, isActive: true },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+    });
+    if (staff.length === 0) return undefined;
+    if (staff.length === 1) return staff[0].id;
+    let bestId = staff[0].id;
+    let bestLoad = Number.POSITIVE_INFINITY;
+    for (const s of staff) {
+      const load = await tx.ticket.count({
+        where: { assignedToId: s.id, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
+      });
+      if (load < bestLoad) {
+        bestLoad = load;
+        bestId = s.id;
+      }
+    }
+    return bestId;
   }
 }
