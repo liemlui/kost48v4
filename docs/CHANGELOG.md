@@ -2,6 +2,12 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — refactor(F3-11): lead source + katalog foto marketing ke config
+
+- **M-08 lead source:** sudah lengkap di kode — check-in wizard admin punya dropdown `bookingSource` 10 kanal (Google Maps/Walk-in/Referral/Instagram/TikTok/WhatsApp/Facebook/Website/OTA/Lainnya), backend `stays` menyimpan `bookingSource`+`bookingSourceDetail`, query stay bisa filter per kanal → CAC terukur. Booking publik tetap `WEBSITE` (benar — memang dari website).
+- **M-04 foto config:** ~76 nama berkas foto marketing dipindah dari `marketing-public-rooms.service.ts` ke `marketing/marketing-room-images.config.ts` (`ROOM_MARKETING_IMAGE_FILES`, `GENERIC_ROOM_MARKETING_IMAGES`, `ROOM_IMAGE_BASE_PATH`). Logika resolve tak berubah; daftar foto kini dirawat di config, bukan di tengah service.
+- **Verifikasi:** backend build + `tsc` 0. Tanpa perubahan perilaku (fallback foto identik).
+
 ## 2026-06-14 — ops(F3-10): higiene jurnal — idempoten anti-race P2002 di posting
 
 - **Race P2002 (utama):** `accounting-posting.service` membungkus 7 entrypoint posting ber-transaksi-sendiri (invoice issued/payment, expense, wifi-sale, deposit received/settlement, invoice-cancel-reversal) dengan `runIdempotentPosting`. Bila dua proses paralel memposting source yang sama, `JournalEntry.entryNumber` `@unique` memicu P2002 pada create kedua; karena error Postgres meng-abort transaksi (tak bisa di-catch lalu re-query di dalam tx yang sama), penanganan diletakkan di LUAR transaksi → duplikat diperlakukan sebagai **sudah-terposting** (skip benign), bukan error yang menggagalkan operasi bisnis.
