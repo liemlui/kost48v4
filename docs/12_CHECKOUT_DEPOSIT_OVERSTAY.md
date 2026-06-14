@@ -42,7 +42,7 @@
 - **F2-6 · FASE 2:** auto-tiket inspeksi saat `stays.cancel` stay promoted (salin dari `complete`). (B-08)
 - **F3-13 · FASE 3:** B-07 (exclude+auto-cancel DRAFT saat forced checkout), B-06 (copy/meta).
 - **F3-14 · FASE 3 (BARU):** tombol admin "tenant kabur" → checkout dini + potong deposit. Pemicu: nunggak X hari + tak terhubung. Field `Stay.fledMarkedAt`+reason+konfig X. (B2)
-- **F3-15 · FASE 3 (BARU):** lacak `Stay.belongingsDeadline = checkout+30 hari` → status ABANDONED + notif; tindakan fisik manual. (B3)
+- **F3-15 · FASE 3 (SELESAI 2026-06-14, schema approved):** `Stay.belongingsStatus/belongingsDeadline/belongingsResolvedAt` + enum `BelongingsStatus`. Deadline = checkout+30 hari (di `complete` & `forceCheckoutOverstay`); sweeper `runBelongingsAbandonment` (PENDING & lewat deadline WIB → ABANDONED + notif OWNER/ADMIN dedupe) + endpoint `run/belongings-abandonment`; admin `POST /stays/:id/belongings` (CLAIMED/ABANDONED + catatan). Tindakan fisik tetap manual. (B3)
 - **F3-16 · FASE 3 (BARU):** admin paksa-checkout overstay nunggak + potong sisa dari deposit; **deposit kurang → buat AR (piutang) atas tenant**. Jurnal: 2000 menutup sebagian, sisa tetap AR 1100.
 
 ## 5. Invarian & UAT

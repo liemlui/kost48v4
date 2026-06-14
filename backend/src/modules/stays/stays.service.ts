@@ -28,6 +28,7 @@ import {
   CancelStayDto,
   CompleteStayDto,
   CreateStayDto,
+  MarkBelongingsDto,
   ProcessDepositDto,
   ProcessLossRefundDto,
   RenewStayDto,
@@ -591,6 +592,10 @@ export class StaysService {
           actualCheckOutDate,
           checkoutReason: dto.checkoutReason,
           notes: dto.notes ?? existing.notes,
+          // F3-15: batas pengambilan barang = checkout + 30 hari (status PENDING).
+          belongingsDeadline: new Date(
+            actualCheckOutDate.getTime() + 30 * 24 * 60 * 60 * 1000,
+          ),
         },
       });
       if (updateResult.count !== 1) {
@@ -686,6 +691,40 @@ export class StaysService {
       roomStatusAfterSync: "MAINTENANCE",
       roomReadinessAfterCheckout: "NEEDS_INSPECTION",
     });
+  }
+
+  // F3-15: admin menandai barang tenant pasca-checkout (diambil=CLAIMED atau
+  // dinyatakan ditinggal=ABANDONED). Menghentikan/menyatakan jam abandonment.
+  async markBelongings(id: number, dto: MarkBelongingsDto, actor: CurrentUserPayload) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id },
+      select: { id: true, status: true, belongingsStatus: true, notes: true },
+    });
+    if (!stay) throw new NotFoundException("Stay tidak ditemukan");
+    if (stay.status !== StayStatus.COMPLETED) {
+      throw new ConflictException(
+        "Catatan barang hanya berlaku untuk stay yang sudah checkout (COMPLETED).",
+      );
+    }
+    const updated = await this.prisma.stay.update({
+      where: { id },
+      data: {
+        belongingsStatus: dto.status as any,
+        belongingsResolvedAt: new Date(),
+        ...(dto.note
+          ? { notes: [stay.notes, `Barang (${dto.status}): ${dto.note}`].filter(Boolean).join("\n") }
+          : {}),
+      },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: "MARK_BELONGINGS",
+      entityType: "Stay",
+      entityId: String(id),
+      oldData: { belongingsStatus: stay.belongingsStatus },
+      newData: { belongingsStatus: dto.status },
+    });
+    return updated;
   }
 
   async cancel(id: number, dto: CancelStayDto, actor: CurrentUserPayload) {

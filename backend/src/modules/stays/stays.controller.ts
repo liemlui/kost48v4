@@ -6,7 +6,7 @@ import { UserRole } from '../../common/enums/app.enums';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { CancelStayDto, CompleteStayDto, CreateStayDto, ProcessDepositDto, ProcessLossRefundDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
+import { CancelStayDto, CompleteStayDto, CreateStayDto, MarkBelongingsDto, ProcessDepositDto, ProcessLossRefundDto, RenewStayDto, UpdateStayDto } from './dto/stay.dto';
 import { StaysQueryDto } from './dto/stays-query.dto';
 import { StaysQueryService } from './stays-query.service';
 import { StaysService } from './stays.service';
@@ -97,5 +97,12 @@ export class StaysController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async renewStay(@Param('id', ParseIntPipe) id: number, @Body() dto: RenewStayDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Stay berhasil diperpanjang', data: await this.staysService.renewStay(id, dto, user) };
+  }
+
+  // F3-15: tandai barang tenant pasca-checkout (CLAIMED/ABANDONED).
+  @Post(':id/belongings')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async markBelongings(@Param('id', ParseIntPipe) id: number, @Body() dto: MarkBelongingsDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Status barang tenant berhasil diperbarui', data: await this.staysService.markBelongings(id, dto, user) };
   }
 }

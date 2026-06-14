@@ -102,6 +102,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const bookingResult = await this.runBookingExpiry(options);
       await this.runContractEndReminders(options);
       await this.runTicketSlaEscalation(options);
+      await this.runBelongingsAbandonment(options);
       // F2-1 inc.3: sweeper renewal (hibrida) — expiry prioritas OTOMATIS, forfeit DITANDAI.
       await this.runRenewalPriorityExpiry(options);
       await this.runRenewalSettlementForfeit(options);
@@ -594,6 +595,64 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
    * Notifikasi in-app ke tenant promoted yang plannedCheckOutDate-nya mendekat,
    * dedupe per stay per gelombang lewat judul notifikasi.
    */
+  /**
+   * F3-15: barang tenant yang ditinggal melewati batas 30 hari (belongingsDeadline)
+   * dengan status masih PENDING → tandai ABANDONED + notif admin. Tindakan fisik
+   * (keluarkan/buang/lelang) tetap manual.
+   */
+  async runBelongingsAbandonment(options: { actorUserId?: number | null; source?: string } = {}) {
+    void options;
+    const todayWib = this.wibToday();
+    const overdue = await this.prisma.stay.findMany({
+      where: {
+        belongingsStatus: 'PENDING' as any,
+        belongingsDeadline: { not: null, lt: todayWib },
+      },
+      select: {
+        id: true,
+        belongingsDeadline: true,
+        tenant: { select: { fullName: true } },
+        room: { select: { code: true, name: true } },
+      },
+      take: 200,
+    });
+    if (overdue.length === 0) return { abandoned: 0 };
+
+    let abandoned = 0;
+    for (const stay of overdue) {
+      await this.prisma.stay.update({
+        where: { id: stay.id },
+        data: { belongingsStatus: 'ABANDONED' as any, belongingsResolvedAt: new Date() },
+      });
+      abandoned += 1;
+
+      const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.id}`;
+      const tenantName = stay.tenant?.fullName || 'Tenant';
+      const deadline = stay.belongingsDeadline
+        ? (stay.belongingsDeadline as Date).toISOString().slice(0, 10)
+        : '-';
+      const admins = await this.prisma.user.findMany({
+        where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true },
+        select: { id: true },
+      });
+      for (const admin of admins) {
+        await this.appNotification
+          .createOnce({
+            recipientUserId: admin.id,
+            title: `📦 Barang ditinggal jadi ABANDONED — ${roomLabel}`,
+            body: `Barang ${tenantName} di ${roomLabel} melewati batas pengambilan 30 hari (jatuh tempo ${deadline}) dan kini berstatus ABANDONED. Lakukan tindakan fisik sesuai kebijakan (keluarkan/simpan/buang).`,
+            linkTo: '/stays',
+            entityType: 'BelongingsAbandoned',
+            entityId: String(stay.id),
+          })
+          .catch((err) =>
+            this.logger.warn(`Notif barang abandoned stay #${stay.id} gagal: ${err instanceof Error ? err.message : String(err)}`),
+          );
+      }
+    }
+    return { abandoned };
+  }
+
   /**
    * F3-19: eskalasi tiket yang melewati SLA (dueAt) dan belum selesai.
    * L0->1 (staf lewat SLA) → notif ADMIN+OWNER; L1->2 (setelah grace) → notif OWNER.
@@ -1117,6 +1176,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           actualCheckOutDate: new Date(),
           checkoutReason:
             'Forced checkout otomatis: kontrak berakhir dan tenant tidak memperpanjang/checkout hingga H+1 pk 12:00 WIB meski sudah diberi pengingat berkala.',
+          // F3-15: tenant overstay sering meninggalkan barang → mulai jam 30 hari.
+          belongingsDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         },
       });
 

@@ -108,4 +108,11 @@ export class AutoOpsController {
   async runTicketSla(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps eskalasi SLA tiket berhasil dijalankan', data: await this.autoOpsService.runTicketSlaEscalation({ actorUserId: user.id, source: 'MANUAL_TICKET_SLA_RUN' }) };
   }
+
+  // F3-15: trigger manual penandaan barang abandoned 30 hari (UAT/ops).
+  @Post('run/belongings-abandonment')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runBelongingsAbandonment(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps penandaan barang abandoned berhasil dijalankan', data: await this.autoOpsService.runBelongingsAbandonment({ actorUserId: user.id, source: 'MANUAL_BELONGINGS_ABANDONMENT_RUN' }) };
+  }
 }

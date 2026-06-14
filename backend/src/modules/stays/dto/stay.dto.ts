@@ -1,5 +1,15 @@
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsIn, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, Min } from 'class-validator';
 import { LeadSource, PricingTerm, StayPurpose } from '../../../common/enums/app.enums';
+
+// F3-15: admin menandai barang tenant pasca-checkout (diambil / dinyatakan ditinggal).
+export class MarkBelongingsDto {
+  @IsIn(['CLAIMED', 'ABANDONED'])
+  status!: 'CLAIMED' | 'ABANDONED';
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
 
 export class CreateStayDto {
   @IsInt()

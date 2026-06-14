@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — feat(F3-15): lacak barang ditinggal 30 hari → ABANDONED
+
+- **Schema (approved):** `Stay.belongingsStatus` (enum `BelongingsStatus PENDING/CLAIMED/ABANDONED`, default PENDING), `belongingsDeadline`, `belongingsResolvedAt` + index.
+- **Set deadline:** checkout final (`stays.complete`) dan forced-checkout overstay (`auto-ops.forceCheckoutOverstay`) men-set `belongingsDeadline = checkout + 30 hari`.
+- **Sweeper:** `runBelongingsAbandonment` (di `runAll` + endpoint `POST /auto-ops/run/belongings-abandonment`) — `belongingsDeadline < hari ini (WIB)` & status PENDING → set `ABANDONED` + `belongingsResolvedAt` + notif OWNER/ADMIN (dedupe `createOnce`). Tindakan fisik tetap manual.
+- **Admin action:** `POST /stays/:id/belongings` (OWNER/ADMIN) tandai `CLAIMED` (tenant ambil) atau `ABANDONED` manual + catatan.
+- **Verifikasi:** backend `tsc` 0; unit test 26/26 hijau. Default PENDING → baris lama tak terdampak.
+
 ## 2026-06-14 — feat(F3-19): SLA tiket — dueAt per kategori, resolved-time adil, eskalasi
 
 - **Schema (approved):** `Ticket.assignedAt/dueAt/escalationLevel/escalatedAt` + index `dueAt`.
