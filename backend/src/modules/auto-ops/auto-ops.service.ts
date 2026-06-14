@@ -5,6 +5,7 @@ import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
+import { RentRecognitionService } from '../accounting/rent-recognition.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { DepositLedgerService } from '../deposit-ledger/deposit-ledger.service';
 import { releaseRoomAfterBookingCancelTx } from '../../common/utils/room-booking.util';
@@ -23,6 +24,7 @@ type AutoOpsRunResult = {
   automaticDepreciation?: unknown;
   notificationPruning?: unknown;
   pushDispatch?: unknown;
+  rentRecognition?: unknown;
 };
 
 @Injectable()
@@ -39,6 +41,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     private readonly depositLedger: DepositLedgerService,
     private readonly assetsService: AssetsService,
     private readonly pushService: PushService,
+    private readonly rentRecognitionService: RentRecognitionService,
   ) {}
 
   private static parseEnabled(): boolean {
@@ -119,6 +122,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const overstayResult = await this.runOverstayEnforcement(options);
       const recurringExpenseDrafts = await this.runRecurringExpenseDrafts(options);
       const automaticDepreciation = await this.runAutomaticDepreciation(options);
+      const rentRecognition = await this.runRentRecognition(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       const notificationPruning = await this.runNotificationPruning(options);
       const pushDispatch = await this.runPushDispatch(options);
@@ -130,6 +134,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         releasedRoomIds: [...roomResult.releasedRoomIds, ...noonResult.releasedRoomIds],
         recurringExpenseDrafts,
         automaticDepreciation,
+        rentRecognition,
         accountingAutoClose,
         notificationPruning,
         pushDispatch,
@@ -659,6 +664,23 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       }
     }
     return { abandoned };
+  }
+
+  /**
+   * F4-1 (PSAK 72): tangguhkan pendapatan sewa panjang ke Unearned (2200) lalu akui
+   * bertahap per bulan. Best-effort; nonaktif via env RENT_RECOGNITION_ENABLED=false.
+   */
+  async runRentRecognition(options: { actorUserId?: number | null; source?: string } = {}) {
+    const source = options.source ?? 'AUTO_OPS_RENT_RECOGNITION';
+    const enabled = String(process.env.RENT_RECOGNITION_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { skipped: true, skippedReason: 'RENT_RECOGNITION_DISABLED', source };
+    try {
+      const result = await this.rentRecognitionService.run({ actorUserId: options.actorUserId ?? null });
+      return { ...result, skipped: false, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps rent recognition gagal: ${error?.message ?? error}`);
+      return { skipped: true, skippedReason: error?.message ?? 'Rent recognition skipped', source };
+    }
   }
 
   /**

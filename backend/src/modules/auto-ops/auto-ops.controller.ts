@@ -129,4 +129,11 @@ export class AutoOpsController {
   async runPushDispatch(@CurrentUser() user: CurrentUserPayload) {
     return { message: 'AutoOps dispatch push berhasil dijalankan', data: await this.autoOpsService.runPushDispatch({ actorUserId: user.id, source: 'MANUAL_PUSH_DISPATCH_RUN' }) };
   }
+
+  // F4-1: trigger manual pengakuan pendapatan sewa (unearned) (UAT/ops).
+  @Post('run/rent-recognition')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runRentRecognition(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps pengakuan pendapatan sewa berhasil dijalankan', data: await this.autoOpsService.runRentRecognition({ actorUserId: user.id, source: 'MANUAL_RENT_RECOGNITION_RUN' }) };
+  }
 }

@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-1): Unearned Revenue PSAK 72 (F-15) — SELESAI, schema S-2 approved
+
+- **Kebijakan (keputusan owner):** sewa yang mencakup **>1 bulan** diakui pendapatan **bertahap** (straight-line per bulan), bukan sekaligus saat check-in. **Invoice & uang tetap 1 penuh di muka** (1 invoice di bulan awal); yang dibagi hanya pengakuan pendapatan via akun **2200 Unearned Revenue** (sudah ada). Sekarang berlaku untuk **SMESTERLY (6) & YEARLY (12)**; mekanisme berbasis "jumlah bulan N" sehingga reusable oleh prabayar fleksibel (D-18/F4-11).
+- **Schema additive (S-2):** `RentRecognitionSchedule` (stayId, periodIndex, periodStart/End, scheduledAmountRupiah, recognizedAt, journalEntryId; unique stayId+periodIndex) + back-rel Stay/JournalEntry. Migration `20260615090000_f4_1_rent_recognition` (zero-risk).
+- **Helper murni** `rent-recognition.helper.ts`: `monthsForPricingTerm`, `splitRentByMonths` (sisa pembulatan ke bulan terakhir → Σ tepat), `buildRentRecognitionSchedule` (periode bulanan clamp akhir bulan) + unit test.
+- **Posting BARU (hormati DO-NOT-TOUCH, tak ubah fungsi lama):** `postRentDeferralTx` (DR 4000 / CR 2200) + `postRentRecognitionTx` (DR 2200 / CR 4000), sourceType `ADJUSTMENT`, sourceId `RENT_DEFERRAL:stayId` / `RENT_RECOGNITION:stayId:idx` (idempotent per source).
+- **`RentRecognitionService`** (decoupled dari flow check-in): (1) ensure — untuk stay long-lease promoted yang invoice sewanya sudah POSTED & belum berjadwal → jurnal deferral seluruh sewa ke 2200 + buat jadwal N bulan (atomik; rollback bila periode tutup); (2) recognize — akui baris yang periodenya sudah mulai (DR 2200/CR 4000). Sweeper `AutoOps.runRentRecognition` (env `RENT_RECOGNITION_ENABLED`) + endpoint manual `POST /auto-ops/run/rent-recognition`.
+- **Finance gate LULUS:** `tsc` 0; `node --test` **37/37** (+`rent-recognition.helper.test.js`); **UAT runtime (DB 5433, skenario SMESTERLY 6.000.000):** issuance → 4000=6jt/AR=6jt; ensure → deferral pindah 6jt ke 2200 (4000 net 0), jadwal 6 baris Σ=6jt; recognize → bulan-1 diakui 1jt (4000=1jt, 2200=5jt sisa); **trial balance seimbang tiap langkah**; idempotent (re-run 0, total tetap 3 jurnal); residu 0.
+
 ## 2026-06-15 — feat(F4-2): PWA Web Push (4 kelompok event J-d) — SELESAI, schema S-2 approved
 
 - **Schema additive (owner-approve S-2):** `PushSubscription` (endpoint unik/device) + enum `PushDeliveryStatus` + `AppNotification.pushStatus/pushAttempts/pushedAt` (**outbox in-place**, bukan tabel terpisah) + `User.pushSubscriptions`. Migration `20260614220000_f4_2_push` (zero-risk). Dependency baru `web-push@3.6.7` (+@types) — diizinkan owner.

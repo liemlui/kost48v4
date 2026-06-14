@@ -1151,6 +1151,65 @@ export class AccountingPostingService {
     };
   }
 
+  /**
+   * F4-1 (PSAK 72): penangguhan pendapatan sewa panjang — pindahkan seluruh sewa yang
+   * sudah dikreditkan ke 4000 (saat invoice issued) menjadi kewajiban Unearned (2200).
+   * Idempotent per (ADJUSTMENT, RENT_DEFERRAL:stayId). Jurnal BARU; tak menyentuh fungsi
+   * posting lama. DR 4000 (kurangi pendapatan) / CR 2200 (pendapatan diterima di muka).
+   */
+  async postRentDeferralTx(
+    tx: any,
+    params: { stayId: number; unearnedAmountRupiah: number; entryDate: Date; createdById?: number | null },
+  ) {
+    const sourceId = `RENT_DEFERRAL:${params.stayId}`;
+    const amount = rupiah(params.unearnedAmountRupiah);
+    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Nominal deferral 0.");
+    const rentRevenue = await findAccountByCodeTx(tx, "4000");
+    const unearned = await findAccountByCodeTx(tx, "2200");
+    if (!rentRevenue || !unearned)
+      return this.skip("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(params.entryDate),
+      memo: `Penangguhan pendapatan sewa (unearned) stay #${params.stayId}`,
+      createdById: params.createdById ?? null,
+      lines: [
+        { chartOfAccountId: rentRevenue.id, description: "Penangguhan pendapatan sewa", debitRupiah: amount, creditRupiah: 0, sortOrder: 0 },
+        { chartOfAccountId: unearned.id, description: "Pendapatan diterima di muka", debitRupiah: 0, creditRupiah: amount, sortOrder: 1 },
+      ],
+    });
+  }
+
+  /**
+   * F4-1: pengakuan pendapatan sewa bulan ke-i — pindahkan dari Unearned (2200) ke
+   * Pendapatan Sewa (4000). Idempotent per (ADJUSTMENT, RENT_RECOGNITION:stayId:idx).
+   * DR 2200 / CR 4000.
+   */
+  async postRentRecognitionTx(
+    tx: any,
+    params: { stayId: number; periodIndex: number; amountRupiah: number; entryDate: Date; createdById?: number | null },
+  ) {
+    const sourceId = `RENT_RECOGNITION:${params.stayId}:${params.periodIndex}`;
+    const amount = rupiah(params.amountRupiah);
+    if (amount <= 0) return this.skip("ADJUSTMENT", sourceId, "Nominal recognition 0.");
+    const rentRevenue = await findAccountByCodeTx(tx, "4000");
+    const unearned = await findAccountByCodeTx(tx, "2200");
+    if (!rentRevenue || !unearned)
+      return this.skip("ADJUSTMENT", sourceId, "COA 4000/2200 belum tersedia.");
+    return this.postBalancedJournalTx(tx, {
+      sourceType: "ADJUSTMENT",
+      sourceId,
+      entryDate: dateOnly(params.entryDate),
+      memo: `Pengakuan pendapatan sewa bulan ${params.periodIndex} stay #${params.stayId}`,
+      createdById: params.createdById ?? null,
+      lines: [
+        { chartOfAccountId: unearned.id, description: "Pengakuan pendapatan diterima di muka", debitRupiah: amount, creditRupiah: 0, sortOrder: 0 },
+        { chartOfAccountId: rentRevenue.id, description: `Pendapatan sewa bulan ${params.periodIndex}`, debitRupiah: 0, creditRupiah: amount, sortOrder: 1 },
+      ],
+    });
+  }
+
   private async postBySourceType(
     sourceType: AutoSourceType,
     sourceId: number,

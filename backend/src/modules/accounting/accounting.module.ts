@@ -6,10 +6,11 @@ import { AccountingReadinessService } from './accounting-readiness.service';
 import { AccountingReportsService } from './accounting-reports.service';
 import { AccountingSchemaGuard } from './accounting-schema.guard';
 import { AccountingPeriodCloseService } from './accounting-period-close.service';
+import { RentRecognitionService } from './rent-recognition.service';
 
 @Module({
   controllers: [AccountingController],
-  providers: [AccountingService, AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard, AccountingPeriodCloseService],
-  exports: [AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard, AccountingPeriodCloseService],
+  providers: [AccountingService, AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard, AccountingPeriodCloseService, RentRecognitionService],
+  exports: [AccountingPostingService, AccountingReadinessService, AccountingReportsService, AccountingSchemaGuard, AccountingPeriodCloseService, RentRecognitionService],
 })
 export class AccountingModule {}
