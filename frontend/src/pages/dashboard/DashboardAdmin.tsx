@@ -738,7 +738,7 @@ export default function AdminDashboard() {
   const staysQuery = useQuery({ queryKey: ['dashboard-admin', 'stays-active', activeArea], queryFn: () => listResource<Stay>('/stays', { status: 'ACTIVE', limit: needsTodayData ? 300 : 160 }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const invoicesQuery = useQuery({ queryKey: ['dashboard-admin', 'invoices', activeArea], queryFn: () => listResource<Invoice>('/invoices', { limit: needsTodayData ? 500 : 180 }), enabled: needsFinanceData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const ticketsQuery = useQuery({ queryKey: ['dashboard-admin', 'tickets', activeArea], queryFn: () => listResource<Ticket>('/tickets', { limit: needsTodayData ? 150 : 100 }), enabled: needsTicketData, ...MEDIUM_FRESH_QUERY_OPTIONS });
-  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests', activeArea], queryFn: () => listAdminRenewRequests({ status: 'PENDING' }), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
+  const renewRequestsQuery = useQuery({ queryKey: ['dashboard-admin', 'renew-requests', activeArea], queryFn: () => listAdminRenewRequests(), enabled: needsStaysData, ...MEDIUM_FRESH_QUERY_OPTIONS });
   const checkoutRequestsPendingQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-pending', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'PENDING' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
   const checkoutRequestsApprovedQuery = useQuery({ queryKey: ['dashboard-admin', 'checkout-requests-approved', activeArea], queryFn: () => listAdminCheckoutRequests({ status: 'APPROVED' }), enabled: needsStaysData, ...ACTION_QUERY_OPTIONS });
   const paymentReviewQuery = useQuery({ queryKey: ['dashboard-admin', 'payment-review', activeArea], queryFn: () => listPaymentReviewQueue({ limit: needsTodayData ? 25 : 15 }), enabled: needsFinanceData, ...ACTION_QUERY_OPTIONS });
@@ -750,7 +750,9 @@ export default function AdminDashboard() {
   const stays = staysQuery.data?.items ?? [];
   const invoices = invoicesQuery.data?.items ?? [];
   const tickets = ticketsQuery.data?.items ?? [];
-  const renewRequests = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) => rr.status === 'PENDING') ?? [];
+  const renewRequests = renewRequestsQuery.data?.items?.filter((rr: RenewRequest) =>
+    ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'].includes(rr.status),
+  ) ?? [];
   const checkoutPendingRequests = checkoutRequestsPendingQuery.data?.items ?? [];
   const checkoutApprovedRequests = checkoutRequestsApprovedQuery.data?.items ?? [];
   const paymentReviewItems = (paymentReviewQuery.data?.items ?? []).filter((submission: PaymentSubmission) => submission.status === 'PENDING_REVIEW');

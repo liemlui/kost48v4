@@ -642,7 +642,26 @@ export type Ticket = {
   updatedAt?: string;
 };
 
-export type RenewRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | string;
+export type RenewRequestStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'PENDING_DECISION'
+  | 'AWAITING_DP'
+  | 'DP_SECURED'
+  | 'COMPLETED'
+  | 'REJECTED_BY_TENANT'
+  | 'EXPIRED_PRIORITY'
+  | 'FORFEITED';
+
+export type RenewalInvoiceSnapshot = {
+  id: number;
+  invoiceNumber: string;
+  status: string;
+  totalAmountRupiah: number;
+  dueDate?: string | null;
+  paidAt?: string | null;
+};
 
 export type RenewRequest = {
   id: number;
@@ -653,6 +672,14 @@ export type RenewRequest = {
   status: RenewRequestStatus;
   requestNotes?: string | null;
   reviewNotes?: string | null;
+  downPaymentAmountRupiah?: number | null;
+  downPaymentPaidAt?: string | null;
+  downPaymentDueDate?: string | null;
+  settlementDueDate?: string | null;
+  downPaymentInvoiceId?: number | null;
+  settlementInvoiceId?: number | null;
+  downPaymentInvoice?: RenewalInvoiceSnapshot | null;
+  settlementInvoice?: RenewalInvoiceSnapshot | null;
   reviewedById?: number | null;
   reviewedAt?: string | null;
   createdAt?: string;
@@ -680,10 +707,15 @@ export type CreateRenewRequestPayload = {
 export type ApproveRenewRequestPayload = {
   plannedCheckOutDate?: string;
   agreedRentAmountRupiah?: number;
-  electricityReadingValue: string;
-  waterReadingValue: string;
-  meterReadingAt: string;
+  electricityReadingValue?: string;
+  waterReadingValue?: string;
+  meterReadingAt?: string;
   reviewNotes?: string;
+};
+
+export type DecideRenewRequestPayload = {
+  decision: 'YA' | 'TIDAK';
+  notes?: string;
 };
 
 export type RejectRenewRequestPayload = {

@@ -39291,6 +39291,7 @@ export namespace Prisma {
     reviewedById: number | null
     downPaymentAmountRupiah: number | null
     downPaymentInvoiceId: number | null
+    settlementInvoiceId: number | null
   }
 
   export type RenewRequestSumAggregateOutputType = {
@@ -39300,6 +39301,7 @@ export namespace Prisma {
     reviewedById: number | null
     downPaymentAmountRupiah: number | null
     downPaymentInvoiceId: number | null
+    settlementInvoiceId: number | null
   }
 
   export type RenewRequestMinAggregateOutputType = {
@@ -39318,6 +39320,7 @@ export namespace Prisma {
     downPaymentDueDate: Date | null
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
+    settlementInvoiceId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -39338,6 +39341,7 @@ export namespace Prisma {
     downPaymentDueDate: Date | null
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
+    settlementInvoiceId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -39358,6 +39362,7 @@ export namespace Prisma {
     downPaymentDueDate: number
     settlementDueDate: number
     downPaymentInvoiceId: number
+    settlementInvoiceId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -39371,6 +39376,7 @@ export namespace Prisma {
     reviewedById?: true
     downPaymentAmountRupiah?: true
     downPaymentInvoiceId?: true
+    settlementInvoiceId?: true
   }
 
   export type RenewRequestSumAggregateInputType = {
@@ -39380,6 +39386,7 @@ export namespace Prisma {
     reviewedById?: true
     downPaymentAmountRupiah?: true
     downPaymentInvoiceId?: true
+    settlementInvoiceId?: true
   }
 
   export type RenewRequestMinAggregateInputType = {
@@ -39398,6 +39405,7 @@ export namespace Prisma {
     downPaymentDueDate?: true
     settlementDueDate?: true
     downPaymentInvoiceId?: true
+    settlementInvoiceId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -39418,6 +39426,7 @@ export namespace Prisma {
     downPaymentDueDate?: true
     settlementDueDate?: true
     downPaymentInvoiceId?: true
+    settlementInvoiceId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -39438,6 +39447,7 @@ export namespace Prisma {
     downPaymentDueDate?: true
     settlementDueDate?: true
     downPaymentInvoiceId?: true
+    settlementInvoiceId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -39545,6 +39555,7 @@ export namespace Prisma {
     downPaymentDueDate: Date | null
     settlementDueDate: Date | null
     downPaymentInvoiceId: number | null
+    settlementInvoiceId: number | null
     createdAt: Date
     updatedAt: Date
     _count: RenewRequestCountAggregateOutputType | null
@@ -39584,6 +39595,7 @@ export namespace Prisma {
     downPaymentDueDate?: boolean
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
+    settlementInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39607,6 +39619,7 @@ export namespace Prisma {
     downPaymentDueDate?: boolean
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
+    settlementInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39630,6 +39643,7 @@ export namespace Prisma {
     downPaymentDueDate?: boolean
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
+    settlementInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stay?: boolean | StayDefaultArgs<ExtArgs>
@@ -39653,11 +39667,12 @@ export namespace Prisma {
     downPaymentDueDate?: boolean
     settlementDueDate?: boolean
     downPaymentInvoiceId?: boolean
+    settlementInvoiceId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "downPaymentAmountRupiah" | "downPaymentPaidAt" | "downPaymentDueDate" | "settlementDueDate" | "downPaymentInvoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
+  export type RenewRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stayId" | "tenantId" | "requestedTerm" | "requestedCheckOutDate" | "status" | "requestNotes" | "reviewNotes" | "reviewedById" | "reviewedAt" | "downPaymentAmountRupiah" | "downPaymentPaidAt" | "downPaymentDueDate" | "settlementDueDate" | "downPaymentInvoiceId" | "settlementInvoiceId" | "createdAt" | "updatedAt", ExtArgs["result"]["renewRequest"]>
   export type RenewRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stay?: boolean | StayDefaultArgs<ExtArgs>
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
@@ -39697,6 +39712,7 @@ export namespace Prisma {
       downPaymentDueDate: Date | null
       settlementDueDate: Date | null
       downPaymentInvoiceId: number | null
+      settlementInvoiceId: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["renewRequest"]>
@@ -40140,6 +40156,7 @@ export namespace Prisma {
     readonly downPaymentDueDate: FieldRef<"RenewRequest", 'DateTime'>
     readonly settlementDueDate: FieldRef<"RenewRequest", 'DateTime'>
     readonly downPaymentInvoiceId: FieldRef<"RenewRequest", 'Int'>
+    readonly settlementInvoiceId: FieldRef<"RenewRequest", 'Int'>
     readonly createdAt: FieldRef<"RenewRequest", 'DateTime'>
     readonly updatedAt: FieldRef<"RenewRequest", 'DateTime'>
   }
@@ -61491,6 +61508,7 @@ export namespace Prisma {
     downPaymentDueDate: 'downPaymentDueDate',
     settlementDueDate: 'settlementDueDate',
     downPaymentInvoiceId: 'downPaymentInvoiceId',
+    settlementInvoiceId: 'settlementInvoiceId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -65598,6 +65616,7 @@ export namespace Prisma {
     downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -65621,6 +65640,7 @@ export namespace Prisma {
     downPaymentDueDate?: SortOrderInput | SortOrder
     settlementDueDate?: SortOrderInput | SortOrder
     downPaymentInvoiceId?: SortOrderInput | SortOrder
+    settlementInvoiceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stay?: StayOrderByWithRelationInput
@@ -65647,6 +65667,7 @@ export namespace Prisma {
     downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
     stay?: XOR<StayScalarRelationFilter, StayWhereInput>
@@ -65670,6 +65691,7 @@ export namespace Prisma {
     downPaymentDueDate?: SortOrderInput | SortOrder
     settlementDueDate?: SortOrderInput | SortOrder
     downPaymentInvoiceId?: SortOrderInput | SortOrder
+    settlementInvoiceId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RenewRequestCountOrderByAggregateInput
@@ -65698,6 +65720,7 @@ export namespace Prisma {
     downPaymentDueDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
     settlementDueDate?: DateTimeNullableWithAggregatesFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
+    settlementInvoiceId?: IntNullableWithAggregatesFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RenewRequest"> | Date | string
   }
@@ -70565,6 +70588,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -70588,6 +70612,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -70604,6 +70629,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -70627,6 +70653,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -70647,6 +70674,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -70663,6 +70691,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -70683,6 +70712,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -75559,6 +75589,7 @@ export namespace Prisma {
     downPaymentDueDate?: SortOrder
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
+    settlementInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75570,6 +75601,7 @@ export namespace Prisma {
     reviewedById?: SortOrder
     downPaymentAmountRupiah?: SortOrder
     downPaymentInvoiceId?: SortOrder
+    settlementInvoiceId?: SortOrder
   }
 
   export type RenewRequestMaxOrderByAggregateInput = {
@@ -75588,6 +75620,7 @@ export namespace Prisma {
     downPaymentDueDate?: SortOrder
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
+    settlementInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75608,6 +75641,7 @@ export namespace Prisma {
     downPaymentDueDate?: SortOrder
     settlementDueDate?: SortOrder
     downPaymentInvoiceId?: SortOrder
+    settlementInvoiceId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -75619,6 +75653,7 @@ export namespace Prisma {
     reviewedById?: SortOrder
     downPaymentAmountRupiah?: SortOrder
     downPaymentInvoiceId?: SortOrder
+    settlementInvoiceId?: SortOrder
   }
 
   export type EnumRenewRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -84646,6 +84681,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -84667,6 +84703,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -85928,6 +85965,7 @@ export namespace Prisma {
     downPaymentDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     settlementDueDate?: DateTimeNullableFilter<"RenewRequest"> | Date | string | null
     downPaymentInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
+    settlementInvoiceId?: IntNullableFilter<"RenewRequest"> | number | null
     createdAt?: DateTimeFilter<"RenewRequest"> | Date | string
     updatedAt?: DateTimeFilter<"RenewRequest"> | Date | string
   }
@@ -86673,6 +86711,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stay: StayCreateNestedOneWithoutRenewRequestsInput
@@ -86694,6 +86733,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -88530,6 +88570,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant: TenantCreateNestedOneWithoutRenewRequestsInput
@@ -88551,6 +88592,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -103457,6 +103499,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -104703,6 +104746,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -104724,6 +104768,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -104743,6 +104788,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -105534,6 +105580,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -105917,6 +105964,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stay?: StayUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -105938,6 +105986,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -105957,6 +106006,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -107177,6 +107227,7 @@ export namespace Prisma {
     downPaymentDueDate?: Date | string | null
     settlementDueDate?: Date | string | null
     downPaymentInvoiceId?: number | null
+    settlementInvoiceId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -107513,6 +107564,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneRequiredWithoutRenewRequestsNestedInput
@@ -107534,6 +107586,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -107553,6 +107606,7 @@ export namespace Prisma {
     downPaymentDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settlementDueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     downPaymentInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
+    settlementInvoiceId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

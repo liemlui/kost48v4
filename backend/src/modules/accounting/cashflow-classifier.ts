@@ -1,6 +1,4 @@
-// F1-3 (F-01/05/19/20) — klasifikasi arus kas (direct method) yang PURE & teruji.
-// Diekstrak dari accounting-reports.service.ts agar bisa diuji zero-dependency
-// (lihat backend/test/unit/cashflow-classifier.test.js).
+// F1-3 (F-01/05/19/20): pure direct-method cashflow classification.
 
 export interface CashflowLineInput {
   sourceType: string | null;
@@ -23,19 +21,13 @@ export interface CashflowClassification {
   investingCashOut: number;
   financingCashIn: number;
   financingCashOut: number;
-  // F1-9 (F-10): deposit = dana titipan/liability, BUKAN operating. Section terpisah.
   depositLiabilityIn: number;
   depositLiabilityOut: number;
   operatingInTotal: number;
   operatingOutTotal: number;
-  netRupiah: number; // = total mutasi kas periode (operating+investing+financing+deposit)
+  netRupiah: number;
 }
 
-/**
- * F1-3a (F-01): sebuah journal line memutasi KAS jika ditandai cashAccountId,
- * ATAU akun COA-nya berkode prefix '10' (1000/1010/1020 = Kas/Bank).
- * BUKAN '11' (1100 = PIUTANG/AR) — itulah bug F-01 yang membuat AR dihitung sebagai kas.
- */
 export function isCashLine(coaCode: string | null, cashAccountId: number | null): boolean {
   if (cashAccountId != null) return true;
   return !!coaCode && String(coaCode).startsWith('10');
@@ -43,27 +35,29 @@ export function isCashLine(coaCode: string | null, cashAccountId: number | null)
 
 const INVESTING_SOURCES = new Set(['FIXED_ASSET', 'DEPRECIATION']);
 const FINANCING_SOURCES = new Set(['OPENING_BALANCE']);
-// F1-9 (F-10): deposit jaminan = perubahan liabilitas titipan, dipisah dari operating.
 const DEPOSIT_SOURCES = new Set(['DEPOSIT']);
 
+type DirectionData = { amount: number; count: number };
+
 /**
- * F1-3c: klasifikasikan setiap sumber SEKALI ke satu kategori (operating/investing/financing)
- * berbasis NET (debit−kredit) per sourceType. Menghapus double-count versi lama yang
- * memasukkan semua line ke operating total LALU menambah investing/financing lagi.
- * netRupiah = Σ(debit−kredit) seluruh cash line = mutasi kas periode (untuk invarian beginning+net=ending).
+ * Each cash line is classified exactly once. Inflow and outflow remain gross,
+ * so opposite movements with the same sourceType cannot hide each other.
  */
 export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassification {
-  const buckets = new Map<string, { net: number; count: number }>();
+  const incoming = new Map<string, DirectionData>();
+  const outgoing = new Map<string, DirectionData>();
+
   for (const line of lines) {
     if (!isCashLine(line.coaCode, line.cashAccountId)) continue;
     const sourceType = String(line.sourceType ?? 'UNKNOWN');
-    const debit = Number(line.debitRupiah ?? 0);
-    const credit = Number(line.creditRupiah ?? 0);
-    if (debit === 0 && credit === 0) continue;
-    const cur = buckets.get(sourceType) ?? { net: 0, count: 0 };
-    cur.net += debit - credit;
-    cur.count += 1;
-    buckets.set(sourceType, cur);
+    const net = Number(line.debitRupiah ?? 0) - Number(line.creditRupiah ?? 0);
+    if (net === 0) continue;
+
+    const target = net > 0 ? incoming : outgoing;
+    const current = target.get(sourceType) ?? { amount: 0, count: 0 };
+    current.amount += Math.abs(net);
+    current.count += 1;
+    target.set(sourceType, current);
   }
 
   const operatingCashIn: CashflowBucket[] = [];
@@ -77,35 +71,45 @@ export function classifyCashflow(lines: CashflowLineInput[]): CashflowClassifica
   let operatingInTotal = 0;
   let operatingOutTotal = 0;
 
-  for (const [sourceType, data] of buckets) {
-    const abs = Math.abs(data.net);
+  const addDirection = (
+    sourceType: string,
+    data: DirectionData,
+    direction: 'IN' | 'OUT',
+  ) => {
     if (INVESTING_SOURCES.has(sourceType)) {
-      if (data.net >= 0) investingCashIn += abs;
-      else investingCashOut += abs;
-    } else if (FINANCING_SOURCES.has(sourceType)) {
-      if (data.net >= 0) financingCashIn += abs;
-      else financingCashOut += abs;
-    } else if (DEPOSIT_SOURCES.has(sourceType)) {
-      // F1-9 (F-10): dana titipan — perubahan liabilitas, BUKAN operating.
-      if (data.net >= 0) depositLiabilityIn += abs;
-      else depositLiabilityOut += abs;
-    } else {
-      // Operating: INVOICE_PAYMENT, WIFI_SALE, EXPENSE, fallback.
-      if (data.net >= 0) {
-        operatingCashIn.push({ sourceType, amountRupiah: abs, count: data.count });
-        operatingInTotal += abs;
-      } else {
-        operatingCashOut.push({ sourceType, amountRupiah: abs, count: data.count });
-        operatingOutTotal += abs;
-      }
+      if (direction === 'IN') investingCashIn += data.amount;
+      else investingCashOut += data.amount;
+      return;
     }
-  }
+    if (FINANCING_SOURCES.has(sourceType)) {
+      if (direction === 'IN') financingCashIn += data.amount;
+      else financingCashOut += data.amount;
+      return;
+    }
+    if (DEPOSIT_SOURCES.has(sourceType)) {
+      if (direction === 'IN') depositLiabilityIn += data.amount;
+      else depositLiabilityOut += data.amount;
+      return;
+    }
+
+    const bucket = { sourceType, amountRupiah: data.amount, count: data.count };
+    if (direction === 'IN') {
+      operatingCashIn.push(bucket);
+      operatingInTotal += data.amount;
+    } else {
+      operatingCashOut.push(bucket);
+      operatingOutTotal += data.amount;
+    }
+  };
+
+  for (const [sourceType, data] of incoming) addDirection(sourceType, data, 'IN');
+  for (const [sourceType, data] of outgoing) addDirection(sourceType, data, 'OUT');
 
   const netRupiah =
-    operatingInTotal - operatingOutTotal +
-    (investingCashIn - investingCashOut) +
-    (financingCashIn - financingCashOut) +
-    (depositLiabilityIn - depositLiabilityOut);
+    operatingInTotal - operatingOutTotal
+    + investingCashIn - investingCashOut
+    + financingCashIn - financingCashOut
+    + depositLiabilityIn - depositLiabilityOut;
 
   return {
     operatingCashIn,

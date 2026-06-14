@@ -568,6 +568,7 @@ exports.Prisma.RenewRequestScalarFieldEnum = {
   downPaymentDueDate: 'downPaymentDueDate',
   settlementDueDate: 'settlementDueDate',
   downPaymentInvoiceId: 'downPaymentInvoiceId',
+  settlementInvoiceId: 'settlementInvoiceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

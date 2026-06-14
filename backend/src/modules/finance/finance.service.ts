@@ -92,7 +92,18 @@ export class FinanceService {
         where: { status: 'CONFIRMED' as any, expenseDate: { gte: start, lt: end } },
       }),
       this.prisma.paymentSubmission.count({ where: { status: PaymentSubmissionStatus.PENDING_REVIEW as any } }),
-      this.prisma.renewRequest.count({ where: { status: RenewRequestStatus.PENDING as any } }),
+      this.prisma.renewRequest.count({
+        where: {
+          status: {
+            in: [
+              RenewRequestStatus.PENDING,
+              RenewRequestStatus.PENDING_DECISION,
+              RenewRequestStatus.AWAITING_DP,
+              RenewRequestStatus.DP_SECURED,
+            ] as any,
+          },
+        },
+      }),
       this.prisma.checkoutRequest.count({ where: { status: CheckoutRequestStatus.PENDING as any } }),
       this.prisma.checkoutRequest.count({ where: { status: CheckoutRequestStatus.APPROVED as any } }),
       this.prisma.ticket.count({ where: { status: { in: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS] as any } } }),

@@ -1201,6 +1201,7 @@ model RenewRequest {
   downPaymentDueDate      DateTime?         @db.Date // = hari-H (plannedCheckOutDate lama)
   settlementDueDate       DateTime?         @db.Date // = downPaymentPaidAt + 7 hari
   downPaymentInvoiceId    Int?                       // F2-1 inc.2b: invoice DP 30% terpisah (dibayar penuh sblm DP_SECURED)
+  settlementInvoiceId     Int?                       // Invoice sisa sewa + utilitas; wajib PAID sebelum COMPLETED
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
@@ -1211,6 +1212,7 @@ model RenewRequest {
   @@index([stayId])
   @@index([tenantId])
   @@index([status, createdAt])
+  @@index([settlementInvoiceId])
 }
 
 model CheckoutRequest {

@@ -1,5 +1,5 @@
 import { createResource, getResource, listResource, postAction } from './resources';
-import type { CreateRenewRequestPayload, RenewRequest, ApproveRenewRequestPayload, RejectRenewRequestPayload, PaginatedResponse } from '../types';
+import type { CreateRenewRequestPayload, RenewRequest, ApproveRenewRequestPayload, RejectRenewRequestPayload, PaginatedResponse, DecideRenewRequestPayload } from '../types';
 
 export async function createRenewRequest(payload: CreateRenewRequestPayload): Promise<RenewRequest> {
   return createResource<RenewRequest>('/tenant/renew-requests', payload as unknown as Record<string, unknown>);
@@ -32,4 +32,12 @@ export async function approveRenewRequest(id: number, payload?: ApproveRenewRequ
 
 export async function rejectRenewRequest(id: number, payload: RejectRenewRequestPayload): Promise<RenewRequest> {
   return postAction<RenewRequest>(`/admin/renew-requests/${id}/reject`, payload as unknown as Record<string, unknown>);
+}
+
+export async function decideRenewRequest(id: number, payload: DecideRenewRequestPayload): Promise<RenewRequest> {
+  return postAction<RenewRequest>(`/tenant/renew-requests/${id}/decide`, payload as unknown as Record<string, unknown>);
+}
+
+export async function confirmRenewDownPayment(id: number, notes?: string): Promise<RenewRequest> {
+  return postAction<RenewRequest>(`/admin/renew-requests/${id}/confirm-dp`, notes ? { notes } : {});
 }

@@ -2,18 +2,20 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationQueryDto } from './dto/notification.dto';
 
+export type CreateAppNotificationInput = {
+  recipientUserId: number;
+  title: string;
+  body: string;
+  linkTo?: string;
+  entityType?: string;
+  entityId?: string;
+};
+
 @Injectable()
 export class AppNotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(input: {
-    recipientUserId: number;
-    title: string;
-    body: string;
-    linkTo?: string;
-    entityType?: string;
-    entityId?: string;
-  }) {
+  async create(input: CreateAppNotificationInput) {
     return this.prisma.appNotification.create({
       data: {
         recipientUserId: input.recipientUserId,
@@ -24,6 +26,25 @@ export class AppNotificationService {
         entityId: input.entityId ?? null,
       },
     });
+  }
+
+  async createOnce(input: CreateAppNotificationInput) {
+    const duplicate = await this.prisma.appNotification.findFirst({
+      where: {
+        recipientUserId: input.recipientUserId,
+        title: input.title,
+        entityType: input.entityType ?? null,
+        entityId: input.entityId ?? null,
+      },
+      select: { id: true },
+    });
+
+    if (duplicate) {
+      return { created: false, notificationId: duplicate.id };
+    }
+
+    const notification = await this.create(input);
+    return { created: true, notificationId: notification.id };
   }
 
   async listMine(userId: number, query: NotificationQueryDto) {

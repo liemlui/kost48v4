@@ -173,17 +173,17 @@ export class RenewRequestsService {
     }
     const dpInvoice = await this.prisma.invoice.findUnique({
       where: { id: request.downPaymentInvoiceId },
-      select: { status: true },
+      select: { status: true, paidAt: true },
     });
-    if (!dpInvoice || dpInvoice.status !== InvoiceStatus.PAID) {
+    if (!dpInvoice || dpInvoice.status !== InvoiceStatus.PAID || !dpInvoice.paidAt) {
       throw new ConflictException('DP belum lunas. Setujui dulu bukti pembayaran DP (invoice harus PAID) sebelum mengamankan kamar.');
     }
     // F2-1 R3: gate deadline di command service (tak hanya andalkan sweeper). DP hanya boleh
     // diamankan ≤ hari-H (downPaymentDueDate, WIB). Lewat hari-H → tolak (prioritas hangus).
-    if (request.downPaymentDueDate && RenewRequestsService.wibStartOfToday().getTime() > new Date(request.downPaymentDueDate).getTime()) {
+    if (request.downPaymentDueDate && new Date(dpInvoice.paidAt).getTime() > new Date(request.downPaymentDueDate).getTime()) {
       throw new ConflictException('Hari-H (batas prioritas) sudah lewat; DP tak dapat diamankan lagi. Prioritas perpanjangan hangus — ajukan ulang bila kamar masih tersedia.');
     }
-    const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
+    const paidAt = new Date(dpInvoice.paidAt);
     const settlementDueDate = new Date(paidAt);
     settlementDueDate.setUTCDate(settlementDueDate.getUTCDate() + 7); // pelunasan maks H+7 dari DP (R2)
 
@@ -232,12 +232,13 @@ export class RenewRequestsService {
       }
       // F2-1 R3: gate deadline di command service. Pelunasan/approve maks ≤ H+7 (settlementDueDate, WIB).
       // Lewat H+7 → tolak (seharusnya FORFEITED via sweeper; admin proses forced checkout manual).
-      if (request.settlementDueDate && RenewRequestsService.wibStartOfToday().getTime() > new Date(request.settlementDueDate).getTime()) {
+      if (!request.settlementInvoiceId && request.settlementDueDate && RenewRequestsService.wibStartOfToday().getTime() > new Date(request.settlementDueDate).getTime()) {
         throw new ConflictException('Batas pelunasan (H+7) sudah lewat. Perpanjangan gagal — proses sebagai FORFEITED (forced checkout + settle deposit manual).');
       }
 
       // F2-1 rent-loyalty (D-16): harga sewa renewal = sewa SAAT INI (tak naik). Abaikan kenaikan via dto.
       const currentStay = await tx.stay.findUnique({ where: { id: request.stayId }, select: { agreedRentAmountRupiah: true } });
+      if (!currentStay) throw new NotFoundException('Stay tidak ditemukan');
 
       const finalPlannedCheckOutDate = dto.plannedCheckOutDate
         ?? (request.requestedCheckOutDate ? request.requestedCheckOutDate.toISOString() : undefined);
@@ -253,7 +254,56 @@ export class RenewRequestsService {
         meterReadingAt: dto.meterReadingAt,
       };
 
-      const renewResult = await this.staysService.renewStayInTransaction(tx, request.stayId, renewDto, actor);
+      if (!request.settlementInvoiceId) {
+        const prepared = await this.staysService.prepareRenewalSettlementInTransaction(
+          tx,
+          request.stayId,
+          renewDto,
+          actor,
+          request.settlementDueDate,
+        );
+        const updated = await tx.renewRequest.update({
+          where: { id },
+          data: {
+            settlementInvoiceId: prepared.invoice.id,
+            requestedCheckOutDate: prepared.plannedStayUpdate.plannedCheckOutDate,
+            reviewNotes: dto.reviewNotes ?? request.reviewNotes,
+            reviewedById: actor.id,
+            reviewedAt: new Date(),
+          },
+        });
+        return {
+          phase: 'SETTLEMENT_ISSUED' as const,
+          request: updated,
+          invoice: prepared.invoice,
+          meterSummary: prepared.meterSummary,
+        };
+      }
+
+      const settlementInvoice = await tx.invoice.findUnique({
+        where: { id: request.settlementInvoiceId },
+        select: { id: true, status: true, paidAt: true },
+      });
+      if (!settlementInvoice || settlementInvoice.status !== InvoiceStatus.PAID || !settlementInvoice.paidAt) {
+        throw new ConflictException('Invoice pelunasan belum PAID. Verifikasi pembayaran penuh sebelum finalisasi.');
+      }
+      if (
+        request.settlementDueDate
+        && new Date(settlementInvoice.paidAt).getTime() > new Date(request.settlementDueDate).getTime()
+      ) {
+        throw new ConflictException('Pelunasan dibayar setelah batas H+7. Perpanjangan harus diproses sebagai FORFEITED.');
+      }
+
+      const renewResult = await this.staysService.finalizePreparedRenewalInTransaction(
+        tx,
+        {
+          stayId: request.stayId,
+          settlementInvoiceId: settlementInvoice.id,
+          pricingTerm: request.requestedTerm as PricingTerm,
+          agreedRentAmountRupiah: currentStay.agreedRentAmountRupiah,
+        },
+        actor,
+      );
 
       const updated = await tx.renewRequest.update({
         where: { id },
@@ -266,8 +316,32 @@ export class RenewRequestsService {
         },
       });
 
-      return { request: updated, ...renewResult };
+      return { phase: 'COMPLETED' as const, request: updated, ...renewResult };
     });
+
+    if (result.phase === 'SETTLEMENT_ISSUED') {
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: 'PREPARE_RENEW_SETTLEMENT',
+        entityType: 'RenewRequest',
+        entityId: String(result.request.id),
+        newData: result.request,
+      });
+      await this.audit.log({
+        actorUserId: actor.id,
+        action: 'CREATE',
+        entityType: 'Invoice',
+        entityId: String(result.invoice.id),
+        newData: result.invoice,
+      });
+      await this.notifyTenantRenew(
+        result.request.stayId,
+        result.request.id,
+        'Tagihan pelunasan perpanjangan terbit',
+        `Invoice ${result.invoice.invoiceNumber} sudah terbit. Bayar penuh sebelum ${result.request.settlementDueDate?.toISOString().slice(0, 10) ?? 'batas H+7'}, lalu admin akan memfinalkan perpanjangan.`,
+      );
+      return result;
+    }
 
     await this.audit.log({
       actorUserId: actor.id,
@@ -284,14 +358,6 @@ export class RenewRequestsService {
       oldData: result.oldStay,
       newData: result.stay,
     });
-    await this.audit.log({
-      actorUserId: actor.id,
-      action: 'CREATE',
-      entityType: 'Invoice',
-      entityId: String(result.invoice.id),
-      newData: result.invoice,
-    });
-
     const outStr = result.stay.plannedCheckOutDate
       ? new Date(result.stay.plannedCheckOutDate).toISOString().slice(0, 10)
       : '-';
@@ -299,47 +365,75 @@ export class RenewRequestsService {
       result.request.stayId,
       result.request.id,
       '🎉 Perpanjangan disetujui',
-      `Perpanjangan masa sewa Anda telah disetujui dan final. Masa sewa kini berlaku sampai ${outStr}. Terima kasih.`,
+      `Pelunasan telah diverifikasi. Masa sewa Anda kini berlaku sampai ${outStr}.`,
     );
 
-    return { request: result.request, stay: result.stay, invoice: result.invoice, meterSummary: result.meterSummary };
+    return { phase: result.phase, request: result.request, stay: result.stay, invoice: result.invoice };
   }
 
   /** Admin/owner rejects a pending renew request. */
   async rejectRequest(id: number, dto: RejectRenewRequestDto, actor: CurrentUserPayload) {
-    const request = await this.prisma.renewRequest.findUnique({ where: { id } });
-    if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
-    const rejectable = [RenewRequestStatus.PENDING, RenewRequestStatus.PENDING_DECISION, RenewRequestStatus.AWAITING_DP, RenewRequestStatus.DP_SECURED];
-    if (!rejectable.includes(request.status as RenewRequestStatus)) {
-      throw new ConflictException('Permintaan perpanjangan sudah final dan tidak dapat ditolak.');
-    }
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "RenewRequest" WHERE id = ${id} FOR UPDATE`;
+      const request = await tx.renewRequest.findUnique({ where: { id } });
+      if (!request) throw new NotFoundException('Permintaan perpanjangan tidak ditemukan');
+      const rejectable = [
+        RenewRequestStatus.PENDING,
+        RenewRequestStatus.PENDING_DECISION,
+        RenewRequestStatus.AWAITING_DP,
+      ];
+      if (!rejectable.includes(request.status as RenewRequestStatus)) {
+        throw new ConflictException(
+          'Renewal yang DP-nya sudah diamankan tidak dapat ditolak. Selesaikan pelunasan atau proses forfeit/refund sesuai kondisi pembayaran.',
+        );
+      }
 
-    const updated = await this.prisma.renewRequest.update({
-      where: { id },
-      data: {
-        status: RenewRequestStatus.REJECTED,
-        reviewNotes: dto.reviewNotes,
-        reviewedById: actor.id,
-        reviewedAt: new Date(),
-      },
+      if (request.status === RenewRequestStatus.AWAITING_DP && request.downPaymentInvoiceId) {
+        await this.staysService.cancelUnpaidRenewalInvoiceInTransaction(
+          tx,
+          request.downPaymentInvoiceId,
+          actor.id,
+          `Permintaan renewal #${request.id} ditolak: ${dto.reviewNotes}`,
+        );
+      }
+
+      const updated = await tx.renewRequest.update({
+        where: { id },
+        data: {
+          status: RenewRequestStatus.REJECTED,
+          reviewNotes: dto.reviewNotes,
+          reviewedById: actor.id,
+          reviewedAt: new Date(),
+        },
+      });
+      return { request, updated };
+    });
+
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: 'RENEW_REJECT',
+      entityType: 'RenewRequest',
+      entityId: String(id),
+      oldData: result.request,
+      newData: result.updated,
     });
 
     await this.notifyTenantRenew(
-      request.stayId,
-      updated.id,
+      result.request.stayId,
+      result.updated.id,
       '❌ Perpanjangan ditolak',
       dto.reviewNotes
         ? `Permintaan perpanjangan Anda ditolak. Catatan: ${dto.reviewNotes}`
         : 'Permintaan perpanjangan Anda ditolak. Silakan hubungi admin untuk informasi lebih lanjut.',
     );
 
-    return updated;
+    return result.updated;
   }
 
   /** Admin/owner list all renew requests with optional status filter. */
   async findAll(status?: RenewRequestStatus) {
     const where = status ? { status } : {};
-    return this.prisma.renewRequest.findMany({
+    const items = await this.prisma.renewRequest.findMany({
       where,
       include: {
         stay: { select: { id: true, agreedRentAmountRupiah: true, tenant: { select: { fullName: true, phone: true } }, room: { select: { code: true } } } },
@@ -348,13 +442,14 @@ export class RenewRequestsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+    return this.attachInvoiceSnapshots(items);
   }
 
   /** Tenant gets their own renew requests. */
   async findMine(actor: CurrentUserPayload) {
     if (!actor.tenantId) throw new ForbiddenException('Hanya tenant yang dapat melihat permintaan');
 
-    return this.prisma.renewRequest.findMany({
+    const items = await this.prisma.renewRequest.findMany({
       where: { tenantId: actor.tenantId },
       include: {
         stay: { select: { id: true, room: { select: { code: true } } } },
@@ -362,6 +457,36 @@ export class RenewRequestsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+    return this.attachInvoiceSnapshots(items);
+  }
+
+  private async attachInvoiceSnapshots<T extends {
+    downPaymentInvoiceId?: number | null;
+    settlementInvoiceId?: number | null;
+  }>(items: T[]) {
+    const invoiceIds = Array.from(new Set(
+      items.flatMap((item) => [item.downPaymentInvoiceId, item.settlementInvoiceId])
+        .filter((value): value is number => typeof value === 'number'),
+    ));
+    const invoices = invoiceIds.length
+      ? await this.prisma.invoice.findMany({
+          where: { id: { in: invoiceIds } },
+          select: {
+            id: true,
+            invoiceNumber: true,
+            status: true,
+            totalAmountRupiah: true,
+            dueDate: true,
+            paidAt: true,
+          },
+        })
+      : [];
+    const byId = new Map(invoices.map((invoice) => [invoice.id, invoice]));
+    return items.map((item) => ({
+      ...item,
+      downPaymentInvoice: item.downPaymentInvoiceId ? byId.get(item.downPaymentInvoiceId) ?? null : null,
+      settlementInvoice: item.settlementInvoiceId ? byId.get(item.settlementInvoiceId) ?? null : null,
+    }));
   }
 
   // ── F2-1 inc.4: notifikasi in-app siklus renewal (best-effort, tak menggagalkan transaksi) ──

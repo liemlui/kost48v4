@@ -115,8 +115,8 @@ export function getRenewApprovalSafety(input: RenewApprovalSafetyInput): RenewAp
     checklist: [
       'Meter listrik & air sudah dicatat.',
       'Tanggal akhir masa sewa sudah benar.',
-      'Tagihan renew akan dibuat.',
-      'Tenant tetap harus bayar tagihan renew.',
+      'Invoice pelunasan akan diterbitkan.',
+      'Masa sewa baru aktif hanya setelah invoice PAID.',
     ],
     requiresAcknowledgement,
     canApprove: blockers.length === 0,
@@ -124,6 +124,18 @@ export function getRenewApprovalSafety(input: RenewApprovalSafetyInput): RenewAp
 }
 
 export function getRenewRequestRiskBadge(request: RenewRequest): { label: string; tone: SafetyTone } {
+  if (request.status === 'PENDING_DECISION') return { label: 'Menunggu tenant', tone: 'info' };
+  if (request.status === 'AWAITING_DP') {
+    return request.downPaymentInvoice?.status === 'PAID'
+      ? { label: 'DP siap dikonfirmasi', tone: 'warning' }
+      : { label: 'Menunggu DP', tone: 'warning' };
+  }
+  if (request.status === 'DP_SECURED') {
+    if (!request.settlementInvoiceId) return { label: 'Butuh meter', tone: 'warning' };
+    return request.settlementInvoice?.status === 'PAID'
+      ? { label: 'Siap finalisasi', tone: 'success' }
+      : { label: 'Menunggu pelunasan', tone: 'warning' };
+  }
   if (request.status !== 'PENDING') return { label: 'Selesai', tone: 'info' };
 
   const currentEnd = normalizeDateOnly(request.stay?.plannedCheckOutDate ?? null);

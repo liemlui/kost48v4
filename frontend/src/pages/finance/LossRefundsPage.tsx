@@ -38,6 +38,15 @@ export default function LossRefundsPage() {
     },
   });
 
+  const submitRefund = () => {
+    if (!proofUrl.trim()) {
+      setError('URL bukti transfer balik wajib diisi.');
+      return;
+    }
+    setError(null);
+    mutation.mutate();
+  };
+
   const items = data ?? [];
 
   return (
@@ -107,7 +116,7 @@ export default function LossRefundsPage() {
                 <Form.Control as="textarea" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Transfer balik BCA ref ..." />
               </Form.Group>
               <Form.Group>
-                <Form.Label>URL bukti (opsional)</Form.Label>
+                <Form.Label>URL bukti transfer balik</Form.Label>
                 <Form.Control value={proofUrl} onChange={(e) => setProofUrl(e.target.value)} placeholder="/uploads/refunds/..." />
               </Form.Group>
             </>
@@ -115,7 +124,7 @@ export default function LossRefundsPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setTarget(null)} disabled={mutation.isPending}>Batal</Button>
-          <Button variant="primary" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          <Button variant="primary" onClick={submitRefund} disabled={mutation.isPending || !proofUrl.trim()}>
             {mutation.isPending ? 'Memproses…' : 'Tandai Selesai (refund dikembalikan)'}
           </Button>
         </Modal.Footer>

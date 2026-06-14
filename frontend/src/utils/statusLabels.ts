@@ -124,6 +124,11 @@ export function getStatusLabel(status?: string, customLabel?: string, options?: 
     PROJECT: 'Proyek',
     PENDING_REVIEW: domain === 'payment' ? 'Menunggu Dicek' : 'Menunggu Dicek',
     PENDING: 'Menunggu Dicek',
+    PENDING_DECISION: 'Menunggu Keputusan Tenant',
+    AWAITING_DP: 'Menunggu DP',
+    DP_SECURED: 'DP Aman / Menunggu Pelunasan',
+    REJECTED_BY_TENANT: 'Tidak Diperpanjang',
+    EXPIRED_PRIORITY: 'Prioritas Berakhir',
     APPROVED: 'Disetujui',
     REJECTED: 'Ditolak',
     EXPIRED: 'Kedaluwarsa',
@@ -142,8 +147,8 @@ export function getStatusVariant(status?: string): 'success' | 'warning' | 'dang
   const normalized = String(status ?? '').toUpperCase();
 
   if (['ACTIVE', 'AVAILABLE', 'PAID', 'SUCCESS', 'GOOD', 'REFUNDED', 'RESOLVED', 'DONE', 'APPROVED', 'OPPORTUNITY', 'PAYMENT_RECEIVED', 'INCREASE_LIABILITY'].includes(normalized)) return 'success';
-  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR', 'DEDUCTION', 'FORFEIT'].includes(normalized)) return 'warning';
-  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER', 'OUT_OF_STOCK', 'DAMAGED'].includes(normalized)) return 'danger';
+  if (['OPEN', 'PARTIAL', 'WARNING', 'HELD', 'COUNTDOWN_7PLUS', 'COUNTDOWN_3_6', 'RESERVED', 'PENDING_REVIEW', 'PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED', 'HIGH', 'MEDIUM', 'LOW_STOCK', 'PENDING_CHECK', 'NEEDS_REPAIR', 'DEDUCTION', 'FORFEIT'].includes(normalized)) return 'warning';
+  if (['CANCELLED', 'OVERDUE', 'DANGER', 'FORFEITED', 'EXPIRED_PRIORITY', 'REJECTED_BY_TENANT', 'COUNTDOWN_1_2', 'COUNTDOWN_0', 'COUNTDOWN_OVERDUE', 'REJECTED', 'BLOCKER', 'OUT_OF_STOCK', 'DAMAGED'].includes(normalized)) return 'danger';
   if (['COMPLETED', 'ISSUED', 'INFO', 'OCCUPIED', 'PARTIALLY_REFUNDED', 'IN_PROGRESS', 'REFUND', 'DECREASE_LIABILITY'].includes(normalized)) return 'info';
   if (['CLOSED', 'DRAFT', 'SECONDARY', 'INACTIVE', 'MAINTENANCE', 'UNAVAILABLE', 'COUNTDOWN_NODATE', 'EXPIRED'].includes(normalized)) return 'secondary';
   if (['MISSING'].includes(normalized)) return 'dark';

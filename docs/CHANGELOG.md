@@ -2,6 +2,14 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-14 — audit-fix(Fase 1/2): checklist dibuktikan ulang terhadap kode
+
+- **Renewal:** menutup celah kritis approval sebelum lunas. DP PAID kini hanya mengamankan prioritas; admin menerbitkan invoice pelunasan setelah catat meter; stay baru diperpanjang setelah invoice pelunasan PAID tepat waktu. Ditambah `RenewRequest.settlementInvoiceId`, gate payment deadline, pembatalan+reversal invoice saat reject sebelum DP, UI tenant/admin lengkap, dan direct-renew bypass dimatikan.
+- **Cashflow:** classifier menyimpan gross inflow/outflow terpisah per sumber sehingga transaksi dua arah tidak saling menutup.
+- **Refund:** hanya submission valid dianggap sudah transfer; bukti transfer balik wajib sebelum status COMPLETED.
+- **Ticket number:** generator memakai PostgreSQL transaction advisory lock dan seluruh caller berjalan dalam transaksi.
+- **Verifikasi terbaru:** backend build lulus; frontend production build + PWA verification lulus (94 chunks); unit test **26/26 lulus**, termasuk regression renewal, deadline payment, refund proof, gross cashflow, dan ticket-number concurrency.
+
 ## 2026-06-14 — feat(F3-1): coverage notifikasi operasional (assign, room-ready, K-6/K-8)
 
 - **Ticket-assign → assignee:** `tickets.service.assign()` mengirim notif ke penerima tugas (best-effort, di luar audit) hanya saat assignee benar-benar berubah; self-assign di-skip.

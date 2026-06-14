@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
@@ -9,7 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import SafeImage from '../../components/common/SafeImage';
 import Kost48OfficialInfoCard from '../../components/common/Kost48OfficialInfoCard';
 import { getResource, listResource } from '../../api/resources';
-import { listMyRenewRequests } from '../../api/renewRequests';
+import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
@@ -159,6 +159,16 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
     refetchOnWindowFocus: true,
   });
 
+  const decideRenewMutation = useMutation({
+    mutationFn: ({ id, decision }: { id: number; decision: 'YA' | 'TIDAK' }) =>
+      decideRenewRequest(id, { decision }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal-renew-requests', stay.id] });
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices', stay.id] });
+      queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
+    },
+  });
+
   const ticketsQuery = useQuery<PaginatedResponse<Ticket>>({
     queryKey: ['portal-tickets', stay.id],
     queryFn: () => listResource<Ticket>('/tickets/my'),
@@ -201,8 +211,12 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const priceFacts = useMemo(() => getRoomPriceFacts(stay), [stay]);
 
   const activeTickets = useMemo(() => tickets.filter((t) => !['CLOSED', 'CANCELLED'].includes((t.status ?? '').toUpperCase())), [tickets]);
-  const pendingRenewRequest = renewRequests.find((rr) => rr.stayId === stay.id && rr.status === 'PENDING');
-  const rejectedRequest = renewRequests.find((rr) => rr.stayId === stay.id && rr.status === 'REJECTED');
+  const activeRenewStatuses = ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'];
+  const pendingRenewRequest = renewRequests.find((rr) => rr.stayId === stay.id && activeRenewStatuses.includes(rr.status));
+  const pendingDecisionRequest = pendingRenewRequest?.status === 'PENDING_DECISION' ? pendingRenewRequest : null;
+  const rejectedRequest = renewRequests.find((rr) =>
+    rr.stayId === stay.id && ['REJECTED', 'REJECTED_BY_TENANT', 'EXPIRED_PRIORITY', 'FORFEITED'].includes(rr.status),
+  );
   const pendingCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'PENDING');
   const approvedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'APPROVED');
   const rejectedCheckoutRequest = checkoutRequests.find((cr) => cr.stayId === stay.id && cr.status === 'REJECTED');
@@ -261,13 +275,22 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       };
     }
     if (pendingRenewRequest) {
+      const renewMessage = pendingRenewRequest.status === 'PENDING_DECISION'
+        ? 'Tentukan apakah kamu lanjut memperpanjang.'
+        : pendingRenewRequest.status === 'AWAITING_DP'
+          ? 'Bayar invoice DP penuh sebelum hari-H.'
+          : pendingRenewRequest.settlementInvoiceId
+            ? 'Pelunasan sedang menunggu verifikasi/finalisasi admin.'
+            : 'DP sudah aman. Tunggu admin mencatat meter dan menerbitkan pelunasan.';
       return {
         tone: 'info' as const,
-        title: 'Perpanjangan menunggu admin',
-        message: endMeta.hasDate ? `Tunggu admin. Akhir masa sewa ${endMeta.absoluteLabel}.` : 'Tunggu admin catat meter.',
-        primaryLabel: 'Lihat Tagihan',
-        onAction: undefined as (() => void) | undefined,
-        primaryRoute: '/portal/invoices',
+        title: 'Proses perpanjangan aktif',
+        message: renewMessage,
+        primaryLabel: pendingDecisionRequest ? 'Ya, Lanjut Perpanjangan' : 'Lihat Tagihan',
+        onAction: pendingDecisionRequest
+          ? () => decideRenewMutation.mutate({ id: pendingDecisionRequest.id, decision: 'YA' })
+          : undefined as (() => void) | undefined,
+        primaryRoute: pendingDecisionRequest ? undefined : '/portal/invoices',
       };
     }
     if (pendingCheckoutRequest) {
@@ -554,7 +577,44 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       )}
 
       {/* ── State alerts ── */}
-      {pendingRenewRequest ? <Alert variant="info" className="tenant-short-alert mb-3">Perpanjangan sedang diproses admin.</Alert> : null}
+      {pendingDecisionRequest ? (
+        <Alert variant="info" className="tenant-short-alert mb-3">
+          <div className="fw-semibold mb-1">Konfirmasi perpanjangan</div>
+          <div className="small mb-2">Pilih YA untuk menerbitkan invoice DP 30%, atau TIDAK jika kamu akan keluar sesuai jadwal.</div>
+          {decideRenewMutation.isError ? (
+            <div className="text-danger small mb-2">
+              {getApiErrorMessage(decideRenewMutation.error, 'Gagal menyimpan keputusan perpanjangan.')}
+            </div>
+          ) : null}
+          <div className="d-flex gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="primary"
+              disabled={decideRenewMutation.isPending}
+              onClick={() => decideRenewMutation.mutate({ id: pendingDecisionRequest.id, decision: 'YA' })}
+            >
+              Ya, lanjut dan bayar DP
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-secondary"
+              disabled={decideRenewMutation.isPending}
+              onClick={() => decideRenewMutation.mutate({ id: pendingDecisionRequest.id, decision: 'TIDAK' })}
+            >
+              Tidak memperpanjang
+            </Button>
+          </div>
+        </Alert>
+      ) : pendingRenewRequest ? (
+        <Alert variant="info" className="tenant-short-alert mb-3">
+          <StatusBadge status={pendingRenewRequest.status} domain="renew" className="me-2" />
+          {pendingRenewRequest.status === 'AWAITING_DP'
+            ? 'Bayar invoice DP penuh sebelum batas prioritas.'
+            : pendingRenewRequest.settlementInvoiceId
+              ? 'Invoice pelunasan sudah terbit. Selesaikan pembayaran penuh agar admin dapat memfinalkan.'
+              : 'DP sudah aman. Admin akan mencatat meter dan menerbitkan invoice pelunasan.'}
+        </Alert>
+      ) : null}
       {approvedCheckoutRequest ? <Alert variant="info" className="tenant-short-alert mb-3">Tanggal keluar disetujui. Admin akan finalkan setelah tagihan beres.</Alert> : null}
       {rejectedRequest ? <Alert variant="warning" className="tenant-short-alert mb-3">Pengajuan perpanjangan ditolak.</Alert> : null}
       {rejectedCheckoutRequest ? <Alert variant="warning" className="tenant-short-alert mb-3">Pengajuan keluar ditolak.</Alert> : null}

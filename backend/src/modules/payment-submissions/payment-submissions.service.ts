@@ -66,6 +66,7 @@ export class PaymentSubmissionsService {
       if (!eligibility) {
         throw new NotFoundException('Booking atau invoice tidak ditemukan');
       }
+      await this.assertRenewalPaymentWithinDeadline(this.prisma, dto.invoiceId, paidAt);
 
       if (eligibility.stayStatus !== StayStatus.ACTIVE) {
         throw new ConflictException('Booking tidak lagi aktif');
@@ -220,6 +221,7 @@ export class PaymentSubmissionsService {
         return this.findSubmissionByIdTx(tx, submission.id);
       });
 
+      await this.notifyOwnerAdminPaymentSubmitted(created);
       return serializePrismaResult(created);
     } catch (error: any) {
       if (error?.code === 'P2002') {
@@ -364,6 +366,11 @@ export class PaymentSubmissionsService {
         if (submission.status !== PaymentSubmissionStatus.PENDING_REVIEW) {
           throw new ConflictException('Bukti pembayaran ini sudah pernah diproses');
         }
+        await this.assertRenewalPaymentWithinDeadline(
+          tx,
+          submission.invoiceId,
+          new Date(submission.paidAt),
+        );
 
         if (submission.stayStatus !== StayStatus.ACTIVE) {
           throw new ConflictException('Hunian tidak lagi aktif');
@@ -847,7 +854,12 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
       select: {
         id: true,
         downPaymentPaidRupiah: true,
-        paymentSubmissions: { select: { amountRupiah: true }, orderBy: { id: 'desc' }, take: 1 },
+        paymentSubmissions: {
+          where: { status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] } },
+          select: { amountRupiah: true, status: true },
+          orderBy: { id: 'desc' },
+          take: 1,
+        },
       },
     });
     for (const s of refundCandidates) {
@@ -903,7 +915,13 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
         // F2-3 (A17 dua-varian): loser yang SUDAH transfer (pernah upload bukti bayar atau
         // DP-nya tercatat terbayar) butuh pesan REFUND; yang belum cukup diarahkan pilih kamar lain.
         const [submission, stay] = await Promise.all([
-          this.prisma.paymentSubmission.findFirst({ where: { stayId: loser.stayId }, select: { id: true } }),
+          this.prisma.paymentSubmission.findFirst({
+            where: {
+              stayId: loser.stayId,
+              status: { in: [PaymentSubmissionStatus.PENDING_REVIEW, PaymentSubmissionStatus.APPROVED] },
+            },
+            select: { id: true },
+          }),
           this.prisma.stay.findUnique({ where: { id: loser.stayId }, select: { downPaymentPaidRupiah: true } }),
         ]);
         const hasTransferred = !!submission || Number(stay?.downPaymentPaidRupiah ?? 0) > 0;
@@ -1425,6 +1443,37 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
     };
   }
 
+  private async assertRenewalPaymentWithinDeadline(
+    db: Prisma.TransactionClient | PrismaService,
+    invoiceId: number,
+    paidAt: Date,
+  ) {
+    const request = await (db as any).renewRequest.findFirst({
+      where: {
+        status: { in: ['AWAITING_DP', 'DP_SECURED'] },
+        OR: [
+          { downPaymentInvoiceId: invoiceId },
+          { settlementInvoiceId: invoiceId },
+        ],
+      },
+      select: {
+        downPaymentInvoiceId: true,
+        settlementInvoiceId: true,
+        downPaymentDueDate: true,
+        settlementDueDate: true,
+      },
+    });
+    if (!request) return;
+
+    const deadline = request.downPaymentInvoiceId === invoiceId
+      ? request.downPaymentDueDate
+      : request.settlementDueDate;
+    if (deadline && paidAt.getTime() > new Date(deadline).getTime()) {
+      const label = request.downPaymentInvoiceId === invoiceId ? 'hari-H prioritas' : 'batas pelunasan H+7';
+      throw new ConflictException(`Tanggal pembayaran melewati ${label}. Pembayaran renewal tidak dapat diterima.`);
+    }
+  }
+
   private async lockSubmissionTx(tx: Prisma.TransactionClient, submissionId: number) {
     const rows = await tx.$queryRaw<SubmissionLockRow[]>(Prisma.sql`
       SELECT
@@ -1530,6 +1579,49 @@ if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P20
   // ---------------------------------------------------------------------------
   // Notification helpers
   // ---------------------------------------------------------------------------
+
+  private async notifyOwnerAdminPaymentSubmitted(submission: SubmissionDetail) {
+    try {
+      const recipients = await this.prisma.user.findMany({
+        where: {
+          role: { in: [UserRole.OWNER, UserRole.ADMIN] },
+          isActive: true,
+        },
+        select: { id: true },
+      });
+      if (!recipients.length) return;
+
+      const roomLabel = submission.room.code
+        ? `${submission.room.code}${submission.room.name ? ` - ${submission.room.name}` : ''}`
+        : 'kamar terkait';
+      const amount = submission.amountRupiah.toLocaleString('id-ID');
+      const body = `${submission.tenant.fullName} mengirim bukti pembayaran Rp ${amount} untuk ${submission.invoice.invoiceNumber} (${roomLabel}).`;
+      const results = await Promise.allSettled(
+        recipients.map((recipient) =>
+          this.appNotificationService.createOnce({
+            recipientUserId: recipient.id,
+            title: 'Bukti Pembayaran Baru',
+            body,
+            linkTo: '/payment-submissions/review',
+            entityType: 'PaymentSubmission',
+            entityId: String(submission.id),
+          }),
+        ),
+      );
+
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        this.logger.warn(
+          `Gagal mengirim ${failedCount} notifikasi OWNER/ADMIN untuk payment submission #${submission.id}`,
+        );
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Gagal menyiapkan notifikasi OWNER/ADMIN untuk payment submission #${submission.id}`,
+        (error as Error)?.message ?? error,
+      );
+    }
+  }
 
   private async resolveTenantPortalUser(tenantId: number): Promise<number | null> {
     const user = await this.prisma.user.findFirst({

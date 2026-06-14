@@ -834,7 +834,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         status: RenewRequestStatus.DP_SECURED as any,
         settlementDueDate: { not: null, lt: todayWib },
       },
-      select: { id: true, stayId: true },
+      select: { id: true, stayId: true, settlementInvoiceId: true, settlementDueDate: true },
       take: 100,
     });
 
@@ -846,6 +846,47 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
             Prisma.sql`SELECT status FROM "RenewRequest" WHERE id = ${req.id} FOR UPDATE`,
           );
           if (!rows[0] || rows[0].status !== 'DP_SECURED') return false;
+          if (req.settlementInvoiceId) {
+            const settlementInvoice = await tx.invoice.findUnique({
+              where: { id: req.settlementInvoiceId },
+              select: { id: true, invoiceNumber: true, status: true, paidAt: true },
+            });
+            if (settlementInvoice?.status === InvoiceStatus.PAID || settlementInvoice?.status === InvoiceStatus.PARTIAL) {
+              return false;
+            }
+            if (
+              settlementInvoice
+              && [InvoiceStatus.DRAFT, InvoiceStatus.ISSUED].includes(settlementInvoice.status as InvoiceStatus)
+            ) {
+              await tx.invoice.update({
+                where: { id: settlementInvoice.id },
+                data: {
+                  status: InvoiceStatus.CANCELLED,
+                  cancelReason: 'Pelunasan renewal tidak masuk hingga batas H+7.',
+                },
+              });
+              const postedJournal = await tx.journalEntry.findFirst({
+                where: {
+                  sourceType: 'INVOICE' as any,
+                  sourceId: String(settlementInvoice.id),
+                  status: 'POSTED' as any,
+                },
+                select: { id: true },
+              });
+              if (postedJournal) {
+                const reversal = await this.accountingPosting.postInvoiceCancellationReversalTx(
+                  tx,
+                  settlementInvoice.id,
+                  options.actorUserId ?? null,
+                );
+                if (reversal?.skipped) {
+                  throw new ConflictException(
+                    `Reversal jurnal invoice pelunasan ${settlementInvoice.invoiceNumber} gagal: ${reversal.reason ?? 'alasan tidak diketahui'}`,
+                  );
+                }
+              }
+            }
+          }
           await tx.renewRequest.update({
             where: { id: req.id },
             data: {

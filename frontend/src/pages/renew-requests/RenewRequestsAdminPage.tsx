@@ -8,7 +8,7 @@ import { AssistantInsightLine, EntityBadgeFilterBar, StatusStrip } from '../../c
 import EmptyState from '../../components/common/EmptyState';
 import { TableSkeleton } from '../../components/common/SkeletonLoader';
 import StatusBadge from '../../components/common/StatusBadge';
-import { listAdminRenewRequests, approveRenewRequest, rejectRenewRequest } from '../../api/renewRequests';
+import { listAdminRenewRequests, approveRenewRequest, confirmRenewDownPayment, rejectRenewRequest } from '../../api/renewRequests';
 import { formatRupiah } from '../../utils/formatCurrency';
 import { getRenewApprovalSafety, getRenewRequestRiskBadge } from '../../utils/renewApprovalSafety';
 import { getRenewTermLabel } from '../../utils/renewTermLabels';
@@ -54,9 +54,14 @@ function getCurrentRent(rr?: RenewRequest | null) {
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Semua Status' },
-  { value: 'PENDING', label: 'Menunggu' },
-  { value: 'APPROVED', label: 'Disetujui' },
+  { value: 'PENDING_DECISION', label: 'Keputusan Tenant' },
+  { value: 'AWAITING_DP', label: 'Menunggu DP' },
+  { value: 'DP_SECURED', label: 'DP Aman / Pelunasan' },
+  { value: 'COMPLETED', label: 'Selesai' },
   { value: 'REJECTED', label: 'Ditolak' },
+  { value: 'REJECTED_BY_TENANT', label: 'Ditolak Tenant' },
+  { value: 'EXPIRED_PRIORITY', label: 'Prioritas Berakhir' },
+  { value: 'FORFEITED', label: 'Hangus' },
 ];
 
 function RenewAnalyticsPanel({ pendingCount, approvedCount, rejectedCount, total }: { pendingCount: number; approvedCount: number; rejectedCount: number; total: number }) {
@@ -170,6 +175,16 @@ export default function RenewRequestsAdminPage() {
     },
   });
 
+  const confirmDpMutation = useMutation({
+    mutationFn: (id: number) => confirmRenewDownPayment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-renew-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-renew-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
   const rejectMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: { reviewNotes: string } }) => rejectRenewRequest(id, payload),
     onSuccess: () => {
@@ -183,9 +198,9 @@ export default function RenewRequestsAdminPage() {
   });
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
-  const pendingCount = items.filter((r) => r.status === 'PENDING').length;
-  const approvedCount = items.filter((r) => r.status === 'APPROVED').length;
-  const rejectedCount = items.filter((r) => r.status === 'REJECTED').length;
+  const pendingCount = items.filter((r) => ['PENDING', 'PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'].includes(r.status)).length;
+  const approvedCount = items.filter((r) => ['APPROVED', 'COMPLETED'].includes(r.status)).length;
+  const rejectedCount = items.filter((r) => ['REJECTED', 'REJECTED_BY_TENANT', 'EXPIRED_PRIORITY', 'FORFEITED'].includes(r.status)).length;
 
   const assistantItems: AssistantItem[] = [
     pendingCount ? {
@@ -322,8 +337,8 @@ export default function RenewRequestsAdminPage() {
               filters={STATUS_OPTIONS.map((opt) => ({
                 id: opt.value || 'ALL',
                 label: opt.label.replace(' Status', ''),
-                count: opt.value === 'PENDING' ? pendingCount : opt.value === 'APPROVED' ? approvedCount : opt.value === 'REJECTED' ? rejectedCount : items.length,
-                tone: opt.value === 'PENDING' ? 'warning' : opt.value === 'APPROVED' ? 'success' : opt.value === 'REJECTED' ? 'danger' : 'info',
+                count: opt.value ? items.filter((item) => item.status === opt.value).length : items.length,
+                tone: ['PENDING_DECISION', 'AWAITING_DP', 'DP_SECURED'].includes(opt.value) ? 'warning' : opt.value === 'COMPLETED' ? 'success' : ['REJECTED', 'REJECTED_BY_TENANT', 'EXPIRED_PRIORITY', 'FORFEITED'].includes(opt.value) ? 'danger' : 'info',
               }))}
             />
           </div>
@@ -332,6 +347,11 @@ export default function RenewRequestsAdminPage() {
 
       <Card className="content-card border-0 renew-table-card">
         <Card.Body>
+          {confirmDpMutation.isError ? (
+            <Alert variant="danger">
+              {(confirmDpMutation.error as any)?.response?.data?.message ?? 'Gagal mengonfirmasi DP perpanjangan.'}
+            </Alert>
+          ) : null}
           {query.isLoading ? <TableSkeleton rows={5} cols={6} /> : query.isError ? (
             <Alert variant="danger">Gagal memuat data permintaan perpanjangan. Silakan coba lagi.</Alert>
           ) : items.length === 0 ? (
@@ -373,11 +393,40 @@ export default function RenewRequestsAdminPage() {
                       {(rr as any).reviewNotes ? <div className="mt-1 text-danger"><em>{(rr as any).reviewNotes}</em></div> : null}
                     </td>
                     <td data-label="Aksi">
-                      {rr.status === 'PENDING' ? (
+                      {rr.status === 'AWAITING_DP' ? (
                         <div className="d-flex gap-2 flex-wrap">
-                          <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(todayDateInput()); setApproveFormError(''); setApprovalAcknowledged(false); }}>Catat & Setujui</Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={confirmDpMutation.isPending || rr.downPaymentInvoice?.status !== 'PAID'}
+                            onClick={() => confirmDpMutation.mutate(rr.id)}
+                          >
+                            Konfirmasi DP
+                          </Button>
+                          {rr.downPaymentInvoice ? (
+                            <Button variant="outline-primary" size="sm" href={`/invoices/${rr.downPaymentInvoice.id}`}>
+                              Invoice DP
+                            </Button>
+                          ) : null}
                           <Button variant="outline-danger" size="sm" onClick={() => { setRejectTarget(rr); setReviewNotes(''); setRejectFormError(''); }}>Tolak</Button>
                         </div>
+                      ) : rr.status === 'DP_SECURED' && !rr.settlementInvoiceId ? (
+                        <Button variant="success" size="sm" onClick={() => { setApproveTarget(rr); setPlannedCheckOutDate(rr.requestedCheckOutDate ? rr.requestedCheckOutDate.slice(0, 10) : ''); setApproveReviewNotes(''); setApprovedRentAmount(''); setElectricityReadingValue(''); setWaterReadingValue(''); setMeterReadingAt(todayDateInput()); setApproveFormError(''); setApprovalAcknowledged(false); }}>Catat Meter & Terbitkan Pelunasan</Button>
+                      ) : rr.status === 'DP_SECURED' && rr.settlementInvoice?.status === 'PAID' ? (
+                        <Button
+                          variant="success"
+                          size="sm"
+                          disabled={approveMutation.isPending}
+                          onClick={() => approveMutation.mutate({ id: rr.id, payload: {} })}
+                        >
+                          Finalkan Perpanjangan
+                        </Button>
+                      ) : rr.status === 'DP_SECURED' && rr.settlementInvoice ? (
+                        <Button variant="outline-primary" size="sm" href={`/invoices/${rr.settlementInvoice.id}`}>
+                          Pelunasan: {rr.settlementInvoice.status}
+                        </Button>
+                      ) : rr.status === 'PENDING_DECISION' ? (
+                        <span className="text-muted small">Menunggu keputusan tenant</span>
                       ) : <span className="text-muted small">Sudah diproses</span>}
                     </td>
                   </tr>
@@ -391,7 +440,7 @@ export default function RenewRequestsAdminPage() {
 
       <Modal show={!!approveTarget} onHide={() => { if (!approveMutation.isPending) { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); } }} centered size="xl" dialogClassName="renew-approval-command-modal">
         <Modal.Header closeButton>
-          <Modal.Title>Catat & Setujui Perpanjangan</Modal.Title>
+          <Modal.Title>Catat Meter & Terbitkan Pelunasan</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {approveFormError ? <Alert variant="warning" className="small">{approveFormError}</Alert> : null}
@@ -504,7 +553,7 @@ export default function RenewRequestsAdminPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => { setApproveTarget(null); setApproveFormError(''); setApprovalAcknowledged(false); }} disabled={approveMutation.isPending}>Batal</Button>
-          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending || !canSubmitApprove}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menyetujui...</> : approvalSafety.blockers.length ? 'Lengkapi Data Perpanjangan' : 'Approve & Buat Tagihan'}</Button>
+          <Button variant="success" onClick={handleApprove} disabled={approveMutation.isPending || !canSubmitApprove}>{approveMutation.isPending ? <><Spinner animation="border" size="sm" className="me-1" />Menerbitkan...</> : approvalSafety.blockers.length ? 'Lengkapi Data Perpanjangan' : 'Terbitkan Invoice Pelunasan'}</Button>
         </Modal.Footer>
       </Modal>
 

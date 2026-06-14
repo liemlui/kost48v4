@@ -44,7 +44,7 @@ export class RenewRequestsAdminController {
   @Post(':id/approve')
   async approve(@Param('id', ParseIntPipe) id: number, @Body() dto: ApproveRenewRequestDto, @CurrentUser() user: CurrentUserPayload) {
     return {
-      message: 'Pelunasan diverifikasi, perpanjangan dieksekusi (meter dicatat, tagihan diterbitkan)',
+      message: 'Tahap perpanjangan berhasil diproses',
       data: await this.renewRequestsService.approveRequest(id, dto, user),
     };
   }

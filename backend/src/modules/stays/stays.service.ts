@@ -1008,36 +1008,11 @@ export class StaysService {
 
   async renewStay(id: number, dto: RenewStayDto, actor: CurrentUserPayload) {
     assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
-    try {
-      const result = await this.prisma.$transaction((tx) =>
-        this.renewStayInTransaction(tx, id, dto, actor),
-      );
-
-      await this.audit.log({
-        actorUserId: actor.id,
-        action: "RENEW",
-        entityType: "Stay",
-        entityId: String(result.stay.id),
-        oldData: result.oldStay,
-        newData: result.stay,
-      });
-      await this.audit.log({
-        actorUserId: actor.id,
-        action: "CREATE",
-        entityType: "Invoice",
-        entityId: String(result.invoice.id),
-        newData: result.invoice,
-      });
-
-      return { stay: result.stay, invoice: result.invoice };
-    } catch (error: any) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new ConflictException(
-          'Gagal menyimpan data. Kesalahan integritas database.',
-        );
-      }
-      throw error;
-    }
+    void id;
+    void dto;
+    throw new ConflictException(
+      "Perpanjangan langsung dinonaktifkan. Gunakan alur Permintaan Perpanjangan agar DP, invoice pelunasan, dan status pembayaran terverifikasi.",
+    );
   }
 
   /**
@@ -1095,11 +1070,12 @@ export class StaysService {
     return issued;
   }
 
-  async renewStayInTransaction(
+  async prepareRenewalSettlementInTransaction(
     tx: Prisma.TransactionClient,
     id: number,
     dto: RenewStayDto,
     actor: CurrentUserPayload,
+    settlementDueDate?: Date | null,
   ) {
     assertCoreLifecycleActor(actor, "Perpanjangan masa sewa");
 
@@ -1115,6 +1091,11 @@ export class StaysService {
       throw new ConflictException("Stay tidak aktif, tidak dapat diperpanjang");
 
     await assertNoOpenInvoicesTx(tx, id, "Perpanjangan masa sewa");
+    if (!dto.electricityReadingValue || !dto.waterReadingValue || !dto.meterReadingAt) {
+      throw new BadRequestException(
+        "Meter listrik, meter air, dan tanggal pencatatan wajib diisi untuk menerbitkan invoice pelunasan.",
+      );
+    }
 
     const effectivePricingTerm = dto.pricingTerm ?? stay.pricingTerm;
 
@@ -1132,16 +1113,10 @@ export class StaysService {
       "air",
     );
 
-    const today = startOfDay(new Date());
     const currentPlannedCheckOut = stay.plannedCheckOutDate
       ? startOfDay(stay.plannedCheckOutDate)
       : null;
-    // Kebijakan owner: tidak boleh ada tunggakan. Tolak renewal jika sudah lewat plannedCheckOut.
-    if (currentPlannedCheckOut && today > currentPlannedCheckOut) {
-      throw new ConflictException(
-        'Kontrak sewa sudah berakhir. Tidak dapat memperpanjang kontrak yang sudah lewat. Silakan melakukan check-in ulang (rebooking).',
-      );
-    }
+    const today = startOfDay(new Date());
     // periodEnd/plannedCheckOutDate is exclusive, so the renewal starts on the current periodEnd date.
     const logicalPeriodStart = currentPlannedCheckOut ?? today;
 
@@ -1169,7 +1144,9 @@ export class StaysService {
     const invoiceNumber = `INV-${stay.id}-R-${Date.now().toString().slice(-6)}`;
     const periodStart = logicalPeriodStart;
     const periodEnd = newPlannedCheckOut;
-    const dueDate = calculateDueDate(periodEnd);
+    const dueDate = settlementDueDate
+      ? startOfDay(settlementDueDate)
+      : calculateDueDate(periodEnd);
 
     // Keep invoice in DRAFT while inserting all lines because DB guards prevent line mutation after ISSUE.
     let invoice = await tx.invoice.create({
@@ -1258,25 +1235,138 @@ export class StaysService {
       include: { lines: { orderBy: { sortOrder: "asc" } } },
     });
 
-    const updatedStay = await tx.stay.update({
-      where: { id },
-      data: {
+    return {
+      oldStay: stay,
+      invoice: issuedInvoice ?? invoice,
+      plannedStayUpdate: {
         plannedCheckOutDate: newPlannedCheckOut,
         pricingTerm: effectivePricingTerm,
         agreedRentAmountRupiah: rentAmount,
       },
-    });
-
-    return {
-      oldStay: stay,
-      stay: updatedStay,
-      invoice: issuedInvoice ?? invoice,
       meterSummary: {
         readingAt: meterReadingAt,
         electricity: electricitySummary,
         water: waterSummary,
       },
     };
+  }
+
+  async finalizePreparedRenewalInTransaction(
+    tx: Prisma.TransactionClient,
+    params: {
+      stayId: number;
+      settlementInvoiceId: number;
+      pricingTerm: PricingTerm;
+      agreedRentAmountRupiah: number;
+    },
+    actor: CurrentUserPayload,
+  ) {
+    assertCoreLifecycleActor(actor, "Finalisasi perpanjangan masa sewa");
+    await tx.$queryRaw`SELECT id FROM "Stay" WHERE id = ${params.stayId} FOR UPDATE`;
+
+    const [stay, invoice] = await Promise.all([
+      tx.stay.findUnique({ where: { id: params.stayId } }),
+      tx.invoice.findUnique({
+        where: { id: params.settlementInvoiceId },
+        include: { lines: { orderBy: { sortOrder: "asc" } } },
+      }),
+    ]);
+
+    if (!stay) throw new NotFoundException("Stay tidak ditemukan");
+    if (stay.status !== StayStatus.ACTIVE) {
+      throw new ConflictException("Stay tidak aktif, tidak dapat difinalkan");
+    }
+    if (!invoice || invoice.stayId !== stay.id) {
+      throw new ConflictException("Invoice pelunasan perpanjangan tidak cocok dengan stay");
+    }
+    if (invoice.status !== InvoiceStatus.PAID || !invoice.paidAt) {
+      throw new ConflictException(
+        "Invoice pelunasan belum PAID. Setujui bukti pembayaran penuh sebelum finalisasi perpanjangan.",
+      );
+    }
+    const otherOpenInvoice = await tx.invoice.findFirst({
+      where: {
+        stayId: stay.id,
+        id: { not: invoice.id },
+        status: { notIn: [InvoiceStatus.PAID, InvoiceStatus.CANCELLED] },
+      },
+      select: { invoiceNumber: true },
+    });
+    if (otherOpenInvoice) {
+      throw new ConflictException(
+        `Masih ada tagihan aktif ${otherOpenInvoice.invoiceNumber}. Selesaikan sebelum finalisasi perpanjangan.`,
+      );
+    }
+    if (
+      stay.plannedCheckOutDate
+      && startOfDay(stay.plannedCheckOutDate).getTime() !== startOfDay(invoice.periodStart).getTime()
+    ) {
+      throw new ConflictException(
+        "Periode stay berubah setelah invoice pelunasan diterbitkan. Batalkan dan siapkan ulang renewal.",
+      );
+    }
+
+    const updatedStay = await tx.stay.update({
+      where: { id: stay.id },
+      data: {
+        plannedCheckOutDate: invoice.periodEnd,
+        pricingTerm: params.pricingTerm,
+        agreedRentAmountRupiah: params.agreedRentAmountRupiah,
+      },
+    });
+
+    return {
+      oldStay: stay,
+      stay: updatedStay,
+      invoice,
+    };
+  }
+
+  async cancelUnpaidRenewalInvoiceInTransaction(
+    tx: Prisma.TransactionClient,
+    invoiceId: number,
+    actorUserId: number,
+    reason: string,
+  ) {
+    const invoice = await tx.invoice.findUnique({
+      where: { id: invoiceId },
+      select: { id: true, invoiceNumber: true, status: true },
+    });
+    if (!invoice || invoice.status === InvoiceStatus.CANCELLED) return invoice;
+    if ([InvoiceStatus.PAID, InvoiceStatus.PARTIAL].includes(invoice.status as InvoiceStatus)) {
+      throw new ConflictException(
+        `Invoice ${invoice.invoiceNumber} sudah memiliki pembayaran dan tidak dapat dibatalkan lewat penolakan renewal.`,
+      );
+    }
+
+    const cancelled = await tx.invoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: InvoiceStatus.CANCELLED,
+        cancelReason: reason,
+      },
+    });
+    const postedJournal = await tx.journalEntry.findFirst({
+      where: {
+        sourceType: "INVOICE" as any,
+        sourceId: String(invoice.id),
+        status: "POSTED" as any,
+      },
+      select: { id: true },
+    });
+    if (postedJournal) {
+      const reversal = await this.accountingPosting.postInvoiceCancellationReversalTx(
+        tx,
+        invoice.id,
+        actorUserId,
+      );
+      if (reversal?.skipped) {
+        throw new ConflictException(
+          `Reversal jurnal invoice ${invoice.invoiceNumber} gagal: ${reversal.reason ?? "alasan tidak diketahui"}`,
+        );
+      }
+    }
+    return cancelled;
   }
 
   /** F2-3b: daftar refund kalah-cepat (loser sudah-transfer) yang menunggu diproses. */
@@ -1309,12 +1399,17 @@ export class StaysService {
     if (stay.lossRefundStatus !== "PENDING") {
       throw new ConflictException("Refund hanya dapat diproses saat berstatus PENDING.");
     }
+    const proofUrl = dto.proofUrl?.trim();
+    const proofFileKey = dto.proofFileKey?.trim();
+    if (!proofUrl && !proofFileKey) {
+      throw new BadRequestException("Bukti transfer balik wajib diisi sebelum refund ditandai selesai.");
+    }
     const updated = await this.prisma.stay.update({
       where: { id },
       data: {
         lossRefundStatus: "COMPLETED" as any,
-        lossRefundProofUrl: dto.proofUrl ?? null,
-        lossRefundProofFileKey: dto.proofFileKey ?? null,
+        lossRefundProofUrl: proofUrl ?? null,
+        lossRefundProofFileKey: proofFileKey ?? null,
         lossRefundNote: dto.note ?? undefined,
         lossRefundProcessedAt: new Date(),
         lossRefundProcessedById: actor.id,
