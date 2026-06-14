@@ -18,6 +18,10 @@
 - Menambahkan auto depresiasi bulan sebelumnya sebelum accounting auto-close, termasuk safe-skip saat tidak ada aset eligible atau depresiasi sudah diposting.
 - **Verifikasi:** migration Prisma deployed dan up to date; backend build lulus; 18/18 unit test lulus; frontend build dan PWA verification lulus; UAT read-only/rollback pada database lokal lulus.
 
+## 2026-06-14 — test(F2-6): UAT cancel stay promoted → MAINTENANCE + tiket inspeksi (F2-6 SELESAI)
+
+Verifikasi runtime F2-6 (kode sudah ada): cancel stay promoted (stay 1, room OCCUPIED) → stay `CANCELLED` + room `MAINTENANCE` + tiket `TIC-2026-CHK-1` (`CHECKOUT_INSPECTION`, OPEN) terbentuk + invoice ter-reversal → **trial-balance balanced**. Kamar bekas huni tak lagi nyangkut MAINTENANCE (gate room-ready terbuka lewat tutup tiket inspeksi). → **F2-6 SELESAI.**
+
 ## 2026-06-14 — ui(F2-11): paginasi 12 + skeleton katalog publik → F2-11 SELESAI
 
 `PublicRoomsPage`: **W-03** paginasi **12 kamar/halaman** (kontrol ‹ Sebelumnya / nomor / Berikutnya ›; reset ke hal.1 saat filter/sort berubah) — sebelumnya seluruh hasil dirender sekaligus. **W-02** skeleton grid (`SkeletonBlock`) saat memuat (ganti grid kosong+spinner). Melengkapi V-1 (code-split, sebelumnya) + UD-05 sticky CTA detail (`room-detail-mobile-sticky`). `npm run build` LULUS (94 chunk, PWA verify ok). → **F2-11 SELESAI.**
