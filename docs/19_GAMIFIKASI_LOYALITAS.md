@@ -34,6 +34,9 @@
 | "Kamar Legendaris" badge | 1000 | Status + marketing | Bisa dipajang di katalog publik |
 | Merchandise / gimmick fisik | 150 | Fisik | |
 
+> **Preferensi owner (2026-06-15):** utamakan reward **layanan in-house** (pembersihan kamar, **cat ulang kamar**, voucher WiFi) daripada diskon sewa — lebih hemat. **Nilai poin:** 1 poin ≈ Rp (env `LOYALTY_POINT_RUPIAH_VALUE`, default Rp100); admin form menyarankan biaya poin dari nilai rupiah reward (F4-9 selesai).
+> **Reward "special request" → tugas staf (backlog F4-13b):** reward yang menukar poin jadi **perintah kerja staf** — mis. bersihkan **kamar mandi luar, area umum, dapur umum**. Saat FULFILLED → auto-create tiket tugas staf (+ jurnal reward M4).
+
 ## 4. Implementasi (F4-9 — Fase 4)
 - **Schema:** `LoyaltyPoint`, `LoyaltyReward`, `Redemption` (sourceType/sourceId idempotent seperti jurnal).
 - **Akuntansi (M4):** diskon sewa → jurnal pengurang pendapatan; reward fisik → expense; WiFi → expense.
