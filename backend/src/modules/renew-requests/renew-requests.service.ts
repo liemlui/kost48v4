@@ -11,6 +11,7 @@ import { RejectRenewRequestDto } from './dto/reject-renew-request.dto';
 import { DecideRenewRequestDto } from './dto/decide-renew-request.dto';
 import { ConfirmDownPaymentDto } from './dto/confirm-down-payment.dto';
 import { CheckoutRequestStatus, StayStatus, RenewRequestStatus, UserRole, InvoiceStatus, PricingTerm } from '../../common/enums/app.enums';
+import { roundRupiah } from '../../common/business/money.helper';
 
 @Injectable()
 export class RenewRequestsService {
@@ -77,7 +78,7 @@ export class RenewRequestsService {
 
     // F2-1: DP 30% perpanjangan = 30% × sewa SAAT INI (rent-loyalty D-16: tak naik saat renew).
     const renewalRentRupiah = stay.agreedRentAmountRupiah ?? 0;
-    const downPaymentAmountRupiah = Math.round((renewalRentRupiah * 30) / 100);
+    const downPaymentAmountRupiah = roundRupiah((renewalRentRupiah * 30) / 100);
 
     const request = await this.prisma.renewRequest.create({
       data: {
