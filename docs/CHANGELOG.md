@@ -2,6 +2,12 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — feat(F4-11 deep): prabayar/perpanjangan multi-bulan + unearned (PSAK 72) — SELESAI
+
+- **`PrepayExtensionService.prepayExtension`** (`POST /stays/:id/prepay-extension`, OWNER/ADMIN): tenant membayar **N bulan ke depan dengan harga BULANAN** (terkunci D-16), **satu invoice PAID di muka** (keputusan owner D-18). Stay diperpanjang `plannedCheckOutDate += N bulan`.
+- **Akuntansi PSAK 72:** jurnal issuance (DR 1100 / CR 4000) + payment (DR kas / CR 1100) + **deferral seluruh prabayar (DR 4000 / CR 2200 Unearned)**; lalu sweeper `recognizeDue` (F4-1) mengakui per bulan (DR 2200 / CR 4000). `postRentDeferralTx` kini punya `sourceKey` (deferral per-invoice, tak bentrok); `RentRecognitionService.scheduleExtension` membuat N baris jadwal dengan `periodIndex` MELANJUTKAN sequence stay.
+- **Finance gate LULUS:** `tsc` 0; `node --test` 40/40; **UAT runtime (prabayar 4 bln @Rp1jt = Rp4jt):** kas +4jt, AR net 0, revenue 4000 net 0 (ditangguhkan), unearned 2200 = −4jt, stay diperpanjang ke 2026-10-15; recognize bulan-1 → 4000=−1jt/2200=−3jt; **trial balance SEIMBANG tiap langkah**; residu 0.
+
 ## 2026-06-15 — feat(backlog S-3): F4-11/12/13a/13b/14/15 — implementasi backlog ide owner
 
 - **Schema additive S-3** (owner-approve, migration `20260615120000_f4_backlog_s3`): Room (hasAc/acWattage/acLastCleanedAt/acCleanIntervalDays), LoyaltyReward (fulfillmentTaskCategory/Title), User (tipGopay/Ovo/Dana/Bank), RenewRequest (prepaidMonths/isEarly/tenantReview/tenantReviewAt). **F4-13c (quest sikap anonim) DITUNDA.**
