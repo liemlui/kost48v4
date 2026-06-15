@@ -22,6 +22,14 @@ export class TransferRoomDto {
   @IsOptional() @Type(() => Number) @IsNumber()
   initialWaterM3?: number;
 
+  // F5-7 (AUD-1/D-21.1): meter AKHIR kamar LAMA → tagih utilitas berjalan sebelum pindah.
+  // WAJIB bila kamar lama bertarif utilitas (>0); diabaikan bila utilitas flat.
+  @IsOptional() @Type(() => Number) @IsNumber()
+  finalElectricityKwh?: number;
+
+  @IsOptional() @Type(() => Number) @IsNumber()
+  finalWaterM3?: number;
+
   @IsOptional() @IsString() @MaxLength(500)
   note?: string;
 }

@@ -1,10 +1,13 @@
 import { ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
+import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
+import { InvoiceLineType, InvoiceStatus, RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
 import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
+import { createRenewUtilityCheckpointLineTx } from './stays-service-helpers';
 import { startOfDay } from './stays.helpers';
 import { TransferRoomDto } from './dto/room-transfer.dto';
 
@@ -22,6 +25,7 @@ export class RoomTransferService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
     private readonly appNotification: AppNotificationService,
+    private readonly accountingPosting: AccountingPostingService,
   ) {}
 
   async transferRoom(stayId: number, dto: TransferRoomDto, actor: CurrentUserPayload) {
@@ -53,6 +57,10 @@ export class RoomTransferService {
       const fromRoomId = stay.roomId;
       const rentBefore = stay.agreedRentAmountRupiah;
       const rentAfter = dto.newAgreedRentRupiah ?? rentBefore;
+
+      // F5-7 (AUD-1/D-21.1): tagih utilitas kamar LAMA (snapshot meter akhir + invoice + jurnal)
+      // SEBELUM roomId & tarif diperbarui ke kamar baru. Memakai tarif kamar lama (di stay saat ini).
+      const oldRoomUtility = await this.billOldRoomUtilityTx(tx, { stay, fromRoomId, dto, transferDate, actorId: actor.id });
 
       const updatedStay = await tx.stay.update({
         where: { id: stayId },
@@ -127,7 +135,7 @@ export class RoomTransferService {
         },
       });
 
-      return { stay: updatedStay, transfer, fromRoomId, toRoom, tenantId: stay.tenantId };
+      return { stay: updatedStay, transfer, fromRoomId, toRoom, tenantId: stay.tenantId, oldRoomUtility };
     });
 
     await this.audit.log({
@@ -160,5 +168,96 @@ export class RoomTransferService {
     }
 
     return result;
+  }
+
+  /**
+   * F5-7 (AUD-1 / D-21.1): tagih utilitas kamar LAMA periode berjalan saat pindah.
+   * - Kamar lama tak bertarif utilitas (flat) → tak ada yang ditagih (null).
+   * - Bertarif tapi meter akhir tak diisi → 409 (wajib isi meter akhir kamar lama).
+   * - Buat invoice utilitas (listrik/air) memakai checkpoint meter kamar lama, ISSUED + jurnal
+   *   (best-effort; bila skip → invoice tetap tertagih, F5-6 mem-backfill jurnalnya).
+   */
+  private async billOldRoomUtilityTx(
+    tx: Prisma.TransactionClient,
+    params: {
+      stay: { id: number; electricityTariffPerKwhRupiah: number | null; waterTariffPerM3Rupiah: number | null };
+      fromRoomId: number;
+      dto: TransferRoomDto;
+      transferDate: Date;
+      actorId: number;
+    },
+  ): Promise<{ invoiceId: number; totalAmountRupiah: number } | null> {
+    const { stay, fromRoomId, dto, transferDate, actorId } = params;
+    const elecTariff = stay.electricityTariffPerKwhRupiah ?? 0;
+    const waterTariff = stay.waterTariffPerM3Rupiah ?? 0;
+    const isMetered = elecTariff > 0 || waterTariff > 0;
+    if (!isMetered) return null; // utilitas flat/termasuk → tak ada tagihan utilitas
+
+    const hasFinalReadings = dto.finalElectricityKwh != null || dto.finalWaterM3 != null;
+    if (!hasFinalReadings) {
+      throw new ConflictException(
+        'Kamar lama bertarif utilitas. Masukkan meter AKHIR listrik/air kamar lama untuk menagih pemakaian berjalan sebelum pindah (D-21.1).',
+      );
+    }
+
+    const invoiceNumber = `INV-TRF-${stay.id}-${Date.now().toString().slice(-6)}`;
+    let invoice = await tx.invoice.create({
+      data: {
+        invoiceNumber,
+        stayId: stay.id,
+        status: InvoiceStatus.DRAFT,
+        periodStart: transferDate,
+        periodEnd: transferDate,
+        dueDate: transferDate,
+        notes: 'Tagihan utilitas kamar lama (pemakaian berjalan) saat pindah kamar.',
+        createdById: actorId,
+      },
+    });
+
+    let total = 0;
+    let sortOrder = 0;
+    if (dto.finalElectricityKwh != null) {
+      const s = await createRenewUtilityCheckpointLineTx(tx, {
+        roomId: fromRoomId,
+        invoiceId: invoice.id,
+        utilityType: UtilityType.ELECTRICITY,
+        label: 'listrik',
+        unit: 'kWh',
+        newReadingValue: new Prisma.Decimal(dto.finalElectricityKwh),
+        readingAt: transferDate,
+        tariffRupiah: elecTariff,
+        actorId,
+        sortOrder: sortOrder++,
+      });
+      total += Number(s.amountRupiah ?? 0);
+    }
+    if (dto.finalWaterM3 != null) {
+      const s = await createRenewUtilityCheckpointLineTx(tx, {
+        roomId: fromRoomId,
+        invoiceId: invoice.id,
+        utilityType: UtilityType.WATER,
+        label: 'air',
+        unit: 'm³',
+        newReadingValue: new Prisma.Decimal(dto.finalWaterM3),
+        readingAt: transferDate,
+        tariffRupiah: waterTariff,
+        actorId,
+        sortOrder: sortOrder++,
+      });
+      total += Number(s.amountRupiah ?? 0);
+    }
+
+    invoice = await tx.invoice.update({
+      where: { id: invoice.id },
+      data: { totalAmountRupiah: total, status: InvoiceStatus.ISSUED, issuedAt: new Date() },
+    });
+    await this.accountingPosting.postInvoiceIssuedTx(tx, invoice.id, actorId).catch((err) => {
+      this.logger.warn(
+        `Jurnal utilitas kamar lama (invoice #${invoice.id}, pindah kamar) gagal — invoice tetap tertagih, akan di-backfill F5-6: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return undefined;
+    });
+
+    return { invoiceId: invoice.id, totalAmountRupiah: total };
   }
 }
