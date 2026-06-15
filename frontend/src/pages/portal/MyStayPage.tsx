@@ -1,13 +1,12 @@
 import { type ReactNode, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Spinner } from 'react-bootstrap';
+import { Accordion, Alert, Button, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import StatusBadge from '../../components/common/StatusBadge';
 import CurrencyDisplay from '../../components/common/CurrencyDisplay';
 import EmptyState from '../../components/common/EmptyState';
 import SafeImage from '../../components/common/SafeImage';
-import Kost48OfficialInfoCard from '../../components/common/Kost48OfficialInfoCard';
 import { getResource, listResource } from '../../api/resources';
 import { decideRenewRequest, listMyRenewRequests } from '../../api/renewRequests';
 import { listMyCheckoutRequests } from '../../api/checkoutRequests';
@@ -339,8 +338,16 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
       ? 'Ada tagihan tanpa nominal pembayaran. Hubungi admin agar statusnya dicek sebelum ajukan perpanjangan atau keluar.'
       : null;
 
-  const showRenewSecondary = canRequestRenew;
   const showCheckoutSecondary = canRequestCheckout;
+  // Tombol perpanjangan SELALU tampil di halaman; nonaktif (dengan alasan) bila belum bisa diajukan.
+  const renewDisabledReason = canRequestRenew
+    ? undefined
+    : (blockedText
+      ?? (pendingRenewRequest
+        ? 'Perpanjangan sedang diproses.'
+        : (pendingCheckoutRequest || approvedCheckoutRequest)
+          ? 'Sedang ada pengajuan keluar aktif.'
+          : 'Belum bisa diajukan saat ini.'));
 
   // ── helpers for fact-chip tones ─────────────────────────────────────────────
 
@@ -432,149 +439,152 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             </div>
           </div>
 
-          {/* ── Dossier: Info kamar ── */}
-          <details className="tenant-dossier-section">
-            <summary><span>Info kamar</span></summary>
-            <div className="tenant-dossier-body">
-              <div className="tenant-dossier-tarif">
-                {stay.room?.name ? (
+          {/* ── Detail kamar — accordion (UI/UX selaras menu "Panduan & Aturan") ── */}
+          <Accordion flush className="tenant-dossier-accordion">
+            <Accordion.Item eventKey="info">
+              <Accordion.Header>Info kamar</Accordion.Header>
+              <Accordion.Body>
+                <div className="tenant-dossier-tarif">
+                  {stay.room?.name ? (
+                    <div className="tenant-dossier-tarif-row">
+                      <span>Nama kamar</span><strong>{stay.room.name}</strong>
+                    </div>
+                  ) : null}
+                  {stay.room?.floor ? (
+                    <div className="tenant-dossier-tarif-row">
+                      <span>Lantai</span><strong>{formatRoomFloorLabel(stay.room.floor)}</strong>
+                    </div>
+                  ) : null}
                   <div className="tenant-dossier-tarif-row">
-                    <span>Nama kamar</span><strong>{stay.room.name}</strong>
+                    <span>Jenis masa sewa</span><strong>{tenantPricingTermLabel(stay.pricingTerm)}</strong>
                   </div>
-                ) : null}
-                {stay.room?.floor ? (
                   <div className="tenant-dossier-tarif-row">
-                    <span>Lantai</span><strong>{formatRoomFloorLabel(stay.room.floor)}</strong>
+                    <span>Akhir masa sewa</span>
+                    <strong>{formatDate(stay.plannedCheckOutDate) || 'Belum ditentukan'}</strong>
                   </div>
-                ) : null}
-                <div className="tenant-dossier-tarif-row">
-                  <span>Jenis masa sewa</span><strong>{tenantPricingTermLabel(stay.pricingTerm)}</strong>
+                  {stay.notes ? (
+                    <div className="tenant-dossier-tarif-row">
+                      <span>Catatan</span><strong>{stay.notes}</strong>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="tenant-dossier-tarif-row">
-                  <span>Akhir masa sewa</span>
-                  <strong>{formatDate(stay.plannedCheckOutDate) || 'Belum ditentukan'}</strong>
-                </div>
-                {stay.notes ? (
-                  <div className="tenant-dossier-tarif-row">
-                    <span>Catatan</span><strong>{stay.notes}</strong>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </details>
+              </Accordion.Body>
+            </Accordion.Item>
 
-          {/* ── Dossier: Fasilitas ── */}
-          <details className="tenant-dossier-section">
-            <summary>
-              <span>Fasilitas</span>
-              {roomFacilities.length > 0 && (
-                <span className="tenant-dossier-count">{roomFacilities.length}</span>
-              )}
-            </summary>
-            <div className="tenant-dossier-body">
-              {roomFacilities.length > 0 ? (
-                <div className="tenant-dossier-facilities">
-                  {roomFacilities.map((f) => (
-                    <span key={f.id} className="tenant-dossier-facility-chip">{f.name}</span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted small mb-0">
-                  Belum ada fasilitas tercatat. Hubungi pengelola jika data kamar tidak sesuai.
-                </p>
-              )}
-            </div>
-          </details>
-
-          {/* ── Dossier: Inventaris kamar ── */}
-          <details className="tenant-dossier-section">
-            <summary>
-              <span>Inventaris kamar</span>
-              {inventoryItems.length > 0 && (
-                <span className="tenant-dossier-count">{inventoryItems.length} jenis</span>
-              )}
-            </summary>
-            <div className="tenant-dossier-body">
-              {roomItemsQuery.isLoading ? (
-                <p className="text-muted small mb-0">Memuat data inventaris...</p>
-              ) : inventoryItems.length > 0 ? (
-                <>
-                  <div className="tenant-dossier-inventory-list">
-                    {inventoryItems.map((item) => (
-                      <div key={item.id} className="tenant-dossier-inventory-row">
-                        <strong>{item.name}</strong>
-                        <span className="inv-qty">{item.qty} unit</span>
-                        <span className={`inv-status ${inventoryStatusClass(item.status)}`}>
-                          {friendlyItemStatus(item.status)}
-                        </span>
-                      </div>
+            <Accordion.Item eventKey="fasilitas">
+              <Accordion.Header>
+                Fasilitas
+                {roomFacilities.length > 0 && (
+                  <span className="tenant-dossier-count ms-2">{roomFacilities.length}</span>
+                )}
+              </Accordion.Header>
+              <Accordion.Body>
+                {roomFacilities.length > 0 ? (
+                  <div className="tenant-dossier-facilities">
+                    {roomFacilities.map((f) => (
+                      <span key={f.id} className="tenant-dossier-facility-chip">{f.name}</span>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    className="tenant-installed-items-report mt-2"
-                    onClick={() => navigate('/portal/tickets')}
-                  >
-                    Laporkan masalah →
-                  </button>
-                </>
-              ) : (
-                <p className="text-muted small mb-0">
-                  Data inventaris belum diisi. Kamu tetap bisa melaporkan barang rusak atau hilang lewat{' '}
-                  <button
-                    type="button"
-                    className="tenant-installed-items-report"
-                    onClick={() => navigate('/portal/tickets')}
-                  >
-                    Laporan Saya
-                  </button>.
-                </p>
-              )}
-            </div>
-          </details>
+                ) : (
+                  <p className="text-muted small mb-0">
+                    Belum ada fasilitas tercatat. Hubungi pengelola jika data kamar tidak sesuai.
+                  </p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
 
-          {/* ── Dossier: Tarif & dana titipan ── */}
-          <details className="tenant-dossier-section">
-            <summary><span>Tarif & dana titipan</span></summary>
-            <div className="tenant-dossier-body">
-              <div className="tenant-dossier-tarif">
-                {priceFacts.map((fact) => (
-                  <div key={fact.label} className="tenant-dossier-tarif-row">
-                    <span>{fact.label}</span>
-                    <strong>{fact.value}</strong>
-                  </div>
-                ))}
-              </div>
-              <p className="text-muted small mb-0 mt-2">
-                Dana titipan diproses saat keluar final, setelah semua tagihan selesai.
-              </p>
-            </div>
-          </details>
+            <Accordion.Item eventKey="inventaris">
+              <Accordion.Header>
+                Inventaris kamar
+                {inventoryItems.length > 0 && (
+                  <span className="tenant-dossier-count ms-2">{inventoryItems.length} jenis</span>
+                )}
+              </Accordion.Header>
+              <Accordion.Body>
+                {roomItemsQuery.isLoading ? (
+                  <p className="text-muted small mb-0">Memuat data inventaris...</p>
+                ) : inventoryItems.length > 0 ? (
+                  <>
+                    <div className="tenant-dossier-inventory-list">
+                      {inventoryItems.map((item) => (
+                        <div key={item.id} className="tenant-dossier-inventory-row">
+                          <strong>{item.name}</strong>
+                          <span className="inv-qty">{item.qty} unit</span>
+                          <span className={`inv-status ${inventoryStatusClass(item.status)}`}>
+                            {friendlyItemStatus(item.status)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="tenant-installed-items-report mt-2"
+                      onClick={() => navigate('/portal/tickets')}
+                    >
+                      Laporkan masalah →
+                    </button>
+                  </>
+                ) : (
+                  <p className="text-muted small mb-0">
+                    Data inventaris belum diisi. Kamu tetap bisa melaporkan barang rusak atau hilang lewat{' '}
+                    <button
+                      type="button"
+                      className="tenant-installed-items-report"
+                      onClick={() => navigate('/portal/tickets')}
+                    >
+                      Laporan Saya
+                    </button>.
+                  </p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="tarif">
+              <Accordion.Header>Tarif & dana titipan</Accordion.Header>
+              <Accordion.Body>
+                <div className="tenant-dossier-tarif">
+                  {priceFacts.map((fact) => (
+                    <div key={fact.label} className="tenant-dossier-tarif-row">
+                      <span>{fact.label}</span>
+                      <strong>{fact.value}</strong>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-muted small mb-0 mt-2">
+                  Dana titipan diproses saat keluar final, setelah semua tagihan selesai.
+                </p>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
 
           {blockedText ? <Alert variant="warning" className="tenant-short-alert mt-3 mb-0">{blockedText}</Alert> : null}
         </Card.Body>
       </Card>
 
-      <details className="tenant-official-guide-details mb-3">
-        <summary><span>Panduan resmi KOST48</span><small>Lokasi, WiFi, listrik, dan layanan</small></summary>
-        <Kost48OfficialInfoCard variant="tenant" compact />
-      </details>
+      {/* Panduan resmi KOST48 dipindah sepenuhnya ke menu "Panduan & Aturan"
+         (MyManualPage) agar tidak duplikat di halaman ini. */}
 
       {/* ── Secondary actions ── */}
-      {(showRenewSecondary || showCheckoutSecondary) && (
-        <div className="tenant-stay-secondary-actions mb-3">
-          {showRenewSecondary && (
-            <Button variant="outline-primary" size="sm" onClick={() => setShowRenewModal(true)}>
-              Ajukan Perpanjangan
-            </Button>
-          )}
-          {showCheckoutSecondary && (
-            <Button variant="outline-secondary" size="sm" onClick={() => setShowCheckoutModal(true)}>
-              Ajukan Keluar
-            </Button>
-          )}
-        </div>
-      )}
+      <div className="tenant-stay-secondary-actions mb-3">
+        {/* Tombol perpanjangan SELALU tampil (permintaan owner). Nonaktif + alasan bila belum bisa. */}
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={!canRequestRenew}
+          title={renewDisabledReason}
+          onClick={() => setShowRenewModal(true)}
+        >
+          Ajukan Perpanjangan Masa Sewa
+        </Button>
+        {showCheckoutSecondary && (
+          <Button variant="outline-secondary" size="sm" onClick={() => setShowCheckoutModal(true)}>
+            Ajukan Keluar
+          </Button>
+        )}
+      </div>
+      {renewDisabledReason ? (
+        <p className="text-muted small mb-3">{renewDisabledReason}</p>
+      ) : null}
 
       {/* ── State alerts ── */}
       {pendingDecisionRequest ? (

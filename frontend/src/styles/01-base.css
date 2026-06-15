@@ -293,6 +293,10 @@ a {
   border-radius: 26px;
   padding: 18px 22px;
   margin-bottom: 20px;
+  /* Angkat stacking context topbar di atas kartu konten (yang juga punya
+     backdrop-filter) agar dropdown notifikasi tidak tertimpa kartu di bawahnya. */
+  position: relative;
+  z-index: 1020;
 }
 
 .app-topbar-row {

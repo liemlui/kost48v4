@@ -402,6 +402,16 @@
   color: #64748b;
   font-size: 0.78rem;
 }
+
+/* Judul + keterangan harus BERTUMPUK, bukan menyatu tanpa spasi.
+   Di varian .with-action (judul+pill) & kartu lingkaran, strong/span dan small
+   ada di dalam wrapper <div> biasa sehingga mengalir inline tanpa spasi. */
+.staff-section-head.with-action > div > strong,
+.staff-section-head.with-action > div > small,
+.staff-report-circle-card > div > span,
+.staff-report-circle-card > div > small {
+  display: block;
+}
 .staff-donut-wrap {
   display: flex;
   align-items: center;
