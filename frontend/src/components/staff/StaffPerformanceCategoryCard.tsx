@@ -35,8 +35,11 @@ export default function StaffPerformanceCategoryCard({ performance, compact = fa
             <h3>{category?.label ?? 'Belum ada data'}</h3>
             {!compact ? <p>{category?.copy ?? 'Kinerja akan muncul setelah checklist, tugas, meter, atau audit tercatat.'}</p> : null}
             <div className="staff-score-meta-row">
-              <span>Skor <strong>{score}/100</strong></span>
-              <span>Nilai kerja <strong>{bonus >= 0 ? '+' : ''}{bonus}</strong></span>
+              {/* Skor (0-100) sudah ditampilkan besar di donut → jangan diulang di sini.
+                 Yang ini beda: selisih catatan baik vs perbaikan. */}
+              <span title="Catatan baik dikurangi catatan perbaikan bulan ini">
+                Poin kerja bersih <strong>{bonus >= 0 ? '+' : ''}{bonus}</strong>
+              </span>
             </div>
           </div>
           <DonutGauge

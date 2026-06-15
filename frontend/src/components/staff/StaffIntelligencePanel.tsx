@@ -39,7 +39,7 @@ function buildFocus(performance?: StaffPerformanceSummary | null, inventoryItems
   if ((score.negativeValue ?? 0) > 0) items.push({ title: 'Lengkapi bukti kerja', copy: `${score.negativeValue} catatan perbaikan terdeteksi. Utamakan foto/catatan untuk pekerjaan yang perlu dicek.`, tone: 'warn' });
   if ((kpi.proofCompletionRate ?? 100) < 80) items.push({ title: 'Bukti foto belum kuat', copy: `Bukti foto lengkap baru ${kpi.proofCompletionRate}%. Foto membuat laporan kerja lebih dipercaya.`, tone: 'warn' });
   if ((kpi.meterCount ?? 0) === 0) items.push({ title: 'Catat meter listrik/air', copy: 'Belum ada catatan meter bulan ini. Catat meter saat jadwal cek kamar atau akhir bulan.', tone: 'info' });
-  if ((performance.tenantReviews.count ?? 0) === 0) items.push({ title: 'Review tenant belum masuk', copy: 'Setelah tugas selesai, review tenant akan membantu membuktikan kualitas kerja.', tone: 'info' });
+  if ((performance.tenantReviews.count ?? 0) === 0) items.push({ title: 'Ajak tenant beri review', copy: 'Setelah tugas selesai, minta tenant menilai. Review membuktikan kualitas kerjamu (lihat panel "Review Tenant").', tone: 'info' });
   if ((kpi.auditFailed ?? 0) > 0) items.unshift({ title: 'Ada audit perlu ulang', copy: 'Cek pekerjaan yang belum sesuai dan kerjakan ulang dengan bukti yang jelas.', tone: 'danger' });
   if (!items.length) items.push({ title: 'Pertahankan ritme kerja', copy: 'Data hari ini stabil. Sistem akan otomatis mengangkat stok menipis, ticket tertahan, dan pekerjaan yang perlu bukti.', tone: 'good' });
   return items.slice(0, 4);
