@@ -116,6 +116,13 @@ export class AutoOpsController {
     return { message: 'AutoOps penandaan barang abandoned berhasil dijalankan', data: await this.autoOpsService.runBelongingsAbandonment({ actorUserId: user.id, source: 'MANUAL_BELONGINGS_ABANDONMENT_RUN' }) };
   }
 
+  // F5-6 (L-1): trigger manual rekonsiliasi jurnal warisan (backfill + alert owner).
+  @Post('run/journal-reconciliation')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async runJournalReconciliation(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'AutoOps rekonsiliasi jurnal berhasil dijalankan', data: await this.autoOpsService.runAutoJournalReconciliation({ actorUserId: user.id, source: 'MANUAL_JOURNAL_RECONCILIATION_RUN' }) };
+  }
+
   // F4-7: trigger manual pruning notifikasi >90 hari (UAT/ops).
   @Post('run/notification-pruning')
   @Roles(UserRole.OWNER, UserRole.ADMIN)

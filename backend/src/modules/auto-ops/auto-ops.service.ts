@@ -29,6 +29,7 @@ type AutoOpsRunResult = {
   pushDispatch?: unknown;
   rentRecognition?: unknown;
   acCleaning?: unknown;
+  journalReconciliation?: unknown;
 };
 
 @Injectable()
@@ -130,6 +131,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       const rentRecognition = await this.runRentRecognition(options);
       const acCleaning = await this.runAcCleaningSchedule(options);
       await this.runReferralRewards(options);
+      // F5-6 (L-1): backfill jurnal warisan yang bolong SEBELUM auto-close (agar readiness bersih).
+      const journalReconciliation = await this.runAutoJournalReconciliation(options);
       const accountingAutoClose = await this.runAccountingAutoClose(options);
       const notificationPruning = await this.runNotificationPruning(options);
       const pushDispatch = await this.runPushDispatch(options);
@@ -146,6 +149,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
         notificationPruning,
         pushDispatch,
         acCleaning,
+        journalReconciliation,
       };
     } finally {
       this.running = false;
@@ -807,6 +811,69 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     } catch (error: any) {
       this.logger.warn(`AutoOps notification pruning gagal: ${error?.message ?? error}`);
       return { deleted: 0, skipped: true, skippedReason: error?.message ?? 'Notification pruning skipped', source };
+    }
+  }
+
+  /**
+   * F5-6 (L-1 / D-22.1): AUTO-REKONSILIASI jurnal warisan best-effort.
+   * Flow lama memposting jurnal secara best-effort (operasi tetap commit walau jurnal gagal);
+   * sweeper ini mem-backfill jurnal untuk sumber operasional yang BELUM terjurnal
+   * (invoice/payment/expense/wifi) lalu MEMBERI TAHU OWNER/ADMIN bila ada yang dibuat atau gagal.
+   * Idempotent (postBySourceType dedupe per sumber). Best-effort; nonaktif via env.
+   */
+  async runAutoJournalReconciliation(options: { actorUserId?: number | null; source?: string } = {}) {
+    const source = options.source ?? 'AUTO_OPS_JOURNAL_RECONCILIATION';
+    const enabled = String(process.env.JOURNAL_RECONCILIATION_ENABLED ?? 'true').toLowerCase() !== 'false';
+    if (!enabled) return { skipped: true, skippedReason: 'JOURNAL_RECONCILIATION_DISABLED', source };
+    const limit = Number(process.env.JOURNAL_RECONCILIATION_LIMIT ?? 50);
+    try {
+      const result = await this.accountingPosting.backfillAutoJournal(
+        { limit: Number.isFinite(limit) ? limit : 50 },
+        options.actorUserId ?? null,
+      );
+      // Alert OWNER/ADMIN bila ada jurnal yang baru dibuat (artinya sebelumnya bolong) atau gagal.
+      if (result.createdCount > 0 || result.failedCount > 0) {
+        await this.notifyAdminsJournalReconciliation(result.createdCount, result.failedCount, result.warnings ?? []);
+      }
+      return { ...result, skipped: false, source };
+    } catch (error: any) {
+      this.logger.warn(`AutoOps rekonsiliasi jurnal gagal: ${error?.message ?? error}`);
+      return { skipped: true, skippedReason: error?.message ?? 'Journal reconciliation skipped', source };
+    }
+  }
+
+  /** F5-6: beri tahu OWNER/ADMIN hasil rekonsiliasi jurnal (dedupe per hari WIB). */
+  private async notifyAdminsJournalReconciliation(createdCount: number, failedCount: number, warnings: string[]) {
+    const dayKey = this.wibToday().toISOString().slice(0, 10);
+    const title = `🧾 Rekonsiliasi jurnal otomatis — ${dayKey}`;
+    const admins = await this.prisma.user.findMany({
+      where: { role: { in: ['ADMIN', 'OWNER'] as any }, isActive: true },
+      select: { id: true },
+    });
+    const warnNote = warnings.length ? ` Catatan: ${warnings.slice(0, 5).join('; ')}.` : '';
+    const body =
+      `Sistem menemukan transaksi operasional yang belum terjurnal dan memprosesnya otomatis: ` +
+      `${createdCount} jurnal dibuat, ${failedCount} gagal.` +
+      (failedCount > 0 ? ' Mohon cek menu Akuntansi (readiness "unmapped-operational").' : '') +
+      warnNote;
+    for (const admin of admins) {
+      const existing = await (this.prisma as any).appNotification.findFirst({
+        where: { recipientUserId: admin.id, entityType: 'Accounting', entityId: dayKey, title },
+        select: { id: true },
+      });
+      if (existing) continue;
+      try {
+        await this.appNotification.create({
+          recipientUserId: admin.id,
+          title,
+          body,
+          linkTo: '/accounting',
+          entityType: 'Accounting',
+          entityId: dayKey,
+        });
+      } catch (err) {
+        this.logger.warn(`Notif rekonsiliasi jurnal gagal (admin #${admin.id}): ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
   }
 
