@@ -63,8 +63,12 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
   toggle air, tarif air). Backend: model `OperationalSetting` (singleton id=1) + modul `settings`
   (`GET /api/settings/operational` owner/admin, `PUT` owner-only). Frontend: tab "Tarif & Konstanta"
   di OwnerSettingsPage (`api/settings.ts`). Verified GET/PUT + UI.
-- **M-2:** model siklus meter + endpoint catat meter gabungan (listrik+air) + aturan 1×/siklus
-  + auto-generate invoice meter (pakai konstanta M-1). Reuse MeterReading + InvoiceLine.
+- **M-2 — ✅ SELESAI 2026-06-16:** `POST /meter-readings/cycle` (OWNER/ADMIN) catat listrik+air
+  sekaligus → usage sejak catatan terakhir → kurangi jatah gratis → tarif (room override →
+  OperationalSetting) → auto-issue invoice meter via `invoicesService.createWithLinesAndIssue`
+  (accounting di-skip aman bila COA belum siap). Reading pertama / dalam jatah gratis = tanpa invoice.
+  Frontend: `MeterCycleModal` di tab Meter (`MeterTab`) — tombol "Catat & Terbitkan Tagihan" untuk
+  owner/admin. Verified API (80kWh−30=50×tarif) + screenshot modal.
 - **M-3:** pencatatan mandiri tenant (portal) + badge "Catat meter" di /rooms (H-10).
 - **M-4:** "bayar sekaligus" (group invoice OPEN) + catatan "belum termasuk listrik" di invoice sewa.
 - **M-5:** checkout: tagihan meter terakhir dipotong dari deposit jaminan; teks marketing publik.

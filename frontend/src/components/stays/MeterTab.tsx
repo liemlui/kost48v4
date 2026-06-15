@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Alert, Badge, Button, Card, Spinner, Table } from 'react-bootstrap';
 import AddMeterReadingModal from './AddMeterReadingModal';
+import MeterCycleModal from './MeterCycleModal';
+import { useAuth } from '../../context/AuthContext';
 import { MeterReading, MeterRow, Stay } from '../../types';
 
 function numeric(value: number | string | null | undefined) {
@@ -89,7 +91,10 @@ export default function MeterTab({
   simpleMode?: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
-  
+  const [showCycle, setShowCycle] = useState(false);
+  const { user } = useAuth();
+  const canIssue = user?.role === 'OWNER' || user?.role === 'ADMIN';
+
   // Kategorikan readings menjadi "sejak check-in" dan "sebelum check-in"
   const { sinceCheckIn, beforeCheckIn } = useMemo(() => 
     categorizeReadings(readings ?? [], stay.checkInDate), 
@@ -154,9 +159,16 @@ export default function MeterTab({
             <h5 className="mb-1">{simpleMode ? 'Catat Meter' : 'Riwayat Meter'}</h5>
             <div className="text-muted">{simpleMode ? 'Cek angka terakhir, lalu catat angka baru bila diminta.' : 'Catatan listrik dan air untuk masa sewa ini.'}</div>
           </div>
-          <Button onClick={() => setShowModal(true)} variant="primary">
-            + Catat Meter
-          </Button>
+          <div className="d-flex gap-2 flex-wrap">
+            {canIssue ? (
+              <Button onClick={() => setShowCycle(true)} variant="primary">
+                Catat & Terbitkan Tagihan
+              </Button>
+            ) : null}
+            <Button onClick={() => setShowModal(true)} variant={canIssue ? 'outline-secondary' : 'primary'}>
+              + Catat Meter
+            </Button>
+          </div>
         </div>
 
         <Alert variant={hasNegativeUsage ? 'danger' : 'info'} className="small">
@@ -367,6 +379,9 @@ export default function MeterTab({
         stay={stay}
         readings={readings ?? []}
       />
+      {canIssue ? (
+        <MeterCycleModal show={showCycle} onHide={() => setShowCycle(false)} stay={stay} />
+      ) : null}
     </Card>
   );
 }

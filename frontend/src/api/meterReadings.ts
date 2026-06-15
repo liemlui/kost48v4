@@ -15,3 +15,21 @@ export async function createMeterReading(payload: {
 }) {
   return createResource<MeterReading>('/meter-readings', payload as unknown as Record<string, unknown>);
 }
+
+// M-2: catat siklus meter (listrik+air) + auto-generate invoice (OWNER/ADMIN).
+export type MeterCycleResult = {
+  readings: { electricity: MeterReading; water: MeterReading | null };
+  invoice: { id: number; invoiceNumber: string; totalAmountRupiah: number; status: string } | null;
+  summary: { elecUsage: number; elecChargeable: number; waterUsage: number; waterChargeable: number };
+  message?: string;
+};
+
+export async function recordMeterCycle(payload: {
+  roomId: number;
+  readingAt: string;
+  electricityReadingValue: string;
+  waterReadingValue?: string;
+  note?: string;
+}) {
+  return createResource<MeterCycleResult>('/meter-readings/cycle', payload as unknown as Record<string, unknown>);
+}
