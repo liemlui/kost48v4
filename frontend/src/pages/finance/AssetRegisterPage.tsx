@@ -18,6 +18,7 @@ import {
   type FixedAssetCapitalizationSource,
   type FixedAssetLedgerAlignmentMethod,
 } from '../../api/assets';
+import { listResource } from '../../api/resources';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 function formatRupiah(value?: number | null) {
@@ -89,6 +90,7 @@ const initialForm = {
   usefulLifeMonths: '36',
   accumulatedDepreciationRupiah: '0',
   depreciationEnabled: false,
+  inventoryItemId: '',
   notes: '',
 };
 
@@ -109,6 +111,10 @@ export default function AssetRegisterPage() {
   const readinessQuery = useQuery({ queryKey: ['assets', 'readiness-v2'], queryFn: fetchAssetReadinessV2 });
   const alignmentQuery = useQuery({ queryKey: ['assets', 'ledger-alignment'], queryFn: fetchAssetLedgerAlignment });
   const previewQuery = useQuery({ queryKey: ['assets', 'depreciation-preview', runPeriod], queryFn: () => fetchDepreciationPreview(runPeriod) });
+  const inventoryOptionsQuery = useQuery({
+    queryKey: ['assets', 'inventory-options'],
+    queryFn: () => listResource<{ id: number; name: string; sku?: string | null; category?: string | null }>('/inventory-items', { limit: 500, isActive: 'true' }),
+  });
 
   const createMutation = useMutation({
     mutationFn: createFixedAsset,
@@ -159,6 +165,7 @@ export default function AssetRegisterPage() {
       usefulLifeMonths: Number(form.usefulLifeMonths || 1),
       accumulatedDepreciationRupiah: Number(form.accumulatedDepreciationRupiah || 0),
       depreciationEnabled: form.depreciationEnabled,
+      inventoryItemId: form.inventoryItemId ? Number(form.inventoryItemId) : undefined,
       notes: form.notes || undefined,
     };
     createMutation.mutate(payload);
@@ -241,7 +248,13 @@ export default function AssetRegisterPage() {
                     <tbody>{assets.map((asset) => {
                       const status = asset.ledgerAlignment?.status ?? 'NEEDS_REVIEW';
                       return <tr key={asset.id}>
-                        <td><div className="fw-semibold">{asset.assetCode} · {asset.name}</div><small className="text-muted">{categoryLabels[asset.category] ?? asset.category} · {capitalizationLabels[asset.capitalizationSource] ?? asset.capitalizationSource}</small></td>
+                        <td>
+                          <div className="fw-semibold">{asset.assetCode} · {asset.name}</div>
+                          <small className="text-muted">{categoryLabels[asset.category] ?? asset.category} · {capitalizationLabels[asset.capitalizationSource] ?? asset.capitalizationSource}</small>
+                          {(asset.inventoryItem || asset.room) ? (
+                            <div><small className="text-success">🔗 Tertaut: {[asset.inventoryItem?.name ? `${asset.inventoryItem.name} (inventaris)` : null, asset.room?.code ? `Kamar ${asset.room.code}` : null].filter(Boolean).join(' · ')}</small></div>
+                          ) : null}
+                        </td>
                         <td>{formatRupiah(asset.acquisitionCostRupiah)}</td>
                         <td>{formatRupiah(asset.accumulatedDepreciationRupiah)}</td>
                         <td>{formatRupiah(asset.bookValueRupiah)}</td>
@@ -267,6 +280,16 @@ export default function AssetRegisterPage() {
                 <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Cost</Form.Label><Form.Control type="number" min={1} value={form.acquisitionCostRupiah} onChange={(e) => setForm((prev) => ({ ...prev, acquisitionCostRupiah: e.target.value }))} required /></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Residu</Form.Label><Form.Control type="number" min={0} value={form.salvageValueRupiah} onChange={(e) => setForm((prev) => ({ ...prev, salvageValueRupiah: e.target.value }))} /></Form.Group></Col></Row>
                 <Row className="g-2"><Col sm={6}><Form.Group><Form.Label>Umur manfaat bulan</Form.Label><Form.Control type="number" min={1} value={form.usefulLifeMonths} onChange={(e) => setForm((prev) => ({ ...prev, usefulLifeMonths: e.target.value }))} required /></Form.Group></Col><Col sm={6}><Form.Group><Form.Label>Akumulasi awal</Form.Label><Form.Control type="number" min={0} value={form.accumulatedDepreciationRupiah} onChange={(e) => setForm((prev) => ({ ...prev, accumulatedDepreciationRupiah: e.target.value }))} /></Form.Group></Col></Row>
                 <Form.Check type="switch" label="Aktifkan depresiasi bulanan untuk aset ini" checked={form.depreciationEnabled} onChange={(e) => setForm((prev) => ({ ...prev, depreciationEnabled: e.target.checked }))} />
+                <Form.Group>
+                  <Form.Label>Tautkan ke barang inventaris <span className="text-muted">(opsional — agar tidak dobel input)</span></Form.Label>
+                  <Form.Select value={form.inventoryItemId} onChange={(e) => setForm((prev) => ({ ...prev, inventoryItemId: e.target.value }))}>
+                    <option value="">— Tidak ditautkan —</option>
+                    {(inventoryOptionsQuery.data?.items ?? []).map((opt) => (
+                      <option key={opt.id} value={opt.id}>{opt.name}{opt.category ? ` (${opt.category})` : ''}</option>
+                    ))}
+                  </Form.Select>
+                  <Form.Text muted>Aset ini akan terhubung ke barang inventaris yang sama — satu kesatuan, bukan dua data terpisah.</Form.Text>
+                </Form.Group>
                 <Form.Group><Form.Label>Catatan</Form.Label><Form.Control as="textarea" rows={2} value={form.notes} onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))} placeholder="Contoh: aset sudah termasuk opening balance 2026-05" /></Form.Group>
                 {createMutation.isError ? <Alert variant="danger" className="mb-0">{getApiErrorMessage(createMutation.error, 'Gagal membuat aset')}</Alert> : null}
                 <Button type="submit" disabled={createMutation.isPending}>{createMutation.isPending ? 'Menyimpan...' : 'Simpan Aset'}</Button>
