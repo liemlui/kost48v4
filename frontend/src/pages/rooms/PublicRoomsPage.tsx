@@ -248,7 +248,6 @@ function RoomsTopbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [iconBroken, setIconBroken] = useState(false);
-  const [textBroken, setTextBroken] = useState(false);
 
   return (
     <header className="rm-topbar">
@@ -264,16 +263,8 @@ function RoomsTopbar() {
         ) : (
           <Kost48LogoMark size="small" />
         )}
-        {!textBroken ? (
-          <img
-            src="/room-images/logo-kost48-surabaya.webp"
-            alt="Kost 48 Surabaya"
-            className="rm-topbar-text-logo"
-            onError={() => setTextBroken(true)}
-          />
-        ) : (
-          <div className="rm-topbar-brand-text"><span>Kost48 Surabaya</span><small>Surabaya Barat</small></div>
-        )}
+        {/* Wordmark teks bersih 2-warna (ganti gambar logo gradasi multi-warna). */}
+        <div className="rm-topbar-brand-text"><span>KOST<span className="gx-brand-accent">48</span> Surabaya</span><small>Surabaya Barat</small></div>
       </button>
 
       <nav className="rm-topbar-nav" aria-label="Navigasi">

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button } from 'react-bootstrap';
+import { useAuth } from '../../context/AuthContext';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,6 +17,7 @@ function shortBuildId(buildId: string | undefined) {
 }
 
 export default function PwaStatus() {
+  const { user } = useAuth();
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -150,7 +152,11 @@ export default function PwaStatus() {
     setInstallDismissed(true);
   };
 
-  if (!isOffline && !updateAvailable && (!installPrompt || installDismissed)) {
+  // Tunda prompt "Pasang aplikasi" sampai user login — jangan ganggu/menimpa
+  // halaman publik & login (review UI/UX). Alert offline/update tetap di semua halaman.
+  const showInstall = Boolean(installPrompt) && !installDismissed && Boolean(user);
+
+  if (!isOffline && !updateAvailable && !showInstall) {
     return null;
   }
 
@@ -180,7 +186,7 @@ export default function PwaStatus() {
         </Alert>
       ) : null}
 
-      {installPrompt && !installDismissed ? (
+      {showInstall ? (
         <Alert variant="light" className="pwa-status-card pwa-install-card mb-0">
           <div>
             <strong>Pasang KOST48 di perangkat.</strong>

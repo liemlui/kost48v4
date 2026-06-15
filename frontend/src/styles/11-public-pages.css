@@ -1603,6 +1603,9 @@
 
 .gx-topbar-solid .gx-brand-name { color: #0f172a; }
 
+/* Aksen "48" pada wordmark teks (2-warna). Tetap sky di hero & saat solid. */
+.gx-brand-accent { color: #0ea5e9; }
+
 /* Nav */
 .gx-nav {
   display: flex;
@@ -1706,10 +1709,10 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, .30) 0%,
-    rgba(0, 0, 0, .45) 40%,
-    rgba(0, 0, 0, .70) 85%,
-    rgba(0, 0, 0, .80) 100%
+    rgba(0, 0, 0, .42) 0%,
+    rgba(0, 0, 0, .55) 40%,
+    rgba(0, 0, 0, .72) 85%,
+    rgba(0, 0, 0, .82) 100%
   );
 }
 
@@ -1763,7 +1766,8 @@
   margin: 0;
   font-size: clamp(1rem, 1.8vw, 1.25rem);
   font-style: italic;
-  color: rgba(255, 255, 255, .85);
+  color: rgba(255, 255, 255, .95);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, .45);
   font-family: 'Cormorant Garant', serif;
   font-weight: 400;
   letter-spacing: .02em;
@@ -1773,9 +1777,10 @@
 .gx-hero-sub {
   margin: 0;
   font-size: clamp(.82rem, 1.2vw, .95rem);
-  color: rgba(255, 255, 255, .65);
+  color: rgba(255, 255, 255, .82);
   font-weight: 600;
   letter-spacing: .04em;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .4);
   text-transform: uppercase;
 }
 
@@ -3084,6 +3089,25 @@
   margin-bottom: .15rem;
   filter: brightness(1.5) saturate(0.8);
 }
+
+/* Wordmark teks bersih di footer (ganti gambar logo gradasi). */
+.gx-footer-brand-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  color: #fff;
+  margin-bottom: .12rem;
+}
+
+/* Ikon SVG pada link footer (ganti emoji). */
+.gx-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  justify-content: flex-end;
+}
+.gx-footer-link-icon { flex-shrink: 0; opacity: .85; }
 
 /* ── Rooms topbar text logo ── */
 .rm-topbar-text-logo {

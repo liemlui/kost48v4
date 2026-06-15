@@ -113,7 +113,6 @@ function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
 
 function GuestTopbar({ scrolled }: { scrolled: boolean }) {
   const [iconBroken, setIconBroken] = useState(false);
-  const [textBroken, setTextBroken] = useState(false);
   return (
     <header className={`gx-topbar${scrolled ? ' gx-topbar-solid' : ''}`}>
       <Link to="/" className="gx-brand" aria-label="KOST48 Beranda">
@@ -122,11 +121,8 @@ function GuestTopbar({ scrolled }: { scrolled: boolean }) {
         ) : (
           <Kost48LogoMark size="small" />
         )}
-        {!textBroken ? (
-          <img src="/room-images/logo-kost48-surabaya.webp" alt="Kost 48 Surabaya" className="gx-logo-text-img" onError={() => setTextBroken(true)} />
-        ) : (
-          <span className="gx-brand-name">KOST48 Surabaya</span>
-        )}
+        {/* Wordmark teks bersih 2-warna (ganti gambar logo gradasi multi-warna). */}
+        <span className="gx-brand-name">KOST<span className="gx-brand-accent">48</span> Surabaya</span>
       </Link>
       <nav className="gx-nav" aria-label="Navigasi">
         {NAV_LINKS.map((l) => <a key={l.href} href={l.href} className="gx-nav-link">{l.label}</a>)}
@@ -149,7 +145,7 @@ function GuestFooter() {
           <div className="gx-footer-brand">
             <img src="/room-images/logo-kost48-sby.webp" alt="Logo KOST48" className="gx-footer-logo-img" />
             <div>
-              <img src="/room-images/logo-kost48-surabaya.webp" alt="Kost 48 Surabaya" className="gx-footer-text-img" />
+              <span className="gx-footer-brand-name">KOST<span className="gx-brand-accent">48</span> Surabaya</span>
               <small>Jl. Hikmah V No. 48 · Surabaya Barat 60216</small>
             </div>
           </div>
@@ -159,8 +155,14 @@ function GuestFooter() {
             <Link to="/login">Masuk Portal</Link>
           </nav>
           <div className="gx-footer-links">
-            <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">📍 Google Maps</a>
-            <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">💬 WhatsApp</a>
+            <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">
+              <svg className="gx-footer-link-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>
+              Google Maps
+            </a>
+            <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
+              <svg className="gx-footer-link-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z" /></svg>
+              WhatsApp
+            </a>
           </div>
         </div>
         <p className="gx-footer-copy">
