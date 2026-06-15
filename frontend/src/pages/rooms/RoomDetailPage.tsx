@@ -25,12 +25,13 @@ function formatValue(value?: string | null) {
 const ROOM_ITEM_PROBLEM_STATUSES = new Set(['DAMAGED', 'MISSING', 'NEEDS_REPAIR', 'PENDING_CHECK', 'MAINTENANCE']);
 
 
+// Hanya kondisi FISIK dalam scope staf. Kebersihan & status huni dihitung otomatis /
+// urusan admin — staf tak perlu memutuskannya di sini (cukup tekan tombol kondisi).
 const STAFF_ROOM_CONDITION_OPTIONS = [
-  { value: 'Siap huni', label: 'Siap huni', helper: 'Kamar terlihat bersih dan tidak ada masalah besar.' },
-  { value: 'Perlu dibersihkan', label: 'Perlu dibersihkan', helper: 'Kamar perlu dibersihkan sebelum dipakai lagi.' },
-  { value: 'Ada kerusakan ringan', label: 'Kerusakan ringan', helper: 'Ada masalah kecil yang perlu dicatat admin.' },
-  { value: 'Ada kerusakan berat', label: 'Kerusakan berat', helper: 'Ada masalah besar dan butuh tindak lanjut.' },
-  { value: 'Perlu dicek admin', label: 'Perlu cek admin', helper: 'Staff belum yakin dan meminta admin mengecek.' },
+  { value: 'Perlu dicat', label: 'Perlu dicat', helper: 'Cat kamar mengelupas/kusam, perlu dicat ulang.' },
+  { value: 'Ada kerusakan ringan', label: 'Kerusakan ringan', helper: 'Masalah kecil (engsel, kunci, dll) yang perlu dicatat.' },
+  { value: 'Ada kerusakan berat', label: 'Kerusakan berat', helper: 'Masalah besar yang butuh tindak lanjut admin.' },
+  { value: 'Perlu dicek admin', label: 'Perlu cek admin', helper: 'Belum yakin — minta admin mengecek.' },
 ];
 
 
@@ -349,9 +350,9 @@ export default function RoomDetailPage() {
               <Card className="content-card border-0">
                 <Card.Body>
                   <div className="staff-section-heading mb-3">
-                    <div className="eyebrow mb-1">Catatan Kamar</div>
-                    <h6 className="mb-1">Catat kondisi kamar dari sini.</h6>
-                    <div className="text-muted small">Pilih kondisi, tulis catatan singkat, lalu kirim. Admin akan menerima laporan untuk dicek.</div>
+                    <div className="eyebrow mb-1">Lapor Kondisi Fisik Kamar</div>
+                    <h6 className="mb-1">Cukup pilih kondisi, lalu kirim.</h6>
+                    <div className="text-muted small">Hanya kondisi fisik dalam tugasmu (mis. perlu dicat / kerusakan). Kebersihan &amp; status huni diatur otomatis/admin — tidak perlu kamu putuskan di sini.</div>
                   </div>
 
                   {roomConditionMessage ? <Alert variant="success" className="py-2">{roomConditionMessage}</Alert> : null}
@@ -375,16 +376,16 @@ export default function RoomDetailPage() {
                       </div>
                     </Form.Group>
                     <Form.Group>
-                      <Form.Label>Catatan</Form.Label>
-                      <Form.Control as="textarea" rows={3} value={roomConditionNote} onChange={(event) => setRoomConditionNote(event.currentTarget.value)} placeholder="Contoh: kamar perlu dibersihkan sebelum dihuni lagi" />
+                      <Form.Label>Catatan <span className="text-muted">(opsional)</span></Form.Label>
+                      <Form.Control as="textarea" rows={2} value={roomConditionNote} onChange={(event) => setRoomConditionNote(event.currentTarget.value)} placeholder="Contoh: cat dinding dekat jendela mengelupas" />
                     </Form.Group>
                     <Form.Group>
                       <Form.Label>Foto pendukung</Form.Label>
                       <CameraOrGalleryInput onChange={handleRoomConditionPhoto} />
                       {roomConditionPreview ? <SafeImage className="staff-proof-preview" src={roomConditionPreview} alt="Foto kondisi kamar" /> : null}
                     </Form.Group>
-                    <Button onClick={() => roomConditionMutation.mutate()} disabled={roomConditionMutation.isPending || !roomConditionNote.trim()}>
-                      {roomConditionMutation.isPending ? 'Mengirim...' : 'Kirim catatan kamar'}
+                    <Button onClick={() => roomConditionMutation.mutate()} disabled={roomConditionMutation.isPending || !roomCondition}>
+                      {roomConditionMutation.isPending ? 'Mengirim...' : 'Kirim laporan kondisi'}
                     </Button>
                   </div>
 
