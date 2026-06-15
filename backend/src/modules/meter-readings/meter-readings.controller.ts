@@ -8,6 +8,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { CreateMeterReadingDto, UpdateMeterReadingDto } from './dto/meter-reading.dto';
 import { MeterReadingsQueryDto } from './dto/meter-readings-query.dto';
+import { RecordMeterCycleDto } from './dto/record-meter-cycle.dto';
 import { MeterReadingsService } from './meter-readings.service';
 
 @ApiTags('meter-readings')
@@ -33,6 +34,13 @@ export class MeterReadingsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF)
   async create(@Body() dto: CreateMeterReadingDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Meter reading berhasil dibuat', data: await this.meterreadingsService.create(dto, user) };
+  }
+
+  /** M-2: catat siklus meter (listrik+air) + auto-generate invoice meter. OWNER/ADMIN. */
+  @Post('cycle')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async recordCycle(@Body() dto: RecordMeterCycleDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Catatan meter & tagihan diproses', data: await this.meterreadingsService.recordCycleAndInvoice(dto, user) };
   }
 
   @Patch(':id')

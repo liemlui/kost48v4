@@ -1,17 +1,25 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildMeta, buildPagination } from '../../common/utils/pagination';
 import { CreateMeterReadingDto, UpdateMeterReadingDto } from './dto/meter-reading.dto';
 import { MeterReadingsQueryDto } from './dto/meter-readings-query.dto';
+import { RecordMeterCycleDto } from './dto/record-meter-cycle.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
-import { UtilityType } from '../../common/enums/app.enums';
+import { UserRole, UtilityType } from '../../common/enums/app.enums';
 import { endOfDay, parseJakartaDateOnly } from '../../common/utils/date.util';
+import { InvoicesService } from '../invoices/invoices.service';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class MeterReadingsService {
-  constructor(private readonly prisma: PrismaService, private readonly audit: AuditLogService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditLogService,
+    private readonly invoices: InvoicesService,
+    private readonly settings: SettingsService,
+  ) {}
 
   private parseReadingValue(value: string | Prisma.Decimal, label = 'meter') {
     try {
@@ -148,6 +156,87 @@ export class MeterReadingsService {
       }
       throw error;
     }
+  }
+
+  /**
+   * M-2: catat satu siklus meter (listrik + air) untuk kamar berpenghuni, lalu
+   * auto-generate invoice meter memakai jatah gratis + tarif dari OperationalSetting.
+   * Hanya OWNER/ADMIN (penerbitan invoice = aksi finance). Air hanya bila toggle aktif.
+   */
+  async recordCycleAndInvoice(dto: RecordMeterCycleDto, actor: CurrentUserPayload) {
+    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
+      throw new ForbiddenException('Hanya OWNER/ADMIN yang boleh menerbitkan tagihan meter.');
+    }
+    const roomId = Number(dto.roomId);
+    const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Kamar tidak ditemukan');
+    const stay = await this.prisma.stay.findFirst({ where: { roomId, status: 'ACTIVE' as any }, orderBy: { id: 'desc' } });
+    if (!stay) throw new BadRequestException('Kamar belum berpenghuni aktif — tagihan meter butuh penghuni.');
+
+    const setting = await this.settings.getOperational();
+    const readingAt = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
+
+    const elecValue = this.parseReadingValue(dto.electricityReadingValue, 'meter listrik');
+    const prevElec = await this.prisma.meterReading.findFirst({ where: { roomId, utilityType: UtilityType.ELECTRICITY, readingAt: { lt: readingAt } }, orderBy: { readingAt: 'desc' } });
+    await this.assertReadingIsChronological({ roomId, utilityType: UtilityType.ELECTRICITY, readingAt, readingValue: elecValue });
+
+    const waterEnabled = Boolean(setting.waterMeteringEnabled) && dto.waterReadingValue != null && dto.waterReadingValue !== '';
+    let waterValue: Prisma.Decimal | null = null;
+    let prevWater: { readingAt: Date; readingValue: Prisma.Decimal } | null = null;
+    if (waterEnabled) {
+      waterValue = this.parseReadingValue(dto.waterReadingValue as string, 'meter air');
+      prevWater = await this.prisma.meterReading.findFirst({ where: { roomId, utilityType: UtilityType.WATER, readingAt: { lt: readingAt } }, orderBy: { readingAt: 'desc' } });
+      await this.assertReadingIsChronological({ roomId, utilityType: UtilityType.WATER, readingAt, readingValue: waterValue });
+    }
+
+    const lines: Array<{ lineType: string; utilityType: string; description: string; qty: string; unit: string; unitPriceRupiah: number; sortOrder: number }> = [];
+    let elecUsage = 0; let elecChargeable = 0;
+    if (prevElec) {
+      elecUsage = elecValue.minus(prevElec.readingValue).toNumber();
+      const free = Number(setting.freeElectricityKwhPerMonth ?? 0);
+      elecChargeable = Math.max(0, elecUsage - free);
+      const tariff = Number(room.electricityTariffPerKwhRupiah || setting.electricityTariffPerKwhRupiah || 0);
+      if (elecChargeable > 0 && tariff > 0) {
+        lines.push({ lineType: 'ELECTRICITY', utilityType: 'ELECTRICITY', description: `Listrik: ${elecUsage.toFixed(2)} kWh − ${free} kWh gratis = ${elecChargeable.toFixed(2)} kWh`, qty: elecChargeable.toFixed(3), unit: 'kWh', unitPriceRupiah: tariff, sortOrder: 0 });
+      }
+    }
+    let waterUsage = 0; let waterChargeable = 0;
+    if (waterEnabled && prevWater && waterValue) {
+      waterUsage = waterValue.minus(prevWater.readingValue).toNumber();
+      const freeW = Number(setting.freeWaterM3PerMonth ?? 0);
+      waterChargeable = Math.max(0, waterUsage - freeW);
+      const wtariff = Number(room.waterTariffPerM3Rupiah || setting.waterTariffPerM3Rupiah || 0);
+      if (waterChargeable > 0 && wtariff > 0) {
+        lines.push({ lineType: 'WATER', utilityType: 'WATER', description: `Air: ${waterUsage.toFixed(2)} m³ − ${freeW} m³ gratis = ${waterChargeable.toFixed(2)} m³`, qty: waterChargeable.toFixed(3), unit: 'm³', unitPriceRupiah: wtariff, sortOrder: 1 });
+      }
+    }
+
+    const createdElec = await this.prisma.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.ELECTRICITY, readingAt, readingValue: elecValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
+    let createdWater: typeof createdElec | null = null;
+    if (waterEnabled && waterValue) {
+      createdWater = await this.prisma.meterReading.create({ data: { room: { connect: { id: roomId } }, utilityType: UtilityType.WATER, readingAt, readingValue: waterValue, note: dto.note, recordedBy: { connect: { id: actor.id } } } });
+    }
+    await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'MeterReading', entityId: String(createdElec.id), newData: { electricity: createdElec, water: createdWater } });
+
+    const summary = { elecUsage, elecChargeable, waterUsage, waterChargeable };
+    if (!lines.length) {
+      return { readings: { electricity: createdElec, water: createdWater }, invoice: null, summary, message: prevElec ? 'Pemakaian dalam jatah gratis — tidak ada tagihan meter.' : 'Catatan meter pertama tersimpan (belum ada selisih untuk ditagih).' };
+    }
+
+    const ym = `${readingAt.getUTCFullYear()}${String(readingAt.getUTCMonth() + 1).padStart(2, '0')}`;
+    const periodStart = (prevElec?.readingAt ?? prevWater?.readingAt ?? readingAt);
+    const due = new Date(readingAt); due.setUTCDate(due.getUTCDate() + 7);
+    const invoice = await this.invoices.createWithLinesAndIssue({
+      stayId: stay.id,
+      invoiceNumber: `MTR-${ym}-${roomId}-${createdElec.id}`,
+      periodStart: periodStart.toISOString().slice(0, 10),
+      periodEnd: readingAt.toISOString().slice(0, 10),
+      dueDate: due.toISOString().slice(0, 10),
+      notes: `Tagihan meter (listrik${waterEnabled ? ' & air' : ''}) Kamar ${room.code}. Dibuat otomatis dari catatan meter.`,
+      lines: lines as any,
+    }, actor);
+
+    return { readings: { electricity: createdElec, water: createdWater }, invoice, summary };
   }
 
   async update(id: number, dto: UpdateMeterReadingDto, actor: CurrentUserPayload) {
