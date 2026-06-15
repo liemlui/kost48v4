@@ -158,7 +158,8 @@ function RoomCard({
           onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
           disabled={compareDisabled}
           aria-pressed={isCompared}
-          title={compareDisabled ? "Maks. 3 kamar" : isCompared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
+          aria-label={compareDisabled ? "Maksimal 3 kamar untuk dibandingkan" : isCompared ? "Hapus kamar dari perbandingan" : "Tambah kamar ke perbandingan"}
+          title={compareDisabled ? "Maks. 3 kamar" : isCompared ? "Hapus dari perbandingan" : "Bandingkan kamar ini"}
         >
           {isCompared ? "✓" : "+"}
         </button>
@@ -276,9 +277,18 @@ function RoomsTopbar() {
       </button>
 
       <nav className="rm-topbar-nav" aria-label="Navigasi">
-        <button type="button" onClick={() => navigate("/")}>⌂ Beranda</button>
-        <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">📍 Maps</a>
-        <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">💬 WhatsApp</a>
+        <button type="button" onClick={() => navigate("/")}>
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5" /><path d="M5 10v10h14V10" /></svg>
+          Beranda
+        </button>
+        <a href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>
+          Maps
+        </a>
+        <a href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">
+          <svg className="rm-nav-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z" /></svg>
+          WhatsApp
+        </a>
       </nav>
 
       <div className="rm-topbar-user">
@@ -455,7 +465,11 @@ export default function PublicRoomsPage() {
                 <span className="text-muted"><Spinner animation="border" size="sm" className="me-2" />Memuat kamar...</span>
               ) : (
                 <span>
-                  <strong>{rooms.length}</strong> kamar ditampilkan
+                  {totalPages > 1 ? (
+                    <>Menampilkan <strong>{(safePage - 1) * ROOMS_PER_PAGE + 1}&ndash;{(safePage - 1) * ROOMS_PER_PAGE + pageRooms.length}</strong> dari <strong>{rooms.length}</strong> kamar</>
+                  ) : (
+                    <><strong>{rooms.length}</strong> kamar ditampilkan</>
+                  )}
                   {bookableCount > 0 && rooms.length !== bookableCount && (
                     <> · <strong className="rm-count-bookable">{bookableCount}</strong> bisa diajukan sekarang</>
                   )}

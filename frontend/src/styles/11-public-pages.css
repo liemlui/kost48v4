@@ -1030,6 +1030,9 @@
 
 .rm-topbar-nav button,
 .rm-topbar-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
   padding: .38rem .7rem;
   border-radius: 999px;
   background: none;
@@ -1041,6 +1044,8 @@
   text-decoration: none;
   transition: background .15s, color .15s;
 }
+
+.rm-nav-icon { flex-shrink: 0; opacity: .85; }
 
 .rm-topbar-nav button:hover,
 .rm-topbar-nav a:hover {
@@ -1128,6 +1133,17 @@
   background: rgba(255, 255, 255, .95);
   box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
   margin-bottom: 1rem;
+}
+
+/* Filter mengikuti scroll di layar lebar (menempel di bawah topbar yang juga sticky).
+   Tidak sticky di mobile: topbar menumpuk jadi lebih tinggi & ruang vertikal mahal. */
+@media (min-width: 992px) {
+  .rm-filter-bar {
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+    backdrop-filter: blur(18px);
+  }
 }
 
 .rm-filter-group {

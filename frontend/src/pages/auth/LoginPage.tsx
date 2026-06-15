@@ -34,7 +34,8 @@ export default function LoginPage() {
   const modeCopy = useMemo(() => {
     if (mode === 'TENANT') {
       return {
-        helper: 'Penghuni masuk untuk cek kamar, tagihan, dan laporan. Belum punya akun? Mulai dari katalog kamar.',
+        subtitle: 'Cek pemesanan, tagihan, dan laporan kamu.',
+        helper: 'Penghuni masuk untuk cek kamar, tagihan, dan laporan kos.',
         identifierLabel: 'Email atau No. HP',
         identifierPlaceholder: 'Contoh: nama@email.com atau 0812...',
         passwordPlaceholder: 'Masukkan password',
@@ -42,6 +43,7 @@ export default function LoginPage() {
       };
     }
     return {
+      subtitle: 'Kelola operasional, keuangan, dan tim KOST48.',
       helper: 'Area kerja owner, admin, dan staff KOST48.',
       identifierLabel: 'Email Admin / Staff',
       identifierPlaceholder: 'admin@kost48.com',
@@ -118,7 +120,7 @@ export default function LoginPage() {
           <Kost48LogoMark size="login" className="login-mark" />
           <div className="login-heading-block text-center">
             <h2>Masuk ke Portal KOST48</h2>
-            <p>Cek pemesanan, tagihan, dan laporan kamu.</p>
+            <p>{modeCopy.subtitle}</p>
           </div>
 
           <div className="login-segment" role="tablist" aria-label="Pilih jenis akun">
@@ -129,7 +131,11 @@ export default function LoginPage() {
               aria-selected={mode === 'TENANT'}
               onClick={() => handleModeChange('TENANT')}
             >
-              <span>◎</span> Penghuni
+              <svg className="login-segment-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Penghuni
             </button>
             <button
               type="button"
@@ -138,7 +144,10 @@ export default function LoginPage() {
               aria-selected={mode === 'BACKOFFICE'}
               onClick={() => handleModeChange('BACKOFFICE')}
             >
-              <span>▣</span> Admin / Operasional
+              <svg className="login-segment-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Admin / Operasional
             </button>
           </div>
 

@@ -1830,7 +1830,7 @@ p, small, span, label, .form-text, .text-muted,
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.15rem;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #2f7cf6, #2563eb);
@@ -1849,7 +1849,7 @@ p, small, span, label, .form-text, .text-muted,
 }
 
 .login-experience-v518d .login-heading-block p {
-  margin: .65rem 0 1.85rem;
+  margin: .55rem 0 1.15rem;
   color: #64748b;
   font-size: .96rem;
 }
@@ -1861,7 +1861,16 @@ p, small, span, label, .form-text, .text-muted,
   border-radius: 15px;
   background: #e9e9ee;
   border: 1px solid #e5e7eb;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.1rem;
+}
+
+.login-experience-v518d .login-segment-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.login-experience-v518d .login-segment button.active .login-segment-icon {
+  color: #2563eb;
 }
 
 .login-experience-v518d .login-segment button {
@@ -1987,7 +1996,7 @@ p, small, span, label, .form-text, .text-muted,
 
 .login-experience-v518d .login-catalog-card,
 .login-experience-v518d .login-backoffice-note {
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   padding: 1rem;
   border-radius: 14px;
   background: #eff6ff;
