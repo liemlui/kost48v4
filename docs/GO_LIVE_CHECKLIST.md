@@ -3,10 +3,27 @@
 
 > ⚠️ **LAN = http (bukan https).** Push PWA (VAPID) **tidak aktif** di LAN plain-http (browser butuh secure context); notif **in-app tetap jalan**. VAPID disiapkan untuk publish HTTPS nanti.
 
-## ⚡ RINGKAS — 3 langkah
+## 🗂️ Struktur proyek — kenapa ada banyak `package.json`?
+Ada **4** `package.json`, masing-masing beda peran. **Frontend & backend tetap TERPISAH di source** (dua aplikasi independen) — yang "jadi satu" hanyalah saat **mode combined / deploy**.
+
+| Lokasi | Peran | Diedit? |
+|---|---|---|
+| **`backend/package.json`** | Aplikasi **backend** (NestJS+Prisma). Dependency + script backend (`start`, `build`, `golive`, **`golive:setup`**, `seed:owner`). | ✅ source |
+| **`frontend/package.json`** | Aplikasi **frontend** (React+Vite). Dependency + script frontend (`dev`, `build`, `build:lan`, `golive`). | ✅ source |
+| **`package.json` (root `final_bundle`)** | **Orchestrator/peluncur** — TANPA dependency. Hanya script untuk menjalankan **kedua app sekaligus**: `golive` (2 port), `golive:1` (combined 1 port), `make-deploy`. | ✅ source (jarang) |
+| **`deploy/package.json`** | **HASIL GENERATE** dari `npm run make-deploy` (= salinan backend + frontend yang sudah di-build di `deploy/client/`). Untuk di-upload ke cPanel/VPS. **gitignored — JANGAN edit manual** (akan ditimpa saat generate ulang). | ❌ artefak |
+
+**3 cara menjalankan (semua opsional, pilih sesuai kebutuhan):**
+- **`npm run golive`** (dari root) → backend `:3000` + frontend `:5173` **bersamaan, 1 terminal** (paling mudah untuk LAN). ← dipakai checklist ini.
+- **`npm run golive:1`** (dari root) → **COMBINED 1 server/1 port** (`:3000`): backend menyajikan frontend + API sekaligus. Ini wujud "frontend+backend jadi satu" (mirip produksi).
+- **`npm run make-deploy`** (dari root) → buat folder `deploy/` siap upload ke hosting (cPanel/VPS), nanti di server: `npm ci → npm run build → node dist/main.js`.
+
+> Folder lain di root yang **bukan source** (artefak/abaikan): `node_modules/`, `*.zip`, `kost48-deploy.tgz`, `tmp_*.log`, `deploy/`, `frontend/dist`, `backend/dist`.
+
+## ⚡ RINGKAS — 3 langkah (LAN)
 1. **Buat DB kosong** `kost48_v3` (Postgres port 5432) + isi `backend/.env` (lihat §0).
-2. **`npm run golive:setup`** ← satu perintah: schema + bootstrap.sql + OWNER + COA + periode OPEN + Kas/Bank.
-3. **`npm run golive`** (backend) + **`cd frontend && npm run golive`** (frontend) → buka `http://<IP-LAN>:5173`.
+2. **`cd backend && npm run golive:setup`** ← satu perintah: schema + bootstrap.sql + OWNER + COA + periode OPEN + Kas/Bank.
+3. **`npm run golive`** dari **root `final_bundle`** ← satu perintah jalankan backend+frontend → buka `http://<IP-LAN>:5173`.
 
 ---
 
@@ -38,10 +55,14 @@ Otomatis & **idempoten** (aman diulang): build → `prisma db push` → `bootstr
   (Di LAN push tetap nonaktif — butuh HTTPS.)
 - [ ] `AUTO_OPS_ENABLED=true` di-set otomatis oleh `golive` (server always-on lokal) — tak perlu cron.
 
-## 4. Jalankan (2 terminal)
-- [ ] Backend (port 3000, DB `kost48_v3`, CORS auto-LAN): `cd backend && npm run golive`
-- [ ] Frontend (port 5173, API ke IP LAN): `cd frontend && npm run golive`
-- [ ] Catat **IP LAN** yang dicetak go-live → akses dari HP/laptop lain: `http://<IP-LAN>:5173`
+## 4. Jalankan
+**Cara mudah (1 perintah, dari root `final_bundle`):**
+- [ ] `npm run golive` → bebaskan port, build frontend LAN, jalankan backend `:3000` + frontend `:5173` **bersamaan**. Ctrl+C menutup keduanya.
+- [ ] Catat **IP LAN** yang dicetak → akses dari HP/laptop lain: `http://<IP-LAN>:5173`
+
+**Alternatif COMBINED (1 server/1 port :3000, mirip produksi):** `npm run golive:1` (backend menyajikan frontend + API sekaligus).
+
+**Alternatif manual (2 terminal):** `cd backend && npm run golive` + `cd frontend && npm run golive`.
 
 ## 5. Verifikasi pasca go-live (smoke test)
 - [ ] Login OWNER berhasil; dashboard tampil.
