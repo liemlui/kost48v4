@@ -3347,7 +3347,14 @@ div.tenant-stay-fact-chip {
   margin: 0 !important;
 }
 
-.staff-workspace-topbar,
+/* Topbar staf: TIDAK sticky (hindari bug lama) tapi tetap punya stacking context
+   tinggi agar dropdown notifikasi tampil di ATAS kartu konten (harus terbaca). */
+.staff-workspace-topbar {
+  position: relative !important;
+  top: auto !important;
+  z-index: 1020 !important;
+  transform: none !important;
+}
 .staff-workspace-nav-wrap {
   position: static !important;
   top: auto !important;
