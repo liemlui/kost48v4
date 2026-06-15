@@ -17,7 +17,7 @@ export type TenantPortalStage = 'browsing' | 'booking' | 'occupied';
 
 const ownerSections: NavigationSection[] = [
   {
-    title: 'Dashboard',
+    title: 'Ringkasan',
     links: [
       { to: '/owner-dashboard', label: 'Kokpit Owner', icon: '📈', hint: 'KPI bisnis, sinyal risiko, dan tren 6 bulan.' },
       { to: '/stays', label: 'Masa Sewa & Penghuni', icon: '🏠', hint: 'Masa sewa aktif, booking, perpanjangan, keluar, dan data penghuni.', activePaths: ['/stays', '/tenants'] },
@@ -25,17 +25,26 @@ const ownerSections: NavigationSection[] = [
     ],
   },
   {
-    title: 'Finance',
+    // Satu alur keuangan: Tagihan → Pembayaran → Jurnal/Akuntansi → Laporan.
+    title: 'Keuangan',
     links: [
-      { to: '/invoices', label: 'Tagihan & Piutang', icon: '🧾', hint: 'Pantau tagihan, pembayaran, keterlambatan, dan follow-up.', activePaths: ['/invoices', '/payment-submissions/review'] },
-      { to: '/expenses', label: 'Pengeluaran', icon: '💳', hint: 'Catat dan kategorikan biaya operasional.' },
-      { to: '/wifi-sales', label: 'Penjualan WiFi', icon: '📶', hint: 'Catatan penjualan voucher WiFi.' },
-      { to: '/ancillary-revenue', label: 'Pendapatan Tambahan', icon: '➕', hint: 'Sumber pendapatan tambahan seperti laundry, cleaning, dan layanan lain.' },
+      { to: '/invoices', label: 'Tagihan & Piutang', icon: '🧾', hint: 'Tagihan, pembayaran, dan keterlambatan. Tiap pembayaran otomatis tercatat ke jurnal akuntansi.', activePaths: ['/invoices', '/payment-submissions/review', '/invoice-payments'] },
+      { to: '/expenses', label: 'Pengeluaran', icon: '💳', hint: 'Catat dan kategorikan biaya operasional (masuk ke laba rugi).' },
+      { to: '/ancillary-revenue', label: 'Pendapatan Tambahan', icon: '➕', hint: 'Pendapatan non-sewa: laundry, cleaning, WiFi, dan layanan lain.', activePaths: ['/ancillary-revenue', '/wifi-sales'] },
+      { to: '/finance/accounting-setup', label: 'Akuntansi (Bagan Akun & Jurnal)', icon: '📘', hint: 'Bagan Akun (COA), periode, saldo awal, dan jurnal — fondasi semua laporan keuangan.' },
       { to: '/loss-refunds', label: 'Refund Kalah-Cepat', icon: '↩️', hint: 'Kembalikan dana tenant yang kalah first-paid-wins padahal sudah transfer.' },
     ],
   },
   {
-    title: 'Operations',
+    // Inventaris & aset dijadikan satu kelompok — satu barang bisa jadi keduanya.
+    title: 'Barang & Aset',
+    links: [
+      { to: '/rooms', label: 'Kamar & Inventaris', icon: '🚪', hint: 'Kamar, tarif, fasilitas, barang kamar, dan stok. Barang bernilai bisa dijadikan aset yang disusutkan.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
+      { to: '/finance/assets', label: 'Aset & Depresiasi', icon: '🏗️', hint: 'Aset tetap & penyusutan. Bisa ditautkan ke barang inventaris/kamar agar tidak dobel input.' },
+    ],
+  },
+  {
+    title: 'Operasional',
     links: [
       { to: '/staff-performance', label: 'Kinerja Staff', icon: '📋', hint: 'KPI staff, audit, review, tiket, dan rutinitas kerja.', activePaths: ['/staff-performance', '/staff-routines', '/tickets'] },
       { to: '/announcements', label: 'Pengumuman', icon: '📢', hint: 'Buat dan kelola pengumuman untuk penghuni.' },
@@ -43,13 +52,10 @@ const ownerSections: NavigationSection[] = [
     ],
   },
   {
-    title: 'Settings',
+    title: 'Pengaturan',
     links: [
-      { to: '/rooms', label: 'Kamar & Inventaris', icon: '🚪', hint: 'Detail kamar, tarif, fasilitas, barang kamar, dan stok inventaris.', activePaths: ['/rooms', '/room-items', '/inventory-items', '/inventory-movements'] },
-      { to: '/finance/assets', label: 'Aset Tetap', icon: '🏗️', hint: 'Register aset, depresiasi, dan keselarasan ledger.' },
-      { to: '/finance/accounting-setup', label: 'Setup Akuntansi', icon: '📘', hint: 'Chart of accounts, periode, saldo awal, dan jurnal.' },
       { to: '/users', label: 'Akun User', icon: '👤', hint: 'Kelola akun owner, admin, staff, dan penghuni.' },
-      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, dan konten halaman tamu.' },
+      { to: '/settings', label: 'Pengaturan', icon: '⚙️', hint: 'FAQ publik, foto kamar, konten halaman tamu, dan tarif dasar.' },
     ],
   },
 ];

@@ -13,10 +13,10 @@ const ADMIN_TABS = [
 const OWNER_TABS = [
   { id: 'overview', label: 'Ringkasan', to: '/owner-dashboard', match: (path: string) => path === '/owner-dashboard' },
   { id: 'stays', label: 'Masa Sewa', to: '/stays', match: (path: string) => path.startsWith('/stays') || path.startsWith('/tenants') || path.startsWith('/renew-requests') },
-  { id: 'finance', label: 'Keuangan', to: '/invoices', match: (path: string) => ['/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue', '/finance'].some((prefix) => path.startsWith(prefix)) },
+  { id: 'finance', label: 'Keuangan', to: '/invoices', match: (path: string) => ['/invoices', '/payment-submissions', '/invoice-payments', '/expenses', '/wifi-sales', '/ancillary-revenue', '/finance/accounting-setup', '/loss-refunds'].some((prefix) => path.startsWith(prefix)) },
   { id: 'reports', label: 'Laporan', to: '/reports', match: (path: string) => path.startsWith('/reports') },
   { id: 'staff', label: 'Staff', to: '/staff-performance', match: (path: string) => path.startsWith('/staff') || path.startsWith('/tickets') },
-  { id: 'rooms', label: 'Kamar & Stok', to: '/rooms', match: (path: string) => ['/rooms', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings'].some((prefix) => path.startsWith(prefix)) },
+  { id: 'rooms', label: 'Barang & Aset', to: '/rooms', match: (path: string) => ['/rooms', '/room-items', '/inventory-items', '/inventory-movements', '/meter-readings', '/finance/assets'].some((prefix) => path.startsWith(prefix)) },
   { id: 'settings', label: 'Pengaturan', to: '/settings', match: (path: string) => path.startsWith('/settings') || path.startsWith('/users') || path.startsWith('/announcements') },
 ];
 
