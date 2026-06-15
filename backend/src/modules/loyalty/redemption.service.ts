@@ -131,6 +131,7 @@ export class RedemptionService {
           valueRupiah: value,
           entryDate: new Date(),
           createdById: actorId,
+          rewardType: redemption.reward.type, // L-3: diskon sewa/listrik → kontra-revenue
           memo: `Reward ${redemption.reward.name} tenant #${redemption.tenantId}`,
         });
         journalEntryId = (res as any)?.journalEntry?.id ?? null;

@@ -40,7 +40,7 @@
 
 ## 4. Implementasi (F4-9 — Fase 4)
 - **Schema:** `LoyaltyPoint`, `LoyaltyReward`, `Redemption` (sourceType/sourceId idempotent seperti jurnal).
-- **Akuntansi (M4):** diskon sewa → jurnal pengurang pendapatan; reward fisik → expense; WiFi → expense.
+- **Akuntansi (M4) — SELARAS KODE (L-3, 2026-06-15):** `postRewardFulfillmentTx` mengklasifikasi per `LoyaltyRewardType`: **RENT_DISCOUNT → DR 4000 (kontra-pendapatan sewa)**, **METER_DISCOUNT → DR 4100 (kontra-pendapatan listrik)**, **SERVICE_ADDON/PHYSICAL → DR 6300 (beban marketing)**; semua CR 2100 (utang reward). BADGE/nilai 0 = tak menjurnal. Fallback aman ke 6300 bila COA pendapatan tak ada. (Sebelumnya semua reward → 6300; kini diskon sewa/listrik benar sebagai pengurang pendapatan. UAT: jurnal seimbang per tipe.)
 - **Dashboard tenant:** progress poin + katalog reward + riwayat penukaran.
 - **Admin panel:** approve/reject redemption + lihat loyalitas tenant.
 
