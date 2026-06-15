@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { RoomStatus } from '../../../common/enums/app.enums';
 
 export class CreateRoomDto {
@@ -19,5 +19,7 @@ export class CreateRoomDto {
   @IsOptional() @IsBoolean() hasAc?: boolean;
   @IsOptional() @IsInt() @Min(0) acWattage?: number;
   @IsOptional() @IsInt() @Min(1) acCleanIntervalDays?: number;
+  // F5-4 (AUD-3): estimasi jam pakai AC/hari → pemicu dini kWh hibrid.
+  @IsOptional() @IsNumber() @Min(0) @Max(24) acUsageHoursPerDay?: number;
 }
 export class UpdateRoomDto extends CreateRoomDto {}

@@ -3,6 +3,7 @@ import { Prisma } from '../../generated/prisma';
 import { InvoiceStatus, PaymentSubmissionStatus, RenewRequestStatus, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
 import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
+import { evaluateAcCleaning, AC_DEFAULT_KWH_THRESHOLD } from './ac-cleaning.helper';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
@@ -701,17 +702,18 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
     const enabled = String(process.env.AC_CLEANING_ENABLED ?? 'true').toLowerCase() !== 'false';
     if (!enabled) return { skipped: true, skippedReason: 'AC_CLEANING_DISABLED', source };
     const now = options.now ?? new Date();
+    const kwhThreshold = Number(process.env.AC_CLEAN_KWH_THRESHOLD ?? AC_DEFAULT_KWH_THRESHOLD);
     try {
       const rooms = await this.prisma.room.findMany({
         where: { hasAc: true, isActive: true },
-        select: { id: true, code: true, name: true, acLastCleanedAt: true, acCleanIntervalDays: true },
+        select: { id: true, code: true, name: true, acLastCleanedAt: true, acCleanIntervalDays: true, acWattage: true, acUsageHoursPerDay: true },
         take: 100,
       });
       let created = 0;
       for (const room of rooms) {
-        const intervalMs = Math.max(1, room.acCleanIntervalDays) * 24 * 60 * 60 * 1000;
-        const due = !room.acLastCleanedAt || now.getTime() - new Date(room.acLastCleanedAt).getTime() >= intervalMs;
-        if (!due) continue;
+        // F5-4 (AUD-3): hibrid — interval HARI + pemicu dini estimasi kWh (watt × jam/hari).
+        const evalAc = evaluateAcCleaning(room, now, { kwhThreshold: Number.isFinite(kwhThreshold) ? kwhThreshold : undefined });
+        if (!evalAc.due) continue;
         const open = await this.prisma.ticket.findFirst({
           where: { roomId: room.id, category: 'AC_CLEANING' as any, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
           select: { id: true },
@@ -728,12 +730,18 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           suffix += 1;
           ticketNumber = `${base}-${suffix}`;
         }
+        const triggerNote =
+          evalAc.reason === 'KWH'
+            ? `Pemicu DINI: estimasi pemakaian ~${Math.round(evalAc.estimatedKwh)} kWh sejak cuci terakhir (≈${evalAc.kwhPerDay.toFixed(1)} kWh/hari) sudah tinggi, walau interval ${room.acCleanIntervalDays} hari belum tercapai.`
+            : evalAc.reason === 'NEVER'
+              ? `Belum pernah tercatat dicuci.`
+              : `Sudah lewat interval rutin ${room.acCleanIntervalDays} hari (estimasi ~${Math.round(evalAc.estimatedKwh)} kWh sejak cuci terakhir).`;
         await this.prisma.ticket.create({
           data: {
             ticketNumber,
             roomId: room.id,
             title: `Cuci AC — ${roomLabel}`,
-            description: `AC kamar ${roomLabel} sudah waktunya dicuci (rutin tiap ${room.acCleanIntervalDays} hari). Jadwalkan tukang cuci AC; biaya ditanggung kos (catat sebagai Expense). Tandai tiket selesai setelah AC bersih.`,
+            description: `AC kamar ${roomLabel} waktunya dicuci. ${triggerNote} Jadwalkan tukang cuci AC (boleh staf internal atau vendor luar — tandai bila vendor); biaya ditanggung kos (catat sebagai Expense). Tandai tiket selesai setelah AC bersih.`,
             category: 'AC_CLEANING' as any,
             assignedToId: null,
           },

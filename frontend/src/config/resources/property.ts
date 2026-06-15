@@ -81,6 +81,29 @@ export const propertyConfigs = {
         required: true,
       },
       {
+        name: 'hasAc',
+        label: 'Ada AC',
+        type: 'checkbox' as const,
+      },
+      {
+        name: 'acWattage',
+        label: 'Daya AC (watt)',
+        type: 'number' as const,
+        placeholder: 'mis. 400 (AC 1/2 PK ~ 380-450 watt)',
+      },
+      {
+        name: 'acCleanIntervalDays',
+        label: 'Interval Cuci AC (hari)',
+        type: 'number' as const,
+        placeholder: 'Default 90 hari',
+      },
+      {
+        name: 'acUsageHoursPerDay',
+        label: 'Estimasi Jam Pakai AC / hari',
+        type: 'number' as const,
+        placeholder: 'mis. 8 (untuk pemicu dini cuci AC berbasis kWh)',
+      },
+      {
         name: 'images',
         label: 'Foto Kamar',
         type: 'textarea' as const,
