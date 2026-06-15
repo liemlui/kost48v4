@@ -17,6 +17,7 @@
     "build:local": "npm run build",
     "test:unit": "node --test \"test/**/*.test.js\"",
     "golive": "node scripts/golive.mjs",
+    "golive:setup": "npm run build && node scripts/golive-setup.js",
     "seed:owner": "node scripts/seed-owner.js",
     "cpanel:setup": "npm ci && npm run build && npm prune --omit=dev",
     "cpanel:migrate": "prisma db push",

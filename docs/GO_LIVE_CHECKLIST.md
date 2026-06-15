@@ -3,32 +3,32 @@
 
 > ⚠️ **LAN = http (bukan https).** Push PWA (VAPID) **tidak aktif** di LAN plain-http (browser butuh secure context); notif **in-app tetap jalan**. VAPID disiapkan untuk publish HTTPS nanti.
 
-## 0. Prasyarat
-- [ ] PostgreSQL jalan di port **5432** (DB produksi `kost48_v3`). UAT memakai 5433 `kost48_v3_pro` — **JANGAN tertukar**.
-- [ ] `backend/.env` punya `DATABASE_URL`, `JWT_SECRET` (kuat), `BREVO_API_KEY`+`MAIL_FROM_*` (untuk email reset password; opsional saat LAN).
+## ⚡ RINGKAS — 3 langkah
+1. **Buat DB kosong** `kost48_v3` (Postgres port 5432) + isi `backend/.env` (lihat §0).
+2. **`npm run golive:setup`** ← satu perintah: schema + bootstrap.sql + OWNER + COA + periode OPEN + Kas/Bank.
+3. **`npm run golive`** (backend) + **`cd frontend && npm run golive`** (frontend) → buka `http://<IP-LAN>:5173`.
 
-## 1. Siapkan DB produksi fresh `kost48_v3`
-- [ ] Buat database kosong `kost48_v3` (port 5432).
-- [ ] Dari `backend/`: `npx prisma migrate deploy` **ATAU** `npx prisma db push` (set `DATABASE_URL` → `kost48_v3` dulu).
-- [ ] **WAJIB** jalankan SQL di luar schema Prisma (trigger/CHECK/carve-out F3-16):
-  - `psql "<DATABASE_URL kost48_v3>" -f sql/bootstrap.sql`
-  - `psql "<DATABASE_URL kost48_v3>" -f sql/bootstrap_v4_addendum.sql`
+---
 
-## 2. Seed data awal
-- [ ] **Seed OWNER pertama** (prasyarat F1-12 — DB fresh tak punya user):
-  ```
-  cd backend
-  OWNER_EMAIL=owner@kost48surabaya.com OWNER_PASSWORD='GANTI_password_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run seed:owner
-  ```
-  (Idempoten: aman diulang; tak menimpa bila email sudah ada. Pakai DATABASE_URL yang menunjuk `kost48_v3`.)
-- [ ] Login OWNER lalu seed via API (butuh token OWNER):
-  - `POST /api/accounting/default-coa/seed` (COA 38 akun)
-  - Buat **periode akuntansi OPEN** bulan berjalan
-  - Buat **CashAccount** + **opening balance** (saldo awal kas/aset bila ada)
-  - `POST /api/faqs/seed` (FAQ panduan tenant — operasional + marketing)
+## 0. Prasyarat (sekali)
+- [ ] PostgreSQL jalan di port **5432**; buat database kosong **`kost48_v3`**. (UAT memakai 5433 `kost48_v3_pro` — **JANGAN tertukar**; `golive:setup` & `golive` otomatis pakai `kost48_v3`.)
+- [ ] Isi `backend/.env`:
+  - `DATABASE_URL` (boleh tetap menunjuk `..._pro`; skrip otomatis swap ke `kost48_v3`), `JWT_SECRET` (kuat).
+  - **`KTP_ACTIVATION_GATE_ENABLED=true`** ← **L-4, JANGAN lupa** (default OFF; tanpa ini kamar bisa aktif tanpa KTP terverifikasi).
+  - (Opsional LAN) `BREVO_API_KEY`+`MAIL_FROM_*` (email reset password).
 
-## 3. Env produksi (set di `backend/.env`)
-- [ ] `KTP_ACTIVATION_GATE_ENABLED=true` ← **L-4, JANGAN lupa** (default OFF; tanpa ini kamar bisa aktif tanpa KTP terverifikasi).
+## 1. Setup DB — SATU perintah
+```
+cd backend
+OWNER_EMAIL=owner@kost48surabaya.com OWNER_PASSWORD='GANTI_password_kuat' OWNER_FULLNAME='Pemilik KOST48' npm run golive:setup
+```
+Otomatis & **idempoten** (aman diulang): build → `prisma db push` → `bootstrap.sql`+addendum → OWNER pertama → 37 akun COA → periode bulan berjalan OPEN → CashAccount **Kas Tunai (1000)** + **Bank Utama (1010, default)**.
+- [ ] Skrip selesai dengan **"✅ SETUP SELESAI"**.
+- [ ] (Opsional) **FAQ panduan tenant**: setelah `golive` jalan & login OWNER → `POST /api/faqs/seed` (atau kapan saja).
+- [ ] (Opsional) **Saldo awal (opening balance)** kas/aset bila ada → isi via UI Akuntansi (default 0).
+
+## 3. (Sudah di §0) Env produksi
+- [ ] Pastikan `KTP_ACTIVATION_GATE_ENABLED=true` sudah di `.env`.
 - [ ] (Opsional, untuk publish HTTPS nanti) **VAPID push** — sepasang kunci sudah di-generate 2026-06-15 dan diberikan via chat (publicKey/privateKey/subject). **Tempel ke env produksi, JANGAN commit private key ke git.** Bila perlu generate ulang: `node -e "console.log(require('web-push').generateVAPIDKeys())"`.
   ```
   VAPID_PUBLIC_KEY=<dari chat / generate>
