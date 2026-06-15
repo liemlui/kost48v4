@@ -2,6 +2,15 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — Pasca-Fase 5: hardening + sinkron docs (L-4, SINKRON-DOC, AUD-6, L-3)
+
+Lanjutan tindak-lanjut audit setelah Fase 5 inti:
+- **L-4 (go-live):** runbook `04_DEPLOY` mewajibkan `KTP_ACTIVATION_GATE_ENABLED=true` di produksi (default OFF; tanpa ini kamar bisa aktif tanpa KTP terverifikasi).
+- **SINKRON-DOC:** banner "🔄 SINKRON KODE (2026-06-15)" di §3 dossier 10/11/13/14/15/18 — menandai item ditandai open (🔴/🟠) yang SUDAH selesai di kode (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14) + anchor verifikasi.
+- **AUD-6:** readiness period-close tambah gate `rent-recognition-due` — tutup periode diblokir bila ada `RentRecognitionSchedule` jatuh tempo (`periodStart ≤ akhir periode`) belum diakui → cegah recognition stranded. Read-only.
+- **L-3:** `postRewardFulfillmentTx` klasifikasi per `LoyaltyRewardType` — RENT_DISCOUNT → DR 4000 (kontra-pendapatan sewa), METER_DISCOUNT → DR 4100 (kontra-pendapatan listrik), SERVICE_ADDON/PHYSICAL → DR 6300 (beban); fallback aman 6300. **UAT seimbang per tipe.** Dossier 19 disinkron.
+- **Gate:** `tsc` 0; `node --test` 47/47. Sisa deferred (keputusan sadar): L-2 (edge ~nol dampak), L-5 (Lighthouse perlu browser), AUD-7 (race minor — defer-to-scale).
+
 ## 2026-06-15 — FASE 5 (tindak-lanjut audit menyeluruh): S-5 + F5-1..F5-8 — SELESAI
 
 Audit menyeluruh SEMUA fase (`docs/AUDIT_MENYELURUH_SEMUA_FASE.md`): TIDAK ada 🔴 bug baru; temuan dominan = dossier drift (kode > docs). Keputusan owner D-21/D-22 + S-5 → 9 task tindak-lanjut, semua ter-commit. Tiga task finance LULUS runtime UAT (trial balance seimbang).
