@@ -2,6 +2,21 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-15 — FASE 5 (tindak-lanjut audit menyeluruh): S-5 + F5-1..F5-8 — SELESAI
+
+Audit menyeluruh SEMUA fase (`docs/AUDIT_MENYELURUH_SEMUA_FASE.md`): TIDAK ada 🔴 bug baru; temuan dominan = dossier drift (kode > docs). Keputusan owner D-21/D-22 + S-5 → 9 task tindak-lanjut, semua ter-commit. Tiga task finance LULUS runtime UAT (trial balance seimbang).
+
+- **S-5 schema additive** (owner-approve, migration `20260615140000_s5_ac_usage_vendor`): `Room.acUsageHoursPerDay`, `Ticket.handledByVendor`/`vendorNote`.
+- **F5-1 (AUD-4) FAQ operasional:** seed FAQ dari aturan/flow (Pembayaran/Booking/Perpanjangan/Checkout&Deposit/KTP/Keluhan&Poin); `seed()` idempoten per-pertanyaan.
+- **F5-2 (AUD-2) tip staf self-service:** `PATCH /auth/me/tip-info` (STAFF) + kartu "Info Tip" di ProfilePage. Tetap tak dijurnal (P2P).
+- **F5-3 (AUD-5) AC vendor + round-robin sistem:** tiket cuci AC tanpa assignee + `POST /tickets/:id/vendor` (penanda vendor luar, keluar KPI/round-robin); util bersama `pickRoundRobinStaffTx` dipakai semua tiket sistem (inspeksi/evict/reward/transfer) → round-robin saat staf≥2.
+- **F5-4 (AUD-3) cuci AC HIBRID:** `ac-cleaning.helper` — interval hari + pemicu dini kWh (watt×jam/hari, env `AC_CLEAN_KWH_THRESHOLD`, default 200; default 400W/8 jam). Unit test 7/7. Form kamar dapat field AC (sebelumnya backend-only).
+- **F5-5 (B-9) referral di portal/admin:** `CreateTenantDto.referredByCode` → `linkReferralTx` saat admin daftarkan tenant baru (idempotent + anti self-referral).
+- **F5-6 (L-1) auto-rekonsiliasi jurnal:** sweeper `runAutoJournalReconciliation` (backfill jurnal warisan best-effort yang bolong + alert OWNER/ADMIN, sebelum auto-close; `POST /auto-ops/run/journal-reconciliation`). **UAT LULUS:** backfill 1 invoice, TB seimbang, idempoten.
+- **F5-7 (AUD-1) utilitas kamar lama saat pindah:** `billOldRoomUtilityTx` — snapshot meter akhir kamar lama + invoice utilitas + jurnal SEBELUM `roomId` pindah (flat→skip; bertarif tanpa meter→409). **UAT LULUS:** listrik 10kWh×1500 + air 3m³×8000 = 39.000, jurnal SEIMBANG.
+- **F5-8 prabayar (A-5/A-6/A-7):** A-6 blokir prabayar saat menunggak · A-7 poin RENEWAL saat prabayar (idempotent) · A-5 tarif diskon SMESTERLY(5,5×/6)/YEARLY(10×/12) via `effectiveMonthly` konsisten invoice+deferral+recognition. B-4 sudah berlaku (no-change). **UAT LULUS:** SMESTERLY effMonthly 1.375.000, total 8.250.000 (vs penuh 9.000.000), recognition Σ=total, poin +100, TB seimbang.
+- **Gate semua task:** `tsc` 0; `node --test` 47/47; FE build + PWA verify (99 chunk); boot tanpa circular-dep. S-5 + D-21/D-22 tercatat di `03_KEPUTUSAN_OWNER`.
+
 ## 2026-06-15 — feat(F2-10 + F3-5): round-robin tiket + leaderboard staf (disiapkan, dorman saat 1 staf)
 
 - **Ide owner:** siapkan round-robin & leaderboard meski staf masih 1; aktif otomatis saat staf ≥ 2. **Tanpa schema baru.**

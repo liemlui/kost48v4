@@ -4,6 +4,8 @@
 
 <!-- KOST48_DOCS_SYNC_20260611_GROUND_STATE_REWRITE -->
 
+> **Status (2026-06-15):** Fase 1–4 + backlog owner + **Fase 5 (tindak-lanjut audit, S-5 + F5-1..F5-8) SELESAI** (lihat `CHANGELOG.md`). Audit menyeluruh semua fase TANPA 🔴 bug baru (`docs/AUDIT_MENYELURUH_SEMUA_FASE.md`). Schema additive terkini = S-5 (migration `20260615140000_s5_ac_usage_vendor`). **Belum publish** (DB testing; deploy fresh). **Go-live WAJIB:** set `KTP_ACTIVATION_GATE_ENABLED=true` + VAPID env (lihat `04_DEPLOY`).
+
 ## 1. Identitas & Stack
 - **KOST48 Surabaya** — kost eksklusif pria, 48 kamar (33 reguler, 10 eksklusif, 5 VIP), **Jl. Hikmah V No. 48, Surabaya Barat** (dekat Pakuwon Mall/PTC). (UD-01 terjawab 2026-06-13 D-01: alamat sebelumnya "Ngagel Jaya Utara" SALAH; frontend benar.)
 - Backend: NestJS + TypeScript + Prisma + PostgreSQL. Auth JWT Bearer (expiry 24 jam, tanpa refresh token). Swagger non-production saja.
