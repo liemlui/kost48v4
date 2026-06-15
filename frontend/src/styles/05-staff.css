@@ -1966,6 +1966,13 @@
 .staff-work-queue-intro h2 { margin: 0.35rem 0 0.25rem; }
 .staff-work-queue-intro p { margin: 0; color: #64748b; font-size: 0.9rem; }
 
+/* Gudang: pisahkan grup filter Status stok vs Kategori barang */
+.staff-inventory-filters { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.9rem; }
+.staff-inventory-filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
+.staff-inventory-filter-label {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #64748b;
+}
+
 .staff-simple-hero.compact {
   padding: 1rem 1.1rem;
 }

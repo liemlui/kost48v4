@@ -21,7 +21,10 @@ function priorityScore(item: InventoryItem) {
 
 export default function StaffGeneralInventorySection({ embedded = false }: { embedded?: boolean }) {
   const [selected, setSelected] = useState<InventoryItem | null>(null);
-  const [activeFilter, setActiveFilter] = useState<InventoryViewFilter>('ATTENTION');
+  // Default tampil SEMUA (hindari tabel kosong saat tidak ada yang perlu dicek).
+  // Chip "Perlu dicek" tetap menonjol saat ada masalah.
+  const [activeFilter, setActiveFilter] = useState<InventoryViewFilter>('ALL');
+  const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const query = useQuery({
@@ -45,17 +48,30 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
     return { out, low, physical, attention, good };
   }, [items]);
 
+  // Filter STATUS (kesehatan stok) — terpisah dari filter Kategori (jenis barang).
   const inventoryFilters: Array<{ id: InventoryViewFilter; label: string; count: number }> = [
     { id: 'ATTENTION', label: 'Perlu dicek', count: stockSummary.attention },
     { id: 'OUT', label: 'Habis', count: stockSummary.out },
     { id: 'LOW', label: 'Menipis', count: stockSummary.low },
     { id: 'PHYSICAL', label: 'Masalah fisik', count: stockSummary.physical },
-    { id: 'GOOD', label: 'Aman', count: stockSummary.good },
-    { id: 'ALL', label: 'Semua barang', count: items.length },
+    { id: 'GOOD', label: 'Stok aman', count: stockSummary.good },
+    { id: 'ALL', label: 'Semua status', count: items.length },
   ];
+
+  // Kategori = jenis barang (mis. Furnitur, Elektronik). Beda dari status di atas.
+  const categories = useMemo(() => {
+    const set = new Map<string, number>();
+    for (const item of items) {
+      const cat = (item.category ?? 'Umum').trim() || 'Umum';
+      set.set(cat, (set.get(cat) ?? 0) + 1);
+    }
+    return Array.from(set.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [items]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
+      const cat = (item.category ?? 'Umum').trim() || 'Umum';
+      if (activeCategory !== 'ALL' && cat !== activeCategory) return false;
       const health = getInventoryHealth(item);
       const physical = isInventoryPhysicalIssue(item.status);
       if (activeFilter === 'OUT') return health.status === 'OUT_OF_STOCK';
@@ -65,11 +81,11 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
       if (activeFilter === 'ATTENTION') return health.status !== 'GOOD' || physical;
       return true;
     });
-  }, [activeFilter, items]);
+  }, [activeFilter, activeCategory, items]);
 
   useEffect(() => {
     setPage(1);
-  }, [activeFilter]);
+  }, [activeFilter, activeCategory]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
   const visibleItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -90,21 +106,41 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
           </div>
         </div>
         {!!items.length ? (
-          <div className="staff-inventory-filter-row" aria-label="Filter gudang staff">
-            {inventoryFilters.map((filter) => {
-              if (filter.id !== 'ALL' && filter.count === 0) return null;
-              return (
-                <button
-                  type="button"
-                  key={filter.id}
-                  className={`staff-filter-chip${activeFilter === filter.id ? ' active' : ''}`}
-                  onClick={() => setActiveFilter(filter.id)}
-                >
-                  <span>{filter.label}</span>
-                  <strong>{filter.count}</strong>
-                </button>
-              );
-            })}
+          <div className="staff-inventory-filters">
+            <div className="staff-inventory-filter-group">
+              <span className="staff-inventory-filter-label">Status stok</span>
+              <div className="staff-inventory-filter-row" aria-label="Filter status stok">
+                {inventoryFilters.map((filter) => {
+                  if (filter.id !== 'ALL' && filter.count === 0) return null;
+                  return (
+                    <button
+                      type="button"
+                      key={filter.id}
+                      className={`staff-filter-chip${activeFilter === filter.id ? ' active' : ''}`}
+                      onClick={() => setActiveFilter(filter.id)}
+                    >
+                      <span>{filter.label}</span>
+                      <strong>{filter.count}</strong>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {categories.length > 1 ? (
+              <div className="staff-inventory-filter-group">
+                <span className="staff-inventory-filter-label">Kategori barang</span>
+                <div className="staff-inventory-filter-row" aria-label="Filter kategori barang">
+                  <button type="button" className={`staff-filter-chip${activeCategory === 'ALL' ? ' active' : ''}`} onClick={() => setActiveCategory('ALL')}>
+                    <span>Semua kategori</span><strong>{items.length}</strong>
+                  </button>
+                  {categories.map(([cat, count]) => (
+                    <button type="button" key={cat} className={`staff-filter-chip${activeCategory === cat ? ' active' : ''}`} onClick={() => setActiveCategory(cat)}>
+                      <span>{cat}</span><strong>{count}</strong>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         ) : null}
         {query.isLoading ? <div className="py-4 text-center"><Spinner size="sm" /> Memuat barang gudang...</div> : null}
@@ -115,7 +151,7 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
             <thead>
               <tr>
                 <th>Barang</th>
-                <th>Area</th>
+                <th>Kategori</th>
                 <th>Stok sistem</th>
                 <th>Status otomatis</th>
                 <th>Kondisi fisik</th>
@@ -132,7 +168,7 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
                       <div className="fw-semibold">{item.name}</div>
                       <div className="small text-muted">{item.sku ?? `ID ${item.id}`}</div>
                     </td>
-                    <td data-label="Area">{item.category ?? 'Gudang / umum'}</td>
+                    <td data-label="Kategori">{(item.category ?? 'Umum').trim() || 'Umum'}</td>
                     <td data-label="Stok sistem">
                       <div className="staff-stock-number">{health.qty} {health.unit}</div>
                       <small>Minimal {health.minQty || '-'} {health.minQty ? health.unit : ''}</small>
