@@ -357,6 +357,13 @@ export class AccountingPeriodCloseService {
       this.assetAlignmentReadiness(db),
     ]);
 
+    // AUD-6 (F4-1/F4-11): cegah tutup periode bila masih ada baris pengakuan sewa (RentRecognitionSchedule)
+    // yang JATUH TEMPO (periodStart <= akhir periode) tapi BELUM diakui → mencegah recognition "stranded"
+    // (recognition diposting entryDate=periodStart; bila periode keburu CLOSED, posting akan ditolak selamanya).
+    const dueRecognitionUnrecognized = await db.rentRecognitionSchedule.count({
+      where: { recognizedAt: null, periodStart: { lte: endDate } },
+    });
+
     const preview = await this.buildClosingPreview(year, month, db);
     const checks = [
       { key: 'period-open', label: 'Accounting period OPEN', ready: period.status === 'OPEN', note: `Status sekarang: ${period.status}` },
@@ -367,6 +374,7 @@ export class AccountingPeriodCloseService {
       { key: 'unbalanced-posted', label: 'Tidak ada posted journal tidak balance', ready: unbalancedPosted === 0, count: unbalancedPosted, note: `${unbalancedPosted} journal bermasalah.` },
       { key: 'draft-opening', label: 'Tidak ada draft opening balance periode ini', ready: draftOpening === 0, count: draftOpening, note: `${draftOpening} draft opening balance.` },
       { key: 'unmapped-operational', label: 'Transaksi operasional sudah terjurnal', ready: unmapped.total === 0, count: unmapped.total, note: `${unmapped.total} sample invoice/payment/expense/WiFi belum terjurnal.` },
+      { key: 'rent-recognition-due', label: 'Pengakuan sewa jatuh tempo sudah diakui', ready: dueRecognitionUnrecognized === 0, count: dueRecognitionUnrecognized, note: `${dueRecognitionUnrecognized} baris recognition jatuh tempo belum diakui (jalankan sweeper rent-recognition dulu).` },
       { key: 'depreciation', label: 'Depresiasi bulan ini aman', ready: depreciation.ready, count: depreciation.activeDepreciableAssetCount, note: depreciation.note },
       { key: 'asset-alignment', label: 'Asset ledger alignment aman', ready: assetAlignment.ready, count: assetAlignment.needsReviewCount, note: assetAlignment.note },
       { key: 'closing-preview', label: 'Preview closing journal balance', ready: preview.isBalanced, note: `${preview.lines.length} line, ${rupiah(preview.totalDebitRupiah)} debit / ${rupiah(preview.totalCreditRupiah)} kredit.` },
@@ -401,7 +409,7 @@ export class AccountingPeriodCloseService {
         assetAlignment,
         closingJournal: activeClose,
       },
-      note: 'Readiness B8 memblokir close jika period bukan OPEN, closing aktif masih ada, Trial Balance tidak balance, draft/unmapped critical masih ada, depresiasi/asset alignment belum aman, atau COA laba ditahan belum siap.',
+      note: 'Readiness B8 memblokir close jika period bukan OPEN, closing aktif masih ada, Trial Balance tidak balance, draft/unmapped critical masih ada, depresiasi/asset alignment belum aman, COA laba ditahan belum siap, atau (AUD-6) masih ada pengakuan sewa jatuh tempo yang belum diakui.',
     };
   }
 
