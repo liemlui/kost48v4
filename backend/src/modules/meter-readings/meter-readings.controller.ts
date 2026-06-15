@@ -36,9 +36,10 @@ export class MeterReadingsController {
     return { message: 'Meter reading berhasil dibuat', data: await this.meterreadingsService.create(dto, user) };
   }
 
-  /** M-2: catat siklus meter (listrik+air) + auto-generate invoice meter. OWNER/ADMIN. */
+  /** M-2/M-3: catat siklus meter (listrik+air) + auto-generate invoice meter.
+   *  OWNER/ADMIN (kamar mana saja) atau TENANT (mandiri, kamarnya sendiri). */
   @Post('cycle')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.TENANT)
   async recordCycle(@Body() dto: RecordMeterCycleDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Catatan meter & tagihan diproses', data: await this.meterreadingsService.recordCycleAndInvoice(dto, user) };
   }

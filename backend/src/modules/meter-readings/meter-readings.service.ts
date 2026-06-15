@@ -164,14 +164,28 @@ export class MeterReadingsService {
    * Hanya OWNER/ADMIN (penerbitan invoice = aksi finance). Air hanya bila toggle aktif.
    */
   async recordCycleAndInvoice(dto: RecordMeterCycleDto, actor: CurrentUserPayload) {
-    if (![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
-      throw new ForbiddenException('Hanya OWNER/ADMIN yang boleh menerbitkan tagihan meter.');
+    const isTenant = actor.role === UserRole.TENANT;
+    if (!isTenant && ![UserRole.OWNER, UserRole.ADMIN].includes(actor.role as UserRole)) {
+      throw new ForbiddenException('Hanya owner/admin/penghuni yang boleh mencatat meter.');
     }
-    const roomId = Number(dto.roomId);
+
+    // Tenant hanya boleh mencatat kamarnya sendiri → ambil stay aktif dari tenantId-nya
+    // (abaikan roomId di body demi keamanan). Owner/admin pakai roomId yang dikirim.
+    let stay: { id: number; roomId: number; tenantId: number };
+    if (isTenant) {
+      if (!actor.tenantId) throw new ForbiddenException('Akun penghuni tidak tertaut ke data tenant.');
+      const own = await this.prisma.stay.findFirst({ where: { tenantId: actor.tenantId, status: 'ACTIVE' as any }, orderBy: { id: 'desc' } });
+      if (!own) throw new BadRequestException('Tidak ada masa sewa aktif untuk dicatat.');
+      stay = own;
+    } else {
+      if (dto.roomId == null) throw new BadRequestException('roomId wajib diisi.');
+      const found = await this.prisma.stay.findFirst({ where: { roomId: Number(dto.roomId), status: 'ACTIVE' as any }, orderBy: { id: 'desc' } });
+      if (!found) throw new BadRequestException('Kamar belum berpenghuni aktif — tagihan meter butuh penghuni.');
+      stay = found;
+    }
+    const roomId = stay.roomId;
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Kamar tidak ditemukan');
-    const stay = await this.prisma.stay.findFirst({ where: { roomId, status: 'ACTIVE' as any }, orderBy: { id: 'desc' } });
-    if (!stay) throw new BadRequestException('Kamar belum berpenghuni aktif — tagihan meter butuh penghuni.');
 
     const setting = await this.settings.getOperational();
     const readingAt = parseJakartaDateOnly(dto.readingAt, 'Tanggal catat meter tidak valid');
@@ -232,9 +246,9 @@ export class MeterReadingsService {
       periodStart: periodStart.toISOString().slice(0, 10),
       periodEnd: readingAt.toISOString().slice(0, 10),
       dueDate: due.toISOString().slice(0, 10),
-      notes: `Tagihan meter (listrik${waterEnabled ? ' & air' : ''}) Kamar ${room.code}. Dibuat otomatis dari catatan meter.`,
+      notes: `Tagihan meter (listrik${waterEnabled ? ' & air' : ''}) Kamar ${room.code}. Dibuat otomatis dari catatan meter${isTenant ? ' (mandiri penghuni)' : ''}.`,
       lines: lines as any,
-    }, actor);
+    }, actor, { systemIssued: true });
 
     return { readings: { electricity: createdElec, water: createdWater }, invoice, summary };
   }

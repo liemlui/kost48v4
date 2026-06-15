@@ -278,8 +278,11 @@ export class InvoicesService {
     return created;
   }
 
-  async createWithLinesAndIssue(dto: CreateInvoiceWithLinesAndIssueDto, actor: CurrentUserPayload) {
-    this.assertFinanceMutationAllowed(actor);
+  async createWithLinesAndIssue(dto: CreateInvoiceWithLinesAndIssueDto, actor: CurrentUserPayload, opts?: { systemIssued?: boolean }) {
+    // systemIssued: invoice yang nominalnya dihitung sistem (mis. tagihan meter dari
+    // pencatatan mandiri tenant). Aman walau aktor bukan owner/admin karena tidak ada
+    // input nominal bebas — semua dari tarif/jatah di OperationalSetting.
+    if (!opts?.systemIssued) this.assertFinanceMutationAllowed(actor);
     this.assertValidInvoicePeriod(dto.periodStart, dto.periodEnd);
     if (!dto.lines?.length) throw new ConflictException('Tagihan wajib memiliki minimal satu rincian tagihan');
 

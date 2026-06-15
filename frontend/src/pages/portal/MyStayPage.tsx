@@ -13,6 +13,7 @@ import { listMyCheckoutRequests } from '../../api/checkoutRequests';
 import { listMyPaymentSubmissions } from '../../api/paymentSubmissions';
 import CheckoutRequestModal from '../../components/checkout-requests/CheckoutRequestModal';
 import RenewRequestModal from '../../components/tenant/RenewRequestModal';
+import MeterCycleModal from '../../components/stays/MeterCycleModal';
 import { useAuth } from '../../context/AuthContext';
 import { useTenantPortalStage } from '../../hooks/useTenantPortalStage';
 import type { PaginatedResponse } from '../../types';
@@ -130,6 +131,7 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
   const navigate = useNavigate();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showRenewModal, setShowRenewModal] = useState(false);
+  const [showMeter, setShowMeter] = useState(false);
 
   const renewRequestsQuery = useQuery<PaginatedResponse<RenewRequest>>({
     queryKey: ['portal-renew-requests', stay.id],
@@ -581,6 +583,10 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
             Ajukan Keluar
           </Button>
         )}
+        {/* M-3: tenant boleh catat meter sendiri (listrik pakai-dulu-bayar-kemudian). */}
+        <Button variant="outline-primary" size="sm" onClick={() => setShowMeter(true)}>
+          Catat Meter Listrik/Air
+        </Button>
       </div>
       {renewDisabledReason ? (
         <p className="text-muted small mb-3">{renewDisabledReason}</p>
@@ -698,6 +704,10 @@ function ActiveStayContent({ stay }: { stay: Stay }) {
         queryClient.invalidateQueries({ queryKey: ['portal-checkout-requests', stay.id] });
         queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
       }} stay={stay} />
+      <MeterCycleModal show={showMeter} onHide={() => setShowMeter(false)} stay={stay} onDone={() => {
+        queryClient.invalidateQueries({ queryKey: ['portal-invoices'] });
+        queryClient.invalidateQueries({ queryKey: ['portal-stay'] });
+      }} />
     </>
   );
 }

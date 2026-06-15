@@ -130,6 +130,49 @@
 - [x] **L-4 🟡 GO-LIVE → SELESAI (docs)** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** — sudah masuk runbook `04_DEPLOY` (checklist env + langkah cPanel #6).
 - [x] **L-5 🟡 → SELESAI (terukur)** SEO Lighthouse **100/100** (LH 12.8.2, headless Chrome atas build dist, halaman home) — 10 audit lulus (is-crawlable, document-title, meta-description, http-status, link-text, crawlable-anchors, robots-txt, image-alt, hreflang, canonical); structured-data = N/A (cek manual, JSON-LD ada). Target ≥90 TERLAMPAUI. _(UD-04/V-7 kosmetik tetap backlog UI.)_
 
+## 🆕 SESI UI/UX + PENYATUAN MODUL + METER (2026-06-16) — review owner langsung
+**Konteks:** walkthrough UI/UX owner + verifikasi screenshot Playwright (`ui-shots/`, tak di-commit). Pakai DB dev 5433 (di-reseed via `backend/scripts/seed-dev-dummy.js`). Semua `tsc` 0, dipush ke `origin/main`.
+
+### Sudah SELESAI & ter-commit/push
+- [x] **UI-RESP-1** Fix bug app-shell collapse `<1200px` (override `10-misc` menutup collapse `02-layout`) — global semua role.
+- [x] **UI-LOGIN** Subtitle dinamis per role · ikon tab SVG · rapatkan spacing (tombol Masuk fit) · buang teks redundant.
+- [x] **UI-ROOMS** Copy paginasi "Menampilkan A–B dari N" · sticky filter ≥992px · navbar emoji→SVG · aria-label tombol "+". Bug "Lihat Perbandingan" = TIDAK reproduksi (keterbatasan tool reviewer).
+- [x] **UI-LOGO** Wordmark teks bersih 2-warna ganti gambar logo gradasi (beranda/rooms/footer); kontras hero dipertegas; **PWA install prompt ditunda sampai login**.
+- [x] **TEN-1** Poin & Reward: sembunyikan konversi "1 poin = Rp" + nilai rupiah reward.
+- [x] **TEN-2** Hapus kartu "Lapor masalah penghuni lain" (poin ke tenant yang memperbaiki, bukan pelapor).
+- [x] **TEN-3** /portal/stay: hapus "Panduan resmi KOST48" (sudah di menu) · dropdown detail kamar → Accordion (seperti "Panduan & Aturan") · tombol "Ajukan Perpanjangan" selalu tampil (nonaktif+alasan bila belum bisa).
+- [x] **STF-1** /staff-report: fix judul/keterangan tanpa spasi.
+- [x] **STF-2** Dropdown notifikasi staf tampil di atas kartu — z-index `.app-topbar` (owner/admin) **dan** `.staff-workspace-topbar` (staf).
+- [x] **STF-3** Wording lane: Mendesak→Tugas Penting, Hari Ini→Tugas Hari Ini, Dalam Proses→Tugas Dalam Proses.
+- [x] **STF-4** "Checklist tambahan" → "Checklist operasional" (tanpa collapse) + motivasi (SDT: recognition/relatedness/makna + tenur).
+- [x] **STF-5** Dashboard: chart komposisi recharts + dedup "Papan Kerja" (ringkasan+chart) vs "Daftar Kerja" (aksi).
+- [x] **STF-6** "Laporkan Barang Kamar" disederhanakan: potong langkah saat barang sudah baik · "Catatan lapangan"→"Info kondisi barang" auto-isi · pengganti gudang difilter sejenis (kipas→kipas).
+- [x] **STF-7** "Catatan Kamar" dibatasi scope fisik staf (perlu dicat/kerusakan), catatan opsional, tombol cukup (kebersihan/status=otomatis/admin).
+- [x] **STF-8** Perjelas "Skor" (donut) vs "Poin kerja bersih"; nudge "Review tenant belum masuk" → "Ajak tenant beri review".
+- [x] **STF-9** Gudang: kolom salah-label "Area"→"Kategori"; pisah filter **STATUS STOK** vs **KATEGORI BARANG**; default tampil semua.
+- [x] **OWN-1** Relabel jargon "COA" → "Bagan Akun (COA)" / "Akun" (8 tempat).
+- [x] **OWN-2 (Fase A)** Regroup navigasi owner jadi alur menyatu: "Keuangan" (incl. Akuntansi), "Barang & Aset" (Inventaris+Aset) — config-only.
+- [x] **OWN-3 (Fase B-1)** Surface & buat koneksi **aset↔inventaris** di UI register aset (kolom "Tertaut", dropdown tautkan inventaris).
+- [x] **OWN-4** Laporan owner: kartu **"Pergerakan Pengeluaran"** (per kategori) pendamping "Pergerakan Pendapatan".
+- [x] **METER M-1** Konstanta owner-settable di Settings (`OperationalSetting` + modul `settings` + tab "Tarif & Konstanta"): free 30 kWh, tarif Rp2500, toggle air, tarif air. [SCHEMA additive, owner OK]
+- [x] **METER M-2** `POST /meter-readings/cycle` (OWNER/ADMIN): catat listrik+air → jatah gratis+tarif → auto-issue invoice meter (reuse `createWithLinesAndIssue`) + `MeterCycleModal` di tab Meter. Verified API+UI.
+- [x] **DATA** `seed-dev-dummy.js` (wipe+isi atomik, guard anti-produksi) ganti dummy lama kacau.
+- [x] **DOCS** Spec `_PROPOSAL_METER_LISTRIK_AIR.md` (M-1..M-5) + `_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` (tip/gamifikasi/marketing/cross-sell) + CHANGELOG 2026-06-16.
+
+### Sedang dikerjakan / BELUM
+- [ ] **METER M-3** Pencatatan **mandiri tenant** (auto-issue invoice "system-issued", keputusan owner) — **backend SELESAI** (cycle izinkan TENANT kamar-sendiri + `createWithLinesAndIssue` opsi `systemIssued`; GET `/settings/operational` dibuka semua role); **frontend portal tenant + badge "Catat meter" H-10 (backoffice+portal) = BELUM**.
+- [ ] **METER M-4** "Bayar sekaligus" (group invoice sewa + meter OPEN) + catatan "belum termasuk listrik" di invoice sewa.
+- [ ] **METER M-5** Checkout: tagihan meter terakhir dipotong dari deposit jaminan + teks marketing publik (listrik pascabayar, no sisa saldo).
+- [ ] **STF-GUDANG-2** Stok-min otomatis barang fasilitas (AC/kipas) = jumlah kamar pemakai + standar semua kamar punya kipas (marketing hemat listrik). [logika/data]
+- [ ] **STF-THEME** Percantik SEMUA route staf (satu pass: ikon, warna, komponen Tab yang sesuai) + screenshot review.
+- [ ] **TEN-GAMIF** Poin = ukuran kebaikan + total dikumpulkan/ditukar/sisa · rank Top 3 **kamar (anonim)** · ranking kebersihan depan kamar bulanan.
+- [ ] **TIP+** Tambah ShopeePay di tip staf (F4-14/F5-2 sudah ada e-wallet) + narasi tenant "uang kopi" + tombol terima kasih + tip→poin + tip-count di laporan kinerja.
+- [ ] **OWN-STRUKTUR** Pisah area "fitur admin" vs "khusus owner" di app owner + **kartu status besar** (pola kartu staf) di Admin & Owner.
+- [ ] **FASE B-2** Gabung 4 menu stok (inventaris/barang kamar/mutasi/gudang) jadi tab dalam satu halaman.
+- [ ] **MKT** Marketing high-level: SWOT/PESTLE owner-editable → narasi onboarding & web · pembanding kompetitor · survey guest · cross-sell perpanjangan (WiFi/bantuan bersih) · kebijakan perbaikan GRATIS (lampu/kran/shower/bocor).
+- [ ] **AUDIT-OWNER** Sisa temuan audit owner: overflow Settings/Notif · spinner full-page antar-tab · fallback foto rusak · judul tab browser per-route · konsistensi "tersedia" owner vs publik · /rooms shared URL · "Laporan Formal" dangling.
+- [ ] **CSS+SWEEP** Konsolidasi CSS `.app-shell*` duplikat (6 file) + sweep responsif penuh semua role + sisir teks tanpa-spasi lain.
+
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
 
 <!-- KOST48_DOCS_SYNC_20260613_CHECKLIST_DOSSIER -->

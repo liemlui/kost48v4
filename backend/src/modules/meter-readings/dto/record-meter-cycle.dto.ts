@@ -6,8 +6,11 @@ import { IsDateString, IsInt, IsNumberString, IsOptional, IsString } from 'class
  * OperationalSetting. Hanya OWNER/ADMIN (penerbitan invoice = aksi finance).
  */
 export class RecordMeterCycleDto {
+  // Opsional: TENANT mengambil kamar dari stay-nya sendiri (roomId diabaikan demi keamanan).
+  // OWNER/ADMIN WAJIB mengisi roomId (divalidasi di service).
+  @IsOptional()
   @IsInt()
-  roomId!: number;
+  roomId?: number;
 
   @IsDateString()
   readingAt!: string;

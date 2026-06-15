@@ -69,7 +69,12 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
   (accounting di-skip aman bila COA belum siap). Reading pertama / dalam jatah gratis = tanpa invoice.
   Frontend: `MeterCycleModal` di tab Meter (`MeterTab`) — tombol "Catat & Terbitkan Tagihan" untuk
   owner/admin. Verified API (80kWh−30=50×tarif) + screenshot modal.
-- **M-3:** pencatatan mandiri tenant (portal) + badge "Catat meter" di /rooms (H-10).
+- **M-3 — ⏳ SEBAGIAN (2026-06-16):** ✅ pencatatan **mandiri tenant** auto-issue invoice
+  ("system-issued", keputusan owner) — `/meter-readings/cycle` izinkan TENANT (kamar sendiri,
+  roomId diabaikan demi keamanan); `createWithLinesAndIssue` opsi `systemIssued`; GET
+  `/settings/operational` dibuka semua role; tombol "Catat Meter Listrik/Air" di portal tenant
+  (MyStayPage, reuse MeterCycleModal). Verified API (tenant maya 70−30=40×tarif) + UI.
+  ⏳ **BELUM:** badge "Catat meter" H-10 (backoffice + portal tenant) — butuh hitung "jatuh tempo".
 - **M-4:** "bayar sekaligus" (group invoice OPEN) + catatan "belum termasuk listrik" di invoice sewa.
 - **M-5:** checkout: tagihan meter terakhir dipotong dari deposit jaminan; teks marketing publik.
 

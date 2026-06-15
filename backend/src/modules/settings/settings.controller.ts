@@ -16,9 +16,10 @@ import { SettingsService } from './settings.service';
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  /** Owner & Admin boleh BACA konstanta operasional. */
+  /** Semua peran terautentikasi boleh BACA konstanta (tarif/jatah/toggle = info publik
+   *  internal, dipakai mis. modal catat meter mandiri tenant). PUT tetap owner-only. */
   @Get('operational')
-  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.STAFF, UserRole.TENANT)
   async getOperational() {
     return { message: 'Konstanta operasional', data: await this.settingsService.getOperational() };
   }
