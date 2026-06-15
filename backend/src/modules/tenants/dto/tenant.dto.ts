@@ -51,5 +51,11 @@ export class CreateTenantDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // B-9 (F5-5): kode referral teman yang merekomendasikan tenant baru ini (admin/portal booking).
+  // BUKAN kolom Tenant.referralCode milik tenant sendiri — di-strip sebelum create.
+  @IsOptional()
+  @IsString()
+  referredByCode?: string;
 }
 export class UpdateTenantDto extends CreateTenantDto {}

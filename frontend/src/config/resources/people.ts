@@ -139,6 +139,12 @@ export const peopleConfigs = {
         placeholder: 'Nama perusahaan atau kampus',
       },
       {
+        name: 'referredByCode',
+        label: 'Kode Referral (jika diajak teman)',
+        type: 'text' as const,
+        placeholder: 'Kode referral tenant yang mengajak (hanya saat daftar baru)',
+      },
+      {
         name: 'notes',
         label: 'Catatan',
         type: 'textarea' as const,

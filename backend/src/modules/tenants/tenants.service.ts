@@ -11,6 +11,7 @@ import { ResetPortalPasswordDto } from './dto/reset-portal-password.dto';
 import { TenantProfileOnboardingDto } from './dto/tenant-profile-onboarding.dto';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { ReferralService } from '../loyalty/referral.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { UserRole } from '../../common/enums/app.enums';
 
@@ -32,6 +33,7 @@ export class TenantsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditLogService,
     private readonly loyalty: LoyaltyService,
+    private readonly referral: ReferralService,
   ) {}
 
   private attachPortalSummary<T extends { id: number }>(tenant: T, portalUser?: { id: number; email: string; isActive: boolean; lastLoginAt: Date | null } | null) {
@@ -219,9 +221,19 @@ export class TenantsService {
   }
 
   async create(dto: CreateTenantDto, actor: CurrentUserPayload) {
+    // B-9 (F5-5): kode referral teman yang merekomendasikan tenant baru ini (BUKAN kolom
+    // referralCode milik tenant sendiri). Dibaca dari dto; normalizeTenantData men-strip-nya.
+    const referredByCode = typeof dto.referredByCode === 'string' && dto.referredByCode.trim() !== '' ? dto.referredByCode.trim() : undefined;
     const data = this.normalizeTenantData(dto);
     await this.validateTenantUniqueness(data);
-    const created = await this.prisma.tenant.create({ data: data as Prisma.TenantCreateInput });
+    const created = await this.prisma.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({ data: data as Prisma.TenantCreateInput });
+      if (referredByCode) {
+        // Idempotent + anti self-referral di dalam linkReferralTx; reward menyusul saat tenant aktif.
+        await this.referral.linkReferralTx(tx, { referralCode: referredByCode, referredTenantId: tenant.id });
+      }
+      return tenant;
+    });
     await this.audit.log({ actorUserId: actor.id, action: 'CREATE', entityType: 'Tenant', entityId: String(created.id), newData: created });
     return created;
   }
@@ -284,6 +296,8 @@ export class TenantsService {
 
   private normalizeTenantData(dto: CreateTenantDto | UpdateTenantDto): Record<string, unknown> {
     const data: Record<string, unknown> = { ...dto };
+    // B-9 (F5-5): referredByCode bukan kolom Tenant — jangan diteruskan ke Prisma.
+    delete (data as { referredByCode?: unknown }).referredByCode;
 
     if (data.birthDate !== undefined && data.birthDate !== null) {
       if (typeof data.birthDate === 'string' && data.birthDate.trim() !== '') {
