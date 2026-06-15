@@ -199,8 +199,6 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
 
   const workItems = useMemo(() => buildWorkItems(routines?.items ?? [], tickets), [routines, tickets]);
   const activeItem = workItems.find((item) => item.status === 'IN_PROGRESS') ?? null;
-  const waitingCount = workItems.filter((item) => item.status === 'WAITING_CHECK').length;
-  const todoCount = workItems.filter((item) => item.status === 'TODO').length;
   const activeWorkItems = useMemo(() => workItems.filter((item) => item.status !== 'DONE'), [workItems]);
   const doneWorkItems = useMemo(() => workItems.filter((item) => item.status === 'DONE'), [workItems]);
   const filteredItems = useMemo(() => {
@@ -220,8 +218,6 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
   const visibleWorkItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const doneCount = (routines?.summary.completed ?? 0) + tickets.filter((ticket) => ticket.status === 'DONE' || ticket.status === 'CLOSED').length;
-  const totalCount = Math.max(doneCount + todoCount + (activeItem ? 1 : 0) + waitingCount, routines?.summary.total ?? 0);
 
   const resetModal = () => {
     setModal(null);
@@ -307,21 +303,13 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
 
   return (
     <section id="staff-work-queue" className="staff-unified-work">
-      <Card className="staff-work-summary-card border-0">
-        <Card.Body>
-          <div>
-            <span className="staff-hero-pill">Daftar Kerja</span>
-            <h2>Tugas yang perlu dikerjakan</h2>
-            <p>Lanjutan dari ringkasan di atas — di sinilah kamu mulai, selesaikan, atau kirim kendala. Kebersihan rutin & perbaikan jadi satu antrean.</p>
-          </div>
-          <div className="staff-work-summary-stats">
-            <span><strong>{activeItem ? 1 : 0}</strong><small>Sedang dikerjakan</small></span>
-            <span><strong>{todoCount}</strong><small>Belum mulai</small></span>
-            <span><strong>{waitingCount}</strong><small>Menunggu cek</small></span>
-            <span><strong>{doneCount}/{totalCount}</strong><small>Selesai/total</small></span>
-          </div>
-        </Card.Body>
-      </Card>
+      {/* Angka/ringkasan ada di "Ringkasan hari ini" (chart) di atas. Bagian ini MURNI
+         daftar tugas yang bisa dikerjakan — heading tipis tanpa angka agar tidak mirip. */}
+      <div className="staff-work-queue-intro">
+        <span className="staff-hero-pill">Daftar Kerja</span>
+        <h2>Tugas yang perlu dikerjakan</h2>
+        <p>Mulai, selesaikan, atau kirim kendala. Pakai filter di bawah untuk fokus.</p>
+      </div>
 
       {activeItem ? (
         <div className="staff-active-work-banner">
