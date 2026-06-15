@@ -59,8 +59,10 @@ Sumber TUNGGAL (hindari duplikasi). Per-kamar tetap bisa override tarif bila per
 
 ## Rencana implementasi BERTAHAP (aman, tiap fase bisa dirilis)
 
-- **M-1 (fondasi):** konstanta owner-settable di Settings (free kWh, tarif, toggle air, tarif air).
-  Backend: store config (AppSetting/Owner config) + endpoint; Frontend: form di OwnerSettingsPage.
+- **M-1 (fondasi) — ✅ SELESAI 2026-06-16:** konstanta owner-settable di Settings (free kWh 30, tarif 2500,
+  toggle air, tarif air). Backend: model `OperationalSetting` (singleton id=1) + modul `settings`
+  (`GET /api/settings/operational` owner/admin, `PUT` owner-only). Frontend: tab "Tarif & Konstanta"
+  di OwnerSettingsPage (`api/settings.ts`). Verified GET/PUT + UI.
 - **M-2:** model siklus meter + endpoint catat meter gabungan (listrik+air) + aturan 1×/siklus
   + auto-generate invoice meter (pakai konstanta M-1). Reuse MeterReading + InvoiceLine.
 - **M-3:** pencatatan mandiri tenant (portal) + badge "Catat meter" di /rooms (H-10).

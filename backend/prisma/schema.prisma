@@ -1917,3 +1917,16 @@ model Faq {
   @@index([category])
   @@index([isActive, sortOrder])
 }
+
+// M-1: konstanta operasional yang bisa diatur owner (sumber tunggal).
+// Singleton (selalu id = 1). Dipakai meter listrik/air (free kuota, tarif, toggle air).
+model OperationalSetting {
+  id                            Int      @id @default(1)
+  freeElectricityKwhPerMonth    Int      @default(30)
+  electricityTariffPerKwhRupiah Int      @default(2500)
+  waterMeteringEnabled          Boolean  @default(false)
+  waterTariffPerM3Rupiah        Int      @default(0)
+  freeWaterM3PerMonth           Int      @default(0)
+  updatedAt                     DateTime @updatedAt
+  updatedById                   Int?
+}

@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Col, Form, Modal, Row, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import client from '../../api/client';
 import { createFaq, deleteFaq, fetchAllFaqs, updateFaq, type FaqItem } from '../../api/faqs';
+import { fetchOperationalSettings, updateOperationalSettings, type OperationalSetting } from '../../api/settings';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
@@ -402,21 +403,101 @@ function RoomPhotoPanel() {
 
 /* ─── Main Page ────────────────────────────────────────────────────── */
 
+function TariffSettingsPanel() {
+  const qc = useQueryClient();
+  const { data, isLoading, isError } = useQuery({ queryKey: ['operational-settings'], queryFn: fetchOperationalSettings });
+  const [form, setForm] = useState<OperationalSetting | null>(null);
+  const [savedMsg, setSavedMsg] = useState('');
+  useEffect(() => { if (data) setForm(data); }, [data]);
+
+  const save = useMutation({
+    mutationFn: () => updateOperationalSettings({
+      freeElectricityKwhPerMonth: Number(form?.freeElectricityKwhPerMonth ?? 0),
+      electricityTariffPerKwhRupiah: Number(form?.electricityTariffPerKwhRupiah ?? 0),
+      waterMeteringEnabled: Boolean(form?.waterMeteringEnabled),
+      waterTariffPerM3Rupiah: Number(form?.waterTariffPerM3Rupiah ?? 0),
+      freeWaterM3PerMonth: Number(form?.freeWaterM3PerMonth ?? 0),
+    }),
+    onSuccess: (updated) => { setForm(updated); setSavedMsg('Konstanta tersimpan.'); qc.invalidateQueries({ queryKey: ['operational-settings'] }); },
+  });
+
+  if (isLoading || !form) return <div className="text-muted py-3"><Spinner animation="border" size="sm" className="me-2" />Memuat konstanta...</div>;
+  if (isError) return <Alert variant="danger">Gagal memuat konstanta operasional.</Alert>;
+
+  const set = (key: keyof OperationalSetting, value: number | boolean) => setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+
+  return (
+    <Card className="content-card border-0">
+      <Card.Body>
+        <h5 className="mb-1">Tarif & Konstanta Operasional</h5>
+        <p className="text-muted">Dasar perhitungan tagihan meter listrik &amp; air. Sumber tunggal — berlaku ke semua kamar (tarif per-kamar tetap bisa di-override bila perlu).</p>
+        {save.isError ? <Alert variant="danger" className="py-2">{getApiErrorMessage(save.error, 'Gagal menyimpan konstanta')}</Alert> : null}
+        {savedMsg ? <Alert variant="success" className="py-2" dismissible onClose={() => setSavedMsg('')}>{savedMsg}</Alert> : null}
+        <Row className="g-3">
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Jatah listrik gratis / bulan (kWh)</Form.Label>
+              <Form.Control type="number" min={0} value={form.freeElectricityKwhPerMonth} onChange={(e) => set('freeElectricityKwhPerMonth', Number(e.target.value))} />
+              <Form.Text muted>Pemakaian di bawah jatah ini tidak ditagih.</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Tarif listrik / kWh (Rp)</Form.Label>
+              <Form.Control type="number" min={0} value={form.electricityTariffPerKwhRupiah} onChange={(e) => set('electricityTariffPerKwhRupiah', Number(e.target.value))} />
+              <Form.Text muted>Untuk pemakaian melebihi jatah gratis.</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col md={12}>
+            <Form.Check
+              type="switch"
+              id="water-metering-toggle"
+              label="Hitung tagihan air dari meter (aktifkan nanti saat meter air sudah ada)"
+              checked={form.waterMeteringEnabled}
+              onChange={(e) => set('waterMeteringEnabled', e.target.checked)}
+            />
+          </Col>
+          {form.waterMeteringEnabled ? (
+            <>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Tarif air / m³ (Rp)</Form.Label>
+                  <Form.Control type="number" min={0} value={form.waterTariffPerM3Rupiah} onChange={(e) => set('waterTariffPerM3Rupiah', Number(e.target.value))} />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Jatah air gratis / bulan (m³)</Form.Label>
+                  <Form.Control type="number" min={0} value={form.freeWaterM3PerMonth} onChange={(e) => set('freeWaterM3PerMonth', Number(e.target.value))} />
+                </Form.Group>
+              </Col>
+            </>
+          ) : null}
+        </Row>
+        <Button className="mt-3" onClick={() => { setSavedMsg(''); save.mutate(); }} disabled={save.isPending}>
+          {save.isPending ? 'Menyimpan...' : 'Simpan Konstanta'}
+        </Button>
+      </Card.Body>
+    </Card>
+  );
+}
+
 export default function OwnerSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') === 'photos' ? 'photos' : 'faq';
+  const tabParam = searchParams.get('tab');
+  const activeTab = tabParam === 'photos' ? 'photos' : tabParam === 'tarif' ? 'tarif' : 'faq';
 
   return (
     <div className="settings-page">
       <div className="page-eyebrow mb-1">Owner · Pengaturan</div>
       <h1 className="h3 mb-1">Pengaturan Aplikasi</h1>
-      <p className="text-muted mb-4">Kelola FAQ publik dan foto kamar yang tampil di halaman tamu.</p>
+      <p className="text-muted mb-4">Kelola FAQ publik, foto kamar, dan tarif/konstanta operasional.</p>
 
       <Tabs
         activeKey={activeTab}
         onSelect={(key) => {
           const next = new URLSearchParams(searchParams);
-          next.set('tab', key === 'photos' ? 'photos' : 'faq');
+          next.set('tab', key === 'photos' || key === 'tarif' ? key : 'faq');
           setSearchParams(next, { replace: true });
         }}
         className="command-tabs mb-4"
@@ -426,6 +507,9 @@ export default function OwnerSettingsPage() {
         </Tab>
         <Tab eventKey="photos" title="Foto Kamar">
           <RoomPhotoPanel />
+        </Tab>
+        <Tab eventKey="tarif" title="Tarif & Konstanta">
+          <TariffSettingsPanel />
         </Tab>
       </Tabs>
     </div>

@@ -2,6 +2,18 @@
 **Versi:** 2026-06-13 — Audit V3 + 84 keputusan owner + restruktur docs domain-dossier. Entri < V5.11.0 di `archieve/CHANGELOG_PRE_V5110.md`.
 
 <!-- KOST48_DOCS_SYNC_20260613_AUDIT_V3_DOSSIER -->
+## 2026-06-16 — Walkthrough UI/UX (owner+staf+tenant+publik) + penyatuan modul (Fase A/B-1) + Meter M-1
+
+Sesi UI/UX menyeluruh berbasis review owner + verifikasi screenshot Playwright (`ui-shots/`, tidak di-commit).
+- **Responsif & publik:** fix bug app-shell (konten mepet kiri <1200px, override `10-misc` menutup collapse `02-layout`) — global semua role; login (subtitle dinamis per role, ikon tab SVG, rapatkan spacing, buang teks redundant); /rooms (copy paginasi "Menampilkan A–B dari N", sticky filter ≥992px, navbar emoji→SVG, aria-label tombol +); wordmark teks bersih 2-warna ganti gambar logo gradasi (beranda/rooms/footer); kontras hero dipertegas; PWA install prompt ditunda sampai login.
+- **Tenant:** sembunyikan konversi "1 poin = Rp"; hapus kartu "Lapor penghuni lain" (poin ke yang memperbaiki); /portal/stay dropdown→Accordion + tombol "Ajukan Perpanjangan" selalu tampil; hapus "Panduan resmi KOST48" duplikat.
+- **Staf:** spasi judul /staff-report; **z-index dropdown notifikasi** (`.app-topbar` + `.staff-workspace-topbar`); wording lane "Tugas ..."; "Checklist operasional" tanpa collapse; **dashboard chart recharts + dedup** Papan Kerja vs Daftar Kerja; alur "Laporkan Barang Kamar" disederhanakan (potong langkah saat barang baik, "Info kondisi" auto-isi, pengganti gudang difilter sejenis); "Catatan Kamar" dibatasi scope fisik staf; perjelas "Skor" vs "Poin kerja bersih" + nudge review.
+- **Owner/Finance:** relabel jargon **"COA" → "Bagan Akun (COA)"**; **Fase A** regroup navigasi owner jadi alur menyatu (Keuangan incl. Akuntansi; "Barang & Aset" gabung Inventaris+Aset); **Fase B-1** surface & buat koneksi **aset↔inventaris** di UI register aset.
+- **Meter M-1 (fondasi):** model `OperationalSetting` (singleton, `prisma db push`) + modul `settings` (GET owner/admin, PUT owner-only) + tab **"Tarif & Konstanta"** di Pengaturan owner: jatah gratis listrik (30 kWh), tarif/kWh (2500), **toggle air**, tarif air/m³. Verified runtime GET/PUT + UI.
+- **Data dev:** `backend/scripts/seed-dev-dummy.js` (wipe+isi atomik, guard anti-produksi 5432) menggantikan dummy lama yang kacau (anomali Rp1,9 M hilang).
+- **Docs/spec baru:** `_PROPOSAL_METER_LISTRIK_AIR.md` (pascabayar murni, M-1..M-5) · `_PROPOSAL_MARKETING_GAMIFIKASI_TIP.md` (tip staf P2P (lihat F5-2), gamifikasi tenant anonim, marketing SWOT/PESTLE, cross-sell perpanjangan, kebijakan perbaikan gratis).
+- Gate: `tsc` backend + frontend = 0. Sisa backlog dilacak di `08_CHECKLIST.md`/spec.
+
 ## 2026-06-15 — Pasca-Fase 5: hardening + sinkron docs (L-4, SINKRON-DOC, AUD-6, L-3)
 
 Lanjutan tindak-lanjut audit setelah Fase 5 inti:

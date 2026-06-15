@@ -41,6 +41,7 @@ import { DepositLedgerModule } from './modules/deposit-ledger/deposit-ledger.mod
 import { FaqsModule } from './modules/faqs/faqs.module';
 import { PushModule } from './modules/push/push.module';
 import { LoyaltyModule } from './modules/loyalty/loyalty.module';
+import { SettingsModule } from './modules/settings/settings.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -82,6 +83,7 @@ import { LoyaltyModule } from './modules/loyalty/loyalty.module';
     FaqsModule,
     PushModule,
     LoyaltyModule,
+    SettingsModule,
   ],
   providers: [
     // Audit E-1: default-deny — semua endpoint butuh JWT kecuali ditandai @Public().

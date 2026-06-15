@@ -67,6 +67,21 @@ Saat tenant **perpanjang**, tawarkan add-on (opsional, tidak memaksa):
 - Narasi marketing: *"Kerusakan wajar (lampu, kran, shower, bocor) kami perbaiki GRATIS & cepat —
   cukup lapor lewat app. Kamar selalu kami jaga prima."*
 
+## G. Struktur app Owner vs Admin + kartu status (vision owner 2026-06-16)
+
+- **Owner punya kemampuan Admin; Admin TIDAK punya kemampuan Owner.** Di app owner, **pisahkan**
+  area "fitur admin (mengurus operasional)" vs "fitur khusus owner" agar lebih terarah.
+- **Kartu status besar** (pola seperti kartu kondisi kamar milik staf) juga dipakai di **Admin & Owner** —
+  info penting bisa dianalisis sekali lihat (status keuangan, okupansi, tunggakan, dll).
+
+## Keputusan terverifikasi (2026-06-16)
+- **Gudang staf:** filter = **Area** (Gudang/Area umum/Kamar) + **Kategori** barang + **Status** (Aman/Menipis/
+  Habis/Masalah, otomatis). Stok-min fasilitas (AC/kipas) = jumlah kamar pemakai; semua kamar punya kipas.
+- **Rank tenant Top 3:** tampil **Kamar saja** (anonim penuh), bukan nama.
+- **Percantik route staf:** dikerjakan sebagai **satu pass re-theme** khusus (ikon/warna/komponen Tab).
+- **Tip staf input e-wallet:** SEBAGIAN SUDAH ADA (F5-2: `PATCH /auth/me/tip-info` + kartu di ProfilePage).
+  Sisa: tambah ShopeePay, narasi tenant "uang kopi" + tombol terima kasih, tip→poin, tip-count di laporan.
+
 ## Urutan build disarankan
 1. Tip staf (A) — schema field hampir lengkap, dampak cepat.
 2. Gamifikasi tenant ringkas (C: poin=kebaikan + total/ditukar/sisa) — frontend dari data yang ada.
