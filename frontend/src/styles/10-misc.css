@@ -1012,8 +1012,17 @@ body {
 }
 
 .app-shell-grid {
-  grid-template-columns: 260px minmax(0, 1fr);
   gap: 14px;
+}
+
+/* Template 2-kolom HANYA di >=1200px (xl), selaras dengan sidebar `d-none d-xl-flex`
+   di AppLayout. Di bawah 1200px sidebar jadi offcanvas (display:none) sehingga grid
+   wajib 1 kolom (di-collapse oleh 02-layout.css) — kalau tidak, konten terjepit di
+   track 260px dan menyisakan ruang kosong. */
+@media (min-width: 1200px) {
+  .app-shell-grid {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
 }
 
 .app-sidebar {
