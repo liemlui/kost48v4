@@ -117,6 +117,15 @@
 - [ ] **AUD-8 🟠 WARISAN (A-8, di luar Fase 4)** Auto-journal **best-effort** di flow lama (invoice issue/payment/cancel/expense/wifi/deposit-received) — bila posting gagal, operasi tetap jalan tanpa jurnal. Pertimbangkan blocking + reconciliation otomatis (R1/R2 audit lama `FLOW_AUDIT_LAPORAN.md`).
 > **Abu-abu TERJAWAB (D-21, 2026-06-15):** A-5/A-6/A-7/B-4 (→ AUD-prabayar), D-6 (→ AUD-2 staf isi sendiri). **Masih menunggu owner:** FAQ auto-generate (AUD-4), round-robin tiket sistem (AUD-5), referral via admin/portal (B-9).
 
+### 🔍 AUDIT MENYELURUH SEMUA FASE (2026-06-15 — `docs/AUDIT_MENYELURUH_SEMUA_FASE.md`)
+**Hasil:** TIDAK ada 🔴 bug baru di seluruh fase; 🔴 warisan ghost-stock (I-02) ternyata SUDAH ditutup. Temuan:
+- [ ] **SINKRON-DOC 🟡** Tabel §3 Temuan / §4 Task dossier **10/11/13/14/15/18 BASI** — banyak item ditandai open (🔴/🟠) padahal kode SUDAH selesai (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14). Rapikan tabel agar tak mengira task selesai = belum. _(docs, bukan kode)_
+- [ ] **L-1 🟠 (= AUD-8/A-8)** Auto-journal best-effort warisan (`stays.service.ts:331,1418` dll `.catch`+commit). Keputusan owner: blocking + rekonsiliasi otomatis vs best-effort+monitor readiness.
+- [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).
+- [ ] **L-3 🟡** Jurnal reward selalu DR6300/CR2100 (beban marketing); dossier 19 sebut diskon-sewa → kontra-revenue. Klarifikasi bila reward "Diskon sewa" diaktifkan.
+- [ ] **L-4 🟡 GO-LIVE** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** → masuk runbook `04_DEPLOY`.
+- [ ] **L-5 🟡 over-confidence** SEO Lighthouse ≥90 BELUM diukur (konektor browser gagal); impl ada, validasi belum. + UD-04/V-7 kosmetik.
+
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
 
 <!-- KOST48_DOCS_SYNC_20260613_CHECKLIST_DOSSIER -->
