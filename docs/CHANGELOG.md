@@ -9,7 +9,8 @@ Lanjutan tindak-lanjut audit setelah Fase 5 inti:
 - **SINKRON-DOC:** banner "🔄 SINKRON KODE (2026-06-15)" di §3 dossier 10/11/13/14/15/18 — menandai item ditandai open (🔴/🟠) yang SUDAH selesai di kode (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14) + anchor verifikasi.
 - **AUD-6:** readiness period-close tambah gate `rent-recognition-due` — tutup periode diblokir bila ada `RentRecognitionSchedule` jatuh tempo (`periodStart ≤ akhir periode`) belum diakui → cegah recognition stranded. Read-only.
 - **L-3:** `postRewardFulfillmentTx` klasifikasi per `LoyaltyRewardType` — RENT_DISCOUNT → DR 4000 (kontra-pendapatan sewa), METER_DISCOUNT → DR 4100 (kontra-pendapatan listrik), SERVICE_ADDON/PHYSICAL → DR 6300 (beban); fallback aman 6300. **UAT seimbang per tipe.** Dossier 19 disinkron.
-- **Gate:** `tsc` 0; `node --test` 47/47. Sisa deferred (keputusan sadar): L-2 (edge ~nol dampak), L-5 (Lighthouse perlu browser), AUD-7 (race minor — defer-to-scale).
+- **L-5:** **Lighthouse SEO = 100/100** (terukur — LH 12.8.2, headless Chrome atas build `dist`, halaman home; 10 audit lulus). Target ≥90 terlampaui; dossier 17 M-01/F3-3 disinkron.
+- **Gate:** `tsc` 0; `node --test` 47/47. Sisa deferred (keputusan sadar): L-2 (edge ~nol dampak), AUD-7 (race minor — defer-to-scale).
 
 ## 2026-06-15 — FASE 5 (tindak-lanjut audit menyeluruh): S-5 + F5-1..F5-8 — SELESAI
 
