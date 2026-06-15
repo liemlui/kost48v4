@@ -143,7 +143,9 @@
 - **D-22.3 (AUD-4, FAQ awal):** **YA — seed FAQ awal** dari `03_KEPUTUSAN_OWNER` + dossier (pembayaran, DP vs deposit, booking, renewal, checkout, deposit, overstay, KTP, tiket, dll); owner tinggal edit. Tetap bisa diperkaya dari interview/WhatsApp nanti.
 - **D-22.4 (B-9, referral di portal):** **YA — tambah field kode referral di alur booking admin/portal** agar referral tetap tercatat walau teman dibooking-kan admin (pakai `TenantReferral` yang ada).
 
-> Catatan eksekusi: D-22 + D-21 menjadi **Fase 5 (tindak-lanjut audit)** di `08_CHECKLIST.md`. Item yang menyentuh schema (penanda vendor tiket AC, jam-pakai AC per kamar) menunggu **proposal + approval schema** sebelum eksekusi.
+> Catatan eksekusi: D-22 + D-21 menjadi **Fase 5 (tindak-lanjut audit)** di `08_CHECKLIST.md`.
+
+- **S-5 (2026-06-15): Owner MENYETUJUI schema additive Fase 5** (migration `20260615140000_s5_ac_usage_vendor`): **`Room.acUsageHoursPerDay Float?`** (AUD-3, estimasi kWh hibrid; null→default konstanta) + **`Ticket.handledByVendor Boolean @default(false)` + `Ticket.vendorNote String?`** (AUD-5, tiket cuci AC oleh vendor luar → keluar round-robin/KPI staf). Murni additive (kolom baru nullable/default), aman `migrate deploy`. Owner: "Setujui + mulai semua".
 
 ---
 
