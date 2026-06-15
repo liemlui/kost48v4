@@ -11508,6 +11508,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah: number | null
     acWattage: number | null
     acCleanIntervalDays: number | null
+    acUsageHoursPerDay: number | null
   }
 
   export type RoomSumAggregateOutputType = {
@@ -11521,6 +11522,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah: number | null
     acWattage: number | null
     acCleanIntervalDays: number | null
+    acUsageHoursPerDay: number | null
   }
 
   export type RoomMinAggregateOutputType = {
@@ -11543,6 +11545,7 @@ export namespace Prisma {
     acWattage: number | null
     acLastCleanedAt: Date | null
     acCleanIntervalDays: number | null
+    acUsageHoursPerDay: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11567,6 +11570,7 @@ export namespace Prisma {
     acWattage: number | null
     acLastCleanedAt: Date | null
     acCleanIntervalDays: number | null
+    acUsageHoursPerDay: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11592,6 +11596,7 @@ export namespace Prisma {
     acWattage: number
     acLastCleanedAt: number
     acCleanIntervalDays: number
+    acUsageHoursPerDay: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11609,6 +11614,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: true
     acWattage?: true
     acCleanIntervalDays?: true
+    acUsageHoursPerDay?: true
   }
 
   export type RoomSumAggregateInputType = {
@@ -11622,6 +11628,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: true
     acWattage?: true
     acCleanIntervalDays?: true
+    acUsageHoursPerDay?: true
   }
 
   export type RoomMinAggregateInputType = {
@@ -11644,6 +11651,7 @@ export namespace Prisma {
     acWattage?: true
     acLastCleanedAt?: true
     acCleanIntervalDays?: true
+    acUsageHoursPerDay?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11668,6 +11676,7 @@ export namespace Prisma {
     acWattage?: true
     acLastCleanedAt?: true
     acCleanIntervalDays?: true
+    acUsageHoursPerDay?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11693,6 +11702,7 @@ export namespace Prisma {
     acWattage?: true
     acLastCleanedAt?: true
     acCleanIntervalDays?: true
+    acUsageHoursPerDay?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11805,6 +11815,7 @@ export namespace Prisma {
     acWattage: number | null
     acLastCleanedAt: Date | null
     acCleanIntervalDays: number
+    acUsageHoursPerDay: number | null
     createdAt: Date
     updatedAt: Date
     _count: RoomCountAggregateOutputType | null
@@ -11849,6 +11860,7 @@ export namespace Prisma {
     acWattage?: boolean
     acLastCleanedAt?: boolean
     acCleanIntervalDays?: boolean
+    acUsageHoursPerDay?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stays?: boolean | Room$staysArgs<ExtArgs>
@@ -11889,6 +11901,7 @@ export namespace Prisma {
     acWattage?: boolean
     acLastCleanedAt?: boolean
     acCleanIntervalDays?: boolean
+    acUsageHoursPerDay?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -11914,6 +11927,7 @@ export namespace Prisma {
     acWattage?: boolean
     acLastCleanedAt?: boolean
     acCleanIntervalDays?: boolean
+    acUsageHoursPerDay?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["room"]>
@@ -11939,11 +11953,12 @@ export namespace Prisma {
     acWattage?: boolean
     acLastCleanedAt?: boolean
     acCleanIntervalDays?: boolean
+    acUsageHoursPerDay?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "hasAc" | "acWattage" | "acLastCleanedAt" | "acCleanIntervalDays" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "floor" | "status" | "dailyRateRupiah" | "weeklyRateRupiah" | "biWeeklyRateRupiah" | "monthlyRateRupiah" | "defaultDepositRupiah" | "electricityTariffPerKwhRupiah" | "waterTariffPerM3Rupiah" | "images" | "notes" | "isActive" | "allowBookingWhileCleaning" | "hasAc" | "acWattage" | "acLastCleanedAt" | "acCleanIntervalDays" | "acUsageHoursPerDay" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stays?: boolean | Room$staysArgs<ExtArgs>
     meterReadings?: boolean | Room$meterReadingsArgs<ExtArgs>
@@ -12003,6 +12018,7 @@ export namespace Prisma {
       acWattage: number | null
       acLastCleanedAt: Date | null
       acCleanIntervalDays: number
+      acUsageHoursPerDay: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["room"]>
@@ -12462,6 +12478,7 @@ export namespace Prisma {
     readonly acWattage: FieldRef<"Room", 'Int'>
     readonly acLastCleanedAt: FieldRef<"Room", 'DateTime'>
     readonly acCleanIntervalDays: FieldRef<"Room", 'Int'>
+    readonly acUsageHoursPerDay: FieldRef<"Room", 'Float'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly updatedAt: FieldRef<"Room", 'DateTime'>
   }
@@ -25434,6 +25451,8 @@ export namespace Prisma {
     dueAt: Date | null
     escalationLevel: number | null
     escalatedAt: Date | null
+    handledByVendor: boolean | null
+    vendorNote: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -25471,6 +25490,8 @@ export namespace Prisma {
     dueAt: Date | null
     escalationLevel: number | null
     escalatedAt: Date | null
+    handledByVendor: boolean | null
+    vendorNote: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -25508,6 +25529,8 @@ export namespace Prisma {
     dueAt: number
     escalationLevel: number
     escalatedAt: number
+    handledByVendor: number
+    vendorNote: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -25573,6 +25596,8 @@ export namespace Prisma {
     dueAt?: true
     escalationLevel?: true
     escalatedAt?: true
+    handledByVendor?: true
+    vendorNote?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -25610,6 +25635,8 @@ export namespace Prisma {
     dueAt?: true
     escalationLevel?: true
     escalatedAt?: true
+    handledByVendor?: true
+    vendorNote?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -25647,6 +25674,8 @@ export namespace Prisma {
     dueAt?: true
     escalationLevel?: true
     escalatedAt?: true
+    handledByVendor?: true
+    vendorNote?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -25771,6 +25800,8 @@ export namespace Prisma {
     dueAt: Date | null
     escalationLevel: number
     escalatedAt: Date | null
+    handledByVendor: boolean
+    vendorNote: string | null
     createdAt: Date
     updatedAt: Date
     _count: TicketCountAggregateOutputType | null
@@ -25827,6 +25858,8 @@ export namespace Prisma {
     dueAt?: boolean
     escalationLevel?: boolean
     escalatedAt?: boolean
+    handledByVendor?: boolean
+    vendorNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -25872,6 +25905,8 @@ export namespace Prisma {
     dueAt?: boolean
     escalationLevel?: boolean
     escalatedAt?: boolean
+    handledByVendor?: boolean
+    vendorNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -25915,6 +25950,8 @@ export namespace Prisma {
     dueAt?: boolean
     escalationLevel?: boolean
     escalatedAt?: boolean
+    handledByVendor?: boolean
+    vendorNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
@@ -25958,11 +25995,13 @@ export namespace Prisma {
     dueAt?: boolean
     escalationLevel?: boolean
     escalatedAt?: boolean
+    handledByVendor?: boolean
+    vendorNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "issueImageUrl" | "issueImageFileKey" | "issueImageOriginalFilename" | "issueImageMimeType" | "issueImageFileSizeBytes" | "resolutionImageUrl" | "resolutionImageFileKey" | "resolutionImageOriginalFilename" | "resolutionImageMimeType" | "resolutionImageFileSizeBytes" | "status" | "assignedToId" | "linkedRoomItemId" | "linkedInventoryItemId" | "finalRoomItemStatus" | "finalInventoryItemStatus" | "finalAdminNote" | "resolutionNote" | "resolvedAt" | "closedAt" | "assignedAt" | "dueAt" | "escalationLevel" | "escalatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
+  export type TicketOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ticketNumber" | "tenantId" | "roomId" | "stayId" | "title" | "description" | "category" | "issueImageUrl" | "issueImageFileKey" | "issueImageOriginalFilename" | "issueImageMimeType" | "issueImageFileSizeBytes" | "resolutionImageUrl" | "resolutionImageFileKey" | "resolutionImageOriginalFilename" | "resolutionImageMimeType" | "resolutionImageFileSizeBytes" | "status" | "assignedToId" | "linkedRoomItemId" | "linkedInventoryItemId" | "finalRoomItemStatus" | "finalInventoryItemStatus" | "finalAdminNote" | "resolutionNote" | "resolvedAt" | "closedAt" | "assignedAt" | "dueAt" | "escalationLevel" | "escalatedAt" | "handledByVendor" | "vendorNote" | "createdAt" | "updatedAt", ExtArgs["result"]["ticket"]>
   export type TicketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | Ticket$tenantArgs<ExtArgs>
     room?: boolean | Ticket$roomArgs<ExtArgs>
@@ -26034,6 +26073,8 @@ export namespace Prisma {
       dueAt: Date | null
       escalationLevel: number
       escalatedAt: Date | null
+      handledByVendor: boolean
+      vendorNote: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["ticket"]>
@@ -26498,6 +26539,8 @@ export namespace Prisma {
     readonly dueAt: FieldRef<"Ticket", 'DateTime'>
     readonly escalationLevel: FieldRef<"Ticket", 'Int'>
     readonly escalatedAt: FieldRef<"Ticket", 'DateTime'>
+    readonly handledByVendor: FieldRef<"Ticket", 'Boolean'>
+    readonly vendorNote: FieldRef<"Ticket", 'String'>
     readonly createdAt: FieldRef<"Ticket", 'DateTime'>
     readonly updatedAt: FieldRef<"Ticket", 'DateTime'>
   }
@@ -72658,6 +72701,7 @@ export namespace Prisma {
     acWattage: 'acWattage',
     acLastCleanedAt: 'acLastCleanedAt',
     acCleanIntervalDays: 'acCleanIntervalDays',
+    acUsageHoursPerDay: 'acUsageHoursPerDay',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -72909,6 +72953,8 @@ export namespace Prisma {
     dueAt: 'dueAt',
     escalationLevel: 'escalationLevel',
     escalatedAt: 'escalatedAt',
+    handledByVendor: 'handledByVendor',
+    vendorNote: 'vendorNote',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -73718,6 +73764,20 @@ export namespace Prisma {
    * Reference to a field of type 'RoomStatus[]'
    */
   export type ListEnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -74545,20 +74605,6 @@ export namespace Prisma {
    */
   export type ListEnumReferralStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReferralStatus[]'>
     
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
   /**
    * Deep Input Types
    */
@@ -74996,6 +75042,7 @@ export namespace Prisma {
     acWattage?: IntNullableFilter<"Room"> | number | null
     acLastCleanedAt?: DateTimeNullableFilter<"Room"> | Date | string | null
     acCleanIntervalDays?: IntFilter<"Room"> | number
+    acUsageHoursPerDay?: FloatNullableFilter<"Room"> | number | null
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -75035,6 +75082,7 @@ export namespace Prisma {
     acWattage?: SortOrderInput | SortOrder
     acLastCleanedAt?: SortOrderInput | SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stays?: StayOrderByRelationAggregateInput
@@ -75077,6 +75125,7 @@ export namespace Prisma {
     acWattage?: IntNullableFilter<"Room"> | number | null
     acLastCleanedAt?: DateTimeNullableFilter<"Room"> | Date | string | null
     acCleanIntervalDays?: IntFilter<"Room"> | number
+    acUsageHoursPerDay?: FloatNullableFilter<"Room"> | number | null
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     stays?: StayListRelationFilter
@@ -75116,6 +75165,7 @@ export namespace Prisma {
     acWattage?: SortOrderInput | SortOrder
     acLastCleanedAt?: SortOrderInput | SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoomCountOrderByAggregateInput
@@ -75149,6 +75199,7 @@ export namespace Prisma {
     acWattage?: IntNullableWithAggregatesFilter<"Room"> | number | null
     acLastCleanedAt?: DateTimeNullableWithAggregatesFilter<"Room"> | Date | string | null
     acCleanIntervalDays?: IntWithAggregatesFilter<"Room"> | number
+    acUsageHoursPerDay?: FloatNullableWithAggregatesFilter<"Room"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
   }
@@ -76341,6 +76392,8 @@ export namespace Prisma {
     dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     escalationLevel?: IntFilter<"Ticket"> | number
     escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    handledByVendor?: BoolFilter<"Ticket"> | boolean
+    vendorNote?: StringNullableFilter<"Ticket"> | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -76385,6 +76438,8 @@ export namespace Prisma {
     dueAt?: SortOrderInput | SortOrder
     escalationLevel?: SortOrder
     escalatedAt?: SortOrderInput | SortOrder
+    handledByVendor?: SortOrder
+    vendorNote?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tenant?: TenantOrderByWithRelationInput
@@ -76432,6 +76487,8 @@ export namespace Prisma {
     dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     escalationLevel?: IntFilter<"Ticket"> | number
     escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    handledByVendor?: BoolFilter<"Ticket"> | boolean
+    vendorNote?: StringNullableFilter<"Ticket"> | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
@@ -76476,6 +76533,8 @@ export namespace Prisma {
     dueAt?: SortOrderInput | SortOrder
     escalationLevel?: SortOrder
     escalatedAt?: SortOrderInput | SortOrder
+    handledByVendor?: SortOrder
+    vendorNote?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TicketCountOrderByAggregateInput
@@ -76521,6 +76580,8 @@ export namespace Prisma {
     dueAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
     escalationLevel?: IntWithAggregatesFilter<"Ticket"> | number
     escalatedAt?: DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+    handledByVendor?: BoolWithAggregatesFilter<"Ticket"> | boolean
+    vendorNote?: StringNullableWithAggregatesFilter<"Ticket"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   }
@@ -80681,6 +80742,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -80720,6 +80782,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -80758,6 +80821,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -80797,6 +80861,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -80836,6 +80901,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -80860,6 +80926,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -80885,6 +80952,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82204,6 +82272,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -82248,6 +82318,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -82279,6 +82351,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -82323,6 +82397,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -82361,6 +82437,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -82391,6 +82469,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -82428,6 +82508,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -87025,6 +87107,17 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type RoomItemListRelationFilter = {
     every?: RoomItemWhereInput
     some?: RoomItemWhereInput
@@ -87066,6 +87159,7 @@ export namespace Prisma {
     acWattage?: SortOrder
     acLastCleanedAt?: SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87081,6 +87175,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: SortOrder
     acWattage?: SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrder
   }
 
   export type RoomMaxOrderByAggregateInput = {
@@ -87103,6 +87198,7 @@ export namespace Prisma {
     acWattage?: SortOrder
     acLastCleanedAt?: SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87127,6 +87223,7 @@ export namespace Prisma {
     acWattage?: SortOrder
     acLastCleanedAt?: SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -87142,6 +87239,7 @@ export namespace Prisma {
     waterTariffPerM3Rupiah?: SortOrder
     acWattage?: SortOrder
     acCleanIntervalDays?: SortOrder
+    acUsageHoursPerDay?: SortOrder
   }
 
   export type EnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -87152,6 +87250,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoomStatusFilter<$PrismaModel>
     _max?: NestedEnumRoomStatusFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type RoomScalarRelationFilter = {
@@ -88434,6 +88548,8 @@ export namespace Prisma {
     dueAt?: SortOrder
     escalationLevel?: SortOrder
     escalatedAt?: SortOrder
+    handledByVendor?: SortOrder
+    vendorNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -88484,6 +88600,8 @@ export namespace Prisma {
     dueAt?: SortOrder
     escalationLevel?: SortOrder
     escalatedAt?: SortOrder
+    handledByVendor?: SortOrder
+    vendorNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -88521,6 +88639,8 @@ export namespace Prisma {
     dueAt?: SortOrder
     escalationLevel?: SortOrder
     escalatedAt?: SortOrder
+    handledByVendor?: SortOrder
+    vendorNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -93982,6 +94102,14 @@ export namespace Prisma {
     push?: string | string[]
   }
 
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type StayUpdateManyWithoutRoomNestedInput = {
     create?: XOR<StayCreateWithoutRoomInput, StayUncheckedCreateWithoutRoomInput> | StayCreateWithoutRoomInput[] | StayUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: StayCreateOrConnectWithoutRoomInput | StayCreateOrConnectWithoutRoomInput[]
@@ -98315,6 +98443,22 @@ export namespace Prisma {
     _max?: NestedEnumRoomStatusFilter<$PrismaModel>
   }
 
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumStayStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.StayStatus | EnumStayStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StayStatus[] | ListEnumStayStatusFieldRefInput<$PrismaModel>
@@ -99951,6 +100095,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -99993,6 +100139,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -101709,6 +101857,8 @@ export namespace Prisma {
     dueAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
     escalationLevel?: IntFilter<"Ticket"> | number
     escalatedAt?: DateTimeNullableFilter<"Ticket"> | Date | string | null
+    handledByVendor?: BoolFilter<"Ticket"> | boolean
+    vendorNote?: StringNullableFilter<"Ticket"> | string | null
     createdAt?: DateTimeFilter<"Ticket"> | Date | string
     updatedAt?: DateTimeFilter<"Ticket"> | Date | string
   }
@@ -103037,6 +103187,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     room?: RoomCreateNestedOneWithoutTicketsInput
@@ -103079,6 +103231,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -104162,6 +104316,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -104204,6 +104360,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -104972,6 +105130,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -105010,6 +105169,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -105063,6 +105223,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -105101,6 +105262,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -105222,6 +105384,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingCreateNestedManyWithoutRoomInput
@@ -105260,6 +105423,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     meterReadings?: MeterReadingUncheckedCreateNestedManyWithoutRoomInput
@@ -105681,6 +105845,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -105723,6 +105889,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -106178,6 +106346,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUpdateManyWithoutRoomNestedInput
@@ -106216,6 +106385,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meterReadings?: MeterReadingUncheckedUpdateManyWithoutRoomNestedInput
@@ -106966,6 +107136,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -107004,6 +107175,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -107389,6 +107561,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -107427,6 +107600,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -107578,6 +107752,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -107616,6 +107791,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -107777,6 +107953,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -107815,6 +107992,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -110339,6 +110517,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -110377,6 +110556,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -110891,6 +111071,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -110929,6 +111110,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -111786,6 +111968,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -111824,6 +112007,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -112074,6 +112258,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -112112,6 +112297,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -112337,6 +112523,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -112375,6 +112562,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -112618,6 +112806,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -112656,6 +112845,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -114273,6 +114463,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -114315,6 +114507,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -114649,6 +114843,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -114687,6 +114882,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -114781,6 +114977,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -114823,6 +115021,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     staffFieldReports?: StaffFieldReportUncheckedCreateNestedManyWithoutTicketInput
@@ -115013,6 +115213,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -115051,6 +115252,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -115234,6 +115436,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -115272,6 +115475,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -115544,6 +115748,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -115582,6 +115787,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -115755,6 +115961,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tenant?: TenantCreateNestedOneWithoutTicketsInput
@@ -115798,6 +116006,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -115827,6 +116037,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -115865,6 +116076,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -116290,6 +116502,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -116333,6 +116547,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -116368,6 +116584,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -116406,6 +116623,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -118209,6 +118427,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -118247,6 +118466,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -118621,6 +118841,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -118659,6 +118880,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -118960,6 +119182,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -118998,6 +119221,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -119398,6 +119622,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -119436,6 +119661,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -123429,6 +123655,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -123467,6 +123694,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -123509,6 +123737,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayCreateNestedManyWithoutRoomInput
@@ -123547,6 +123776,7 @@ export namespace Prisma {
     acWattage?: number | null
     acLastCleanedAt?: Date | string | null
     acCleanIntervalDays?: number
+    acUsageHoursPerDay?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     stays?: StayUncheckedCreateNestedManyWithoutRoomInput
@@ -123842,6 +124072,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -123880,6 +124111,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -123928,6 +124160,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUpdateManyWithoutRoomNestedInput
@@ -123966,6 +124199,7 @@ export namespace Prisma {
     acWattage?: NullableIntFieldUpdateOperationsInput | number | null
     acLastCleanedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acCleanIntervalDays?: IntFieldUpdateOperationsInput | number
+    acUsageHoursPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stays?: StayUncheckedUpdateManyWithoutRoomNestedInput
@@ -125782,6 +126016,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -126832,6 +127068,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -126874,6 +127112,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -126911,6 +127151,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -128593,6 +128835,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -128947,6 +129191,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     room?: RoomUpdateOneWithoutTicketsNestedInput
@@ -128989,6 +129235,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -129026,6 +129274,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -129560,6 +129810,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -129978,6 +130230,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -130020,6 +130274,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -130057,6 +130313,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -130662,6 +130920,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -130875,6 +131135,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -130917,6 +131179,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -130954,6 +131218,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -131842,6 +132108,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -132028,6 +132296,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -132070,6 +132340,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -132107,6 +132379,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -132403,6 +132677,8 @@ export namespace Prisma {
     dueAt?: Date | string | null
     escalationLevel?: number
     escalatedAt?: Date | string | null
+    handledByVendor?: boolean
+    vendorNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -132495,6 +132771,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tenant?: TenantUpdateOneWithoutTicketsNestedInput
@@ -132537,6 +132815,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffFieldReports?: StaffFieldReportUncheckedUpdateManyWithoutTicketNestedInput
@@ -132574,6 +132854,8 @@ export namespace Prisma {
     dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     escalationLevel?: IntFieldUpdateOperationsInput | number
     escalatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    handledByVendor?: BoolFieldUpdateOperationsInput | boolean
+    vendorNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

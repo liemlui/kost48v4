@@ -589,6 +589,8 @@ model Room {
   acWattage           Int? // watt AC (1/2 PK ~ 380-450)
   acLastCleanedAt     DateTime?
   acCleanIntervalDays Int       @default(90)
+  // AUD-3 (S-5): estimasi jam pakai AC per hari → kWh = watt × jam/hari (alert dini hibrid). null → default konstanta.
+  acUsageHoursPerDay  Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -946,6 +948,9 @@ model Ticket {
   dueAt                           DateTime?
   escalationLevel                 Int                  @default(0)
   escalatedAt                     DateTime?
+  // AUD-5 (S-5): tiket cuci AC bisa dikerjakan vendor luar (bukan staf internal) → tak masuk round-robin/KPI staf.
+  handledByVendor                 Boolean              @default(false)
+  vendorNote                      String?
   createdAt                       DateTime             @default(now())
   updatedAt                       DateTime             @updatedAt
 

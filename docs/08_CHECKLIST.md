@@ -127,7 +127,7 @@
 - [x] **B-9 🟡 → F5-5 SELESAI** Field `referredByCode` di pendaftaran tenant admin/portal → `linkReferralTx` (D-22.4).
 - [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).
 - [ ] **L-3 🟡** Jurnal reward selalu DR6300/CR2100 (beban marketing); dossier 19 sebut diskon-sewa → kontra-revenue. Klarifikasi bila reward "Diskon sewa" diaktifkan.
-- [ ] **L-4 🟡 GO-LIVE** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** → masuk runbook `04_DEPLOY`.
+- [x] **L-4 🟡 GO-LIVE → SELESAI (docs)** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** — sudah masuk runbook `04_DEPLOY` (checklist env + langkah cPanel #6).
 - [ ] **L-5 🟡 over-confidence** SEO Lighthouse ≥90 BELUM diukur (konektor browser gagal); impl ada, validasi belum. + UD-04/V-7 kosmetik.
 
 > Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.

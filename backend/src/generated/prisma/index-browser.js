@@ -187,6 +187,7 @@ exports.Prisma.RoomScalarFieldEnum = {
   acWattage: 'acWattage',
   acLastCleanedAt: 'acLastCleanedAt',
   acCleanIntervalDays: 'acCleanIntervalDays',
+  acUsageHoursPerDay: 'acUsageHoursPerDay',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -408,6 +409,8 @@ exports.Prisma.TicketScalarFieldEnum = {
   dueAt: 'dueAt',
   escalationLevel: 'escalationLevel',
   escalatedAt: 'escalatedAt',
+  handledByVendor: 'handledByVendor',
+  vendorNote: 'vendorNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
