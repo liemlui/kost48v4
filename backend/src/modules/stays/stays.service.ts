@@ -25,6 +25,7 @@ import {
 } from "../../common/enums/app.enums";
 import { serializePrismaResult } from "../../common/utils/serialization";
 import { deleteFileSafe } from "../../common/utils/file-signature.util";
+import { pickRoundRobinStaffTx } from "../../common/utils/staff-assignment.util";
 import { join } from "path";
 import { PrismaService } from "../../prisma/prisma.service";
 import {
@@ -649,11 +650,7 @@ export class StaysService {
         });
 
         if (!existingInspectionTicket) {
-          const staffAssignee = await tx.user.findFirst({
-            where: { role: UserRole.STAFF, isActive: true },
-            orderBy: { id: "asc" },
-            select: { id: true },
-          });
+          const staffAssignee = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
           const room = await tx.room.findUnique({
             where: { id: existing.roomId },
             select: { code: true, name: true },
@@ -685,7 +682,7 @@ export class StaysService {
                 "Jika semua aman, tandai pekerjaan selesai agar admin bisa menjadikan kamar siap ditempati kembali.",
               ].join("\n"),
               category: "CHECKOUT_INSPECTION",
-              assignedToId: staffAssignee?.id,
+              assignedToId: staffAssignee ?? null,
             },
           });
         }
@@ -881,11 +878,7 @@ export class StaysService {
           select: { id: true },
         });
         if (!existingInspection) {
-          const staffAssignee = await tx.user.findFirst({
-            where: { role: UserRole.STAFF, isActive: true },
-            orderBy: { id: "asc" },
-            select: { id: true },
-          });
+          const staffAssignee = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
           const roomInfo = await tx.room.findUnique({
             where: { id: stay.roomId },
             select: { code: true, name: true },
@@ -911,7 +904,7 @@ export class StaysService {
                 "Barang tenant dilacak 30 hari (ABANDONED otomatis bila tak diambil).",
               ].join("\n"),
               category: "CHECKOUT_INSPECTION",
-              assignedToId: staffAssignee?.id ?? null,
+              assignedToId: staffAssignee ?? null,
             },
           });
         }
@@ -1148,11 +1141,7 @@ export class StaysService {
         // WAJIB punya tiket CHECKOUT_INSPECTION (seperti complete()). Tanpa ini kamar
         // nyangkut MAINTENANCE selamanya (gate room-ready hanya buka via tutup tiket inspeksi).
         if (wasPromoted && !openCleaningTicket) {
-          const staffAssignee = await tx.user.findFirst({
-            where: { role: UserRole.STAFF, isActive: true },
-            orderBy: { id: "asc" },
-            select: { id: true },
-          });
+          const staffAssignee = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
           const roomInfo = await tx.room.findUnique({
             where: { id: existing.roomId },
             select: { code: true, name: true },
@@ -1183,7 +1172,7 @@ export class StaysService {
                 "Jika semua aman, tandai pekerjaan selesai agar admin bisa menjadikan kamar siap ditempati kembali.",
               ].join("\n"),
               category: "CHECKOUT_INSPECTION",
-              assignedToId: staffAssignee?.id,
+              assignedToId: staffAssignee ?? null,
             },
           });
         }

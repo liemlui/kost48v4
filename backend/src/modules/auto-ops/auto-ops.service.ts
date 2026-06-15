@@ -2,6 +2,7 @@ import { ConflictException, Injectable, Logger, OnModuleDestroy, OnModuleInit } 
 import { Prisma } from '../../generated/prisma';
 import { InvoiceStatus, PaymentSubmissionStatus, RenewRequestStatus, RoomStatus, StayStatus } from '../../common/enums/app.enums';
 import { AUTO_OPS_DEADLINES } from '../../common/business/auto-ops.constants';
+import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPeriodCloseService } from '../accounting/accounting-period-close.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
@@ -716,7 +717,8 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           select: { id: true },
         });
         if (open) continue;
-        const staff = await this.prisma.user.findFirst({ where: { role: 'STAFF' as any, isActive: true }, orderBy: { id: 'asc' }, select: { id: true } });
+        // F5-3 (AUD-5/D-22.2): tiket cuci AC dibuat TANPA assignee → admin memilih staf internal
+        // ATAU menandai vendor luar (handledByVendor). Jadi tak masuk round-robin/KPI staf otomatis.
         const roomLabel = room.code || room.name || `Kamar #${room.id}`;
         const base = `TIC-${now.getFullYear()}-AC-${room.id}`;
         let ticketNumber = base;
@@ -733,7 +735,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
             title: `Cuci AC — ${roomLabel}`,
             description: `AC kamar ${roomLabel} sudah waktunya dicuci (rutin tiap ${room.acCleanIntervalDays} hari). Jadwalkan tukang cuci AC; biaya ditanggung kos (catat sebagai Expense). Tandai tiket selesai setelah AC bersih.`,
             category: 'AC_CLEANING' as any,
-            assignedToId: staff?.id,
+            assignedToId: null,
           },
         });
         created += 1;
@@ -1343,11 +1345,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
           select: { id: true },
         });
         if (!existingInspection) {
-          const staffAssignee = await tx.user.findFirst({
-            where: { role: 'STAFF' as any, isActive: true },
-            orderBy: { id: 'asc' },
-            select: { id: true },
-          });
+          const staffAssignee = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
           const room = await tx.room.findUnique({ where: { id: current.roomId }, select: { code: true, name: true } });
           const roomLabel = room?.code || room?.name || `Kamar #${current.roomId}`;
           const baseTicketNumber = `TIC-${new Date().getFullYear()}-CHK-${stayId}`;
@@ -1371,7 +1369,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
                 'Admin: biaya overstay/pembersihan dipotong dari deposit jaminan tenant lama saat settlement (Proses Deposit).',
               ].join('\n'),
               category: 'CHECKOUT_INSPECTION',
-              assignedToId: staffAssignee?.id ?? null,
+              assignedToId: staffAssignee ?? null,
             },
           });
         }
@@ -1506,11 +1504,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
       });
       if (existingTicket) continue;
 
-      const staffAssignee = await this.prisma.user.findFirst({
-        where: { role: 'STAFF' as any, isActive: true },
-        orderBy: { id: 'asc' },
-        select: { id: true },
-      });
+      const staffAssignee = await pickRoundRobinStaffTx(this.prisma); // F5-3: round-robin tiket sistem
 
       const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${stay.roomId}`;
       await this.prisma.$transaction(async (tx) => {
@@ -1535,7 +1529,7 @@ export class AutoOpsService implements OnModuleInit, OnModuleDestroy {
               `Admin: jika tenant memperpanjang, proses renewal; jika keluar, jalankan checkout final.`,
             ].join('\n'),
             category: 'EVICT_OVERSTAY',
-            assignedToId: staffAssignee?.id ?? null,
+            assignedToId: staffAssignee ?? null,
             status: 'OPEN' as any,
           },
         });

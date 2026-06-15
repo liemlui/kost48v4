@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsIn,
   IsInt,
@@ -105,6 +106,18 @@ export class CreatePortalTicketDto extends TicketImageFieldsDto {
 export class AssignTicketDto {
   @IsInt()
   assignedToId!: number;
+}
+
+// F5-3 (AUD-5 / D-22.2): tandai tiket (mis. cuci AC) dikerjakan VENDOR LUAR.
+// handledByVendor=true → assignee staf dikosongkan (keluar round-robin/KPI staf).
+export class MarkTicketVendorDto {
+  @IsBoolean()
+  handledByVendor!: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  vendorNote?: string;
 }
 
 export class ResolutionDto {

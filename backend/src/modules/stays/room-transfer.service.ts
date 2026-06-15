@@ -4,6 +4,7 @@ import { AuditLogService } from '../../audit-log/audit-log.service';
 import { AppNotificationService } from '../notifications/app-notification.service';
 import { CurrentUserPayload } from '../../common/interfaces/current-user.interface';
 import { RoomStatus, UserRole, UtilityType } from '../../common/enums/app.enums';
+import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
 import { startOfDay } from './stays.helpers';
 import { TransferRoomDto } from './dto/room-transfer.dto';
 
@@ -85,7 +86,7 @@ export class RoomTransferService {
         select: { id: true },
       });
       if (!existingInspection) {
-        const staff = await tx.user.findFirst({ where: { role: UserRole.STAFF, isActive: true }, orderBy: { id: 'asc' }, select: { id: true } });
+        const staffAssigneeId = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
         const roomLabel = stay.room?.code || stay.room?.name || `Kamar #${fromRoomId}`;
         const base = `TIC-${new Date().getFullYear()}-CHK-${stayId}`;
         let ticketNumber = base;
@@ -107,7 +108,7 @@ export class RoomTransferService {
               'Jika semua aman, tandai pekerjaan selesai agar admin bisa menjadikan kamar siap ditempati kembali.',
             ].join('\n'),
             category: 'CHECKOUT_INSPECTION' as any,
-            assignedToId: staff?.id,
+            assignedToId: staffAssigneeId ?? null,
           },
         });
       }

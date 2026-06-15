@@ -12,6 +12,7 @@ import { buildMeta, buildPagination } from "../../common/utils/pagination";
 import { PrismaService } from "../../prisma/prisma.service";
 import { STAFF_FIELD_CATEGORY_SET, UserRole } from "../../common/enums/app.enums";
 import { generateTicketNumberTx } from "../../common/utils/ticket-number.util";
+import { pickRoundRobinStaffTx } from "../../common/utils/staff-assignment.util";
 import { computeTicketDueAt } from "./ticket-sla";
 import { AppNotificationService } from "../notifications/app-notification.service";
 import { LoyaltyService } from "../loyalty/loyalty.service";
@@ -20,6 +21,7 @@ import {
   CloseTicketDto,
   CreateBackofficeTicketDto,
   CreatePortalTicketDto,
+  MarkTicketVendorDto,
   ResolutionDto,
 } from "./dto/ticket.dto";
 import { TicketsQueryDto } from "./dto/tickets-query.dto";
@@ -449,6 +451,38 @@ export class TicketsService {
     if (ticket.assignedToId !== dto.assignedToId) {
       await this.notifyTicketAssigned(updated.id, dto.assignedToId, actor.id);
     }
+    return updated;
+  }
+
+  /**
+   * F5-3 (AUD-5 / D-22.2): tandai tiket dikerjakan vendor luar (mis. cuci AC).
+   * handledByVendor=true → kosongkan assignee staf (keluar round-robin/KPI staf);
+   * false → lepas penanda vendor (assignee bisa di-set lagi via assign).
+   */
+  async markVendor(id: number, dto: MarkTicketVendorDto, actor: CurrentUserPayload) {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id } });
+    if (!ticket) throw new NotFoundException("Tiket tidak ditemukan");
+    if (["CLOSED", "CANCELLED"].includes(String(ticket.status))) {
+      throw new ConflictException("Tiket yang sudah ditutup/dibatalkan tidak dapat diubah");
+    }
+    const updated = await this.prisma.ticket.update({
+      where: { id },
+      data: {
+        handledByVendor: dto.handledByVendor,
+        vendorNote: dto.handledByVendor ? (dto.vendorNote ?? null) : null,
+        // saat ditandai vendor, lepas assignee staf agar tak terhitung beban/KPI staf
+        ...(dto.handledByVendor ? { assignedToId: null } : {}),
+      },
+    });
+    await this.audit.log({
+      actorUserId: actor.id,
+      action: "UPDATE",
+      entityType: "Ticket",
+      entityId: String(updated.id),
+      oldData: ticket,
+      newData: updated,
+      meta: { handledByVendor: dto.handledByVendor },
+    });
     return updated;
   }
 
@@ -1098,24 +1132,7 @@ export class TicketsService {
    * staf dengan tiket aktif paling sedikit. (Ide owner 2026-06-15.)
    */
   private async pickStaffAssigneeTx(tx: any): Promise<number | undefined> {
-    const staff = await tx.user.findMany({
-      where: { role: UserRole.STAFF, isActive: true },
-      select: { id: true },
-      orderBy: { id: 'asc' },
-    });
-    if (staff.length === 0) return undefined;
-    if (staff.length === 1) return staff[0].id;
-    let bestId = staff[0].id;
-    let bestLoad = Number.POSITIVE_INFINITY;
-    for (const s of staff) {
-      const load = await tx.ticket.count({
-        where: { assignedToId: s.id, status: { in: ['OPEN', 'IN_PROGRESS', 'DONE'] as any } },
-      });
-      if (load < bestLoad) {
-        bestLoad = load;
-        bestId = s.id;
-      }
-    }
-    return bestId;
+    // F5-3: konsolidasi ke util bersama (dipakai juga auto-ops/stays/room-transfer/loyalty).
+    return pickRoundRobinStaffTx(tx);
   }
 }

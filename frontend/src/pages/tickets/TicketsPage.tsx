@@ -791,6 +791,9 @@ export default function TicketsPage() {
                             : "Belum ada petugas"}
                         </div>
                       )}
+                      {(item as any).handledByVendor ? (
+                        <div className="small text-warning fw-semibold mt-1">🔧 Vendor luar</div>
+                      ) : null}
                     </td>
                     <td>{formatDate(item.updatedAt || item.createdAt)}</td>
                     <td onClick={(event) => event.stopPropagation()}>
@@ -812,6 +815,24 @@ export default function TicketsPage() {
                             }
                           >
                             Tugaskan
+                          </Button>
+                        ) : null}
+                        {canAssign &&
+                        String(item.category ?? "").toUpperCase() === "AC_CLEANING" &&
+                        !["CLOSED", "CANCELLED"].includes(String(item.status)) ? (
+                          <Button
+                            size="sm"
+                            variant={(item as any).handledByVendor ? "outline-secondary" : "outline-warning"}
+                            disabled={simpleAction.isPending}
+                            title="Tiket cuci AC bisa dikerjakan vendor luar (keluar dari beban/KPI staf)"
+                            onClick={() =>
+                              simpleAction.mutate({
+                                path: `/tickets/${item.id}/vendor`,
+                                payload: { handledByVendor: !(item as any).handledByVendor },
+                              })
+                            }
+                          >
+                            {(item as any).handledByVendor ? "Batal vendor" : "Vendor luar"}
                           </Button>
                         ) : null}
                         {canProgress && item.status === "OPEN" ? (

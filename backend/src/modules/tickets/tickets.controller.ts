@@ -39,6 +39,7 @@ import {
   CloseTicketDto,
   CreateBackofficeTicketDto,
   CreatePortalTicketDto,
+  MarkTicketVendorDto,
   ResolutionDto,
 } from './dto/ticket.dto';
 import { TicketsQueryDto } from './dto/tickets-query.dto';
@@ -167,6 +168,13 @@ export class TicketsController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async assign(@Param('id', ParseIntPipe) id: number, @Body() dto: AssignTicketDto, @CurrentUser() user: CurrentUserPayload) {
     return { message: 'Tiket berhasil di-assign', data: await this.ticketsService.assign(id, dto, user) };
+  }
+
+  // F5-3 (AUD-5): tandai tiket (mis. cuci AC) dikerjakan vendor luar / lepas penanda vendor.
+  @Post(':id/vendor')
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async markVendor(@Param('id', ParseIntPipe) id: number, @Body() dto: MarkTicketVendorDto, @CurrentUser() user: CurrentUserPayload) {
+    return { message: dto.handledByVendor ? 'Tiket ditandai dikerjakan vendor luar' : 'Penanda vendor dilepas', data: await this.ticketsService.markVendor(id, dto, user) };
   }
 
   @Post(':id/start')

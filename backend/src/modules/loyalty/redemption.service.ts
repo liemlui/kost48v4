@@ -2,6 +2,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { PrismaService } from '../../prisma/prisma.service';
 import { AccountingPostingService } from '../accounting/accounting-posting.service';
 import { LoyaltyService } from './loyalty.service';
+import { pickRoundRobinStaffTx } from '../../common/utils/staff-assignment.util';
 import { CreateRewardDto, UpdateRewardDto } from './dto/loyalty.dto';
 
 /**
@@ -142,7 +143,7 @@ export class RedemptionService {
           orderBy: { id: 'desc' },
           select: { id: true, roomId: true },
         });
-        const staff = await tx.user.findFirst({ where: { role: 'STAFF' as any, isActive: true }, orderBy: { id: 'asc' }, select: { id: true } });
+        const staffAssigneeId = await pickRoundRobinStaffTx(tx); // F5-3: round-robin tiket sistem
         const base = `TIC-${new Date().getFullYear()}-RWD-${redemption.id}`;
         let ticketNumber = base;
         let suffix = 1;
@@ -160,7 +161,7 @@ export class RedemptionService {
             title: redemption.reward.fulfillmentTaskTitle || `Reward: ${redemption.reward.name}`,
             description: `Tugas dari penukaran poin tenant (reward "${redemption.reward.name}"). ${redemption.reward.description ?? ''}`.trim(),
             category: redemption.reward.fulfillmentTaskCategory as any,
-            assignedToId: staff?.id,
+            assignedToId: staffAssigneeId ?? null,
           },
         });
       }
