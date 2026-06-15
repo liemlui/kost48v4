@@ -45,6 +45,11 @@ export class PrepayExtensionDto {
   @IsOptional() @IsString()
   paidAt?: string;
 
+  // F5-8 (A-5): tarif diskon untuk prabayar jangka panjang. MONTHLY (default, tanpa diskon),
+  // SMESTERLY (butuh ≥6 bln), atau YEARLY (butuh ≥12 bln). Diskon mengikuti multiplier owner (5,5×/10×).
+  @IsOptional() @IsString()
+  rateTerm?: 'MONTHLY' | 'SMESTERLY' | 'YEARLY';
+
   @IsOptional() @IsString() @MaxLength(500)
   note?: string;
 }

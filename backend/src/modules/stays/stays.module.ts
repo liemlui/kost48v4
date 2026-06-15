@@ -8,9 +8,10 @@ import { AuditLogModule } from '../../audit-log/audit-log.module';
 import { AccountingModule } from '../accounting/accounting.module';
 import { DepositLedgerModule } from '../deposit-ledger/deposit-ledger.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { LoyaltyModule } from '../loyalty/loyalty.module';
 
 @Module({
-  imports: [AuditLogModule, AccountingModule, DepositLedgerModule, NotificationsModule],
+  imports: [AuditLogModule, AccountingModule, DepositLedgerModule, NotificationsModule, LoyaltyModule],
   controllers: [StaysController],
   providers: [StaysService, StaysQueryService, RoomTransferService, PrepayExtensionService],
   exports: [StaysService],
