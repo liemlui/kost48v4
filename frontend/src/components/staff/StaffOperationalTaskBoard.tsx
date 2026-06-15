@@ -127,7 +127,7 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
   const lanes: StaffLane[] = [
     {
       id: 'urgent',
-      label: 'Mendesak',
+      label: 'Tugas Penting',
       value: urgentCount,
       helper: 'Kendala checklist, stok habis, atau kamar perlu dicek.',
       tone: urgentRoutines.length || maintenanceRooms.length ? 'danger' : lowStockItems.length ? 'warning' : 'success',
@@ -137,7 +137,7 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
     },
     {
       id: 'today',
-      label: 'Hari Ini',
+      label: 'Tugas Hari Ini',
       value: todayCount,
       helper: 'Checklist dan tiket yang belum mulai.',
       tone: todoRoutines.length || openTickets.length ? 'warning' : 'success',
@@ -146,7 +146,7 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
     },
     {
       id: 'progress',
-      label: 'Dalam Proses',
+      label: 'Tugas Dalam Proses',
       value: progressCount,
       helper: 'Pekerjaan aktif yang perlu diselesaikan dulu.',
       tone: inProgressRoutines.length || inProgressTickets.length ? 'info' : 'neutral',
@@ -225,7 +225,7 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
   const assistantTitle = focusItems.length ? 'Prioritas terdekat' : 'Operasional aman';
   const assistantBody = focusItems.length
     ? `Mulai dari ${focusItems[0].title}. Catat hasil kerja dengan singkat agar tindak lanjut berikutnya jelas.`
-    : 'Tidak ada pekerjaan mendesak dari data yang dimuat. Tetap cek area umum, stok harian, dan laporan penghuni yang baru masuk.';
+    : 'Tidak ada tugas penting dari data yang dimuat. Tetap cek area umum, stok harian, dan laporan penghuni yang baru masuk.';
 
   return (
     <Card className="staff-operational-board border-0">

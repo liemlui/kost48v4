@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Button, Card, Collapse } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { useQuery } from '@tanstack/react-query';
 import StaffPerformanceCategoryCard from './StaffPerformanceCategoryCard';
 import StaffUnifiedWorkQueue from './StaffUnifiedWorkQueue';
@@ -35,7 +34,6 @@ function staffFirstName(user: AuthUser | null) {
 }
 
 export default function StaffMotivationDashboard({ user, tickets, rooms = [], inventoryItems = [], queueItems, onRefresh, routineToday, routineKpi, routinesLoading, onRoutineUpdated }: Props) {
-  const [showChecklistDetail, setShowChecklistDetail] = useState(false);
   const performanceQuery = useQuery({ queryKey: ['staff-performance-me-dashboard'], queryFn: () => fetchMyStaffPerformance(), staleTime: 60_000 });
   const stats = makeStaffWorkStats(tickets, queueItems, safeUserCreatedAt(user));
   const motivation = getStaffMotivation(stats);
@@ -52,7 +50,7 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
               <p>{motivation}</p>
               <div className="staff-thank-card compact">
                 <span>🙏</span>
-                <small>Terima kasih, kita sudah bekerja bersama selama {daysText}. Kerja rapi membuat penghuni lebih nyaman.</small>
+                <small>Terima kasih, {staffFirstName(user)}. Kita sudah saling kenal dan bekerja bersama {daysText} sejak kamu bergabung — setiap kerja rapimu bikin penghuni betah, dan itu sangat berarti untuk tim.</small>
               </div>
             </div>
             <div className="staff-day-hero-actions" aria-label="Aksi cepat staff">
@@ -87,27 +85,17 @@ export default function StaffMotivationDashboard({ user, tickets, rooms = [], in
           <Card.Body>
             <div className="staff-checklist-disclosure-head">
               <div>
-                <strong>Checklist tambahan</strong>
-                <span>Detail rutin harian/mingguan/bulanan. Daftar kerja utama tetap jadi titik awal agar alurnya rapi.</span>
+                <strong>Checklist operasional</strong>
+                <span>Rutin harian, mingguan, dan bulanan — tandai selesai sambil bekerja.</span>
               </div>
-              <Button
-                size="sm"
-                variant="outline-primary"
-                aria-expanded={showChecklistDetail}
-                onClick={() => setShowChecklistDetail((value) => !value)}
-              >
-                {showChecklistDetail ? 'Sembunyikan' : 'Buka detail'}
-              </Button>
             </div>
-            <Collapse in={showChecklistDetail}>
-              <div className="staff-checklist-disclosure-body">
-                <StaffRoutineChecklist
-                  today={routineToday ?? null}
-                  isLoading={routinesLoading}
-                  onUpdated={onRoutineUpdated ?? onRefresh}
-                />
-              </div>
-            </Collapse>
+            <div className="staff-checklist-disclosure-body">
+              <StaffRoutineChecklist
+                today={routineToday ?? null}
+                isLoading={routinesLoading}
+                onUpdated={onRoutineUpdated ?? onRefresh}
+              />
+            </div>
           </Card.Body>
         </Card>
       </div>
