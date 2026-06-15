@@ -135,7 +135,15 @@
   - **B-4:** poin ON_TIME diberikan untuk **SETIAP invoice** yang dibayar tepat waktu (bukan hanya invoice sewa).
   - **A-5:** izinkan **tarif diskon SMESTERLY/YEARLY** untuk prabayar (bukan hanya tarif bulanan penuh) — owner yang menetapkan tarif diskonnya.
 
-> Catatan eksekusi: D-21 menghasilkan task tindak-lanjut AUD-1..AUD-4 di `08_CHECKLIST.md`. AUD-4 (FAQ auto-generate) & AUD-5 (round-robin tiket sistem) & B-9 (referral via admin) masih perlu keputusan lanjutan.
+> Catatan eksekusi: D-21 menghasilkan task tindak-lanjut AUD-1..AUD-4 di `08_CHECKLIST.md`.
+
+## D-22 — Keputusan tindak-lanjut AUDIT MENYELURUH (2026-06-15, jawaban owner atas `AUDIT_MENYELURUH_SEMUA_FASE.md`)
+- **D-22.1 (L-1, jurnal warisan best-effort):** pilih **best-effort + AUTO-REKONSILIASI**. Operasi (bayar/check-in/deposit) TETAP jalan walau jurnal gagal; tambah **sweeper rekonsiliasi otomatis** yang rutin mem-backfill jurnal yang bolong (pakai `backfillAutoJournal` yang sudah ada) + **alert owner** bila ada. Laporan tetap benar tanpa pernah memblok operasi harian. (BUKAN blocking penuh.)
+- **D-22.2 (AUD-5 + AC vendor):** tiket **cuci AC dibuat TANPA assignee** → admin memilih: tugaskan **staf internal** ATAU tandai **vendor luar** (biaya tetap dicatat owner sbg expense, lihat F4-15/C-5). Tiket **sistem lain** (inspeksi checkout, reward→tugas, pindah kamar) **di-round-robin ke staf internal saat staf ≥2** (dorman saat 1 staf). Perlu penanda "vendor" pada tiket AC.
+- **D-22.3 (AUD-4, FAQ awal):** **YA — seed FAQ awal** dari `03_KEPUTUSAN_OWNER` + dossier (pembayaran, DP vs deposit, booking, renewal, checkout, deposit, overstay, KTP, tiket, dll); owner tinggal edit. Tetap bisa diperkaya dari interview/WhatsApp nanti.
+- **D-22.4 (B-9, referral di portal):** **YA — tambah field kode referral di alur booking admin/portal** agar referral tetap tercatat walau teman dibooking-kan admin (pakai `TenantReferral` yang ada).
+
+> Catatan eksekusi: D-22 + D-21 menjadi **Fase 5 (tindak-lanjut audit)** di `08_CHECKLIST.md`. Item yang menyentuh schema (penanda vendor tiket AC, jam-pakai AC per kamar) menunggu **proposal + approval schema** sebelum eksekusi.
 
 ---
 

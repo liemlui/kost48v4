@@ -109,18 +109,19 @@
 - [ ] **AUD-1 🟠 (C-1)** Pindah kamar (F4-8): utilitas **kamar LAMA** belum diselesaikan saat pindah → bisa tak tertagih. **✅ KEPUTUSAN D-21.1: tagih kamar lama dulu** (snapshot meter akhir + invoice utilitas berjalan SEBELUM `roomId` pindah). → implementasi.
 - [ ] **AUD-2 🟠 (D-5)** Tip staf (F4-14): **TAK ada UI input** e-wallet staf. **✅ KEPUTUSAN D-21.2: staf isi sendiri** (halaman profil self-service + field e-wallet; tetap tak dijurnal). → implementasi.
 - [ ] **AUD-3 🟡 (C-4)** Cuci AC (F4-15): hanya interval hari; `acWattage` tak dipakai. **✅ KEPUTUSAN D-21.3: HIBRID** (interval hari + alert dini kWh = watt×jam/hari; perlu data jam-pakai per kamar). → implementasi.
-- [ ] **AUD-4 🟡 over-confidence (D-4)** FAQ/manual (F4-12): "**generate dari aturan flow**" = kurasi MANUAL, bukan auto-generate. **(masih perlu keputusan)** — seed FAQ awal dari `03_KEPUTUSAN_OWNER`/dossier bila owner mau.
-- [ ] **AUD-5 🟡 (C-6)** Round-robin (F2-10): hanya tiket portal/backoffice; tiket **sistem-auto** (inspeksi/AC/reward/transfer) belum round-robin. **(masih perlu keputusan)**
+- [ ] **AUD-4 🟡 (D-4)** FAQ/manual (F4-12). **✅ KEPUTUSAN D-22.3: seed FAQ awal** dari `03_KEPUTUSAN_OWNER`+dossier (owner tinggal edit; bisa diperkaya WhatsApp nanti). → implementasi (no-schema).
+- [ ] **AUD-5 🟡 (C-6) + AC vendor. ✅ KEPUTUSAN D-22.2:** tiket **cuci AC dibuat TANPA assignee** (admin pilih staf internal / tandai **vendor luar**); tiket **sistem lain** (inspeksi/reward/transfer) **round-robin ke staf saat ≥2**. Penanda "vendor" pada tiket AC = 🧬 perlu approval schema.
 - [ ] **AUD-prabayar ✅ KEPUTUSAN D-21.4 (A-5/A-6/A-7/B-4 SEMUA aktif):** blokir prabayar saat menunggak (A-6) · poin saat prabayar (A-7) · poin ON_TIME tiap invoice (B-4) · izinkan tarif diskon SMESTERLY/YEARLY utk prabayar (A-5). → implementasi.
 - [ ] **AUD-6 🟠 (A-1)** Recognition/deferral (F4-1/F4-11) bisa **stranded** bila periode akuntansi tutup sebelum sweeper memproses. Mitigasi ada (sweeper 5 mnt). Saran: larang tutup periode dengan baris recognition jatuh-tempo belum diakui.
 - [ ] **AUD-7 🟡 race minor** (risiko rendah, 1 admin): overspend poin (B-1), stok reward negatif (B-2), toRoom tak di-lock (C-2). Fix saat skala naik: row lock / serializable.
 - [ ] **AUD-8 🟠 WARISAN (A-8, di luar Fase 4)** Auto-journal **best-effort** di flow lama (invoice issue/payment/cancel/expense/wifi/deposit-received) — bila posting gagal, operasi tetap jalan tanpa jurnal. Pertimbangkan blocking + reconciliation otomatis (R1/R2 audit lama `FLOW_AUDIT_LAPORAN.md`).
-> **Abu-abu TERJAWAB (D-21, 2026-06-15):** A-5/A-6/A-7/B-4 (→ AUD-prabayar), D-6 (→ AUD-2 staf isi sendiri). **Masih menunggu owner:** FAQ auto-generate (AUD-4), round-robin tiket sistem (AUD-5), referral via admin/portal (B-9).
+> **Semua abu-abu TERJAWAB (D-21 + D-22, 2026-06-15):** A-5/A-6/A-7/B-4 (AUD-prabayar), D-6 (AUD-2), L-1 (D-22.1), AUD-5+AC-vendor (D-22.2), AUD-4 FAQ (D-22.3), B-9 referral (D-22.4). → semua jadi **Fase 5 tindak-lanjut audit**; item schema (penanda vendor AC, jam-pakai AC) menunggu proposal+approval.
 
 ### 🔍 AUDIT MENYELURUH SEMUA FASE (2026-06-15 — `docs/AUDIT_MENYELURUH_SEMUA_FASE.md`)
 **Hasil:** TIDAK ada 🔴 bug baru di seluruh fase; 🔴 warisan ghost-stock (I-02) ternyata SUDAH ditutup. Temuan:
 - [ ] **SINKRON-DOC 🟡** Tabel §3 Temuan / §4 Task dossier **10/11/13/14/15/18 BASI** — banyak item ditandai open (🔴/🟠) padahal kode SUDAH selesai (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14). Rapikan tabel agar tak mengira task selesai = belum. _(docs, bukan kode)_
-- [ ] **L-1 🟠 (= AUD-8/A-8)** Auto-journal best-effort warisan (`stays.service.ts:331,1418` dll `.catch`+commit). Keputusan owner: blocking + rekonsiliasi otomatis vs best-effort+monitor readiness.
+- [ ] **L-1 🟠 (= AUD-8/A-8). ✅ KEPUTUSAN D-22.1: best-effort + AUTO-REKONSILIASI** — operasi tetap jalan; tambah **sweeper rekonsiliasi** (backfill jurnal bolong via `backfillAutoJournal` + alert owner). BUKAN blocking penuh. → implementasi (no-schema).
+- [ ] **B-9 🟡. ✅ KEPUTUSAN D-22.4: tambah field kode referral di booking admin/portal** (pakai `TenantReferral`). → implementasi (no-schema).
 - [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).
 - [ ] **L-3 🟡** Jurnal reward selalu DR6300/CR2100 (beban marketing); dossier 19 sebut diskon-sewa → kontra-revenue. Klarifikasi bila reward "Diskon sewa" diaktifkan.
 - [ ] **L-4 🟡 GO-LIVE** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** → masuk runbook `04_DEPLOY`.
