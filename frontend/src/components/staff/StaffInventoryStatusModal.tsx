@@ -236,13 +236,20 @@ export default function StaffInventoryStatusModal({
       }),
     enabled: show && canRequestReplacement && requestsReplacement,
   });
-  const replacementOptions = useMemo(
-    () =>
-      (inventoryItemsQuery.data?.items ?? []).filter(
-        (item) => item.isActive !== false,
-      ),
-    [inventoryItemsQuery.data?.items],
-  );
+  // Smart replacement: barang yang dilaporkan (mis. kipas angin) sebaiknya diganti
+  // barang sejenis — bukan sembarang barang gudang. Filter ke item yang SAMA atau
+  // sekategori; kalau tak ada yang cocok, tampilkan semua sebagai fallback.
+  const reportedItemId = target?.type === "room-item" ? target.item.itemId : null;
+  const reportedCategory =
+    target?.type === "room-item" ? (target.item.item as { category?: string | null } | undefined)?.category ?? null : null;
+  const replacementOptions = useMemo(() => {
+    const all = (inventoryItemsQuery.data?.items ?? []).filter((item) => item.isActive !== false);
+    if (reportedItemId == null && !reportedCategory) return all;
+    const matched = all.filter(
+      (item) => item.id === reportedItemId || (reportedCategory != null && item.category === reportedCategory),
+    );
+    return matched.length ? matched : all;
+  }, [inventoryItemsQuery.data?.items, reportedItemId, reportedCategory]);
 
   const helperCopy = useMemo(() => {
     if (isRoomTarget) {
@@ -265,10 +272,33 @@ export default function StaffInventoryStatusModal({
     setRequestedQty("1");
   };
 
+  // Status barang saat ini sudah baik? (default GOOD). Kalau ya, laporan "kondisi baik"
+  // tak masuk akal — langsung arahkan ke alur "ada masalah".
+  const roomAlreadyGood =
+    target?.type === "room-item" ? (target.item.status ?? "GOOD") === "GOOD" : false;
+
   useEffect(() => {
-    if (show) reset();
+    if (!show) return;
+    reset();
+    if (target?.type === "room-item" && roomAlreadyGood) setRoomTriage("PROBLEM");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show, target?.type, target?.item.id]);
+
+  // Prefill "Info kondisi barang" otomatis dari ringkasan pilihan (tetap bisa diubah staf).
+  useEffect(() => {
+    if (selectedCondition && !note.trim()) {
+      setNote(`${targetTitle(target)} — ${selectedCondition.label}.`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCondition?.value]);
+
+  // Default barang pengganti = barang yang SAMA dengan yang dilaporkan (mis. kipas → kipas).
+  useEffect(() => {
+    if (requestsReplacement && !requestedInventoryItemId && reportedItemId != null) {
+      setRequestedInventoryItemId(String(reportedItemId));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestsReplacement, reportedItemId]);
 
   const close = () => {
     reset();
@@ -452,38 +482,45 @@ export default function StaffInventoryStatusModal({
 
         {isRoomTarget ? (
           <div className="staff-progressive-form">
-            <section className="staff-step-card">
-              <div className="staff-step-head">
-                <span>1</span>
-                <div>
-                  <strong>Kondisi barang ini sekarang?</strong>
-                  <small>
-                    Pilih jawaban paling dekat dengan kondisi lapangan.
-                  </small>
+            {!roomAlreadyGood ? (
+              <section className="staff-step-card">
+                <div className="staff-step-head">
+                  <span>1</span>
+                  <div>
+                    <strong>Kondisi barang ini sekarang?</strong>
+                    <small>
+                      Status tercatat: bermasalah. Pilih kondisi terbaru di lapangan.
+                    </small>
+                  </div>
                 </div>
+                <div className="staff-choice-grid two">
+                  <ChoiceCard
+                    active={roomTriage === "NORMAL"}
+                    title="Sudah kembali baik"
+                    helper="Barang sudah diperbaiki / berfungsi normal lagi."
+                    tone="good"
+                    onClick={() => chooseRoomTriage("NORMAL")}
+                  />
+                  <ChoiceCard
+                    active={roomTriage === "PROBLEM"}
+                    title="Masih ada masalah"
+                    helper="Barang rusak, hilang, atau perlu dicek."
+                    tone="warning"
+                    onClick={() => chooseRoomTriage("PROBLEM")}
+                  />
+                </div>
+              </section>
+            ) : (
+              <div className="staff-system-rule-note">
+                <strong>Status saat ini: Baik</strong>
+                <span>Karena kondisinya sudah baik, langsung laporkan masalah yang kamu temukan di bawah.</span>
               </div>
-              <div className="staff-choice-grid two">
-                <ChoiceCard
-                  active={roomTriage === "NORMAL"}
-                  title="Normal"
-                  helper="Barang terlihat aman atau sudah kembali baik."
-                  tone="good"
-                  onClick={() => chooseRoomTriage("NORMAL")}
-                />
-                <ChoiceCard
-                  active={roomTriage === "PROBLEM"}
-                  title="Ada masalah"
-                  helper="Barang rusak, hilang, atau perlu dicek."
-                  tone="warning"
-                  onClick={() => chooseRoomTriage("PROBLEM")}
-                />
-              </div>
-            </section>
+            )}
 
             {roomTriage === "PROBLEM" ? (
               <section className="staff-step-card">
                 <div className="staff-step-head">
-                  <span>2</span>
+                  <span>{roomAlreadyGood ? "1" : "2"}</span>
                   <div>
                     <strong>Masalah yang terlihat?</strong>
                     <small>
@@ -526,7 +563,7 @@ export default function StaffInventoryStatusModal({
             {roomNeedsHandlingStep ? (
               <section className="staff-step-card">
                 <div className="staff-step-head">
-                  <span>3</span>
+                  <span>{roomAlreadyGood ? "2" : "3"}</span>
                   <div>
                     <strong>Menurut kondisi lapangan, perlu apa?</strong>
                     <small>
@@ -633,7 +670,7 @@ export default function StaffInventoryStatusModal({
             </Form.Text>
           </Form.Group>
           <Form.Group>
-            <Form.Label>Catatan lapangan</Form.Label>
+            <Form.Label>Info kondisi barang</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -645,6 +682,7 @@ export default function StaffInventoryStatusModal({
                   : "Contoh: jumlah fisik hanya 3 pcs, di sistem tertulis 8 pcs"
               }
             />
+            <Form.Text muted>Terisi otomatis dari ringkasan pilihan — lengkapi detail kondisinya bila perlu.</Form.Text>
           </Form.Group>
         </div>
 
