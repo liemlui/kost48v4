@@ -20,6 +20,7 @@
 | 3. Admin-review field report (boleh buat movement) | `staff-field-reports.service.ts:478-505` | ❌ | ❌ | 🔴 I-02 |
 
 ## 3. Temuan audit
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** 🔴 **I-02/F2-5 SUDAH DITUTUP** — `adminReview` kini pakai util bersama `common/utils/room-booking.util` (`assertRoomItemQtyAvailableTx`/`syncRoomItemTx`) dgn lock + validasi qty RETURN (`staff-field-reports.service.ts:11,488-489`). Ghost-stock via admin-review tertutup; helper terkonsolidasi (X-01/X-03/I-03 ikut beres). Baris 🔴/🟠 di tabel = historis, bukan TODO.
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | I-02 | 🔴 P2 | adminReview buat movement TANPA lock + TANPA validasi qty-kamar RETURN → bisa ghost-stock (kamar 1 kasur, RETURN qty 3 → gudang +2 fiktif). Satu-satunya vektor ghost-stock nyata. | `staff-field-reports.service.ts:478-505,563-597` | **F2-5** pakai util movement resmi (lock+validasi) |

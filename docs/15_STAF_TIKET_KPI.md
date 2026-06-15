@@ -23,6 +23,7 @@
 | Staff review (tenant rating) | `reviews` module |
 
 ## 3. Temuan audit
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** **K-5/F2-14 SUDAH SELESAI** — `monthRange` dihitung dalam WIB (`staff-performance.service.ts:9-22`), laporan bulanan tak bergeser hari. Round-robin tiket SISTEM (AUD-5/F5-3) kini juga aktif (util bersama `pickRoundRobinStaffTx`); tiket cuci AC dibuat tanpa assignee + bisa ditandai vendor. Baris di tabel/task = historis.
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | K-1 | ✅ RESOLVED (F3-19, 2026-06-14) | Waktu penyelesaian KPI dihitung dari `assignedAt` (bukan `createdAt`) via `avgResolutionHours` di staff summary — idle antrean tak menghukum staf. | `staff-performance.service.ts` | **F3-19** |

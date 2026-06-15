@@ -122,7 +122,7 @@
 
 ### 🔍 AUDIT MENYELURUH SEMUA FASE (2026-06-15 — `docs/AUDIT_MENYELURUH_SEMUA_FASE.md`)
 **Hasil:** TIDAK ada 🔴 bug baru di seluruh fase; 🔴 warisan ghost-stock (I-02) ternyata SUDAH ditutup. Temuan:
-- [ ] **SINKRON-DOC 🟡** Tabel §3 Temuan / §4 Task dossier **10/11/13/14/15/18 BASI** — banyak item ditandai open (🔴/🟠) padahal kode SUDAH selesai (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14). Rapikan tabel agar tak mengira task selesai = belum. _(docs, bukan kode)_
+- [x] **SINKRON-DOC 🟡 → SELESAI (docs)** Banner "🔄 SINKRON KODE (2026-06-15)" ditambahkan di §3 dossier **10/11/13/14/15/18** menandai item yang ditandai open (🔴/🟠) tapi SUDAH selesai di kode (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14) + anchor verifikasi. (Severity tabel = historis, bukan TODO.)
 - [x] **L-1 🟠 (= AUD-8/A-8) → F5-6 SELESAI** Sweeper `runAutoJournalReconciliation` (backfill jurnal warisan yang bolong + alert OWNER/ADMIN, di runAll sebelum auto-close; endpoint manual). UAT: backfill 1 invoice, TB seimbang, idempoten (D-22.1).
 - [x] **B-9 🟡 → F5-5 SELESAI** Field `referredByCode` di pendaftaran tenant admin/portal → `linkReferralTx` (D-22.4).
 - [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).

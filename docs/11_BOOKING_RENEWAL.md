@@ -27,6 +27,7 @@
 | Renew request dua fase | `renew-requests.service.ts`: DP PAID → terbitkan invoice pelunasan; pelunasan PAID → finalisasi stay melalui `stays.service.ts` |
 
 ## 3. Temuan audit
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** **C3/F1-10** SUDAH SELESAI — deposit jaminan dikunci ke `Room.defaultDepositRupiah` (`tenant-bookings.service.ts:342-343` + `stays.service.ts:191-192`), admin tak bisa override. Baris 🟠 di tabel = historis, bukan TODO.
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | GAP #2 / B-03 | ✅ RESOLVED | Renewal DP penuh + state machine + invoice DP terpisah + rent-loyalty + sweeper hibrida + deadline-gate command (R3) selesai 2026-06-14. | `renew-requests.service.ts` | **F2-1 selesai** |

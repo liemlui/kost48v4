@@ -23,6 +23,7 @@
 | File proof terproteksi (pola utk KTP) | `payment-submissions` proof endpoint + `common/utils/file-signature.util.ts` |
 
 ## 3. Temuan audit
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** **X-01/X-03/F2-5 SUDAH SELESAI** — helper keselamatan (qty inventaris, ticket-number, room-release) dikonsolidasi ke `common/utils/` (mis. `room-booking.util`, `staff-assignment.util`, `ticket-number.util`); jalur admin-review pakai util sama (ghost-stock tertutup). **Catatan go-live (L-4):** gate aktivasi KTP default OFF → WAJIB `KTP_ACTIVATION_GATE_ENABLED=true` di produksi (`04_DEPLOY`).
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | D-17 OWNER-only | ✅ SELESAI (2026-06-14) | 4 area kini OWNER-only (ADMIN→403): periode, user/staf (+role/isActive), setelan kamar & harga, deposit/refund. UAT lulus. | `users`/`rooms`/`stays`/`accounting` controller @Roles | **F2-16 ✅** |

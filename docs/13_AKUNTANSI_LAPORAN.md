@@ -33,6 +33,7 @@
 | General Ledger query | Prisma raw + report helpers |
 
 ## 3. Temuan audit
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** tabel BASI — fix laporan & guard berikut SUDAH SELESAI (lihat §6/§7/§8 + kode): **F-01/F-18→F1-3/F1-4** (cashflow & rasio: AR 11xx ≠ kas 10xx; `cashflow-classifier.ts` + `financial-ratios.helper.ts`), **F-02→F1-4** (expenseRatio presedensi), **F-17→F1-5** (balance sheet grouping), **F-09→F1-7** (DRAFT exclude revenue), **F-10→F1-9** (deposit ≠ operating cashflow), **F-24→F1-8** (guard settlement cek receipt journal, `accounting-posting.service.ts:631-641,727-736`). Severity 🔴/🟠 di tabel = historis. Catatan tetap relevan: **A-8 (best-effort auto-journal warisan)** kini punya sweeper rekonsiliasi otomatis (F5-6).
 | ID | Sev | Dampak bisnis | Lokasi | Fix/Task |
 |---|---|---|---|---|
 | F-01 | 🔴 P1 | Cashflow mendeteksi AR prefix `11` sebagai kas → laporan overstate. | `accounting-reports.service.ts` | **F1-3**: gunakan `cashAccountId`/prefix `10` |

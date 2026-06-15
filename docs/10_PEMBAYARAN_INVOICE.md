@@ -22,6 +22,7 @@
 | Issue/cancel invoice | `invoices.service.ts:444` issue, :480 cancel (lock+reversal blocking) |
 
 ## 3. Temuan audit (semua, dua-lapis: dampak bisnis + lokasi/fix)
+> 🔄 **SINKRON KODE (2026-06-15, audit menyeluruh):** tabel di bawah BASI — item berikut SUDAH SELESAI di kode (terverifikasi langsung): **B-01/F1-1R** no-partial menyeluruh (`payment-submissions.service.ts:418-450` gate approve + `invoice-payments.service.ts:167-172,223-228` manual lunas penuh); **GAP#3/F1-2** guard payment OCCUPIED (`invoice-payments.service.ts:270-276`). Severity 🔴/🟠 di tabel = status historis, bukan TODO aktif.
 | ID | Sev | Dampak bisnis | Lokasi kode | Fix / Task |
 |---|---|---|---|---|
 | B-01 | 🔴 P1 | GAP #1 sebagian tertutup; approve tidak re-validasi nominal dan pembayaran manual admin masih dapat mencatat nominal parsial. | `payment-submissions.service.ts` approve + `invoice-payments.service.ts` create/update | **F1-1R**: gate dua nominal booking; invoice-only/manual wajib lunas penuh |
