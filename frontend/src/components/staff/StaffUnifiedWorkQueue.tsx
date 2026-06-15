@@ -310,9 +310,9 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
       <Card className="staff-work-summary-card border-0">
         <Card.Body>
           <div>
-            <span className="staff-hero-pill">Pekerjaan Hari Ini</span>
-            <h2>Satu daftar kerja nyata</h2>
-            <p>Kebersihan rutin dan perbaikan digabung di sini. Mulai, selesaikan, atau kirim kendala dari satu antrean yang rapi.</p>
+            <span className="staff-hero-pill">Daftar Kerja</span>
+            <h2>Tugas yang perlu dikerjakan</h2>
+            <p>Lanjutan dari ringkasan di atas — di sinilah kamu mulai, selesaikan, atau kirim kendala. Kebersihan rutin & perbaikan jadi satu antrean.</p>
           </div>
           <div className="staff-work-summary-stats">
             <span><strong>{activeItem ? 1 : 0}</strong><small>Sedang dikerjakan</small></span>

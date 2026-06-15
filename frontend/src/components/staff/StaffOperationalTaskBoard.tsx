@@ -1,5 +1,6 @@
 import { Button, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { InventoryItem, Room, Ticket } from '../../types';
 import type { StaffRoutineKpiResponse, StaffRoutineTodayResponse } from '../../api/staffRoutines';
 import { getInventoryHealth, getInventoryPhysicalIssueLabel, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
@@ -10,6 +11,14 @@ const doneRoutineStatuses = new Set(['DONE', 'SKIPPED']);
 const urgentRoutineStatuses = new Set(['NEED_HELP', 'MISSED']);
 
 type LaneTone = 'danger' | 'warning' | 'info' | 'success' | 'neutral';
+
+const TONE_COLOR: Record<LaneTone, string> = {
+  danger: '#ef4444',
+  warning: '#f59e0b',
+  info: '#2563eb',
+  success: '#22c55e',
+  neutral: '#94a3b8',
+};
 
 type StaffLane = {
   id: string;
@@ -242,25 +251,46 @@ export default function StaffOperationalTaskBoard({ tickets, rooms, inventoryIte
           </div>
         </div>
 
-        <div className="staff-board-lanes" aria-label="Lane tugas staff">
+        {/* Komposisi tugas hari ini — chart ringkas modern (recharts). */}
+        <div className="staff-board-chart" aria-hidden="true">
+          <ResponsiveContainer width="100%" height={52}>
+            <BarChart
+              layout="vertical"
+              data={[lanes.reduce((row, lane) => ({ ...row, [lane.id]: lane.value }), { cat: 'today' } as Record<string, number | string>)]}
+              margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
+            >
+              <XAxis type="number" hide />
+              <YAxis type="category" dataKey="cat" hide />
+              <Tooltip cursor={{ fill: 'transparent' }} formatter={(value, name) => [value as number, lanes.find((l) => l.id === name)?.label ?? String(name)]} />
+              {lanes.map((lane, index) => (
+                <Bar
+                  key={lane.id}
+                  dataKey={lane.id}
+                  stackId="today"
+                  fill={TONE_COLOR[lane.tone]}
+                  radius={index === 0 ? [8, 0, 0, 8] : index === lanes.length - 1 ? [0, 8, 8, 0] : 0}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="staff-board-legend" aria-label="Rincian tugas staff">
           {lanes.map((lane) => {
-            const className = `staff-board-lane tone-${lane.tone}${lane.actionLabel ? ' is-actionable' : ' is-static'}`;
-            const content = (
+            const chipClass = `staff-board-legend-chip tone-${lane.tone}${lane.actionLabel ? ' is-clickable' : ''}`;
+            const inner = (
               <>
-                <span>{lane.label}</span>
+                <span className="staff-board-legend-dot" style={{ background: TONE_COLOR[lane.tone] }} />
                 <strong>{lane.value}</strong>
-                <small>{lane.helper}</small>
-                <em>{lane.actionLabel ?? 'Aman'}</em>
+                <span className="staff-board-legend-label">{lane.label}</span>
               </>
             );
             return lane.actionLabel ? (
-              <button type="button" key={lane.id} className={className} onClick={() => openStaffTarget(lane)}>
-                {content}
+              <button type="button" key={lane.id} className={chipClass} onClick={() => openStaffTarget(lane)} title={lane.actionLabel}>
+                {inner}
               </button>
             ) : (
-              <div key={lane.id} className={className} aria-label={`${lane.label}: aman`}>
-                {content}
-              </div>
+              <span key={lane.id} className={chipClass}>{inner}</span>
             );
           })}
         </div>

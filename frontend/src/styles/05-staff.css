@@ -1948,6 +1948,19 @@
   margin-bottom: 1rem;
 }
 
+/* Ringkasan tugas: chart komposisi modern + legenda chip (ganti lane tiles datar) */
+.staff-board-chart { margin: 0.35rem 0 0.7rem; }
+.staff-board-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.staff-board-legend-chip {
+  display: inline-flex; align-items: center; gap: 0.42rem;
+  border: 1px solid #e2e8f0; background: #fff; border-radius: 999px;
+  padding: 0.34rem 0.72rem; font-size: 0.82rem; color: #475569;
+}
+.staff-board-legend-chip strong { font-size: 0.95rem; color: #0f172a; }
+.staff-board-legend-chip.is-clickable { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.staff-board-legend-chip.is-clickable:hover { transform: translateY(-1px); border-color: #93c5fd; box-shadow: 0 8px 18px rgba(37, 99, 235, .10); }
+.staff-board-legend-dot { width: 9px; height: 9px; border-radius: 999px; flex-shrink: 0; }
+
 .staff-simple-hero.compact {
   padding: 1rem 1.1rem;
 }
