@@ -256,7 +256,7 @@ export default function ReportsPage() {
           </section>
 
           <Row className="g-3 mb-3">
-            <Col xl={5} lg={6}>
+            <Col xl={6} lg={6}>
               <Card className="report-panel h-100">
                 <Card.Header>
                   <span>Pergerakan Pendapatan</span>
@@ -267,7 +267,21 @@ export default function ReportsPage() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col xl={3} lg={6}>
+            <Col xl={6} lg={6}>
+              <Card className="report-panel h-100">
+                <Card.Header>
+                  <span>Pergerakan Pengeluaran</span>
+                  <Badge bg="warning" text="dark">{monthLabel(ym)}</Badge>
+                </Card.Header>
+                <Card.Body>
+                  <ExpenseMovement expenseSummary={expenseSummary.data!} />
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row className="g-3 mb-3">
+            <Col xl={4} lg={6}>
               <Card className="report-panel h-100">
                 <Card.Header><span>Okupansi Kamar</span></Card.Header>
                 <Card.Body>
@@ -275,7 +289,7 @@ export default function ReportsPage() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col xl={4}>
+            <Col xl={8} lg={6}>
               <Card className="report-panel h-100">
                 <Card.Header><span>Umur Tunggakan</span><Badge bg="danger">Risiko</Badge></Card.Header>
                 <Card.Body>
@@ -515,6 +529,18 @@ function RevenueRadar({ monthlyIncome, cashFlow, profitLoss }: { monthlyIncome: 
     { label: 'Net CF', value: Math.max(0, cashFlow.netCashFlowRupiah), color: '#7c3aed' },
   ];
   return <HorizontalBarChart points={rows} ariaLabel="Perbandingan revenue dan cashflow" valueFormatter={formatCompactRupiah} height={242} leftWidth={72} />;
+}
+
+function ExpenseMovement({ expenseSummary }: { expenseSummary: ExpenseSummary }) {
+  const palette = ['#f97316', '#ef4444', '#f59e0b', '#a855f7', '#0891b2', '#64748b'];
+  const rows = [...expenseSummary.categories]
+    .sort((a, b) => b.totalRupiah - a.totalRupiah)
+    .slice(0, 6)
+    .map((c, i) => ({ label: c.category || 'Lainnya', value: c.totalRupiah, color: palette[i % palette.length] }));
+  if (!rows.length || expenseSummary.totalExpenseRupiah <= 0) {
+    return <div className="text-muted small text-center py-5">Belum ada pengeluaran tercatat bulan ini.</div>;
+  }
+  return <HorizontalBarChart points={rows} ariaLabel="Pergerakan pengeluaran per kategori" valueFormatter={formatCompactRupiah} height={242} leftWidth={96} />;
 }
 
 function OverdueHeatmap({ data }: { data: OverdueAging }) {
