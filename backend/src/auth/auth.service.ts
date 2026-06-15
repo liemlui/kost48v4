@@ -13,6 +13,7 @@ import { Prisma } from '../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizePhone, denormalizePhone } from '../common/utils/phone.util';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateMyTipInfoDto } from './dto/update-my-tip-info.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -90,6 +91,40 @@ export class AuthService {
       role: user.role,
       tenantId: user.tenantId,
       isActive: user.isActive,
+      // F5-2 (AUD-2): info tip P2P agar staf bisa lihat/edit sendiri.
+      tipGopay: user.tipGopay,
+      tipOvo: user.tipOvo,
+      tipDana: user.tipDana,
+      tipBank: user.tipBank,
+    };
+  }
+
+  /**
+   * F5-2 (AUD-2 / D-21.2): staf mengisi sendiri info tip P2P (e-wallet/bank).
+   * String kosong / hanya spasi → null (hapus). Tidak dijurnal (P2P di luar buku kos).
+   */
+  async updateMyTipInfo(userId: number, dto: UpdateMyTipInfoDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User pada token tidak ditemukan');
+    if (!user.isActive) throw new ForbiddenException('User tidak aktif atau akses dicabut');
+
+    const clean = (v?: string) => {
+      if (v === undefined) return undefined; // tak diubah
+      const t = v.trim();
+      return t.length === 0 ? null : t;
+    };
+    const data: Record<string, string | null> = {};
+    if (dto.tipGopay !== undefined) data.tipGopay = clean(dto.tipGopay) as string | null;
+    if (dto.tipOvo !== undefined) data.tipOvo = clean(dto.tipOvo) as string | null;
+    if (dto.tipDana !== undefined) data.tipDana = clean(dto.tipDana) as string | null;
+    if (dto.tipBank !== undefined) data.tipBank = clean(dto.tipBank) as string | null;
+
+    const updated = await this.prisma.user.update({ where: { id: userId }, data });
+    return {
+      tipGopay: updated.tipGopay,
+      tipOvo: updated.tipOvo,
+      tipDana: updated.tipDana,
+      tipBank: updated.tipBank,
     };
   }
 

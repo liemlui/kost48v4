@@ -1,12 +1,16 @@
-﻿import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+﻿import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../common/enums/app.enums';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { CurrentUserPayload } from '../common/interfaces/current-user.interface';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateMyTipInfoDto } from './dto/update-my-tip-info.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -55,5 +59,15 @@ export class AuthController {
   async changePassword(@CurrentUser() user: CurrentUserPayload, @Body() dto: ChangePasswordDto) {
     const data = await this.authService.changePassword(user.id, dto);
     return { message: 'Password berhasil diperbarui', data };
+  }
+
+  // F5-2 (AUD-2 / D-21.2): staf mengisi sendiri info tip P2P (e-wallet/bank). Self-service STAFF.
+  @Patch('me/tip-info')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.STAFF)
+  @ApiBearerAuth()
+  async updateMyTipInfo(@CurrentUser() user: CurrentUserPayload, @Body() dto: UpdateMyTipInfoDto) {
+    const data = await this.authService.updateMyTipInfo(user.id, dto);
+    return { message: 'Info tip berhasil diperbarui', data };
   }
 }

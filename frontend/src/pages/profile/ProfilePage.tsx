@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import PasswordInput from '../../components/common/PasswordInput';
-import { changePassword } from '../../api/auth';
+import { changePassword, updateMyTipInfo } from '../../api/auth';
 import { getTenantProfile, fillTenantProfileOnboarding } from '../../api/tenants';
 import type { TenantProfileOnboardingPayload } from '../../api/tenants';
 import PageHeader from '../../components/common/PageHeader';
@@ -74,6 +74,28 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isTenant = user?.role === 'TENANT';
+  const isStaff = user?.role === 'STAFF';
+
+  // F5-2 (AUD-2): info tip P2P staf (self-service).
+  const [tipForm, setTipForm] = useState({
+    tipGopay: user?.tipGopay ?? '',
+    tipOvo: user?.tipOvo ?? '',
+    tipDana: user?.tipDana ?? '',
+    tipBank: user?.tipBank ?? '',
+  });
+  const [tipError, setTipError] = useState('');
+  const [tipSuccess, setTipSuccess] = useState('');
+  const tipMutation = useMutation({
+    mutationFn: () => updateMyTipInfo(tipForm),
+    onSuccess: () => {
+      setTipSuccess('Info tip berhasil disimpan. Penghuni akan melihatnya di tiket yang sudah selesai.');
+      setTipError('');
+    },
+    onError: (err: unknown) => {
+      setTipError(getApiErrorMessage(err, 'Gagal menyimpan info tip.'));
+      setTipSuccess('');
+    },
+  });
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -260,6 +282,51 @@ export default function ProfilePage() {
           </Card>
         </Col>
       </Row>
+
+      {/* ── Staff: Info Tip (E-wallet) self-service (F5-2 / AUD-2) ── */}
+      {isStaff && (
+        <Card className="content-card border-0 mt-4">
+          <Card.Body>
+            <h5 className="mb-1">Info Tip (E-wallet / Bank)</h5>
+            <p className="text-muted small mb-3">
+              Isi tautan / nomor e-wallet kamu. Penghuni dapat memberi tip langsung ke kamu setelah keluhan
+              selesai. Tip ini langsung dari penghuni ke kamu dan <strong>tidak dipotong / dicatat pengelola</strong>.
+              Kosongkan untuk menghapus.
+            </p>
+            {tipError ? <Alert variant="danger">{tipError}</Alert> : null}
+            {tipSuccess ? <Alert variant="success">{tipSuccess}</Alert> : null}
+            <Row className="g-3">
+              {([
+                { key: 'tipGopay', label: 'GoPay', placeholder: 'Nomor GoPay / tautan' },
+                { key: 'tipOvo', label: 'OVO', placeholder: 'Nomor OVO' },
+                { key: 'tipDana', label: 'DANA', placeholder: 'Nomor DANA' },
+                { key: 'tipBank', label: 'Bank (nama bank + no. rekening + a.n.)', placeholder: 'mis. BCA 1234567890 a.n. Budi' },
+              ] as const).map((f) => (
+                <Col md={6} key={f.key}>
+                  <Form.Group>
+                    <Form.Label>{f.label}</Form.Label>
+                    <Form.Control
+                      value={tipForm[f.key]}
+                      onChange={(e) => {
+                        setTipForm((prev) => ({ ...prev, [f.key]: e.target.value }));
+                        if (tipSuccess) setTipSuccess('');
+                        if (tipError) setTipError('');
+                      }}
+                      placeholder={f.placeholder}
+                      maxLength={f.key === 'tipBank' ? 200 : 120}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+            <div className="d-flex justify-content-end mt-3">
+              <Button onClick={() => tipMutation.mutate()} disabled={tipMutation.isPending}>
+                {tipMutation.isPending ? 'Menyimpan...' : 'Simpan Info Tip'}
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      )}
 
       {/* ── Tenant onboarding: Data Penghuni Tambahan ── */}
       {isTenant && (

@@ -19,6 +19,19 @@ export async function changePassword(payload: {
   return response.data.data;
 }
 
+export type TipInfoPayload = {
+  tipGopay?: string;
+  tipOvo?: string;
+  tipDana?: string;
+  tipBank?: string;
+};
+
+// F5-2 (AUD-2): staf isi sendiri info tip P2P (e-wallet/bank).
+export async function updateMyTipInfo(payload: TipInfoPayload) {
+  const response = await client.patch<ApiEnvelope<TipInfoPayload>>('/auth/me/tip-info', payload);
+  return response.data.data;
+}
+
 export async function forgotPassword(payload: { identifier: string }) {
   const response = await client.post<ApiEnvelope<{ success: boolean; resetTokenPreview?: string; expiresAt?: string; channel?: string; destination?: string | null }>>('/auth/forgot-password', payload);
   return response.data.data;

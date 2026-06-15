@@ -44,6 +44,11 @@ export type AuthUser = {
   tenantId: number | null;
   isActive: boolean;
   lastLoginAt?: string | null;
+  // F5-2 (AUD-2): info tip P2P staf (self-service).
+  tipGopay?: string | null;
+  tipOvo?: string | null;
+  tipDana?: string | null;
+  tipBank?: string | null;
 };
 
 export type Tenant = {
