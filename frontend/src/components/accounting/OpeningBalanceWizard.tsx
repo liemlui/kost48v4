@@ -195,7 +195,7 @@ export default function OpeningBalanceWizard({
           </Row>
 
           <Table responsive className="mt-3 accounting-lines-table">
-            <thead><tr><th>COA</th><th>Deskripsi</th><th>Debit</th><th>Kredit</th><th /></tr></thead>
+            <thead><tr><th>Akun</th><th>Deskripsi</th><th>Debit</th><th>Kredit</th><th /></tr></thead>
             <tbody>
               {lines.map((line) => (
                 <tr key={line.key}>

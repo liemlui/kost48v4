@@ -23,7 +23,7 @@ export default function TrialBalancePreview({ trial }: { trial?: TrialBalance })
           <div className="status-strip-item info"><span className="status-strip-label">Kredit</span><strong>{formatRupiah(trial?.totalCreditRupiah ?? 0)}</strong></div>
         </div>
         <Table responsive hover className="mb-0 small">
-          <thead><tr><th>COA</th><th>Tipe</th><th>Debit</th><th>Kredit</th><th>Balance</th></tr></thead>
+          <thead><tr><th>Akun</th><th>Tipe</th><th>Debit</th><th>Kredit</th><th>Balance</th></tr></thead>
           <tbody>
             {lines.length ? linePagination.pagedItems.map((line) => (
               <tr key={line.accountId}>

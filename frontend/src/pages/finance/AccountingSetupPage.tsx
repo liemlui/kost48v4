@@ -169,10 +169,10 @@ export default function AccountingSetupPage() {
     onMutate: () => { setActionError(null); setActionMessage(null); },
     onSuccess: async (result) => {
       setActionError(null);
-      setActionMessage(`Default COA siap: ${result.seededCount} akun.`);
+      setActionMessage(`Bagan Akun (COA) siap: ${result.seededCount} akun.`);
       await refreshAccounting();
     },
-    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal seed default COA.')); },
+    onError: (error: unknown) => { setActionMessage(null); setActionError(getApiErrorMessage(error, 'Gagal menyiapkan Bagan Akun (COA).')); },
   });
 
   const createCashMutation = useMutation({
@@ -340,7 +340,7 @@ export default function AccountingSetupPage() {
         eyebrow="Finance · Laporan Keuangan"
         title="Laporan Keuangan & Kesehatan Ledger"
         description="Cockpit owner untuk membaca Trial Balance, Neraca, Laba Rugi, aset, kualitas data, dan status tutup periode tanpa jargon fase teknis."
-        secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>Siapkan COA Default</Button>}
+        secondaryAction={<Button variant="outline-primary" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending} title="Bagan Akun (Chart of Accounts): daftar akun standar untuk mencatat keuangan kos">Siapkan Bagan Akun (COA)</Button>}
       />
 
       <div className="admin-area-internal-menu finance-inline-menu" aria-label="Sub-menu Finance">
@@ -372,7 +372,7 @@ export default function AccountingSetupPage() {
 
       <StatusStrip
         items={[
-          { id: 'coa', label: 'COA aktif', value: accounts.length, helper: 'Default COA kos', tone: accounts.length >= 30 ? 'success' : 'warning' },
+          { id: 'coa', label: 'Bagan Akun (COA)', value: accounts.length, helper: 'Daftar akun standar kos', tone: accounts.length >= 30 ? 'success' : 'warning' },
           { id: 'cash', label: 'Cash/Bank', value: cashAccounts.length, helper: 'Minimal 1 akun', tone: cashAccounts.length ? 'success' : 'warning' },
           { id: 'period', label: 'Periode', value: periods.length, helper: 'Bulan accounting', tone: periods.length ? 'success' : 'warning' },
           { id: 'opening', label: 'Saldo Awal', value: postedOpeningBalance ? 'POSTED' : draftOpeningBalance ? 'DRAFT' : 'Belum', helper: 'Titik mulai neraca', tone: postedOpeningBalance ? 'success' : draftOpeningBalance ? 'warning' : 'danger' },

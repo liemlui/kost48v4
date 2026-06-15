@@ -50,7 +50,7 @@ export default function CashAccountSetupPanel({
       <Card.Body>
         <div className="section-kicker mb-2">Cash / Bank setup</div>
         <h3 className="panel-title mb-1">Akun kas dan bank</h3>
-        <p className="text-muted">Buat minimal satu cash account agar readiness naik dan saldo awal bisa dikaitkan ke COA asset.</p>
+        <p className="text-muted">Buat minimal satu akun kas/bank agar readiness naik dan saldo awal bisa dikaitkan ke akun aset di Bagan Akun (COA).</p>
         <Form onSubmit={submit} className="accounting-mini-form">
           <Form.Group>
             <Form.Label>Nama akun</Form.Label>
@@ -63,7 +63,7 @@ export default function CashAccountSetupPanel({
             </Form.Select>
           </Form.Group>
           <Form.Group>
-            <Form.Label>COA Asset</Form.Label>
+            <Form.Label>Akun Aset (di Bagan Akun)</Form.Label>
             <Form.Select value={selectedAccountId} onChange={(event) => setChartOfAccountId(Number(event.target.value))}>
               {assetAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
             </Form.Select>
@@ -84,7 +84,7 @@ export default function CashAccountSetupPanel({
         </Form>
 
         <Table responsive hover className="mt-3 mb-0 small">
-          <thead><tr><th>Akun</th><th>Tipe</th><th>COA</th><th>Saldo</th></tr></thead>
+          <thead><tr><th>Akun</th><th>Tipe</th><th>Akun (COA)</th><th>Saldo</th></tr></thead>
           <tbody>
             {cashAccounts.length ? cashAccounts.map((item) => (
               <tr key={item.id}>

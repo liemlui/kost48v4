@@ -12,7 +12,7 @@ export default function AccountingReadinessCard({ readiness }: { readiness?: Acc
         <div className="d-flex justify-content-between align-items-start gap-3 mb-2">
           <div>
             <h3 className="panel-title mb-1">Gate laporan keuangan</h3>
-            <p className="text-muted mb-0">Laporan owner aman dibaca jika COA, cash/bank, periode, saldo awal, dan jurnal pembuka sudah lengkap.</p>
+            <p className="text-muted mb-0">Laporan owner aman dibaca jika Bagan Akun (COA), kas/bank, periode, saldo awal, dan jurnal pembuka sudah lengkap.</p>
           </div>
           <div className="accounting-score-pill">{score}%</div>
         </div>
