@@ -1945,6 +1945,7 @@
   background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,246,255,0.9));
   padding: 1.15rem 1.25rem;
   box-shadow: 0 16px 34px rgba(30, 64, 175, 0.07);
+  margin-bottom: 1rem;
 }
 
 .staff-simple-hero.compact {
