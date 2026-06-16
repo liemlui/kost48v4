@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card } from 'react-bootstrap';
 import PageHeader from '../../components/common/PageHeader';
 import PaginationControls from '../../components/common/PaginationControls';
+import SegmentedTabs from '../../components/common/SegmentedTabs';
 import { type TicketItem, type StatusTab, getStaffStatusText, getStatusClass, getStaffCategoryText, getStaffLocation, staffSortScore } from './ticketsShared';
 
 export default function StaffTicketsMode({
@@ -45,11 +46,11 @@ export default function StaffTicketsMode({
   const totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
   const pagedItems = visibleItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const chips: { key: StatusTab; label: string; count: number }[] = [
-    { key: 'ALL', label: 'Semua tugas', count: openCount + progressCount },
-    { key: 'URGENT', label: 'Kerjakan dulu', count: openCount },
-    { key: 'IN_PROGRESS', label: 'Sedang dikerjakan', count: progressCount },
-    { key: 'DONE', label: 'Tunggu dicek', count: doneCount },
+  const chips: { key: StatusTab; label: string; count: number; icon: string }[] = [
+    { key: 'ALL', label: 'Semua tugas', count: openCount + progressCount, icon: '📋' },
+    { key: 'URGENT', label: 'Kerjakan dulu', count: openCount, icon: '🔥' },
+    { key: 'IN_PROGRESS', label: 'Sedang dikerjakan', count: progressCount, icon: '🛠️' },
+    { key: 'DONE', label: 'Tunggu dicek', count: doneCount, icon: '👀' },
   ];
 
   return (
@@ -60,14 +61,13 @@ export default function StaffTicketsMode({
       {isError ? <Alert variant="danger" className="staff-alert">Tugas belum bisa dimuat. Coba muat ulang halaman.</Alert> : null}
       <Card className="staff-work-panel border-0">
         <Card.Body>
-          <div className="staff-filter-row" aria-label="Pilih jenis tugas">
-            {chips.map((chip) => (
-              <button key={chip.key} type="button" className={`staff-filter-chip${activeTab === chip.key ? ' active' : ''}`} onClick={() => setActiveTab(chip.key)}>
-                <span>{chip.label}</span>
-                <strong>{chip.count}</strong>
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            ariaLabel="Pilih jenis tugas"
+            size="md"
+            value={activeTab}
+            onChange={setActiveTab}
+            items={chips.map((chip) => ({ key: chip.key, label: chip.label, icon: chip.icon, count: chip.count }))}
+          />
           {isLoading ? <div className="staff-empty-box">Memuat tugas...</div> : null}
           {!isLoading && !isError && !visibleItems.length ? (
             <div className="staff-empty-box"><strong>Tidak ada tugas sekarang.</strong><span>Kalau ada pekerjaan baru, akan muncul di sini.</span></div>

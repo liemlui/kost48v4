@@ -7,6 +7,7 @@ import { listStaffFieldReports } from '../../api/staffFieldReports';
 import { fieldReportStatusLabels, getTicketStatusLabel } from '../../constants/staffRepairOptions';
 import { uploadTicketImage, type UploadedImageMeta } from '../../api/mediaUploads';
 import PaginationControls from '../common/PaginationControls';
+import SegmentedTabs from '../common/SegmentedTabs';
 import CameraOrGalleryInput from '../common/CameraOrGalleryInput';
 import SafeImage from '../common/SafeImage';
 import { useClientPagination } from '../../hooks/useClientPagination';
@@ -55,6 +56,10 @@ const filters: Array<{ key: WorkFilterKey; label: string }> = [
   { key: 'METER', label: 'Meter' },
   { key: 'DONE', label: 'Selesai' },
 ];
+
+const WORK_FILTER_ICONS: Partial<Record<WorkFilterKey, string>> = {
+  ALL: '📋', CLEANING: '🧹', REPAIR: '🔧', ROOM: '🚪', WAREHOUSE: '📦', METER: '⚡', DONE: '✅',
+};
 
 
 function fieldReportTitle(report: StaffFieldReport) {
@@ -363,29 +368,19 @@ export default function StaffUnifiedWorkQueue({ routines, tickets, isLoading, on
         </Card>
       ) : null}
 
-      <div className="staff-filter-row compact" aria-label="Filter pekerjaan hari ini">
-        {filters.map((filter) => {
+      <SegmentedTabs
+        ariaLabel="Filter pekerjaan hari ini"
+        value={activeFilter}
+        onChange={setActiveFilter}
+        items={filters.map((filter) => {
           const count = filter.key === 'ALL'
             ? activeWorkItems.length
             : filter.key === 'DONE'
               ? doneWorkItems.length
               : activeWorkItems.filter((item) => item.type === filter.key).length;
-          const isEmpty = count === 0;
-          return (
-            <button
-              key={filter.key}
-              type="button"
-              className={`staff-filter-chip${activeFilter === filter.key ? ' active' : ''}${isEmpty ? ' is-empty' : ''}`}
-              onClick={() => !isEmpty || activeFilter === filter.key ? setActiveFilter(filter.key) : undefined}
-              disabled={isEmpty && activeFilter !== filter.key}
-              aria-disabled={isEmpty && activeFilter !== filter.key}
-            >
-              <span>{filter.label}</span>
-              <strong>{count}</strong>
-            </button>
-          );
+          return { key: filter.key, label: filter.label, icon: WORK_FILTER_ICONS[filter.key], count, disabled: count === 0 };
         })}
-      </div>
+      />
 
       {successMessage ? <Alert variant="success" className="staff-alert">{successMessage}</Alert> : null}
       {actionMutation.isError && error ? <Alert variant="danger" className="staff-alert">{error}</Alert> : null}

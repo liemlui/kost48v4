@@ -7,8 +7,13 @@ import PaginationControls from '../common/PaginationControls';
 import type { InventoryItem } from '../../types';
 import { getInventoryHealth, getInventoryPhysicalIssueLabel, isInventoryPhysicalIssue } from '../../utils/inventoryHealth';
 import StaffInventoryStatusModal from './StaffInventoryStatusModal';
+import SegmentedTabs from '../common/SegmentedTabs';
 
 type InventoryViewFilter = 'ALL' | 'ATTENTION' | 'OUT' | 'LOW' | 'PHYSICAL' | 'GOOD';
+
+const STATUS_ICONS: Record<InventoryViewFilter, string> = {
+  ALL: '📦', ATTENTION: '⚠️', OUT: '⛔', LOW: '🔻', PHYSICAL: '🔧', GOOD: '✅',
+};
 
 function priorityScore(item: InventoryItem) {
   const health = getInventoryHealth(item);
@@ -109,36 +114,31 @@ export default function StaffGeneralInventorySection({ embedded = false }: { emb
           <div className="staff-inventory-filters">
             <div className="staff-inventory-filter-group">
               <span className="staff-inventory-filter-label">Status stok</span>
-              <div className="staff-inventory-filter-row" aria-label="Filter status stok">
-                {inventoryFilters.map((filter) => {
-                  if (filter.id !== 'ALL' && filter.count === 0) return null;
-                  return (
-                    <button
-                      type="button"
-                      key={filter.id}
-                      className={`staff-filter-chip${activeFilter === filter.id ? ' active' : ''}`}
-                      onClick={() => setActiveFilter(filter.id)}
-                    >
-                      <span>{filter.label}</span>
-                      <strong>{filter.count}</strong>
-                    </button>
-                  );
-                })}
-              </div>
+              <SegmentedTabs
+                ariaLabel="Filter status stok"
+                rowClassName="staff-inventory-filter-row"
+                size="md"
+                value={activeFilter}
+                onChange={setActiveFilter}
+                items={inventoryFilters
+                  .filter((f) => f.id === 'ALL' || f.count > 0)
+                  .map((f) => ({ key: f.id, label: f.label, icon: STATUS_ICONS[f.id], count: f.count }))}
+              />
             </div>
             {categories.length > 1 ? (
               <div className="staff-inventory-filter-group">
                 <span className="staff-inventory-filter-label">Kategori barang</span>
-                <div className="staff-inventory-filter-row" aria-label="Filter kategori barang">
-                  <button type="button" className={`staff-filter-chip${activeCategory === 'ALL' ? ' active' : ''}`} onClick={() => setActiveCategory('ALL')}>
-                    <span>Semua kategori</span><strong>{items.length}</strong>
-                  </button>
-                  {categories.map(([cat, count]) => (
-                    <button type="button" key={cat} className={`staff-filter-chip${activeCategory === cat ? ' active' : ''}`} onClick={() => setActiveCategory(cat)}>
-                      <span>{cat}</span><strong>{count}</strong>
-                    </button>
-                  ))}
-                </div>
+                <SegmentedTabs
+                  ariaLabel="Filter kategori barang"
+                  rowClassName="staff-inventory-filter-row"
+                  size="md"
+                  value={activeCategory}
+                  onChange={setActiveCategory}
+                  items={[
+                    { key: 'ALL', label: 'Semua kategori', icon: '📋', count: items.length },
+                    ...categories.map(([cat, count]) => ({ key: cat, label: cat, icon: '🏷️', count })),
+                  ]}
+                />
               </div>
             ) : null}
           </div>
