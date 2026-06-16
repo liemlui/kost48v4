@@ -19,6 +19,8 @@
     "golive": "node scripts/golive.mjs",
     "golive:setup": "npm run build && node scripts/golive-setup.js",
     "seed:owner": "node scripts/seed-owner.js",
+    "seed:dev:reset": "node scripts/seed-dev-reset.js",
+    "seed:dev:api": "node scripts/seed-dev-via-api.js",
     "cpanel:setup": "npm ci && npm run build && npm prune --omit=dev",
     "cpanel:migrate": "prisma db push",
     "start:prod": "node --max-old-space-size=256 dist/main.js",
