@@ -46,6 +46,10 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - **FIX CORS dev** — `main.ts`: dev kini izinkan **semua origin localhost/127.0.0.1 port apa pun**
   (Vite bisa geser 5173→5174→5175) meski `.env CORS_ORIGIN` hanya 5173 → login dari **5174** sempat
   diblokir browser (curl jalan, browser gagal). Produksi tetap wajib CORS_ORIGIN eksplisit. Verified: fetch dari origin 5174 → 201.
+- **U-2** — Kartu status BESAR di dashboard admin (`AdminHealthChips`): dari pill kecil → kartu vertikal
+  (angka besar + eyebrow label + aksen warna kiri per status success/warning/danger/info), setara kartu
+  metrik owner. Owner dashboard sudah punya kartu metrik besar. CSS `09-finance.css`. (Pemisahan hak
+  owner/admin sendiri sudah ditegakkan backend via `@Roles`.)
 - Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
   pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
 
