@@ -27,11 +27,11 @@ import {
 } from '../../utils/publicRoomDisplay';
 
 const NAV_LINKS = [
-  { href: '#pilihan-kamar', label: 'Kamar' },
-  { href: '#fasilitas', label: 'Fasilitas' },
-  { href: '#lokasi', label: 'Lokasi' },
-  { href: '#ulasan', label: 'Ulasan' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '#pilihan-kamar', icon: '🛏️', label: 'Kamar' },
+  { href: '#fasilitas', icon: '✨', label: 'Fasilitas' },
+  { href: '#lokasi', icon: '📍', label: 'Lokasi' },
+  { href: '#ulasan', icon: '⭐', label: 'Ulasan' },
+  { href: '#faq', icon: '❓', label: 'FAQ' },
 ];
 
 const GALLERY_ITEMS = [
@@ -45,32 +45,32 @@ const FACILITY_GROUPS = [
     id: 'umum',
     title: 'Umum',
     items: [
-      { mark: 'P', label: 'Parkir luas', desc: 'Ruang parkir untuk mobil dan motor.' },
-      { mark: 'D', label: 'Dapur bersama', desc: 'Area masak bersama untuk kebutuhan harian.' },
-      { mark: 'A', label: 'Air PDAM + tandon', desc: 'Pasokan air dibantu tandon cadangan.' },
-      { mark: 'B', label: 'Balkon santai', desc: 'Area terbuka untuk istirahat sejenak.' },
-      { mark: 'J', label: 'Area jemur', desc: 'Beberapa titik jemur di area kos.' },
-      { mark: 'T', label: 'Taman & area hijau', desc: 'Lingkungan lebih teduh dan nyaman.' },
+      { mark: '🅿️', label: 'Parkir luas', desc: 'Ruang parkir untuk mobil dan motor.' },
+      { mark: '🍳', label: 'Dapur bersama', desc: 'Area masak bersama untuk kebutuhan harian.' },
+      { mark: '💧', label: 'Air PDAM + tandon', desc: 'Pasokan air dibantu tandon cadangan.' },
+      { mark: '🌅', label: 'Balkon santai', desc: 'Area terbuka untuk istirahat sejenak.' },
+      { mark: '🧺', label: 'Area jemur', desc: 'Beberapa titik jemur di area kos.' },
+      { mark: '🌳', label: 'Taman & area hijau', desc: 'Lingkungan lebih teduh dan nyaman.' },
     ],
   },
   {
     id: 'kamar',
     title: 'Kamar',
     items: [
-      { mark: 'K', label: 'Kasur', desc: 'Tipe kasur menyesuaikan kamar yang dipilih.' },
-      { mark: 'L', label: 'Lemari baju', desc: 'Penyimpanan dasar tersedia di kamar.' },
-      { mark: 'AC', label: 'AC / kipas', desc: 'Pilihan pendingin sesuai tipe kamar.' },
-      { mark: 'KM', label: 'Kamar mandi', desc: 'Pilihan kamar mandi dalam atau luar.' },
+      { mark: '🛏️', label: 'Kasur', desc: 'Tipe kasur menyesuaikan kamar yang dipilih.' },
+      { mark: '🚪', label: 'Lemari baju', desc: 'Penyimpanan dasar tersedia di kamar.' },
+      { mark: '❄️', label: 'AC / kipas', desc: 'Pilihan pendingin sesuai tipe kamar.' },
+      { mark: '🚿', label: 'Kamar mandi', desc: 'Pilihan kamar mandi dalam atau luar.' },
     ],
   },
   {
     id: 'tambahan',
     title: 'Tambahan',
     items: [
-      { mark: 'WF', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
-      { mark: 'G', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
-      { mark: 'TV', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
-      { mark: 'R', label: 'Perbaikan dasar', desc: 'Laporan fasilitas dibantu pengelola.' },
+      { mark: '📶', label: 'WiFi', desc: 'Rp 50.000 per perangkat.' },
+      { mark: '🚰', label: 'Galon air', desc: 'Rp 15.000 per galon.' },
+      { mark: '📺', label: 'TV tambahan', desc: 'Rp 50.000 per bulan.' },
+      { mark: '🔧', label: 'Perbaikan dasar', desc: 'Laporan fasilitas dibantu pengelola.' },
     ],
   },
 ];
@@ -231,17 +231,29 @@ function GuestTopbar({ scrolled }: { scrolled: boolean }) {
         <span className="gx-brand-name">KOST<span className="gx-brand-accent">48</span> Surabaya</span>
       </Link>
       <nav className="gx-nav" aria-label="Navigasi">
-        {NAV_LINKS.map((l) => <a key={l.href} href={l.href} className="gx-nav-link">{l.label}</a>)}
+        {NAV_LINKS.map((l) => (
+          <a key={l.href} href={l.href} className="gx-nav-link">
+            <span aria-hidden="true" className="gx-nav-ico">{l.icon}</span> {l.label}
+          </a>
+        ))}
         <Link to="/login" className="gx-nav-link gx-nav-login" style={{ marginLeft: 'auto', fontWeight: 600 }}>
-          Masuk Portal
+          <span aria-hidden="true" className="gx-nav-ico">🔑</span> Masuk Portal
         </Link>
       </nav>
       <div className="gx-nav-cta">
-        <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
-        <a className="gx-btn-solid" href="#pilihan-kamar">Cek Kamar</a>
+        <a className="gx-btn-ghost" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp</a>
+        <a className="gx-btn-solid" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Cek Kamar</a>
       </div>
     </header>
   );
+}
+
+// PUB-ICON: ikon status kamar per tone (badge ketersediaan publik).
+function roomStatusIcon(tone: string): string {
+  if (tone === 'is-occupied') return '🔴';
+  if (tone === 'is-maintenance') return '🧹';
+  if (tone === 'is-limited') return '🟡';
+  return '🟢';
 }
 
 function RoomPreviewCard({ room }: { room: PublicRoom }) {
@@ -257,7 +269,7 @@ function RoomPreviewCard({ room }: { room: PublicRoom }) {
     <article className="gx-room-card">
       <div className="gx-room-image-wrap">
         <img src={getRoomCover(room)} alt={`Foto ${room.name || room.code || 'kamar KOST48'}`} className="gx-room-image" loading="lazy" />
-        <span className={`gx-room-status ${availability.tone}`}>{availability.label}</span>
+        <span className={`gx-room-status ${availability.tone}`}><span aria-hidden="true">{roomStatusIcon(availability.tone)}</span> {availability.label}</span>
       </div>
       <div className="gx-room-body">
         <div>
@@ -455,9 +467,9 @@ export default function PublicGuestDashboardPage() {
             Kamar nyaman dengan pilihan AC atau kipas, fasilitas harian lengkap, dan proses booking yang lebih jelas dari awal.
           </p>
           <div className="gx-hero-cta">
-            <a className="gx-hero-btn-primary" href="#pilihan-kamar">Cek Kamar Tersedia</a>
-            <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer">WhatsApp Admin</a>
-            <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Lihat di Maps</a>
+            <a className="gx-hero-btn-primary" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Cek Kamar Tersedia</a>
+            <a className="gx-hero-btn-ghost" href={buildWhatsAppUrl('Halo Admin KOST48, saya ingin tanya ketersediaan kamar.')} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> WhatsApp Admin</a>
+            <a className="gx-hero-btn-ghost" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Lihat di Maps</a>
           </div>
           <p className="gx-hero-tagline">"Rumah kos sih, tapi terasa seperti rumah sendiri."</p>
         </div>
@@ -528,7 +540,6 @@ export default function PublicGuestDashboardPage() {
               <h2>Beranda dan cek kamar dalam satu halaman.</h2>
               <p>Filter kamar berdasarkan ketersediaan, tipe pendingin, kamar mandi, dan tarif tanpa meninggalkan beranda.</p>
             </div>
-            <a className="gx-btn-outline" href="#cek-kamar">Ubah Preferensi Tinggal</a>
           </div>
 
           <div className="gx-home-proof-grid">
@@ -830,9 +841,9 @@ export default function PublicGuestDashboardPage() {
               </address>
             </div>
             <div className="gx-final-actions">
-              <a className="gx-btn-primary" href="#pilihan-kamar">Cek Kamar Tersedia</a>
-              <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer">Chat WhatsApp</a>
-              <a className="gx-btn-outline" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer">Buka Google Maps</a>
+              <a className="gx-btn-primary" href="#pilihan-kamar"><span aria-hidden="true">🔍</span> Lihat Pilihan Kamar</a>
+              <a className="gx-btn-outline" href={officialKost48Location.whatsappUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">💬</span> Chat WhatsApp</a>
+              <a className="gx-btn-outline" href={officialKost48Location.mapsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">📍</span> Buka Google Maps</a>
             </div>
           </div>
         </Container>
@@ -840,7 +851,7 @@ export default function PublicGuestDashboardPage() {
 
       <a className="gx-mobile-booking" href="#pilihan-kamar" aria-label="Cek kamar tersedia">
         <strong>{roomsQuery.isLoading ? 'Cek kamar' : `${stats.bookable} kamar tersedia`}</strong>
-        <span>Cek</span>
+        <span><span aria-hidden="true">🔍</span> Cek</span>
       </a>
 
       <GuestFooter />
