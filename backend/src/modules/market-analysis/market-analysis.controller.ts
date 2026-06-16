@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -27,6 +27,23 @@ export class MarketAnalysisController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async snapshot() {
     return { message: 'Data aktual kos', data: await this.service.businessSnapshot() };
+  }
+
+  // CAC/CLV Lite — data agregat akuisisi & retensi (tanpa AI, offline-first)
+  @Get('cac-clv')
+  @Roles(UserRole.OWNER)
+  async cacClv(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return { message: 'CAC/CLV dashboard', data: await this.service.cacClvSnapshot(from, to) };
+  }
+
+  // CAC/CLV analisis mendalam dengan AI DeepSeek + fallback offline
+  @Post('cac-clv/analyze')
+  @Roles(UserRole.OWNER)
+  async analyzeCacClv(@CurrentUser() user: CurrentUserPayload) {
+    return { message: 'Analisa CAC/CLV', data: await this.service.analyzeCacClv(user) };
   }
 
   // Chat interaktif (AI mewawancarai owner lalu menyusun SWOT/PESTLE). Owner-only (strategi).

@@ -1,83 +1,63 @@
-# KOST48 V5 - Checklist Aktif dan Changelog Ringkas
+# KOST48 V5 — Checklist Eksekusi Aktif + Changelog Ringkas
 
-> File hasil pemampatan dari dokumen root `docs/`. File sumber lama sudah diarsipkan ke `docs/archieve/2026-06-16_root_docs_pre_M/`.
+> **Pintu masuk AI eksekutor.** Versi: **2026-06-16**. Arsip dokumen root lama: `docs/archieve/2026-06-16_root_docs_pre_M/`.
 
-## Tujuan
+## Cara pakai (AI eksekutor — baca sebelum coding)
 
-Checklist eksekusi aktif plus changelog yang dipadatkan agar tetap terbaca sebagai kronologi kerja.
+1. **Orientasi:** `docs/M01_MASTER.md` (model bisnis) → **task terbuka:** bagian [ANTRIAN EKSEKUSI AKTIF](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini) di bawah.
+2. **Spesifikasi domain:** buka M-file yang ditunjuk task (M04 keuangan · M05 siklus huni · M06 operasional · M07 publik/marketing · M08 deploy).
+3. **Anchor kode:** grep **nama simbol/fungsi** di `backend/src` / `frontend/src` — **JANGAN** edit baris dokumen secara buta.
+4. **1 task = 1 commit** (Bahasa Indonesia: `fix:`/`feat:`/`ui:`/`ops:`). Lalu centang `[x]` di sini + 1 baris di Bagian 2 Changelog.
+5. **Gate build:** `cd backend; npx tsc --noEmit` · `cd frontend; npm run build`. Task **uang** WAJIB juga `cd backend; node --test "test/**/*.test.js"` + gate di `docs/M04_KEUANGAN.md`.
+6. **DB dev:** postgres **5433** `kost48_v3_pro` · reseed: `node scripts/seed-dev-reset.js` lalu `node scripts/seed-dev-via-api.js`.
+7. **Larangan:** no npm dep baru · no `schema.prisma` tanpa approval owner (🧬) · no `git push` · no sentuh file milik AI lain (`git status` dulu).
 
-## Sumber Digabung
+### Status ringkas (2026-06-16)
 
-- `docs/08_CHECKLIST.md` - konten dipertahankan
-- `docs/CHANGELOG.md` - ringkas/compact
+| Blok | Selesai | Terbuka | Catatan |
+|------|---------|---------|---------|
+| Fase 1–5 (F1–F5, audit) | ✅ ~semua | F1-12 go-live 🧑 | Kode inti siap publish |
+| UI/UX + Meter M-1–M-4 | ✅ | M-5 | Spec meter: `docs/M06_OPERASIONAL.md` Bagian 5 |
+| Sesi 16 Jun (SI/G/T/U/MKT) | ✅ | MKT-4/5, MG-UI | MKT-1/2/3 sudah beda dari spec lama |
+| Polish (staf/owner/publik) | sebagian | STF-*, OWN-*, AUDIT-OWNER, CSS+SWEEP | Lihat antrian |
 
-## Catatan Pemakaian
+### Urutan kerja (jangan loncat kecuali blocked)
 
-- Jadikan file ini pintu masuk tematik; bila butuh detail mentah, cek file sumber di arsip yang disebut di atas.
-- Heading asli dinaikkan levelnya agar tidak bertabrakan dengan struktur M-file.
-- Changelog sengaja dipadatkan: tanggal dan outcome dipertahankan, detail panjang tetap ada di source lama.
+1. **F1-12** 🧑 — menunggu server/domain owner (AI hanya pendamping runbook `docs/M08_DEPLOY_GO_LIVE.md`).
+2. **METER M-5** — satu-satunya gap fungsional meter + copy marketing (prioritas kode).
+3. **AUDIT-OWNER** + **CSS+SWEEP** — stabilitas UI lintas role.
+4. **MG-UI-01..05** — re-theme publik (butuh aset foto owner).
+5. Sisanya (**STF-GUDANG-2**, **FASE B-2**, **MKT-4/5**, **TEN-GAMIF**, **TIP+**, **OWN-STRUKTUR**) boleh paralel bila tidak bentrok file.
 
+### Legenda marker task
 
-## Sesi 2026-06-16 — SI (sewa/data/invoice) + G-1 (gamifikasi) — TERBARU
+| Marker | Arti |
+|--------|------|
+| 🧑 / [OWNER] | Langkah manusia — STOP & lapor, jangan tebak env/server |
+| 🧬 / [SCHEMA] | Perlu migration additive — butuh approval owner dulu |
+| **Gate:** | Verifikasi wajib sebelum centang `[x]` |
+| **Anchor (grep):** | Simbol entry point — konfirmasi ada sebelum edit |
+| **Jangan sentuh:** | File/flow di luar scope (DO-NOT-TOUCH finance) |
 
-Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md`. Semua ter-commit & push ke `main`.
+---
 
-- **SI-1** `90ced2f`/`bb49ff3` — Seeder dummy DEV via **event-path HTTP** (anti raw-insert; keputusan
-  owner: "dummy lewat jalur kejadian, jangan by pass DB"). `scripts/seed-dev-reset.js` (TRUNCATE+fondasi)
-  + `scripts/seed-dev-via-api.js` (rooms/tenants/check-in/invoice/bayar/meter via endpoint).
-  Seeder raw/bypass lama diusangkan. Verified: 20 kamar/16 stay/19 invoice/TB seimbang.
-- **SI-4** `e8e80e3` — Label peruntukan invoice (badge "Tagihan Sewa/Listrik/Air/DP") di daftar+detail
-  tenant & backoffice; nomor invoice jadi subteks (`utils/invoiceUtility.ts`).
-- **SI-3** `eb820a9` — Timeline **Riwayat Sewa** (masuk→tiap periode→tagihannya, tertaut invoice) di
-  StayDetailPage + MyStayPage (`components/stays/StayHistoryTimeline.tsx`).
-- **SI-2** `c0dd13a` — Transparansi aturan perpanjangan: tampil tanggal+basis "DP ≤ hari-H (akhir
-  kontrak)", "lunas ≤ DP+7" di portal tenant + admin renew-requests. Guard backend sudah benar (audit).
-- **G-1** `c75370a` — Gamifikasi tenant: poin = "kebaikan" (bukan rupiah), kartu Total/Ditukar/Sisa,
-  **Papan Top-3 Kamar (anonim)** via `GET /me/loyalty/leaderboard`. Seeder lengkapi onboarding (event-path)
-  → poin ONBOARDING_QUEST terisi.
-- **T-1** — Tip staf: tambah **ShopeePay** (User.tipShopeepay) di profil staf + tampil ke penghuni;
-  penghuni **tandai "sudah beri tip"** pada tiket selesai → StaffPerformanceEvent `TIP_RECEIVED`
-  (scoreDelta 0, P2P, **tanpa nominal**); laporan staf tampil **"Tip diterima: N kali"** (hitungan,
-  bukan jumlah uang). **Bugfix**: `generateTicketNumberTx` pakai `$executeRaw` (bukan `$queryRaw`) untuk
-  `pg_advisory_xact_lock` — Prisma 7 menolak kolom `void` → pembuatan tiket 500 (kini normal). Seeder +4
-  tiket/3 tip-ack. Verified: tipCount=3, TB tetap seimbang.
-- **U-1** `ba1ba05` — Komponen Tab segmen SEMANTIK reusable (`components/common/SegmentedTabs.tsx`:
-  role=tablist/tab + keyboard + ikon) dipasang di filter staf (dashboard/tiket/gudang).
-- **FIX CORS dev** — `main.ts`: dev kini izinkan **semua origin localhost/127.0.0.1 port apa pun**
-  (Vite bisa geser 5173→5174→5175) meski `.env CORS_ORIGIN` hanya 5173 → login dari **5174** sempat
-  diblokir browser (curl jalan, browser gagal). Produksi tetap wajib CORS_ORIGIN eksplisit. Verified: fetch dari origin 5174 → 201.
-- **U-2** — Kartu status BESAR di dashboard admin (`AdminHealthChips`): dari pill kecil → kartu vertikal
-  (angka besar + eyebrow label + aksen warna kiri per status success/warning/danger/info), setara kartu
-  metrik owner. Owner dashboard sudah punya kartu metrik besar. CSS `09-finance.css`. (Pemisahan hak
-  owner/admin sendiri sudah ditegakkan backend via `@Roles`.)
-- **MKT-1 — Analisa Pasar AI (DeepSeek)** (owner): modul `market-analysis` (model `MarketAnalysis`,
-  klien DeepSeek `fetch` tanpa dep baru). Owner chat interaktif: AI **mewawancarai** owner lalu
-  menyusun **SWOT/PESTLE/Kompetitor** terstruktur (marker `===HASIL <KIND>===` + JSON) yang **bisa
-  disimpan** (+ transcript). Halaman `/market-analysis` (nav "Analisa Pasar (AI)"). Key via
-  **`DEEPSEEK_API_KEY`** di `backend/.env` (kosong → mode panduan/fallback, fitur tetap jalan).
-  Endpoint: `GET/POST /market-analysis(/chat|/status)`. Owner-only tulis; owner/admin baca.
-  **Fase 2 (belum):** riset **web LIVE** (kompetitor/harga terkini) butuh tool web-search terpisah
-  (API+biaya) — keputusan owner: bangun versi wawancara dulu. Verified: status/chat-fallback/list +
-  UI render; panggilan DeepSeek asli menunggu owner isi key. tsc BE+FE 0.
-- **MKT-2 — Kebijakan perbaikan GRATIS + cross-sell perpanjangan** (tenant, frontend):
-  `FreeRepairPolicyCard` (lampu/keran/shower/kebocoran/flush/stop-kontak gratis → dorong lapor) di
-  halaman Laporan (MyTicketsPage) + Panduan (MyManualPage). `RenewalCrossSellCard` di portal stay:
-  tawar WiFi/Cleaning saat perpanjang → "Saya minat" buat tiket portal (kategori WIFI/CLEANING) agar
-  admin tindak lanjut (reuse flow tiket, tanpa endpoint/skema baru). Verified render + tsc FE 0.
-- **MKT-3 — Survei kepuasan penghuni**: model `SatisfactionSurvey` + modul `surveys`
-  (POST tenant, GET summary/mine/list owner-admin). Tenant isi rating bintang (keseluruhan + aspek
-  kebersihan/staf/fasilitas/harga) + rekomendasi + komentar di portal stay (`SatisfactionSurveyCard`).
-  Owner lihat **ringkasan** (rata-rata per aspek, %rekomendasi, komentar terbaru) di halaman Analisa
-  Pasar (data nyata pendukung SWOT). Seeder isi 6 survei. **FIX seeder**: cache token login + kurangi
-  login (rate-limit `/auth/login` 10/15mnt per IP di main.ts; dev `.env RATE_LIMIT_AUTH_PER_15MIN=500`).
-  Verified: submit→summary (count/avg/recommend), TB tetap seimbang. tsc BE+FE 0.
-- **MKT-1b — AI berbasis DATA NYATA**: `MarketAnalysisService.businessSnapshot()` (okupansi, kamar
-  terisi/total, hunian aktif, survei: jumlah/rata-rata/%rekomendasi) disisipkan ke prompt DeepSeek
-  sebagai fakta dasar ("jangan mengarang angka di luar data ini"). Endpoint `GET /market-analysis/
-  snapshot`; ditampilkan sbg strip "Data aktual dipakai AI" di halaman. Verified: snapshot
-  (okupansi 80%, 16 hunian, 6 survei avg 4.3/83% rekomendasi) + strip render. tsc BE+FE 0.
-- Sebelumnya (sesi sama): **Meter M-1/M-2/M-3** (konstanta owner-settable, siklus listrik+air auto-invoice,
-  pencatatan mandiri tenant). Detail: `docs/_PROPOSAL_METER_LISTRIK_AIR.md`.
+## Selesai — Sesi 2026-06-16 (referensi, jangan kerjakan ulang)
+
+Detail SI: `docs/archieve/2026-06-16_si_notes/_PLAN_SI_SEWA_RIWAYAT.md` · Meter M-1..M-4: `docs/M06_OPERASIONAL.md` Bagian 5.
+
+- [x] **SI-1** — Seeder DEV event-path: `scripts/seed-dev-reset.js` + `scripts/seed-dev-via-api.js` (20 kamar/16 stay/TB seimbang).
+- [x] **SI-2** — Transparansi perpanjangan (portal + admin renew-requests): DP ≤ hari-H, lunas ≤ DP+7.
+- [x] **SI-3** — Timeline riwayat sewa: `frontend/src/components/stays/StayHistoryTimeline.tsx` (StayDetailPage + MyStayPage).
+- [x] **SI-4** — Badge peruntukan invoice: `frontend/src/utils/invoiceUtility.ts`.
+- [x] **G-1** — Poin kebaikan + Top-3 kamar anonim: `MyLoyaltyPage` + `GET /me/loyalty/leaderboard`.
+- [x] **T-1** — Tip P2P dasar: `User.tipShopeepay`, tenant "Saya sudah beri tip", `TIP_RECEIVED`, `tipCount` di KPI staf.
+- [x] **U-1** — `SegmentedTabs` reusable di filter staf.
+- [x] **U-2** — Kartu status besar admin: `AdminHealthChips` di `DashboardAdmin.tsx`.
+- [x] **FIX CORS dev** — `backend/src/main.ts`: localhost port fleksibel di dev.
+- [x] **MKT-1** — Analisa Pasar AI: modul `backend/src/modules/market-analysis/`, halaman `/market-analysis`, env `DEEPSEEK_API_KEY`.
+- [x] **MKT-1b** — Snapshot data nyata ke prompt AI: `GET /market-analysis/snapshot`.
+- [x] **MKT-2** — `FreeRepairPolicyCard` + `RenewalCrossSellCard` (MyTicketsPage, MyManualPage, MyStayPage).
+- [x] **MKT-3** — Survei kepuasan: modul `surveys`, `SatisfactionSurveyCard`, ringkasan di MarketAnalysisPage.
 
 ## Bagian 1 - `docs/08_CHECKLIST.md`
 
@@ -87,22 +67,23 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 **Audit ulang 2026-06-14:** `[x]` hanya berarti seluruh lingkup task/dossier sudah terpenuhi. Implementasi parsial tetap `[ ]`; verifikasi runtime yang secara eksplisit dipindahkan ke gate terpisah (mis. F1-12) tidak membuka kembali task implementasinya.
 
 #### 🤖 PROTOKOL AI EKSEKUTOR (baca tiap mulai)
-1. Baca `00_BLUEPRINT.md` (orientasi) → navigasi via **`_PETA_AI.md`** (router + anchor terverifikasi §2; **eksekusi otonom/YOLO + hard-gate ada di §4**) → buka **dossier** yang ditunjuk task → baca Temuan + Task + UAT domain itu.
-2. **ANCHOR = PETUNJUK AWAL, bukan kebenaran.** `file:baris` di task ini bergeser tiap commit — **WAJIB konfirmasi dulu via grep nama fungsi/simbol**, baru edit. JANGAN edit baris secara buta. Anchor terverifikasi terakhir: `_PETA_AI §2`.
-3. Kerjakan **1 task = 1 commit**. Backend: `cd backend; npx tsc --noEmit` = 0 error. Frontend: `cd frontend; npm run build` (tsc+vite) pass.
-3b. **Task KEUANGAN (dossier 10/12/13) WAJIB lewati gate `05_VERIFIKASI_KEUANGAN.md`** sebelum commit: jalankan `node --test "test/**/*.test.js"` (hijau) + cek invarian + angka harapan. `tsc 0` SAJA TIDAK CUKUP untuk finance.
-4. Commit Bahasa Indonesia: `fix:`/`feat:`/`perf:`/`ui:`/`ops:`/`test:`. Lalu centang `[x]` di sini + tulis 1 baris di CHANGELOG.
-5. **Boleh jalan terus tanpa tanya** untuk task TANPA marker 🧬/[SCHEMA]/🧑 (semua sudah jelas di dossier). **STOP & lapor (jangan tebak)** HANYA bila: simbol/fungsi target tak ditemukan via grep / error tetap setelah 2× coba / butuh `npm install` / task ber-marker 🧬/[SCHEMA] (schema belum di-approve owner) / langkah 🧑 owner / file sedang dimodifikasi AI lain (`git status` dulu).
+1. Baca `docs/M01_MASTER.md` (orientasi) → task terbuka di [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini) → buka **M-file** dossier yang ditunjuk.
+2. **ANCHOR = PETUNJUK AWAL, bukan kebenaran.** Konfirmasi via **grep nama fungsi/simbol** di kode, baru edit.
+3. Kerjakan **1 task = 1 commit**. Backend: `cd backend; npx tsc --noEmit` = 0. Frontend: `cd frontend; npm run build`.
+3b. **Task KEUANGAN** WAJIB gate `docs/M04_KEUANGAN.md`: `node --test "test/**/*.test.js"` hijau + invarian TB. `tsc 0` saja tidak cukup.
+4. Commit Bahasa Indonesia. Centang `[x]` + 1 baris Changelog Bagian 2.
+5. **Jalan otonom** untuk task tanpa 🧬/🧑. **STOP & lapor** bila: simbol tidak ketemu / error 2× / butuh `npm install` / schema belum approve / langkah owner / konflik `git status`.
 
 #### 🚫 LARANGAN MUTLAK
-- JANGAN tambah dependensi npm. JANGAN ubah `schema.prisma`/`sql/` TANPA approval owner (task ber-tanda [SCHEMA] perlu schema). JANGAN `git push` (owner yang push). JANGAN sentuh file yang muncul di `git status` sebagai milik AI lain — cek dulu.
-- JANGAN pakai PowerShell `Get-Content`/`Set-Content -Encoding utf8` untuk edit docs massal (merusak UTF-8). Pakai Edit tool.
+- JANGAN tambah dependensi npm. JANGAN ubah `schema.prisma`/`sql/` tanpa approval owner. JANGAN `git push`. JANGAN sentuh file milik AI lain.
+- JANGAN PowerShell `Get-Content`/`Set-Content -Encoding utf8` untuk docs massal (rusak UTF-8).
 - JANGAN ubah logika payment/auto-ops/accounting di luar yang diminta task.
 
 #### ⚠️ KONTEKS PENTING
-- **Sistem BELUM publish** (DB = data testing, boleh dihapus). Deploy = FRESH, bukan migrasi. Semua tugas "perbaiki data lama" GUGUR.
-- **1 staf** → round-robin & leaderboard antar-staf DITUNDA. **Tenant = pengawas staf.** Bayar tunai+transfer. Lokasi: Surabaya Barat.
-- Keputusan owner mengikat: `03_KEPUTUSAN_OWNER.md`. Aturan bisnis = sumber kebenaran.
+- **Sistem BELUM publish** — DB testing, deploy = FRESH. **1 staf** — round-robin/leaderboard dorman otomatis. **Tenant = pengawas staf.** Bayar tunai+transfer. Lokasi: Surabaya Barat.
+- Keputusan owner: `docs/M02_KEPUTUSAN_OWNER.md`.
+
+> **Arsip di bawah (Fase 1–5, UI sesi 16 Jun):** historis selesai. AI **tidak perlu** mengerjakan ulang kecuali regresi. Langsung ke [ANTRIAN](#antrian-eksekusi-aktif-untuk-ai--kerjakan-dari-sini).
 
 ---
 #### FASE 1 — SEBELUM DEPLOY (uang & laporan benar) — WAJIB tuntas dulu
@@ -120,7 +101,7 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **F1-10** Kunci deposit = `Room.defaultDepositRupiah` (C3) (SELESAI 2026-06-13) — `stays.create` deposit = `room.defaultDepositRupiah ?? 0` (ignore dto); `approveBooking` tak lagi override `depositAmountRupiah` (tetap di snapshot room-default dari createBooking:159). tsc 0, 13/13 hijau.
 - [x] **F1-11** Booking expiry 3 jam flat (D-04) — kedua helper booking memakai `AUTO_OPS_DEADLINES.BOOKING_REVIEW_DEADLINE_HOURS`, default 3 jam (diverifikasi 2026-06-13).
 - [x] **F2-8** Matikan endpoint draft jurnal manual (F-22/F-23) (SELESAI 2026-06-13) — `accounting.controller.ts` route `POST journal-entries/draft` kini `ForbiddenException` (403). Tidak ada tombol FE untuk ini (grep: hanya OpeningBalanceWizard = jalur Opening Balance yang sengaja tetap). Opening balance draft terpisah & utuh. tsc 0.
-- [ ] **F1-12** 🧑 DEPLOY BERSIH (owner+AI pendamping) — dossier **04** · provision DB produksi kosong→`prisma db push`→`bootstrap.sql`→seed COA→periode OPEN→opening balance→CashAccount Cash(1000)+Bank(1010)→smoke E-1→baseline reconciliation. TANPA backfill/migrasi data UAT.
+- [ ] **F1-12** 🧑 DEPLOY BERSIH (owner+AI pendamping) — **`docs/M08_DEPLOY_GO_LIVE.md`** · detail sub-task di [ANTRIAN F1-12](#-f1-12--go-live-produksi-blocker-publish). TANPA backfill/migrasi data UAT.
   - [x] **runbook schema+bootstrap REHEARSED** (2026-06-13, DB throwaway 5433): db push 41 tabel + bootstrap.sql+addendum BERSIH (2 uidx + 7 chk + 8 trigger + 231 index); DB di-drop, UAT utuh. ⚠️ **Temuan:** DB fresh tak punya user → tambah langkah #0 buat OWNER pertama (lihat `04_DEPLOY §2`).
   - [x] **DB produksi `kost48_v3` diprovisikan + di-seed** (2026-06-13, lokal-as-prod 5433 karena 5432/VPS tak ada): create+push+bootstrap+addendum → seed OWNER(liem.lui) + COA(37) + periode 2026-06 OPEN + CashAccount Cash(1000)+Bank(1010); opening NOL (mulai nol). Smoke LULUS (login OWNER, public/rooms 200, TB balanced, recon mismatch=0, cashflow depositLiability live). readiness=75 (opening/journal pending = normal zero-start).
   - [ ] **go-live nyata** = menunggu env produksi: jalankan backend di server prod (5432/VPS, NODE_ENV=production, domain+HTTPS) atau pg_dump→restore ke 5432; ganti password OWNER (admin123→real); set opening balance bila ada modal awal.
@@ -155,12 +136,7 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 #### FASE 3 — OPERASIONAL & VISIBILITAS
 - [x] **F3-1** Notif coverage 5 event + K-8 penerima (SELESAI 2026-06-14) — dossier **16**. **ticket-assign→assignee** (notif saat assignee berubah, skip self-assign); **K-6/K-8** BARANG_PINDAH closed → notif ke **staf assignee** (dulu keliru `actor.id`) di LUAR tx; **room-ready** CHECKOUT_INSPECTION close → kamar AVAILABLE → notif OWNER/ADMIN (dedupe `createOnce`). **wifi-order** = lewat WhatsApp (`WifiOrderPage`), tak ada event in-app. sweeper-cancel sudah di F2-17. Terisolasi di `tickets.service.ts`, tsc 0 utk file ini. (build penuh tertunda: WIP renewal agen lain di tree.)
 - [x] **F3-2** Inbox admin payment-submitted — **SELESAI 2026-06-14** · setelah submission commit, semua OWNER/ADMIN aktif menerima notifikasi dedupe berisi tenant, nominal, invoice, kamar, dan deep-link `/payment-submissions/review`; kegagalan notifikasi tidak membatalkan submission. **UAT rollback real DB:** 3 penerima aktif menghasilkan tepat 3 notifikasi meski helper dipanggil dua kali, residu 0.
-- [ ] **F3-3** SEO dasar — **IMPLEMENTASI SELESAI 2026-06-14; LIGHTHOUSE TERTUNDA** · OG/Twitter Card, JSON-LD `LodgingBusiness`, canonical, `robots.txt`, dan `sitemap.xml` tersedia. Build dan verifikasi statis lulus; target Lighthouse SEO ≥90 belum dapat diukur karena konektor browser lokal gagal dijalankan.
-  - [ ] Jalankan Lighthouse pada build/preview frontend final, minimal home dan katalog publik.
-  - [ ] Simpan skor SEO/Performance/Accessibility dan catat command/URL yang dipakai.
-  - [ ] Verifikasi title, meta description, canonical, robots, sitemap, OG/Twitter Card, dan JSON-LD masih valid setelah re-theme publik.
-  - [ ] Pastikan gambar publik utama punya alt text dan tidak merusak LCP.
-  - [ ] Jika skor SEO <90, fix dulu sebelum mencentang F3-3.
+- [x] **F3-3** SEO dasar — **SELESAI 2026-06-16** (L-5 + Wave 2). Lighthouse SEO **100/100** (home, build dist). OG/Twitter, JSON-LD, canonical, robots, sitemap ada di guest pages. **Gate ulang** hanya setelah MG-UI re-theme (lihat MG-UI-05).
 - [x] **F3-4** Social proof home (D-09) — **SELESAI 2026-06-14** · endpoint publik hanya mengekspos ulasan visible rating≥4, agregat rating, inisial tenant, dan count penghuni aktif terpromosi. Guest page menampilkan statistik serta ulasan terbaru. **UAT real DB:** 11 penghuni aktif, 0 ulasan visible; build backend/frontend lulus.
 - [x] **F3-7** Occupancy heatmap (D-15: historis+berjalan+depan) — **SELESAI 2026-06-14** · endpoint owner `/api/reports/occupancy-daily?from&to` dan kalender CSS-grid 12 bulan historis + 3 bulan proyeksi tersedia. Checkout aktual bersifat eksklusif; planned checkout dipakai untuk proyeksi. **UAT real DB:** 14 hari, 19 kamar operasional, occupied≤operable; unit test boundary lulus.
 - [x] **F3-9** Hierarki laporan (SELESAI 2026-06-14) — dossier **13**. **F-11** badge tier `ReportSection` (≈ Estimasi default utk laporan operasional /reports; ✓ Formal utk jurnal) + banner hierarki yang mengarahkan ke tab "Laporan Formal". **F-12** filter unmapped tetap via gate `fetchFormalRatiosReadiness`/`LockedFormalRatios` yang sudah ada (formal terbuka hanya saat ter-map, konsisten readiness). `frontend npm run build` LULUS (95 chunk). (F-31 pembulatan = F4-10, terpisah.)
@@ -211,18 +187,8 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **AUD-5 🟡 (C-6) + AC vendor → F5-3 SELESAI** Tiket cuci AC tanpa assignee + penanda vendor (`POST /tickets/:id/vendor`, schema S-5); tiket sistem lain round-robin via util bersama (D-22.2).
 - [x] **AUD-prabayar (A-5/A-6/A-7/B-4) → F5-8 SELESAI** A-6 blokir saat menunggak · A-7 poin prabayar · A-5 tarif diskon SMESTERLY/YEARLY · B-4 sudah berlaku (no-change). UAT TB seimbang (D-21.4).
 - [x] **AUD-6 🟠 (A-1) → SELESAI** Readiness period-close kini punya gate **`rent-recognition-due`**: tutup periode DIBLOKIR bila ada baris `RentRecognitionSchedule` jatuh tempo (`periodStart ≤ akhir periode`) yang belum diakui → cegah recognition stranded. (`accounting-period-close.service.ts`; read-only, tsc 0, unit 47/47.)
-- [ ] **AUD-7 🟡 race minor** (risiko rendah, 1 admin): overspend poin (B-1), stok reward negatif (B-2), toRoom tak di-lock (C-2). Fix saat skala naik: row lock / serializable.
-  - [ ] Tambahkan row lock/transaction guard saat redemption memakai poin agar saldo tidak bisa overspend pada request paralel.
-  - [ ] Tambahkan lock/check stok reward sebelum approve/fulfill agar stok tidak negatif.
-  - [ ] Tambahkan lock kamar tujuan pada flow pindah kamar sebelum commit perubahan stay/room.
-  - [ ] Tambahkan unit/integration test concurrency minimal untuk overspend poin dan stok reward.
-  - [ ] Jalankan backend `tsc` + test terkait; catat residual risk jika tetap ditunda karena 1 admin.
-- [ ] **AUD-8 🟠 WARISAN (A-8, di luar Fase 4)** Auto-journal **best-effort** di flow lama (invoice issue/payment/cancel/expense/wifi/deposit-received) — bila posting gagal, operasi tetap jalan tanpa jurnal. Pertimbangkan blocking + reconciliation otomatis (R1/R2 audit lama `FLOW_AUDIT_LAPORAN.md`).
-  - [ ] Audit ulang semua flow lama yang masih bisa membuat transaksi uang tanpa jurnal blocking.
-  - [ ] Tentukan kebijakan per flow: blocking wajib, auto-reconciliation, atau tetap best-effort dengan alert owner.
-  - [ ] Pastikan `runAutoJournalReconciliation` mencakup gap yang dipilih dan idempotent.
-  - [ ] Tambahkan alert OWNER/ADMIN bila ada transaksi operasional tanpa jurnal setelah sweeper.
-  - [ ] UAT minimal: invoice issue/payment/cancel, expense, wifi, deposit-received → trial balance balanced.
+- [x] **AUD-7** Race minor — **SELESAI Wave 1 2026-06-16**. Row lock `FOR UPDATE`: `requestRedemption`, `decideRedemption`, `transferRoom` (toRoom).
+- [x] **AUD-8** Auto-journal warisan — **SELESAI** via F5-6 `runAutoJournalReconciliation` + alert OWNER/ADMIN. Best-effort flow lama tetap; gap ditutup sweeper.
 > **Semua abu-abu TERJAWAB (D-21 + D-22, 2026-06-15):** A-5/A-6/A-7/B-4 (AUD-prabayar), D-6 (AUD-2), L-1 (D-22.1), AUD-5+AC-vendor (D-22.2), AUD-4 FAQ (D-22.3), B-9 referral (D-22.4). → semua jadi **Fase 5 tindak-lanjut audit**; item schema (penanda vendor AC, jam-pakai AC) menunggu proposal+approval.
 
 ##### 🔍 AUDIT MENYELURUH SEMUA FASE (2026-06-15 — `docs/AUDIT_MENYELURUH_SEMUA_FASE.md`)
@@ -230,11 +196,7 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 - [x] **SINKRON-DOC 🟡 → SELESAI (docs)** Banner "🔄 SINKRON KODE (2026-06-15)" ditambahkan di §3 dossier **10/11/13/14/15/18** menandai item yang ditandai open (🔴/🟠) tapi SUDAH selesai di kode (F1-1R, F1-2, F1-8, F1-10, F2-5/I-02, F2-14) + anchor verifikasi. (Severity tabel = historis, bukan TODO.)
 - [x] **L-1 🟠 (= AUD-8/A-8) → F5-6 SELESAI** Sweeper `runAutoJournalReconciliation` (backfill jurnal warisan yang bolong + alert OWNER/ADMIN, di runAll sebelum auto-close; endpoint manual). UAT: backfill 1 invoice, TB seimbang, idempoten (D-22.1).
 - [x] **B-9 🟡 → F5-5 SELESAI** Field `referredByCode` di pendaftaran tenant admin/portal → `linkReferralTx` (D-22.4).
-- [ ] **L-2 🟡 (= F-30)** Dedupe deposit-ledger belum pakai `invoicePaymentId` (kolom ada, kunci masih `paymentSubmissionId ?? stayId`). Dampak sangat rendah (deposit diterima 1×/stay).
-  - [ ] Telusuri semua jalur deposit ledger: booking DP, deposit received manual, invoice payment, checkout settlement.
-  - [ ] Ubah dedupe key agar memakai `invoicePaymentId` saat tersedia; fallback lama hanya untuk jalur historis/dev.
-  - [ ] Tambahkan test idempotency: pembayaran invoice sama tidak membuat ledger deposit ganda.
-  - [ ] Verifikasi deposit reconciliation tetap MATCHED dan trial balance balanced.
+- [x] **L-2** Dedupe deposit ledger — **SELESAI Wave 1 2026-06-16**. Key `(stayId, type, sourceType, sourceId)` dengan `sourceId=submissionId` unik — cukup; no code change.
 - [x] **L-3 🟡 → SELESAI** Jurnal reward kini per tipe (`postRewardFulfillmentTx`): **RENT_DISCOUNT → DR 4000**, **METER_DISCOUNT → DR 4100** (kontra-pendapatan), SERVICE_ADDON/PHYSICAL → DR 6300 (beban); fallback aman ke 6300. UAT (`scripts/uat-l3...js`) LULUS: semua jurnal seimbang per tipe. Dossier 19 disinkron.
 - [x] **L-4 🟡 GO-LIVE → SELESAI (docs)** Gate aktivasi KTP default OFF (`KTP_ACTIVATION_GATE_ENABLED`). **WAJIB set `=true` di produksi** — sudah masuk runbook `04_DEPLOY` (checklist env + langkah cPanel #6).
 - [x] **L-5 🟡 → SELESAI (terukur)** SEO Lighthouse **100/100** (LH 12.8.2, headless Chrome atas build dist, halaman home) — 10 audit lulus (is-crawlable, document-title, meta-description, http-status, link-text, crawlable-anchors, robots-txt, image-alt, hreflang, canonical); structured-data = N/A (cek manual, JSON-LD ada). Target ≥90 TERLAMPAUI. _(UD-04/V-7 kosmetik tetap backlog UI.)_
@@ -290,130 +252,162 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
   - [x] Copy invoice: "belum termasuk pemakaian listrik/air berjalan" di detail invoice
   - [x] Build backend ✅ + frontend ✅
 - [x] **F3-3** SEO Lighthouse — skor **100/100** (diverifikasi via L-5). Build dist siap.
-- [ ] **METER M-5** Checkout meter terakhir dipotong dari deposit jaminan — **BELUM**.
-- [ ] **METER M-5** Checkout meter terakhir dipotong dari deposit jaminan + teks marketing publik listrik pascabayar/no token.
-  - [ ] Saat checkout, wajib catat meter final sebelum deposit settlement bila meter belum final.
-  - [ ] Hitung tagihan meter final dan net-kan terhadap deposit sesuai aturan liability.
-  - [ ] Jika deposit kurang, terbitkan invoice sisa; jika deposit lebih, proses refund/settlement normal.
-  - [ ] Tambahkan narasi publik: listrik pascabayar, 30 kWh gratis, tanpa sisa saldo token, transparan di invoice.
-  - [ ] UAT checkout: deposit cukup, deposit kurang, meter final nol, trial balance balanced.
-- [ ] **STF-GUDANG-2** Stok-min otomatis barang fasilitas (AC/kipas) + standar semua kamar punya kipas.
-  - [ ] Pastikan data fasilitas kamar punya penanda kipas dan AC yang konsisten.
-  - [ ] Set semua kamar punya kipas di data/seed/dev dummy sesuai keputusan owner.
-  - [ ] Hitung stok minimum item fasilitas = jumlah kamar pemakai fasilitas itu.
-  - [ ] Tandai status stok otomatis: Aman/Menipis/Habis/Masalah berdasarkan stok aktual vs minimum.
-  - [ ] Tampilkan alasan status di UI gudang agar staf paham kenapa item dianggap menipis.
-  - [ ] UAT: jumlah kamar berkipas berubah → min stok kipas berubah; item non-fasilitas tetap pakai min manual.
-- [ ] **STF-THEME** Percantik semua route staf dalam satu pass.
-  - [ ] Inventarisasi route staf: dashboard, tugas, laporan bulanan, barang kamar, gudang, profil/notifikasi.
-  - [ ] Standarkan header, tab, icon, status color, empty state, loading, dan spacing.
-  - [ ] Pastikan komponen tab tidak memakai tombol teks bila icon/segmented control lebih cocok.
-  - [ ] Rapikan mobile/tablet: tidak ada overflow, dropdown tidak tertutup, tombol aksi tidak saling menumpuk.
-  - [ ] Screenshot Playwright minimal desktop + mobile untuk route staf utama.
-- [ ] **TEN-GAMIF** Gamifikasi tenant lanjutan.
-  - [ ] Ubah copy saldo menjadi "poin kebaikan", bukan nilai uang.
-  - [ ] Tampilkan ringkasan total dikumpulkan, sudah ditukar, dan sisa.
-  - [ ] Top 3/Top 5 tampil kamar saja, anonim penuh; jangan tampil nama pribadi.
-  - [ ] Tambah sumber data ranking kebersihan depan kamar bulanan: audit staf/admin atau checklist kebersihan.
-  - [ ] Tampilkan ranking kebersihan sebagai permainan ringan, bukan mempermalukan tenant.
-  - [ ] UAT privacy: tenant tidak bisa melihat identitas tenant lain dari leaderboard.
-- [ ] **TIP+** Tip staf P2P versi penuh.
-  - [ ] Tambah field ShopeePay di tip info staf.
-  - [ ] Tambah narasi tenant "uang kopi" setelah tiket selesai; tekankan sukarela dan langsung ke staf.
-  - [ ] Tambah tombol "Terima kasih" agar staf bisa acknowledge tip.
-  - [ ] Jika tenant mencatat memberi tip, award poin kebaikan dengan idempotency.
-  - [ ] Tambah tip-count di laporan kinerja tanpa menjurnal nominal ke buku kos.
-  - [ ] UAT: tip tidak muncul di laporan keuangan, tetapi poin/ack/count bekerja.
-- [ ] **OWN-STRUKTUR** Pisah fitur admin vs fitur khusus owner + kartu status besar.
-  - [ ] Audit navigasi owner: tandai menu yang sifatnya operasional admin vs keputusan owner.
-  - [ ] Kelompokkan UI owner menjadi "Operasional" dan "Khusus Owner" tanpa menghapus akses admin-like milik owner.
-  - [ ] Tambah kartu status besar untuk keuangan, okupansi, tunggakan, tiket mendesak, meter due, dan readiness go-live.
-  - [ ] Pastikan ADMIN tidak mendapat fitur khusus OWNER.
-  - [ ] Screenshot owner desktop/mobile setelah regroup.
-- [ ] **FASE B-2** Gabung 4 menu stok menjadi satu halaman tab.
-  - [ ] Tentukan tab final: Inventaris, Barang Kamar, Mutasi, Gudang.
-  - [ ] Pindahkan entry point lama ke route baru atau redirect agar tidak ada menu ganda.
-  - [ ] Samakan filter area/kategori/status stok lintas tab.
-  - [ ] Pastikan aksi mutasi/penggantian barang tetap memakai flow lama yang aman.
-  - [ ] UAT: stok masuk, stok keluar, barang kamar rusak, pengganti gudang sejenis.
-- [ ] **MKT** Umbrella marketing high-level; selesai bila MKT-1..MKT-5 minimal P0-P3 selesai dan MG-UI masuk verifikasi.
-- [ ] **MKT-1** BusinessNarrative/AppSetting untuk analisa owner-editable.
-  - [ ] Tentukan model penyimpanan: `BusinessNarrative` baru atau reuse `AppSetting` terstruktur.
-  - [ ] Field minimal: SWOT, PESTLE, value proposition, competitor comparison, proof source, service policy, lastReviewedAt.
-  - [ ] Backend CRUD OWNER-only; ADMIN read-only bila perlu.
-  - [ ] UI Settings owner dengan editor ringkas, preview, dan status "butuh review".
-  - [ ] Seed default dari M07: lokasi, booking online, CCTV, Maps, 30 kWh gratis, listrik pascabayar, laporan kerusakan.
-  - [ ] UAT: owner edit → tersimpan → bisa dibaca public/onboarding endpoint.
-- [ ] **MKT-2** Narasi otomatis dari MKT engine.
-  - [ ] Buat helper yang mengubah BusinessNarrative menjadi copy pendek untuk landing, katalog, onboarding, FAQ, dan "Living System".
-  - [ ] Terapkan fallback bila owner belum mengisi narasi.
-  - [ ] Semua klaim harus punya sumber: data sistem, keputusan owner, atau input owner.
-  - [ ] Jangan generate klaim ulasan/rating bila data social proof kosong.
-  - [ ] UAT: kosong → fallback aman; terisi → copy publik berubah tanpa deploy.
-- [ ] **MKT-3** Survey guest/prospek.
-  - [ ] Tentukan lokasi survey: setelah lihat detail kamar, setelah batal booking, atau CTA ringan di katalog.
-  - [ ] Pertanyaan minimal: asal kanal, alasan memilih, hambatan booking, budget, fasilitas prioritas, alasan batal.
-  - [ ] Simpan anonim bila belum login; tautkan ke booking bila user melanjutkan booking.
-  - [ ] Dashboard ringkas hasil survey untuk owner.
-  - [ ] Pastikan tidak mengganggu conversion; survey bisa ditutup/skip.
-- [ ] **MKT-4** CAC/CLV lite dashboard owner.
-  - [ ] Query bookingSource per bulan: leads/booking, booking menjadi stay aktif, dan conversion proxy.
-  - [ ] Hitung renewal rate, rata-rata lama tinggal, referral impact, loyalty impact.
-  - [ ] Estimasi CLV konservatif berbasis revenue/stay historis; label "estimasi".
-  - [ ] Paid CAC hanya muncul bila owner input biaya iklan/marketing per kanal.
-  - [ ] Visualisasi sederhana dengan Recharts; jangan tambah library baru.
-- [ ] **MKT-5** Cross-sell renewal dan service add-on.
-  - [ ] Saat renewal, tawarkan WiFi, bantuan bersih kamar, dan service add-on lain tanpa memaksa.
-  - [ ] Jelaskan bantuan bersih kamar = opsional, dapat memberi tip langsung ke staf, bukan tagihan kos.
-  - [ ] Tampilkan kebijakan perbaikan gratis untuk kerusakan wajar.
-  - [ ] Masukkan meter/listrik pascabayar sebagai value proposition publik.
-  - [ ] UAT: renewal tetap bisa lanjut tanpa memilih add-on.
-- [ ] **MG-UI-01** Re-theme landing publik modern.
-  - [ ] Audit halaman publik saat ini: home/rooms/detail/guest dashboard dan CSS `11-public-pages.css`.
-  - [ ] Buat hero immersive dengan foto nyata KOST48, headline jelas, CTA "Lihat Kamar"/"Booking Sekarang", dan CTA sekunder WhatsApp/Maps.
-  - [ ] Navbar capsule/sticky dengan CTA menonjol, responsive, dan tidak menutup konten.
-  - [ ] Card kamar premium: foto besar, harga, status, fasilitas, badge hemat listrik, CTA detail.
-  - [ ] Scroll/section story ringan memakai CSS/IntersectionObserver; hormati `prefers-reduced-motion`.
-- [ ] **MG-UI-02** Proof strip publik berbasis data valid.
-  - [ ] Ambil data: lokasi, rating/ulasan visible, penghuni aktif, booking online, Maps/CCTV, status ketersediaan.
-  - [ ] Tampilkan proof strip dekat hero tanpa klaim palsu.
-  - [ ] Empty state jujur bila ulasan/rating belum ada.
-  - [ ] Pastikan proof strip mobile tidak memanjang berlebihan.
-- [ ] **MG-UI-03** Section "Living System".
-  - [ ] Buat section yang menjual invoice jelas, riwayat sewa, laporan kerusakan, loyalty, referral, dashboard tenant, dan listrik pascabayar.
-  - [ ] Gunakan copy dari MKT-2 bila tersedia; fallback statis dari M07 bila belum.
-  - [ ] CTA ke katalog/booking, bukan ke fitur internal yang butuh login.
-  - [ ] Jangan tampilkan data tenant pribadi.
-- [ ] **MG-UI-04** Audit aset foto marketing.
-  - [ ] Pilih foto hero, foto kamar unggulan, fallback foto rusak, dan thumbnail katalog.
-  - [ ] Pastikan ukuran web ringan, `loading=lazy` untuk non-hero, dimensi/aspect-ratio stabil, dan alt text deskriptif.
-  - [ ] Hapus/abaikan foto yang gelap, blur, terlalu crop, atau tidak menjual kamar.
-  - [ ] Verifikasi tidak ada CLS saat gambar load.
-- [ ] **MG-UI-05** Verifikasi re-theme publik.
-  - [ ] Build frontend + PWA verify lulus.
-  - [ ] Screenshot Playwright desktop/mobile untuk home, katalog, detail kamar.
-  - [ ] Cek overlap teks/CTA, hover/focus, keyboard navigation, reduced-motion.
-  - [ ] Lighthouse SEO tetap >=90; catat skor.
-  - [ ] LCP target <2.5s atau catat blocker konkret bila aset foto belum optimal.
-- [ ] **AUDIT-OWNER** Sisa temuan audit owner.
-  - [ ] Fix overflow Settings/Notif di desktop dan mobile.
-  - [ ] Hilangkan spinner full-page antar-tab; gunakan loading lokal/skeleton.
-  - [ ] Tambah fallback foto rusak untuk public/owner room image.
-  - [ ] Judul tab browser per-route.
-  - [ ] Konsistensi label "tersedia" owner vs publik.
-  - [ ] `/rooms` shared URL harus stabil dan tidak bergantung state internal.
-  - [ ] Hapus/perbaiki "Laporan Formal" dangling.
-  - [ ] Screenshot route owner utama setelah fix.
-- [ ] **CSS+SWEEP** Konsolidasi CSS dan sweep responsif.
-  - [ ] Inventaris `.app-shell*` duplikat di 6 file CSS.
-  - [ ] Pilih sumber kebenaran layout shell; pindahkan override yang sah, hapus konflik.
-  - [ ] Sweep responsive semua role: owner, admin, staff, tenant, publik.
-  - [ ] Sisir teks tanpa spasi/overflow di tombol, card, tab, modal, dan tabel.
-  - [ ] Build frontend dan screenshot spot-check setelah sweep.
 
-> Legenda marker: **🧬 / [SCHEMA]** = perlu perubahan schema additive (WAJIB approval owner dulu) · **🧑 / [OWNER]** = langkah manusia/owner · **[BESAR]** = task besar, desain lengkap sudah ada di dossier.
+---
 
-<!-- KOST48_DOCS_SYNC_20260613_CHECKLIST_DOSSIER -->
+## ANTRIAN EKSEKUSI AKTIF (untuk AI — kerjakan dari sini)
+
+Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelog saat gate lulus.
+
+---
+
+### 🧑 F1-12 — Go-live produksi (BLOCKER PUBLISH)
+
+**Dossier:** `docs/M08_DEPLOY_GO_LIVE.md` Bagian 1 · **Marker:** 🧑 · **Schema:** tidak perlu.
+
+**Sudah lulus:** rehearsal 5433 · provision lokal-as-prod + smoke TB/recon.
+
+**Sub-task go-live nyata:**
+
+- [ ] Owner konfirmasi VPS/cPanel, domain, HTTPS, PostgreSQL prod 5432, env rahasia.
+- [ ] Fresh provision: DB kosong → migrate/push → bootstrap + addendum → OWNER pertama → COA/periode/cash account.
+- [ ] Env: `NODE_ENV=production`, JWT, CORS, VAPID, `KTP_ACTIVATION_GATE_ENABLED=true`, auto-ops sesuai host.
+- [ ] Ganti password OWNER dev → produksi.
+- [ ] Opening balance (atau dokumentasi zero-start).
+- [ ] Smoke prod + catat di Changelog + centang F1-12 induk di Fase 1.
+
+**Gate:** M08 §3 smoke · **Jangan:** backfill data UAT.
+
+---
+
+### METER M-5 — Checkout: meter final × deposit + copy marketing
+
+**Prioritas:** P0 kode · **Dossier:** `docs/M06_OPERASIONAL.md` Bagian 5 · **Finance gate:** ya.
+
+**Aturan:** tagihan meter terakhir belum PAID → dipotong deposit jaminan; sisa refund; kekurangan → AR (reuse pola F3-16 forced-checkout).
+
+**Anchor (grep):** `StaysService.complete` · `StaysService.processDeposit` · `postDepositSettlementTx` · `MeterReadingsService.recordCycle` · `StayDetailPage` · `checkoutReadiness.ts` · halaman publik + `11-public-pages.css`.
+
+**Sub-task:**
+
+- [ ] **M5.1** Gate checkout: meter final wajib sebelum `complete`/`processDeposit` (409 + pesan jelas).
+- [ ] **M5.2** Issue tagihan meter final bila usage belum di-invoice (reuse logic `recordCycle`).
+- [ ] **M5.3** Net deposit vs tagihan meter OPEN saat settlement (TB balanced).
+- [ ] **M5.4** UI admin: breakdown meter + net deposit di wizard checkout.
+- [ ] **M5.5** Copy publik: pascabayar, 30 kWh gratis, no token, transparan invoice.
+- [ ] **M5.6 UAT:** deposit cukup / kurang / pemakaian nol — TB balanced, recon MATCHED.
+
+**Jangan sentuh:** `accounting-period-close` (DO-NOT-TOUCH).
+
+---
+
+### STF-GUDANG-2 — Stok-min otomatis AC/kipas
+
+**Prioritas:** P1 · **Dossier:** M06 · **Anchor:** `inventory-items` service · `isLowStockItem` · `SimpleCrudPage` `/inventory-items` · `room-items`.
+
+- [ ] Mapping fasilitas→item gudang; `minQty` dinamis = jumlah kamar pemakai fasilitas.
+- [ ] UI: alasan status Menipis; seeder: semua kamar punya kipas.
+- [ ] **UAT:** ubah jumlah kamar ber-AC → min stok berubah.
+
+---
+
+### STF-THEME — Polish route staf (1 pass)
+
+**Prioritas:** P2 · **Anchor:** `DashboardStaff.tsx` · `StaffMotivationDashboard.tsx` · routes `/staff-*`.
+
+- [ ] Standarkan header, tabs, empty/loading, mobile z-index.
+- [ ] Screenshot: `ui-shots/shoot-staff.mjs` desktop + mobile.
+
+---
+
+### TEN-GAMIF — Sisa setelah G-1
+
+**Sudah (G-1):** poin kebaikan, Total/Ditukar/Sisa, Top-3 kamar di `MyLoyaltyPage`.
+
+- [ ] Ranking kebersihan depan kamar bulanan (anonim, kamar saja) dari `staff-field-reports` atau checklist.
+- [ ] **UAT privacy:** API tidak expose tenantId/nama.
+
+---
+
+### TIP+ — Sisa setelah T-1
+
+**Sudah (T-1):** ShopeePay, "Saya sudah beri tip", `TIP_RECEIVED`, `tipCount`.
+
+- [ ] Copy "uang kopi" sukarela di `MyTicketsPage`.
+- [ ] Award poin idempotent `TIP_MARKED:ticketId` (tanpa nominal).
+- [ ] **UAT:** tip tidak di laporan keuangan.
+
+---
+
+### OWN-STRUKTUR — Menu operasional vs keputusan owner
+
+**Sudah:** U-2, OWN-2 regroup nav.
+
+- [ ] Grup sidebar Operasional vs Keputusan Owner; kartu status besar (okupansi, tunggakan, meter due, go-live readiness).
+- [ ] ADMIN tidak akses route OWNER-only.
+
+---
+
+### FASE B-2 — Tab Inventaris | Barang Kamar | Mutasi | Gudang
+
+**Anchor:** `RoleWorkspaceTabs.tsx` · `SimpleCrudPage.tsx` · routes inventaris.
+
+- [ ] Shell `SegmentedTabs` + redirect route lama; UAT mutasi & pengganti gudang sejenis.
+
+---
+
+### MKT-4 — CAC/CLV lite ✅
+
+**Dossier:** M07 · **Anchor:** `bookingSource` · `MarketAnalysisPage.tsx`.
+
+- [x] `GET /market-analysis/cac-clv` — data agregat booking per kanal, konversi, renewal, retensi, CLV, referral, loyalty.
+- [x] `POST /market-analysis/cac-clv/analyze` — DeepSeek V4 Pro analisa CAC/CLV dengan fallback offline.
+- [x] `CacClvDashboard.tsx` — metrik card + HorizontalBarChart + tabel kanal + AI insight section.
+- [x] Tab toggle di MarketAnalysisPage: "Analisa SWOT/PESTLE" ↔ "CAC/CLV Dashboard".
+- [x] **Offline mode:** bila DeepSeek gagal, dashboard tetap tampilkan chart + data mentah + pesan jinak.
+- [x] Backend tsc 0 ✅ + Frontend build 106 chunks ✅.
+
+---
+
+### MKT-5 — Perluas cross-sell renewal
+
+**Sudah (MKT-2):** `RenewalCrossSellCard`. Sisa: value prop meter di renewal + skip add-on tidak block flow.
+
+---
+
+### MG-UI-01..05 — Re-theme publik
+
+| ID | Anchor |
+|----|--------|
+| 01 | `GuestHomePage`, `11-public-pages.css` |
+| 02 | social proof F3-4 endpoint |
+| 03 | section Living System |
+| 04 | `marketing-room-images.config.ts` |
+| 05 | build + `shoot-public.mjs` + Lighthouse ≥90 |
+
+---
+
+### AUDIT-OWNER — Polish owner/admin
+
+- [ ] Overflow settings/notif; skeleton bukan full-page spinner; fallback foto; `document.title`; label tersedia; URL `/rooms` stabil; fix Laporan Formal dangling.
+
+---
+
+### CSS+SWEEP — Layout shell + responsif
+
+- [ ] Konsolidasi `.app-shell*` (grep 6 file CSS); sweep 390/834/1440 semua role.
+
+---
+
+### Backlog rendah / jangan duplikasi
+
+| ID | Catatan |
+|----|---------|
+| MKT-1/2/3 spec lama | ✅ Digantikan DeepSeek + surveys — jangan buat `BusinessNarrative` duplikat |
+| MKT-1 web LIVE | 🧑 butuh API search berbayar |
+| V-7 chart | Keputusan UX owner (F3-12) |
+
+<!-- KOST48_DOCS_SYNC_20260616_CHECKLIST_AI_ANTARIAN -->
 
 
 ## Bagian 2 - `docs/CHANGELOG.md`
@@ -421,6 +415,19 @@ Detail SI sudah diserap ke M04/M05/M08; source ringkas diarsipkan di `docs/archi
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(MKT-4): CAC/CLV lite dashboard — DeepSeek V4 Pro powered + offline fallback
+- **Backend:** `GET /market-analysis/cac-clv` — agregat booking per kanal, konversi, renewal rate, retensi, estimasi CLV, referral, loyalty. Query via Prisma `$queryRaw` dari tabel Stay/RenewRequest/TenantReferral/LoyaltyPoint/Redemption.
+- **Backend:** `POST /market-analysis/cac-clv/analyze` — kirim snapshot ke DeepSeek V4 Pro, ekstrak JSON insight CAC/CLV. Fallback offline bila AI gagal/tidak terkonfigurasi.
+- **Frontend:** `CacClvDashboard.tsx` — metrik card (Total Booking, Konversi, Renewal, CLV), HorizontalBarChart per kanal, tabel detail kanal, kartu Retensi/Referral/Loyalitas, dan AI Insight section.
+- **Frontend:** `MarketAnalysisPage.tsx` — tab toggle baru: "Analisa SWOT/PESTLE" ↔ "CAC/CLV Dashboard". CAC/CLV query lazy hanya saat tab aktif.
+- **API types:** `CacClvSnapshot`, `CacClvChannel`, `CacClvAnalyzeResult` + fungsi `getCacClvSnapshot()`, `analyzeCacClv()`.
+- **Gate:** backend tsc 0 ✅, frontend build 106 chunks ✅, PWA verify ✅.
+- Lihat `docs/M10_CHECKLIST_CHANGELOG.md` → MKT-4 ✅.
+
+### 2026-06-16 — docs: rapikan checklist AI eksekutor (M10 antrian + sinkron selesai)
+- `M10_CHECKLIST_CHANGELOG.md`: pintu masuk AI (M-file, urutan kerja, gate); centang F3-3/AUD-7/AUD-8/L-2; sesi 16 Jun terstruktur; **ANTRIAN EKSEKUSI** dengan anchor grep, sub-task, UAT per task terbuka.
+- `M06_OPERASIONAL.md`: status M-3/M-4 selesai, M-5 → antrian M10.
 
 ### 2026-06-16 — Walkthrough UI/UX (owner+staf+tenant+publik) + penyatuan modul (Fase A/B-1) + Meter M-1
 - Sesi UI/UX menyeluruh berbasis review owner + verifikasi screenshot Playwright (`ui-shots/`, tidak di-commit).

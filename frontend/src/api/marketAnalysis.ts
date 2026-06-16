@@ -32,6 +32,39 @@ export type MarketSnapshot = {
   survey: { count: number; avgOverall: number | null; recommendRate: number | null };
 };
 
+// ─── CAC/CLV Types ─────────────────────────────────────────────────────
+
+export type CacClvChannel = {
+  source: string;
+  total: number;
+  active: number;
+  completed: number;
+  cancelled: number;
+  conversionPercent: number;
+};
+
+export type CacClvSnapshot = {
+  period: { from: string; to: string };
+  bookingByChannel: CacClvChannel[];
+  totals: { totalBooking: number; promoted: number; conversionPercent: number };
+  retention: { avgStayDays: number | null; avgStayMonths: number | null; avgMonthlyRent: number; renewalRate: number };
+  clvEstimate: { value: number; months: number | null; multiplier: number } | null;
+  referral: { total: number; active: number };
+  loyalty: { pointsGiven: number; pointsRedeemed: number; redemptionCount: number };
+};
+
+export type CacClvAnalyzeResult = {
+  configured: boolean;
+  mode: 'DEEPSEEK' | 'RULE_FALLBACK';
+  reply: string | null;
+  result: Record<string, unknown> | null;
+  snapshot: CacClvSnapshot;
+  fallback: boolean;
+  message?: string;
+};
+
+// ─── Existing API functions ─────────────────────────────────────────────
+
 export async function getMarketAnalysisStatus(): Promise<{ configured: boolean }> {
   const res = await client.get<ApiEnvelope<{ configured: boolean }>>('/market-analysis/status');
   return res.data.data;
@@ -70,4 +103,20 @@ export async function getMarketAnalysis(id: number): Promise<MarketAnalysis> {
 
 export async function deleteMarketAnalysis(id: number): Promise<void> {
   await client.delete(`/market-analysis/${id}`);
+}
+
+// ─── CAC/CLV API ───────────────────────────────────────────────────────
+
+export async function getCacClvSnapshot(from?: string, to?: string): Promise<CacClvSnapshot> {
+  const params: string[] = [];
+  if (from) params.push(`from=${from}`);
+  if (to) params.push(`to=${to}`);
+  const qs = params.length ? '?' + params.join('&') : '';
+  const res = await client.get<ApiEnvelope<CacClvSnapshot>>(`/market-analysis/cac-clv${qs}`);
+  return res.data.data;
+}
+
+export async function analyzeCacClv(): Promise<CacClvAnalyzeResult> {
+  const res = await client.post<ApiEnvelope<CacClvAnalyzeResult>>('/market-analysis/cac-clv/analyze');
+  return res.data.data;
 }

@@ -79,6 +79,211 @@ export class MarketAnalysisService {
     };
   }
 
+  // ─── CAC/CLV Lite ─────────────────────────────────────────────────────────────
+  // Agregat akuisisi & retensi dari data sistem. Offline-first: tanpa AI pun tetap
+  // menampilkan chart + metrik. AI digunakan untuk insight naratif.
+
+  /** System prompt khusus untuk analisa CAC/CLV */
+  private cacClvSystemPrompt(): string {
+    return [
+      'Kamu analis growth untuk KOST48. Tugas: analisa CAC (biaya akuisisi) & CLV (nilai seumur hidup tenant).',
+      'Bahasa Indonesia, ringkas, ramah, berdasarkan DATA NYATA dari sistem.',
+      'Jangan meminta wawancara — langsung analisa data yang diberikan.',
+      '',
+      'HASILKAN output JSON dengan struktur:',
+      '{ "summary": string, "channelInsights": [{ "channel": string, "volume": number, "conversionRate": number, "assessment": string }], "retentionInsight": string, "clvEstimate": { "value": number, "explanation": string }, "recommendations": string[] }',
+    ].join('\n');
+  }
+
+  /** Kirim data CAC/CLV ke DeepSeek untuk insight naratif. Fallback offline bila gagal. */
+  async analyzeCacClv(actor: CurrentUserPayload) {
+    this.rateLimit(actor.id);
+    const snapshot = await this.cacClvSnapshot();
+    if (!deepseekConfigured()) {
+      return this.cacClvFallback(snapshot);
+    }
+    const dataPrompt = [
+      'DATA AKTUAL KOST48 — pakai sebagai fakta dasar analisa CAC/CLV:',
+      `- Periode: ${snapshot.period.from} s.d ${snapshot.period.to}`,
+      `- Total booking: ${snapshot.totals.totalBooking}, konversi ke huni: ${snapshot.totals.conversionPercent}%`,
+      `- Booking per kanal:`,
+      ...snapshot.bookingByChannel.map((c) =>
+        `  ${c.source}: ${c.total} booking (${c.active} aktif, ${c.completed} selesai, konversi ${c.conversionPercent}%)`
+      ),
+      `- Retensi: ${snapshot.retention.renewalRate}% renewal, rata-rata ${snapshot.retention.avgStayMonths ?? '?'} bulan tinggal`,
+      `- Estimasi CLV: Rp ${(snapshot.clvEstimate?.value ?? 0).toLocaleString('id-ID')}`,
+      `- Referral ${snapshot.referral.total} total, ${snapshot.referral.active} aktif`,
+      `- Loyalitas: ${snapshot.loyalty.pointsGiven} poin diberikan, ${snapshot.loyalty.redemptionCount} penukaran`,
+      'Jangan mengarang angka di luar data ini.',
+    ].join('\n');
+
+    const messages: ChatMsg[] = [
+      { role: 'system', content: this.cacClvSystemPrompt() },
+      { role: 'system', content: dataPrompt },
+      { role: 'user', content: 'Analisa data CAC/CLV di atas dan berikan insight serta rekomendasi.' },
+    ];
+    try {
+      const raw = await deepseekChat(messages, { temperature: 0.4 });
+      const parsed = this.extractCacClvResult(raw);
+      return { configured: true, mode: 'DEEPSEEK', reply: raw, result: parsed, snapshot, fallback: false };
+    } catch {
+      return this.cacClvFallback(snapshot);
+    }
+  }
+
+  /** Fallback offline: tanpa AI, tetap tampilkan data lengkap + pesan jinak. */
+  private cacClvFallback(snapshot: Awaited<ReturnType<MarketAnalysisService['cacClvSnapshot']>>) {
+    return {
+      configured: deepseekConfigured(),
+      mode: 'RULE_FALLBACK',
+      reply: null,
+      result: null,
+      snapshot,
+      fallback: true,
+      message: 'Analisa AI tidak tersedia. Data di bawah dihitung langsung dari sistem KOST48.',
+    };
+  }
+
+  /** Ekstrak JSON hasil analisa CAC/CLV. */
+  private extractCacClvResult(text: string): Record<string, unknown> | null {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start < 0 || end <= start) return null;
+    try {
+      return JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }
+
+  async cacClvSnapshot(fromMonth?: string, toMonth?: string) {
+    const now = new Date();
+    const rawFrom = fromMonth ? new Date(fromMonth + '-01T00:00:00.000Z') : new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const rawTo = toMonth ? new Date(toMonth + '-01T00:00:00.000Z') : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    // 1. Booking per kanal per bulan — rawQuery karena Prisma groupBy terbatas
+    const bookingByChannel = await this.prisma.$queryRaw<Array<{ bookingSource: string; total: bigint; active: bigint; completed: bigint; cancelled: bigint }>>`
+      SELECT
+        "bookingSource" AS "bookingSource",
+        COUNT(*)::int8 AS total,
+        COUNT(*) FILTER (WHERE status = 'ACTIVE'::text)::int8 AS active,
+        COUNT(*) FILTER (WHERE status = 'COMPLETED'::text)::int8 AS completed,
+        COUNT(*) FILTER (WHERE status = 'CANCELLED'::text)::int8 AS cancelled
+      FROM "Stay"
+      WHERE "bookingSource" IS NOT NULL
+        AND "createdAt" >= ${rawFrom} AND "createdAt" < ${rawTo}
+      GROUP BY "bookingSource"
+      ORDER BY total DESC
+    `;
+
+    // 2. Total booking, konversi ke stay promoted (ada initialMetersPromotedAt)
+    const [bookingTotals] = await this.prisma.$queryRaw<[{ total: bigint; promoted: bigint; avgStayDays: number | null }]>`
+      SELECT
+        COUNT(*)::int8 AS total,
+        COUNT(*) FILTER (WHERE "initialMetersPromotedAt" IS NOT NULL)::int8 AS promoted,
+        AVG(
+          CASE
+            WHEN "actualCheckOutDate" IS NOT NULL AND "checkInDate" IS NOT NULL
+            THEN ("actualCheckOutDate" - "checkInDate")
+            WHEN "plannedCheckOutDate" IS NOT NULL AND "checkInDate" IS NOT NULL
+            THEN ("plannedCheckOutDate" - "checkInDate")
+            ELSE NULL
+          END
+        ) AS "avgStayDays"
+      FROM "Stay"
+      WHERE "createdAt" >= ${rawFrom} AND "createdAt" < ${rawTo}
+    `;
+
+    // 3. Renewal rate — stay yang punya renewRequest COMPLETED
+    const [renewalAgg] = await this.prisma.$queryRaw<[{ renewed: bigint; total: bigint }]>`
+      SELECT
+        COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM "RenewRequest" r WHERE r."stayId" = s."id" AND r.status = 'COMPLETED'
+        ))::int8 AS renewed,
+        COUNT(*)::int8 AS total
+      FROM "Stay" s
+      WHERE s.status IN ('ACTIVE', 'COMPLETED')
+        AND s."createdAt" >= ${rawFrom} AND s."createdAt" < ${rawTo}
+    `;
+
+    // 4. Referral impact — count tenant referral yang jadi stay aktif
+    const [referralAgg] = await this.prisma.$queryRaw<[{ total: bigint; active: bigint }]>`
+      SELECT
+        COUNT(*)::int8 AS total,
+        COUNT(*) FILTER (WHERE s.status = 'ACTIVE')::int8 AS active
+      FROM "TenantReferral" tr
+      JOIN "Tenant" t ON t.id = tr."referredTenantId"
+      JOIN "Stay" s ON s."tenantId" = t.id AND s.status IN ('ACTIVE', 'COMPLETED')
+      WHERE tr.status = 'REWARDED'
+    `;
+
+    // 5. Loyalty impact — total poin diberikan & ditukar
+    const [loyaltyAgg] = await this.prisma.$queryRaw<[{ given: bigint; redeemed: bigint; redemptionCount: bigint }]>`
+      SELECT
+        COALESCE(SUM("pointAmount"), 0)::int8 AS given,
+        COALESCE((SELECT SUM(r."pointCost") FROM "Redemption" r WHERE r.status = 'APPROVED'), 0)::int8 AS redeemed,
+        (SELECT COUNT(*)::int8 FROM "Redemption" WHERE status = 'APPROVED') AS "redemptionCount"
+      FROM "LoyaltyPoint"
+    `;
+
+    // 6. Rata-rata harga sewa bulanan (dari stay COMPLETED/ACTIVE)
+    const [rentAvg] = await this.prisma.$queryRaw<[{ avgRent: number | null }]>`
+      SELECT AVG("agreedRentAmountRupiah")::int AS "avgRent"
+      FROM "Stay"
+      WHERE status IN ('ACTIVE', 'COMPLETED')
+    `;
+
+    const toNumber = (v: bigint | null | undefined): number => (v ? Number(v) : 0);
+    const totalBooking = toNumber(bookingTotals?.total);
+    const promoted = toNumber(bookingTotals?.promoted);
+    const avgStayDays = bookingTotals?.avgStayDays != null ? Math.round(Number(bookingTotals.avgStayDays)) : null;
+    const avgRent = rentAvg?.avgRent ?? 0;
+    const avgStayMonths = avgStayDays ? Math.round((avgStayDays / 30.5) * 10) / 10 : null;
+
+    // CLV = rata-rata lama tinggal (bulan) × rata-rata harga sewa bulanan × renewal rate
+    const renewalRate = toNumber(renewalAgg?.total) > 0
+      ? Math.round((toNumber(renewalAgg?.renewed) / toNumber(renewalAgg?.total)) * 100)
+      : 0;
+    const clvEstimate = avgStayMonths && avgRent
+      ? Math.round(avgStayMonths * avgRent * (1 + renewalRate / 100))
+      : null;
+
+    return {
+      period: { from: rawFrom.toISOString().slice(0, 7), to: rawTo.toISOString().slice(0, 7) },
+      bookingByChannel: bookingByChannel.map((r) => ({
+        source: r.bookingSource,
+        total: toNumber(r.total),
+        active: toNumber(r.active),
+        completed: toNumber(r.completed),
+        cancelled: toNumber(r.cancelled),
+        conversionPercent: toNumber(r.total) > 0
+          ? Math.round(((toNumber(r.active) + toNumber(r.completed)) / toNumber(r.total)) * 100)
+          : 0,
+      })),
+      totals: {
+        totalBooking,
+        promoted,
+        conversionPercent: totalBooking > 0 ? Math.round((promoted / totalBooking) * 100) : 0,
+      },
+      retention: {
+        avgStayDays,
+        avgStayMonths,
+        avgMonthlyRent: avgRent,
+        renewalRate,
+      },
+      clvEstimate: clvEstimate != null ? { value: clvEstimate, months: avgStayMonths, multiplier: 1 + renewalRate / 100 } : null,
+      referral: {
+        total: toNumber(referralAgg?.total),
+        active: toNumber(referralAgg?.active),
+      },
+      loyalty: {
+        pointsGiven: toNumber(loyaltyAgg?.given),
+        pointsRedeemed: toNumber(loyaltyAgg?.redeemed),
+        redemptionCount: toNumber(loyaltyAgg?.redemptionCount),
+      },
+    };
+  }
+
   private snapshotPrompt(s: Awaited<ReturnType<MarketAnalysisService['businessSnapshot']>>) {
     return [
       'DATA AKTUAL KOST48 (per hari ini, dari sistem) — pakai sebagai fakta dasar analisamu:',
