@@ -399,6 +399,23 @@ Task di bawah = **satu-satunya `[ ]` yang perlu dikerjakan**. Centang + changelo
 
 ---
 
+### AUDIT-KEUANGAN-ULTRA — Audit seluruh aliran keuangan ✅
+
+**Dossier:** `docs/AUDIT_KEUANGAN_ULTRA_2026-06-17.md` · **Tanggal:** 2026-06-17
+
+- [x] Chain of Custody — Invoice → Jurnal → Trial Balance terverifikasi UTUH.
+- [x] 8 Invarian Akuntansi M04 §1 — semua PASS.
+- [x] 5 High-Risk Flows — Booking, Checkout, Renewal, Forced, Meter — semua SEHAT.
+- [x] Dead code `postPaymentReversalTx` teridentifikasi (0 pemanggil).
+- [x] PSAK 72 RentRecognitionSchedule — 0 stranded.
+- [x] 7 DO-NOT-TOUCH blocks — semua UTUH.
+- [x] Deposit reconciliation MATCHED (16 stay, Rp8.000.000).
+- [ ] ⬜ Retry: cashflow, financial-ratios, reconciliation-lite (endpoint gagal saat runtime).
+
+**Gate:** Trial balance `isBalanced: True` ✅ · Deposit `MATCHED` ✅ · `postBalancedJournalTx` utuh ✅.
+
+---
+
 ### Backlog rendah / jangan duplikasi
 
 | ID | Catatan |
