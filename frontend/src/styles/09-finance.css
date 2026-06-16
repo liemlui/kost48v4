@@ -1643,9 +1643,7 @@
     font-size: .95rem;
     line-height: 1.45;
   }
-  .app-shell {
-    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-  }
+  /* .app-shell padding → 02-layout.css (canonical); rule lama ter-mask, dihapus. */
   .app-topbar-breadcrumb span:not(:last-child) {
     display: none;
   }

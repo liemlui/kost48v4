@@ -68,19 +68,7 @@ a {
   color: inherit;
 }
 
-.app-shell {
-  min-height: 100vh;
-  /* 100dvh untuk iOS Safari dynamic toolbar — mencegah black gap */
-  min-height: 100dvh;
-  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-}
-
-.app-shell-grid {
-  display: grid;
-  grid-template-columns: 290px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
+/* .app-shell / .app-shell-grid dipindah ke 02-layout.css (B1: sumber tunggal). */
 
 .app-sidebar,
 .app-topbar,

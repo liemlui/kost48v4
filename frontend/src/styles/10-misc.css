@@ -1007,23 +1007,8 @@ body {
   font-size: 0.88rem;
 }
 
-.app-shell {
-  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
-}
-
-.app-shell-grid {
-  gap: 14px;
-}
-
-/* Template 2-kolom HANYA di >=1200px (xl), selaras dengan sidebar `d-none d-xl-flex`
-   di AppLayout. Di bawah 1200px sidebar jadi offcanvas (display:none) sehingga grid
-   wajib 1 kolom (di-collapse oleh 02-layout.css) — kalau tidak, konten terjepit di
-   track 260px dan menyisakan ruang kosong. */
-@media (min-width: 1200px) {
-  .app-shell-grid {
-    grid-template-columns: 260px minmax(0, 1fr);
-  }
-}
+/* .app-shell / .app-shell-grid (padding, gap, grid-template-columns) dipindah ke
+   02-layout.css (B1: sumber tunggal layout shell). */
 
 .app-sidebar {
   top: 14px;
@@ -1326,7 +1311,7 @@ body {
 .finance-donut strong { font-size: 1.45rem; }
 
 @media (max-width: 991.98px) {
-  .app-shell { padding: 0; }
+  /* .app-shell padding:0 → 02-layout.css (canonical) */
   .app-main { padding: 0.65rem; }
   .app-topbar { margin-bottom: 0.65rem; }
   .page-header h1,

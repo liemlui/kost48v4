@@ -572,7 +572,31 @@
 .text-soft-success { color: var(--color-success); }
 .text-soft-info { color: var(--color-info); }
 
+/* ============================================================
+   APP SHELL — SUMBER TUNGGAL layout (B1 konsolidasi 2026-06-17)
+   Semua rule .app-shell / .app-shell-grid dipusatkan di sini agar tidak
+   ada lagi override lintas-file yang saling tabrak (akar bug collapse
+   <1200px). Override SAH yang tetap di file lain: 03-components.css
+   (@media print → display:block, padding:0).
+   ============================================================ */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh; /* iOS Safari dynamic toolbar — cegah black gap */
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+}
+.app-shell-grid {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr); /* ≥1200px: sidebar tetap */
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 991.98px) {
+  /* mobile: rapatkan padding shell (konten pakai padding-nya sendiri) */
+  .app-shell { padding: 0; }
+}
+
 @media (max-width: 1199.98px) {
+  /* <1200px: sidebar jadi offcanvas (d-none d-xl-flex) → grid 1 kolom */
   .app-shell-grid {
     grid-template-columns: 1fr;
   }
@@ -589,10 +613,6 @@
 }
 
 @media (max-width: 767.98px) {
-  .app-shell {
-    padding: 12px;
-  }
-
   .app-topbar,
   .app-sidebar,
   .content-card .card-body,
