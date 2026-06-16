@@ -387,12 +387,12 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 
 **Sub-task (kerjakan berurutan dari A ke I):**
 
-#### Fase A — Navigasi, Tombol & Ikon
+#### Fase A — Navigasi, Tombol & Ikon — ✅ SELESAI 2026-06-17 (commit cf4c63c)
 - [x] Penjelasan saran owner sudah dicatat di M07.
 - [x] **PUB-LOGIN-BTN** — tombol "Masuk Portal" di navbar publik → `/login` (commit 26b0b6b).
-- [ ] **PUB-ICON** — Tambah ikon emoji/SVG di fasilitas kamar, CTA, navbar, badge status (tanpa lib baru).
-- [ ] **PUB-CTA-AUDIT** — Kurangi duplikasi tombol "Cek Kamar Tersedia". Cukup 1 di hero + 1 sticky di navbar.
-- [ ] **PUB-REMOVE-PREF** — Hapus tombol "Ubah Preferensi Tinggal" dari halaman publik.
+- [x] **PUB-ICON** — emoji + aria-hidden (tanpa lib): nav links, CTA (hero/navbar/penutup/sticky), mark fasilitas, badge status per tone (🟢🟡🔴🧹).
+- [x] **PUB-CTA-AUDIT** — prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar); CTA penutup di-relabel "Lihat Pilihan Kamar"; form submit tetap (fungsional).
+- [x] **PUB-REMOVE-PREF** — tombol "Ubah Preferensi Tinggal" dihapus dari halaman publik.
 
 #### Fase B — Kalender Ketersediaan Cerdas
 - [ ] **PUB-CALENDAR** — Backend `GET /public/rooms/availability-calendar?from&to` + frontend timeline horizontal.
@@ -461,6 +461,11 @@ changelog (Bagian 2) saat gate lulus. Item ✅ sudah dipindah ke daftar referens
 ## Changelog Ringkas
 
 > Dipadatkan dari `docs/CHANGELOG.md`: header tanggal dipertahankan, tiap entry hanya menyimpan 1-2 poin outcome. Detail verbose tetap ada di source lama.
+
+### 2026-06-17 — feat(PUB-UI-REVAMP Fase A): ikon publik + audit CTA (cf4c63c)
+- **PUB-REMOVE-PREF** hapus tombol "Ubah Preferensi Tinggal"; **PUB-CTA-AUDIT** prominent "Cek Kamar Tersedia" tinggal 2 (hero + sticky navbar), CTA penutup di-relabel.
+- **PUB-ICON** (emoji + aria-hidden, tanpa lib): nav links, CTA, mark fasilitas (🅿️🍳❄️🚿📶…), badge status per tone (🟢🟡🔴🧹).
+- Gate: FE build (105 chunk, PWA ok) · sweep Playwright 30 cek 0 overflow (publik 390/834/1440).
 
 ### 2026-06-17 — feat(AUDIT-OWNER + CSS+SWEEP): polish UI stabilitas lintas role (app-wide)
 - **AUDIT-OWNER** (`ff415f5`): `document.title` per-rute (`useDocumentTitle` + `routeTitles` + `RouteTitleSync`); skeleton ganti full-page spinner (`PageLoadingSkeleton` di App Suspense/Rooms/Reports/OwnerDashboard); foto OwnerSettings lewat `SafeImage`; dropdown notif width responsif (anti-overflow ≤390px); hapus dead-code "Laporan Formal" di ReportsPage (2 API mubazir); a11y emoji dekoratif `aria-hidden`.
